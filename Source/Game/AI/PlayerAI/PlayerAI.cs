@@ -647,8 +647,10 @@ namespace Game.AI
 
             Unit charmer = me.GetCharmer();
             if (charmer != null)
+            {
                 if (!charmer.IsValidAttackTarget(who))
                     return false;
+            }
 
             return base.CanAIAttack(who);
         }

@@ -166,9 +166,14 @@ namespace Game.Arenas
                         winnerMatchmakerChange = winnerArenaTeam.WonAgainst(winnerMatchmakerRating, loserMatchmakerRating, ref winnerChange);
                         loserMatchmakerChange = loserArenaTeam.LostAgainst(loserMatchmakerRating, winnerMatchmakerRating, ref loserChange);
 
-                        Log.outDebug(LogFilter.Arena, "match Type: {0} --- Winner: old rating: {1}, rating gain: {2}, old MMR: {3}, MMR gain: {4} --- Loser: old rating: {5}, " +
-                            "rating loss: {6}, old MMR: {7}, MMR loss: {8} ---", GetArenaType(), winnerTeamRating, winnerChange, winnerMatchmakerRating, winnerMatchmakerChange,
-                            loserTeamRating, loserChange, loserMatchmakerRating, loserMatchmakerChange);
+                        Log.outDebug(LogFilter.Arena, 
+                            $"match Type: {GetArenaType()}" +
+                            " --- " +
+                            $"Winner: old rating: {winnerTeamRating}, " +
+                            $"rating gain: {winnerChange}, old MMR: {winnerMatchmakerRating}, " +
+                            $"MMR gain: {winnerMatchmakerChange} --- Loser: old rating: {loserTeamRating}, " +
+                            $"rating loss: {loserChange}, old MMR: {loserMatchmakerRating}, MMR loss: {loserMatchmakerChange}" +
+                            " --- ");
 
                         SetArenaMatchmakerRating(winner, winnerMatchmakerRating + winnerMatchmakerChange);
                         SetArenaMatchmakerRating(GetOtherTeam(winner), loserMatchmakerRating + loserMatchmakerChange);
@@ -181,8 +186,10 @@ namespace Game.Arenas
                         _arenaTeamScores[winnerTeam].Assign(winnerTeamRating, winnerTeamRating + winnerChange, winnerMatchmakerRating, GetArenaMatchmakerRating(winner));
                         _arenaTeamScores[loserTeam].Assign(loserTeamRating, loserTeamRating + loserChange, loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
 
-                        Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} ended. WinnerTeamId: {3}. Winner rating: +{4}, Loser rating: {5}",
-                            GetArenaType(), GetArenaTeamIdByIndex(BattleGroundTeamId.Alliance), GetArenaTeamIdByIndex(BattleGroundTeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);
+                        Log.outDebug(LogFilter.Arena, 
+                            $"Arena match Type: {GetArenaType()} for " +
+                            $"Team1Id: {GetArenaTeamIdByIndex(BattleGroundTeamId.Alliance)} - Team2Id: {GetArenaTeamIdByIndex(BattleGroundTeamId.Horde)} ended. " +
+                            $"WinnerTeamId: {winnerArenaTeam.GetId()}. Winner rating: +{winnerChange}, Loser rating: {loserChange}");
 
                         if (WorldConfig.GetBoolValue(WorldCfg.ArenaLogExtendedInfo))
                         {
@@ -191,9 +198,10 @@ namespace Game.Arenas
                                 Player player = Global.ObjAccessor.FindPlayer(score.Key);
                                 if (player != null)
                                 {
-                                    Log.outDebug(LogFilter.Arena, "Statistics match Type: {0} for {1} (GUID: {2}, Team: {3}, IP: {4}): {5}",
-                                        GetArenaType(), player.GetName(), score.Key, player.GetArenaTeamId((byte)(GetArenaType() == ArenaTypes.Team5v5 ? 2 : (GetArenaType() == ArenaTypes.Team3v3 ? 1 : 0))),
-                                        player.GetSession().GetRemoteAddress(), score.Value.ToString());
+                                    int team = player.GetArenaTeamId((byte)(GetArenaType() == ArenaTypes.Team5v5 ? 2 : (GetArenaType() == ArenaTypes.Team3v3 ? 1 : 0)));
+                                    Log.outDebug(LogFilter.Arena, 
+                                        $"Statistics match Type: {GetArenaType()} for {player.GetName()} (GUID: {score.Key}, Team: {team}, " +
+                                        $"IP: {player.GetSession().GetRemoteAddress()}): {score.Value}");
                                 }
                             }
                         }

@@ -61,7 +61,9 @@ namespace Game.Arenas
             // Add captain as member
             AddMember(CaptainGuid);
 
-            Log.outDebug(LogFilter.Arena, "New ArenaTeam created Id: {0}, Name: {1} Type: {2} Captain low GUID: {3}", GetId(), GetName(), GetArenaType(), captainLowGuid);
+            Log.outDebug(LogFilter.Arena, 
+                $"New ArenaTeam created Id: {GetId()}, Name: {GetName()} " +
+                $"Type: {GetArenaType()} Captain low GUID: {captainLowGuid}");
             return true;
         }
 
@@ -93,7 +95,9 @@ namespace Game.Arenas
             // Check if player is already in a similar arena team
             if ((player != null && player.GetArenaTeamId(GetSlot()) != 0) || Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(playerGuid, GetArenaType()) != 0)
             {
-                Log.outDebug(LogFilter.Arena, "Arena: {0} {1} already has an arena team of Type {2}", playerGuid.ToString(), playerName, GetArenaType());
+                Log.outDebug(LogFilter.Arena, 
+                    $"Arena: {playerGuid} {playerName} " +
+                    $"already has an arena team of Type {GetArenaType()}");
                 return false;
             }
 
@@ -154,7 +158,9 @@ namespace Game.Arenas
                     player.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 1);
             }
 
-            Log.outDebug(LogFilter.Arena, "Player: {0} [{1}] joined arena team Type: {2} [Id: {3}, Name: {4}].", playerName, playerGuid.ToString(), GetArenaType(), GetId(), GetName());
+            Log.outDebug(LogFilter.Arena, 
+                $"Player: {playerName} [{playerGuid}] joined arena team " +
+                $"Type: {GetArenaType()} [Id: {GetId()}, Name: {GetName()}].");
 
             return true;
         }
@@ -212,7 +218,9 @@ namespace Game.Arenas
                 // Delete member if character information is missing
                 if (string.IsNullOrEmpty(newMember.Name))
                 {
-                    Log.outError(LogFilter.Sql, "ArenaTeam {0} has member with empty name - probably {1} doesn't exist, deleting him from memberlist!", arenaTeamId, newMember.Guid.ToString());
+                    Log.outError(LogFilter.Sql,
+                        $"ArenaTeam {arenaTeamId} has member with empty name - " +
+                        $"probably {newMember.Guid} doesn't exist, deleting him from memberlist!");
                     DelMember(newMember.Guid, true);
                     continue;
                 }
@@ -230,7 +238,9 @@ namespace Game.Arenas
             if (Empty() || !captainPresentInTeam)
             {
                 // Arena team is empty or captain is not in team, delete from db
-                Log.outDebug(LogFilter.Arena, "ArenaTeam {0} does not have any members or its captain is not in team, disbanding it...", teamId);
+                Log.outDebug(LogFilter.Arena, 
+                    $"ArenaTeam {teamId} does not have any members " +
+                    $"or its captain is not in team, disbanding it...");
                 return false;
             }
 
@@ -273,9 +283,10 @@ namespace Game.Arenas
                 newCaptain.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 0);
                 if (oldCaptain != null)
                 {
-                    Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] promoted player: {2} [GUID: {3}] to leader of arena team [Id: {4}, Name: {5}] [Type: {6}].",
-                        oldCaptain.GetName(), oldCaptain.GetGUID().ToString(), newCaptain.GetName(),
-                        newCaptain.GetGUID().ToString(), GetId(), GetName(), GetArenaType());
+                    Log.outDebug(LogFilter.Arena, 
+                        $"Player: {oldCaptain.GetName()} [GUID: {oldCaptain.GetGUID()}] promoted " +
+                        $"player: {newCaptain.GetName()} [GUID: {newCaptain.GetGUID()}] to leader of " +
+                        $"arena team [Id: {GetId()}, Name: {GetName()}] [Type: {GetArenaType()}].");
                 }
             }
         }
@@ -300,7 +311,9 @@ namespace Game.Arenas
                 // delete all info regarding this team
                 for (uint i = 0; i < (int)ArenaTeamInfoType.End; ++i)
                     player.SetArenaTeamInfoField(GetSlot(), (ArenaTeamInfoType)i, 0);
-                Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] left arena team Type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
+                Log.outDebug(LogFilter.Arena, 
+                    $"Player: {player.GetName()} [GUID: {player.GetGUID()}] left arena team " +
+                    $"Type: {GetArenaType()} [Id: {GetId()}, Name: {GetName()}].");
             }
 
             // Only used for single member deletion, for arena team disband we use a single query for more efficiency
@@ -320,7 +333,9 @@ namespace Game.Arenas
             {
                 Player player = session.GetPlayer();
                 if (player != null)
-                    Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] disbanded arena team type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
+                    Log.outDebug(LogFilter.Arena,
+                        $"Player: {player.GetName()} [GUID: {player.GetGUID()}] disbanded arena team " +
+                        $"Type: {GetArenaType()} [Id: {GetId()}, Name: {GetName()}].");
             }
 
             // Remove all members from arena team
@@ -412,7 +427,8 @@ namespace Game.Arenas
                 default:
                     break;
             }
-            Log.outError(LogFilter.Arena, "FATAL: Unknown arena team Type {0} for some arena team", type);
+            Log.outError(LogFilter.Arena, 
+                $"FATAL: Unknown arena team Type {type} for some arena team");
             return 0xFF;
         }
 
@@ -426,7 +442,8 @@ namespace Game.Arenas
                 default:
                     break;
             }
-            Log.outError(LogFilter.Arena, "FATAL: Unknown arena team slot {0} for some arena team", slot);
+            Log.outError(LogFilter.Arena, 
+                $"FATAL: Unknown arena team slot {slot} for some arena team");
             return 0xFF;
         }
 

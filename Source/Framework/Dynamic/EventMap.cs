@@ -296,8 +296,10 @@ namespace Framework.Dynamic
         public TimeSpan GetTimeUntilEvent(int eventId)
         {
             foreach (var pair in _eventMap)
+            {
                 if (eventId == (pair.Value & 0x0000FFFF))
                     return pair.Key - _time;
+            }
 
             return TimeSpan.MaxValue;
         }

@@ -97,7 +97,7 @@ namespace BNetServer.Networking
             if (gameAccountInfo == null)
                 return BattlenetRpcErrorCode.UtilServerInvalidIdentityArgs;
 
-            if (gameAccountInfo.IsPermanenetlyBanned)
+            if (gameAccountInfo.IsPermanentlyBanned)
                 return BattlenetRpcErrorCode.GameAccountBanned;
             else if (gameAccountInfo.IsBanned)
                 return BattlenetRpcErrorCode.GameAccountSuspended;

@@ -24,7 +24,9 @@ namespace Game.Scripting
         {
             if (!Validate(entry))
             {
-                Log.outError(LogFilter.Scripts, "Spell `{0}` did not pass Validate() function of script `{1}` - script will be not added to the spell", entry.Id, m_scriptName);
+                Log.outError(LogFilter.Scripts, 
+                    $"Spell `{entry.Id}` did not pass Validate() function of script `{m_scriptName}`" +
+                    $" - script will be not added to the spell");
                 return false;
             }
             return true;
@@ -37,7 +39,8 @@ namespace Game.Scripting
             {
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 {
-                    Log.outError(LogFilter.Scripts, "BaseSpellScript::ValidateSpellInfo: Spell {0} does not exist.", spellId);
+                    Log.outError(LogFilter.Scripts, 
+                        $"BaseSpellScript::ValidateSpellInfo: Spell {spellId} does not exist.");
                     allValid = false;
                 }
             }
@@ -53,6 +56,7 @@ namespace Game.Scripting
                 if (!ValidateSpellEffect(spellId, effectIndex))
                     allValid = false;
             }
+
             return allValid;
         }
 
@@ -61,13 +65,16 @@ namespace Game.Scripting
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Scripts, $"BaseSpellScript::ValidateSpellEffect: Spell {spellId} does not exist.");
+                Log.outError(LogFilter.Scripts, 
+                    $"BaseSpellScript::ValidateSpellEffect: Spell {spellId} does not exist.");
                 return false;
             }
 
             if (spellInfo.GetEffects().Count <= effectIndex)
             {
-                Log.outError(LogFilter.Scripts, $"BaseSpellScript::ValidateSpellEffect: Spell {spellId} does not have EFFECT_{effectIndex}.");
+                Log.outError(LogFilter.Scripts, 
+                    $"BaseSpellScript::ValidateSpellEffect: " +
+                    $"Spell {spellId} does not have EFFECT_{effectIndex}.");
                 return false;
             }
 
@@ -127,6 +134,7 @@ namespace Game.Scripting
                     if (CheckEffect(spellInfo, _effIndex))
                         mask |= 1u << _effIndex;
                 }
+
                 return mask;
             }
 
@@ -253,8 +261,10 @@ namespace Game.Scripting
                 SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(effIndex);
                 if (spellEffectInfo.Effect == 0 && _effName == 0)
                     return true;
+
                 if (spellEffectInfo.Effect == 0)
                     return false;
+
                 return (_effName == SpellEffectName.Any) || (spellEffectInfo.Effect == _effName);
             }
 
@@ -426,32 +436,74 @@ namespace Game.Scripting
         public override bool _Validate(SpellInfo entry)
         {
             foreach (var eff in OnEffectLaunch)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectLaunch` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts, 
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectLaunch` of SpellScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectLaunchTarget)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectLaunchTarget` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts, 
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectLaunchTarget` of SpellScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectHit)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectHit` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectHit` of SpellScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectHitTarget)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectHitTarget` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectHitTarget` of SpellScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectSuccessfulDispel)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectSuccessfulDispel` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectSuccessfulDispel` of SpellScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnObjectAreaTargetSelect)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnObjectAreaTargetSelect` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnObjectAreaTargetSelect` of SpellScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnObjectTargetSelect)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnObjectTargetSelect` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnObjectTargetSelect` of SpellScript won't be executed");
+                }
+            }
 
             if (!CalcDamage.Empty())
             {
@@ -462,7 +514,11 @@ namespace Game.Scripting
                     && !entry.HasEffect(SpellEffectName.WeaponDamageNoSchool)
                     && !entry.HasEffect(SpellEffectName.NormalizedWeaponDmg)
                     && !entry.HasEffect(SpellEffectName.WeaponPercentDamage))
-                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - handler bound to hook `CalcDamage` of SpellScript won't be executed");
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - " +
+                        $"handler bound to hook `CalcDamage` of SpellScript won't be executed");
+            }
             }
 
             if (!CalcHealing.Empty())
@@ -471,7 +527,11 @@ namespace Game.Scripting
                     && !entry.HasEffect(SpellEffectName.HealPct)
                     && !entry.HasEffect(SpellEffectName.HealMechanical)
                     && !entry.HasEffect(SpellEffectName.HealthLeech))
-                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - handler bound to hook `CalcHealing` of SpellScript won't be executed");
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - " +
+                        $"handler bound to hook `CalcHealing` of SpellScript won't be executed");
+            }
             }
 
             return base._Validate(entry);
@@ -492,9 +552,15 @@ namespace Game.Scripting
             m_hitPreventDefaultEffectMask = 0;
         }
 
-        public bool _IsEffectPrevented(int effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & (1 << effIndex)); }
+        public bool _IsEffectPrevented(int effIndex) 
+        { 
+            return (m_hitPreventEffectMask & (1 << effIndex)) != 0; 
+        }
 
-        public bool _IsDefaultEffectPrevented(int effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & (1 << effIndex)); }
+        public bool _IsDefaultEffectPrevented(int effIndex) 
+        { 
+            return (m_hitPreventDefaultEffectMask & (1 << effIndex)) != 0; 
+        }
 
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
@@ -526,7 +592,9 @@ namespace Game.Scripting
         {
             return (SpellScriptHookType)m_currentScriptState switch
             {
-                SpellScriptHookType.LaunchTarget or SpellScriptHookType.EffectHitTarget or SpellScriptHookType.EffectSuccessfulDispel or SpellScriptHookType.BeforeHit or SpellScriptHookType.Hit or SpellScriptHookType.AfterHit => true,
+                SpellScriptHookType.LaunchTarget or SpellScriptHookType.EffectHitTarget or 
+                SpellScriptHookType.EffectSuccessfulDispel or SpellScriptHookType.BeforeHit or 
+                SpellScriptHookType.Hit or SpellScriptHookType.AfterHit => true,
                 _ => false,
             };
         }
@@ -537,7 +605,8 @@ namespace Game.Scripting
             // modifying it at this point has no effect
             return (SpellScriptHookType)m_currentScriptState switch
             {
-                SpellScriptHookType.LaunchTarget or SpellScriptHookType.EffectHitTarget or SpellScriptHookType.BeforeHit or SpellScriptHookType.Hit => true,
+                SpellScriptHookType.LaunchTarget or SpellScriptHookType.EffectHitTarget or 
+                SpellScriptHookType.BeforeHit or SpellScriptHookType.Hit => true,
                 _ => false,
             };
         }
@@ -656,6 +725,7 @@ namespace Game.Scripting
         {
             if (m_spell.m_targets.HasDst())
                 return m_spell.m_targets.GetDstPos();
+
             return null;
         }
 
@@ -680,9 +750,12 @@ namespace Game.Scripting
         {
             if (!IsAfterTargetSelectionPhase())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetUnitTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetUnitTargetCountForEffect was called, " +
+                    $"but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
+
             return m_spell.GetUnitTargetCountForEffect(effect);
         }
 
@@ -690,9 +763,12 @@ namespace Game.Scripting
         {
             if (!IsAfterTargetSelectionPhase())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetGameObjectTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetGameObjectTargetCountForEffect was called, " +
+                    $"but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
+
             return m_spell.GetGameObjectTargetCountForEffect(effect);
         }
 
@@ -700,9 +776,12 @@ namespace Game.Scripting
         {
             if (!IsAfterTargetSelectionPhase())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetItemTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetItemTargetCountForEffect was called, " +
+                    $"but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
+
             return m_spell.GetItemTargetCountForEffect(effect);
         }
 
@@ -710,9 +789,12 @@ namespace Game.Scripting
         {
             if (!IsAfterTargetSelectionPhase())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetCorpseTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetCorpseTargetCountForEffect was called, " +
+                    $"but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
+
             return m_spell.GetCorpseTargetCountForEffect(effect);
         }
 
@@ -724,9 +806,12 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitUnit was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: " +
+                    $"function SpellScript.GetHitUnit was called, but function has no effect in current hook!");
                 return null;
             }
+
             return m_spell.unitTarget;
         }
 
@@ -738,9 +823,12 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitCreature was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitCreature was called, " +
+                    $"but function has no effect in current hook!");
                 return null;
             }
+
             if (m_spell.unitTarget != null)
                 return m_spell.unitTarget.ToCreature();
             else
@@ -755,9 +843,12 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitPlayer was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitPlayer was called, " +
+                    $"but function has no effect in current hook!");
                 return null;
             }
+
             if (m_spell.unitTarget != null)
                 return m_spell.unitTarget.ToPlayer();
             else
@@ -772,9 +863,12 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitItem was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitItem was called, " +
+                    $"but function has no effect in current hook!");
                 return null;
             }
+
             return m_spell.itemTarget;
         }
 
@@ -786,9 +880,12 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitGObj was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitGObj was called, " +
+                    $"but function has no effect in current hook!");
                 return null;
             }
+
             return m_spell.gameObjTarget;
         }
 
@@ -800,9 +897,12 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetHitCorpse was called, but function has no effect in current hook!");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetHitCorpse was called, " +
+                    $"but function has no effect in current hook!");
                 return null;
             }
+
             return m_spell.corpseTarget;
         }
 
@@ -814,9 +914,12 @@ namespace Game.Scripting
         {
             if (!IsInEffectHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitDest was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitDest was called, " +
+                    $"but function has no effect in current hook!");
                 return null;
             }
+
             return m_spell.destTarget;
         }
 
@@ -826,41 +929,58 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitDamage was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitDamage was called, " +
+                    $"but function has no effect in current hook!");
                 return 0;
             }
+
             return m_spell.m_damage;
         }
+
         public void SetHitDamage(int damage)
         {
             if (!IsInModifiableHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetHitDamage was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.SetHitDamage was called, " +
+                    $"but function has no effect in current hook!");
                 return;
             }
+
             m_spell.m_damage = damage;
         }
+
         public void PreventHitDamage() { SetHitDamage(0); }
+
         // setter/getter for for heal done by spell to target of spell hit
         // returns healing calculated before hit, and real dmg done after hit
         public int GetHitHeal()
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitHeal was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitHeal was called, " +
+                    $"but function has no effect in current hook!");
                 return 0;
             }
+
             return m_spell.m_healing;
         }
+
         public void SetHitHeal(int heal)
         {
             if (!IsInModifiableHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetHitHeal was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.SetHitHeal was called, " +
+                    $"but function has no effect in current hook!");
                 return;
             }
+
             m_spell.m_healing = heal;
         }
+
         public void PreventHitHeal() { SetHitHeal(0); }
         public Spell GetSpell() { return m_spell; }
 
@@ -872,7 +992,9 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::IsHitCrit was called, but function has no effect in current hook!");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::IsHitCrit was called, " +
+                    $"but function has no effect in current hook!");
                 return false;
             }
 
@@ -883,6 +1005,7 @@ namespace Game.Scripting
                 Cypher.Assert(targetInfo != null);
                 return targetInfo.IsCrit;
             }
+
             return false;
         }
 
@@ -891,7 +1014,9 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitAura was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetHitAura was called, " +
+                    $"but function has no effect in current hook!");
                 return null;
             }
 
@@ -910,7 +1035,9 @@ namespace Game.Scripting
         {
             if (!IsInTargetHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitAura was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.PreventHitAura was called, " +
+                    $"but function has no effect in current hook!");
                 return;
             }
 
@@ -929,9 +1056,12 @@ namespace Game.Scripting
         {
             if (!IsInHitPhase() && !IsInEffectHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.PreventHitEffect was called, " +
+                    $"but function has no effect in current hook!");
                 return;
             }
+
             m_hitPreventEffectMask |= (1u << effIndex);
             PreventHitDefaultEffect(effIndex);
         }
@@ -943,15 +1073,20 @@ namespace Game.Scripting
         {
             if (!IsInHitPhase() && !IsInEffectHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitDefaultEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.PreventHitDefaultEffect was called, " +
+                    $"but function has no effect in current hook!");
                 return;
             }
+
             m_hitPreventDefaultEffectMask |= (1u << effIndex);
         }
 
         public SpellEffectInfo GetEffectInfo()
         {
-            Cypher.Assert(IsInEffectHook(), $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectInfo was called, but function has no effect in current hook!");
+            Cypher.Assert(IsInEffectHook(), 
+                $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectInfo was called, " +
+                $"but function has no effect in current hook!");
 
             return m_spell.effectInfo;
         }
@@ -961,7 +1096,9 @@ namespace Game.Scripting
         {
             if (!IsInEffectHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitDefaultEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.PreventHitDefaultEffect was called, " +
+                    $"but function has no effect in current hook!");
                 return 0;
             }
             return m_spell.damage;
@@ -971,7 +1108,9 @@ namespace Game.Scripting
         {
             if (!IsInEffectHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetEffectValue was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.SetEffectValue was called, " +
+                    $"but function has no effect in current hook!");
                 return;
             }
 
@@ -982,7 +1121,9 @@ namespace Game.Scripting
         {
             if (!IsInEffectHook())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectVariance was called, but function has no effect in current hook!");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectVariance was called, " +
+                    $"but function has no effect in current hook!");
                 return 0.0f;
             }
 
@@ -993,7 +1134,9 @@ namespace Game.Scripting
         {
             if (!IsInEffectHook())
             {
-                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::SetEffectVariance was called, but function has no effect in current hook!");
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::SetEffectVariance was called, " +
+                    $"but function has no effect in current hook!");
                 return;
             }
 
@@ -1020,7 +1163,9 @@ namespace Game.Scripting
         {
             if (!IsInCheckCastHook())
             {
-                Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetCustomCastResultMessage was called while spell not in check cast phase!", m_scriptName, m_scriptSpellId);
+                Log.outError(LogFilter.Scripts, 
+                    $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function " +
+                    $"SpellScript.SetCustomCastResultMessage was called while spell not in check cast phase!");
                 return;
             }
 
@@ -1057,8 +1202,11 @@ namespace Game.Scripting
                 if (prioritizeGroupMembersOf != null && (!target.IsUnit() || target.ToUnit().IsInRaidWith(prioritizeGroupMembersOf)))
                     negativePoints |= 1 << NOT_GROUPED;
 
-                if (prioritizePlayers && !target.IsPlayer() && (!target.IsCreature() || !target.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+                if (prioritizePlayers && !target.IsPlayer()
+                    && (!target.IsCreature() || !target.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+                {
                     negativePoints |= 1 << NOT_PLAYER;
+                }
 
                 if (!target.IsUnit() || target.ToUnit().IsFullHealth())
                     negativePoints |= 1 << NOT_INJURED;
@@ -1430,111 +1578,269 @@ namespace Game.Scripting
         public override bool _Validate(SpellInfo entry)
         {
             foreach (var _ in DoCheckAreaTarget)
-                if (!entry.HasAreaAuraEffect() && !entry.HasEffect(SpellEffectName.PersistentAreaAura) && !entry.HasEffect(SpellEffectName.ApplyAura))
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `DoCheckAreaTarget` of AuraScript won't be executed", entry.Id, m_scriptName);
+            {
+                if (!entry.HasAreaAuraEffect() && !entry.HasEffect(SpellEffectName.PersistentAreaAura) 
+                    && !entry.HasEffect(SpellEffectName.ApplyAura))
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` of script `{m_scriptName}` does not have apply aura effect - " +
+                        $"handler bound to hook `DoCheckAreaTarget` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var _ in OnDispel)
+            {
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `OnDispel` of AuraScript won't be executed", entry.Id, m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` of script `{m_scriptName}` does not have apply aura effect - " +
+                        $"handler bound to hook `OnDispel` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var _ in AfterDispel)
+            {
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `AfterDispel` of AuraScript won't be executed", entry.Id, m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` of script `{m_scriptName}` does not have apply aura effect - " +
+                        $"handler bound to hook `AfterDispel` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectApply)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectApply` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectApply` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectRemove)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectRemove` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectRemove` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in AfterEffectApply)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `AfterEffectApply` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `AfterEffectApply` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in AfterEffectRemove)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `AfterEffectRemove` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `AfterEffectRemove` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectPeriodic)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectUpdatePeriodic)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectUpdatePeriodic` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectUpdatePeriodic` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in DoEffectCalcAmount)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `DoEffectCalcAmount` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `DoEffectCalcAmount` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in DoEffectCalcPeriodic)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `DoEffectCalcPeriodic` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `DoEffectCalcPeriodic` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in DoEffectCalcSpellMod)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `DoEffectCalcSpellMod` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `DoEffectCalcSpellMod` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in DoEffectCalcCritChance)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - handler bound to hook `DoEffectCalcCritChance` of AuraScript won't be executed");
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `DoEffectCalcCritChance` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var hook in DoEffectCalcDamageAndHealing)
+            {
                 if (hook.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` Effect `{hook}` of script `{m_scriptName}` did not match dbc effect data - handler bound to hook `DoEffectCalcDamageAndHealing` of AuraScript won't be executed");
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{hook}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `DoEffectCalcDamageAndHealing` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectAbsorb)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectAbsorb` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectAbsorb` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in AfterEffectAbsorb)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `AfterEffectAbsorb` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `AfterEffectAbsorb` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectManaShield)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectManaShield` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectManaShield` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in AfterEffectManaShield)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `AfterEffectManaShield` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `AfterEffectManaShield` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectSplit)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectSplit` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectSplit` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var _ in DoCheckProc)
+            {
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `DoCheckProc` of AuraScript won't be executed", entry.Id, m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` of script `{m_scriptName}` does not have apply aura effect - " +
+                        $"handler bound to hook `DoCheckProc` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in DoCheckEffectProc)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `DoCheckEffectProc` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `DoCheckEffectProc` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var _ in DoPrepareProc)
+            {
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `DoPrepareProc` of AuraScript won't be executed", entry.Id, m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` of script `{m_scriptName}` does not have apply aura effect - " +
+                        $"handler bound to hook `DoPrepareProc` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var _ in OnProc)
+            {
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `OnProc` of AuraScript won't be executed", entry.Id, m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` of script `{m_scriptName}` does not have apply aura effect - " +
+                        $"handler bound to hook `OnProc` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var _ in AfterProc)
+            {
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `AfterProc` of AuraScript won't be executed", entry.Id, m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` of script `{m_scriptName}` does not have apply aura effect - " +
+                        $"handler bound to hook `AfterProc` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in OnEffectProc)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectProc` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `OnEffectProc` of AuraScript won't be executed");
+                }
+            }
 
             foreach (var eff in AfterEffectProc)
+            {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `AfterEffectProc` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
+                        $"handler bound to hook `AfterEffectProc` of AuraScript won't be executed");
+                }
+            }
 
             return base._Validate(entry);
         }
+
         public bool _Load(Aura aura)
         {
             m_aura = aura;
@@ -1543,6 +1849,7 @@ namespace Game.Scripting
             _FinishScriptCall();
             return load;
         }
+
         public void _PrepareScriptCall(AuraScriptHookType hookType, AuraApplication aurApp = null)
         {
             m_scriptStates.Push(new ScriptStateStore(m_currentScriptState, m_auraApplication, m_defaultActionPrevented));
@@ -1550,6 +1857,7 @@ namespace Game.Scripting
             m_defaultActionPrevented = false;
             m_auraApplication = aurApp;
         }
+
         public void _FinishScriptCall()
         {
             ScriptStateStore stateStore = m_scriptStates.Peek();
@@ -1558,11 +1866,14 @@ namespace Game.Scripting
             m_defaultActionPrevented = stateStore._defaultActionPrevented;
             m_scriptStates.Pop();
         }
+
         public bool _IsDefaultActionPrevented()
         {
             return (AuraScriptHookType)m_currentScriptState switch
             {
-                AuraScriptHookType.EffectApply or AuraScriptHookType.EffectRemove or AuraScriptHookType.EffectPeriodic or AuraScriptHookType.EffectAbsorb or AuraScriptHookType.EffectSplit or AuraScriptHookType.PrepareProc or AuraScriptHookType.Proc or AuraScriptHookType.EffectProc => m_defaultActionPrevented,
+                AuraScriptHookType.EffectApply or AuraScriptHookType.EffectRemove or AuraScriptHookType.EffectPeriodic or 
+                AuraScriptHookType.EffectAbsorb or AuraScriptHookType.EffectSplit or AuraScriptHookType.PrepareProc or 
+                AuraScriptHookType.Proc or AuraScriptHookType.EffectProc => m_defaultActionPrevented,
                 _ => throw new Exception("AuraScript._IsDefaultActionPrevented is called in a wrong place"),
             };
         }
@@ -1753,7 +2064,9 @@ namespace Game.Scripting
                     m_defaultActionPrevented = true;
                     break;
                 default:
-                    Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.PreventDefaultAction called in a hook in which the call won't have effect!", m_scriptName, m_scriptSpellId);
+                    Log.outError(LogFilter.Scripts, 
+                        $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}` AuraScript.PreventDefaultAction " +
+                        $"called in a hook in which the call won't have effect!");
                     break;
             }
         }
@@ -1773,6 +2086,7 @@ namespace Game.Scripting
 
         // returns guid of object which casted the aura (m_originalCaster of the Spell class)
         public ObjectGuid GetCasterGUID() { return m_aura.GetCasterGUID(); }
+
         // returns unit which casted the aura or null if not avalible (caster logged out for example)
         public Unit GetCaster()
         {
@@ -1782,6 +2096,7 @@ namespace Game.Scripting
 
             return null;
         }
+
         // returns gameobject which cast the aura or NULL if not available
         public GameObject GetGObjCaster()
         {
@@ -1791,15 +2106,19 @@ namespace Game.Scripting
 
             return null;
         }
+
         // returns object on which aura was casted, target for non-area auras, area aura source for area auras
         public WorldObject GetOwner() { return m_aura.GetOwner(); }
+        
         // returns owner if it's unit or unit derived object, null otherwise (only for persistent area auras null is returned)
         public Unit GetUnitOwner() { return m_aura.GetUnitOwner(); }
+        
         // returns owner if it's dynobj, null otherwise
         public DynamicObject GetDynobjOwner() { return m_aura.GetDynobjOwner(); }
 
         // removes aura with remove mode (see AuraRemoveMode enum)
         public void Remove(AuraRemoveMode removeMode = 0) { m_aura.Remove(removeMode); }
+        
         // returns aura object of script
         public Aura GetAura() { return m_aura; }
 
@@ -1809,6 +2128,7 @@ namespace Game.Scripting
         // aura duration manipulation - when duration goes to 0 aura is removed
         public int GetDuration() { return m_aura.GetDuration(); }
         public void SetDuration(int duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
+        
         // sets duration to maxduration
         public void RefreshDuration() { m_aura.RefreshDuration(); }
         public long GetApplyTime() { return m_aura.GetApplyTime(); }
@@ -1817,6 +2137,7 @@ namespace Game.Scripting
         public int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
         // expired - duration just went to 0
         public bool IsExpired() { return m_aura.IsExpired(); }
+        
         // permament - has infinite duration
         public bool IsPermanent() { return m_aura.IsPermanent(); }
 
@@ -1825,6 +2146,7 @@ namespace Game.Scripting
         public void SetCharges(byte charges) { m_aura.SetCharges(charges); }
         public byte CalcMaxCharges() { return m_aura.CalcMaxCharges(); }
         public bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModCharges(num, removeMode); }
+        
         // returns true if last charge dropped
         public bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.DropCharge(removeMode); }
 
@@ -1835,11 +2157,13 @@ namespace Game.Scripting
 
         // passive - "working in background", not saved, not removed by immunities, not seen by player
         public bool IsPassive() { return m_aura.IsPassive(); }
+        
         // death persistent - not removed on death
         public bool IsDeathPersistent() { return m_aura.IsDeathPersistent(); }
 
         // check if aura has effect of given effindex
         public bool HasEffect(byte effIndex) { return m_aura.HasEffect(effIndex); }
+        
         // returns aura effect of given effect index or null
         public AuraEffect GetEffect(byte effIndex) { return m_aura.GetEffect(effIndex); }
 
@@ -1850,7 +2174,8 @@ namespace Game.Scripting
         }
 
         // AuraScript interface - functions which are redirecting to AuraApplication class
-        // Do not call these in hooks in which AuraApplication is not avalible, otherwise result will differ from expected (the functions will return null)
+        // Do not call these in hooks in which AuraApplication is not avalible,
+        // otherwise result will differ from expected (the functions will return null)
 
         // returns currently processed target of an aura
         // Return value does not need to be null-checked, the only situation this will (always)
@@ -1881,12 +2206,15 @@ namespace Game.Scripting
                 case AuraScriptHookType.EnterLeaveCombat:
                     return m_auraApplication.GetTarget();
                 default:
-                    Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.GetTarget called in a hook in which the call won't have effect!", m_scriptName, m_scriptSpellId);
+                    Log.outError(LogFilter.Scripts, 
+                        $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}` AuraScript.GetTarget " +
+                        $"called in a hook in which the call won't have effect!");
                     break;
             }
 
             return null;
         }
+        
         // returns AuraApplication object of currently processed target
         public AuraApplication GetTargetApplication() { return m_auraApplication; }
 

@@ -52,7 +52,11 @@ namespace Game.Entities
                                 newAI = charmerAI.GetAIForCharmedPlayer(ToPlayer());
                         }
                         else
-                            Log.outError(LogFilter.Misc, $"Attempt to assign charm AI to player {GetGUID()} who is charmed by non-creature {GetCharmerGUID()}.");
+                        {
+                            Log.outError(LogFilter.Misc,
+                                $"Attempt to assign charm AI to player {GetGUID()} " +
+                                $"who is charmed by non-creature {GetCharmerGUID()}.");
+                    }
                     }
                     if (newAI == null) // otherwise, we default to the generic one
                         newAI = new SimpleCharmedPlayerAI(ToPlayer());
@@ -83,19 +87,24 @@ namespace Game.Entities
 
         public void SetMinion(Minion minion, bool apply)
         {
-            Log.outDebug(LogFilter.Unit, $"SetMinion {minion.GetEntry()} for {GetEntry()}, apply {apply}");
+            Log.outDebug(LogFilter.Unit, 
+                $"SetMinion {minion.GetEntry()} for {GetEntry()}, apply {apply}");
 
             if (apply)
             {
                 if (!minion.GetOwnerGUID().IsEmpty())
                 {
-                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion {minion.GetEntry()} is not the minion of owner {GetEntry()}");
+                    Log.outFatal(LogFilter.Unit, 
+                        $"SetMinion: Minion {minion.GetEntry()} " +
+                        $"is not the minion of owner {GetEntry()}");
                     return;
                 }
 
                 if (!IsInWorld)
                 {
-                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion being added to owner not in world. Minion: {minion.GetGUID()}, Owner: {GetDebugInfo()}");
+                    Log.outFatal(LogFilter.Unit, 
+                        $"SetMinion: Minion being added to owner not in world. " +
+                        $"Minion: {minion.GetGUID()}, Owner: {GetDebugInfo()}");
                     return;
                 }
 
@@ -116,7 +125,8 @@ namespace Game.Entities
                     Guardian oldPet = GetGuardianPet();
                     if (oldPet != null)
                     {
-                        if (oldPet != minion && (oldPet.IsPet() || minion.IsPet() || oldPet.GetEntry() != minion.GetEntry()))
+                        if (oldPet != minion && (oldPet.IsPet() || minion.IsPet() 
+                            || oldPet.GetEntry() != minion.GetEntry()))
                         {
                             // remove existing minion pet
                             if (oldPet.ToPet() is Pet oldPetAsPet)
@@ -146,7 +156,9 @@ namespace Game.Entities
                     {
                         if (properties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
-                            var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
+                            var pet = thisPlayer.GetSession().
+                                GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
+
                             if (pet != null)
                             {
                                 minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
@@ -178,7 +190,9 @@ namespace Game.Entities
             {
                 if (minion.GetOwnerGUID() != GetGUID())
                 {
-                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion {minion.GetEntry()} is not the minion of owner {GetEntry()}");
+                    Log.outFatal(LogFilter.Unit, 
+                        $"SetMinion: Minion {minion.GetEntry()} " +
+                        $"is not the minion of owner {GetEntry()}");
                     return;
                 }
 
@@ -265,26 +279,33 @@ namespace Game.Entities
                 charmer.RemoveAurasByType(AuraType.Mounted);
 
             Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
-            Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() != null && GetVehicleKit().IsControllableVehicle()));
+            Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() != null 
+                && GetVehicleKit().IsControllableVehicle()));
 
-            Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), Type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
+            Log.outDebug(LogFilter.Unit, 
+                $"SetCharmedBy: charmer {charmer.GetEntry()} (GUID {charmer.GetGUID()}), " +
+                $"charmed {GetEntry()} (GUID {GetGUID()}), Type {type}.");
 
             if (this == charmer)
             {
-                Log.outFatal(LogFilter.Unit, "Unit:SetCharmedBy: Unit {0} (GUID {1}) is trying to charm itself!", GetEntry(), GetGUID().ToString());
+                Log.outFatal(LogFilter.Unit, 
+                    $"Unit:SetCharmedBy: Unit {GetEntry()} (GUID {GetGUID()}) is trying to charm itself!");
                 return false;
             }
 
             if (IsPlayer() && ToPlayer().GetTransport() != null)
             {
-                Log.outFatal(LogFilter.Unit, "Unit:SetCharmedBy: Player on transport is trying to charm {0} (GUID {1})", GetEntry(), GetGUID().ToString());
+                Log.outFatal(LogFilter.Unit, 
+                    $"Unit:SetCharmedBy: Player on transport is trying to charm {GetEntry()} (GUID {GetGUID()})");
                 return false;
             }
 
             // Already charmed
             if (!GetCharmerGUID().IsEmpty())
             {
-                Log.outFatal(LogFilter.Unit, "Unit:SetCharmedBy: {0} (GUID {1}) has already been charmed but {2} (GUID {3}) is trying to charm it!", GetEntry(), GetGUID().ToString(), charmer.GetEntry(), charmer.GetGUID().ToString());
+                Log.outFatal(LogFilter.Unit, 
+                    $"Unit:SetCharmedBy: {GetEntry()} (GUID {GetGUID()}) has already been charmed but " +
+                    $"{charmer.GetEntry()} (GUID {charmer.GetGUID()}) is trying to charm it!");
                 return false;
             }
 
@@ -310,7 +331,11 @@ namespace Game.Entities
             // StopCastingCharm may remove a possessed pet?
             if (!IsInWorld)
             {
-                Log.outFatal(LogFilter.Unit, "Unit:SetCharmedBy: {0} (GUID {1}) is not in world but {2} (GUID {3}) is trying to charm it!", GetEntry(), GetGUID().ToString(), charmer.GetEntry(), charmer.GetGUID().ToString());
+                Log.outFatal(LogFilter.Unit, 
+                    $"Unit:SetCharmedBy: {GetEntry()} (GUID {GetGUID()}) " +
+                    $"is not in world but {charmer.GetEntry()} " +
+                    $"(GUID {charmer.GetGUID()}) is trying to charm it!");
+
                 return false;
             }
 
@@ -329,7 +354,10 @@ namespace Game.Entities
             GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
 
             // Stop any remaining spline, if no involuntary movement is found
-            Func<MovementGenerator, bool> criteria = movement => movement.Priority == MovementGeneratorPriority.Highest;
+            Func<MovementGenerator, bool> criteria = 
+                movement => 
+                movement.Priority == MovementGeneratorPriority.Highest;
+
             if (!GetMotionMaster().HasMovementGenerator(criteria))
                 StopMoving();
 
@@ -349,7 +377,8 @@ namespace Game.Entities
             // prevent undefined behaviour
             if (aurApp != null && aurApp.GetRemoveMode() != 0)
             {
-                // properly clean up charm changes up to this point to avoid leaving the unit in partially charmed state
+                // properly clean up charm changes up to this point
+                // to avoid leaving the unit in partially charmed state
                 SetFaction(_oldFactionId);
                 GetMotionMaster().InitializeDefault();
                 charmer.SetCharm(this, false);
@@ -496,8 +525,12 @@ namespace Game.Entities
                                 if (GetCharmInfo() != null)
                                     GetCharmInfo().SetPetNumber(0, true);
                                 else
-                                    Log.outError(LogFilter.Unit, "Aura:HandleModCharm: target={0} with typeid={1} has a charm aura but no charm info!", GetGUID(), GetTypeId());
+                                {
+                                    Log.outError(LogFilter.Unit,
+                                        $"Aura:HandleModCharm: target={GetGUID()} " +
+                                        $"with typeid={GetTypeId()} has a charm aura but no charm info!");
                             }
+                        }
                         }
                         break;
                     case CharmType.Convert:
@@ -557,7 +590,10 @@ namespace Game.Entities
             {
                 if (IsTypeId(TypeId.Player))
                 {
-                    Cypher.Assert(GetCharmedGUID().IsEmpty(), $"Player {GetName()} is trying to charm unit {charm.GetEntry()}, but it already has a charmed unit {GetCharmedGUID()}");
+                    Cypher.Assert(GetCharmedGUID().IsEmpty(), 
+                        $"Player {GetName()} is trying to charm unit {charm.GetEntry()}, " +
+                        $"but it already has a charmed unit {GetCharmedGUID()}");
+
                     SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), charm.GetGUID());
                     m_charmed = charm;
 
@@ -571,7 +607,10 @@ namespace Game.Entities
                 // PvP, FFAPvP
                 charm.ReplaceAllPvpFlags(GetPvpFlags());
 
-                Cypher.Assert(charm.GetCharmerGUID().IsEmpty(), $"Unit {charm.GetEntry()} is being charmed, but it already has a charmer {charm.GetCharmerGUID()}");
+                Cypher.Assert(charm.GetCharmerGUID().IsEmpty(), 
+                    $"Unit {charm.GetEntry()} is being charmed, " +
+                    $"but it already has a charmer {charm.GetCharmerGUID()}");
+
                 charm.SetUpdateFieldValue(charm.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), GetGUID());
                 charm.m_charmer = this;
 
@@ -588,12 +627,18 @@ namespace Game.Entities
 
                 if (IsPlayer())
                 {
-                    Cypher.Assert(GetCharmedGUID() == charm.GetGUID(), $"Player {GetName()} is trying to uncharm unit {charm.GetEntry()}, but it has another charmed unit {GetCharmedGUID()}");
+                    Cypher.Assert(GetCharmedGUID() == charm.GetGUID(), 
+                        $"Player {GetName()} is trying to uncharm unit {charm.GetEntry()}, " +
+                        $"but it has another charmed unit {GetCharmedGUID()}");
+
                     SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), ObjectGuid.Empty);
                     m_charmed = null;
                 }
 
-                Cypher.Assert(charm.GetCharmerGUID() == GetGUID(), $"Unit {charm.GetEntry()} is being uncharmed, but it has another charmer {charm.GetCharmerGUID()}");
+                Cypher.Assert(charm.GetCharmerGUID() == GetGUID(), 
+                    $"Unit {charm.GetEntry()} is being uncharmed, " +
+                    $"but it has another charmer {charm.GetCharmerGUID()}");
+
                 charm.SetUpdateFieldValue(charm.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), ObjectGuid.Empty);
                 charm.m_charmer = null;
 
@@ -667,14 +712,31 @@ namespace Game.Entities
                 else if (target.GetOwnerGUID() == GetGUID() && target.IsSummon())
                     target.ToTempSummon().UnSummon();
                 else
-                    Log.outError(LogFilter.Unit, "Unit {0} is trying to release unit {1} which is neither charmed nor owned by it", GetEntry(), target.GetEntry());
+                {
+                    Log.outError(LogFilter.Unit,
+                        $"Unit {GetEntry()} is trying to release unit {target.GetEntry()} " +
+                        $"which is neither charmed nor owned by it");
             }
+            }
+
             if (!GetPetGUID().IsEmpty())
-                Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its pet {1}", GetEntry(), GetPetGUID());
+            {
+                Log.outFatal(LogFilter.Unit,
+                    $"Unit {GetEntry()} is not able to release its pet {GetPetGUID()}");
+            }
+
             if (!GetMinionGUID().IsEmpty())
-                Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its minion {1}", GetEntry(), GetMinionGUID());
+            {
+                Log.outFatal(LogFilter.Unit,
+                    $"Unit {GetEntry()} is not able to release its minion {GetMinionGUID()}");
+            }
+
             if (!GetCharmedGUID().IsEmpty())
-                Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its charm {1}", GetEntry(), GetCharmedGUID());
+            {
+                Log.outFatal(LogFilter.Unit,
+                    $"Unit {GetEntry()} is not able to release its charm {GetCharmedGUID()}");
+            }
+
             if (!IsPet()) // pets don't use the flag for this
                 RemoveUnitFlag(UnitFlags.PetInCombat); // m_controlled is now empty, so we know none of our minions are in combat
         }
@@ -772,7 +834,8 @@ namespace Game.Entities
 
             if (!pet.InitStatsForLevel(level))
             {
-                Log.outError(LogFilter.Unit, "Pet:InitStatsForLevel() failed for creature (Entry: {0})!", pet.GetEntry());
+                Log.outError(LogFilter.Unit, 
+                    $"Pet:InitStatsForLevel() failed for creature (Entry: {pet.GetEntry()})!");
                 return false;
             }
 

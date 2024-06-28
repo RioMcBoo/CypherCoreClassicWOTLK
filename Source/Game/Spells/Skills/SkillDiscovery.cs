@@ -24,7 +24,9 @@ namespace Game.Spells
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 skill discovery definitions. DB table `skill_discovery_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 skill discovery definitions. " +
+                    "DB table `skill_discovery_template` is empty.");
                 return;
             }
 
@@ -42,7 +44,11 @@ namespace Game.Spells
 
                 if (chance <= 0)                                    // Chance
                 {
-                    ssNonDiscoverableEntries.AppendFormat("spellId = {0} reqSkillOrSpell = {1} reqSkillValue = {2} Chance = {3} (Chance problem)\n", spellId, reqSkillOrSpell, reqSkillValue, chance);
+                    ssNonDiscoverableEntries.AppendFormat(
+                        $"spellId = {spellId} " +
+                        $"reqSkillOrSpell = {reqSkillOrSpell} " +
+                        $"reqSkillValue = {reqSkillValue} " +
+                        $"Chance = {chance} (Chance problem)\n");
                     continue;
                 }
 
@@ -54,7 +60,9 @@ namespace Game.Spells
                     {
                         if (!reportedReqSpells.Contains(absReqSkillOrSpell))
                         {
-                            Log.outError(LogFilter.Sql, "Spell (ID: {0}) have not existed spell (ID: {1}) in `reqSpell` field in `skill_discovery_template` table", spellId, reqSkillOrSpell);
+                            Log.outError(LogFilter.Sql, 
+                                $"Spell (ID: {spellId}) have not existed spell (ID: {reqSkillOrSpell}) " +
+                                $"in `reqSpell` field in `skill_discovery_template` table");
                             reportedReqSpells.Add(absReqSkillOrSpell);
                         }
                         continue;
@@ -67,9 +75,11 @@ namespace Game.Spells
                     {
                         if (!reportedReqSpells.Contains(absReqSkillOrSpell))
                         {
-                            Log.outError(LogFilter.Sql, "Spell (ID: {0}) not have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc" +
-                                " and not 100%% Chance random discovery ability but listed for spellId {1} (and maybe more) in `skill_discovery_template` table",
-                                absReqSkillOrSpell, spellId);
+                            Log.outError(LogFilter.Sql, 
+                                $"Spell (ID: {absReqSkillOrSpell}) not have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc" +
+                                $" and not 100%% Chance random discovery ability but listed for spellId {spellId} (and maybe more) " +
+                                $"in `skill_discovery_template` table");
+
                             reportedReqSpells.Add(absReqSkillOrSpell);
                         }
                         continue;
@@ -83,7 +93,9 @@ namespace Game.Spells
 
                     if (bounds.Empty())
                     {
-                        Log.outError(LogFilter.Sql, "Spell (ID: {0}) not listed in `SkillLineAbility.dbc` but listed with `reqSpell`=0 in `skill_discovery_template` table", spellId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell (ID: {spellId}) not listed in `SkillLineAbility.dbc` but listed with `reqSpell`=0 " +
+                            $"in `skill_discovery_template` table");
                         continue;
                     }
 
@@ -92,7 +104,9 @@ namespace Game.Spells
                 }
                 else
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}) have negative value in `reqSpell` field in `skill_discovery_template` table", spellId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell (ID: {spellId}) have negative value in `reqSpell` field " +
+                        $"in `skill_discovery_template` table");
                     continue;
                 }
 
@@ -101,7 +115,12 @@ namespace Game.Spells
             while (result.NextRow());
 
             if (ssNonDiscoverableEntries.Length != 0)
-                Log.outError(LogFilter.Sql, "Some items can't be successfully discovered: have in Chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n{0}", ssNonDiscoverableEntries.ToString());
+            {
+                Log.outError(LogFilter.Sql, 
+                    $"Some items can't be successfully discovered: " +
+                    $"have in Chance field value < 0.000001 in `skill_discovery_template` DB table . " +
+                    $"List:\n{ssNonDiscoverableEntries}");
+            }
 
             // report about empty data for explicit discovery spells
             foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
@@ -115,7 +134,11 @@ namespace Game.Spells
                     continue;
 
                 if (!SkillDiscoveryStorage.ContainsKey(spellEntry.Id))
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}) is 100% Chance random discovery ability but not have data in `skill_discovery_template` table", spellEntry.Id);
+                {
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell (ID: {spellEntry.Id}) is 100% Chance random discovery ability " +
+                        $"but not have data in `skill_discovery_template` table");
+                }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill discovery definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -139,7 +162,7 @@ namespace Game.Spells
                         full_chance += item_iter.chance;
 
             float rate = full_chance / 100.0f;
-            float roll = (float)RandomHelper.randChance() * rate;                      // roll now in range 0..full_chance
+            float roll = (float)RandomHelper.randPercent() * rate;                      // roll now in range 0..full_chance
 
             foreach (var item_iter in tab)
             {
@@ -165,8 +188,10 @@ namespace Game.Spells
                 return true;
 
             foreach (var item_iter in tab)
+            {
                 if (!player.HasSpell(item_iter.spellId))
                     return false;
+            }
 
             return true;
         }
@@ -178,8 +203,10 @@ namespace Game.Spells
                 return false;
 
             foreach (var item_iter in tab)
+            {
                 if (player.HasSpell(item_iter.spellId))
                     return true;
+            }
 
             return false;
         }

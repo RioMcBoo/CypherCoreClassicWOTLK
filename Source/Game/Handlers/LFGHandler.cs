@@ -25,7 +25,8 @@ namespace Game
 
             if (dfJoin.Slots.Empty())
             {
-                Log.outDebug(LogFilter.Lfg, "CMSG_DF_JOIN {0} no dungeons selected", GetPlayerInfo());
+                Log.outDebug(LogFilter.Lfg, 
+                    $"CMSG_DF_JOIN {GetPlayerInfo()} no dungeons selected");
                 return;
             }
 
@@ -37,7 +38,10 @@ namespace Game
                     newDungeons.Add(dungeon);
             }
 
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_JOIN {0} roles: {1}, Dungeons: {2}", GetPlayerInfo(), dfJoin.Roles, newDungeons.Count);
+            Log.outDebug(LogFilter.Lfg, 
+                $"CMSG_DF_JOIN {GetPlayerInfo()} " +
+                $"roles: {dfJoin.Roles}, " +
+                $"Dungeons: {newDungeons.Count}");
 
             Global.LFGMgr.JoinLfg(GetPlayer(), dfJoin.Roles, newDungeons);
         }
@@ -46,8 +50,11 @@ namespace Game
         void HandleLfgLeave(DFLeave dfLeave)
         {
             Group group = GetPlayer().GetGroup();
+            int groupNumb = group != null ? 1 : 0;
 
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent guid {2}.", GetPlayerInfo(), group != null ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
+            Log.outDebug(LogFilter.Lfg, 
+                $"CMSG_DF_LEAVE {GetPlayerInfo()} in group: " +
+                $"{groupNumb} sent guid {dfLeave.Ticket.RequesterGuid}.");
 
             // Check cheating - only leader can leave the queue
             if (group == null || group.GetLeaderGUID() == dfLeave.Ticket.RequesterGuid)
@@ -57,7 +64,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DfProposalResponse)]
         void HandleLfgProposalResult(DFProposalResponse dfProposalResponse)
         {
-            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_PROPOSAL_RESULT {0} proposal: {1} accept: {2}", GetPlayerInfo(), dfProposalResponse.ProposalID, dfProposalResponse.Accepted ? 1 : 0);
+            Log.outDebug(LogFilter.Lfg, 
+                $"CMSG_LFG_PROPOSAL_RESULT {GetPlayerInfo()} proposal: " +
+                $"{dfProposalResponse.ProposalID} accept: {dfProposalResponse.Accepted}");
+            
             Global.LFGMgr.UpdateProposal(dfProposalResponse.ProposalID, GetPlayer().GetGUID(), dfProposalResponse.Accepted);
         }
 
@@ -68,12 +78,17 @@ namespace Game
             Group group = GetPlayer().GetGroup();
             if (group == null)
             {
-                Log.outDebug(LogFilter.Lfg, "CMSG_DF_SET_ROLES {0} Not in group",
-                    GetPlayerInfo());
+                Log.outDebug(LogFilter.Lfg, 
+                    $"CMSG_DF_SET_ROLES {GetPlayerInfo()} Not in group");
                 return;
             }
             ObjectGuid gguid = group.GetGUID();
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_SET_ROLES: Group {0}, Player {1}, Roles: {2}", gguid.ToString(), GetPlayerInfo(), dfSetRoles.RolesDesired);
+
+            Log.outDebug(LogFilter.Lfg, 
+                $"CMSG_DF_SET_ROLES: Group {gguid}, " +
+                $"Player {GetPlayerInfo()}, " +
+                $"Roles: {dfSetRoles.RolesDesired}");
+
             Global.LFGMgr.UpdateRoleCheck(gguid, guid, dfSetRoles.RolesDesired);
         }
 
@@ -81,21 +96,27 @@ namespace Game
         void HandleLfgSetBootVote(DFBootPlayerVote dfBootPlayerVote)
         {
             ObjectGuid guid = GetPlayer().GetGUID();
-            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_SET_BOOT_VOTE {0} agree: {1}", GetPlayerInfo(), dfBootPlayerVote.Vote ? 1 : 0);
+            Log.outDebug(LogFilter.Lfg, 
+                $"CMSG_LFG_SET_BOOT_VOTE {GetPlayerInfo()} agree: {dfBootPlayerVote.Vote}");
+
             Global.LFGMgr.UpdateBoot(guid, dfBootPlayerVote.Vote);
         }
 
         [WorldPacketHandler(ClientOpcodes.DfTeleport)]
         void HandleLfgTeleport(DFTeleport dfTeleport)
         {
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_TELEPORT {0} out: {1}", GetPlayerInfo(), dfTeleport.TeleportOut ? 1 : 0);
+            Log.outDebug(LogFilter.Lfg, 
+                $"CMSG_DF_TELEPORT {GetPlayerInfo()} out: {dfTeleport.TeleportOut}");
+
             Global.LFGMgr.TeleportPlayer(GetPlayer(), dfTeleport.TeleportOut, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.DfGetSystemInfo, Processing = PacketProcessing.ThreadSafe)]
         void HandleDfGetSystemInfo(DFGetSystemInfo dfGetSystemInfo)
         {
-            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_Lock_INFO_REQUEST {0} for {1}", GetPlayerInfo(), (dfGetSystemInfo.Player ? "player" : "party"));
+            Log.outDebug(LogFilter.Lfg, 
+                $"CMSG_LFG_Lock_INFO_REQUEST {GetPlayerInfo()} " +
+                $"for {(dfGetSystemInfo.Player ? "player" : "party")}");
 
             if (dfGetSystemInfo.Player)
                 SendLfgPlayerLockInfo();
@@ -222,7 +243,7 @@ namespace Game
                 lfgPartyInfo.Player.Add(lfgBlackList);
             }
 
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PARTY_INFO {0}", GetPlayerInfo());
+            Log.outDebug(LogFilter.Lfg, $"SMSG_LFG_PARTY_INFO {GetPlayerInfo()}");
             SendPacket(lfgPartyInfo);
         }
 
@@ -293,7 +314,7 @@ namespace Game
             else
                 dungeons = roleCheck.dungeons;
 
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_ROLE_CHECK_UPDATE {0}", GetPlayerInfo());
+            Log.outDebug(LogFilter.Lfg, $"SMSG_LFG_ROLE_CHECK_UPDATE {GetPlayerInfo()}");
 
             LFGRoleCheckUpdate lfgRoleCheckUpdate = new();
             lfgRoleCheckUpdate.PartyIndex = 127;
@@ -308,7 +329,9 @@ namespace Game
             {
                 // Leader info MUST be sent 1st :S
                 byte roles = (byte)roleCheck.roles.Find(roleCheck.leader).Value;
-                lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(roleCheck.leader, roles, Global.CharacterCacheStorage.GetCharacterCacheByGuid(roleCheck.leader).Level, roles > 0));
+
+                lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(roleCheck.leader, roles, 
+                    Global.CharacterCacheStorage.GetCharacterCacheByGuid(roleCheck.leader).Level, roles > 0));
 
                 foreach (var it in roleCheck.roles)
                 {
@@ -316,7 +339,9 @@ namespace Game
                         continue;
 
                     roles = (byte)it.Value;
-                    lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(it.Key, roles, Global.CharacterCacheStorage.GetCharacterCacheByGuid(it.Key).Level, roles > 0));
+
+                    lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(it.Key, roles, 
+                        Global.CharacterCacheStorage.GetCharacterCacheByGuid(it.Key).Level, roles > 0));
                 }
             }
 
@@ -344,8 +369,11 @@ namespace Game
 
                 foreach (var lockInfo in it.Value)
                 {
-                    Log.outTrace(LogFilter.Lfg, "SendLfgJoinResult:: {0} DungeonID: {1} Lock status: {2} Required itemLevel: {3} Current itemLevel: {4}",
-                        it.Key.ToString(), (lockInfo.Key & 0x00FFFFFF), lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, lockInfo.Value.currentItemLevel);
+                    Log.outTrace(LogFilter.Lfg, 
+                        $"SendLfgJoinResult:: {it.Key} DungeonID: {lockInfo.Key & 0x00FFFFFF} " +
+                        $"Lock status: {lockInfo.Value.lockStatus} " +
+                        $"Required itemLevel: {lockInfo.Value.requiredItemLevel} " +
+                        $"Current itemLevel: {lockInfo.Value.currentItemLevel}");
 
                     blackList.Slot.Add(new LFGBlackListSlot(lockInfo.Key, lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, lockInfo.Value.currentItemLevel, 0));
                 }
@@ -358,10 +386,19 @@ namespace Game
 
         public void SendLfgQueueStatus(LfgQueueStatusData queueData)
         {
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_QUEUE_STATUS {0} state: {1} dungeon: {2}, waitTime: {3}, " +
-                "avgWaitTime: {4}, waitTimeTanks: {5}, waitTimeHealer: {6}, waitTimeDps: {7}, queuedTime: {8}, tanks: {9}, healers: {10}, dps: {11}",
-                GetPlayerInfo(), Global.LFGMgr.GetState(GetPlayer().GetGUID()), queueData.dungeonId, queueData.waitTime, queueData.waitTimeAvg,
-                queueData.waitTimeTank, queueData.waitTimeHealer, queueData.waitTimeDps, queueData.queuedTime, queueData.tanks, queueData.healers, queueData.dps);
+            Log.outDebug(LogFilter.Lfg, 
+                $"SMSG_LFG_QUEUE_STATUS {GetPlayerInfo()} " +
+                $"state: {Global.LFGMgr.GetState(GetPlayer().GetGUID())} " +
+                $"dungeon: {queueData.dungeonId}, " +
+                $"waitTime: {queueData.waitTime}, " +
+                $"avgWaitTime: {queueData.waitTimeAvg}, " +
+                $"waitTimeTanks: {queueData.waitTimeTank}, " +
+                $"waitTimeHealer: {queueData.waitTimeHealer}, " +
+                $"waitTimeDps: {queueData.waitTimeDps}, " +
+                $"queuedTime: {queueData.queuedTime}, " +
+                $"tanks: {queueData.tanks}, " +
+                $"healers: {queueData.healers}, " +
+                $"dps: {queueData.dps}");
 
             LFGQueueStatus lfgQueueStatus = new();
 
@@ -387,8 +424,11 @@ namespace Game
             if (rewardData.rdungeonEntry == 0 || rewardData.sdungeonEntry == 0 || rewardData.quest == null)
                 return;
 
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PLAYER_REWARD {0} rdungeonEntry: {1}, sdungeonEntry: {2}, done: {3}",
-                GetPlayerInfo(), rewardData.rdungeonEntry, rewardData.sdungeonEntry, rewardData.done);
+            Log.outDebug(LogFilter.Lfg, 
+                $"SMSG_LFG_PLAYER_REWARD {GetPlayerInfo()} " +
+                $"rdungeonEntry: {rewardData.rdungeonEntry}, " +
+                $"sdungeonEntry: {rewardData.sdungeonEntry}, " +
+                $"done: {rewardData.done}");
 
             LFGPlayerReward lfgPlayerReward = new();
             lfgPlayerReward.QueuedSlot = rewardData.rdungeonEntry;
@@ -428,8 +468,17 @@ namespace Game
                         ++agreeNum;
                 }
             }
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_BOOT_PROPOSAL_UPDATE {0} inProgress: {1} - didVote: {2} - agree: {3} - victim: {4} votes: {5} - agrees: {6} - left: {7} - needed: {8} - reason {9}",
-                GetPlayerInfo(), boot.inProgress, playerVote != LfgAnswer.Pending, playerVote == LfgAnswer.Agree, boot.victim.ToString(), votesNum, agreeNum, secsleft, SharedConst.LFGKickVotesNeeded, boot.reason);
+            Log.outDebug(LogFilter.Lfg, 
+                $"SMSG_LFG_BOOT_PROPOSAL_UPDATE {GetPlayerInfo()} " +
+                $"inProgress: {boot.inProgress} - " +
+                $"didVote: {playerVote != LfgAnswer.Pending} - " +
+                $"agree: {playerVote == LfgAnswer.Agree} - " +
+                $"victim: {boot.victim} " +
+                $"votes: {votesNum} - " +
+                $"agrees: {agreeNum} - " +
+                $"left: {secsleft} - " +
+                $"needed: {SharedConst.LFGKickVotesNeeded} - " +
+                $"reason {boot.reason}");
 
             LfgBootPlayer lfgBootPlayer = new();
             lfgBootPlayer.Info.VoteInProgress = boot.inProgress;                                 // Vote in progress
@@ -452,7 +501,8 @@ namespace Game
             bool silent = !proposal.isNew && guildGuid == proposal.group;
             int dungeonEntry = proposal.dungeonId;
 
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PROPOSAL_UPDATE {0} state: {1}", GetPlayerInfo(), proposal.state);
+            Log.outDebug(LogFilter.Lfg,
+                $"SMSG_LFG_PROPOSAL_UPDATE {GetPlayerInfo()} state: {proposal.state}");
 
             // show random dungeon if player selected random dungeon and it's not lfg group
             if (!silent)
@@ -499,13 +549,15 @@ namespace Game
 
         public void SendLfgOfferContinue(int dungeonEntry)
         {
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_OFFER_CONTINUE {0} dungeon entry: {1}", GetPlayerInfo(), dungeonEntry);
+            Log.outDebug(LogFilter.Lfg, 
+                $"SMSG_LFG_OFFER_CONTINUE {GetPlayerInfo()} dungeon entry: {dungeonEntry}");
             SendPacket(new LfgOfferContinue(Global.LFGMgr.GetLFGDungeonEntry(dungeonEntry)));
         }
 
         public void SendLfgTeleportError(LfgTeleportResult err)
         {
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_TELEPORT_DENIED {0} reason: {1}", GetPlayerInfo(), err);
+            Log.outDebug(LogFilter.Lfg, 
+                $"SMSG_LFG_TELEPORT_DENIED {GetPlayerInfo()} reason: {err}");
             SendPacket(new LfgTeleportDenied(err));
         }
     }

@@ -21,7 +21,9 @@ namespace Game.Entities
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.Player, "Loaded 0 Random item bonus list definitions. DB table `item_random_enchantment_template` is empty.");
+                Log.outInfo(LogFilter.Player, 
+                    "Loaded 0 Random item bonus list definitions. " +
+                    "DB table `item_random_enchantment_template` is empty.");
                 return;
             }
             uint count = 0;
@@ -34,14 +36,18 @@ namespace Game.Entities
 
                 if (CliDB.ItemRandomPropertiesStorage.LookupByKey(enchantmentId) != null && CliDB.ItemRandomSuffixStorage.LookupByKey(enchantmentId) != null)
                 {
-                    Log.outError(LogFilter.Sql, $"ItemRandomProperties / ItemRandomSuffix Id {enchantmentId} used in `item_random_enchantment_template` by id {id} " +
+                    Log.outError(LogFilter.Sql, 
+                        $"ItemRandomProperties / ItemRandomSuffix Id {enchantmentId} " +
+                        $"used in `item_random_enchantment_template` by id {id} " +
                         "doesn't have exist in its corresponding db2 file.");
                     continue;
                 }
 
                 if (chance < 0.000001f || chance > 100.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Enchantment Id {enchantmentId} used in `item_random_enchantment_template` by id {id} has invalid chance {chance}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Enchantment Id {enchantmentId} used in `item_random_enchantment_template` " +
+                        $"by id {id} has invalid chance {chance}");
                     continue;
                 }
 
@@ -148,7 +154,9 @@ namespace Game.Entities
                 var tab = RandomEnchantmentData.LookupByKey(randomSelect);
                 if (tab == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Item RandomSelect Id {randomSelect} used but it does not have records in `item_random_enchantment_template` table.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Item RandomSelect Id {randomSelect} used " +
+                        $"but it does not have records in `item_random_enchantment_template` table.");
                     return properties;
                 }
 
@@ -156,7 +164,9 @@ namespace Game.Entities
                 var randomPropertiesEntry = CliDB.ItemRandomPropertiesStorage.LookupByKey(randomPropertiesId.EnchantmentID);
                 if (randomPropertiesEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Enchantment Id {randomPropertiesId.EnchantmentID} used but it doesn't have records in 'ItemRandomProperties.db2'.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Enchantment Id {randomPropertiesId.EnchantmentID} used " +
+                        $"but it doesn't have records in 'ItemRandomProperties.db2'.");
                     return properties;
                 }
 
@@ -167,7 +177,9 @@ namespace Game.Entities
                 var tab = RandomEnchantmentData.LookupByKey(randomSuffix);
                 if (tab == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Item RandomSuffixGroupID Id {randomSuffix} used but it does not have records in `item_random_enchantment_template` table.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Item RandomSuffixGroupID Id {randomSuffix} used " +
+                        $"but it does not have records in `item_random_enchantment_template` table.");
                     return properties;
                 }
 
@@ -175,7 +187,9 @@ namespace Game.Entities
                 var randomSuffixEntry = CliDB.ItemRandomSuffixStorage.LookupByKey(randomSuffixId.EnchantmentID);
                 if (randomSuffixEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Enchantment id Id {randomSuffixId} used but it doesn't have records in 'ItemRandomSuffixEntry.db2'.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Enchantment id Id {randomSuffixId} used " +
+                        $"but it doesn't have records in 'ItemRandomSuffixEntry.db2'.");
                     return properties;
                 }
 

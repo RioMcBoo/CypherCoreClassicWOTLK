@@ -113,7 +113,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
 
         public override void DamageTaken(Unit who, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            // @todo this is wrong - razorgore should still take damage, he should just nuke the whole room and respawn if he dies during P1
+            // @todo this is wrong - razorgore should still take damage,
+            // he should just nuke the whole room and respawn if he dies during P1
             if (!secondPhase)
                 damage = 0;
         }

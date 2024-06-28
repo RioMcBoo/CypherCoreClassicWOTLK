@@ -129,9 +129,9 @@ namespace Game.Chat
                         max2 = max - 1;
                     string padding = "";
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage("|    {0} GMLevel {1}", name, security);
+                        handler.SendSysMessage($"|    {name} GMLevel {security}");
                     else
-                        handler.SendSysMessage("|{0}{1}{2}|   {3}  |", padding.PadRight(max), name, padding.PadRight(max2), security);
+                        handler.SendSysMessage($"|{padding.PadRight(max)}{name}{padding.PadRight(max2)}|   {security}  |");
                 } while (result.NextRow());
                 handler.SendSysMessage("========================");
             }
@@ -165,7 +165,11 @@ namespace Game.Chat
 
             if (!visibleArg.HasValue)
             {
-                handler.SendSysMessage(CypherStrings.YouAre, _player.IsGMVisible() ? Global.ObjectMgr.GetCypherString(CypherStrings.Visible) : Global.ObjectMgr.GetCypherString(CypherStrings.Invisible));
+                handler.SendSysMessage(CypherStrings.YouAre, 
+                    _player.IsGMVisible() 
+                    ? Global.ObjectMgr.GetCypherString(CypherStrings.Visible) 
+                    : Global.ObjectMgr.GetCypherString(CypherStrings.Invisible));
+
                 return true;
             }
 

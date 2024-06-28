@@ -335,14 +335,25 @@ namespace Game.Chat
 
                 if (uint.TryParse(objectIdStr, out uint objectId))
                 {
-                    stmt = new PreparedStatement(String.Format("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND id = '{4}' ORDER BY order_ ASC LIMIT 1",
-                    player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectId));
+                    stmt = new PreparedStatement(
+                        $"SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (" +
+                        $"POW(position_x - '{player.GetPositionX()}', 2) + " +
+                        $"POW(position_y - '{player.GetPositionY()}', 2) + " +
+                        $"POW(position_z - '{player.GetPositionZ()}', 2)) " +
+                        $"AS order_ FROM gameobject WHERE map = '{player.GetMapId()}' AND id = '{objectId}' " +
+                        $"ORDER BY order_ ASC LIMIT 1");
                 }
                 else
                 {
-                    stmt = new PreparedStatement(String.Format("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ " +
-                        "FROM gameobject LEFT JOIN gameobject_template ON gameobject_template.entry = gameobject.id WHERE map = {3} AND name LIKE CONCAT('%%', '{4}', '%%') ORDER BY order_ ASC LIMIT 1",
-                        player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectIdStr));
+                    stmt = new PreparedStatement(
+                        $"SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (" +
+                        $"POW(position_x - {player.GetPositionX()}, 2) + " +
+                        $"POW(position_y - {player.GetPositionY()}, 2) + " +
+                        $"POW(position_z - {player.GetPositionZ()}, 2)) " +
+                        $"AS order_ FROM gameobject LEFT JOIN gameobject_template " +
+                        $"ON gameobject_template.entry = gameobject.id " +
+                        $"WHERE map = {player.GetMapId()} AND name LIKE CONCAT('%%', '{objectIdStr}', '%%') " +
+                        $"ORDER BY order_ ASC LIMIT 1");
                 }
             }
             else
@@ -367,11 +378,15 @@ namespace Game.Chat
                 else
                     eventFilter.Append(')');
 
-                stmt = new PreparedStatement(String.Format("SELECT gameobject.guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, " +
-                    "(POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ FROM gameobject " +
-                    "LEFT OUTER JOIN game_event_gameobject on gameobject.guid = game_event_gameobject.guid WHERE map = '{3}' {4} ORDER BY order_ ASC LIMIT 10",
-                    handler.GetSession().GetPlayer().GetPositionX(), handler.GetSession().GetPlayer().GetPositionY(), handler.GetSession().GetPlayer().GetPositionZ(),
-                    handler.GetSession().GetPlayer().GetMapId(), eventFilter.ToString()));
+                stmt = new PreparedStatement(
+                    $"SELECT gameobject.guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (" +
+                    $"POW(position_x - {handler.GetSession().GetPlayer().GetPositionX()}, 2) + " +
+                    $"POW(position_y - {handler.GetSession().GetPlayer().GetPositionY()}, 2) + " +
+                    $"POW(position_z - {handler.GetSession().GetPlayer().GetPositionZ()}, 2)) " +
+                    $"AS order_ FROM gameobject LEFT OUTER JOIN game_event_gameobject " +
+                    $"on gameobject.guid = game_event_gameobject.guid " +
+                    $"WHERE map = '{handler.GetSession().GetPlayer().GetMapId()}' {eventFilter} " +
+                    $"ORDER BY order_ ASC LIMIT 10");
             }
 
             SQLResult result = DB.World.Query(stmt);
@@ -491,7 +506,9 @@ namespace Game.Chat
                 if (objectInfo.displayId != 0 && !CliDB.GameObjectDisplayInfoStorage.ContainsKey(objectInfo.displayId))
                 {
                     // report to DB errors log as in loading case
-                    Log.outError(LogFilter.Sql, "Gameobject (Entry {0} GoType: {1}) have invalid displayId ({2}), not spawned.", objectId, objectInfo.type, objectInfo.displayId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Gameobject (Entry {objectId} GoType: {objectInfo.type}) " +
+                        $"have invalid displayId ({objectInfo.displayId}), not spawned.");
                     handler.SendSysMessage(CypherStrings.GameobjectHaveInvalidData, objectId);
                     return false;
                 }
@@ -621,7 +638,7 @@ namespace Game.Chat
                         break;
                 }
 
-                handler.SendSysMessage("Set gobject Type {0} state {1}", objectType, objectState);
+                handler.SendSysMessage($"Set gobject Type {objectType} state {objectState}");
                 return true;
             }
         }

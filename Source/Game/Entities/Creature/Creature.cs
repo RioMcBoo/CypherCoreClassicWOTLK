@@ -214,7 +214,8 @@ namespace Game.Entities
             CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (creatureInfo == null)
             {
-                Log.outError(LogFilter.Sql, "Creature.InitEntry creature entry {0} does not exist.", entry);
+                Log.outError(LogFilter.Sql, 
+                    $"Creature.InitEntry creature entry {entry} does not exist.");
                 return false;
             }
 
@@ -229,15 +230,20 @@ namespace Game.Entities
             // Cancel load if no model defined
             if (creatureInfo.GetFirstValidModel() == null)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has no model defined in table `creature_template`, can't load. ", entry);
+                Log.outError(LogFilter.Sql, 
+                    $"Creature (Entry: {entry}) has no model defined " +
+                    $"in table `creature_template`, can't load. ");
                 return false;
             }
+
 
             CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo, data);
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
             if (minfo == null)                                             // Cancel load if no model defined
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid model {1} defined in table `creature_template`, can't load.", entry, model.CreatureDisplayID);
+                Log.outError(LogFilter.Sql,
+                    $"Creature (Entry: {entry}) has invalid model {model.CreatureDisplayID} " +
+                    $"defined in table `creature_template`, can't load.");
                 return false;
             }
 
@@ -439,15 +445,19 @@ namespace Game.Entities
             {
                 case DeathState.JustRespawned:
                 case DeathState.JustDied:
-                    Log.outError(LogFilter.Unit, $"Creature ({GetGUID()}) in wrong state: {m_deathState}");
+                    Log.outError(LogFilter.Unit, 
+                        $"Creature ({GetGUID()}) in wrong state: {m_deathState}");
                     break;
                 case DeathState.Dead:
                 {
                     if (!m_respawnCompatibilityMode)
                     {
-                        Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong state: DEAD (3)");
+                        Log.outError(LogFilter.Unit, 
+                            $"Creature (GUID: {GetGUID().GetCounter()} " +
+                            $"Entry: {GetEntry()}) in wrong state: DEAD (3)");
                         break;
                     }
+
                     long now = GameTime.GetGameTime();
                     if (m_respawnTime <= now)
                     {
@@ -508,7 +518,7 @@ namespace Game.Entities
                     if (m_corpseRemoveTime <= GameTime.GetGameTime())
                     {
                         RemoveCorpse(false);
-                        Log.outDebug(LogFilter.Unit, "Removing corpse... {0} ", GetEntry());
+                        Log.outDebug(LogFilter.Unit, $"Removing corpse... {GetEntry()} ");
                     }
                     break;
                 case DeathState.Alive:
@@ -593,11 +603,17 @@ namespace Game.Entities
                                 if (WorldConfig.GetBoolValue(WorldCfg.RegenHpCannotReachTargetInRaid) || !GetMap().IsRaid())
                                 {
                                     RegenerateHealth();
-                                    Log.outDebug(LogFilter.Unit, $"RegenerateHealth() enabled because Creature cannot reach the target. Detail: {GetDebugInfo()}");
+                                    Log.outDebug(LogFilter.Unit,
+                                        $"RegenerateHealth() enabled because Creature cannot reach the target. " +
+                                        $"Detail: {GetDebugInfo()}");
                                 }
                                 else
-                                    Log.outDebug(LogFilter.Unit, $"RegenerateHealth() disabled even if the Creature cannot reach the target. Detail: {GetDebugInfo()}");
+                                {
+                                    Log.outDebug(LogFilter.Unit,
+                                        $"RegenerateHealth() disabled even if the Creature cannot reach the target. " +
+                                        $"Detail: {GetDebugInfo()}");
                             }
+                        }
                         }
 
                         if (GetPowerType() == PowerType.Energy)
@@ -821,7 +837,9 @@ namespace Game.Entities
             CreatureTemplate cinfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (cinfo == null)
             {
-                Log.outError(LogFilter.Sql, "Creature.Create: creature template (guidlow: {0}, entry: {1}) does not exist.", guidlow, entry);
+                Log.outError(LogFilter.Sql, 
+                    $"Creature.Create: creature template (guidlow: {guidlow}, " +
+                    $"entry: {entry}) does not exist.");
                 return false;
             }
 
@@ -835,7 +853,9 @@ namespace Game.Entities
             // invalid position, triggering a crash about Auras not removed in the destructor
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Unit, $"Creature.Create: given coordinates for creature (guidlow {guidlow}, entry {entry}) are not valid ({pos})");
+                Log.outError(LogFilter.Unit, 
+                    $"Creature.Create: given coordinates for creature (guidlow {guidlow}, " +
+                    $"entry {entry}) are not valid ({pos})");
                 return false;
             }
 
@@ -1038,7 +1058,11 @@ namespace Game.Entities
             if (!repeats.Contains(id))
                 repeats.Add(id);
             else
-                Log.outError(LogFilter.Sql, "CreatureTextMgr: TextGroup {0} for ({1}) {2}, id {3} already added", textGroup, GetName(), GetGUID().ToString(), id);
+            {
+                Log.outError(LogFilter.Sql, 
+                    $"CreatureTextMgr: TextGroup {textGroup} " +
+                    $"for ({GetName()}) {GetGUID()}, id {id} already added");
+        }
         }
 
         public List<byte> GetTextRepeatGroup(byte textGroup)
@@ -1085,7 +1109,8 @@ namespace Game.Entities
             }
 
             MovementGeneratorType movetype = GetMotionMaster().GetCurrentMovementGeneratorType();
-            if (movetype == MovementGeneratorType.Waypoint || movetype == MovementGeneratorType.Point || (IsAIEnabled() && GetAI().IsEscorted()))
+            if (movetype == MovementGeneratorType.Waypoint || movetype == MovementGeneratorType.Point 
+                || (IsAIEnabled() && GetAI().IsEscorted()))
             {
                 SetHomePosition(GetPosition());
                 // if its a vehicle, set the home positon of every creature passenger at engage
@@ -1142,7 +1167,12 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nAIName: {GetAIName()} ScriptName: {GetScriptName()} WaypointPath: {GetWaypointPathId()} SpawnId: {GetSpawnId()}";
+            return 
+                $"{base.GetDebugInfo()}\n" +
+                $"AIName: {GetAIName()} " +
+                $"ScriptName: {GetScriptName()} " +
+                $"WaypointPath: {GetWaypointPathId()} " +
+                $"SpawnId: {GetSpawnId()}";
         }
 
         public override void ExitVehicle(Position exitPosition = null)
@@ -1308,8 +1338,10 @@ namespace Game.Entities
                 return false;
 
             foreach (var (_, loot) in m_personalLoot)
+            {
                 if (!loot.IsLooted())
                     return false;
+            }
 
             return true;
         }
@@ -1345,8 +1377,10 @@ namespace Game.Entities
             int mapId = GetMapId();
             ITransport transport = GetTransport();
             if (transport != null)
+            {
                 if (transport.GetMapIdForSpawning() >= 0)
                     mapId = transport.GetMapIdForSpawning();
+            }
 
             SaveToDB(mapId, data.SpawnDifficulties);
         }
@@ -1375,8 +1409,10 @@ namespace Game.Entities
             if (cinfo != null)
             {
                 foreach (CreatureModel model in cinfo.Models)
+                {
                     if (displayId != 0 && displayId == model.CreatureDisplayID)
                         displayId = 0;
+                }
 
                 if ((spawnNpcFlags != cinfo.Npcflag) && (spawnNpcFlags2 != cinfo.Npcflag2))
                 {
@@ -1561,8 +1597,10 @@ namespace Game.Entities
 
                 var areaTable = CliDB.AreaTableStorage.LookupByKey(GetZoneId());
                 if (areaTable != null)
+                {
                     if (areaTable.WildBattlePetLevelMin > 0)
                         wildBattlePetLevel = (byte)RandomHelper.URand(areaTable.WildBattlePetLevelMin, areaTable.WildBattlePetLevelMax);
+                }
 
                 SetWildBattlePetLevel(wildBattlePetLevel);
             }
@@ -1714,7 +1752,9 @@ namespace Game.Entities
             CreatureTemplate cinfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (cinfo == null)
             {
-                Log.outError(LogFilter.Sql, "Creature.CreateFromProto: creature template (guidlow: {0}, entry: {1}) does not exist.", guidlow, entry);
+                Log.outError(LogFilter.Sql, 
+                    $"Creature.CreateFromProto: " +
+                    $"creature template (guidlow: {guidlow}, entry: {entry}) does not exist.");
                 return false;
             }
 
@@ -1760,6 +1800,7 @@ namespace Game.Entities
                 {
                     for (byte i = 0; i < SharedConst.MaxEquipmentItems; ++i)
                         SetVirtualItem(i, 0);
+
                     m_equipmentId = 0;
                 }
                 return;
@@ -2114,7 +2155,7 @@ namespace Game.Entities
 
                 if (GetDeathState() == DeathState.Dead)
                 {
-                    Log.outDebug(LogFilter.Unit, "Respawning creature {0} ({1})", GetName(), GetGUID().ToString());
+                    Log.outDebug(LogFilter.Unit, $"Respawning creature {GetName()} ({GetGUID()})");
                     m_respawnTime = 0;
                     ResetPickPocketRefillTimer();
                     _loot = null;
@@ -2247,9 +2288,13 @@ namespace Game.Entities
 
             var schoolMask = GetCreatureTemplate().SpellSchoolImmuneMask;
             if (schoolMask != 0)
+            {
                 for (var i = SpellSchools.Normal; i <= SpellSchools.Max; ++i)
+                {
                     if ((schoolMask.HasSchool(i)))
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.School, i.GetSpellSchoolMask(), true);
+        }
+            }
         }
 
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
@@ -2294,7 +2339,10 @@ namespace Game.Entities
         {
             if (dist > SharedConst.MaxVisibilityDistance)
             {
-                Log.outError(LogFilter.Unit, "Creature ({0}) SelectNearestTargetInAttackDistance called with dist > MAX_VISIBILITY_DISTANCE. Distance set to ATTACK_DISTANCE.", GetGUID().ToString());
+                Log.outError(LogFilter.Unit, 
+                    $"Creature ({GetGUID()}) SelectNearestTargetInAttackDistance " +
+                    $"called with dist > MAX_VISIBILITY_DISTANCE. " +
+                    $"Distance set to ATTACK_DISTANCE.");
                 dist = SharedConst.AttackDistance;
             }
 
@@ -2360,7 +2408,9 @@ namespace Game.Entities
 
             if (target == null)
             {
-                Log.outError(LogFilter.Unit, $"Creature {GetEntry()} ({GetName()}) trying to call for help without being in combat.");
+                Log.outError(LogFilter.Unit, 
+                    $"Creature {GetEntry()} ({GetName()}) " +
+                    $"trying to call for help without being in combat.");
                 return;
             }
 
@@ -2581,7 +2631,8 @@ namespace Game.Entities
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(id, GetMap().GetDifficultyID());
                     if (AdditionalSpellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Creature ({GetGUID()}) has wrong spell {id} defined in `auras` field.");
+                        Log.outError(LogFilter.Sql,
+                            $"Creature ({GetGUID()}) has wrong spell {id} defined in `auras` field.");
                         continue;
                     }
 
@@ -2590,7 +2641,8 @@ namespace Game.Entities
                         continue;
 
                     AddAura(id, this);
-                    Log.outDebug(LogFilter.Unit, $"Spell: {id} added to creature ({GetGUID()}).");
+                    Log.outDebug(LogFilter.Unit, 
+                        $"Spell: {id} added to creature ({GetGUID()}).");
                 }
             }
             return true;
@@ -3095,9 +3147,15 @@ namespace Game.Entities
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID, GetMap().GetDifficultyID());
                 if (spellInfo != null)
                 {
-                    if (spellInfo.GetRecoveryTime() == 0 && spellInfo.RangeEntry != null && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/ && spellInfo.GetMaxRange() > range)
+                    if (spellInfo.GetRecoveryTime() == 0
+                        && spellInfo.RangeEntry != null
+                        && spellInfo.RangeEntry.Id != 1 /*Self*/
+                        && spellInfo.RangeEntry.Id != 2 /*Combat Range*/
+                        && spellInfo.GetMaxRange() > range)
+                    {
                         range = spellInfo.GetMaxRange();
                 }
+            }
             }
 
             return range;
@@ -3114,7 +3172,11 @@ namespace Game.Entities
             m_cannotReachTimer = 0;
 
             if (cannotReach)
-                Log.outDebug(LogFilter.Unit, $"Creature::SetCannotReachTarget() called with true. Details: {GetDebugInfo()}");
+            {
+                Log.outDebug(LogFilter.Unit,
+                    $"Creature::SetCannotReachTarget() called with true. " +
+                    $"Details: {GetDebugInfo()}");
+            }
         }
 
         public bool IsIgnoringChaseRange()
@@ -3297,8 +3359,12 @@ namespace Game.Entities
             if (IsDead()) // dead creatures cannot focus
             {
                 if (_spellFocusInfo.Spell != null || _spellFocusInfo.Delay != 0)
-                    Log.outWarn(LogFilter.Unit, $"Creature '{GetName()}' (entry {GetEntry()}) has spell focus (spell id {(_spellFocusInfo.Spell != null ? _spellFocusInfo.Spell.GetSpellInfo().Id : 0)}, delay {_spellFocusInfo.Delay}ms) despite being dead.");
-
+                {
+                    Log.outWarn(LogFilter.Unit, 
+                        $"Creature '{GetName()}' (entry {GetEntry()}) has spell focus " +
+                        $"(spell id {(_spellFocusInfo.Spell != null ? _spellFocusInfo.Spell.GetSpellInfo().Id : 0)}, " +
+                        $"delay {_spellFocusInfo.Delay} ms) despite being dead.");
+                }
                 return false;
             }
 
@@ -3335,7 +3401,9 @@ namespace Game.Entities
         {
             if (!HasSpellFocus())
             {
-                Log.outError(LogFilter.Unit, $"Creature::ReacquireSpellFocusTarget() being called with HasSpellFocus() returning false. {GetDebugInfo()}");
+                Log.outError(LogFilter.Unit, 
+                    $"Creature::ReacquireSpellFocusTarget() " +
+                    $"being called with HasSpellFocus() returning false. {GetDebugInfo()}");
                 return;
             }
 
@@ -3372,14 +3440,17 @@ namespace Game.Entities
         }
         public uint GetCorpseDelay() { return m_corpseDelay; }
         public bool IsRacialLeader() { return GetCreatureTemplate().RacialLeader; }
+
         public bool IsCivilian()
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Civilian);
         }
+
         public bool IsTrigger()
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Trigger);
         }
+
         public bool IsGuard()
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Guard);
@@ -3389,17 +3460,23 @@ namespace Game.Entities
         public override bool CanFly() { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }
         bool CanHover() { return GetMovementTemplate().Ground == CreatureGroundMovementType.Hover || IsHovering(); }
 
-        public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
-        public override bool IsAffectedByDiminishingReturns() { return base.IsAffectedByDiminishingReturns() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish); }
+        public bool IsDungeonBoss() { return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss); }
+
+        public override bool IsAffectedByDiminishingReturns() 
+        { 
+            return base.IsAffectedByDiminishingReturns() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish); 
+        }
 
         public void SetReactState(ReactStates st)
         {
             reactState = st;
         }
+
         public ReactStates GetReactState()
         {
             return reactState;
         }
+
         public bool HasReactState(ReactStates state)
         {
             return (reactState == state);
@@ -3463,13 +3540,15 @@ namespace Game.Entities
                 {
                     if (creature.IsAlive())
                     {
-                        Log.outDebug(LogFilter.Maps, "Would have spawned {0} but {1} already exists", spawnId, creature.GetGUID().ToString());
+                        Log.outDebug(LogFilter.Maps, 
+                            $"Would have spawned {spawnId} but {creature.GetGUID()} already exists");
                         return false;
                     }
                     else
                     {
                         despawnList.Add(creature);
-                        Log.outDebug(LogFilter.Maps, "Despawned dead instance of spawn {0} ({1})", spawnId, creature.GetGUID().ToString());
+                        Log.outDebug(LogFilter.Maps, 
+                            $"Despawned dead instance of spawn {spawnId} ({creature.GetGUID()})");
                     }
                 }
 
@@ -3482,7 +3561,8 @@ namespace Game.Entities
             CreatureData data = Global.ObjectMgr.GetCreatureData(spawnId);
             if (data == null)
             {
-                Log.outError(LogFilter.Sql, $"Creature (SpawnID: {spawnId}) not found in table `creature`, can't load.");
+                Log.outError(LogFilter.Sql, 
+                    $"Creature (SpawnID: {spawnId}) not found in table `creature`, can't load.");
                 return false;
             }
 
@@ -3509,7 +3589,9 @@ namespace Game.Entities
                     // @todo pools need fixing! this is just a temporary thing, but they violate dynspawn principles
                     if (data.poolId == 0)
                     {
-                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group '{data.spawnGroupData.name}':\n{GetDebugInfo()}");
+                        Log.outError(LogFilter.Unit, 
+                            $"Creature (SpawnID {spawnId}) trying to load " +
+                            $"in inactive spawn group '{data.spawnGroupData.name}':\n{GetDebugInfo()}");
                         return false;
                     }
                 }
@@ -3524,7 +3606,9 @@ namespace Game.Entities
                     // @todo same as above
                     if (data.poolId == 0)
                     {
-                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress:\n{GetDebugInfo()}");
+                        Log.outError(LogFilter.Unit, 
+                            $"Creature (SpawnID {spawnId}) trying to load despite " +
+                            $"a respawn timer in progress:\n{GetDebugInfo()}");
                         return false;
                     }
                 }

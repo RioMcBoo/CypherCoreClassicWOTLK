@@ -40,7 +40,11 @@ namespace Game.Networking.Packets
 
             int sizeLimit = CliDB.BattlePetSpeciesStorage.GetNumRows() / 8 + 1;
             if (knownPetSize >= sizeLimit)
-                throw new System.Exception($"Attempted to read more array elements from packet {knownPetSize} than allowed {sizeLimit}");
+            {
+                throw new System.Exception(
+                    $"Attempted to read more array elements " +
+                    $"from packet {knownPetSize} than allowed {sizeLimit}");
+            }
 
             KnownPets = new byte[knownPetSize];
             for (var i = 0; i < knownPetSize; ++i)

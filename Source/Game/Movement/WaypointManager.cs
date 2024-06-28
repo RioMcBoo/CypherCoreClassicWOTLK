@@ -31,7 +31,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT  PathId, MoveType, Flags FROM waypoint_path");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoint paths. DB table `waypoint_path` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 waypoint paths. DB table `waypoint_path` is empty!");
                 return;
             }
 
@@ -54,7 +55,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT PathId, NodeId, PositionX, PositionY, PositionZ, Orientation, Delay FROM waypoint_path_node ORDER BY PathId, NodeId");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoint path nodes. DB table `waypoint_path_node` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 waypoint path nodes. DB table `waypoint_path_node` is empty!");
                 return;
             }
 
@@ -81,7 +83,8 @@ namespace Game
 
             if (path.MoveType >= WaypointMoveType.Max)
             {
-                Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path` has invalid MoveType {path.MoveType}, ignoring");
+                Log.outError(LogFilter.Sql,
+                    $"PathId {pathId} in `waypoint_path` has invalid MoveType {path.MoveType}, ignoring");
                 return;
             }
             path.Flags = (WaypointPathFlags)fields.Read<byte>(2);
@@ -96,7 +99,8 @@ namespace Game
 
             if (!_pathStorage.ContainsKey(pathId))
             {
-                Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path_node` does not exist in `waypoint_path`, ignoring");
+                Log.outError(LogFilter.Sql, 
+                    $"PathId {pathId} in `waypoint_path_node` does not exist in `waypoint_path`, ignoring");
                 return;
             }
 
@@ -120,10 +124,18 @@ namespace Game
             {
                 WaypointPath pathInfo = path.Value;
                 if (pathInfo.Nodes.Empty())
-                    Log.outError(LogFilter.Sql, $"PathId {pathInfo.Id} in `waypoint_path` has no assigned nodes in `waypoint_path_node`");
+                {
+                    Log.outError(LogFilter.Sql, $"PathId {pathInfo.Id} in `waypoint_path` " +
+                        $"has no assigned nodes in `waypoint_path_node`");
+                }
 
-                if (pathInfo.Flags.HasFlag(WaypointPathFlags.FollowPathBackwardsFromEndToStart) && pathInfo.Nodes.Count < 2)
-                    Log.outError(LogFilter.Sql, $"PathId {pathInfo.Id} in `waypoint_path` has FollowPathBackwardsFromEndToStart set, but only {pathInfo.Nodes.Count} nodes, requires {2}");
+                if (pathInfo.Flags.HasFlag(WaypointPathFlags.FollowPathBackwardsFromEndToStart)
+                    && pathInfo.Nodes.Count < 2)
+                {
+                    Log.outError(LogFilter.Sql, 
+                        $"PathId {pathInfo.Id} in `waypoint_path` has FollowPathBackwardsFromEndToStart set, " +
+                        $"but only {pathInfo.Nodes.Count} nodes, requires {2}");
+                }
             }
         }
 
@@ -137,7 +149,9 @@ namespace Game
             
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path` not found, ignoring");
+                    Log.outError(LogFilter.Sql, 
+                        $"PathId {pathId} in `waypoint_path` not found, ignoring");
+
                     return;
                 }
 
@@ -155,7 +169,9 @@ namespace Game
             
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path_node` not found, ignoring");
+                    Log.outError(LogFilter.Sql, 
+                        $"PathId {pathId} in `waypoint_path_node` not found, ignoring");
+
                     return;
                 }
 

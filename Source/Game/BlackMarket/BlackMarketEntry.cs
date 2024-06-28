@@ -42,13 +42,17 @@ namespace Game.BlackMarket
 
             if (Global.ObjectMgr.GetCreatureTemplate(SellerNPC) == null)
             {
-                Log.outError(LogFilter.Misc, "Black market template {0} does not have a valid seller. (Entry: {1})", MarketID, SellerNPC);
+                Log.outError(LogFilter.Misc, 
+                    $"Black market template {MarketID} " +
+                    $"does not have a valid seller. (Entry: {SellerNPC})");
                 return false;
             }
 
             if (Global.ObjectMgr.GetItemTemplate(Item.ItemID) == null)
             {
-                Log.outError(LogFilter.Misc, "Black market template {0} does not have a valid item. (Entry: {1})", MarketID, Item.ItemID);
+                Log.outError(LogFilter.Misc, 
+                    $"Black market template {MarketID} " +
+                    $"does not have a valid item. (Entry: {Item.ItemID})");
                 return false;
             }
 
@@ -107,7 +111,8 @@ namespace Game.BlackMarket
             BlackMarketTemplate templ = Global.BlackMarketMgr.GetTemplateByID(_marketId);
             if (templ == null)
             {
-                Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid id.", _marketId);
+                Log.outError(LogFilter.Misc, 
+                    $"Black market auction {_marketId} does not have a valid id.");
                 return false;
             }
 
@@ -119,7 +124,9 @@ namespace Game.BlackMarket
             // Either no bidder or existing player
             if (_bidder != 0 && Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, _bidder)) == 0) // Probably a better way to check if player exists
             {
-                Log.outError(LogFilter.Misc, $"Black market auction {_marketId} does not have a valid bidder (GUID: {_bidder}).");
+                Log.outError(LogFilter.Misc, 
+                    $"Black market auction {_marketId} " +
+                    $"does not have a valid bidder (GUID: {_bidder}).");
                 return false;
             }
 
@@ -191,12 +198,12 @@ namespace Game.BlackMarket
 
         public string BuildAuctionMailSubject(BMAHMailAuctionAnswers response)
         {
-            return GetTemplate().Item.ItemID + ":0:" + response + ':' + GetMarketId() + ':' + GetTemplate().Quantity;
+            return $"{GetTemplate().Item.ItemID}:{0}:{response}:{GetMarketId()}:{GetTemplate().Quantity}";
         }
 
         public string BuildAuctionMailBody()
         {
-            return GetTemplate().SellerNPC + ":" + _currentBid;
+            return $"{GetTemplate().SellerNPC}:{_currentBid}";
         }
 
 

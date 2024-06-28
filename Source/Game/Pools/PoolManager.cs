@@ -31,7 +31,8 @@ namespace Game
                 if (result.IsEmpty())
                 {
                     mPoolTemplate.Clear();
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 object pools. DB table `pool_template` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 object pools. DB table `pool_template` is empty.");
                     return;
                 }
 
@@ -62,7 +63,8 @@ namespace Game
 
                 if (result.IsEmpty())
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creatures in  pools. DB table `pool_creature` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 creatures in  pools. DB table `pool_creature` is empty.");
                 }
                 else
                 {
@@ -76,17 +78,23 @@ namespace Game
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` has a non existing creature spawn (GUID: {0}) defined for pool id ({1}), skipped.", guid, pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_creature` has a non existing creature spawn" +
+                                $" (GUID: {guid}) defined for pool id ({pool_id}), skipped.");
                             continue;
                         }
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_creature` pool id ({pool_id}) " +
+                                $"is not in `pool_template`, skipped.");
                             continue;
                         }
                         if (chance < 0 || chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` has an invalid Chance ({0}) for creature guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_creature` has an invalid Chance ({chance}) " +
+                                $"for creature guid ({guid}) in pool id ({pool_id}), skipped.");
                             continue;
                         }
 
@@ -96,7 +104,10 @@ namespace Game
 
                         if (pPoolTemplate.MapId != data.MapId)
                         {
-                            Log.outError(LogFilter.Sql, $"`pool_creature` has creature spawns on multiple different maps for creature guid ({guid}) in pool id ({pool_id}), skipped.");
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_creature` has creature spawns " +
+                                $"on multiple different maps for creature guid " +
+                                $"({guid}) in pool id ({pool_id}), skipped.");
                             continue;
                         }
 
@@ -129,7 +140,9 @@ namespace Game
 
                 if (result.IsEmpty())
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobjects in  pools. DB table `pool_gameobject` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 gameobjects in  pools. " +
+                        "DB table `pool_gameobject` is empty.");
                 }
                 else
                 {
@@ -143,19 +156,25 @@ namespace Game
                         GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a non existing gameobject spawn (GUID: {0}) defined for pool id ({1}), skipped.", guid, pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_gameobject` has a non existing gameobject spawn " +
+                                $"(GUID: {guid}) defined for pool id ({pool_id}), skipped.");
                             continue;
                         }
 
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`pool_gameobject` pool id ({pool_id}) " +
+                                $"is not in `pool_template`, skipped.");
                             continue;
                         }
 
                         if (chance < 0 || chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has an invalid Chance ({0}) for gameobject guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_gameobject` has an invalid Chance ({chance}) " +
+                                $"for gameobject guid ({guid}) in pool id ({pool_id}), skipped.");
                             continue;
                         }
 
@@ -165,7 +184,10 @@ namespace Game
 
                         if (pPoolTemplate.MapId != data.MapId)
                         {
-                            Log.outError(LogFilter.Sql, $"`pool_gameobject` has gameobject spawns on multiple different maps for gameobject guid ({guid}) in pool id ({pool_id}), skipped.");
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_gameobject` has gameobject spawns " +
+                                $"on multiple different maps for gameobject guid ({guid}) " +
+                                $"in pool id ({pool_id}), skipped.");
                             continue;
                         }
 
@@ -211,22 +233,31 @@ namespace Game
 
                         if (!mPoolTemplate.ContainsKey(mother_pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` mother_pool id ({0}) is not in `pool_template`, skipped.", mother_pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_pool` mother_pool id ({mother_pool_id}) " +
+                                $"is not in `pool_template`, skipped.");
                             continue;
                         }
                         if (!mPoolTemplate.ContainsKey(child_pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` included pool_id ({0}) is not in `pool_template`, skipped.", child_pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_pool` included pool_id ({child_pool_id}) " +
+                                $"is not in `pool_template`, skipped.");
                             continue;
                         }
                         if (mother_pool_id == child_pool_id)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` pool_id ({0}) includes itself, dead-lock detected, skipped.", child_pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_pool` pool_id ({child_pool_id}) includes itself, " +
+                                $"dead-lock detected, skipped.");
                             continue;
                         }
                         if (chance < 0 || chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` has an invalid Chance ({0}) for pool id ({1}) in mother pool id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`pool_pool` has an invalid Chance ({chance}) " +
+                                $"for pool id ({child_pool_id}) " +
+                                $"in mother pool id ({mother_pool_id}), skipped.");
                             continue;
                         }
                         PoolTemplateData pPoolTemplateMother = mPoolTemplate[mother_pool_id];
@@ -259,7 +290,10 @@ namespace Game
 
                                 if (mPoolTemplate[poolItr].MapId != poolData.MapId)
                                 {
-                                    Log.outError(LogFilter.Sql, $"`pool_pool` has child pools on multiple maps in pool id ({poolItr}), skipped.");
+                                    Log.outError(LogFilter.Sql, 
+                                        $"`pool_pool` has child pools on multiple maps " +
+                                        $"in pool id ({poolItr}), skipped.");
+
                                     mPoolPoolGroups[poolItr].RemoveOneRelation(id);
                                     mPoolSearchMap.Remove(poolItr);
                                     --count;
@@ -272,8 +306,13 @@ namespace Game
                             {
                                 string ss = "The pool(s) ";
                                 foreach (var itr in checkedPools)
+                                {
                                     ss += $"{itr} ";
-                                ss += $"create(s) a circular reference, which can cause the server to freeze.\nRemoving the last link between mother pool {id} and child pool {poolItr}";
+                                }
+
+                                ss += $"create(s) a circular reference, which can cause the server to freeze.\n" +
+                                    $"Removing the last link between mother pool {id} and child pool {poolItr}";
+
                                 Log.outError(LogFilter.Sql, ss);
                                 mPoolPoolGroups[poolItr].RemoveOneRelation(id);
                                 mPoolSearchMap.Remove(poolItr);
@@ -293,7 +332,10 @@ namespace Game
             {
                 if (IsEmpty(poolId))
                 {
-                    Log.outError(LogFilter.Sql, $"Pool Id {poolId} is empty (has no creatures and no gameobects and either no child pools or child pools are all empty. The pool will not be spawned");
+                    Log.outError(LogFilter.Sql, 
+                        $"Pool Id {poolId} is empty (has no creatures and no gameobects " +
+                        $"and either no child pools or child pools are all empty. " +
+                        $"The pool will not be spawned");
                     continue;
                 }
                 Cypher.Assert(templateData.MapId != -1);
@@ -326,11 +368,22 @@ namespace Game
                         if (!CheckPool(pool_entry))
                         {
                             if (pool_pool_id != 0)
+                            {
                                 // The pool is a child pool in pool_pool table. Ideally we should remove it from the pool handler to ensure it never gets spawned,
                                 // however that could recursively invalidate entire chain of mother pools. It can be done in the future but for now we'll do nothing.
-                                Log.outError(LogFilter.Sql, "Pool Id {0} has no equal Chance pooled entites defined and explicit Chance sum is not 100. This broken pool is a child pool of Id {1} and cannot be safely removed.", pool_entry, result.Read<uint>(2));
+                                Log.outError(LogFilter.Sql,
+                                    $"Pool Id {pool_entry} has no equal Chance pooled entites defined " +
+                                    $"and explicit Chance sum is not 100. " +
+                                    $"This broken pool is a child pool of Id {result.Read<uint>(2)} " +
+                                    $"and cannot be safely removed.");                                
+                            }
                             else
-                                Log.outError(LogFilter.Sql, "Pool Id {0} has no equal Chance pooled entites defined and explicit Chance sum is not 100. The pool will not be spawned.", pool_entry);
+                            {
+                                Log.outError(LogFilter.Sql,
+                                    $"Pool Id {pool_entry} has no equal Chance pooled entites defined " +
+                                    $"and explicit Chance sum is not 100. " +
+                                    $"The pool will not be spawned.");
+                            }
                             continue;
                         }
 
@@ -479,7 +532,9 @@ namespace Game
                 case SpawnObjectType.AreaTrigger:
                     return 0;
                 default:
-                    Cypher.Assert(false, $"Invalid spawn Type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
+                    Cypher.Assert(false, 
+                        $"Invalid spawn Type {type} passed to PoolMgr.IsPartOfPool " +
+                        $"(with spawnId {spawnId})");
                     return 0;
             }
         }
@@ -653,6 +708,7 @@ namespace Game
                     break;
                 }
             }
+
             foreach (var poolObject in EqualChanced)
             {
                 if (poolObject.guid == child_pool_id)
@@ -681,7 +737,7 @@ namespace Game
                 // roll objects to be spawned
                 if (!ExplicitlyChanced.Empty())
                 {
-                    float roll = (float)RandomHelper.randChance();
+                    float roll = (float)RandomHelper.randPercent();
 
                     foreach (PoolObject obj in ExplicitlyChanced)
                     {
@@ -698,7 +754,10 @@ namespace Game
 
                 if (!EqualChanced.Empty() && rolledObjects.Empty())
                 {
-                    rolledObjects.AddRange(EqualChanced.Where(obj => obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)));
+                    rolledObjects.AddRange(EqualChanced.Where(obj => 
+                    obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid))
+                        );
+
                     rolledObjects.RandomResize(count);
                 }
 
@@ -839,7 +898,9 @@ namespace Game
                 case SpawnObjectType.GameObject:
                     return mSpawnedGameobjects.Contains(db_guid_or_pool_id);
                 default:
-                    Log.outFatal(LogFilter.Misc, $"Invalid spawn Type {type} passed to SpawnedPoolData::IsSpawnedObject (with spawnId {db_guid_or_pool_id})");
+                    Log.outFatal(LogFilter.Misc, 
+                        $"Invalid spawn Type {type} passed to SpawnedPoolData::IsSpawnedObject " +
+                        $"(with spawnId {db_guid_or_pool_id})");
                     return false;
             }
         }

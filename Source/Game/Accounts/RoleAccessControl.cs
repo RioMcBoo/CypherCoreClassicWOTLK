@@ -32,24 +32,33 @@ namespace Game.Accounts
             RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
             if (perm == null)
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.GrantPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Permission does not exists");
+
                 return RBACCommandResult.IdDoesNotExists;
             }
 
             // Check if already added in denied list
             if (HasDeniedPermission(permissionId))
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission in deny list",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.GrantPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Permission in deny list");
+
                 return RBACCommandResult.InDeniedList;
             }
 
             // Already added?
             if (HasGrantedPermission(permissionId))
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission already granted",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.GrantPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Permission already granted");
+
                 return RBACCommandResult.CantAddAlreadyAdded;
             }
 
@@ -58,14 +67,19 @@ namespace Game.Accounts
             // Do not save to db when loading data from DB (realmId = 0)
             if (realmId != 0)
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac,
+                    $"RBACData.GrantPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). Ok and DB updated");
+
                 SavePermission(permissionId, true, realmId);
                 CalculateNewPermissions();
             }
             else
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
-                               GetId(), GetName(), permissionId, realmId);
+            {
+                Log.outDebug(LogFilter.Rbac,
+                    $"RBACData.GrantPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). Ok");
+            }
 
             return RBACCommandResult.OK;
         }
@@ -76,24 +90,33 @@ namespace Game.Accounts
             RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
             if (perm == null)
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.DenyPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Permission does not exists");
+
                 return RBACCommandResult.IdDoesNotExists;
             }
 
             // Check if already added in granted list
             if (HasGrantedPermission(permissionId))
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission in grant list",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.DenyPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Permission in grant list");
+
                 return RBACCommandResult.InGrantedList;
             }
 
             // Already added?
             if (HasDeniedPermission(permissionId))
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission already denied",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.DenyPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Permission already denied");
+
                 return RBACCommandResult.CantAddAlreadyAdded;
             }
 
@@ -102,15 +125,19 @@ namespace Game.Accounts
             // Do not save to db when loading data from DB (realmId = 0)
             if (realmId != 0)
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.DenyPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). Ok and DB updated");
+
                 SavePermission(permissionId, false, realmId);
                 CalculateNewPermissions();
             }
             else
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
-                               GetId(), GetName(), permissionId, realmId);
-
+            {
+                Log.outDebug(LogFilter.Rbac,
+                    $"RBACData.DenyPermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). Ok");
+            }
             return RBACCommandResult.OK;
         }
 
@@ -129,8 +156,11 @@ namespace Game.Accounts
             // Check if it's present in any list
             if (!HasGrantedPermission(permissionId) && !HasDeniedPermission(permissionId))
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Not granted or revoked",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.RevokePermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Not granted or revoked");
+
                 return RBACCommandResult.CantRevokeNotInList;
             }
 
@@ -140,8 +170,11 @@ namespace Game.Accounts
             // Do not save to db when loading data from DB (realmId = 0)
             if (realmId != 0)
             {
-                Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
-                               GetId(), GetName(), permissionId, realmId);
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.RevokePermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). " +
+                    $"Ok and DB updated");
+
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
                 stmt.SetInt32(0, GetId());
                 stmt.SetInt32(1, (int)permissionId);
@@ -151,8 +184,11 @@ namespace Game.Accounts
                 CalculateNewPermissions();
             }
             else
-                Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
-                               GetId(), GetName(), permissionId, realmId);
+            {
+                Log.outDebug(LogFilter.Rbac, 
+                    $"RBACData.RevokePermission [Id: {GetId()} Name: {GetName()}] " +
+                    $"(Permission {permissionId}, RealmId {realmId}). Ok");
+            }
 
             return RBACCommandResult.OK;
         }
@@ -161,7 +197,9 @@ namespace Game.Accounts
         {
             ClearData();
 
-            Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
+            Log.outDebug(LogFilter.Rbac, 
+                $"RBACData.LoadFromDB [Id: {GetId()} Name: {GetName()}]: Loading permissions");
+
             // Load account permissions (granted and denied) that affect current realm
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
             stmt.SetInt32(0, GetId());
@@ -174,7 +212,9 @@ namespace Game.Accounts
         {
             ClearData();
 
-            Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
+            Log.outDebug(LogFilter.Rbac, 
+                $"RBACData.LoadFromDB [Id: {GetId()} Name: {GetName()}]: Loading permissions");
+
             // Load account permissions (granted and denied) that affect current realm
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
             stmt.SetInt32(0, GetId());
@@ -208,7 +248,8 @@ namespace Game.Accounts
 
         void CalculateNewPermissions()
         {
-            Log.outDebug(LogFilter.Rbac, "RBACData.CalculateNewPermissions [Id: {0} Name: {1}]", GetId(), GetName());
+            Log.outDebug(LogFilter.Rbac, 
+                $"RBACData.CalculateNewPermissions [Id: {GetId()} Name: {GetName()}]");
 
             // Get the list of granted permissions
             _globalPerms = GetGrantedPermissions();

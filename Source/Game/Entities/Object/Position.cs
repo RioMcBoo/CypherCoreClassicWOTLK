@@ -51,14 +51,17 @@ namespace Game.Entities
         {
             return posX;
         }
+
         public float GetPositionY()
         {
             return posY;
         }
+
         public float GetPositionZ()
         {
             return posZ;
         }
+
         public float GetOrientation()
         {
             return Orientation;
@@ -69,12 +72,14 @@ namespace Game.Entities
             posX = x;
             posY = y;
         }
+
         public void Relocate(float x, float y, float z)
         {
             posX = x;
             posY = y;
             posZ = z;
         }
+
         public void Relocate(float x, float y, float z, float o)
         {
             posX = x;
@@ -82,14 +87,17 @@ namespace Game.Entities
             posZ = z;
             SetOrientation(o);
         }
+
         public void Relocate(Position loc)
         {
             Relocate(loc.posX, loc.posY, loc.posZ, loc.Orientation);
         }
+
         public void Relocate(Vector3 pos)
         {
             Relocate(pos.X, pos.Y, pos.Z);
         }
+
         public void RelocateOffset(Position offset)
         {
             posX = (float)(posX + (offset.posX * Math.Cos(Orientation) + offset.posY * Math.Sin(Orientation + MathFunctions.PI)));

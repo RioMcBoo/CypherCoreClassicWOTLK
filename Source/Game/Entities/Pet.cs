@@ -103,8 +103,13 @@ namespace Game.Entities
             {
                 // Current pet
                 if (slot == PetSaveMode.AsCurrent)
-                    if (stable.GetCurrentActivePetIndex().HasValue && stable.ActivePets[stable.GetCurrentActivePetIndex().Value] != null)
+                {
+                    if (stable.GetCurrentActivePetIndex().HasValue
+                        && stable.ActivePets[stable.GetCurrentActivePetIndex().Value] != null)
+                    {
                         return (stable.ActivePets[stable.GetCurrentActivePetIndex().Value], (PetSaveMode)stable.GetCurrentActivePetIndex());
+                    }
+                }
 
                 if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
                     if (stable.ActivePets[(int)slot.Value] != null)
@@ -116,7 +121,8 @@ namespace Game.Entities
             }
             else if (petEntry != 0)
             {
-                // known petEntry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
+                // known petEntry entry (unique for summoned pet, but non unique for hunter pet
+                // (only from current or not stabled pets)
 
                 foreach (var pet in stable.UnslottedPets)
                     if (pet.CreatureId == petEntry)
@@ -142,7 +148,10 @@ namespace Game.Entities
             PetStable petStable = owner.GetPetStable();
 
             long ownerid = owner.GetGUID().GetCounter();
-            (PetStable.PetInfo petInfo, PetSaveMode slot) = GetLoadPetInfo(petStable, petEntry, petnumber, forcedSlot);
+
+            (PetStable.PetInfo petInfo, PetSaveMode slot) = 
+                GetLoadPetInfo(petStable, petEntry, petnumber, forcedSlot);
+
             if (petInfo == null || (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot))
             {
                 m_loading = false;
@@ -150,10 +159,14 @@ namespace Game.Entities
             }
 
             // Don't try to reload the current pet
-            if (petStable.GetCurrentPet() != null && owner.GetPet() != null && petStable.GetCurrentPet().PetNumber == petInfo.PetNumber)
+            if (petStable.GetCurrentPet() != null && owner.GetPet() != null
+                && petStable.GetCurrentPet().PetNumber == petInfo.PetNumber)
+            {
                 return false;
+            }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(petInfo.CreatedBySpellId, owner.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = 
+                Global.SpellMgr.GetSpellInfo(petInfo.CreatedBySpellId, owner.GetMap().GetDifficultyID());
 
             bool isTemporarySummon = spellInfo != null && spellInfo.GetDuration() > 0;
             if (current && isTemporarySummon)
@@ -166,8 +179,11 @@ namespace Game.Entities
                     return false;
 
                 CreatureDifficulty creatureDifficulty = creatureInfo.GetDifficulty(Difficulty.None);
-                if (creatureDifficulty == null || !creatureInfo.IsTameable(owner.CanTameExoticPets(), creatureDifficulty))
+                if (creatureDifficulty == null
+                    || !creatureInfo.IsTameable(owner.CanTameExoticPets(), creatureDifficulty))
+                {
                     return false;
+            }
             }
 
             if (current && owner.IsPetNeedBeTemporaryUnsummoned())
@@ -193,13 +209,16 @@ namespace Game.Entities
             float px, py, pz;
             if (IsCritter())
             {
-                owner.GetClosePoint(out px, out py, out pz, GetCombatReach(), SharedConst.PetFollowDist, GetFollowAngle());
+                owner.GetClosePoint(out px, out py, out pz, GetCombatReach(), 
+                    SharedConst.PetFollowDist, GetFollowAngle());
+
                 Relocate(px, py, pz, owner.GetOrientation());
 
                 if (!IsPositionValid())
                 {
-                    Log.outError(LogFilter.Pet, "Pet (guidlow {0}, entry {1}) not loaded. Suggested coordinates isn't valid (X: {2} Y: {3})",
-                        GetGUID().ToString(), GetEntry(), GetPositionX(), GetPositionY());
+                    Log.outError(LogFilter.Pet, 
+                        $"Pet (guidlow {GetGUID()}, entry {GetEntry()}) not loaded. " +
+                        $"Suggested coordinates isn't valid (X: {GetPositionX()} Y: {GetPositionY()})");
                     return false;
                 }
 
@@ -219,7 +238,6 @@ namespace Game.Entities
             {
                 case PetType.Summon:
                     petlevel = owner.GetLevel();
-
                     SetClass(Class.Mage);
                     ReplaceAllUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet dismiss, cancel)
                     break;
@@ -227,12 +245,19 @@ namespace Game.Entities
                     SetClass(Class.Warrior);
                     SetGender(Gender.None);
                     SetSheath(SheathState.Melee);
-                    ReplaceAllPetFlags(petInfo.WasRenamed ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
+
+                    ReplaceAllPetFlags(petInfo.WasRenamed 
+                        ? UnitPetFlags.CanBeAbandoned 
+                        : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
+
                     ReplaceAllUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet abandon, cancel)
                     break;
                 default:
                     if (!IsPetGhoul())
-                        Log.outError(LogFilter.Pet, "Pet have incorrect Type ({0}) for pet loading.", GetPetType());
+                    {
+                        Log.outError(LogFilter.Pet,
+                            $"Pet have incorrect Type ({GetPetType()}) for pet loading.");
+                    }
                     break;
             }
 
@@ -249,7 +274,9 @@ namespace Game.Entities
             Relocate(px, py, pz, owner.GetOrientation());
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Pet, "Pet ({0}, entry {1}) not loaded. Suggested coordinates isn't valid (X: {2} Y: {3})", GetGUID().ToString(), GetEntry(), GetPositionX(), GetPositionY());
+                Log.outError(LogFilter.Pet, 
+                    $"Pet ({GetGUID()}, entry {GetEntry()}) not loaded. " +
+                    $"Suggested coordinates isn't valid (X: {GetPositionX()} Y: {GetPositionY()})");
                 return false;
             }
 
@@ -280,7 +307,10 @@ namespace Game.Entities
                 if (petStable.CurrentPetIndex != 0)
                     owner.RemovePet(null, PetSaveMode.NotInSlot);
 
-                var unslottedPetIndex = petStable.UnslottedPets.FindIndex(unslottedPet => unslottedPet.PetNumber == petInfoNumber);
+                var unslottedPetIndex = petStable.UnslottedPets.FindIndex(unslottedPet => 
+                unslottedPet.PetNumber == petInfoNumber
+                );
+
                 Cypher.Assert(!petStable.CurrentPetIndex.HasValue);
                 Cypher.Assert(unslottedPetIndex != -1);
 
@@ -288,7 +318,9 @@ namespace Game.Entities
             }
             else if (PetSaveMode.FirstActiveSlot <= slot && slot <= PetSaveMode.LastActiveSlot)
             {
-                var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => pet?.PetNumber == petInfo.PetNumber);
+                var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => 
+                pet?.PetNumber == petInfo.PetNumber
+                );
 
                 Cypher.Assert(activePetIndex != -1);
 
@@ -303,8 +335,11 @@ namespace Game.Entities
             map.AddToMap(ToCreature());
 
             //set last used pet number (for use in BG's)
-            if (owner.IsPlayer() && IsControlled() && !IsTemporarySummoned() && (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
+            if (owner.IsPlayer() && IsControlled() && !IsTemporarySummoned()
+                && (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
+            {
                 owner.ToPlayer().SetLastPetNumber(petInfo.PetNumber);
+            }
 
             var session = owner.GetSession();
             var lastSaveTime = petInfo.LastSaveTime;
@@ -580,8 +615,12 @@ namespace Game.Entities
                     {
                         if (owner.GetPetGUID() != GetGUID())
                         {
-                            Log.outError(LogFilter.Pet, $"Pet {GetEntry()} is not pet of owner {GetOwner().GetName()}, removed");
-                            Cypher.Assert(GetPetType() != PetType.Hunter, $"Unexpected unlinked pet found for owner {owner.GetSession().GetPlayerInfo()}");
+                            Log.outError(LogFilter.Pet,
+                                $"Pet {GetEntry()} is not pet of owner {GetOwner().GetName()}, removed");
+                            
+                            Cypher.Assert(GetPetType() != PetType.Hunter, 
+                                $"Unexpected unlinked pet found for owner {owner.GetSession().GetPlayerInfo()}");
+                            
                             Remove(PetSaveMode.NotInSlot);
                             return;
                         }
@@ -699,8 +738,9 @@ namespace Game.Entities
 
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Pet, "Pet (guidlow {0}, entry {1}) not created base at creature. Suggested coordinates isn't valid (X: {2} Y: {3})",
-                    GetGUID().ToString(), GetEntry(), GetPositionX(), GetPositionY());
+                Log.outError(LogFilter.Pet, 
+                    $"Pet (guidlow {GetGUID()}, entry {GetEntry()}) not created base at creature. " +
+                    $"Suggested coordinates isn't valid (X: {GetPositionX()} Y: {GetPositionY()})");
                 return false;
             }
 
@@ -836,7 +876,7 @@ namespace Game.Entities
 
         void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
         {
-            Log.outDebug(LogFilter.Pet, "Loading auras for {0}", GetGUID().ToString());
+            Log.outDebug(LogFilter.Pet, $"Loading auras for {GetGUID()}");
 
             ObjectGuid casterGuid = default;
             ObjectGuid itemGuid = default;
@@ -884,18 +924,23 @@ namespace Game.Entities
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Pet, "Pet._LoadAuras: Unknown aura (spellid {0}), ignore.", key.SpellId);
+                        Log.outError(LogFilter.Pet, 
+                            $"Pet._LoadAuras: Unknown aura " +
+                            $"(spellid {key.SpellId}), ignore.");
                         continue;
                     }
 
                     if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey(difficulty))
                     {
-                        Log.outError(LogFilter.Pet, $"Pet._LoadAuras: Unknown difficulty {difficulty} (spellid {key.SpellId}), ignore.");
+                        Log.outError(LogFilter.Pet, 
+                            $"Pet._LoadAuras: Unknown difficulty {difficulty} " +
+                            $"(spellid {key.SpellId}), ignore.");
                         continue;
                     }
 
                     // negative effects should continue counting down after logout
-                    if (remainTime != -1 && (!spellInfo.IsPositive() || spellInfo.HasAttribute(SpellAttr4.AuraExpiresOffline)))
+                    if (remainTime != -1 && (!spellInfo.IsPositive() 
+                        || spellInfo.HasAttribute(SpellAttr4.AuraExpiresOffline)))
                     {
                         if (remainTime / Time.InMilliseconds <= timediff)
                             continue;
@@ -929,7 +974,9 @@ namespace Game.Entities
                         }
                         aura.SetLoadedState(maxDuration, remainTime, remainCharges, stackCount, recalculateMask, info.Amounts);
                         aura.ApplyForTargets();
-                        Log.outInfo(LogFilter.Pet, "Added aura spellid {0}, effectmask {1}", spellInfo.Id, key.EffectMask);
+
+                        Log.outInfo(LogFilter.Pet, 
+                            $"Added aura spellid {spellInfo.Id}, effectmask {key.EffectMask}");
                     }
                 }
                 while (auraResult.NextRow());
@@ -958,7 +1005,9 @@ namespace Game.Entities
                 uint recalculateMask;
                 AuraKey key = aura.GenerateKey(out recalculateMask);
 
-                // don't save guid of caster in case we are caster of the spell - guid for pet is generated every pet load, so it won't match saved guid anyways
+                // don't save guid of caster in case we are caster of the spell
+                // - guid for pet is generated every pet load,
+                // so it won't match saved guid anyways
                 if (key.Caster == GetGUID())
                     key.Caster.Clear();
 
@@ -1003,7 +1052,9 @@ namespace Game.Entities
                 // do pet spell book cleanup
                 if (state == PetSpellState.Unchanged)                    // spell load case
                 {
-                    Log.outError(LogFilter.Pet, "addSpell: Non-existed in SpellStore spell #{0} request, deleting for all pets in `pet_spell`.", spellId);
+                    Log.outError(LogFilter.Pet, 
+                        $"addSpell: Non-existed in SpellStore spell #{spellId} request, " +
+                        $"deleting for all pets in `pet_spell`.");
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_PET_SPELL);
 
@@ -1012,7 +1063,10 @@ namespace Game.Entities
                     DB.Characters.Execute(stmt);
                 }
                 else
-                    Log.outError(LogFilter.Pet, "addSpell: Non-existed in SpellStore spell #{0} request.", spellId);
+                {
+                    Log.outError(LogFilter.Pet,
+                        $"addSpell: Non-existed in SpellStore spell #{spellId} request.");
+                }
 
                 return false;
             }
@@ -1088,8 +1142,11 @@ namespace Game.Entities
 
             m_spells[spellId] = newspell;
 
-            if (spellInfo.IsPassive() && (spellInfo.CasterAuraState == 0 || HasAuraState(spellInfo.CasterAuraState)))
+            if (spellInfo.IsPassive()
+                && (spellInfo.CasterAuraState == 0 || HasAuraState(spellInfo.CasterAuraState)))
+            {
                 CastSpell(this, spellId, true);
+            }
             else
                 GetCharmInfo().AddSpellToActionBar(spellInfo);
 
@@ -1134,7 +1191,11 @@ namespace Game.Entities
         void InitLevelupSpellsForLevel()
         {
             var level = GetLevel();
-            var levelupSpells = GetCreatureTemplate().Family != 0 ? Global.SpellMgr.GetPetLevelupSpellList(GetCreatureTemplate().Family) : null;
+            var levelupSpells = 
+                GetCreatureTemplate().Family != 0 
+                ? Global.SpellMgr.GetPetLevelupSpellList(GetCreatureTemplate().Family) 
+                : null;
+
             if (levelupSpells != null)
             {
                 // PetLevelupSpellSet ordered by levels, process in reversed order
@@ -1149,7 +1210,8 @@ namespace Game.Entities
                 }
             }
 
-            // default spells (can be not learned if pet level (as owner level decrease result for example) less first possible in normal game)
+            // default spells (can be not learned if pet level
+            // (as owner level decrease result for example) less first possible in normal game)
             PetDefaultSpellsEntry defSpells = Global.SpellMgr.GetPetDefaultSpellsEntry(GetEntry());
             if (defSpells != null)
             {
@@ -1411,7 +1473,10 @@ namespace Game.Entities
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 
             if (auraId == 35696)                                      // Demonic Knowledge
-                args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));
+            {
+                args.AddSpellMod(SpellValueMod.BasePoint0,
+                    MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));
+            }
 
             CastSpell(this, auraId, args);
         }
@@ -1532,7 +1597,9 @@ namespace Game.Entities
         {
             List<int> learnedSpells = new();
 
-            List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);
+            List<SpecializationSpellsRecord> specSpells = 
+                Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);
+
             if (specSpells != null)
             {
                 foreach (var specSpell in specSpells)
@@ -1557,7 +1624,9 @@ namespace Game.Entities
                 ChrSpecializationRecord specialization = Global.DB2Mgr.GetChrSpecializationByIndex(0, i);
                 if (specialization != null)
                 {
-                    List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization.Id);
+                    List<SpecializationSpellsRecord> specSpells = 
+                        Global.DB2Mgr.GetSpecializationSpells(specialization.Id);
+
                     if (specSpells != null)
                     {
                         foreach (var specSpell in specSpells)
@@ -1568,7 +1637,9 @@ namespace Game.Entities
                 ChrSpecializationRecord specialization1 = Global.DB2Mgr.GetChrSpecializationByIndex(Class.Max, i);
                 if (specialization1 != null)
                 {
-                    List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization1.Id);
+                    List<SpecializationSpellsRecord> specSpells = 
+                        Global.DB2Mgr.GetSpecializationSpells(specialization1.Id);
+
                     if (specSpells != null)
                     {
                         foreach (var specSpell in specSpells)
@@ -1585,8 +1656,10 @@ namespace Game.Entities
             if (m_petSpecialization == spec)
                 return;
 
-            // remove all the old spec's specalization spells, set the new spec, then add the new spec's spells
-            // clearActionBars is false because we'll be updating the pet actionbar later so we don't have to do it now
+            // remove all the old spec's specalization spells,
+            // set the new spec, then add the new spec's spells
+            // clearActionBars is false because we'll be updating the pet actionbar later
+            // so we don't have to do it now
             RemoveSpecializationSpells(false);
             if (!CliDB.ChrSpecializationStorage.ContainsKey((int)spec))
             {
@@ -1612,7 +1685,8 @@ namespace Game.Entities
 
             for (byte i = SharedConst.ActionBarIndexStart; i < SharedConst.ActionBarIndexEnd; ++i)
             {
-                ss.AppendFormat("{0} {1} ", (uint)GetCharmInfo().GetActionBarEntry(i).GetActiveState(), (uint)GetCharmInfo().GetActionBarEntry(i).GetAction());
+                ss.AppendFormat(
+                    $"{(uint)GetCharmInfo().GetActionBarEntry(i).GetActiveState()} {(uint)GetCharmInfo().GetActionBarEntry(i).GetAction()} ");
             }
 
             return ss.ToString();
@@ -1620,7 +1694,9 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nPetType: {GetPetType()} PetNumber: {GetCharmInfo().GetPetNumber()}";
+            return 
+                $"{base.GetDebugInfo()}\n" +
+                $"PetType: {GetPetType()}  PetNumber: {GetCharmInfo().GetPetNumber()}";
         }
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
@@ -1638,6 +1714,7 @@ namespace Game.Entities
         DeclinedName _declinedname;
         ChrSpecialization m_petSpecialization;
     }
+
     public class PetSpell
     {
         public ActiveStates active;
@@ -1689,10 +1766,29 @@ namespace Game.Entities
             return null;
         }
 
-        public int? GetCurrentActivePetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) == 0) ? CurrentPetIndex : null; }
-        public void SetCurrentActivePetIndex(int index) { CurrentPetIndex = index; }
-        int? GetCurrentUnslottedPetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) != 0) ? (CurrentPetIndex.Value & ~UnslottedPetIndexMask) : null; }
-        public void SetCurrentUnslottedPetIndex(int index) { CurrentPetIndex = index | UnslottedPetIndexMask; }
+        public int? GetCurrentActivePetIndex() 
+        { 
+            return CurrentPetIndex.HasValue 
+                && ((CurrentPetIndex & UnslottedPetIndexMask) == 0) ? CurrentPetIndex : null; 
+        }
+
+        public void SetCurrentActivePetIndex(int index) 
+        { 
+            CurrentPetIndex = index;
+        }
+
+        int? GetCurrentUnslottedPetIndex() 
+        { 
+            return CurrentPetIndex.HasValue && (
+                (CurrentPetIndex & UnslottedPetIndexMask) != 0) 
+                ? (CurrentPetIndex.Value & ~UnslottedPetIndexMask) 
+                : null; 
+        }
+
+        public void SetCurrentUnslottedPetIndex(int index) 
+        { 
+            CurrentPetIndex = index | UnslottedPetIndexMask; 
+        }
     }
     
     public enum ActiveStates : byte

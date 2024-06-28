@@ -92,8 +92,10 @@ namespace Game.Entities
             }
 
             // This happens when a mage portal is despawned after the caster changes map (for example using the portal)
-            Log.outDebug(LogFilter.Server, "Removed GameObject (GUID: {0} Entry: {1} SpellId: {2} LinkedGO: {3}) that just lost any reference to the owner {4} GO list",
-                GetGUID().ToString(), GetGoInfo().entry, m_spellId, GetGoInfo().GetLinkedGameObjectEntry(), ownerGUID.ToString());
+            Log.outDebug(LogFilter.Server, 
+                $"Removed GameObject (GUID: {GetGUID()} Entry: {GetGoInfo().entry} " +
+                $"SpellId: {GetGoInfo().GetLinkedGameObjectEntry()} " +
+                $"LinkedGO: {m_spellId}) that just lost any reference to the owner {ownerGUID} GO list");
             SetOwnerGUID(ObjectGuid.Empty);
         }
 
@@ -135,8 +137,10 @@ namespace Game.Entities
 
                 RemoveFromOwner();
                 if (m_model != null)
+                {
                     if (GetMap().ContainsGameObjectModel(m_model))
                         GetMap().RemoveGameObjectModel(m_model);
+                }
 
                 // If linked trap exists, despawn it
                 GameObject linkedTrap = GetLinkedTrap();
@@ -182,7 +186,9 @@ namespace Game.Entities
             StationaryPosition.Relocate(pos);
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Server, "Gameobject (Spawn id: {0} Entry: {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
+                Log.outError(LogFilter.Server, 
+                    $"Gameobject (Spawn id: {GetSpawnId()} Entry: {entry}) not created. " +
+                    $"Suggested coordinates isn't valid (X: {pos.GetPositionX()} Y: {pos.GetPositionY()})");
                 return false;
             }
 
@@ -203,13 +209,17 @@ namespace Game.Entities
             GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (goInfo == null)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing entry in `gameobject_template`. Map: {2} (X: {3} Y: {4} Z: {5})", GetSpawnId(), entry, map.GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+                Log.outError(LogFilter.Sql, 
+                    $"Gameobject (Spawn id: {GetSpawnId()} Entry: {entry}) not created: non-existing entry in `gameobject_template`. " +
+                    $"Map: {map.GetId()} (X: {pos.GetPositionX()} Y: {pos.GetPositionY()} Z: {pos.GetPositionZ()})");
                 return false;
             }
 
             if (goInfo.type == GameObjectTypes.MapObjTransport)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject Type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
+                Log.outError(LogFilter.Sql, 
+                    $"Gameobject (Spawn id: {GetSpawnId()} Entry: {entry}) not created: " +
+                    $"gameobject Type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.");
                 return false;
             }
 
@@ -229,7 +239,9 @@ namespace Game.Entities
 
             if (goInfo.type >= GameObjectTypes.Max)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO Type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
+                Log.outError(LogFilter.Sql, 
+                    $"Gameobject (Spawn id: {GetSpawnId()} Entry: {entry}) not created: " +
+                    $"non-existing GO Type '{goInfo.type}' in `gameobject_template`. It will crash client if created.");
                 return false;
             }
 
@@ -1028,8 +1040,10 @@ namespace Game.Entities
             var mapId = GetMapId();
             ITransport transport = GetTransport();
             if (transport != null)
+            {
                 if (transport.GetMapIdForSpawning() >= 0)
                     mapId = transport.GetMapIdForSpawning();
+            }
 
             SaveToDB(mapId, data.SpawnDifficulties);
         }
@@ -1098,7 +1112,8 @@ namespace Game.Entities
             GameObjectData data = Global.ObjectMgr.GetGameObjectData(spawnId);
             if (data == null)
             {
-                Log.outError(LogFilter.Maps, "Gameobject (SpawnId: {0}) not found in table `gameobject`, can't load. ", spawnId);
+                Log.outError(LogFilter.Maps, 
+                    $"Gameobject (SpawnId: {spawnId}) not found in table `gameobject`, can't load.");
                 return false;
             }
 
@@ -1143,7 +1158,10 @@ namespace Game.Entities
             {
                 if (!m_respawnCompatibilityMode)
                 {
-                    Log.outWarn(LogFilter.Sql, $"GameObject {entry} (SpawnID {spawnId}) is not spawned by default, but tries to use a non-hack spawn system. This will not work. Defaulting to compatibility mode.");
+                    Log.outWarn(LogFilter.Sql, 
+                        $"GameObject {entry} (SpawnID {spawnId}) is not spawned by default, " +
+                        $"but tries to use a non-hack spawn system. " +
+                        $"This will not work. Defaulting to compatibility mode.");
                     m_respawnCompatibilityMode = true;
                 }
 
@@ -1467,7 +1485,8 @@ namespace Game.Entities
             switch (action)
             {
                 case GameObjectActions.None:
-                    Log.outFatal(LogFilter.Spells, $"Spell {spellId} has action Type NONE in effect {effectIndex}");
+                    Log.outFatal(LogFilter.Spells, 
+                        $"Spell {spellId} has action Type NONE in effect {effectIndex}");
                     break;
                 case GameObjectActions.AnimateCustom0:
                 case GameObjectActions.AnimateCustom1:
@@ -1538,7 +1557,11 @@ namespace Game.Entities
                         artKitValue = templateAddon.ArtKits[artKitIndex];
 
                     if (artKitValue == 0)
-                        Log.outError(LogFilter.Sql, $"GameObject {GetEntry()} hit by spell {spellId} needs `artkit{artKitIndex}` in `gameobject_template_addon`");
+                    {
+                        Log.outError(LogFilter.Sql,
+                            $"GameObject {GetEntry()} hit by spell {spellId} needs `artkit{artKitIndex}` " +
+                            $"in `gameobject_template_addon`");
+                    }
                     else
                         SetGoArtKit(artKitValue);
 
@@ -1557,7 +1580,11 @@ namespace Game.Entities
                     if (GetGoType() == GameObjectTypes.Transport)
                         SetGoState((GameObjectState)action);
                     else
-                        Log.outError(LogFilter.Spells, $"Spell {spellId} targeted non-transport gameobject for transport only action \"Go to Floor\" {action} in effect {effectIndex}");
+                    {
+                        Log.outError(LogFilter.Spells,
+                            $"Spell {spellId} targeted non-transport gameobject for transport " +
+                            $"only action \"Go to Floor\" {action} in effect {effectIndex}");
+                    }
                     break;
                 case GameObjectActions.PlayAnimKit:
                     SetAnimKitId((ushort)param, false);
@@ -1593,7 +1620,8 @@ namespace Game.Entities
                     SetSpellVisualId(0);
                     break;
                 default:
-                    Log.outError(LogFilter.Spells, $"Spell {spellId} has unhandled action {action} in effect {effectIndex}");
+                    Log.outError(LogFilter.Spells, 
+                        $"Spell {spellId} has unhandled action {action} in effect {effectIndex}");
                     break;
             }
 
@@ -1914,7 +1942,8 @@ namespace Game.Entities
 
                         if (info.Goober.eventID != 0)
                         {
-                            Log.outDebug(LogFilter.Scripts, "Goober ScriptStart id {0} for GO entry {1} (GUID {2}).", info.Goober.eventID, GetEntry(), GetSpawnId());
+                            Log.outDebug(LogFilter.Scripts, 
+                                $"Goober ScriptStart id {info.Goober.eventID} for GO entry {GetEntry()} (GUID {GetSpawnId()}).");
                             GameEvents.Trigger(info.Goober.eventID, player, this);
                         }
 
@@ -2016,7 +2045,9 @@ namespace Game.Entities
                             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
                             if (areaEntry == null)
                             {
-                                Log.outError(LogFilter.GameObject, $"Gameobject '{GetEntry()}' ({GetGUID()}) spawned in unknown area (x: {GetPositionX()} y: {GetPositionY()} z: {GetPositionZ()} map: {GetMapId()})");
+                                Log.outError(LogFilter.GameObject, 
+                                    $"Gameobject '{GetEntry()}' ({GetGUID()}) spawned in unknown area " +
+                                    $"(x: {GetPositionX()} y: {GetPositionY()} z: {GetPositionZ()} map: {GetMapId()})");
                                 break;
                             }
 
@@ -2038,7 +2069,9 @@ namespace Game.Entities
                                     chance = 1;
                             }
 
-                            Log.outDebug(LogFilter.Misc, $"Fishing check (skill {playerFishingSkill} level: {playerFishingLevel} area skill level: {areaFishingLevel} chance {chance} roll: {roll}");
+                            Log.outDebug(LogFilter.Misc, 
+                                $"Fishing check (skill {playerFishingSkill} level: {playerFishingLevel} area skill level: " +
+                                $"{areaFishingLevel} chance {chance} roll: {roll}");
 
                             // @todo find reasonable value for fishing hole search
                             GameObject fishingPool = LookupFishingHoleAround(20.0f + SharedConst.ContactDistance);
@@ -2222,8 +2255,10 @@ namespace Game.Entities
                     //required lvl checks!
                     var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, 0);
                     if (userLevels.HasValue)
+                    {
                         if (player.GetLevel() < userLevels.Value.MaxLevel)
                             return;
+                    }
 
                     var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, 0);
                     if (targetLevels.HasValue)
@@ -2451,8 +2486,11 @@ namespace Game.Entities
                     Player player = user.ToPlayer();
                     PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ItemForge.conditionID1);
                     if (playerCondition != null)
+                    {
                         if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                             return;                    
+                    }
+
                     break;
                 }
                 case GameObjectTypes.UILink:
@@ -2543,8 +2581,11 @@ namespace Game.Entities
                 }
                 default:
                     if (GetGoType() >= GameObjectTypes.Max)
-                        Log.outError(LogFilter.Server, "GameObject.Use(): unit (Type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown Type ({6})",
-                            user.GetTypeId(), user.GetGUID().ToString(), user.GetName(), GetGUID().ToString(), GetEntry(), GetGoInfo().name, GetGoType());
+                    {
+                        Log.outError(LogFilter.Server,
+                            $"GameObject.Use(): unit (Type: {user.GetTypeId()}, guid: {user.GetGUID()}, name: {user.GetName()}) " +
+                            $"tries to use object (guid: {GetGUID()}, entry: {GetEntry()}, name: {GetGoInfo().name}) of unknown Type ({GetGoType()})");
+                    }
                     break;
             }
 
@@ -2554,9 +2595,16 @@ namespace Game.Entities
             if (!Global.SpellMgr.HasSpellInfo(spellId, GetMap().GetDifficultyID()))
             {
                 if (!user.IsTypeId(TypeId.Player) || !Global.OutdoorPvPMgr.HandleCustomSpell(user.ToPlayer(), spellId, this))
-                    Log.outError(LogFilter.Server, "WORLD: unknown spell id {0} at use action for gameobject (Entry: {1} GoType: {2})", spellId, GetEntry(), GetGoType());
+                {
+                    Log.outError(LogFilter.Server,
+                        $"WORLD: unknown spell id {spellId} at use action for gameobject " +
+                        $"(Entry: {GetEntry()} GoType: {GetGoType()})");
+                }
                 else
-                    Log.outDebug(LogFilter.Outdoorpvp, "WORLD: {0} non-dbc spell was handled by OutdoorPvP", spellId);
+                {
+                    Log.outDebug(LogFilter.Outdoorpvp, 
+                        $"WORLD: {spellId} non-dbc spell was handled by OutdoorPvP");
+                }
                 return;
             }
 
@@ -2651,8 +2699,10 @@ namespace Game.Entities
             {
                 GameObjectLocale cl = Global.ObjectMgr.GetGameObjectLocale(GetEntry());
                 if (cl != null)
+                {
                     if (cl.Name.Length > (int)locale && !cl.Name[(int)locale].IsEmpty())
                         return cl.Name[(int)locale];
+            }
             }
 
             return base.GetName(locale);
@@ -2718,7 +2768,9 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nSpawnId: {GetSpawnId()} GoState: {GetGoState()} ScriptId: {GetScriptId()} AIName: {GetAIName()}";
+            return 
+                $"{base.GetDebugInfo()}\nSpawnId: {GetSpawnId()} GoState: {GetGoState()} " +
+                $"ScriptId: {GetScriptId()} AIName: {GetAIName()}";
         }
 
         public bool IsAtInteractDistance(Player player, SpellInfo spell = null)
@@ -2800,10 +2852,14 @@ namespace Game.Entities
                     if (spell != null)
                     {
                         foreach (var effect in spell.GetEffects())
+                        {
                             if (effect.Effect == SpellEffectName.OpenLock && effect.MiscValue == lockEntry.Index[i])
+                            {
                                 if (effect.CalcValue(player) >= lockEntry.Skill[i])
                                     return spell;
                     }
+                }
+            }
                 }
             }
 
@@ -2889,8 +2945,11 @@ namespace Game.Entities
                     int modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                     if (modelData != null)
+                    {
                         if (modelData.State1Wmo != 0)
                             modelId = modelData.State1Wmo;
+                    }
+
                     SetDisplayId(modelId);
 
                     if (setHealth)
@@ -2924,8 +2983,11 @@ namespace Game.Entities
                     int modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                     if (modelData != null)
+                    {
                         if (modelData.State2Wmo != 0)
                             modelId = modelData.State2Wmo;
+                    }
+
                     SetDisplayId(modelId);
 
                     if (setHealth)
@@ -2945,8 +3007,11 @@ namespace Game.Entities
                     int modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                     if (modelData != null)
+                    {
                         if (modelData.State3Wmo != 0)
                             modelId = modelData.State3Wmo;
+                    }
+
                     SetDisplayId(modelId);
 
                     // restores to full health
@@ -3001,8 +3066,10 @@ namespace Game.Entities
                 return false;
 
             foreach (var (_, loot) in m_personalLoot)
+            {
                 if (!loot.IsLooted())
                     return false;
+            }
 
             return true;
         }
@@ -3143,8 +3210,10 @@ namespace Game.Entities
                 return;
 
             if (m_model != null)
+            {
                 if (GetMap().ContainsGameObjectModel(m_model))
                     GetMap().RemoveGameObjectModel(m_model);
+            }
 
             RemoveFlag(GameObjectFlags.MapObject);
             m_model = null;
@@ -3161,6 +3230,7 @@ namespace Game.Entities
             {
                 if (loot.IsLooted()) // nothing to loot or everything looted.
                     return false;
+
                 if (!loot.HasAllowedLooter(GetGUID()) || (!loot.HasItemForAll() && !loot.HasItemFor(player))) // no loot in chest for this player
                     return false;
             }
@@ -3398,8 +3468,10 @@ namespace Game.Entities
 
             GameObjectAI ai = GetAI();
             if (ai != null)
+            {
                 if (ai.OnCapturePointAssaulted(player))
                     return;
+            }
 
             // only supported in battlegrounds
             Battleground battleground = null;
@@ -3484,8 +3556,10 @@ namespace Game.Entities
 
             GameObjectAI ai = GetAI();
             if (ai != null)
+            {
                 if (ai.OnCapturePointUpdated(m_goValue.CapturePoint.State))
                     return;
+            }
 
             int spellVisualId = 0;
             int customAnim = 0;
@@ -3612,8 +3686,10 @@ namespace Game.Entities
 
             PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(m_goInfo.GetConditionID1());
             if (playerCondition != null)
+            {
                 if (!ConditionManager.IsPlayerMeetingCondition(user, playerCondition))
                     return false;
+            }
 
             return true;
         }
@@ -3645,6 +3721,7 @@ namespace Game.Entities
         public long GetPackedLocalRotation() { return m_packedRotation; }
 
         public override ObjectGuid GetCreatorGUID() { return m_gameObjectData.CreatedBy; }
+        
         public void SetOwnerGUID(ObjectGuid owner)
         {
             // Owner already found and different than expected owner - remove object from old owner
@@ -3655,6 +3732,7 @@ namespace Game.Entities
             m_spawnedByDefault = false;                     // all object with owner is despawned after delay
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.CreatedBy), owner);
         }
+
         public override ObjectGuid GetOwnerGUID() { return m_gameObjectData.CreatedBy; }
 
         public void SetSpellId(int id)
@@ -3723,11 +3801,14 @@ namespace Game.Entities
         public bool IsInSkillupList(ObjectGuid PlayerGuid)
         {
             foreach (var i in m_SkillupList)
+            {
                 if (i == PlayerGuid)
                     return true;
+            }
 
             return false;
         }
+
         void ClearSkillupList() { m_SkillupList.Clear(); }
 
         public void AddUse() { ++m_usetimes; }
@@ -3967,6 +4048,7 @@ namespace Game.Entities
             public int Health;
             public int MaxHealth;
         }
+
         //42 GAMEOBJECT_TYPE_CAPTURE_POINT
         public struct capturePoint
         {
@@ -4321,7 +4403,8 @@ namespace Game.Entities
                     _passengers.Add(passenger);
                     passenger.SetTransport(this);
                     passenger.m_movementInfo.transport.guid = GetTransportGUID();
-                    Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} boarded transport {_owner.GetName()}.");
+                    Log.outDebug(LogFilter.Transport, 
+                        $"Object {passenger.GetName()} boarded transport {_owner.GetName()}.");
                 }
             }
 
@@ -4331,7 +4414,8 @@ namespace Game.Entities
                 {
                     passenger.SetTransport(null);
                     passenger.m_movementInfo.transport.Reset();
-                    Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} removed from transport {_owner.GetName()}.");
+                    Log.outDebug(LogFilter.Transport, 
+                        $"Object {passenger.GetName()} removed from transport {_owner.GetName()}.");
 
                     Player plr = passenger.ToPlayer();
                     if (plr != null)

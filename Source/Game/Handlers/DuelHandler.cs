@@ -51,8 +51,8 @@ namespace Game
             if (target.m_playerData.DuelArbiter != arbiterGuid)
                 return;
 
-            Log.outDebug(LogFilter.Network, "Player 1 is: {0} ({1})", player.GetGUID().ToString(), player.GetName());
-            Log.outDebug(LogFilter.Network, "Player 2 is: {0} ({1})", target.GetGUID().ToString(), target.GetName());
+            Log.outDebug(LogFilter.Network, $"Player 1 is: {player.GetGUID()} ({player.GetName()})");
+            Log.outDebug(LogFilter.Network, $"Player 2 is: {target.GetGUID()} ({target.GetName()})");
 
             long now = GameTime.GetGameTime();
             player.duel.StartTime = now + 3;

@@ -55,7 +55,9 @@ namespace Game
                     type = ChatMsg.InstanceChat;
                     break;
                 default:
-                    Log.outError(LogFilter.Network, "HandleMessagechatOpcode : Unknown chat opcode ({0})", packet.GetOpcode());
+                    Log.outError(LogFilter.Network, 
+                        $"HandleMessagechatOpcode : " +
+                        $"Unknown chat opcode ({packet.GetOpcode()})");
                     return;
             }
 
@@ -86,7 +88,10 @@ namespace Game
 
             if (lang == Language.Universal && type != ChatMsg.Emote)
             {
-                Log.outError(LogFilter.Network, "CMSG_MESSAGECHAT: Possible hacking-attempt: {0} tried to send a message in universal language", GetPlayerInfo());
+                Log.outError(LogFilter.Network, 
+                    $"CMSG_MESSAGECHAT: Possible hacking-attempt: {GetPlayerInfo()} " +
+                    $"tried to send a message in universal language");
+
                 SendNotification(CypherStrings.UnknownLanguage);
                 return;
             }
@@ -331,7 +336,12 @@ namespace Game
                             return;
                         }
                     }
-                    Channel chn = !channelGuid.IsEmpty() ? ChannelManager.GetChannelForPlayerByGuid(channelGuid, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+
+                    Channel chn = 
+                        !channelGuid.IsEmpty() 
+                        ? ChannelManager.GetChannelForPlayerByGuid(channelGuid, sender) 
+                        : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+
                     if (chn != null)
                     {
                         var chatChannel = CliDB.ChatChannelsStorage.LookupByKey(chn.GetChannelId());
@@ -359,7 +369,7 @@ namespace Game
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.ChatSystem, "CHAT: unknown message Type {0}, lang: {1}", type, lang);
+                    Log.outError(LogFilter.ChatSystem, $"CHAT: unknown message Type {type}, lang: {lang}");
                     break;
             }
         }
@@ -446,7 +456,7 @@ namespace Game
                     break;
 
                 default:
-                    Log.outError(LogFilter.Server, "HandleAddonMessagechat: unknown addon message Type {0}", type);
+                    Log.outError(LogFilter.Server, $"HandleAddonMessagechat: unknown addon message Type {type}");
                     break;
             }
         }

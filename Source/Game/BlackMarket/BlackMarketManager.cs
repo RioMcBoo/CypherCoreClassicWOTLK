@@ -24,7 +24,8 @@ namespace Game.BlackMarket
             SQLResult result = DB.World.Query("SELECT marketId, sellerNpc, itemEntry, quantity, minBid, duration, Chance, bonusListIDs FROM blackmarket_template");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market templates. DB table `blackmarket_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 black market templates. DB table `blackmarket_template` is empty.");
                 return;
             }
 
@@ -52,7 +53,8 @@ namespace Game.BlackMarket
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market auctions. DB table `blackmarket_auctions` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 black market auctions. DB table `blackmarket_auctions` is empty.");
                 return;
             }
 
@@ -236,8 +238,11 @@ namespace Game.BlackMarket
 
             // Log trade
             if (logGmTrade)
-                Log.outCommand(bidderAccId, $"GM {bidderName} (Account: {bidderAccId}) won item in blackmarket auction: {item.GetTemplate().GetName()} " +
+            {
+                Log.outCommand(bidderAccId, 
+                    $"GM {bidderName} (Account: {bidderAccId}) won item in blackmarket auction: {item.GetTemplate().GetName()} " +
                     $"(Entry: {item.GetEntry()} Count: {item.GetCount()}) and payed gold : {entry.GetCurrentBid() / MoneyConstants.Gold}.");
+            }
 
             if (bidder != null)
                 bidder.GetSession().SendBlackMarketWonNotification(entry, item);

@@ -689,7 +689,9 @@ namespace Game
                     itemForSale = pair.Value.Item1.CloneItem(pair.Value.Item2, _player);
                     if (itemForSale == null)
                     {
-                        Log.outError(LogFilter.Network, $"CMSG_AUCTION_SELL_COMMODITY: Could not create clone of item {pair.Value.Item1.GetEntry()}");
+                        Log.outError(LogFilter.Network, 
+                            $"CMSG_AUCTION_SELL_COMMODITY: " +
+                            $"Could not create clone of item {pair.Value.Item1.GetEntry()}");
                         SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.DatabaseError, throttle.DelayUntilNext);
                         return;
                     }
@@ -720,7 +722,10 @@ namespace Game
             if (HasPermission(RBACPermissions.LogGmTrade))
             {
                 Item logItem = items2.First().Value.Item1;
-                Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} (Account: {GetAccountId()}) create auction: {logItem.GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {logItem.GetEntry()} Count: {totalCount})");
+                Log.outCommand(GetAccountId(), 
+                    $"GM {GetPlayerName()} (Account: {GetAccountId()}) " +
+                    $"create auction: {logItem.GetName(Global.WorldMgr.GetDefaultDbcLocale())} " +
+                    $"(Entry: {logItem.GetEntry()} Count: {totalCount})");
             }
 
             SQLTransaction trans = new();
@@ -789,7 +794,9 @@ namespace Game
 
             if (sellItem.MinBid > PlayerConst.MaxMoneyAmount || sellItem.BuyoutPrice > PlayerConst.MaxMoneyAmount)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) attempted to sell item with higher price than max gold amount.");
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) " +
+                    $"attempted to sell item with higher price than max gold amount.");
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.Inventory, throttle.DelayUntilNext, InventoryResult.TooMuchGold);
                 return;
             }
@@ -804,7 +811,9 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(sellItem.Auctioneer, NPCFlags1.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, "WORLD: HandleAuctionSellItem - Unit (%s) not found or you can't interact with him.", sellItem.Auctioneer.ToString());
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleAuctionSellItem - Unit ({sellItem.Auctioneer}) " +
+                    $"not found or you can't interact with him.");
                 return;
             }
 
@@ -812,7 +821,9 @@ namespace Game
             AuctionHouseRecord auctionHouseEntry = Global.AuctionHouseMgr.GetAuctionHouseEntry(creature.GetFaction(), ref houseId);
             if (auctionHouseEntry == null)
             {
-                Log.outError(LogFilter.Network, "WORLD: HandleAuctionSellItem - Unit (%s) has wrong faction.", sellItem.Auctioneer.ToString());
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleAuctionSellItem - Unit ({sellItem.Auctioneer})" +
+                    $" has wrong faction.");
                 return;
             }
 
@@ -876,13 +887,20 @@ namespace Game
             auction.EndTime = auction.StartTime + auctionTime;
 
             if (HasPermission(RBACPermissions.LogGmTrade))
-                Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} (Account: {GetAccountId()}) create auction: {item.GetTemplate().GetName()} (Entry: {item.GetEntry()} Count: {item.GetCount()})");
+                Log.outCommand(GetAccountId(), 
+                    $"GM {GetPlayerName()} (Account: {GetAccountId()}) " +
+                    $"create auction: {item.GetTemplate().GetName()} " +
+                    $"(Entry: {item.GetEntry()} Count: {item.GetCount()})");
 
             auction.Items.Add(item);
 
-            Log.outInfo(LogFilter.Network, $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
-                $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} and with time {auctionTime.TotalSeconds} " +
-                $"(in sec) in auctionhouse {auctionHouse.GetAuctionHouseId()}");
+            Log.outInfo(LogFilter.Network, 
+                $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} " +
+                $"is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
+                $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} " +
+                $"with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} " +
+                $"and with time {auctionTime.TotalSeconds} (in sec) " +
+                $"in auctionhouse {auctionHouse.GetAuctionHouseId()}");
 
             // Add to pending auctions, or fail with insufficient funds error
             if (!Global.AuctionHouseMgr.PendingAuctionAdd(_player, auctionHouse.GetAuctionHouseId(), auctionId, auction.Deposit))
@@ -955,7 +973,9 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(getCommodityQuote.Auctioneer, NPCFlags1.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionStartCommoditiesPurchase - {getCommodityQuote.Auctioneer} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleAuctionStartCommoditiesPurchase - {getCommodityQuote.Auctioneer} " +
+                    $"not found or you can't interact with him.");
                 return;
             }
 

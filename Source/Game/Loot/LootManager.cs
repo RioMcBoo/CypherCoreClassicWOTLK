@@ -123,7 +123,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature loot templates. DB table `creature_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 creature loot templates. DB table `creature_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Disenchant()
@@ -153,7 +156,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} disenchanting loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 disenchanting loot templates. DB table `disenchant_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 disenchanting loot templates. DB table `disenchant_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Fishing()
@@ -176,7 +182,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} fishing loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 fishing loot templates. DB table `fishing_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 fishing loot templates. DB table `fishing_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Gameobject()
@@ -223,7 +232,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Item()
@@ -247,7 +259,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 item loot templates. DB table `item_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 item loot templates. DB table `item_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Milling()
@@ -276,7 +291,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} milling loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 milling loot templates. DB table `milling_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 milling loot templates. DB table `milling_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Pickpocketing()
@@ -314,7 +332,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pickpocketing loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 pickpocketing loot templates. DB table `pickpocketing_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 pickpocketing loot templates. DB table `pickpocketing_loot_template` is empty");
+            }        
         }
 
         public static void LoadLootTemplates_Prospecting()
@@ -343,7 +364,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} prospecting loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 prospecting loot templates. DB table `prospecting_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 prospecting loot templates. DB table `prospecting_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Mail()
@@ -366,7 +390,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} mail loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 mail loot templates. DB table `mail_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 mail loot templates. DB table `mail_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Skinning()
@@ -404,7 +431,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skinning loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 skinning loot templates. DB table `skinning_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 skinning loot templates. DB table `skinning_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Spell()
@@ -447,7 +477,10 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell loot templates. DB table `spell_loot_template` is empty");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 spell loot templates. DB table `spell_loot_template` is empty");
+            }
         }
 
         public static void LoadLootTemplates_Reference()
@@ -517,11 +550,14 @@ namespace Game.Loots
 
             return RandomHelper.randChance(chance * qualityModifier);
         }
+
         public bool IsValid(LootStore store, int entry)
         {
             if (mincount == 0)
             {
-                Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: wrong mincount ({3}) - skipped", store.GetName(), entry, itemid, reference);
+                Log.outError(LogFilter.Sql, 
+                    $"Table '{store.GetName()}' entry {entry} item {itemid}: " +
+                    $"wrong mincount ({reference}) - skipped");
                 return false;
             }
 
@@ -530,36 +566,49 @@ namespace Game.Loots
                 ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemid);
                 if (proto == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item does not exist - skipped", store.GetName(), entry, itemid);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table '{store.GetName()}' entry {entry} item {itemid}: " +
+                        $"item does not exist - skipped");
                     return false;
                 }
 
                 if (chance == 0 && groupid == 0)                      // Zero Chance is allowed for grouped entries only
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: equal-chanced grouped entry, but group not defined - skipped", store.GetName(), entry, itemid);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table '{store.GetName()}' entry {entry} item {itemid}: " +
+                        $"equal-chanced grouped entry, but group not defined - skipped");
                     return false;
                 }
 
                 if (chance != 0 && chance < 0.000001f)             // loot with low Chance
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: low Chance ({3}) - skipped",
-                        store.GetName(), entry, itemid, chance);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table '{store.GetName()}' entry {entry} item {itemid}: " +
+                        $"low Chance ({chance}) - skipped");
                     return false;
                 }
 
                 if (maxcount < mincount)                       // wrong max count
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: max count ({3}) less that min count ({4}) - skipped", store.GetName(), entry, itemid, maxcount, reference);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table '{store.GetName()}' entry {entry} item {itemid}: " +
+                        $"max count ({maxcount}) less that min count ({reference}) - skipped");
                     return false;
                 }
             }
             else                                                    // mincountOrRef < 0
             {
                 if (needs_quest)
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: quest Chance will be treated as non-quest Chance", store.GetName(), entry, itemid);
+                {
+                    Log.outError(LogFilter.Sql,
+                        $"Table '{store.GetName()}' entry {entry} item {itemid}: " +
+                        $"quest Chance will be treated as non-quest Chance");
+                }
                 else if (chance == 0)                              // no Chance for the reference
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: zero Chance is specified for a reference, skipped", store.GetName(), entry, itemid);
+                    Log.outError(LogFilter.Sql,
+                        $"Table '{store.GetName()}' entry {entry} item {itemid}: " +
+                        $"zero Chance is specified for a reference, skipped");
                     return false;
                 }
             }
@@ -603,21 +652,29 @@ namespace Game.Loots
 
             return count;
         }
+
         public void CheckLootRefs(List<int> ref_set = null)
         {
             foreach (var pair in m_LootTemplates)
                 pair.Value.CheckLootRefs(m_LootTemplates, ref_set);
         }
+
         public void ReportUnusedIds(List<int> lootIdSet)
         {
             // all still listed ids isn't referenced
             foreach (var id in lootIdSet)
-                Log.outError(LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
+            {
+                Log.outError(LogFilter.Sql,
+                    $"Table '{GetName()}' entry {id} isn't {GetEntryName()} " +
+                    $"and not referenced from loot, and then useless.");
+            }
         }
 
         public void ReportNonExistingId(int lootId, int ownerId)
         {
-            Log.outError(LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
+            Log.outError(LogFilter.Sql, 
+                $"Table '{GetName()}' Entry {lootId} does not exist " +
+                $"but it is used by {GetEntryName()} {ownerId}");
         }
 
         public bool HaveLootFor(int loot_id) { return m_LootTemplates.LookupByKey(loot_id) != null; }
@@ -636,8 +693,10 @@ namespace Game.Loots
         {
             var tab = m_LootTemplates.LookupByKey(loot_id);
             if (tab != null)
+            {
                 if (tab.HasQuestDropForPlayer(m_LootTemplates, player))
                     return true;
+            }
 
             return false;
         }
@@ -672,7 +731,7 @@ namespace Game.Loots
             Clear();
 
             //                                            0     1      2        3         4             5          6        7         8
-            SQLResult result = DB.World.Query("SELECT Entry, Item, Reference, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {0}", GetName());
+            SQLResult result = DB.World.Query($"SELECT Entry, Item, Reference, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {GetName()}");
             if (result.IsEmpty())
                 return 0;
 
@@ -691,7 +750,9 @@ namespace Game.Loots
 
                 if (groupid >= 1 << 7)                                     // it stored in 7 bit field
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: group ({3}) must be less {4} - skipped", GetName(), entry, item, groupid, 1 << 7);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table '{GetName()}' entry {entry} item {item}: " +
+                        $"group ({groupid}) must be less {1 << 7} - skipped");
                     return 0;
                 }
 
@@ -783,8 +844,10 @@ namespace Game.Loots
                         || LootItem.AllowedForPlayer(personalLooter, null, item.itemid, item.needs_quest,
                             !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
                             true, item.conditions))
+                    {
                         loot.AddItem(item);
                 }
+            }
             }
 
             // Now processing groups
@@ -912,13 +975,17 @@ namespace Game.Loots
                 else if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
                     !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
                     strictUsabilityCheck, lootStoreItem.conditions))
+                {
                     return true;                                    // active quest drop found
+            }
             }
 
             // Now checking groups
             foreach (LootGroup group in Groups.Values)
+            {
                 if (group != null && group.HasDropForPlayer(player, strictUsabilityCheck))
                     return true;
+            }
 
             return false;
         }
@@ -965,8 +1032,10 @@ namespace Game.Loots
 
             // Now processing groups
             foreach (var group in Groups.Values)
+            {
                 if (group.HasQuestDrop())
                     return true;
+            }
 
             return false;
         }
@@ -1001,8 +1070,10 @@ namespace Game.Loots
 
             // Now checking groups
             foreach (var group in Groups.Values)
+            {
                 if (group.HasQuestDropForPlayer(player))
                     return true;
+            }
 
             return false;
         }
@@ -1015,6 +1086,7 @@ namespace Game.Loots
 
             // @todo References validity checks
         }
+
         public void CheckLootRefs(LootTemplateMap store, List<int> ref_set)
         {
             foreach (var item in Entries)
@@ -1082,11 +1154,14 @@ namespace Game.Loots
             }
             return false;
         }
+
         public bool IsReference(int id)
         {
             foreach (var storeItem in Entries)
+            {
                 if (storeItem.itemid == id && storeItem.reference > 0)
                     return true;
+            }
 
             return false;//not found or not reference
         }
@@ -1107,12 +1182,16 @@ namespace Game.Loots
             public bool HasQuestDrop()
             {
                 foreach (var i in ExplicitlyChanced)
+                {
                     if (i.needs_quest)
                         return true;
+                }
 
                 foreach (var i in EqualChanced)
+                {
                     if (i.needs_quest)
                         return true;
+                }
 
                 return false;
             }
@@ -1120,12 +1199,16 @@ namespace Game.Loots
             public bool HasQuestDropForPlayer(Player player)
             {
                 foreach (var i in ExplicitlyChanced)
+                {
                     if (player.HasQuestForItem(i.itemid))
                         return true;
+                }
 
                 foreach (var i in EqualChanced)
+                {
                     if (player.HasQuestForItem(i.itemid))
                         return true;
+                }
 
                 return false;
             }
@@ -1142,12 +1225,14 @@ namespace Game.Loots
                 float result = 0;
 
                 foreach (var i in ExplicitlyChanced)
+                {
                     if (!i.needs_quest)
                         result += i.chance;
-
+                }
                
                 return result;
             }
+
             float TotalChance()
             {
                 float result = RawTotalChance();
@@ -1162,12 +1247,21 @@ namespace Game.Loots
             {
                 float chance = RawTotalChance();
                 if (chance > 101.0f)                                    // @todo replace with 100% when DBs will be ready
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has total Chance > 100% ({3})", lootstore.GetName(), id, group_id, chance);
+                {
+                    Log.outError(LogFilter.Sql,
+                        $"Table '{lootstore.GetName()}' entry {id} group {group_id} " +
+                        $"has total Chance > 100% ({chance})");
+                }
 
                 if (chance >= 100.0f && !EqualChanced.Empty())
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has items with Chance=0% but group total Chance >= 100% ({3})", lootstore.GetName(), id, group_id, chance);
+                {
+                    Log.outError(LogFilter.Sql,
+                        $"Table '{lootstore.GetName()}' entry {id} group {group_id} " +
+                        $"has items with Chance=0% but group total Chance >= 100% ({chance})");
+                }
 
             }
+
             public void CheckLootRefs(LootTemplateMap store, List<int> ref_set)
             {
                 foreach (var item in ExplicitlyChanced)
@@ -1192,6 +1286,7 @@ namespace Game.Loots
                     }
                 }
             }
+
             public LootStoreItemList GetExplicitlyChancedItemList() { return ExplicitlyChanced; }
             public LootStoreItemList GetEqualChancedItemList() { return EqualChanced; }
 
@@ -1205,7 +1300,7 @@ namespace Game.Loots
 
                 if (!possibleLoot.Empty())                             // First explicitly chanced entries are checked
                 {
-                    float roll = (float)RandomHelper.randChance();
+                    float roll = (float)RandomHelper.randPercent();
 
                     foreach (var item in possibleLoot)   // check each explicitly chanced entry in the template and modify its Chance based on quality.
                     {
@@ -1229,16 +1324,24 @@ namespace Game.Loots
             public bool HasDropForPlayer(Player player, bool strictUsabilityCheck)
             {
                 foreach (LootStoreItem lootStoreItem in ExplicitlyChanced)
+                {
                     if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
                         !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
                         strictUsabilityCheck, lootStoreItem.conditions))
+                    {
                         return true;
+                    }
+                }
 
                 foreach (LootStoreItem lootStoreItem in EqualChanced)
+                {
                     if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
                         !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
                         strictUsabilityCheck, lootStoreItem.conditions))
+                    {
                         return true;
+                    }
+                }
 
                 return false;
             }
@@ -1261,7 +1364,9 @@ namespace Game.Loots
             if (_personalLooter != null && !LootItem.AllowedForPlayer(_personalLooter, null, item.itemid, item.needs_quest,
                 !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
                 true, item.conditions))
+            {
                 return true;
+            }
 
             return false;
         }

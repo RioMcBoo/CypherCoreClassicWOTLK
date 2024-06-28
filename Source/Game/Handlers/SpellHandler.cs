@@ -72,8 +72,9 @@ namespace Game
             if (!proto.HasFlag(ItemFlags.HasLoot) && !item.IsWrapped())
             {
                 player.SendEquipError(InventoryResult.ClientLockedOut, item);
-                Log.outError(LogFilter.Network, "Possible hacking attempt: Player {0} [guid: {1}] tried to open item [guid: {2}, entry: {3}] which is not openable!",
-                        player.GetName(), player.GetGUID().ToString(), item.GetGUID().ToString(), proto.GetId());
+                Log.outError(LogFilter.Network, 
+                    $"Possible hacking attempt: Player {player.GetName()} [guid: {player.GetGUID()}] " +
+                    $"tried to open item [guid: {item.GetGUID()}, entry: {proto.GetId()}] which is not openable!");
                 return;
             }
 
@@ -85,7 +86,8 @@ namespace Game
                 if (lockInfo == null)
                 {
                     player.SendEquipError(InventoryResult.ItemLocked, item);
-                    Log.outError(LogFilter.Network, "WORLD:OpenItem: item [guid = {0}] has an unknown lockId: {1}!", item.GetGUID().ToString(), lockId);
+                    Log.outError(LogFilter.Network, 
+                        $"WORLD:OpenItem: item [guid = {item.GetGUID()}] has an unknown lockId: {lockId}!");
                     return;
                 }
 
@@ -145,7 +147,9 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.Network, $"Wrapped item {item.GetGUID()} don't have record in character_gifts table and will deleted");
+                Log.outError(LogFilter.Network,
+                    $"Wrapped item {item.GetGUID()} don't have record in character_gifts table and will deleted");
+
                 GetPlayer().DestroyItem(pos, true);
                 return;
             }
@@ -209,7 +213,8 @@ namespace Game
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, $"WorldSession::HandleCastSpellOpcode: attempted to cast a non-existing spell (Id: {cast.Cast.SpellID})");
+                Log.outError(LogFilter.Network, 
+                    $"WorldSession::HandleCastSpellOpcode: attempted to cast a non-existing spell (Id: {cast.Cast.SpellID})");
                 return;
             }
 
@@ -303,20 +308,23 @@ namespace Game
         {
             if (!Global.SpellMgr.HasSpellInfo(packet.SpellID, Difficulty.None))
             {
-                Log.outError(LogFilter.Network, "WORLD: unknown PET spell id {0}", packet.SpellID);
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: unknown PET spell id {packet.SpellID}");
                 return;
             }
 
             Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(_player, packet.PetGUID);
             if (pet == null)
             {
-                Log.outError(LogFilter.Network, "HandlePetCancelAura: Attempt to cancel an aura for non-existant {0} by player '{1}'", packet.PetGUID.ToString(), GetPlayer().GetName());
+                Log.outError(LogFilter.Network, 
+                    $"HandlePetCancelAura: Attempt to cancel an aura for non-existant {packet.PetGUID} by player '{GetPlayer().GetName()}'");
                 return;
             }
 
             if (pet != GetPlayer().GetGuardianPet() && pet != GetPlayer().GetCharmed())
             {
-                Log.outError(LogFilter.Network, "HandlePetCancelAura: {0} is not a pet of player '{1}'", packet.PetGUID.ToString(), GetPlayer().GetName());
+                Log.outError(LogFilter.Network, 
+                    $"HandlePetCancelAura: {packet.PetGUID} is not a pet of player '{GetPlayer().GetName()}'");
                 return;
             }
 
@@ -397,8 +405,11 @@ namespace Game
                 return;
 
             Creature totem = ObjectAccessor.GetCreature(GetPlayer(), _player.m_SummonSlot[slotId]);
-            if (totem != null && totem.IsTotem() && (totemDestroyed.TotemGUID.IsEmpty() || totem.GetGUID() == totemDestroyed.TotemGUID))
+            if (totem != null && totem.IsTotem()
+                && (totemDestroyed.TotemGUID.IsEmpty() || totem.GetGUID() == totemDestroyed.TotemGUID))
+            {
                 totem.DespawnOrUnsummon();
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.SelfRes)]
@@ -542,7 +553,9 @@ namespace Game
         {
             Unit caster = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Guid);
             Spell spell = caster != null ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
-            if (spell == null || spell.m_spellInfo.Id != packet.SpellID || spell.m_castId != packet.CastID || !spell.m_targets.HasDst() || !spell.m_targets.HasSrc())
+
+            if (spell == null || spell.m_spellInfo.Id != packet.SpellID || spell.m_castId != packet.CastID 
+                || !spell.m_targets.HasDst() || !spell.m_targets.HasSrc())
                 return;
 
             Position pos = spell.m_targets.GetSrcPos();

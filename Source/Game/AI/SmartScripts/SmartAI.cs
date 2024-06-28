@@ -60,7 +60,8 @@ namespace Game.AI
             _run = true;
             _canCombatMove = true;
 
-            _hasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, creature.GetEntry());
+            _hasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(
+                ConditionSourceType.CreatureTemplateVehicle, creature.GetEntry());
         }
 
         bool IsAIControlled()
@@ -128,7 +129,9 @@ namespace Game.AI
 
             if (HasEscortState(SmartEscortState.Paused))
             {
-                Log.outError(LogFilter.Server, $"SmartAI.PausePath: Creature entry {me.GetEntry()} wanted to pause waypoint movement while already paused, ignoring.");
+                Log.outError(LogFilter.Server, 
+                    $"SmartAI.PausePath: Creature entry {me.GetEntry()} " +
+                    $"wanted to pause waypoint movement while already paused, ignoring.");
                 return;
             }
 
@@ -378,7 +381,8 @@ namespace Game.AI
                 me.PauseMovement();
                 me.SetHomePosition(me.GetPosition());
             }
-            else if (HasEscortState(SmartEscortState.Escorting) && me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
+            else if (HasEscortState(SmartEscortState.Escorting)
+                && me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
             {
                 WaypointPath path = Global.WaypointMgr.GetPath(pathId);
                 if (path != null && _currentWaypointNodeId == path.Nodes.Last()?.Id)
@@ -558,8 +562,10 @@ namespace Game.AI
             if (formation == null || formation.GetLeader() == me || !formation.IsFormed())
             {
                 if (me.GetMotionMaster().GetCurrentMovementGeneratorType(MovementSlot.Default) != MovementGeneratorType.Waypoint)
+                {
                     if (me.GetWaypointPathId() != 0)
                         me.GetMotionMaster().MovePath(me.GetWaypointPathId(), true);
+                }
                 
                 me.ResumeMovement();
             }
@@ -822,9 +828,12 @@ namespace Game.AI
             {
                 if (on)
                 {
-                    if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() != null && !me.GetMotionMaster().HasMovementGenerator(movement =>
+                    if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() != null 
+                        && !me.GetMotionMaster().HasMovementGenerator(movement =>
                     {
-                        return movement.GetMovementGeneratorType() == MovementGeneratorType.Chase && movement.Mode == MovementGeneratorMode.Default && movement.Priority == MovementGeneratorPriority.Normal;
+                        return movement.GetMovementGeneratorType() == MovementGeneratorType.Chase 
+                        && movement.Mode == MovementGeneratorMode.Default
+                        && movement.Priority == MovementGeneratorPriority.Normal;
                     }))
                     {
                         SetRun(_run);
@@ -833,7 +842,11 @@ namespace Game.AI
                 }
                 else
                 {
-                    var movement = me.GetMotionMaster().GetMovementGenerator(a => a.GetMovementGeneratorType() == MovementGeneratorType.Chase && a.Mode == MovementGeneratorMode.Default && a.Priority == MovementGeneratorPriority.Normal);
+                    var movement = me.GetMotionMaster().GetMovementGenerator(a => 
+                    a.GetMovementGeneratorType() == MovementGeneratorType.Chase 
+                    && a.Mode == MovementGeneratorMode.Default 
+                    && a.Priority == MovementGeneratorPriority.Normal);
+
                     if (movement != null)
                     {
                         me.GetMotionMaster().Remove(movement);
@@ -929,7 +942,8 @@ namespace Game.AI
                             Player player = passenger.ToPlayer();
                             if (player != null)
                             {
-                                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry(), player, me))
+                                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(
+                                    ConditionSourceType.CreatureTemplateVehicle, me.GetEntry(), player, me))
                                 {
                                     player.ExitVehicle();
                                     return; // check other pessanger in next tick
@@ -970,7 +984,8 @@ namespace Game.AI
             if (HasEscortState(SmartEscortState.Paused) && (_waypointReached || _waypointPauseForced))
             {
                 // Resume only if there was a pause timer set
-                if (_waypointPauseTimer != 0 && !me.IsInCombat() && !HasEscortState(SmartEscortState.Returning))
+                if (_waypointPauseTimer != 0 && !me.IsInCombat() 
+                    && !HasEscortState(SmartEscortState.Returning))
                 {
                     if (_waypointPauseTimer <= diff)
                         ResumePath();

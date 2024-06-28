@@ -123,7 +123,10 @@ namespace Game.Mails
                 default:
                     m_messageType = MailMessageType.Normal;
                     m_senderId = 0;                                 // will show mail from not existed player
-                    Log.outError(LogFilter.Server, "MailSender:MailSender - Mail have unexpected sender typeid ({0})", sender.GetTypeId());
+
+                    Log.outError(LogFilter.Server, 
+                        $"MailSender:MailSender - " +
+                        $"Mail have unexpected sender typeid ({sender.GetTypeId()})");
                     break;
             }
         }

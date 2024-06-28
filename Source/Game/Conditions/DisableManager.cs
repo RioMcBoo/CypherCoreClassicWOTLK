@@ -44,7 +44,8 @@ namespace Game
                 DisableType type = (DisableType)result.Read<uint>(0);
                 if (type >= DisableType.Max)
                 {
-                    Log.outError(LogFilter.Sql, "Invalid Type {0} specified in `disables` table, skipped.", type);
+                    Log.outError(LogFilter.Sql, 
+                        $"Invalid Type {type} specified in `disables` table, skipped.");
                     continue;
                 }
 
@@ -61,13 +62,15 @@ namespace Game
                     case DisableType.Spell:
                         if (!(Global.SpellMgr.HasSpellInfo(entry, Difficulty.None) || flags.HasFlag(DisableFlags.SpellDeprecatedSpell)))
                         {
-                            Log.outError(LogFilter.Sql, "Spell entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Spell entry {entry} from `disables` doesn't exist in dbc, skipped.");
                             continue;
                         }
 
                         if (flags == 0 || flags > DisableFlags.MaxSpell)
                         {
-                            Log.outError(LogFilter.Sql, "Disable flags for spell {0} are invalid, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Disable flags for spell {entry} are invalid, skipped.");
                             continue;
                         }
 
@@ -101,7 +104,8 @@ namespace Game
                         MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
                         if (mapEntry == null)
                         {
-                            Log.outError(LogFilter.Sql, "Map entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Map entry {entry} from `disables` doesn't exist in dbc, skipped.");
                             continue;
                         }
                         bool isFlagInvalid = false;
@@ -124,12 +128,14 @@ namespace Game
                                 break;
                             case MapTypes.Battleground:
                             case MapTypes.Arena:
-                                Log.outError(LogFilter.Sql, "Battlegroundmap {0} specified to be disabled in map case, skipped.", entry);
+                                Log.outError(LogFilter.Sql, 
+                                    $"Battlegroundmap {entry} specified to be disabled in map case, skipped.");
                                 continue;
                         }
                         if (isFlagInvalid)
                         {
-                            Log.outError(LogFilter.Sql, "Disable flags for map {0} are invalid, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Disable flags for map {entry} are invalid, skipped.");
                             continue;
                         }
                         break;
@@ -137,64 +143,77 @@ namespace Game
                     case DisableType.Battleground:
                         if (!CliDB.BattlemasterListStorage.ContainsKey(entry))
                         {
-                            Log.outError(LogFilter.Sql, "Battlegroundentry {0} from `disables` doesn't exist in dbc, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Battlegroundentry {entry} from `disables` doesn't exist in dbc, skipped.");
                             continue;
                         }
                         if (flags != 0)
-                            Log.outError(LogFilter.Sql, "Disable flags specified for Battleground{0}, useless data.", entry);
+                        {
+                            Log.outError(LogFilter.Sql, 
+                                $"Disable flags specified for Battleground{entry}, useless data.");
+                        }
                         break;
                     case DisableType.OutdoorPVP:
                         if (entry > (int)OutdoorPvPTypes.Max)
                         {
-                            Log.outError(LogFilter.Sql, "OutdoorPvPTypes value {0} from `disables` is invalid, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"OutdoorPvPTypes value {entry} from `disables` is invalid, skipped.");
                             continue;
                         }
                         if (flags != 0)
-                            Log.outError(LogFilter.Sql, "Disable flags specified for outdoor PvP {0}, useless data.", entry);
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"Disable flags specified for outdoor PvP {entry}, useless data.");
+                        }
                         break;
                     case DisableType.Criteria:
                         if (Global.CriteriaMgr.GetCriteria(entry) == null)
                         {
-                            Log.outError(LogFilter.Sql, "Criteria entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Criteria entry {entry} from `disables` doesn't exist in dbc, skipped.");
                             continue;
                         }
                         if (flags != 0)
-                            Log.outError(LogFilter.Sql, "Disable flags specified for Criteria {0}, useless data.", entry);
+                        {
+                            Log.outError(LogFilter.Sql, 
+                                $"Disable flags specified for Criteria {entry}, useless data.");
+                        }
                         break;
                     case DisableType.VMAP:
                     {
                         MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
                         if (mapEntry == null)
                         {
-                            Log.outError(LogFilter.Sql, "Map entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Map entry {entry} from `disables` doesn't exist in dbc, skipped.");
                             continue;
                         }
                         switch (mapEntry.InstanceType)
                         {
                             case MapTypes.Common:
                                 if (flags.HasFlag(DisableFlags.VmapAreaFlag))
-                                    Log.outInfo(LogFilter.Server, "Areaflag disabled for world map {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"Areaflag disabled for world map {entry}.");
                                 if (flags.HasFlag(DisableFlags.VmapLiquidStatus))
-                                    Log.outInfo(LogFilter.Server, "Liquid status disabled for world map {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"Liquid status disabled for world map {entry}.");
                                 break;
                             case MapTypes.Instance:
                             case MapTypes.Raid:
                                 if (flags.HasFlag(DisableFlags.VmapHeight))
-                                    Log.outInfo(LogFilter.Server, "Height disabled for instance map {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"Height disabled for instance map {entry}.");
                                 if (flags.HasFlag(DisableFlags.VmapLOS))
-                                    Log.outInfo(LogFilter.Server, "LoS disabled for instance map {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"LoS disabled for instance map {entry}.");
                                 break;
                             case MapTypes.Battleground:
                                 if (flags.HasFlag(DisableFlags.VmapHeight))
-                                    Log.outInfo(LogFilter.Server, "Height disabled for Battlegroundmap {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"Height disabled for Battlegroundmap {entry}.");
                                 if (flags.HasFlag(DisableFlags.VmapLOS))
-                                    Log.outInfo(LogFilter.Server, "LoS disabled for Battlegroundmap {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"LoS disabled for Battlegroundmap {entry}.");
                                 break;
                             case MapTypes.Arena:
                                 if (flags.HasFlag(DisableFlags.VmapHeight))
-                                    Log.outInfo(LogFilter.Server, "Height disabled for arena map {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"Height disabled for arena map {entry}.");
                                 if (flags.HasFlag(DisableFlags.VmapLOS))
-                                    Log.outInfo(LogFilter.Server, "LoS disabled for arena map {0}.", entry);
+                                    Log.outInfo(LogFilter.Server, $"LoS disabled for arena map {entry}.");
                                 break;
                             default:
                                 break;
@@ -206,23 +225,24 @@ namespace Game
                         MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
                         if (mapEntry == null)
                         {
-                            Log.outError(LogFilter.Sql, "Map entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
+                            Log.outError(LogFilter.Sql, 
+                                $"Map entry {entry} from `disables` doesn't exist in dbc, skipped.");
                             continue;
                         }
                         switch (mapEntry.InstanceType)
                         {
                             case MapTypes.Common:
-                                Log.outInfo(LogFilter.Server, "Pathfinding disabled for world map {0}.", entry);
+                                Log.outInfo(LogFilter.Server, $"Pathfinding disabled for world map {entry}.");
                                 break;
                             case MapTypes.Instance:
                             case MapTypes.Raid:
-                                Log.outInfo(LogFilter.Server, "Pathfinding disabled for instance map {0}.", entry);
+                                Log.outInfo(LogFilter.Server, $"Pathfinding disabled for instance map {entry}.");
                                 break;
                             case MapTypes.Battleground:
-                                Log.outInfo(LogFilter.Server, "Pathfinding disabled for Battlegroundmap {0}.", entry);
+                                Log.outInfo(LogFilter.Server, $"Pathfinding disabled for Battlegroundmap {entry}.");
                                 break;
                             case MapTypes.Arena:
-                                Log.outInfo(LogFilter.Server, "Pathfinding disabled for arena map {0}.", entry);
+                                Log.outInfo(LogFilter.Server, $"Pathfinding disabled for arena map {entry}.");
                                 break;
                             default:
                                 break;
@@ -259,12 +279,16 @@ namespace Game
                 int entry = pair.Key;
                 if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Quest entry {0} from `disables` doesn't exist, skipped.", entry);
+                    Log.outError(LogFilter.Sql, 
+                        $"Quest entry {entry} from `disables` doesn't exist, skipped.");
                     m_DisableMap[DisableType.Quest].Remove(entry);
                     continue;
                 }
                 if (pair.Value.flags != 0)
-                    Log.outError(LogFilter.Sql, "Disable flags specified for quest {0}, useless data.", entry);
+                {
+                    Log.outError(LogFilter.Sql, 
+                        $"Disable flags specified for quest {entry}, useless data.");
+                }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", m_DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));

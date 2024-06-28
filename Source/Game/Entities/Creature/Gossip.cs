@@ -314,7 +314,8 @@ namespace Game.Misc
             PointOfInterest pointOfInterest = Global.ObjectMgr.GetPointOfInterest(id);
             if (pointOfInterest == null)
             {
-                Log.outError(LogFilter.Sql, "Request to send non-existing PointOfInterest (Id: {0}), ignored.", id);
+                Log.outError(LogFilter.Sql, 
+                    $"Request to send non-existing PointOfInterest (Id: {id}), ignored.");
                 return;
             }
 

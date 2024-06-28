@@ -141,10 +141,18 @@ namespace Game.Chat
                 {
                     Player sessionPlayer = session.GetPlayer();
                     if (sessionPlayer != null)
-                        Log.outCommand(session.GetAccountId(), "GM {0} (Account: {1}) forced rename {2} to player {3} (Account: {4})", sessionPlayer.GetName(), session.GetAccountId(), newName, sessionPlayer.GetName(), Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sessionPlayer.GetGUID()));
+                    {
+                        Log.outCommand(session.GetAccountId(),
+                            $"GM {sessionPlayer.GetName()} (Account: {session.GetAccountId()}) forced rename {newName} " +
+                            $"to player {sessionPlayer.GetName()} " +
+                            $"(Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sessionPlayer.GetGUID())})");
+                }
                 }
                 else
-                    Log.outCommand(0, "CONSOLE forced rename '{0}' to '{1}' ({2})", player.GetName(), newName, player.GetGUID().ToString());
+                {
+                    Log.outCommand(0,
+                        $"CONSOLE forced rename '{player.GetName()}' to '{newName}' ({player.GetGUID()})");
+            }
             }
             else
             {
@@ -293,7 +301,10 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.ChangeAccountSuccess, player.GetName(), newAccount.GetName());
 
-            string logString = $"changed ownership of player {player.GetName()} ({player.GetGUID()}) from account {oldAccountId} to account {newAccount.GetID()}";
+            string logString = 
+                $"changed ownership of player {player.GetName()} ({player.GetGUID()}) " +
+                $"from account {oldAccountId} to account {newAccount.GetID()}";
+            
             WorldSession session = handler.GetSession();
             if (session != null)
             {
@@ -382,11 +393,11 @@ namespace Game.Chat
                 string rankName = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[(int)rank]);
                 StringBuilder ss = new();
                 if (handler.GetSession() != null)
-                    ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1} {2}]|h|r", faction.Id, factionName, loc);
+                    ss.AppendFormat($"{faction.Id} - |cffffffff|Hfaction:{faction.Id}|h[{factionName} {loc}]|h|r");
                 else
-                    ss.AppendFormat("{0} - {1} {2}", faction.Id, factionName, loc);
+                    ss.AppendFormat($"{faction.Id} - {factionName} {loc}");
 
-                ss.AppendFormat(" {0} ({1})", rankName, target.GetReputationMgr().GetReputation(factionEntry));
+                ss.AppendFormat($" {rankName} ({target.GetReputationMgr().GetReputation(factionEntry)})");
 
                 if (faction.Flags.HasFlag(ReputationFlags.Visible))
                     ss.Append(handler.GetCypherString(CypherStrings.FactionVisible));
@@ -603,13 +614,17 @@ namespace Game.Chat
                     string dateStr = Time.UnixTimeToDateTime(info.deleteDate).ToShortDateString();
 
                     if (handler.GetSession() == null)
+                    {
                         handler.SendSysMessage(CypherStrings.CharacterDeletedListLineConsole,
                             info.guid.ToString(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
                             info.accountId, dateStr);
+                    }
                     else
+                    {
                         handler.SendSysMessage(CypherStrings.CharacterDeletedListLineChat,
                             info.guid.ToString(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
                             info.accountId, dateStr);
+                }
                 }
 
                 if (handler.GetSession() == null)

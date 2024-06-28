@@ -192,7 +192,7 @@ namespace Game.Collision
             var filename = Global.WorldMgr.GetDataPath() + "/vmaps/GameObjectModels.dtree";
             if (!File.Exists(filename))
             {
-                Log.outWarn(LogFilter.Server, "Unable to open '{0}' file.", filename);
+                Log.outWarn(LogFilter.Server, $"Unable to open '{filename}' file.");
                 return false;
             }
             try
@@ -201,7 +201,8 @@ namespace Game.Collision
                 string magic = reader.ReadStringFromChars(8);
                 if (magic != MapConst.VMapMagic)
                 {
-                    Log.outError(LogFilter.Misc, $"File '{filename}' has wrong header, expected {MapConst.VMapMagic}.");
+                    Log.outError(LogFilter.Misc, 
+                        $"File '{filename}' has wrong header, expected {MapConst.VMapMagic}.");
                     return false;
                 }
 

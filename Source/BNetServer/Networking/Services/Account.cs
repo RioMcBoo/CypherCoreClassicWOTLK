@@ -62,7 +62,7 @@ namespace BNetServer.Networking
                 if (gameAccountInfo != null)
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;
-                    response.State.GameStatus.IsBanned = gameAccountInfo.IsPermanenetlyBanned;
+                    response.State.GameStatus.IsBanned = gameAccountInfo.IsPermanentlyBanned;
                     response.State.GameStatus.SuspensionExpires = (gameAccountInfo.UnbanDate * 1000000);
                 }
 

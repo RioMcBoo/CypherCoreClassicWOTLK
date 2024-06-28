@@ -187,7 +187,9 @@ namespace Scripts.Spells.Rogue
 
             PreventDefaultAction();
 
-            target.CastSpell(target, SpellIds.CheatDeathDummy, TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
+            target.CastSpell(target, SpellIds.CheatDeathDummy, TriggerCastFlags.IgnoreCastInProgress 
+                | TriggerCastFlags.DontReportCastError);
+
             target.CastSpell(target, SpellIds.CheatedDeath, TriggerCastFlags.DontReportCastError);
             target.CastSpell(target, SpellIds.CheatingDeath, TriggerCastFlags.DontReportCastError);
 
@@ -220,7 +222,9 @@ namespace Scripts.Spells.Rogue
             if (target != null)
             {
                 // Deadly Poison
-                AuraEffect aurEff = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Rogue, new FlagArray128(0x10000, 0x80000, 0), GetCaster().GetGUID());
+                AuraEffect aurEff = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Rogue, 
+                    new FlagArray128(0x10000, 0x80000, 0), GetCaster().GetGUID());
+
                 if (aurEff != null)
                     _stackAmount = aurEff.GetBase().GetStackAmount();
             }
@@ -259,7 +263,10 @@ namespace Scripts.Spells.Rogue
                         SpellInfo spellInfo = SpellMgr.GetSpellInfo(enchant.EffectArg[s], Difficulty.None);
                         if (spellInfo == null)
                         {
-                            Log.outError(LogFilter.Spells, $"Player.CastItemCombatSpell Enchant {enchant.Id}, player (Name: {player.GetName()}, {player.GetGUID().ToString()})cast unknown spell {enchant.EffectArg[s]}");
+                            Log.outError(LogFilter.Spells, 
+                                $"Player.CastItemCombatSpell Enchant {enchant.Id}, " +
+                                $"player (Name: {player.GetName()}, {player.GetGUID().ToString()}) " +
+                                $"cast unknown spell {enchant.EffectArg[s]}");
                             continue;
                         }
 
@@ -866,8 +873,11 @@ namespace Scripts.Spells.Rogue
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Default || !GetTarget().HasAura(SpellIds.TricksOfTheTradeProc))
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Default
+                || !GetTarget().HasAura(SpellIds.TricksOfTheTradeProc))
+            {
                 GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.TricksOfTheTrade);
+        }
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -934,7 +944,8 @@ namespace Scripts.Spells.Rogue
     {
         bool CheckForStun(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            return eventInfo.GetProcSpell() != null && eventInfo.GetProcSpell().GetSpellInfo().HasAura(AuraType.ModStun);
+            return eventInfo.GetProcSpell() != null 
+                && eventInfo.GetProcSpell().GetSpellInfo().HasAura(AuraType.ModStun);
         }
 
         public override void Register()

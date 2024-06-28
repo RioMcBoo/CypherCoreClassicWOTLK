@@ -22,7 +22,9 @@ namespace Game.Entities
             if (creatureGroup != null)
             {
                 //Add member to an existing group
-                Log.outDebug(LogFilter.Unit, "Group found: {0}, inserting creature GUID: {1}, Group InstanceID {2}", leaderSpawnId, creature.GetGUID().ToString(), creature.GetInstanceId());
+                Log.outDebug(LogFilter.Unit, 
+                    $"Group found: {leaderSpawnId}, inserting creature GUID: " +
+                    $"{creature.GetGUID()}, Group InstanceID {creature.GetInstanceId()}");
 
                 // With dynamic spawn the creature may have just respawned
                 // we need to find previous instance of creature and delete it from the formation, as it'll be invalidated
@@ -41,7 +43,9 @@ namespace Game.Entities
             else
             {
                 //Create new group
-                Log.outDebug(LogFilter.Unit, "Group not found: {0}. Creating new group.", leaderSpawnId);
+                Log.outDebug(LogFilter.Unit, 
+                    $"Group not found: {leaderSpawnId}. Creating new group.");
+
                 CreatureGroup group = new(leaderSpawnId);
                 map.CreatureGroupHolder[leaderSpawnId] = group;
                 group.AddMember(creature);
@@ -50,15 +54,19 @@ namespace Game.Entities
 
         public static void RemoveCreatureFromGroup(CreatureGroup group, Creature member)
         {
-            Log.outDebug(LogFilter.Unit, "Deleting member GUID: {0} from group {1}", group.GetLeaderSpawnId(), member.GetSpawnId());
+            Log.outDebug(LogFilter.Unit, 
+                $"Deleting member GUID: {group.GetLeaderSpawnId()} from group {member.GetSpawnId()}");
+
             group.RemoveMember(member);
 
             if (group.IsEmpty())
             {
                 Map map = member.GetMap();
 
-                Log.outDebug(LogFilter.Unit, "Deleting group with InstanceID {0}", member.GetInstanceId());
-                Cypher.Assert(map.CreatureGroupHolder.ContainsKey(group.GetLeaderSpawnId()), $"Not registered group {group.GetLeaderSpawnId()} in map {map.GetId()}");
+                Log.outDebug(LogFilter.Unit, $"Deleting group with InstanceID {member.GetInstanceId()}");
+
+                Cypher.Assert(map.CreatureGroupHolder.ContainsKey(group.GetLeaderSpawnId()), 
+                    $"Not registered group {group.GetLeaderSpawnId()} in map {map.GetId()}");
                 map.CreatureGroupHolder.Remove(group.GetLeaderSpawnId());
             }
         }
@@ -102,13 +110,15 @@ namespace Game.Entities
                 {
                     if (Global.ObjectMgr.GetCreatureData(member.LeaderSpawnId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"creature_formations table leader guid {member.LeaderSpawnId} incorrect (not exist)");
+                        Log.outError(LogFilter.Sql, 
+                            $"creature_formations table leader guid {member.LeaderSpawnId} incorrect (not exist)");
                         continue;
                     }
 
                     if (Global.ObjectMgr.GetCreatureData(memberSpawnId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"creature_formations table member guid {memberSpawnId} incorrect (not exist)");
+                        Log.outError(LogFilter.Sql,
+                            $"creature_formations table member guid {memberSpawnId} incorrect (not exist)");
                         continue;
                     }
 
@@ -124,7 +134,10 @@ namespace Game.Entities
             {
                 if (!_creatureGroupMap.ContainsKey(leaderSpawnId))
                 {
-                    Log.outError(LogFilter.Sql, $"creature_formation contains leader spawn {leaderSpawnId} which is not included on its formation, removing");
+                    Log.outError(LogFilter.Sql, 
+                        $"creature_formation contains leader spawn {leaderSpawnId} " +
+                        $"which is not included on its formation, removing");
+
                     foreach (var itr in _creatureGroupMap.ToList())
                     {
                         if (itr.Value.LeaderSpawnId == leaderSpawnId)
@@ -180,12 +193,14 @@ namespace Game.Entities
 
         public void AddMember(Creature member)
         {
-            Log.outDebug(LogFilter.Unit, "CreatureGroup.AddMember: Adding {0}.", member.GetGUID().ToString());
+            Log.outDebug(LogFilter.Unit, 
+                $"CreatureGroup.AddMember: Adding {member.GetGUID()}.");
 
             //Check if it is a leader
             if (member.GetSpawnId() == _leaderSpawnId)
             {
-                Log.outDebug(LogFilter.Unit, "{0} is formation leader. Adding group.", member.GetGUID().ToString());
+                Log.outDebug(LogFilter.Unit, 
+                    $"{member.GetGUID()} is formation leader. Adding group.");
                 _leader = member;
             }
 
@@ -235,8 +250,11 @@ namespace Game.Entities
                 if (!other.IsAlive())
                     continue;
 
-                if (((other != _leader && groupAI.HasFlag(GroupAIFlags.MembersAssistLeader)) || (other == _leader && groupAI.HasFlag(GroupAIFlags.LeaderAssistsMember))) && other.IsValidAttackTarget(target))
+                if (((other != _leader && groupAI.HasFlag(GroupAIFlags.MembersAssistLeader)) || (other == _leader && groupAI.HasFlag(GroupAIFlags.LeaderAssistsMember)))
+                    && other.IsValidAttackTarget(target))
+                {
                     other.EngageWithTarget(target);
+            }
             }
 
             _engaging = false;
@@ -261,8 +279,11 @@ namespace Game.Entities
             foreach (var pair in _members)
             {
                 Creature member = pair.Key;
-                if (member == _leader || !member.IsAlive() || member.IsEngaged() || !pair.Value.GroupAI.HasAnyFlag((int)GroupAIFlags.IdleInFormation))
+                if (member == _leader || !member.IsAlive() || member.IsEngaged()
+                    || !pair.Value.GroupAI.HasAnyFlag((int)GroupAIFlags.IdleInFormation))
+                {
                     continue;
+                }
 
                 float angle = pair.Value.FollowAngle + MathF.PI; // for some reason, someone thought it was a great idea to invert relativ angles...
                 float dist = pair.Value.FollowDist;

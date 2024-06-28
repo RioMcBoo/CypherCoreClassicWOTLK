@@ -294,11 +294,19 @@ public static class PacketHandlerExtensions
             data.WriteFloat(1.0f);                                  // DurationModifier
             data.WriteFloat(1.0f);                                  // NextDurationModifier
             data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
-            bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
+
+            bool hasFadeObjectTime = 
+                data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) 
+                && moveSpline.effect_start_time < moveSpline.Duration());
+
             data.WriteBits(moveSpline.GetPath().Length, 16);
             data.WriteBit(false);                                       // HasSplineFilter
             data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
-            bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
+
+            bool hasJumpExtraData = 
+                data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) 
+                && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
+
             data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
             data.FlushBits();
 
@@ -366,15 +374,18 @@ public static class PacketHandlerExtensions
                     movementForce.Origin.Y - objectPosition.GetPositionY(),
                     movementForce.Origin.Z - objectPosition.GetPositionZ());
                 float lengthSquared = tmp.GetExactDistSq(0.0f, 0.0f, 0.0f);
+                
                 if (lengthSquared > 0.0f)
                 {
                     float mult = 1.0f / (float)Math.Sqrt(lengthSquared) * movementForce.Magnitude;
                     tmp.posX *= mult;
                     tmp.posY *= mult;
                     tmp.posZ *= mult;
+                    
                     float minLengthSquared = (tmp.GetPositionX() * tmp.GetPositionX() * 0.04f) +
                         (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
                         (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
+                    
                     if (lengthSquared > minLengthSquared)
                         direction = new Vector3(tmp.posX, tmp.posY, tmp.posZ);
                 }

@@ -68,8 +68,10 @@ namespace Scripts.Pets.Hunter
                     addTargetIfValid(pair.Value);
 
                 if (targets.Empty())
+                {
                     foreach (var pair in summoner.GetCombatManager().GetPvECombatRefs())
                         addTargetIfValid(pair.Value);
+                }
 
                 foreach (Unit target in targets)
                     me.EngageWithTarget(target);
@@ -89,7 +91,7 @@ namespace Scripts.Pets.Hunter
             {
                 if (_spellTimer <= diff)
                 {
-                    if (RandomHelper.URand(0, 2) == 0) // 33% chance to cast
+                    if (RandomHelper.IRand(0, 2) == 0) // 33% chance to cast
                         DoCastVictim(RandomHelper.RAND(SpellHunterMindNumbingPoison, SpellHunterCripplingPoison));
 
                     _spellTimer = 3000;

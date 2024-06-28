@@ -519,11 +519,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                         {
                             List<Creature> creatureList = rune.GetCreatureListWithEntryInGrid(BRSMiscConst.DragonspireMobs[j], 15.0f);
                             foreach (var creature in creatureList)
+                            {
                                 if (creature != null)
                                     runecreaturelist[i].Add(creature.GetGUID());
                         }
                     }
                 }
+            }
             }
 
             void Dragonspireroomcheck()

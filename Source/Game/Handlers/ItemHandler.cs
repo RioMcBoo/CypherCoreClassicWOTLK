@@ -20,7 +20,8 @@ namespace Game
         {
             if (splitItem.Inv.Items.Count != 0)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleSplitItemOpcode - Invalid itemCount ({splitItem.Inv.Items.Count})");
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleSplitItemOpcode - Invalid itemCount ({splitItem.Inv.Items.Count})");
                 return;
             }
 
@@ -53,7 +54,8 @@ namespace Game
         {
             if (swapInvItem.Inv.Items.Count != 2)
             {
-                Log.outError(LogFilter.Network, "WORLD: HandleSwapInvItemOpcode - Invalid itemCount ({0})", swapInvItem.Inv.Items.Count);
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleSwapInvItemOpcode - Invalid itemCount ({swapInvItem.Inv.Items.Count})");
                 return;
             }
 
@@ -78,7 +80,9 @@ namespace Game
 
             if ((src.IsBankPos || dst.IsBankPos) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} " +
+                    $"not found or you can't interact with him.");
                 return;
             }
 
@@ -108,7 +112,8 @@ namespace Game
         {
             if (swapItem.Inv.Items.Count != 2)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleSwapItem - Invalid itemCount ({swapItem.Inv.Items.Count})");
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleSwapItem - Invalid itemCount ({swapItem.Inv.Items.Count})");
                 return;
             }
 
@@ -135,7 +140,9 @@ namespace Game
 
             if ((src.IsBankPos || dst.IsBankPos) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} " +
+                    $"not found or you can't interact with him.");
                 return;
             }
 
@@ -147,7 +154,8 @@ namespace Game
         {
             if (autoEquipItem.Inv.Items.Count != 1)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAutoEquipItem - Invalid itemCount ({autoEquipItem.Inv.Items.Count}).");
+                Log.outError(LogFilter.Network, 
+                    $"WORLD: HandleAutoEquipItem - Invalid itemCount ({autoEquipItem.Inv.Items.Count}).");
                 return;
             }
 
@@ -337,7 +345,9 @@ namespace Game
             Creature creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleSellItemOpcode - {packet.VendorGUID} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleSellItemOpcode - {packet.VendorGUID} " +
+                    $"not found or you can not interact with him.");
                 pl.SendSellError(SellResult.CantFindVendor, null, packet.ItemGUID);
                 return;
             }
@@ -416,7 +426,9 @@ namespace Game
                             Item pNewItem = pItem.CloneItem(packet.Amount, pl);
                             if (pNewItem == null)
                             {
-                                Log.outError(LogFilter.Network, $"WORLD: HandleSellItemOpcode - could not create clone of item {pItem.GetEntry()}; count = {packet.Amount}");
+                                Log.outError(LogFilter.Network, 
+                                    $"WORLD: HandleSellItemOpcode - could not create clone of item {pItem.GetEntry()}; " +
+                                    $"count = {packet.Amount}");
                                 pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
                                 return;
                             }
@@ -454,7 +466,10 @@ namespace Game
             Creature creature = _player.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleBuybackItem - {packet.VendorGUID} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBuybackItem - {packet.VendorGUID} " +
+                    $"not found or you can not interact with him.");
+
                 _player.SendSellError(SellResult.CantFindVendor, null, ObjectGuid.Empty);
                 return;
             }
@@ -515,7 +530,8 @@ namespace Game
                     GetPlayer().BuyCurrencyFromVendorSlot(packet.VendorGUID, packet.Muid, packet.Item.ItemID, (byte)packet.Quantity);
                     break;
                 default:
-                    Log.outDebug(LogFilter.Network, $"WORLD: received wrong itemType {packet.ItemType} in HandleBuyItem");
+                    Log.outDebug(LogFilter.Network, 
+                        $"WORLD: received wrong itemType {packet.ItemType} in HandleBuyItem");
                     break;
             }
         }
@@ -525,7 +541,8 @@ namespace Game
         {
             if (!packet.Inv.Items.Empty())
             {
-                Log.outError(LogFilter.Network, $"HandleAutoStoreBagItemOpcode - Invalid itemCount ({packet.Inv.Items.Count})");
+                Log.outError(LogFilter.Network, 
+                    $"HandleAutoStoreBagItemOpcode - Invalid itemCount ({packet.Inv.Items.Count})");
                 return;
             }
 
@@ -601,7 +618,8 @@ namespace Game
         {
             if (packet.Inv.Items.Count != 2)
             {
-                Log.outError(LogFilter.Network, $"HandleWrapItem - Invalid itemCount ({packet.Inv.Items.Count})");
+                Log.outError(LogFilter.Network, 
+                    $"HandleWrapItem - Invalid itemCount ({packet.Inv.Items.Count})");
                 return;
             }
             
@@ -882,8 +900,12 @@ namespace Game
             //if a meta gem is being equipped, all information has to be written to the item before testing if the conditions for the gem are met
 
             //remove ALL enchants
-            for (EnchantmentSlot enchanmentSlot = EnchantmentSlot.EnhancementSocket; enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets); ++enchanmentSlot)
+            for (EnchantmentSlot enchanmentSlot = EnchantmentSlot.EnhancementSocket; 
+                enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets); 
+                ++enchanmentSlot)
+            {
                 _player.ApplyEnchantment(itemTarget, enchanmentSlot, false);
+            }
 
             for (ushort i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
@@ -899,8 +921,12 @@ namespace Game
                 }
             }
 
-            for (EnchantmentSlot enchanmentSlot = EnchantmentSlot.EnhancementSocket; enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets); ++enchanmentSlot)
+            for (EnchantmentSlot enchanmentSlot = EnchantmentSlot.EnhancementSocket;
+                enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets);
+                ++enchanmentSlot)
+            {
                 _player.ApplyEnchantment(itemTarget, enchanmentSlot, true);           
+            }
 
             bool SocketBonusToBeActivated = itemTarget.HasAllSocketsFilledWithMatchingColors();//current socketbonus state
             if (hadSocketBonusActive ^ SocketBonusToBeActivated)     //if there was a change...
@@ -944,7 +970,8 @@ namespace Game
             Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
             if (item == null)
             {
-                Log.outDebug(LogFilter.Network, "HandleGetItemPurchaseData: Item {0} not found!", packet.ItemGUID.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"HandleGetItemPurchaseData: Item {packet.ItemGUID} not found!");
                 return;
             }
 
@@ -957,7 +984,8 @@ namespace Game
             Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
             if (item == null)
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleItemRefund: Item {0} not found!", packet.ItemGUID.ToString());
+                Log.outDebug(LogFilter.Network,
+                    $"WorldSession.HandleItemRefund: Item {packet.ItemGUID} not found!");
                 return;
             }
 
@@ -1000,7 +1028,10 @@ namespace Game
 
                 var speciesEntry = BattlePetMgr.GetBattlePetSpeciesBySpell(itemEffect.SpellID);
                 if (speciesEntry != null)
-                    GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
+                {
+                    GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry),
+                        BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
+                }
             }
 
             GetPlayer().DestroyItem(item.InventoryPosition, true);
@@ -1036,7 +1067,9 @@ namespace Game
             Item item = _player.GetItemByGuid(removeNewItem.ItemGuid);
             if (item == null)
             {
-                Log.outDebug(LogFilter.Network, $"WorldSession.HandleRemoveNewItem: Item ({removeNewItem.ItemGuid}) not found for {GetPlayerInfo()}!");
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleRemoveNewItem: " +
+                    $"Item ({removeNewItem.ItemGuid}) not found for {GetPlayerInfo()}!");
                 return;
             }
 

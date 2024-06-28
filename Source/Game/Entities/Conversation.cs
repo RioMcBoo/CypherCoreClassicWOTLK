@@ -164,7 +164,9 @@ namespace Game.Entities
                     ConversationActorField actor = line.ActorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[line.ActorIndex] : null;
                     if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty()))
                     {
-                        Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {GetEntry()}) due to missing actor (Idx: {line.ActorIndex}).");
+                        Log.outError(LogFilter.Conversation, 
+                            $"Failed to create conversation (Id: {GetEntry()}) " +
+                            $"due to missing actor (Idx: {line.ActorIndex}).");
                         return false;
                     }
                 }
@@ -172,7 +174,8 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
-                Log.outError(LogFilter.Conversation, $"Attempted to start conversation (Id: {GetEntry()}) multiple times.");
+                Log.outError(LogFilter.Conversation, 
+                    $"Attempted to start conversation (Id: {GetEntry()}) multiple times.");
                 return true; // returning true to not cause delete in Conversation::CreateConversation if convo is already started in ConversationScript::OnConversationCreate
             }
 
@@ -218,7 +221,9 @@ namespace Game.Entities
             var convoLine = CliDB.ConversationLineStorage.LookupByKey(lineId);
             if (convoLine == null)
             {
-                Log.outError(LogFilter.Conversation, $"Conversation::GetLineDuration: Tried to get duration for invalid ConversationLine id {lineId}.");
+                Log.outError(LogFilter.Conversation, 
+                    $"Conversation::GetLineDuration: Tried to get duration " +
+                    $"for invalid ConversationLine id {lineId}.");
                 return 0;
             }
 
@@ -230,7 +235,9 @@ namespace Game.Entities
             TimeSpan lineStartTime = GetLineStartTime(locale, lineId);
             if (lineStartTime == TimeSpan.Zero)
             {
-                Log.outError(LogFilter.Conversation, $"Conversation::GetLineEndTime: Unable to get line start time for locale {locale}, lineid {lineId} (Conversation ID: {GetEntry()}).");
+                Log.outError(LogFilter.Conversation, 
+                    $"Conversation::GetLineEndTime: Unable to get line start time " +
+                    $"for locale {locale}, lineid {lineId} (Conversation ID: {GetEntry()}).");
                 return TimeSpan.Zero;
             }
             return lineStartTime + TimeSpan.FromMilliseconds(GetLineDuration(locale, lineId));
@@ -249,7 +256,9 @@ namespace Game.Entities
         {
             if (m_conversationData.Actors.Size() <= actorIdx)
             {
-                Log.outError(LogFilter.Conversation, $"Conversation::GetActorUnit: Tried to access invalid actor idx {actorIdx} (Conversation ID: {GetEntry()}).");
+                Log.outError(LogFilter.Conversation, 
+                    $"Conversation::GetActorUnit: Tried to access invalid actor idx {actorIdx} " +
+                    $"(Conversation ID: {GetEntry()}).");
                 return null;
             }
             return Global.ObjAccessor.GetUnit(this, m_conversationData.Actors[actorIdx].ActorGUID);

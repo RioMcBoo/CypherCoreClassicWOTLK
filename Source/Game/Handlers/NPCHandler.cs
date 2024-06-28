@@ -20,7 +20,9 @@ namespace Game
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(tabardVendorActivate.Vendor, NPCFlags1.TabardDesigner, NPCFlags2.None);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleTabardVendorActivateOpcode - {tabardVendorActivate.Vendor} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleTabardVendorActivateOpcode - {tabardVendorActivate.Vendor} " +
+                    $"not found or you can not interact with him.");
                 return;
             }
 
@@ -63,7 +65,9 @@ namespace Game
             Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Trainer, NPCFlags2.None);
             if (npc == null)
             {
-                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.SendTrainerList - {packet.Unit} " +
+                    $"not found or you can not interact with him.");
                 return;
             }
 
@@ -71,7 +75,11 @@ namespace Game
             if (trainerId != 0)
                 SendTrainerList(npc, trainerId);
             else
-                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - Creature id {npc.GetEntry()} has no trainer data.");
+            {
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.SendTrainerList - Creature id {npc.GetEntry()} " +
+                    $"has no trainer data.");
+        }
         }
 
         public void SendTrainerList(Creature npc, int trainerId)
@@ -83,7 +91,9 @@ namespace Game
             Trainer trainer = Global.ObjectMgr.GetTrainer(trainerId);
             if (trainer == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - trainer spells not found for trainer {npc.GetGUID()} id {trainerId}");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: SendTrainerList - trainer spells " +
+                    $"not found for trainer {npc.GetGUID()} id {trainerId}");
                 return;
             }
 
@@ -99,7 +109,9 @@ namespace Game
             Creature npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags1.Trainer, NPCFlags2.None);
             if (npc == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleTrainerBuySpell - {packet.TrainerGUID} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleTrainerBuySpell - {packet.TrainerGUID} " +
+                    $"not found or you can not interact with him.");
                 return;
             }
 
@@ -136,7 +148,9 @@ namespace Game
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Gossip, NPCFlags2.None);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleGossipHello - {0} not found or you can not interact with him.", packet.Unit.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleGossipHello - {packet.Unit} " +
+                    $"not found or you can not interact with him.");
                 return;
             }
 
@@ -151,6 +165,7 @@ namespace Game
             uint pause = unit.GetMovementTemplate().GetInteractionPauseTimer();
             if (pause != 0)
                 unit.PauseMovement(pause);
+
             unit.SetHomePosition(unit.GetPosition());
 
             if (unit.IsAreaSpiritHealer())
@@ -185,7 +200,9 @@ namespace Game
                 unit = GetPlayer().GetNPCIfCanInteractWith(packet.GossipUnit, NPCFlags1.Gossip, NPCFlags2.None);
                 if (unit == null)
                 {
-                    Log.outDebug(LogFilter.Network, "WORLD: HandleGossipSelectOption - {0} not found or you can't interact with him.", packet.GossipUnit.ToString());
+                    Log.outDebug(LogFilter.Network, 
+                        $"WORLD: HandleGossipSelectOption - {packet.GossipUnit} " +
+                        $"not found or you can't interact with him.");
                     return;
                 }
             }
@@ -194,13 +211,16 @@ namespace Game
                 go = GetPlayer().GetGameObjectIfCanInteractWith(packet.GossipUnit);
                 if (go == null)
                 {
-                    Log.outDebug(LogFilter.Network, "WORLD: HandleGossipSelectOption - {0} not found or you can't interact with it.", packet.GossipUnit.ToString());
+                    Log.outDebug(LogFilter.Network, 
+                        $"WORLD: HandleGossipSelectOption - {packet.GossipUnit} " +
+                        $"not found or you can't interact with it.");
                     return;
                 }
             }
             else
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleGossipSelectOption - unsupported {0}.", packet.GossipUnit.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleGossipSelectOption - unsupported {packet.GossipUnit}.");
                 return;
             }
 
@@ -208,9 +228,13 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            if ((unit != null && unit.GetScriptId() != unit.LastUsedScriptID) || (go != null && go.GetScriptId() != go.LastUsedScriptID))
+            if ((unit != null && unit.GetScriptId() != unit.LastUsedScriptID) 
+                || (go != null && go.GetScriptId() != go.LastUsedScriptID))
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleGossipSelectOption - Script reloaded while in use, ignoring and set new scipt id");
+                Log.outDebug(LogFilter.Network, 
+                    "WORLD: HandleGossipSelectOption - Script reloaded while in use, " +
+                    "ignoring and set new scipt id");
+
                 if (unit != null)
                     unit.LastUsedScriptID = unit.GetScriptId();
 
@@ -223,14 +247,20 @@ namespace Game
             {
                 if (unit != null)
                 {
-                    if (!unit.GetAI().OnGossipSelectCode(_player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                    if (!unit.GetAI().OnGossipSelectCode(
+                        _player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                    {
                         GetPlayer().OnGossipSelect(unit, packet.GossipOptionID, packet.GossipID);
+                }
                 }
                 else
                 {
-                    if (!go.GetAI().OnGossipSelectCode(_player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                    if (!go.GetAI().OnGossipSelectCode(
+                        _player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                    {
                         _player.OnGossipSelect(go, packet.GossipOptionID, packet.GossipID);
                 }
+            }
             }
             else
             {
@@ -250,10 +280,14 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SpiritHealerActivate)]
         void HandleSpiritHealerActivate(SpiritHealerActivate packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags1.SpiritHealer, NPCFlags2.None);
+            Creature unit = 
+                GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags1.SpiritHealer, NPCFlags2.None);
+
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleSpiritHealerActivateOpcode - {0} not found or you can not interact with him.", packet.Healer.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleSpiritHealerActivateOpcode - {packet.Healer} " +
+                    $"not found or you can not interact with him.");
                 return;
             }
 
@@ -275,7 +309,8 @@ namespace Game
             WorldLocation corpseLocation = GetPlayer().GetCorpseLocation();
             if (GetPlayer().HasCorpse())
             {
-                corpseGrave = Global.ObjectMgr.GetClosestGraveyard(corpseLocation, GetPlayer().GetTeam(), GetPlayer());
+                corpseGrave = 
+                    Global.ObjectMgr.GetClosestGraveyard(corpseLocation, GetPlayer().GetTeam(), GetPlayer());
             }
 
             // now can spawn bones
@@ -284,7 +319,8 @@ namespace Game
             // teleport to nearest from corpse graveyard, if different from nearest to player ghost
             if (corpseGrave != null)
             {
-                WorldSafeLocsEntry ghostGrave = Global.ObjectMgr.GetClosestGraveyard(GetPlayer(), GetPlayer().GetTeam(), GetPlayer());
+                WorldSafeLocsEntry ghostGrave = 
+                    Global.ObjectMgr.GetClosestGraveyard(GetPlayer(), GetPlayer().GetTeam(), GetPlayer());
 
                 if (corpseGrave != ghostGrave)
                     GetPlayer().TeleportTo(corpseGrave.Loc);
@@ -297,10 +333,14 @@ namespace Game
             if (!GetPlayer().IsInWorld || !GetPlayer().IsAlive())
                 return;
 
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Innkeeper, NPCFlags2.None);
+            Creature unit = 
+                GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Innkeeper, NPCFlags2.None);
+
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBinderActivate - {0} not found or you can not interact with him.", packet.Unit.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBinderActivate - {packet.Unit} " +
+                    $"not found or you can not interact with him.");
                 return;
             }
 
@@ -352,7 +392,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetPetSlot)]
         void HandleSetPetSlot(SetPetSlot setPetSlot)
         {
-            if (!CheckStableMaster(setPetSlot.StableMaster) || setPetSlot.DestSlot >= (byte)PetSaveMode.LastStableSlot)
+            if (!CheckStableMaster(setPetSlot.StableMaster) 
+                || setPetSlot.DestSlot >= (byte)PetSaveMode.LastStableSlot)
             {
                 SendPetStableResult(StableResult.InternalError);
                 return;
@@ -367,7 +408,9 @@ namespace Game
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags1.Repair, NPCFlags2.None);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleRepairItemOpcode - {0} not found or you can not interact with him.", packet.NpcGUID.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleRepairItemOpcode - {packet.NpcGUID} " +
+                    $"not found or you can not interact with him.");
                 return;
             }
 
@@ -380,7 +423,8 @@ namespace Game
 
             if (!packet.ItemGUID.IsEmpty())
             {
-                Log.outDebug(LogFilter.Network, "ITEM: Repair {0}, at {1}", packet.ItemGUID.ToString(), packet.NpcGUID.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"ITEM: Repair {packet.ItemGUID}, at {packet.NpcGUID}");
 
                 Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
                 if (item != null)
@@ -388,7 +432,9 @@ namespace Game
             }
             else
             {
-                Log.outDebug(LogFilter.Network, "ITEM: Repair all items at {0}", packet.NpcGUID.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"ITEM: Repair all items at {packet.NpcGUID}");
+
                 GetPlayer().DurabilityRepairAll(true, discountMod, packet.UseGuildBank);
             }
         }
@@ -407,7 +453,10 @@ namespace Game
             Creature vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags1.Vendor, NPCFlags2.None);
             if (vendor == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: SendListInventory - {vendorGuid} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: SendListInventory - {vendorGuid} " +
+                    $"not found or you can not interact with him.");
+
                 GetPlayer().SendSellError(SellResult.CantFindVendor, null, ObjectGuid.Empty);
                 return;
             }
@@ -418,8 +467,10 @@ namespace Game
 
             // Stop the npc if moving
             uint pause = vendor.GetMovementTemplate().GetInteractionPauseTimer();
+            
             if (pause != 0)
                 vendor.PauseMovement(pause);
+
             vendor.SetHomePosition(vendor.GetPosition());
 
             VendorItemData vendorItems = vendor.GetVendorItems();
@@ -452,8 +503,11 @@ namespace Game
                     int leftInStock = vendorItem.maxcount == 0 ? -1 : vendor.GetVendorItemCurrentCount(vendorItem);
                     if (!GetPlayer().IsGameMaster())
                     {
-                        if (!itemTemplate.GetAllowableClass().HasClass(GetPlayer().GetClass()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
+                        if (!itemTemplate.GetAllowableClass().HasClass(GetPlayer().GetClass())
+                            && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
+                        {
                             continue;
+                        }
 
                         if ((itemTemplate.HasFlag(ItemFlags2.FactionHorde) && GetPlayer().GetTeam() == Team.Alliance) ||
                             (itemTemplate.HasFlag(ItemFlags2.FactionAlliance) && GetPlayer().GetTeam() == Team.Horde))
@@ -463,9 +517,12 @@ namespace Game
                             continue;
                     }
 
-                    if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(vendor.GetEntry(), vendorItem.item, _player, vendor))
+                    if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(
+                        vendor.GetEntry(), vendorItem.item, _player, vendor))
                     {
-                        Log.outDebug(LogFilter.Condition, $"SendListInventory: conditions not met for creature entry {vendor.GetEntry()} item {vendorItem.item}");
+                        Log.outDebug(LogFilter.Condition, 
+                            $"SendListInventory: conditions not met " +
+                            $"for creature entry {vendor.GetEntry()} item {vendorItem.item}");
                         continue;
                     }
 
@@ -484,9 +541,14 @@ namespace Game
                     item.StackCount = itemTemplate.GetBuyCount();
                     item.Price = price;
                     item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
-                    item.Refundable = itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
+
+                    item.Refundable = 
+                        itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) 
+                        && vendorItem.ExtendedCost != 0 
+                        && itemTemplate.GetMaxStackSize() == 1;
 
                     item.Item.ItemID = vendorItem.item;
+
                     if (!vendorItem.BonusListIDs.Empty())
                     {
                         item.Item.ItemBonus = new();

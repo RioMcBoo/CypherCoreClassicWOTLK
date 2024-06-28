@@ -58,11 +58,15 @@ namespace Game
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.PlayerWrongFaction);
                 return;
             }
-            if (invitingPlayer.GetInstanceId() != 0 && invitedPlayer.GetInstanceId() != 0 && invitingPlayer.GetInstanceId() != invitedPlayer.GetInstanceId() && invitingPlayer.GetMapId() == invitedPlayer.GetMapId())
+
+            if (invitingPlayer.GetInstanceId() != 0 && invitedPlayer.GetInstanceId() != 0 
+                && invitingPlayer.GetInstanceId() != invitedPlayer.GetInstanceId() 
+                && invitingPlayer.GetMapId() == invitedPlayer.GetMapId())
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.TargetNotInInstanceS);
                 return;
             }
+
             // just ignore us
             if (invitedPlayer.GetInstanceId() != 0 && invitedPlayer.GetDungeonDifficultyID() != invitingPlayer.GetDungeonDifficultyID())
             {
@@ -168,7 +172,10 @@ namespace Game
 
                 if (group.GetLeaderGUID() == GetPlayer().GetGUID())
                 {
-                    Log.outError(LogFilter.Network, "HandleGroupAcceptOpcode: player {0} ({1}) tried to accept an invite to his own group", GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
+                    Log.outError(LogFilter.Network, 
+                        $"HandleGroupAcceptOpcode: player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                        $"tried to accept an invite to his own group.");
+
                     return;
                 }
 
@@ -227,8 +234,9 @@ namespace Game
             //can't uninvite yourself
             if (packet.TargetGUID == GetPlayer().GetGUID())
             {
-                Log.outError(LogFilter.Network, "HandleGroupUninviteGuidOpcode: leader {0}({1}) tried to uninvite himself from the group.",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
+                Log.outError(LogFilter.Network, 
+                    $"HandleGroupUninviteGuidOpcode: leader {GetPlayer().GetName()}({GetPlayer().GetGUID()}) " +
+                    $"tried to uninvite himself from the group.");
                 return;
             }
 

@@ -1031,7 +1031,8 @@ namespace Game.Groups
                     player.GetGroupRef().SetSubGroup(group);
                 else
                 {
-                    // If player is in BG raid, it is possible that he is also in normal raid - and that normal raid is stored in m_originalGroup reference
+                    // If player is in BG raid, it is possible that he is also in normal raid -
+                    // and that normal raid is stored in m_originalGroup reference
                     player.GetOriginalGroupRef().SetSubGroup(group);
                 }
             }
@@ -1385,7 +1386,7 @@ namespace Game.Groups
                     player.m_values.ModifyValue(player.m_unitData).ModifyValue(player.m_unitData.PvpFlags);
                     player.m_values.ModifyValue(player.m_unitData).ModifyValue(player.m_unitData.FactionTemplate);
                     player.ForceUpdateFieldChange();
-                    Log.outDebug(LogFilter.Server, "-- Forced group value update for '{0}'", player.GetName());
+                    Log.outDebug(LogFilter.Server, $"-- Forced group value update for '{player.GetName()}'");
                 }
             }
         }

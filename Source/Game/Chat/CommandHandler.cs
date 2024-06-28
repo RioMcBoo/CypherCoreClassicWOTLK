@@ -510,14 +510,17 @@ namespace Game.Chat
         }
 
         public bool IsConsole() { return _session == null; }
+
         public WorldSession GetSession()
         {
             return _session;
         }
+
         public Player GetPlayer()
         {
             return _session?.GetPlayer();
         }
+
         public string GetCypherString(CypherStrings str)
         {
             return Global.ObjectMgr.GetCypherString(str);
@@ -527,10 +530,12 @@ namespace Game.Chat
         {
             return _session.GetSessionDbcLocale();
         }
+
         public virtual byte GetSessionDbLocaleIndex()
         {
             return (byte)_session.GetSessionDbLocaleIndex();
         }
+
         public string GetParsedString(CypherStrings cypherString, params object[] args)
         {
             return string.Format(Global.ObjectMgr.GetCypherString(cypherString), args);
@@ -540,6 +545,7 @@ namespace Game.Chat
         {
             SendSysMessage(string.Format(str, args));
         }
+
         public void SendSysMessage(CypherStrings cypherString, params object[] args)
         {
             SendSysMessage(string.Format(Global.ObjectMgr.GetCypherString(cypherString), args));

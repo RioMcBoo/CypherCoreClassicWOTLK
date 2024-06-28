@@ -193,7 +193,9 @@ namespace Game.Loots
             
             if (_lootItemStorage.ContainsKey(containerId))
             {
-                Log.outError(LogFilter.Misc, $"Trying to store item loot by player: {player.GetGUID()} for container id: {containerId} that is already in storage!");
+                Log.outError(LogFilter.Misc, 
+                    $"Trying to store item loot by player: {player.GetGUID()} " +
+                    $"for container id: {containerId} that is already in storage!");
                 return;
             }
 

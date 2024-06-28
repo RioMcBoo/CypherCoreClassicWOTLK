@@ -183,9 +183,11 @@ namespace Game.Maps
             {
                 Creature creature = objs[i];
                 foreach (var visionPlayer in creature.GetSharedVisionList())
+                {
                     if (visionPlayer.seerView == creature)
                         visionPlayer.UpdateVisibilityOf(i_objects);
             }
+        }
         }
 
         public override void Visit(IList<DynamicObject> objs)
@@ -435,8 +437,10 @@ namespace Game.Maps
                 if (player.HasSharedVision())
                 {
                     foreach (var visionPlayer in player.GetSharedVisionList())
+                    {
                         if (visionPlayer.seerView == player)
                             SendPacket(visionPlayer);
+                    }
                 }
 
                 if (player.seerView == player || player.GetVehicle() != null)
@@ -530,8 +534,10 @@ namespace Game.Maps
                 if (player.HasSharedVision())
                 {
                     foreach (var visionPlayer in player.GetSharedVisionList())
+                    {
                         if (visionPlayer.seerView == player)
                             SendPacket(visionPlayer);
+                }
                 }
 
                 if (player.seerView == player || player.GetVehicle() != null)
@@ -554,10 +560,12 @@ namespace Game.Maps
                 if (creature.HasSharedVision())
                 {
                     foreach (var player in creature.GetSharedVisionList())
+                    {
                         if (player.seerView == creature)
                             SendPacket(player);
                 }
             }
+        }
         }
 
         public override void Visit(IList<DynamicObject> objs)
@@ -869,10 +877,12 @@ namespace Game.Maps
                     //Caster may be NULL if DynObj is in removelist
                     Player caster = Global.ObjAccessor.FindPlayer(guid);
                     if (caster != null)
+                    {
                         if (caster.m_activePlayerData.FarsightObject == dynamicObject.GetGUID())
                             BuildPacket(caster);
                 }
             }
+        }
         }
 
         void BuildPacket(Player player)
@@ -1545,10 +1555,12 @@ namespace Game.Maps
             {
                 GameObject gameObject = objs[i];
                 if (gameObject.InSamePhase(i_phaseShift))
+                {
                     if (i_check.Invoke(gameObject))
                         i_objects.Add(gameObject);
             }
         }
+    }
     }
 
     public class UnitSearcher : Notifier
@@ -1658,9 +1670,11 @@ namespace Game.Maps
             {
                 Player player = objs[i];
                 if (player.InSamePhase(i_phaseShift))
+                {
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
             }
+        }
         }
 
         public override void Visit(IList<Creature> objs)
@@ -1669,10 +1683,12 @@ namespace Game.Maps
             {
                 Creature creature = objs[i];
                 if (creature.InSamePhase(i_phaseShift))
+                {
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
             }
         }
+    }
     }
 
     public class CreatureSearcher : Notifier
@@ -1757,10 +1773,12 @@ namespace Game.Maps
             {
                 Creature creature = objs[i];
                 if (creature.InSamePhase(i_phaseShift))
+                {
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
             }
         }
+    }
     }
 
     public class PlayerSearcher : Notifier
@@ -1851,10 +1869,12 @@ namespace Game.Maps
             {
                 Player player = objs[i];
                 if (player.InSamePhase(i_phaseShift))
+                {
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
             }
         }
+    }
     }
 
     //Checks
@@ -1926,8 +1946,10 @@ namespace Game.Maps
         {
             if (i_excludeSelf && i_obj.GetGUID() == u.GetGUID())
                 return false;
+
             if (u.GetEntry() == i_entry && u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) && u.HealthBelowPct(i_pct))
                 return true;
+
             return false;
         }
 
@@ -1950,7 +1972,10 @@ namespace Game.Maps
         {
             if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) &&
                 (u.IsFeared() || u.IsCharmed() || u.HasRootAura() || u.HasUnitState(UnitState.Stunned) || u.HasUnitState(UnitState.Confused)))
+            {
                 return true;
+            }
+
             return false;
         }
 
@@ -1974,6 +1999,7 @@ namespace Game.Maps
             {
                 return true;
             }
+
             return false;
         }
 
@@ -2055,8 +2081,10 @@ namespace Game.Maps
                 return false;
 
             float searchRadius = i_range;
+
             if (i_incOwnRadius)
                 searchRadius += i_obj.GetCombatReach();
+
             if (i_incTargetRadius)
                 searchRadius += u.GetCombatReach();
 
@@ -2212,8 +2240,10 @@ namespace Game.Maps
                 return false;
 
             float searchRadius = i_range;
+
             if (i_incOwnRadius)
                 searchRadius += i_obj.GetCombatReach();
+
             if (i_incTargetRadius)
                 searchRadius += u.GetCombatReach();
 
@@ -2325,8 +2355,10 @@ namespace Game.Maps
             {
                 Creature c = u.ToCreature();
                 if (c != null)
+                {
                     if (c.IsCivilian())
                         return false;
+            }
             }
 
             return true;
@@ -2488,6 +2520,7 @@ namespace Game.Maps
                 return false;
 
             i_customizer.Update(u);
+
             return true;
         }
     }
@@ -2539,6 +2572,7 @@ namespace Game.Maps
                 return false;
 
             _customizer.Update(go);
+
             return true;
         }
     }
@@ -2678,9 +2712,11 @@ namespace Game.Maps
             {
                 if (m_fRange > 0.0f && !m_pObject.IsWithinDist(creature, m_fRange, false))
                     return false;
+
                 if (m_fRange < 0.0f && m_pObject.IsWithinDist(creature, m_fRange, false))
                     return false;
             }
+
             return true;
         }
 
@@ -2725,7 +2761,8 @@ namespace Game.Maps
         {
             if (entry == 0 || (go.GetGoInfo() != null && go.GetGoInfo().entry == entry))
                 return go.IsInRange(x, y, z, range);
-            else return false;
+            else 
+                return false;
         }
 
         float x, y, z, range;
@@ -2864,6 +2901,7 @@ namespace Game.Maps
                 return false;
 
             float dist = go.GetGoInfo().GetSpellFocusRadius();
+
             return go.IsWithinDist(_caster, dist);
         }
 
@@ -2887,6 +2925,7 @@ namespace Game.Maps
                 i_range = i_obj.GetDistance(go);
                 return true;
             }
+
             return false;
         }
 
@@ -2909,6 +2948,7 @@ namespace Game.Maps
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
             }
+
             return false;
         }
 
@@ -2934,6 +2974,7 @@ namespace Game.Maps
                 _range = _obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
             }
+
             return false;
         }
 
@@ -2964,6 +3005,7 @@ namespace Game.Maps
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
             }
+
             return false;
         }
     }
@@ -2985,6 +3027,7 @@ namespace Game.Maps
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
             }
+
             return false;
         }
 

@@ -62,7 +62,9 @@ namespace Game.AI
             Map map = creature.GetMap();
             if (!map.IsDungeon()) // use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
             {
-                Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
+                int entry = creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0;
+                Log.outError(LogFilter.Server, 
+                    $"DoZoneInCombat call for map that isn't an instance (creature entry = {entry})");
                 return;
             }
 
@@ -203,7 +205,8 @@ namespace Game.AI
             if (!_EnterEvadeMode(why))
                 return;
 
-            Log.outDebug(LogFilter.Unit, $"CreatureAI::EnterEvadeMode: entering evade mode (why: {why}) ({me.GetGUID()})");
+            Log.outDebug(LogFilter.Unit, 
+                $"CreatureAI::EnterEvadeMode: entering evade mode (why: {why}) ({me.GetGUID()})");
 
             if (me.GetVehicle() == null) // otherwise me will be in evade mode forever
             {
@@ -259,7 +262,9 @@ namespace Game.AI
         {
             if (_isEngaged)
             {
-                Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementStart called even though creature is already engaged. Creature debug info:\n{me.GetDebugInfo()}");
+                Log.outError(LogFilter.ScriptsAi, 
+                    $"CreatureAI::EngagementStart called even though creature is already engaged. " +
+                    $"Creature debug info:\n{me.GetDebugInfo()}");
                 return;
             }
             _isEngaged = true;
@@ -271,7 +276,9 @@ namespace Game.AI
         {
             if (!_isEngaged)
             {
-                Log.outDebug(LogFilter.ScriptsAi, $"CreatureAI::EngagementOver called even though creature is not currently engaged. Creature debug info:\n{me.GetDebugInfo()}");
+                Log.outDebug(LogFilter.ScriptsAi, 
+                    $"CreatureAI::EngagementOver called even though creature is not currently engaged. " +
+                    $"Creature debug info:\n{me.GetDebugInfo()}");
                 return;
             }
             _isEngaged = false;

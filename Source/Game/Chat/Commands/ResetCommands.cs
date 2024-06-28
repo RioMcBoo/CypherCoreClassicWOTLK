@@ -48,7 +48,8 @@ namespace Game.Chat
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)player.GetClass());
             if (classEntry == null)
             {
-                Log.outError(LogFilter.Server, "Class {0} not found in DBC (Wrong DBC files?)", player.GetClass());
+                Log.outError(LogFilter.Server, 
+                    $"Class {player.GetClass()} not found in DBC (Wrong DBC files?)");
                 return false;
             }
 

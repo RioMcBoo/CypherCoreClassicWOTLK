@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Game.BattleGrounds;
-using Game.Entities;
 using System;
 
 namespace Game.Arenas

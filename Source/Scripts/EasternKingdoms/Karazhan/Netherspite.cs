@@ -134,7 +134,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             ];
             for (int i = 0; i < 3; ++i)
             {
-                Creature portal = me.SummonCreature(MiscConst.PortalID[i], MiscConst.PortalCoord[pos[i]].X, MiscConst.PortalCoord[pos[i]].Y, MiscConst.PortalCoord[pos[i]].Z, 0, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+                Creature portal = 
+                    me.SummonCreature(
+                        MiscConst.PortalID[i], 
+                        MiscConst.PortalCoord[pos[i]].X, 
+                        MiscConst.PortalCoord[pos[i]].Y, 
+                        MiscConst.PortalCoord[pos[i]].Z, 
+                        0, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+
                 if (portal != null)
                 {
                     PortalGUID[i] = portal.GetGUID();
@@ -273,7 +280,9 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             // Void Zone
             if (VoidZoneTimer <= diff)
             {
-                DoCast(SelectTarget(SelectTargetMethod.Random, 1, 45, true), SpellIds.Voidzone, new CastSpellExtraArgs(true));
+                DoCast(SelectTarget(SelectTargetMethod.Random, 1, 45, true), 
+                    SpellIds.Voidzone, new CastSpellExtraArgs(true));
+
                 VoidZoneTimer = 15000;
             }
             else VoidZoneTimer -= diff;

@@ -34,20 +34,31 @@ namespace Game.Entities
                         var parameters = methodInfo.GetParameters();
                         if (parameters.Length < 3)
                         {
-                            Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter count: {1} Should be 3. Can't load AuraEffect.", methodInfo.Name, parameters.Length);
+                            Log.outError(LogFilter.ServerLoading, 
+                                $"Method: {methodInfo.Name} " +
+                                $"has wrong parameter count: {parameters.Length}. " +
+                                $"Should be {3}. " +
+                                $"Can't load AuraEffect.");
                             continue;
                         }
 
-                        if (parameters[0].ParameterType != typeof(AuraApplication) || parameters[1].ParameterType != typeof(AuraEffectHandleModes) || parameters[2].ParameterType != typeof(bool))
+                        if (parameters[0].ParameterType != typeof(AuraApplication) 
+                            || parameters[1].ParameterType != typeof(AuraEffectHandleModes) 
+                            || parameters[2].ParameterType != typeof(bool))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter Types: ({1}, {2}, {3}) Should be (AuraApplication, AuraEffectHandleModes, Bool). Can't load AuraEffect.",
-                                methodInfo.Name, parameters[0].ParameterType, parameters[1].ParameterType, parameters[2].ParameterType);
+                            Log.outError(LogFilter.ServerLoading, 
+                                $"Method: {methodInfo.Name} " +
+                                $"has wrong parameter Types: ({parameters[0].ParameterType}, {parameters[1].ParameterType}, {parameters[2].ParameterType}). " +
+                                $"Should be (AuraApplication, AuraEffectHandleModes, Bool). " +
+                                $"Can't load AuraEffect.");
                             continue;
                         }
 
                         if (AuraEffectHandlers.ContainsKey(auraEffect.AuraType))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Tried to override AuraEffectHandler of {0} with {1} (AuraType {2}).", AuraEffectHandlers[auraEffect.AuraType].GetMethodInfo().Name, methodInfo.Name, auraEffect.AuraType);
+                            Log.outError(LogFilter.ServerLoading, 
+                                $"Tried to override AuraEffectHandler of {AuraEffectHandlers[auraEffect.AuraType].GetMethodInfo().Name} " +
+                                $"with {methodInfo.Name} (AuraType {auraEffect.AuraType}).");
                             continue;
                         }
 
@@ -62,7 +73,9 @@ namespace Game.Entities
 
                         if (SpellEffectsHandlers.ContainsKey(spellEffect.EffectName))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Tried to override SpellEffectsHandler of {0} with {1} (EffectName {2}).", SpellEffectsHandlers[spellEffect.EffectName].ToString(), methodInfo.Name, spellEffect.EffectName);
+                            Log.outError(LogFilter.ServerLoading, 
+                                $"Tried to override SpellEffectsHandler of {SpellEffectsHandlers[spellEffect.EffectName]} " +
+                                $"with {methodInfo.Name} (EffectName {spellEffect.EffectName}).");
                             continue;
                         }
 
@@ -73,7 +86,8 @@ namespace Game.Entities
 
             if (SpellEffectsHandlers.Count == 0)
             {
-                Log.outFatal(LogFilter.ServerLoading, "Could'nt find any SpellEffectHandlers. Dev needs to check this out.");
+                Log.outFatal(LogFilter.ServerLoading, 
+                    "Could'nt find any SpellEffectHandlers. Dev needs to check this out.");
                 Environment.Exit(1);
             }
         }
@@ -111,10 +125,11 @@ namespace Game.Entities
                             {
                                 if (msg)
                                 {
+                                    string text = $"Craft spell {spellInfo.Id} not have create item entry.";
                                     if (player != null)
-                                        player.SendSysMessage("Craft spell {0} not have create item entry.", spellInfo.Id);
+                                        player.SendSysMessage(text);
                                     else
-                                        Log.outError(LogFilter.Spells, "Craft spell {0} not have create item entry.", spellInfo.Id);
+                                        Log.outError(LogFilter.Spells, text);
                                 }
                                 return false;
                             }
@@ -125,10 +140,13 @@ namespace Game.Entities
                         {
                             if (msg)
                             {
+                                string text = $"Craft spell {spellInfo.Id} create not-exist in DB " +
+                                    $"item (Entry: {spellEffectInfo.ItemType}) and then...";
+
                                 if (player != null)
-                                    player.SendSysMessage("Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                    player.SendSysMessage(text);                                
                                 else
-                                    Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                    Log.outError(LogFilter.Spells, text);                                
                             }
                             return false;
                         }
@@ -143,10 +161,13 @@ namespace Game.Entities
                         {
                             if (msg)
                             {
+                                string text = $"Spell {spellInfo.Id} learn to invalid spell " +
+                                    $"{spellEffectInfo.TriggerSpell}, and then...";
+
                                 if (player != null)
-                                    player.SendSysMessage("Spell {0} learn to broken spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
+                                    player.SendSysMessage(text);                                
                                 else
-                                    Log.outError(LogFilter.Spells, "Spell {0} learn to invalid spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
+                                    Log.outError(LogFilter.Spells, text);                                
                             }
                             return false;
                         }
@@ -163,10 +184,13 @@ namespace Game.Entities
                     {
                         if (msg)
                         {
+                            string text = $"Craft spell {spellInfo.Id} have not-exist reagent in DB " +
+                                $"item (Entry: {spellInfo.Reagent[j]}) and then..."; 
+
                             if (player != null)
-                                player.SendSysMessage("Craft spell {0} have not-exist reagent in DB item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
+                                player.SendSysMessage(text);
                             else
-                                Log.outError(LogFilter.Spells, "Craft spell {0} have not-exist reagent in DB item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
+                                Log.outError(LogFilter.Spells, text);
                         }
                         return false;
                     }
@@ -283,8 +307,11 @@ namespace Game.Entities
         {
             var bounds = GetSpellLearnSpellMapBounds(spell_id1);
             foreach (var bound in bounds)
+            {
                 if (bound.Spell == spell_id2)
                     return true;
+            }
+
             return false;
         }
 
@@ -460,8 +487,10 @@ namespace Game.Entities
             {
                 Player actor = eventInfo.GetActor().ToPlayer();
                 if (actor != null)
+                {
                     if (eventInfo.GetActionTarget() != null && !actor.IsHonorOrXPTarget(eventInfo.GetActionTarget()))
                         return false;
+            }
             }
 
             // check power requirement
@@ -489,8 +518,10 @@ namespace Game.Entities
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
                 if (eventSpellInfo != null)
+                {
                     if (!eventSpellInfo.IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
                         return false;
+                }
 
                 // check spell Type mask (if set)
                 if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(eventInfo.GetSpellTypeMask() & procEntry.SpellTypeMask))
@@ -646,8 +677,10 @@ namespace Game.Entities
         void UnloadSpellInfoChains()
         {
             foreach (var pair in mSpellChains)
+            {
                 foreach (SpellInfo spellInfo in _GetSpellInfo(pair.Key))
                     spellInfo.ChainEntry = null;
+            }
 
             mSpellChains.Clear();
         }
@@ -767,26 +800,31 @@ namespace Game.Entities
                 SpellInfo spell = GetSpellInfo(spell_id, Difficulty.None);
                 if (spell == null)
                 {
-                    Log.outError(LogFilter.Sql, "spell_id {0} in `spell_required` table is not found in dbcs, skipped", spell_id);
+                    Log.outError(LogFilter.Sql, 
+                        $"spell_id {spell_id} in `spell_required` table is not found in dbcs, skipped");
                     continue;
                 }
 
                 SpellInfo req_spell = GetSpellInfo(spell_req, Difficulty.None);
                 if (req_spell == null)
                 {
-                    Log.outError(LogFilter.Sql, "req_spell {0} in `spell_required` table is not found in dbcs, skipped", spell_req);
+                    Log.outError(LogFilter.Sql, 
+                        $"req_spell {spell_req} in `spell_required` table is not found in dbcs, skipped");
                     continue;
                 }
 
                 if (spell.IsRankOf(req_spell))
                 {
-                    Log.outError(LogFilter.Sql, "req_spell {0} and spell_id {1} in `spell_required` table are ranks of the same spell, entry not needed, skipped", spell_req, spell_id);
+                    Log.outError(LogFilter.Sql, 
+                        $"req_spell {spell_req} and spell_id {spell_id} in `spell_required` table are ranks of the same spell, " +
+                        $"entry not needed, skipped");
                     continue;
                 }
 
                 if (IsSpellRequiringSpell(spell_id, spell_req))
                 {
-                    Log.outError(LogFilter.Sql, "duplicated entry of req_spell {0} and spell_id {1} in `spell_required`, skipped", spell_req, spell_id);
+                    Log.outError(LogFilter.Sql, 
+                        $"duplicated entry of req_spell {spell_req} and spell_id {spell_id} in `spell_required`, skipped");
                     continue;
                 }
 
@@ -866,19 +904,22 @@ namespace Game.Entities
                 SpellInfo spellInfo = GetSpellInfo(spell_id, Difficulty.None);
                 if (spellInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` does not exist", spell_id);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {spell_id} listed in `spell_learn_spell` does not exist");
                     continue;
                 }
 
                 if (!HasSpellInfo(node.Spell, Difficulty.None))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` learning not existed spell {1}", spell_id, node.Spell);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {spell_id} listed in `spell_learn_spell` learning not existed spell {node.Spell}");
                     continue;
                 }
 
                 if (spellInfo.HasAttribute(SpellCustomAttributes.IsTalent))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` attempt learning talent spell {1}, skipped", spell_id, node.Spell);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {spell_id} listed in `spell_learn_spell` attempt learning talent spell {node.Spell}, skipped");
                     continue;
                 }
 
@@ -918,8 +959,9 @@ namespace Game.Entities
                         {
                             if (bound.Spell == dbc_node.Spell)
                             {
-                                Log.outError(LogFilter.Sql, "Spell {0} auto-learn spell {1} in spell.dbc then the record in `spell_learn_spell` is redundant, please fix DB.",
-                                    entry.Id, dbc_node.Spell);
+                                Log.outError(LogFilter.Sql, 
+                                    $"Spell {entry.Id} auto-learn spell {dbc_node.Spell} in spell.dbc, " +
+                                    $"then the record in `spell_learn_spell` is redundant, please fix DB.");
                                 found = true;
                                 break;
                             }
@@ -936,8 +978,11 @@ namespace Game.Entities
 
             foreach (var spellLearnSpell in CliDB.SpellLearnSpellStorage.Values)
             {
-                if (!HasSpellInfo(spellLearnSpell.SpellID, Difficulty.None) || !HasSpellInfo(spellLearnSpell.LearnSpellID, Difficulty.None))
+                if (!HasSpellInfo(spellLearnSpell.SpellID, Difficulty.None)
+                    || !HasSpellInfo(spellLearnSpell.LearnSpellID, Difficulty.None))
+                {
                     continue;
+                }
 
                 var db_node_bounds = mSpellLearnSpells.LookupByKey(spellLearnSpell.SpellID);
                 bool found = false;
@@ -945,7 +990,11 @@ namespace Game.Entities
                 {
                     if (spellNode.Spell == spellLearnSpell.LearnSpellID)
                     {
-                        Log.outError(LogFilter.Sql, $"Found redundant record (entry: {spellLearnSpell.SpellID}, SpellID: {spellLearnSpell.LearnSpellID}) in `spell_learn_spell`, spell added automatically from SpellLearnSpell.db2");
+                        Log.outError(LogFilter.Sql, 
+                            $"Found redundant record (entry: {spellLearnSpell.SpellID}, " +
+                            $"SpellID: {spellLearnSpell.LearnSpellID}) in `spell_learn_spell`, " +
+                            $"spell added automatically from SpellLearnSpell.db2");
+
                         found = true;
                         break;
                     }
@@ -992,7 +1041,8 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT ID, EffectIndex, MapID, PositionX, PositionY, PositionZ, Orientation FROM spell_target_position");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell target coordinates. DB table `spell_target_position` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 spell target coordinates. DB table `spell_target_position` is empty.");
                 return;
             }
 
@@ -1011,26 +1061,31 @@ namespace Game.Entities
                 var mapEntry = CliDB.MapStorage.LookupByKey(st.target_mapId);
                 if (mapEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) is using a non-existant MapID (ID: {2})", spellId, effIndex, st.target_mapId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell (ID: {spellId}, EffectIndex: {effIndex}) is using a non-existant MapID (ID: {st.target_mapId})");
                     continue;
                 }
 
                 if (st.target_X == 0 && st.target_Y == 0 && st.target_Z == 0)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) target coordinates not provided.", spellId, effIndex);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell (ID: {spellId}, EffectIndex: {effIndex}) target coordinates not provided.");
                     continue;
                 }
 
                 SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
                 if (spellInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}) listed in `spell_target_position` does not exist.", spellId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell (ID: {spellId}) listed in `spell_target_position` does not exist.");
                     continue;
                 }
 
                 if (effIndex >= spellInfo.GetEffects().Count)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have an effect at index {2}.", spellId, effIndex, effIndex);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell (Id: {spellId}, effIndex: {effIndex}) listed in `spell_target_position` " +
+                        $"does not have an effect at index {effIndex}.");
                     continue;
                 }
 
@@ -1059,7 +1114,9 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have target TARGET_DEST_DB (17).", spellId, effIndex);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell (Id: {spellId}, effIndex: {effIndex}) listed in `spell_target_position` " +
+                        $"does not have target TARGET_DEST_DB ({(int)Targets.DestDb}).");
                     continue;
                 }
 
@@ -1080,7 +1137,8 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT id, spell_id FROM spell_group");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell group definitions. DB table `spell_group` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 spell group definitions. DB table `spell_group` is empty.");
                 return;
             }
 
@@ -1091,7 +1149,8 @@ namespace Game.Entities
                 int group_id = result.Read<int>(0);
                 if (group_id <= 1000 && group_id >= (int)SpellGroup.CoreRangeMax)
                 {
-                    Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` is in core range, but is not defined in core!", group_id);
+                    Log.outError(LogFilter.Sql, 
+                        $"SpellGroup id {group_id} listed in `spell_group` is in core range, but is not defined in core!");
                     continue;
                 }
                 int spell_id = result.Read<int>(1);
@@ -1107,7 +1166,9 @@ namespace Game.Entities
                 {
                     if (!groups.Contains(Math.Abs(group.Value)))
                     {
-                        Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` does not exist", Math.Abs(group.Value));
+                        Log.outError(LogFilter.Sql, 
+                            $"SpellGroup id {Math.Abs(group.Value)} listed in `spell_group` does not exist");
+
                         mSpellGroupSpell.Remove(group.Key);
                     }
                 }
@@ -1116,12 +1177,16 @@ namespace Game.Entities
                     SpellInfo spellInfo = GetSpellInfo(group.Value, Difficulty.None);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_group` does not exist", group.Value);
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell {group.Value} listed in `spell_group` does not exist");
+
                         mSpellGroupSpell.Remove(group.Key);
                     }
                     else if (spellInfo.GetRank() > 1)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_group` is not first rank of spell", group.Value);
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell {group.Value} listed in `spell_group` is not first rank of spell");
+
                         mSpellGroupSpell.Remove(group.Key);
                     }
                 }
@@ -1155,7 +1220,8 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT group_id, stack_rule FROM spell_group_stack_rules");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell group stack rules. DB table `spell_group_stack_rules` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 spell group stack rules. DB table `spell_group_stack_rules` is empty.");
                 return;
             }
 
@@ -1166,14 +1232,16 @@ namespace Game.Entities
                 SpellGroupStackRule stack_rule = (SpellGroupStackRule)result.Read<byte>(1);
                 if (stack_rule >= SpellGroupStackRule.Max)
                 {
-                    Log.outError(LogFilter.Sql, "SpellGroupStackRule {0} listed in `spell_group_stack_rules` does not exist", stack_rule);
+                    Log.outError(LogFilter.Sql, 
+                        $"SpellGroupStackRule {stack_rule} listed in `spell_group_stack_rules` does not exist");
                     continue;
                 }
 
                 var spellGroup = GetSpellGroupSpellMapBounds(group_id);
                 if (spellGroup == null)
                 {
-                    Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group_stack_rules` does not exist", group_id);
+                    Log.outError(LogFilter.Sql, 
+                        $"SpellGroup id {group_id} listed in `spell_group_stack_rules` does not exist");
                     continue;
                 }
 
@@ -1276,7 +1344,11 @@ namespace Game.Entities
 
                     // not found either, log error
                     if (!found)
-                        Log.outError(LogFilter.Sql, $"SpellId {spellId} listed in `spell_group` with stack rule 3 does not share aura assigned for group {group_id}");
+                    {
+                        Log.outError(LogFilter.Sql,
+                            $"SpellId {spellId} listed in `spell_group` with stack rule '3' " +
+                            $"does not share aura assigned for group {group_id}");
+                }
                 }
 
                 mSpellSameEffectStack[group_id] = auraTypes;
@@ -1314,7 +1386,8 @@ namespace Game.Entities
                     SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` does not exist", spellId);
+                        Log.outError(LogFilter.Sql,
+                            $"Spell {spellId} listed in `spell_proc` does not exist");
                         continue;
                     }
 
@@ -1322,7 +1395,8 @@ namespace Game.Entities
                     {
                         if (spellInfo.GetFirstRankSpell().Id != spellId)
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` is not first rank of spell.", spellId);
+                            Log.outError(LogFilter.Sql,
+                                $"Spell {spellId} listed in `spell_proc` is not first rank of spell.");
                             continue;
                         }
                     }
@@ -1347,7 +1421,9 @@ namespace Game.Entities
                     {
                         if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` has duplicate entry in the table", spellInfo.Id);
+                            Log.outError(LogFilter.Sql,
+                                $"Spell {spellInfo.Id} listed in `spell_proc` " +
+                                $"has duplicate entry in the table");
                             break;
                         }
                         SpellProcEntry procEntry = baseProcEntry;
@@ -1363,41 +1439,111 @@ namespace Game.Entities
                             procEntry.Cooldown = spellInfo.ProcCooldown;
 
                         // validate data
-                        if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SchoolMask` set: {1}", spellInfo.Id, procEntry.SchoolMask);
+                        if (procEntry.SchoolMask.HasAnyFlag(~SpellSchoolMask.All))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has wrong `SchoolMask` set: {procEntry.SchoolMask}");
+                        }
+
                         if (procEntry.SpellFamilyName != 0 && !Global.DB2Mgr.IsValidSpellFamiliyName(procEntry.SpellFamilyName))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellFamilyName` set: {1}", spellInfo.Id, procEntry.SpellFamilyName);
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has wrong `SpellFamilyName` set: {procEntry.SpellFamilyName}");
+                        }
+
                         if (procEntry.Chance < 0)
                         {
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `Chance` field", spellInfo.Id);
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has negative value in `Chance` field");
                             procEntry.Chance = 0;
                         }
+
                         if (procEntry.ProcsPerMinute < 0)
                         {
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `ProcsPerMinute` field", spellInfo.Id);
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has negative value in `ProcsPerMinute` field");
                             procEntry.ProcsPerMinute = 0;
                         }
+
                         if (!procEntry.ProcFlags)
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `ProcFlags` value defined, proc will not be triggered", spellInfo.Id);
-                        if (Convert.ToBoolean(procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellTypeMask` set: {1}", spellInfo.Id, procEntry.SpellTypeMask);
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"doesn't have `ProcFlags` value defined, proc will not be triggered");
+                        }
+
+                        if (procEntry.SpellTypeMask.HasAnyFlag(~ProcFlagsSpellType.MaskAll))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has wrong `SpellTypeMask` set: {procEntry.SpellTypeMask}");
+                        }
+
                         if (procEntry.SpellTypeMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.SpellMask))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value");
+                        }
+
                         if (procEntry.SpellPhaseMask == 0 && procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `SpellPhaseMask` value defined, but it's required for defined `ProcFlags` value, proc will not be triggered", spellInfo.Id);
-                        if (Convert.ToBoolean(procEntry.SpellPhaseMask & ~ProcFlagsSpellPhase.MaskAll))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellPhaseMask` set: {1}", spellInfo.Id, procEntry.SpellPhaseMask);
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"doesn't have `SpellPhaseMask` value defined, but it's required for defined `ProcFlags` value, " +
+                                $"proc will not be triggered");
+                        }
+
+                        if (procEntry.SpellPhaseMask.HasAnyFlag(~ProcFlagsSpellPhase.MaskAll))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has wrong `SpellPhaseMask` set: {procEntry.SpellPhaseMask}");
+                        }
+
                         if (procEntry.SpellPhaseMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellPhaseMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
-                        if (procEntry.SpellPhaseMask == 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask) && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has `SpellPhaseMask` value defined, but it won't be used for defined `ProcFlags` value");
+                        }
+
+                        if (procEntry.SpellPhaseMask == 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask) 
+                            && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
+                        {
                             procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Cast; // set default phase for PROC_FLAG_2_CAST_SUCCESSFUL
-                        if (Convert.ToBoolean(procEntry.HitMask & ~ProcFlagsHit.MaskAll))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `HitMask` set: {1}", spellInfo.Id, procEntry.HitMask);
-                        if (procEntry.HitMask != 0 && !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
+                        }
+
+                        if (procEntry.HitMask.HasAnyFlag(~ProcFlagsHit.MaskAll))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has wrong `HitMask` set: {procEntry.HitMask}");
+                        }
+
+                        if (procEntry.HitMask != 0
+                            && !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || procEntry.SpellPhaseMask.HasAnyFlag(ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish)))))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has `HitMask` value defined, but it won't be used " +
+                                $"for defined `ProcFlags` and `SpellPhaseMask` values");
+                        }
+
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
+                        {
                             if ((procEntry.DisableEffectsMask & (1u << spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsAura())
-                                Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has DisableEffectsMask with effect {spellEffectInfo.EffectIndex}, but effect {spellEffectInfo.EffectIndex} is not an aura effect");
+                            {
+                                Log.outError(LogFilter.Sql,
+                                    $"The `spell_proc` table entry for spellId {spellInfo.Id} " +
+                                    $"has DisableEffectsMask with effect {spellEffectInfo.EffectIndex}, " +
+                                    $"but effect {spellEffectInfo.EffectIndex} is not an aura effect");
+                            }
+                        }
 
                         if (procEntry.AttributesMask.HasFlag(ProcAttributes.ReqSpellmod))
                         {
@@ -1417,11 +1563,21 @@ namespace Game.Entities
                             }
 
                             if (!found)
-                                Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has Attribute PROC_ATTR_REQ_SPELLMOD, but spell has no spell mods. Proc will not be triggered");
+                            {
+                                Log.outError(LogFilter.Sql,
+                                    $"The `spell_proc` table entry for spellId {spellInfo.Id} " +
+                                    $"has Attribute PROC_ATTR_REQ_SPELLMOD, " +
+                                    $"but spell has no spell mods. Proc will not be triggered");
                         }
+                        }
+
                         if ((procEntry.AttributesMask & ~ProcAttributes.AllAllowed) != 0)
                         {
-                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has `AttributesMask` value specifying invalid attributes 0x{(procEntry.AttributesMask & ~ProcAttributes.AllAllowed):X}.");
+                            Log.outError(LogFilter.Sql,
+                                $"The `spell_proc` table entry for spellId {spellInfo.Id} " +
+                                $"has `AttributesMask` value specifying invalid attributes " +
+                                $"0x{(procEntry.AttributesMask & ~ProcAttributes.AllAllowed):X}.");
+
                             procEntry.AttributesMask &= ProcAttributes.AllAllowed;
                         }
 
@@ -1438,7 +1594,10 @@ namespace Game.Entities
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             }
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
+            {
+                Log.outInfo(LogFilter.ServerLoading, 
+                    $"Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
+            }
 
             // This generates default procs to retain compatibility with previous proc system
             Log.outInfo(LogFilter.ServerLoading, "Generating spell proc data from SpellMap...");
@@ -1500,7 +1659,12 @@ namespace Game.Entities
                     {
                         if (spellEffectInfo.IsAura())
                         {
-                            Log.outError(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags 0x{spellInfo.ProcFlags[0]:X} 0x{spellInfo.ProcFlags[1]:X}, but it's of non-proc aura Type, it probably needs an entry in `spell_proc` table to be handled correctly.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Spell Id {spellInfo.Id} has DBC ProcFlags " +
+                                $"0x{spellInfo.ProcFlags[0]:X} " +
+                                $"0x{spellInfo.ProcFlags[1]:X}, " +
+                                $"but it's of non-proc aura Type, " +
+                                $"it probably needs an entry in `spell_proc` table to be handled correctly.");
                             break;
                         }
                     }
@@ -1523,8 +1687,11 @@ namespace Game.Entities
                 procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
                 procEntry.HitMask = ProcFlagsHit.None; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
 
-                if (!procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask) && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
+                if (!procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask)
+                    && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
+                {
                     procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Cast; // set default phase for PROC_FLAG_2_CAST_SUCCESSFUL
+                }
 
                 bool triggersSpell = false;
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -1583,8 +1750,11 @@ namespace Game.Entities
                     | ProcFlags.DealHarmfulAbility | ProcFlags.DealHelpfulSpell | ProcFlags.DealHarmfulSpell | ProcFlags.DealHarmfulPeriodic | ProcFlags.DealHelpfulPeriodic)
                     && triggersSpell)
                 {
-                    Log.outError(LogFilter.Sql, $"Spell Id {spellInfo.Id} has SPELL_ATTR3_CAN_PROC_FROM_PROCS attribute and no restriction on what spells can cause it to proc and no cooldown. " +
-                        "This spell can cause infinite proc loops. Proc data for this spell was not generated, data in `spell_proc` table is required for it to function!");
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell Id {spellInfo.Id} has SPELL_ATTR3_CAN_PROC_FROM_PROCS attribute " +
+                        $"and no restriction on what spells can cause it to proc and no cooldown. " +
+                        "This spell can cause infinite proc loops. Proc data for this spell was not generated, " +
+                        "data in `spell_proc` table is required for it to function!");
                     continue;
                 }
 
@@ -1605,17 +1775,20 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT entry, flatMod, pctMod, apPctMod FROM spell_threat");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 aggro generating spells. DB table `spell_threat` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 aggro generating spells. DB table `spell_threat` is empty.");
                 return;
             }
+
             uint count = 0;
+
             do
             {
                 int entry = result.Read<int>(0);
 
                 if (!HasSpellInfo(entry, Difficulty.None))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_threat` does not exist", entry);
+                    Log.outError(LogFilter.Sql, $"Spell {entry} listed in `spell_threat` does not exist");
                     continue;
                 }
 
@@ -1673,25 +1846,30 @@ namespace Game.Entities
                     SpellInfo spellInfo = GetSpellInfo(spell, Difficulty.None);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_pet_auras` does not exist", spell);
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell {spell} listed in `spell_pet_auras` does not exist");
                         continue;
                     }
                     if (eff >= spellInfo.GetEffects().Count)
                     {
-                        Log.outError(LogFilter.Spells, "Spell {0} listed in `spell_pet_auras` does not have effect at index {1}", spell, eff);
+                        Log.outError(LogFilter.Spells, 
+                            $"Spell {spell} listed in `spell_pet_auras` does not have effect at index {eff}");
                         continue;
                     }
 
-                    if (spellInfo.GetEffect(eff).Effect != SpellEffectName.Dummy && (spellInfo.GetEffect(eff).Effect != SpellEffectName.ApplyAura || spellInfo.GetEffect(eff).ApplyAuraName != AuraType.Dummy))
+                    if (spellInfo.GetEffect(eff).Effect != SpellEffectName.Dummy 
+                        && (spellInfo.GetEffect(eff).Effect != SpellEffectName.ApplyAura || spellInfo.GetEffect(eff).ApplyAuraName != AuraType.Dummy))
                     {
-                        Log.outError(LogFilter.Spells, "Spell {0} listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
+                        Log.outError(LogFilter.Spells, 
+                            $"Spell {spell} listed in `spell_pet_auras` does not have dummy aura or dummy effect");
                         continue;
                     }
 
                     SpellInfo spellInfo2 = GetSpellInfo(aura, Difficulty.None);
                     if (spellInfo2 == null)
                     {
-                        Log.outError(LogFilter.Sql, "Aura {0} listed in `spell_pet_auras` does not exist", aura);
+                        Log.outError(LogFilter.Sql, 
+                            $"Aura {aura} listed in `spell_pet_auras` does not exist");
                         continue;
                     }
 
@@ -1714,7 +1892,8 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT EnchantID, Chance, ProcsPerMinute, HitMask, AttributesMask FROM spell_enchant_proc_data");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell enchant proc event conditions. DB table `spell_enchant_proc_data` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 spell enchant proc event conditions. DB table `spell_enchant_proc_data` is empty.");
                 return;
             }
 
@@ -1726,7 +1905,8 @@ namespace Game.Entities
                 var ench = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
                 if (ench == null)
                 {
-                    Log.outError(LogFilter.Sql, "Enchancment {0} listed in `spell_enchant_proc_data` does not exist", enchantId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Enchancment {enchantId} listed in `spell_enchant_proc_data` does not exist");
                     continue;
                 }
 
@@ -1768,7 +1948,8 @@ namespace Game.Entities
                 SpellInfo spellInfo = GetSpellInfo(Math.Abs(trigger), Difficulty.None);
                 if (spellInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_linked_spell` does not exist", Math.Abs(trigger));
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {Math.Abs(trigger)} listed in `spell_linked_spell` does not exist");
                     continue;
                 }
 
@@ -1777,26 +1958,38 @@ namespace Game.Entities
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
                         if (spellEffectInfo.CalcValue() == Math.Abs(effect))
-                            Log.outError(LogFilter.Sql, $"The spell {Math.Abs(trigger)} Effect: {Math.Abs(effect)} listed in `spell_linked_spell` has same bp{spellEffectInfo.EffectIndex} like effect (possible hack)");
+                        {
+                            Log.outError(LogFilter.Sql, 
+                                $"The spell {Math.Abs(trigger)} Effect: " +
+                                $"{Math.Abs(effect)} listed in `spell_linked_spell` " +
+                                $"has same bp{spellEffectInfo.EffectIndex} like effect (possible hack)");
                     }
+                }
                 }
 
                 if (!HasSpellInfo(Math.Abs(effect), Difficulty.None))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_linked_spell` does not exist", Math.Abs(effect));
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {Math.Abs(effect)} listed in `spell_linked_spell` does not exist");
                     continue;
                 }
 
                 if (type < SpellLinkedType.Cast || type > SpellLinkedType.Remove)
                 {
-                    Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` has invalid link type {type}, skipped.");
+                    Log.outError(LogFilter.Sql, 
+                        $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` " +
+                        $"has invalid link type {type}, skipped.");
                     continue;
                 }
 
                 if (trigger < 0)
                 {
                     if (type != SpellLinkedType.Cast)
-                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger} listed in `spell_linked_spell` has invalid link type {type}, changed to 0.");
+                    {
+                        Log.outError(LogFilter.Sql, 
+                            $"The spell trigger {trigger} listed in `spell_linked_spell` " +
+                            $"has invalid link type {type}, changed to 0.");
+                    }
 
                     trigger = -trigger;
                     type = SpellLinkedType.Remove;
@@ -1807,7 +2000,9 @@ namespace Game.Entities
                 {
                     if (trigger == effect)
                     {
-                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` triggers itself (infinite loop), skipped.");
+                        Log.outError(LogFilter.Sql, 
+                            $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` " +
+                            $"triggers itself (infinite loop), skipped.");
                         continue;
                     }
                 }
@@ -1926,6 +2121,7 @@ namespace Game.Entities
                     break;
                 }
             }
+
             if (!have_spell)
                 return false;
 
@@ -2007,7 +2203,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` does not exist", spell);
+                    Log.outError(LogFilter.Sql, $"Spell {spell} listed in `spell_area` does not exist");
                     continue;
                 }
 
@@ -2036,20 +2232,23 @@ namespace Game.Entities
 
                     if (!ok)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` already listed with similar requirements.", spell);
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell {spell} listed in `spell_area` already listed with similar requirements.");
                         continue;
                     }
                 }
 
                 if (spellArea.areaId != 0 && !CliDB.AreaTableStorage.ContainsKey(spellArea.areaId))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong area ({1}) requirement", spell, spellArea.areaId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {spell} listed in `spell_area` have wrong area ({spellArea.areaId}) requirement");
                     continue;
                 }
 
                 if (spellArea.questStart != 0 && Global.ObjectMgr.GetQuestTemplate(spellArea.questStart) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong start quest ({1}) requirement", spell, spellArea.questStart);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {spell} listed in `spell_area` have wrong start quest ({spellArea.questStart}) requirement");
                     continue;
                 }
 
@@ -2057,7 +2256,8 @@ namespace Game.Entities
                 {
                     if (Global.ObjectMgr.GetQuestTemplate(spellArea.questEnd) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong end quest ({1}) requirement", spell, spellArea.questEnd);
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell {spell} listed in `spell_area` have wrong end quest ({spellArea.questEnd}) requirement");
                         continue;
                     }
                 }
@@ -2067,13 +2267,19 @@ namespace Game.Entities
                     SpellInfo info = GetSpellInfo(Math.Abs(spellArea.auraSpell), Difficulty.None);
                     if (info == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong aura spell ({1}) requirement", spell, Math.Abs(spellArea.auraSpell));
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell {spell} listed in `spell_area` have wrong aura spell " +
+                            $"({Math.Abs(spellArea.auraSpell)}) requirement");
+
                         continue;
                     }
 
                     if (Math.Abs(spellArea.auraSpell) == spellArea.spellId)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement for itself", spell, Math.Abs(spellArea.auraSpell));
+                        Log.outError(LogFilter.Sql, 
+                            $"Spell {spell} listed in `spell_area` have aura spell " +
+                            $"({Math.Abs(spellArea.auraSpell)}) requirement for itself");
+
                         continue;
                     }
 
@@ -2093,7 +2299,11 @@ namespace Game.Entities
 
                         if (chain)
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.auraSpell);
+                            Log.outError(LogFilter.Sql, 
+                                $"Spell {spell} listed in `spell_area` " +
+                                $"have aura spell ({spellArea.auraSpell}) " +
+                                $"requirement that itself autocast from aura");
+
                             continue;
                         }
 
@@ -2109,7 +2319,11 @@ namespace Game.Entities
 
                         if (chain)
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.auraSpell);
+                            Log.outError(LogFilter.Sql, 
+                                $"Spell {spell} listed in `spell_area` " +
+                                $"have aura spell ({spellArea.auraSpell}) " +
+                                $"requirement that itself autocast from aura");
+
                             continue;
                         }
                     }
@@ -2117,13 +2331,16 @@ namespace Game.Entities
 
                 if (spellArea.raceMask != RaceMask.None && !spellArea.raceMask.HasAnyFlag(RaceMask.Playable))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {spell} listed in `spell_area` " +
+                        $"have wrong race mask ({spellArea.raceMask}) requirement");
                     continue;
                 }
 
                 if (spellArea.gender != Gender.None && spellArea.gender != Gender.Female && spellArea.gender != Gender.Male)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong gender ({1}) requirement", spell, spellArea.gender);
+                    Log.outError(LogFilter.Sql, 
+                        $"Spell {spell} listed in `spell_area` have wrong gender ({spellArea.gender}) requirement");
                     continue;
                 }
                 mSpellAreaMap.Add(spell, spellArea);
@@ -2170,8 +2387,10 @@ namespace Game.Entities
 
             Dictionary<int, BattlePetSpeciesRecord> battlePetSpeciesByCreature = new();
             foreach (var battlePetSpecies in CliDB.BattlePetSpeciesStorage.Values)
+            {
                 if (battlePetSpecies.CreatureID != 0)
                     battlePetSpeciesByCreature[battlePetSpecies.CreatureID] = battlePetSpecies;
+            }
 
             SpellInfoLoadHelper GetLoadHelper(int spellId, Difficulty difficulty)
             {
@@ -2214,7 +2433,8 @@ namespace Game.Entities
                     case AuraType.AddFlatModifier:
                     case AuraType.AddPctModifier:
                     case AuraType.AddPctModifierBySpellLabel:
-                        Cypher.Assert(effect.EffectMiscValue[0] < (int)SpellModOp.Max, $"MAX_SPELLMOD must be at least {effect.EffectMiscValue[0] + 1}");
+                        Cypher.Assert(effect.EffectMiscValue[0] < (int)SpellModOp.Max, 
+                            $"MAX_SPELLMOD must be at least {effect.EffectMiscValue[0] + 1}");
                         break;
                     default:
                         break;
@@ -2252,8 +2472,10 @@ namespace Game.Entities
                 GetLoadHelper(levels.SpellID, levels.DifficultyID).Levels = levels;
 
             foreach (SpellMiscRecord misc in CliDB.SpellMiscStorage.Values)
+            {
                 if (misc.DifficultyID == 0)
                     GetLoadHelper(misc.SpellID, misc.DifficultyID).Misc = misc;
+            }
 
             foreach (SpellPowerRecord power in CliDB.SpellPowerStorage.Values)
             {
@@ -2296,7 +2518,12 @@ namespace Game.Entities
 
             // sorted with unconditional visuals being last
             foreach (var data in loadData)
-                data.Value.Visuals.Sort((left, right) => { return right.CasterPlayerConditionID.CompareTo(left.CasterPlayerConditionID); });
+            {
+                data.Value.Visuals.Sort((left, right) =>
+                {
+                    return right.CasterPlayerConditionID.CompareTo(left.CasterPlayerConditionID);
+                });
+            }
 
             foreach (var data in loadData)
             {
@@ -2310,7 +2537,9 @@ namespace Game.Entities
                 {
                     do
                     {
-                        SpellInfoLoadHelper fallbackData = loadData.LookupByKey((data.Key.Id, difficultyEntry.FallbackDifficultyID));
+                        SpellInfoLoadHelper fallbackData = 
+                            loadData.LookupByKey((data.Key.Id, difficultyEntry.FallbackDifficultyID));
+
                         if (fallbackData != null)
                         {
                             if (data.Value.AuraOptions == null)
@@ -2460,54 +2689,73 @@ namespace Game.Entities
                         var existingSpellBounds = _GetSpellInfo(spellId);
                         if (existingSpellBounds == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} effext index {effect.EffectIndex} references a regular spell loaded from file. Adding serverside effects to existing spells is not allowed.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} effext index {effect.EffectIndex} " +
+                                $"references a regular spell loaded from file. " +
+                                $"Adding serverside effects to existing spells is not allowed.");
                             continue;
                         }
 
                         if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.HasRecord((int)difficulty))
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} effect index {effect.EffectIndex} references non-existing difficulty {difficulty}, skipped");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} effect index {effect.EffectIndex} " +
+                                $"references non-existing difficulty {difficulty}, skipped");
                             continue;
                         }
 
                         if (effect.EffectIndex >= SpellConst.MaxEffects)
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has more than {SpellConst.MaxEffects} effects, effect at index {effect.EffectIndex} skipped");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} " +
+                                $"has more than {SpellConst.MaxEffects} effects, effect at index {effect.EffectIndex} skipped");
                             continue;
                         }
 
                         if (effect.Effect >= SpellEffectName.TotalSpellEffects)
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect Type {effect.Effect} at index {effect.EffectIndex}, skipped");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} " +
+                                $"has invalid effect Type {effect.Effect} at index {effect.EffectIndex}, skipped");
                             continue;
                         }
 
                         if (effect.EffectAura >= AuraType.Total)
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura Type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} " +
+                                $"has invalid aura Type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
                             continue;
                         }
 
                         if (effect.ImplicitTarget[0] >= (uint)Targets.TotalSpellTargets)
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetA Type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} " +
+                                $"has invalid targetA Type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
                             continue;
                         }
 
                         if (effect.ImplicitTarget[1] >= (uint)Targets.TotalSpellTargets)
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetB Type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} " +
+                                $"has invalid targetB Type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
                             continue;
                         }
 
                         if (effect.EffectRadiusIndex[0] != 0 && !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[0]))
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid radius id {effect.EffectRadiusIndex[0]} at index {effect.EffectIndex}, set to 0");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} " +
+                                $"has invalid radius id {effect.EffectRadiusIndex[0]} at index {effect.EffectIndex}, set to 0");
                         }
 
                         if (effect.EffectRadiusIndex[1] != 0 && !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[1]))
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid max radius id {effect.EffectRadiusIndex[1]} at index {effect.EffectIndex}, set to 0");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} " +
+                                $"has invalid max radius id {effect.EffectRadiusIndex[1]} at index {effect.EffectIndex}, set to 0");
                         }
 
                         spellEffects.Add((spellId, difficulty), effect);
@@ -2544,7 +2792,9 @@ namespace Game.Entities
                         Difficulty difficulty = (Difficulty)spellsResult.Read<int>(1);
                         if (CliDB.SpellNameStorage.HasRecord(spellId))
                         {
-                            Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} is already loaded from file. Overriding existing spells is not allowed.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Serverside spell {spellId} difficulty {difficulty} is already loaded from file. " +
+                                $"Overriding existing spells is not allowed.");
                             continue;
                         }
 
@@ -2638,7 +2888,10 @@ namespace Game.Entities
 
             SQLResult result = DB.World.Query("SELECT entry, attributes FROM spell_custom_attr");
             if (result.IsEmpty())
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell custom attributes from DB. DB table `spell_custom_attr` is empty.");
+            {
+                Log.outInfo(LogFilter.ServerLoading,
+                    "Loaded 0 spell custom attributes from DB. DB table `spell_custom_attr` is empty.");
+            }
             else
             {
                 uint count = 0;
@@ -2650,7 +2903,8 @@ namespace Game.Entities
                     var spells = _GetSpellInfo(spellId);
                     if (spells.Empty())
                     {
-                        Log.outError(LogFilter.Sql, "Table `spell_custom_attr` has wrong spell (entry: {0}), ignored.", spellId);
+                        Log.outError(LogFilter.Sql,
+                            $"Table `spell_custom_attr` has wrong spell (entry: {spellId}), ignored.");
                         continue;
                     }
 
@@ -2660,7 +2914,9 @@ namespace Game.Entities
                         {
                             if (!spellInfo.HasEffect(SpellEffectName.SchoolDamage))
                             {
-                                Log.outError(LogFilter.Sql, "Spell {0} listed in table `spell_custom_attr` with SPELL_ATTR0_CU_SHARE_DAMAGE has no SPELL_EFFECT_SCHOOL_DAMAGE, ignored.", spellId);
+                                Log.outError(LogFilter.Sql, 
+                                    $"Spell {spellId} listed in table `spell_custom_attr` " +
+                                    $"with SPELL_ATTR0_CU_SHARE_DAMAGE has no SPELL_EFFECT_SCHOOL_DAMAGE, ignored.");
                                 continue;
                             }
                         }
@@ -2880,7 +3136,8 @@ namespace Game.Entities
                 }
 
                 // Remove normal school mask to properly calculate damage
-                if (spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Normal) && spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Magic))
+                if (spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Normal) 
+                    && spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Magic))
                 {
                     spellInfo.SchoolMask &= ~SpellSchoolMask.Normal;
                     spellInfo.AttributesCu |= SpellCustomAttributes.SchoolmaskNormalWithMagic;
@@ -2931,7 +3188,9 @@ namespace Game.Entities
 
                         foreach (SpellVisualMissileRecord spellVisualMissile in spellVisualMissiles)
                         {
-                            var spellVisualEffectName = CliDB.SpellVisualEffectNameStorage.LookupByKey(spellVisualMissile.SpellVisualEffectNameID);
+                            var spellVisualEffectName = 
+                                CliDB.SpellVisualEffectNameStorage.LookupByKey(spellVisualMissile.SpellVisualEffectNameID);
+
                             if (spellVisualEffectName == null)
                                 continue;
 
@@ -2974,7 +3233,9 @@ namespace Game.Entities
                                 case AuraType.PeriodicTriggerSpell:
                                 case AuraType.PeriodicTriggerSpellFromClient:
                                 case AuraType.PeriodicTriggerSpellWithValue:
-                                    SpellInfo triggerSpell = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
+                                    SpellInfo triggerSpell = 
+                                        Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
+                                    
                                     if (triggerSpell != null)
                                     {
                                         overrideAttr = true;
@@ -3002,8 +3263,10 @@ namespace Game.Entities
             foreach (var liquid in CliDB.LiquidTypeStorage.Values)
             {
                 if (liquid.SpellID != 0)
+                {
                     foreach (SpellInfo spellInfo in _GetSpellInfo(liquid.SpellID))
                         spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
+            }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
@@ -3016,7 +3279,8 @@ namespace Game.Entities
                 var range = _GetSpellInfo(spellId);
                 if (range == null)
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Spell info correction specified for non-existing spell {spellId}");
+                    Log.outError(LogFilter.ServerLoading, 
+                        $"Spell info correction specified for non-existing spell {spellId}");
                     continue;
                 }
 
@@ -3029,7 +3293,9 @@ namespace Game.Entities
         {
             if (spellInfo.GetEffects().Count <= effectIndex)
             {
-                Log.outError(LogFilter.ServerLoading, $"Spell effect info correction specified for non-existing effect {effectIndex} of spell {spellInfo.Id}");
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Spell effect info correction specified " +
+                    $"for non-existing effect {effectIndex} of spell {spellInfo.Id}");
                 return;
             }
 
@@ -3131,7 +3397,8 @@ namespace Game.Entities
                     });
                 });
 
-                // Tear of Azzinoth Summon Channel - it's not really supposed to do anything, and this only prevents the console spam
+                // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,
+                // and this only prevents the console spam
                 ApplySpellFix([39857], spellInfo =>
                 {
                     ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
@@ -4406,7 +4673,8 @@ namespace Game.Entities
                 // Fix range for trajectory triggered spell
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
-                    if (spellEffectInfo.IsEffect() && (spellEffectInfo.TargetA.GetTarget() == Targets.DestTraj || spellEffectInfo.TargetB.GetTarget() == Targets.DestTraj))
+                    if (spellEffectInfo.IsEffect() && 
+                        (spellEffectInfo.TargetA.GetTarget() == Targets.DestTraj || spellEffectInfo.TargetB.GetTarget() == Targets.DestTraj))
                     {
                         // Get triggered spell if any
                         foreach (SpellInfo spellInfoTrigger in _GetSpellInfo(spellEffectInfo.TriggerSpell))
@@ -4432,9 +4700,12 @@ namespace Game.Entities
                             break;
                     }
 
-                    if (spellEffectInfo.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone || spellEffectInfo.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
+                    if (spellEffectInfo.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone
+                        || spellEffectInfo.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
+                    {
                         if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
                             spellInfo.ConeAngle = 90.0f;
+                    }
 
                     // Area auras may not target area (they're self cast)
                     if (spellEffectInfo.IsAreaAuraEffect() && spellEffectInfo.IsTargetingArea())
@@ -4520,8 +4791,10 @@ namespace Game.Entities
         {
             Dictionary<int, SpellLevelsRecord> levelsBySpell = new();
             foreach (SpellLevelsRecord levels in CliDB.SpellLevelsStorage.Values)
+            {
                 if (levels.DifficultyID == 0)
                     levelsBySpell[levels.SpellID] = levels;
+            }
 
             foreach (var skillLine in CliDB.SkillLineAbilityStorage.Values)
             {
@@ -4556,7 +4829,8 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT SpellID, RaceID, DisplayID from spell_totem_model");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell totem model records. DB table `spell_totem_model` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 spell totem model records. DB table `spell_totem_model` is empty.");
                 return;
             }
 
@@ -4570,19 +4844,24 @@ namespace Game.Entities
                 SpellInfo spellEntry = GetSpellInfo(spellId, Difficulty.None);
                 if (spellEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, $"SpellID: {spellId} in `spell_totem_model` table could not be found in dbc, skipped.");
+                    Log.outError(LogFilter.Sql, 
+                        $"SpellID: {spellId} in `spell_totem_model` table " +
+                        $"could not be found in dbc, skipped.");
                     continue;
                 }
 
                 if (!CliDB.ChrRacesStorage.ContainsKey((int)race))
                 {
-                    Log.outError(LogFilter.Sql, $"Race {race} defined in `spell_totem_model` does not exists, skipped.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Race {race} defined in `spell_totem_model` does not exists, skipped.");
                     continue;
                 }
 
                 if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(displayId))
                 {
-                    Log.outError(LogFilter.Sql, $"SpellID: {spellId} defined in `spell_totem_model` has non-existing model ({displayId}).");
+                    Log.outError(LogFilter.Sql, 
+                        $"SpellID: {spellId} defined in `spell_totem_model` " +
+                        $"has non-existing model ({displayId}).");
                     continue;
                 }
 
@@ -4712,7 +4991,7 @@ namespace Game.Entities
         {
             if (!SpellEffectsHandlers.ContainsKey(eff))
             {
-                Log.outError(LogFilter.Spells, "No defined handler for SpellEffect {0}", eff);
+                Log.outError(LogFilter.Spells, $"No defined handler for SpellEffect {eff}");
                 return SpellEffectsHandlers[SpellEffectName.None];
             }
 
@@ -4723,7 +5002,7 @@ namespace Game.Entities
         {
             if (!AuraEffectHandlers.ContainsKey(type))
             {
-                Log.outError(LogFilter.Spells, "No defined handler for AuraEffect {0}", type);
+                Log.outError(LogFilter.Spells, $"No defined handler for AuraEffect {type}");
                 return AuraEffectHandlers[AuraType.None];
             }
 
@@ -4937,28 +5216,43 @@ namespace Game.Entities
         public bool IsFitToRequirements(Player player, int newZone, int newArea)
         {
             if (gender != Gender.None)                   // not in expected gender
+            {
                 if (player == null || gender != player.GetNativeGender())
                     return false;
+            }
 
             if (raceMask != RaceMask.None)                    // not in expected race
+            {
                 if (player == null || !raceMask.HasRace(player.GetRace()))
                     return false;
+            }
 
             if (areaId != 0)                                  // not in expected zone
+            {
                 if (newZone != areaId && newArea != areaId)
                     return false;
+            }
 
             if (questStart != 0)                              // not in expected required quest state
+            {
                 if (player == null || (((1 << (int)player.GetQuestStatus(questStart)) & questStartStatus) == 0))
                     return false;
+            }
 
             if (questEnd != 0)                                // not in expected forbidden quest state
+            {
                 if (player == null || (((1 << (int)player.GetQuestStatus(questEnd)) & questEndStatus) == 0))
                     return false;
+            }
 
             if (auraSpell != 0)                               // not have expected aura
-                if (player == null || (auraSpell > 0 && !player.HasAura(auraSpell)) || (auraSpell < 0 && player.HasAura(-auraSpell)))
+            {
+                if (player == null || (auraSpell > 0 && !player.HasAura(auraSpell))
+                    || (auraSpell < 0 && player.HasAura(-auraSpell)))
+                {
                     return false;
+                }
+            }
 
             if (player != null)
             {
@@ -4976,8 +5270,12 @@ namespace Game.Entities
                         return false;
 
                     BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
-                    if (Bf == null || Bf.CanFlyIn() || (!player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !player.HasAuraType(AuraType.Fly)))
+
+                    if (Bf == null || Bf.CanFlyIn()
+                        || (!player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !player.HasAuraType(AuraType.Fly)))
+                    {
                         return false;
+                    }
                     break;
                 }
                 case 56618: // Horde Controls Factory Phase Shift
@@ -5008,7 +5306,13 @@ namespace Game.Entities
 
                     BattleField battlefieldWG = Global.BattleFieldMgr.GetBattlefieldByBattleId(player.GetMap(), 1);
                     if (battlefieldWG != null)
-                        return battlefieldWG.IsEnabled() && (player.GetBatttleGroundTeamId() == battlefieldWG.GetDefenderTeam()) && !battlefieldWG.IsWarTime();
+                    {
+                        return
+                            battlefieldWG.IsEnabled() &&
+                            (player.GetBatttleGroundTeamId() == battlefieldWG.GetDefenderTeam())
+                            && !battlefieldWG.IsWarTime();
+                    }
+
                     break;
                 }
                 case 74411: // Battleground- Dampening

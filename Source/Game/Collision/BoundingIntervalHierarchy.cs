@@ -65,7 +65,10 @@ namespace Game.Collision
                 for (int i = 0; i < 3; i++)
                 {
                     if (nodeBox.hi.GetAt(i) < gridBox.lo.GetAt(i) || nodeBox.lo.GetAt(i) > gridBox.hi.GetAt(i))
-                        Log.outError(LogFilter.Server, "Reached tree area in error - discarding node with: {0} objects", right - left + 1);
+                    {
+                        Log.outError(LogFilter.Server, 
+                            $"Reached tree area in error - discarding node with: {right - left + 1} objects");
+                    } 
                 }
                 // find longest axis
                 axis = d.primaryAxis();

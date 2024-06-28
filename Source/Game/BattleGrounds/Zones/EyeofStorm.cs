@@ -51,8 +51,10 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
                     byte baseCountAlliance = GetControlledBaseCount(BattleGroundTeamId.Alliance);
                     byte baseCountHorde = GetControlledBaseCount(BattleGroundTeamId.Horde);
+                    
                     if (baseCountAlliance > 0)
                         AddPoints(Team.Alliance, Misc.TickPoints[baseCountAlliance - 1]);
+                    
                     if (baseCountHorde > 0)
                         AddPoints(Team.Horde, Misc.TickPoints[baseCountHorde - 1]);
                 }
@@ -93,11 +95,13 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             int team_index = GetTeamIndexByTeamId(Team);
             m_TeamScores[team_index] += Points;
             m_HonorScoreTics[team_index] += Points;
+            
             if (m_HonorScoreTics[team_index] >= m_HonorTics)
             {
                 RewardHonorToTeam(GetBonusHonorFromKill(1), Team);
                 m_HonorScoreTics[team_index] -= m_HonorTics;
             }
+
             UpdateTeamScore(team_index);
         }
 

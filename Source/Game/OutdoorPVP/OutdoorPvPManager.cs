@@ -22,7 +22,9 @@ namespace Game.PvP
             SQLResult result = DB.World.Query("SELECT TypeId, ScriptName FROM outdoorpvp_template");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 outdoor PvP definitions. DB table `outdoorpvp_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 outdoor PvP definitions. " +
+                    "DB table `outdoorpvp_template` is empty.");
                 return;
             }
 
@@ -37,7 +39,8 @@ namespace Game.PvP
 
                 if (typeId >= OutdoorPvPTypes.Max)
                 {
-                    Log.outError(LogFilter.Sql, "Invalid OutdoorPvPTypes value {0} in outdoorpvp_template; skipped.", typeId);
+                    Log.outError(LogFilter.Sql,
+                        $"Invalid OutdoorPvPTypes value {typeId} in outdoorpvp_template; skipped.");
                     continue;
                 }
 
@@ -59,20 +62,26 @@ namespace Game.PvP
 
                 if (!m_OutdoorPvPDatas.ContainsKey(outdoorPvpType))
                 {
-                    Log.outError(LogFilter.Sql, "Could not initialize OutdoorPvP object for Type ID {0}; no entry in database.", outdoorPvpType);
+                    Log.outError(LogFilter.Sql,
+                        $"Could not initialize OutdoorPvP object " +
+                        $"for Type ID {outdoorPvpType}; no entry in database.");
                     continue;
                 }
 
                 OutdoorPvP pvp = Global.ScriptMgr.CreateOutdoorPvP(m_OutdoorPvPDatas[outdoorPvpType], map);
                 if (pvp == null)
                 {
-                    Log.outError(LogFilter.Outdoorpvp, "Could not initialize OutdoorPvP object for Type ID {0}; got NULL pointer from script.", outdoorPvpType);
+                    Log.outError(LogFilter.Outdoorpvp,
+                        $"Could not initialize OutdoorPvP object " +
+                        $"for Type ID {outdoorPvpType}; got NULL pointer from script.");
                     continue;
                 }
 
                 if (!pvp.SetupOutdoorPvP())
                 {
-                    Log.outError(LogFilter.Outdoorpvp, "Could not initialize OutdoorPvP object for Type ID {0}; SetupOutdoorPvP failed.", outdoorPvpType);
+                    Log.outError(LogFilter.Outdoorpvp, 
+                        $"Could not initialize OutdoorPvP object " +
+                        $"for Type ID {outdoorPvpType}; SetupOutdoorPvP failed.");
                     continue;
                 }
 
@@ -100,7 +109,8 @@ namespace Game.PvP
                 return;
 
             outdoor.HandlePlayerEnterZone(player, zoneid);
-            Log.outDebug(LogFilter.Outdoorpvp, "Player {0} entered outdoorpvp id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
+            Log.outDebug(LogFilter.Outdoorpvp,
+                $"Player {player.GetGUID()} entered outdoorpvp id {outdoor.GetTypeId()}");
         }
 
         public void HandlePlayerLeaveZone(Player player, int zoneid)
@@ -114,7 +124,8 @@ namespace Game.PvP
                 return;
 
             outdoor.HandlePlayerLeaveZone(player, zoneid);
-            Log.outDebug(LogFilter.Outdoorpvp, "Player {0} left outdoorpvp id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
+            Log.outDebug(LogFilter.Outdoorpvp, 
+                $"Player {player.GetGUID()} left outdoorpvp id {outdoor.GetTypeId()}");
         }
 
         public OutdoorPvP GetOutdoorPvPToZoneId(Map map, int zoneid)
@@ -171,7 +182,9 @@ namespace Game.PvP
             if (bct != null)
                 return Global.DB2Mgr.GetBroadcastTextValue(bct, locale);
 
-            Log.outError(LogFilter.Outdoorpvp, "Can not find DefenseMessage (Zone: {0}, Id: {1}). BroadcastText (Id: {2}) does not exist.", zoneId, id, id);
+            Log.outError(LogFilter.Outdoorpvp, 
+                $"Can not find DefenseMessage (Zone: {zoneId}, Id: {id}). " +
+                $"BroadcastText (Id: {id}) does not exist.");
             return "";
         }
 

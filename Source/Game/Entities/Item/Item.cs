@@ -89,7 +89,8 @@ namespace Game.Entities
             if (duration == 0)
                 return;
 
-            Log.outDebug(LogFilter.Player, $"Item.UpdateDuration Item (Entry: {GetEntry()} Duration {duration} Diff {diff})");
+            Log.outDebug(LogFilter.Player, 
+                $"Item.UpdateDuration Item (Entry: {GetEntry()} Duration {duration} Diff {diff})");
 
             if (duration <= diff)
             {
@@ -314,7 +315,8 @@ namespace Game.Entities
             ItemTemplate proto = GetTemplate();
             if (proto == null)
             {
-                Log.outError(LogFilter.PlayerItems, $"Invalid entry {GetEntry()} for item {GetGUID()}. Refusing to load.");
+                Log.outError(LogFilter.PlayerItems,
+                    $"Invalid entry {GetEntry()} for item {GetGUID()}. Refusing to load.");
                 return false;
             }
 
@@ -591,7 +593,9 @@ namespace Game.Entities
 
             if (player.GetGUID() != item.GetOwnerGUID())
             {
-                Log.outError(LogFilter.Player, "Item.AddToUpdateQueueOf - Owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID(), player.GetGUID().ToString());
+                Log.outError(LogFilter.Player, 
+                    $"Item.AddToUpdateQueueOf - Owner's guid ({item.GetOwnerGUID()}) " +
+                    $"and player's guid ({player.GetGUID()}) don't match!");
                 return;
             }
 
@@ -611,7 +615,9 @@ namespace Game.Entities
 
             if (player.GetGUID() != item.GetOwnerGUID())
             {
-                Log.outError(LogFilter.Player, "Item.RemoveFromUpdateQueueOf - Owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID().ToString(), player.GetGUID().ToString());
+                Log.outError(LogFilter.Player, 
+                    $"Item.RemoveFromUpdateQueueOf - Owner's guid ({item.GetOwnerGUID()}) " +
+                    $"and player's guid ({player.GetGUID()}) don't match!");
                 return;
             }
 
@@ -718,9 +724,11 @@ namespace Game.Entities
                 {
                     SpellItemEnchantmentRecord enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
                     if (enchantEntry != null)
+                    {
                         if (enchantEntry.RequiredSkillID != 0 && player.GetSkillValue(enchantEntry.RequiredSkillID) < enchantEntry.RequiredSkillRank)
                             return false;
                 }
+            }
             }
 
             return true;
@@ -738,9 +746,11 @@ namespace Game.Entities
                 {
                     var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
                     if (enchantEntry != null)
+                    {
                         if (enchantEntry.MinLevel > level)
                             level = enchantEntry.MinLevel;
                 }
+            }
             }
 
             return level;
@@ -756,9 +766,11 @@ namespace Game.Entities
                 {
                     var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
                     if (enchantEntry != null)
+                    {
                         if (enchantEntry.HasFlag(SpellItemEnchantmentFlags.Soulbound))
                             return true;
                 }
+            }
             }
 
             return false;
@@ -1287,8 +1299,10 @@ namespace Game.Entities
         {
             ItemTemplate proto = GetTemplate();
             for (int i = 0; i < ItemConst.MaxStats; ++i)
+            {
                 if (proto.GetStatModifierBonusAmount(i) != 0)
                     return true;
+            }
 
             return false;
         }
@@ -1506,7 +1520,8 @@ namespace Game.Entities
                 }
                 case InventoryType.Shield:
                 {
-                    var shieldPrice = CliDB.ImportPriceShieldStorage.LookupByKey(2); // it only has two rows, it's unclear which is the one used
+                    // it only has two rows, it's unclear which is the one used
+                    var shieldPrice = CliDB.ImportPriceShieldStorage.LookupByKey(2); 
                     if (shieldPrice == null)
                         return 0;
 
@@ -1637,11 +1652,17 @@ namespace Game.Entities
 
         public static ItemDisenchantLootRecord GetDisenchantLoot(ItemTemplate itemTemplate, ItemQuality quality, int itemLevel)
         {
-            if (itemTemplate.HasFlag(ItemFlags.Conjured) || itemTemplate.HasFlag(ItemFlags.NoDisenchant) || itemTemplate.GetBonding() == ItemBondingType.Quest)
+            if (itemTemplate.HasFlag(ItemFlags.Conjured) || itemTemplate.HasFlag(ItemFlags.NoDisenchant)
+                || itemTemplate.GetBonding() == ItemBondingType.Quest)
+            {
                 return null;
+            }
 
-            if (itemTemplate.GetArea(0) != 0 || itemTemplate.GetArea(1) != 0 || itemTemplate.GetMap() != 0 || itemTemplate.GetMaxStackSize() > 1)
+            if (itemTemplate.GetArea(0) != 0 || itemTemplate.GetArea(1) != 0
+                || itemTemplate.GetMap() != 0 || itemTemplate.GetMaxStackSize() > 1)
+            {
                 return null;
+            }
 
             if (GetSellPrice(itemTemplate, quality, itemLevel) == 0 && !Global.DB2Mgr.HasItemCurrencyCost(itemTemplate.GetId()))
                 return null;
@@ -1855,7 +1876,9 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nOwner: {GetOwnerGUID()} Count: {GetCount()} BagSlot: {InventoryBagSlot} Slot: {InventorySlot} Equipped: {IsEquipped()}";
+            return 
+                $"{base.GetDebugInfo()}\nOwner: {GetOwnerGUID()} Count: {GetCount()} " +
+                $"BagSlot: {InventoryBagSlot} Slot: {InventorySlot} Equipped: {IsEquipped()}";
         }
 
         public static Item NewItemOrBag(ItemTemplate proto)
@@ -1874,7 +1897,8 @@ namespace Game.Entities
             ItemSetRecord set = CliDB.ItemSetStorage.LookupByKey(setid);
             if (set == null)
             {
-                Log.outError(LogFilter.Sql, "Item set {0} for item (id {1}) not found, mods not applied.", setid, proto.GetId());
+                Log.outError(LogFilter.Sql, 
+                    $"Item set {setid} for item (id {proto.GetId()}) not found, mods not applied.");
                 return;
             }
 
@@ -1941,7 +1965,8 @@ namespace Game.Entities
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None);
                 if (spellInfo == null)
                 {
-                    Log.outError(LogFilter.Player, "WORLD: unknown spell id {0} in items set {1} effects", itemSetSpell.SpellID, setid);
+                    Log.outError(LogFilter.Player, 
+                        $"WORLD: unknown spell id {itemSetSpell.SpellID} in items set {setid} effects");
                     continue;
                 }
 
@@ -1959,7 +1984,8 @@ namespace Game.Entities
             ItemSetRecord set = CliDB.ItemSetStorage.LookupByKey(setid);
             if (set == null)
             {
-                Log.outError(LogFilter.Sql, $"Item set {setid} for item {item.GetEntry()} not found, mods not removed.");
+                Log.outError(LogFilter.Sql, 
+                    $"Item set {setid} for item {item.GetEntry()} not found, mods not removed.");
                 return;
             }
 

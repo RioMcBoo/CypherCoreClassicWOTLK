@@ -55,8 +55,11 @@ namespace Game.Entities
             PlayerRestState oldRestState = (PlayerRestState)(int)_player.m_activePlayerData.RestInfo[(int)restType].StateID;
             PlayerRestState newRestState = PlayerRestState.Normal;
 
-            if (affectedByRaF && _player.GetsRecruitAFriendBonus(true) && (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
+            if (affectedByRaF && _player.GetsRecruitAFriendBonus(true)
+                && (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
+            {
                 newRestState = PlayerRestState.RAFLinked;
+            }
             else if (_restBonus[(int)restType] >= 1)
                 newRestState = PlayerRestState.Rested;
 
@@ -70,7 +73,8 @@ namespace Game.Entities
 
         public void AddRestBonus(RestTypes restType, float restBonus)
         {
-            // Don't add extra rest bonus to max level players. Note: Might need different condition in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
+            // Don't add extra rest bonus to max level players. Note: Might need different condition
+            // in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
             if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 restBonus = 0;
 
@@ -118,8 +122,11 @@ namespace Game.Entities
 
             SetRestBonus(restType, GetRestBonus(restType) - rested_loss);
 
-            Log.outDebug(LogFilter.Player, "RestMgr.GetRestBonus: Player '{0}' ({1}) gain {2} xp (+{3} Rested Bonus). Rested points={4}",
-                _player.GetGUID().ToString(), _player.GetName(), xp + rested_bonus, rested_bonus, GetRestBonus(restType));
+            Log.outDebug(LogFilter.Player, 
+                $"RestMgr.GetRestBonus: Player '{_player.GetGUID()}' ({_player.GetName()}) " +
+                $"gain {xp + rested_bonus} xp (+{rested_bonus} Rested Bonus). " +
+                $"Rested points={GetRestBonus(restType)}");
+
             return rested_bonus;
         }
 

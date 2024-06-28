@@ -26,30 +26,36 @@ namespace Game.Networking
 
                         if (msgAttr.Opcode == ClientOpcodes.Unknown)
                         {
-                            Log.outError(LogFilter.Network, "Opcode {0} does not have a value", msgAttr.Opcode);
+                            Log.outError(LogFilter.Network,
+                                $"{methodInfo.Name} has Attribute with unused opcode.");
                             continue;
                         }
 
                         if (_clientPacketTable.ContainsKey(msgAttr.Opcode))
                         {
-                            Log.outError(LogFilter.Network, "Tried to override OpcodeHandler of {0} with {1} (Opcode {2})", _clientPacketTable[msgAttr.Opcode].ToString(), methodInfo.Name, msgAttr.Opcode);
+                            Log.outError(LogFilter.Network, 
+                                $"Tried to override OpcodeHandler of {_clientPacketTable[msgAttr.Opcode]} " +
+                                $"with {methodInfo.Name} (Opcode {msgAttr.Opcode})");
                             continue;
                         }
 
                         var parameters = methodInfo.GetParameters();
                         if (parameters.Length == 0)
                         {
-                            Log.outError(LogFilter.Network, "Method: {0} Has no paramters", methodInfo.Name);
+                            Log.outError(LogFilter.Network,
+                                $"Method: {methodInfo.Name} Has no paramters");
                             continue;
                         }
 
                         if (parameters[0].ParameterType.BaseType != typeof(ClientPacket))
                         {
-                            Log.outError(LogFilter.Network, "Method: {0} has wrong BaseType", methodInfo.Name);
+                            Log.outError(LogFilter.Network, 
+                                $"Method: {methodInfo.Name} has wrong BaseType");
                             continue;
                         }
 
-                        _clientPacketTable[msgAttr.Opcode] = new PacketHandler(methodInfo, msgAttr.Status, msgAttr.Processing, parameters[0].ParameterType);
+                        _clientPacketTable[msgAttr.Opcode] = 
+                            new PacketHandler(methodInfo, msgAttr.Status, msgAttr.Processing, parameters[0].ParameterType);
                     }
                 }
             }
@@ -108,7 +114,9 @@ namespace Game.Networking
     {
         public PacketHandler(MethodInfo info, SessionStatus status, PacketProcessing processingplace, Type type)
         {
-            methodCaller = (Action<WorldSession, ClientPacket>)GetType().GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(null, [info]);
+            methodCaller = (Action<WorldSession, ClientPacket>)GetType().GetMethod(
+                "CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(null, [info]);
+
             sessionStatus = status;
             ProcessingPlace = processingplace;
             packetType = type;

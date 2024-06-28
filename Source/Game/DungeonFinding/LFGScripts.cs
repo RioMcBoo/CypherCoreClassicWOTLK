@@ -41,7 +41,10 @@ namespace Game.DungeonFinding
                 ObjectGuid gguid2 = group.GetGUID();
                 if (gguid != gguid2)
                 {
-                    Log.outError(LogFilter.Lfg, "{0} on group {1} but LFG has group {2} saved... Fixing.", player.GetSession().GetPlayerInfo(), gguid2.ToString(), gguid.ToString());
+                    Log.outError(LogFilter.Lfg, 
+                        $"{player.GetSession().GetPlayerInfo()} on group {gguid2} " +
+                        $"but LFG has group {gguid} saved... Fixing.");
+
                     Global.LFGMgr.SetupGroupMember(guid, group.GetGUID());
                 }
             }
@@ -66,8 +69,9 @@ namespace Game.DungeonFinding
                     Global.LFGMgr.LeaveLfg(player.GetGUID());
                     player.RemoveAurasDueToSpell(SharedConst.LFGSpellLuckOfTheDraw);
                     player.TeleportTo(player.GetHomebind());
-                    Log.outError(LogFilter.Lfg, "LFGPlayerScript.OnMapChanged, Player {0} ({1}) is in LFG dungeon map but does not have a valid group! Teleporting to homebind.",
-                        player.GetName(), player.GetGUID().ToString());
+                    Log.outError(LogFilter.Lfg, 
+                        $"LFGPlayerScript.OnMapChanged, Player {player.GetName()} ({player.GetGUID()}) " +
+                        $"is in LFG dungeon map but does not have a valid group! Teleporting to homebind.");
                     return;
                 }
 
@@ -90,8 +94,9 @@ namespace Game.DungeonFinding
                 {
                     Global.LFGMgr.LeaveLfg(group.GetGUID());
                     group.Disband();
-                    Log.outDebug(LogFilter.Lfg, "LFGPlayerScript::OnMapChanged, Player {0}({1}) is last in the lfggroup so we disband the group.",
-                        player.GetName(), player.GetGUID().ToString());
+                    Log.outDebug(LogFilter.Lfg, 
+                        $"LFGPlayerScript::OnMapChanged, Player {player.GetName()}({player.GetGUID()}) " +
+                        $"is last in the lfggroup so we disband the group.");
                 }
 
                 player.RemoveAurasDueToSpell(SharedConst.LFGSpellLuckOfTheDraw);
@@ -114,14 +119,16 @@ namespace Game.DungeonFinding
 
             if (leader == guid)
             {
-                Log.outDebug(LogFilter.Lfg, "LFGScripts.OnAddMember [{0}]: added [{1} leader {2}]", gguid, guid, leader);
+                Log.outDebug(LogFilter.Lfg, $"LFGScripts.OnAddMember [{gguid}]: added [{guid} leader {leader}]");
                 Global.LFGMgr.SetLeader(gguid, guid);
             }
             else
             {
                 LfgState gstate = Global.LFGMgr.GetState(gguid);
                 LfgState state = Global.LFGMgr.GetState(guid);
-                Log.outDebug(LogFilter.Lfg, "LFGScripts.OnAddMember [{0}]: added [{1} leader {2}] gstate: {3}, state: {4}", gguid, guid, leader, gstate, state);
+                Log.outDebug(LogFilter.Lfg, 
+                    $"LFGScripts.OnAddMember [{gguid}]: added [{guid} leader {leader}] " +
+                    $"gstate: {gstate}, state: {state}");
 
                 if (state == LfgState.Queued)
                     Global.LFGMgr.LeaveLfg(guid);
@@ -140,7 +147,9 @@ namespace Game.DungeonFinding
                 return;
 
             ObjectGuid gguid = group.GetGUID();
-            Log.outDebug(LogFilter.Lfg, "LFGScripts.OnRemoveMember [{0}]: remove [{1}] Method: {2} Kicker: {3} Reason: {4}", gguid, guid, method, kicker, reason);
+            Log.outDebug(LogFilter.Lfg, 
+                $"LFGScripts.OnRemoveMember [{gguid}]: remove [{guid}] " +
+                $"Method: {method} Kicker: {kicker} Reason: {reason}");
 
             bool isLFG = group.IsLFGGroup();
 
@@ -199,7 +208,7 @@ namespace Game.DungeonFinding
                 return;
 
             ObjectGuid gguid = group.GetGUID();
-            Log.outDebug(LogFilter.Lfg, "LFGScripts.OnDisband {0}", gguid);
+            Log.outDebug(LogFilter.Lfg, $"LFGScripts.OnDisband {gguid}");
 
             Global.LFGMgr.RemoveGroupData(gguid);
         }
@@ -211,7 +220,9 @@ namespace Game.DungeonFinding
 
             ObjectGuid gguid = group.GetGUID();
 
-            Log.outDebug(LogFilter.Lfg, "LFGScripts.OnChangeLeader {0}: old {0} new {0}", gguid, newLeaderGuid, oldLeaderGuid);
+            Log.outDebug(LogFilter.Lfg, 
+                $"LFGScripts.OnChangeLeader {gguid}: old {newLeaderGuid} new {oldLeaderGuid}");
+
             Global.LFGMgr.SetLeader(gguid, newLeaderGuid);
         }
 
@@ -222,7 +233,9 @@ namespace Game.DungeonFinding
 
             ObjectGuid gguid = group.GetGUID();
             ObjectGuid leader = group.GetLeaderGUID();
-            Log.outDebug(LogFilter.Lfg, "LFGScripts.OnInviteMember {0}: invite {0} leader {0}", gguid, guid, leader);
+            Log.outDebug(LogFilter.Lfg, 
+                $"LFGScripts.OnInviteMember {gguid}: invite {guid} leader {leader}");
+
             // No gguid ==  new group being formed
             // No leader == after group creation first invite is new leader
             // leader and no gguid == first invite after leader is added to new group (this is the real invite)

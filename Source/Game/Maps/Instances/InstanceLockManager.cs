@@ -170,8 +170,10 @@ namespace Game.Maps
                     GetNextResetTime(entries), instanceId, sharedData);
             }
             else
+            {
                 instanceLock = new InstanceLock(entries.MapDifficulty.MapID, entries.MapDifficulty.DifficultyID,
                     GetNextResetTime(entries), instanceId);
+            }
 
             instanceLock.SetIsNew(true);
 
@@ -179,8 +181,12 @@ namespace Game.Maps
                 _temporaryInstanceLocksByPlayer[playerGuid] = new Dictionary<InstanceLockKey, InstanceLock>();
 
             _temporaryInstanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
-            Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Created new temporary instance lock for {playerGuid} in instance {instanceId}");
+
+            Log.outDebug(LogFilter.Instance, 
+                $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
+                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
+                $"Created new temporary instance lock for {playerGuid} in instance {instanceId}");
+
             return instanceLock;
         }
 
@@ -207,8 +213,10 @@ namespace Game.Maps
                             if (playerLocks.Empty())
                                 _temporaryInstanceLocksByPlayer.Remove(playerGuid);
 
-                            Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
+                            Log.outDebug(LogFilter.Instance, 
+                                $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
+                                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
+                                $"Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
                         }
                     }
                 }
@@ -226,14 +234,18 @@ namespace Game.Maps
                     Cypher.Assert((instanceLock as SharedInstanceLock).GetSharedData().InstanceId == updateEvent.InstanceId);
                 }
                 else
+                {
                     instanceLock = new InstanceLock(entries.MapDifficulty.MapID, entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId);
+                }
 
                 lock(_lockObject)
                     _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
 
-                Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Created new instance lock for {playerGuid} in instance {updateEvent.InstanceId}");
+                Log.outDebug(LogFilter.Instance, 
+                    $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
+                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
+                    $"Created new instance lock for {playerGuid} in instance {updateEvent.InstanceId}");
             }
             else
             {
@@ -253,9 +265,11 @@ namespace Game.Maps
             if (updateEvent.CompletedEncounter != null)
             {
                 instanceLock.GetData().CompletedEncountersMask |= 1u << updateEvent.CompletedEncounter.Bit;
-                Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
+                Log.outDebug(LogFilter.Instance, 
+                    $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
                     $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
-                    $"Instance lock for {playerGuid} in instance {updateEvent.InstanceId} gains completed encounter [{updateEvent.CompletedEncounter.Id}-{updateEvent.CompletedEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]}]");
+                    $"Instance lock for {playerGuid} in instance {updateEvent.InstanceId} " +
+                    $"gains completed encounter [{updateEvent.CompletedEncounter.Id}-{updateEvent.CompletedEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]}]");
             }
 
             // Synchronize map completed encounters into players completed encounters for UI
@@ -269,8 +283,11 @@ namespace Game.Maps
             {
                 instanceLock.SetExpiryTime(GetNextResetTime(entries));
                 instanceLock.SetExtended(false);
-                Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
+
+                Log.outDebug(LogFilter.Instance, 
+                    $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
+                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
+                    $"Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK);
@@ -305,7 +322,9 @@ namespace Game.Maps
             if (updateEvent.CompletedEncounter != null)
             {
                 sharedData.CompletedEncountersMask |= 1u << updateEvent.CompletedEncounter.Bit;
-                Log.outDebug(LogFilter.Instance, $"Instance {updateEvent.InstanceId} gains completed encounter [{updateEvent.CompletedEncounter.Id}-{updateEvent.CompletedEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]}]");
+                Log.outDebug(LogFilter.Instance, 
+                    $"Instance {updateEvent.InstanceId} gains completed encounter " +
+                    $"[{updateEvent.CompletedEncounter.Id}-{updateEvent.CompletedEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]}]");
             }
 
             if (updateEvent.EntranceWorldSafeLocId.HasValue)
@@ -335,7 +354,9 @@ namespace Game.Maps
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INSTANCE);
             stmt.SetInt32(0, instanceId);
             DB.Characters.Execute(stmt);
-            Log.outDebug(LogFilter.Instance, $"Deleting instance {instanceId} as it is no longer referenced by any player");
+
+            Log.outDebug(LogFilter.Instance, 
+                $"Deleting instance {instanceId} as it is no longer referenced by any player");
         }
 
         public (DateTime, DateTime) UpdateInstanceLockExtensionForPlayer(ObjectGuid playerGuid, MapDb2Entries entries, bool extended)
@@ -351,8 +372,12 @@ namespace Game.Maps
                 stmt.SetInt32(2, entries.MapDifficulty.MapID);
                 stmt.SetUInt8(3, entries.MapDifficulty.LockID);
                 DB.Characters.Execute(stmt);
-                Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
+
+                Log.outDebug(LogFilter.Instance, 
+                    $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
+                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
+                    $"Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
+
                 return (oldExpiryTime, instanceLock.GetEffectiveExpiryTime());
             }
 

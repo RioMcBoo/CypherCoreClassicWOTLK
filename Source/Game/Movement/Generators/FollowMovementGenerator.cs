@@ -149,8 +149,10 @@ namespace Game.Movement
                     bool allowShortcut = false;
                     Pet oPet = owner.ToPet();
                     if (oPet != null)
+                    {
                         if (target.GetGUID() == oPet.GetOwnerGUID())
                             allowShortcut = true;
+                    }
 
                     bool success = _path.CalculatePath(x, y, z, allowShortcut);
                     if (!success || _path.GetPathType().HasFlag(PathType.NoPath))

@@ -109,7 +109,9 @@ namespace Game.Chat
                 float x, y, z;
                 target.GetClosePoint(out x, out y, out z, _player.GetCombatReach(), 1.0f);
 
-                _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAbsoluteAngle(target), TeleportToOptions.GMMode, target.GetInstanceId());
+                _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAbsoluteAngle(target), 
+                    TeleportToOptions.GMMode, target.GetInstanceId());
+
                 PhasingHandler.InheritPhaseShift(_player, target);
                 _player.UpdateObjectVisibility();
             }
@@ -235,7 +237,10 @@ namespace Game.Chat
             {
                 Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
                 if (target != attacker)
-                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage, 0, 0, VictimState.Hit, 0);
+                {
+                    attacker.SendAttackStateUpdate(
+                        HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage, 0, 0, VictimState.Hit, 0);
+                }
                 return true;
             }
 
@@ -247,7 +252,9 @@ namespace Game.Chat
             // melee damage by specific school
             if (spellInfo == null)
             {
-                DamageInfo dmgInfo = new(attacker, target, damage, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                DamageInfo dmgInfo = 
+                    new(attacker, target, damage, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+
                 Unit.CalcAbsorbResist(dmgInfo);
 
                 if (dmgInfo.GetDamage() == 0)
@@ -265,7 +272,10 @@ namespace Game.Chat
 
             // non-melee damage
 
-            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker)), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = 
+                new(attacker, target, spellInfo, new SpellCastVisual(
+                    spellInfo.GetSpellXSpellVisualId(attacker)), spellInfo.SchoolMask);
+
             damageInfo.damage = damage;
             Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
@@ -290,7 +300,8 @@ namespace Game.Chat
             }
 
             go.ModifyHealth(-damage, handler.GetSession().GetPlayer());
-            handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), spawnId, -damage, go.GetGoValue().Building.Health);
+            handler.SendSysMessage(
+                CypherStrings.GameobjectDamaged, go.GetName(), spawnId, -damage, go.GetGoValue().Building.Health);
             return true;
         }
 
@@ -420,7 +431,9 @@ namespace Game.Chat
                 }
             }
 
-            handler.SendSysMessage(CypherStrings.Distance, handler.GetSession().GetPlayer().GetDistance(obj), handler.GetSession().GetPlayer().GetDistance2d(obj), handler.GetSession().GetPlayer().GetExactDist(obj), handler.GetSession().GetPlayer().GetExactDist2d(obj));
+            handler.SendSysMessage(CypherStrings.Distance, handler.GetSession().GetPlayer().GetDistance(obj), 
+                handler.GetSession().GetPlayer().GetDistance2d(obj), handler.GetSession().GetPlayer().GetExactDist(obj), 
+                handler.GetSession().GetPlayer().GetExactDist2d(obj));
             return true;
         }
 
@@ -453,6 +466,7 @@ namespace Game.Chat
                         // We have a selected player. We'll check him later
                         if (!int.TryParse(arg1, out freezeDuration))
                             return false;
+
                         canApplyFreeze = true;
                     }
                     else
@@ -467,6 +481,7 @@ namespace Game.Chat
                         {
                             if (!int.TryParse(arg2, out freezeDuration))
                                 return false;
+
                             canApplyFreeze = true;
                         }
                         else
@@ -600,7 +615,8 @@ namespace Game.Chat
 
             bool haveMap = TerrainInfo.ExistMap(mapId, gridX, gridY);
             bool haveVMap = TerrainInfo.ExistVMap(mapId, gridX, gridY);
-            bool haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null);
+            bool haveMMap = Global.DisableMgr.IsPathfindingEnabled(mapId) 
+                && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null;
 
             if (haveVMap)
             {
@@ -623,18 +639,28 @@ namespace Game.Chat
             Transport transport = obj.GetTransport<Transport>();
             if (transport != null)
             {
-                handler.SendSysMessage(CypherStrings.TransportPosition, transport.GetGoInfo().MoTransport.SpawnMap, obj.GetTransOffsetX(), obj.GetTransOffsetY(), obj.GetTransOffsetZ(), obj.GetTransOffsetO(),
+                handler.SendSysMessage(
+                    CypherStrings.TransportPosition, transport.GetGoInfo().MoTransport.SpawnMap, 
+                    obj.GetTransOffsetX(), obj.GetTransOffsetY(), obj.GetTransOffsetZ(), obj.GetTransOffsetO(),
                     transport.GetEntry(), transport.GetName());
             }
 
-            handler.SendSysMessage(CypherStrings.GridPosition, cell.GetGridX(), cell.GetGridY(), cell.GetCellX(), cell.GetCellY(), obj.GetInstanceId(),
-                zoneX, zoneY, groundZ, floorZ, map.GetMinHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY()), haveMap, haveVMap, haveMMap);
+            handler.SendSysMessage(
+                CypherStrings.GridPosition, cell.GetGridX(), cell.GetGridY(), cell.GetCellX(), 
+                cell.GetCellY(), obj.GetInstanceId(), zoneX, zoneY, groundZ, floorZ, 
+                map.GetMinHeight(obj.GetPhaseShift(), obj.GetPositionX(), 
+                obj.GetPositionY()), haveMap, haveVMap, haveMMap);
 
             LiquidData liquidStatus;
-            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), out liquidStatus);
+            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), 
+                obj.GetPositionY(), obj.GetPositionZ(), out liquidStatus);
 
             if (liquidStatus != null)
-                handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
+            {
+                handler.SendSysMessage(
+                    CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, 
+                    liquidStatus.entry, liquidStatus.type_flags, status);
+            }
 
             PhasingHandler.PrintToChat(handler, obj);
 
@@ -746,7 +772,12 @@ namespace Game.Chat
                 kickReasonStr = kickReason;
 
             if (WorldConfig.GetBoolValue(WorldCfg.ShowKickInWorld))
-                Global.WorldMgr.SendWorldText(CypherStrings.CommandKickmessageWorld, (handler.GetSession() != null ? handler.GetSession().GetPlayerName() : "Server"), playerName, kickReasonStr);
+            {
+                Global.WorldMgr.SendWorldText(
+                    CypherStrings.CommandKickmessageWorld, 
+                    handler.GetSession() != null ? handler.GetSession().GetPlayerName() : "Server", 
+                    playerName, kickReasonStr);
+            }
             else
                 handler.SendSysMessage(CypherStrings.CommandKickmessage, playerName);
 
@@ -851,7 +882,10 @@ namespace Game.Chat
                 return false;
             }
 
-            handler.SendSysMessage(CypherStrings.MovegensList, (unit.IsTypeId(TypeId.Player) ? "Player" : "Creature"), unit.GetGUID().ToString());
+            handler.SendSysMessage(
+                CypherStrings.MovegensList, 
+                unit.IsTypeId(TypeId.Player) ? "Player" : "Creature", 
+                unit.GetGUID().ToString());
 
             if (unit.GetMotionMaster().Empty())
             {
@@ -883,17 +917,29 @@ namespace Game.Chat
                         if (info.TargetGUID.IsEmpty())
                             handler.SendSysMessage(CypherStrings.MovegensChaseNull);
                         else if (info.TargetGUID.IsPlayer())
-                            handler.SendSysMessage(CypherStrings.MovegensChasePlayer, info.TargetName, info.TargetGUID.ToString());
+                        {
+                            handler.SendSysMessage(
+                                CypherStrings.MovegensChasePlayer, info.TargetName, info.TargetGUID.ToString());
+                        }
                         else
-                            handler.SendSysMessage(CypherStrings.MovegensChaseCreature, info.TargetName, info.TargetGUID.ToString());
+                        {
+                            handler.SendSysMessage(
+                                CypherStrings.MovegensChaseCreature, info.TargetName, info.TargetGUID.ToString());
+                        }
                         break;
                     case MovementGeneratorType.Follow:
                         if (info.TargetGUID.IsEmpty())
                             handler.SendSysMessage(CypherStrings.MovegensFollowNull);
                         else if (info.TargetGUID.IsPlayer())
-                            handler.SendSysMessage(CypherStrings.MovegensFollowPlayer, info.TargetName, info.TargetGUID.ToString());
+                        {
+                            handler.SendSysMessage(
+                                CypherStrings.MovegensFollowPlayer, info.TargetName, info.TargetGUID.ToString());
+                        }
                         else
-                            handler.SendSysMessage(CypherStrings.MovegensFollowCreature, info.TargetName, info.TargetGUID.ToString());
+                        {
+                            handler.SendSysMessage(
+                                CypherStrings.MovegensFollowCreature, info.TargetName, info.TargetGUID.ToString());
+                        }
                         break;
                     case MovementGeneratorType.Home:
                         if (unit.IsTypeId(TypeId.Unit))
@@ -990,7 +1036,10 @@ namespace Game.Chat
             string nameLink = handler.PlayerLink(player.GetName());
 
             if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
-                Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReasonStr);
+            {
+                Global.WorldMgr.SendWorldText(
+                    CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReasonStr);
+            }
             if (target != null)
             {
                 target.SendSysMessage(CypherStrings.YourChatDisabled, muteTime, muteBy, muteReasonStr);
@@ -1034,7 +1083,9 @@ namespace Game.Chat
                 // set it to string
                 string buffer = Time.UnixTimeToDateTime(sqlTime).ToShortTimeString();
 
-                handler.SendSysMessage(CypherStrings.CommandMutehistoryOutput, buffer, result.Read<uint>(1), result.Read<string>(2), result.Read<string>(3));
+                handler.SendSysMessage(
+                    CypherStrings.CommandMutehistoryOutput, buffer, result.Read<uint>(1), 
+                    result.Read<string>(2), result.Read<string>(3));
             } while (result.NextRow());
 
             return true;
@@ -1337,7 +1388,9 @@ namespace Game.Chat
                     if (gguid != 0)
                     {
                         // Guild Data - an own query, because it may not happen.
-                        PreparedStatement stmt3 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
+                        PreparedStatement stmt3 = 
+                            CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
+
                         stmt3.SetInt64(0, lowguid);
                         SQLResult result5 = DB.Characters.Query(stmt3);
                         {
@@ -1357,7 +1410,10 @@ namespace Game.Chat
 
             // Initiate output
             // Output I. LANG_PINFO_PLAYER
-            handler.SendSysMessage(CypherStrings.PinfoPlayer, target != null ? "" : handler.GetCypherString(CypherStrings.Offline), nameLink, targetGuid.ToString());
+            handler.SendSysMessage(
+                CypherStrings.PinfoPlayer, 
+                target != null ? "" : handler.GetCypherString(CypherStrings.Offline), 
+                nameLink, targetGuid.ToString());
 
             // Output II. LANG_PINFO_GM_ACTIVE if character is gamemaster
             if (target != null && target.IsGameMaster())
@@ -1384,7 +1440,8 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.PinfoAccRegmails, regMail, eMail);
 
             // Output IX. LANG_PINFO_ACC_IP
-            handler.SendSysMessage(CypherStrings.PinfoAccIp, lastIp, locked != 0 ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No));
+            handler.SendSysMessage(CypherStrings.PinfoAccIp, lastIp, locked != 0 ? 
+                handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No));
 
             // Output X. LANG_PINFO_CHR_LEVEL
             if (level != WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
@@ -1393,7 +1450,9 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.PinfoChrLevelHigh, level);
 
             // Output XI. LANG_PINFO_CHR_RACE
-            handler.SendSysMessage(CypherStrings.PinfoChrRace, (gender == 0 ? handler.GetCypherString(CypherStrings.CharacterGenderMale) : handler.GetCypherString(CypherStrings.CharacterGenderFemale)),
+            handler.SendSysMessage(CypherStrings.PinfoChrRace, 
+                gender == 0 ? handler.GetCypherString(CypherStrings.CharacterGenderMale) 
+                : handler.GetCypherString(CypherStrings.CharacterGenderFemale),
                 Global.DB2Mgr.GetChrRaceName(raceid, locale), Global.DB2Mgr.GetClassName(classid, locale));
 
             // Output XII. LANG_PINFO_CHR_ALIVE
@@ -1447,10 +1506,12 @@ namespace Game.Chat
             }
 
             // Output XX. LANG_PINFO_CHR_PLAYEDTIME
-            handler.SendSysMessage(CypherStrings.PinfoChrPlayedtime, (Time.secsToTimeString(totalPlayerTime, TimeFormat.ShortText, true)));
+            handler.SendSysMessage(CypherStrings.PinfoChrPlayedtime, 
+                Time.secsToTimeString(totalPlayerTime, TimeFormat.ShortText, true));
 
             // Mail Data - an own query, because it may or may not be useful.
-            // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?"
+            // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*)
+            // AS 'totalmail' FROM mail WHERE `receiver` = ?"
             PreparedStatement stmt4 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PINFO_MAILS);
             stmt4.SetInt64(0, lowguid);
             SQLResult result6 = DB.Characters.Query(stmt4);
@@ -1803,10 +1864,14 @@ namespace Game.Chat
 
                 string nameLink = handler.PlayerLink(targetName);
 
-                handler.SendSysMessage(CypherStrings.Summoning, nameLink, handler.GetCypherString(CypherStrings.Offline));
+                handler.SendSysMessage(
+                    CypherStrings.Summoning, nameLink, handler.GetCypherString(CypherStrings.Offline));
 
                 // in point where GM stay
-                Player.SavePositionInDB(new WorldLocation(_player.GetMapId(), _player.GetPositionX(), _player.GetPositionY(), _player.GetPositionZ(), _player.GetOrientation()), _player.GetZoneId(), targetGuid);
+                Player.SavePositionInDB(
+                    new WorldLocation(_player.GetMapId(), _player.GetPositionX(), 
+                    _player.GetPositionY(), _player.GetPositionZ(), _player.GetOrientation()), 
+                    _player.GetZoneId(), targetGuid);
             }
 
             return true;
@@ -1953,7 +2018,8 @@ namespace Game.Chat
             int SPELL_UNSTUCK_VISUAL = 2683;
 
             // No args required for players
-            if (handler.GetSession() != null && handler.GetSession().HasPermission(RBACPermissions.CommandsUseUnstuckWithArgs))
+            if (handler.GetSession() != null 
+                && handler.GetSession().HasPermission(RBACPermissions.CommandsUseUnstuckWithArgs))
             {
                 // 7355: "Stuck"
                 var player1 = handler.GetSession().GetPlayer();
@@ -1982,7 +2048,10 @@ namespace Game.Chat
                 SQLResult result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())
                 {
-                    Player.SavePositionInDB(new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f), result.Read<ushort>(1), targetGUID);
+                    Player.SavePositionInDB(
+                        new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), 
+                        result.Read<float>(4), 0.0f), result.Read<ushort>(1), targetGUID);
+
                     return true;
                 }
 
@@ -1998,8 +2067,13 @@ namespace Game.Chat
                 Player caster = handler.GetSession().GetPlayer();
                 if (caster != null)
                 {
-                    ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Spell.SendCastResult(caster, spellInfo, new SpellCastVisual(SPELL_UNSTUCK_VISUAL), castId, SpellCastResult.CantDoThatRightNow);
+                    ObjectGuid castId = 
+                        ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), 
+                        SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
+
+                    Spell.SendCastResult(caster, spellInfo, 
+                        new SpellCastVisual(SPELL_UNSTUCK_VISUAL), 
+                        castId, SpellCastResult.CantDoThatRightNow);
                 }
 
                 return false;
@@ -2081,7 +2155,7 @@ namespace Game.Chat
                 else
                     return false;
             }
-            else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
+            else    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
             {
                 string idStr = handler.ExtractKeyFromLink(args, "Hitem");
                 if (string.IsNullOrEmpty(idStr))
@@ -2122,20 +2196,25 @@ namespace Game.Chat
                 if (destroyedItemCount > 0)
                 {
                     // output the amount of items successfully destroyed
-                    handler.SendSysMessage(CypherStrings.Removeitem, itemId, destroyedItemCount, handler.GetNameLink(playerTarget));
+                    handler.SendSysMessage(
+                        CypherStrings.Removeitem, itemId, destroyedItemCount, 
+                        handler.GetNameLink(playerTarget));
 
                     // check to see if we were unable to destroy all of the amount requested.
                     var unableToDestroyItemCount = -count - destroyedItemCount;
                     if (unableToDestroyItemCount > 0)
                     {
                         // output message for the amount of items we couldn't destroy
-                        handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, unableToDestroyItemCount, handler.GetNameLink(playerTarget));
+                        handler.SendSysMessage(
+                            CypherStrings.RemoveitemFailure, itemId, unableToDestroyItemCount, 
+                            handler.GetNameLink(playerTarget));
                     }
                 }
                 else
                 {
                     // failed to destroy items of the amount requested
-                    handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, -count, handler.GetNameLink(playerTarget));
+                    handler.SendSysMessage(
+                        CypherStrings.RemoveitemFailure, itemId, -count, handler.GetNameLink(playerTarget));
                 }
                 return true;
             }
@@ -2145,7 +2224,9 @@ namespace Game.Chat
 
             // check space and find places
             List<(ItemPos Item, int Count)> dest;
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
+            InventoryResult msg = playerTarget.CanStoreNewItem(
+                ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
+
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= noSpaceForCount;
 
@@ -2289,7 +2370,7 @@ namespace Game.Chat
                 else
                     return false;
             }
-            else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
+            else    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
             {
                 string id = handler.ExtractKeyFromLink(tailArgs, "Hitem");
                 if (id.IsEmpty())
@@ -2328,20 +2409,25 @@ namespace Game.Chat
                 if (destroyedItemCount > 0)
                 {
                     // output the amount of items successfully destroyed
-                    handler.SendSysMessage(CypherStrings.Removeitem, itemId, destroyedItemCount, handler.GetNameLink(playerTarget));
+                    handler.SendSysMessage(
+                        CypherStrings.Removeitem, itemId, destroyedItemCount, 
+                        handler.GetNameLink(playerTarget));
 
                     // check to see if we were unable to destroy all of the amount requested.
                     int unableToDestroyItemCount = -count - destroyedItemCount;
                     if (unableToDestroyItemCount > 0)
                     {
                         // output message for the amount of items we couldn't destroy
-                        handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, unableToDestroyItemCount, handler.GetNameLink(playerTarget));
+                        handler.SendSysMessage(
+                            CypherStrings.RemoveitemFailure, itemId, unableToDestroyItemCount, 
+                            handler.GetNameLink(playerTarget));
                     }
                 }
                 else
                 {
                     // failed to destroy items of the amount requested
-                    handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, -count, handler.GetNameLink(playerTarget));
+                    handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, -count, 
+                        handler.GetNameLink(playerTarget));
                 }
 
                 return true;
@@ -2352,7 +2438,9 @@ namespace Game.Chat
 
             // check space and find places
             List<(ItemPos Item, int Count)> dest;
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
+            InventoryResult msg = playerTarget.CanStoreNewItem(
+                ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
+
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= noSpaceForCount;
 
@@ -2363,7 +2451,8 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, 
+                ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)

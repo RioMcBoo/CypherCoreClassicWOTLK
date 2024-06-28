@@ -104,7 +104,9 @@ namespace Game.Movement
             // TODO: what to do in such cases? problem is in input data (all points are at same coords)
             if (spline.Length() < 1)
             {
-                Log.outError(LogFilter.Unit, "MoveSpline.init_spline: zero length spline, wrong input data?");
+                Log.outError(LogFilter.Unit, 
+                    "MoveSpline.init_spline: zero length spline, wrong input data?");
+                
                 spline.Set_length(spline.Last(), spline.IsCyclic() ? 1000 : 1);
             }
             point_Idx = spline.First();
@@ -125,12 +127,14 @@ namespace Game.Movement
         public int CurrentSplineIdx() { return point_Idx; }
         public int GetId() { return m_Id; }
         public bool Finalized() { return splineflags.HasFlag(SplineFlag.Done); }
+
         void _Finalize()
         {
             splineflags.SetUnsetFlag(SplineFlag.Done);
             point_Idx = spline.Last() - 1;
             time_passed = Duration();
         }
+
         public Vector4 ComputePosition(int time_point, int point_index)
         {
             float u = 1.0f;
@@ -171,10 +175,12 @@ namespace Game.Movement
 
             return new Vector4(c.X, c.Y, c.Z, orientation);
         }
+
         public Vector4 ComputePosition()
         {
             return ComputePosition(time_passed, point_Idx);
         }
+
         public Vector4 ComputePosition(int time_offset)
         {
             int time_point = time_passed + time_offset;
@@ -193,6 +199,7 @@ namespace Game.Movement
 
             return ComputePosition(time_point, point_index);
         }
+
         public void ComputeParabolicElevation(int time_point, ref float el)
         {
             if (time_point > effect_start_time)
@@ -205,12 +212,14 @@ namespace Game.Movement
                 el += (t_durationf - t_passedf) * 0.5f * vertical_acceleration * t_passedf;
             }
         }
+
         public void ComputeFallElevation(int time_point, ref float el)
         {
             float z_now = spline.GetPoint(spline.First()).Z - ComputeFallElevation(MSToSec((uint)time_point), false);
             float final_z = FinalDestination().Z;
             el = Math.Max(z_now, final_z);
         }
+
         public static float ComputeFallElevation(float t_passed, bool isSafeFall, float start_velocity = 0.0f)
         {
             float termVel;
@@ -249,6 +258,7 @@ namespace Game.Movement
         }
 
         public void Interrupt() { splineflags.SetUnsetFlag(SplineFlag.Done); }
+        
         public void UpdateState(int difftime)
         {
             do
@@ -256,6 +266,7 @@ namespace Game.Movement
                 UpdateState(ref difftime);
             } while (difftime > 0);
         }
+
         UpdateResult UpdateState(ref int ms_time_diff)
         {
             if (Finalized())
@@ -329,6 +340,7 @@ namespace Game.Movement
 
             return result;
         }
+
         int NextTimestamp() { return spline.Length(point_Idx + 1); }
         int SegmentTimeElapsed() { return NextTimestamp() - time_passed; }
         public bool IsCyclic() { return splineflags.HasFlag(SplineFlag.Cyclic); }
@@ -365,6 +377,7 @@ namespace Game.Movement
                 velocityInv = 1000f / _velocity;
                 time = 1;
             }
+
             public float velocityInv;
             public int time;
 
@@ -420,6 +433,7 @@ namespace Game.Movement
             NextSegment = 0x08
         }
     }
+
     public interface IInitializer<T>
     {
         int Invoke(Spline<T> s, int i);

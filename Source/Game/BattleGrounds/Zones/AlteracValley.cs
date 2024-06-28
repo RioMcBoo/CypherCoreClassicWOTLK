@@ -132,7 +132,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
 
         public override void HandleKillUnit(Creature unit, Unit killer)
         {
-            Log.outDebug(LogFilter.Battleground, "bg_av HandleKillUnit {}", unit.GetEntry());
+            Log.outDebug(LogFilter.Battleground, $"bg_av HandleKillUnit {unit.GetEntry()}");
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
 
@@ -140,7 +140,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             {
                 case CreatureIds.Vanndar:
                 {
-                    UpdateWorldState((int)WorldStateIds.VandaarAlive, 0);
+                    UpdateWorldState(WorldStateIds.VandaarAlive, 0);
                     CastSpellOnTeam(MiscConst.SpellCompleteAlteracValleyQuest, Team.Horde); //this is a spell which finishes a quest where a player has to kill the boss
                     RewardReputationToTeam(MiscConst.FactionFrostwolfClan, MiscConst.RepGainBoss, Team.Horde);
                     RewardHonorToTeam(GetBonusHonorFromKill(MiscConst.HonorKillBonusBoss), Team.Horde);
@@ -149,7 +149,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 }
                 case CreatureIds.Drekthar:
                 {
-                    UpdateWorldState((int)WorldStateIds.DrektharAlive, 0);
+                    UpdateWorldState(WorldStateIds.DrektharAlive, 0);
                     CastSpellOnTeam(MiscConst.SpellCompleteAlteracValleyQuest, Team.Alliance); //this is a spell which finishes a quest where a player has to kill the boss
                     RewardReputationToTeam(MiscConst.FactionStormpikeGuard, MiscConst.RepGainBoss, Team.Alliance);
                     RewardHonorToTeam(GetBonusHonorFromKill(MiscConst.HonorKillBonusBoss), Team.Alliance);
@@ -158,7 +158,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 }
                 case CreatureIds.Balinda:
                 {
-                    UpdateWorldState((int)WorldStateIds.BalindaAlive, 0);
+                    UpdateWorldState(WorldStateIds.BalindaAlive, 0);
                     RewardReputationToTeam(MiscConst.FactionFrostwolfClan, MiscConst.RepGainCaptain, Team.Horde);
                     RewardHonorToTeam(GetBonusHonorFromKill(MiscConst.HonorKillBonusCaptain), Team.Horde);
                     UpdateScore(Team.Alliance, MiscConst.ResourceLossCaptain);
@@ -169,7 +169,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 }
                 case CreatureIds.Galvangar:
                 {
-                    UpdateWorldState((int)WorldStateIds.GalvagarAlive, 0);
+                    UpdateWorldState(WorldStateIds.GalvagarAlive, 0);
                     RewardReputationToTeam(MiscConst.FactionStormpikeGuard, MiscConst.RepGainCaptain, Team.Alliance);
                     RewardHonorToTeam(GetBonusHonorFromKill(MiscConst.HonorKillBonusCaptain), Team.Alliance);
                     UpdateScore(Team.Horde, MiscConst.ResourceLossCaptain);
@@ -221,7 +221,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             Team team = GetPlayerTeam(player.GetGUID());
             int teamIndex = GetTeamIndexByTeamId(team);
             /// @todo add reputation, events (including quest not available anymore, next quest available, go/npc de/spawning)and maybe honor
-            Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed", questid);
+            Log.outDebug(LogFilter.Battleground, $"BG_AV Quest {questid} completed");
             switch ((QuestIds)questid)
             {
                 case QuestIds.AScraps1:
@@ -235,21 +235,24 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                     m_Team_QuestStatus[teamIndex][1]++;
                     RewardReputationToTeam((int)team, 1, team);
                     if (m_Team_QuestStatus[teamIndex][1] == 30)
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                     break;
                 case QuestIds.ACommander2:
                 case QuestIds.HCommander2:
                     m_Team_QuestStatus[teamIndex][2]++;
                     RewardReputationToTeam((int)team, 1, team);
                     if (m_Team_QuestStatus[teamIndex][2] == 60)
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                     break;
                 case QuestIds.ACommander3:
                 case QuestIds.HCommander3:
                     m_Team_QuestStatus[teamIndex][3]++;
                     RewardReputationToTeam((int)team, 1, team);
                     if (m_Team_QuestStatus[teamIndex][3] == 120)
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                     break;
                 case QuestIds.ABoss1:
                 case QuestIds.HBoss1:
@@ -259,7 +262,8 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 case QuestIds.HBoss2:
                     m_Team_QuestStatus[teamIndex][4]++;
                     if (m_Team_QuestStatus[teamIndex][4] >= 200)
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                     UpdateWorldState((int)(teamIndex == BattleGroundTeamId.Alliance ? WorldStateIds.IvusStormCrystalCount : WorldStateIds.LokholarStormpikeSoldiersBloodCount), (int)m_Team_QuestStatus[teamIndex][4]);
                     break;
                 case QuestIds.ANearMine:
@@ -267,9 +271,11 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                     m_Team_QuestStatus[teamIndex][5]++;
                     if (m_Team_QuestStatus[teamIndex][5] == 28)
                     {
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                         if (m_Team_QuestStatus[teamIndex][6] == 7)
-                            Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here - ground assault ready", questid);
+                            Log.outDebug(LogFilter.Battleground, 
+                                $"BG_AV Quest {questid} completed (need to implement some events here - ground assault ready");
                     }
                     break;
                 case QuestIds.AOtherMine:
@@ -277,9 +283,11 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                     m_Team_QuestStatus[teamIndex][6]++;
                     if (m_Team_QuestStatus[teamIndex][6] == 7)
                     {
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                         if (m_Team_QuestStatus[teamIndex][5] == 20)
-                            Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here - ground assault ready", questid);
+                            Log.outDebug(LogFilter.Battleground, 
+                                $"BG_AV Quest {questid} completed (need to implement some events here - ground assault ready");
                     }
                     break;
                 case QuestIds.ARiderHide:
@@ -287,9 +295,11 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                     m_Team_QuestStatus[teamIndex][7]++;
                     if (m_Team_QuestStatus[teamIndex][7] == 25)
                     {
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                         if (m_Team_QuestStatus[teamIndex][8] == 25)
-                            Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here - rider assault ready", questid);
+                            Log.outDebug(LogFilter.Battleground, 
+                                $"BG_AV Quest {questid} completed (need to implement some events here - rider assault ready");
                     }
                     break;
                 case QuestIds.ARiderTame:
@@ -297,13 +307,15 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                     m_Team_QuestStatus[teamIndex][8]++;
                     if (m_Team_QuestStatus[teamIndex][8] == 25)
                     {
-                        Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
+                        Log.outDebug(LogFilter.Battleground, 
+                            $"BG_AV Quest {questid} completed (need to implement some events here");
                         if (m_Team_QuestStatus[teamIndex][7] == 25)
-                            Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here - rider assault ready", questid);
+                            Log.outDebug(LogFilter.Battleground, 
+                                $"BG_AV Quest {questid} completed (need to implement some events here - rider assault ready");
                     }
                     break;
                 default:
-                    Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed but is not interesting at all", questid);
+                    Log.outDebug(LogFilter.Battleground, $"BG_AV Quest {questid} completed but is not interesting at all");
                     break;
             }
         }
@@ -416,8 +428,8 @@ namespace Game.BattleGrounds.Zones.AlteracValley
         {
             Log.outDebug(LogFilter.Battleground, "BG_AV: start spawning mine stuff");
 
-            UpdateWorldState((int)WorldStateIds.ShowHordeReinforcements, 1);
-            UpdateWorldState((int)WorldStateIds.ShowAllianceReinforcements, 1);
+            UpdateWorldState(WorldStateIds.ShowHordeReinforcements, 1);
+            UpdateWorldState(WorldStateIds.ShowAllianceReinforcements, 1);
 
             // Achievement: The Alterac Blitz
             TriggerGameEvent(MiscConst.EventStartBattle);
@@ -725,10 +737,13 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             if (owner == team || _nodes[(int)node].State != AVStates.PointAssaulted)
                 return;
 
-            Log.outDebug(LogFilter.Battleground, "player defends point object: {} node: {}", obj, node);
+            Log.outDebug(LogFilter.Battleground, 
+                $"player defends point object: {obj} node: {node}");
+
             if (_nodes[(int)node].PrevOwner != team)
             {
-                Log.outError(LogFilter.Battleground, "BG_AV: player defends point which doesn't belong to his team {}", node);
+                Log.outError(LogFilter.Battleground, 
+                    $"BG_AV: player defends point which doesn't belong to his team {node}");
                 return;
             }
 
@@ -761,7 +776,9 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             Team owner = _nodes[(int)node].Owner; //maybe name it prevowner
             Team team = GetPlayerTeam(player.GetGUID());
 
-            Log.outDebug(LogFilter.Battleground, "bg_av: player assaults point object {} node {}", obj, node);
+            Log.outDebug(LogFilter.Battleground, 
+                $"bg_av: player assaults point object {obj} node {node}");
+
             if (owner == team || team == _nodes[(int)node].TotalOwner)
                 return; //surely a gm used this object
 
@@ -804,7 +821,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             }
 
             if (node == AVNodes.SnowfallGrave)
-                UpdateWorldState((int)WorldStateIds.SnowfallGraveyardUncontrolled, _nodes[(int)node].Owner == Team.Other ? 1 : 0);
+                UpdateWorldState(WorldStateIds.SnowfallGraveyardUncontrolled, _nodes[(int)node].Owner == Team.Other ? 1 : 0);
         }
 
         void SendMineWorldStates(AlteracValleyMine mine)
@@ -975,12 +992,12 @@ namespace Game.BattleGrounds.Zones.AlteracValley
         public byte TextIdAlliance;
         public byte TextIdHorde;
 
-        public StaticMineInfo(WorldStateIds worldStateOwner, WorldStateIds worldStateAllianceControlled, WorldStateIds worldStateHordeControlled, WorldStateIds worldStateNeutralControlled, byte textIdAlliance, byte textIdHorde)
+        public StaticMineInfo(int worldStateOwner, int worldStateAllianceControlled, int worldStateHordeControlled, int worldStateNeutralControlled, byte textIdAlliance, byte textIdHorde)
         {
-            WorldStateOwner = (int)worldStateOwner;
-            WorldStateAllianceControlled = (int)worldStateAllianceControlled;
-            WorldStateHordeControlled = (int)worldStateHordeControlled;
-            WorldStateNeutralControlled = (int)worldStateNeutralControlled;
+            WorldStateOwner = worldStateOwner;
+            WorldStateAllianceControlled = worldStateAllianceControlled;
+            WorldStateHordeControlled = worldStateHordeControlled;
+            WorldStateNeutralControlled = worldStateNeutralControlled;
             TextIdAlliance = textIdAlliance;
             TextIdHorde = textIdHorde;
         }
@@ -1329,131 +1346,131 @@ namespace Game.BattleGrounds.Zones.AlteracValley
         PointControled = 3
     }
 
-    enum WorldStateIds
+    struct WorldStateIds
     {
-        AllianceReinforcements = 3127,
-        HordeReinforcements = 3128,
-        ShowHordeReinforcements = 3133,
-        ShowAllianceReinforcements = 3134,
-        MaxReinforcements = 3136,
+        public static int AllianceReinforcements = 3127;
+        public static int HordeReinforcements = 3128;
+        public static int ShowHordeReinforcements = 3133;
+        public static int ShowAllianceReinforcements = 3134;
+        public static int MaxReinforcements = 3136;
 
         // Graves
         // Alliance
         //Stormpike First Aid Station
-        StormpikeAidStationAllianceControlled = 1325,
-        StormpikeAidStationInConflictAllianceAttacking = 1326,
-        StormpikeAidStationHordeControlled = 1327,
-        StormpikeAidStationInConflictHordeAttacking = 1328,
+        public static int StormpikeAidStationAllianceControlled = 1325;
+        public static int StormpikeAidStationInConflictAllianceAttacking = 1326;
+        public static int StormpikeAidStationHordeControlled = 1327;
+        public static int StormpikeAidStationInConflictHordeAttacking = 1328;
         //Stormpike Graveyard
-        StormpikeGraveyardAllianceControlled = 1333,
-        StormpikeGraveyardInConflictAllianceAttacking = 1335,
-        StormpikeGraveyardHordeControlled = 1334,
-        StormpikeGraveyardInConflictHordeAttacking = 1336,
+        public static int StormpikeGraveyardAllianceControlled = 1333;
+        public static int StormpikeGraveyardInConflictAllianceAttacking = 1335;
+        public static int StormpikeGraveyardHordeControlled = 1334;
+        public static int StormpikeGraveyardInConflictHordeAttacking = 1336;
         //Stoneheart Grave
-        StonehearthGraveyardAllianceControlled = 1302,
-        StonehearthGraveyardInConflictAllianceAttacking = 1304,
-        StonehearthGraveyardHordeControlled = 1301,
-        StonehearthGraveyardInConflictHordeAttacking = 1303,
+        public static int StonehearthGraveyardAllianceControlled = 1302;
+        public static int StonehearthGraveyardInConflictAllianceAttacking = 1304;
+        public static int StonehearthGraveyardHordeControlled = 1301;
+        public static int StonehearthGraveyardInConflictHordeAttacking = 1303;
         //Neutral
         //Snowfall Grave
-        SnowfallGraveyardUncontrolled = 1966,
-        SnowfallGraveyardAllianceControlled = 1341,
-        SnowfallGraveyardInConflictAllianceAttacking = 1343,
-        SnowfallGraveyardHordeControlled = 1342,
-        SnowfallGraveyardInConflictHordeAttacking = 1344,
+        public static int SnowfallGraveyardUncontrolled = 1966;
+        public static int SnowfallGraveyardAllianceControlled = 1341;
+        public static int SnowfallGraveyardInConflictAllianceAttacking = 1343;
+        public static int SnowfallGraveyardHordeControlled = 1342;
+        public static int SnowfallGraveyardInConflictHordeAttacking = 1344;
         //Horde
         //Iceblood Grave
-        IcebloodGraveyardAllianceControlled = 1346,
-        IcebloodGraveyardInConflictAllianceAttacking = 1348,
-        IcebloodGraveyardHordeControlled = 1347,
-        IcebloodGraveyardInConflictHordeAttacking = 1349,
+        public static int IcebloodGraveyardAllianceControlled = 1346;
+        public static int IcebloodGraveyardInConflictAllianceAttacking = 1348;
+        public static int IcebloodGraveyardHordeControlled = 1347;
+        public static int IcebloodGraveyardInConflictHordeAttacking = 1349;
         //Frostwolf Grave
-        FrostwolfGraveyardAllianceControlled = 1337,
-        FrostwolfGraveyardInConflictAllianceAttacking = 1339,
-        FrostwolfGraveyardHordeControlled = 1338,
-        FrostwolfGraveyardInConflictHordeAttacking = 1340,
+        public static int FrostwolfGraveyardAllianceControlled = 1337;
+        public static int FrostwolfGraveyardInConflictAllianceAttacking = 1339;
+        public static int FrostwolfGraveyardHordeControlled = 1338;
+        public static int FrostwolfGraveyardInConflictHordeAttacking = 1340;
         //Frostwolf Hut
-        FrostwolfReliefHutAllianceControlled = 1329,
-        FrostwolfReliefHutInConflictAllianceAttacking = 1331,
-        FrostwolfReliefHutHordeControlled = 1330,
-        FrostwolfReliefHutInConflictHordeAttacking = 1332,
+        public static int FrostwolfReliefHutAllianceControlled = 1329;
+        public static int FrostwolfReliefHutInConflictAllianceAttacking = 1331;
+        public static int FrostwolfReliefHutHordeControlled = 1330;
+        public static int FrostwolfReliefHutInConflictHordeAttacking = 1332;
 
         //Towers
         //Alliance
         //Dunbaldar South Bunker
-        DunBaldarSouthBunkerOwner = 1181,
-        DunBaldarSouthBunkerAllianceControlled = 1361,
-        DunBaldarSouthBunkerDestroyed = 1370,
-        DunBaldarSouthBunkerInConflictHordeAttacking = 1378,
-        DunBaldarSouthBunkerInConflictAllianceAttacking = 1374, // Unused
+        public static int DunBaldarSouthBunkerOwner = 1181;
+        public static int DunBaldarSouthBunkerAllianceControlled = 1361;
+        public static int DunBaldarSouthBunkerDestroyed = 1370;
+        public static int DunBaldarSouthBunkerInConflictHordeAttacking = 1378;
+        public static int DunBaldarSouthBunkerInConflictAllianceAttacking = 1374; // Unused
                                                                 //Dunbaldar North Bunker
-        DunBaldarNorthBunkerOwner = 1182,
-        DunBaldarNorthBunkerAllianceControlled = 1362,
-        DunBaldarNorthBunkerDestroyed = 1371,
-        DunBaldarNorthBunkerInConflictHordeAttacking = 1379,
-        DunBaldarNorthBunkerInConflictAllianceAttacking = 1375, // Unused
+        public static int DunBaldarNorthBunkerOwner = 1182;
+        public static int DunBaldarNorthBunkerAllianceControlled = 1362;
+        public static int DunBaldarNorthBunkerDestroyed = 1371;
+        public static int DunBaldarNorthBunkerInConflictHordeAttacking = 1379;
+        public static int DunBaldarNorthBunkerInConflictAllianceAttacking = 1375; // Unused
                                                                 //Icewing Bunker
-        IcewingBunkerOwner = 1183,
-        IcewingBunkerAllianceControlled = 1363,
-        IcewingBunkerDestroyed = 1372,
-        IcewingBunkerInConflictHordeAttacking = 1380,
-        IcewingBunkerInConflictAllianceAttacking = 1376, // Unused
+        public static int IcewingBunkerOwner = 1183;
+        public static int IcewingBunkerAllianceControlled = 1363;
+        public static int IcewingBunkerDestroyed = 1372;
+        public static int IcewingBunkerInConflictHordeAttacking = 1380;
+        public static int IcewingBunkerInConflictAllianceAttacking = 1376; // Unused
                                                          //Stoneheart Bunker
-        StonehearthBunkerOwner = 1184,
-        StonehearthBunkerAllianceControlled = 1364,
-        StonehearthBunkerDestroyed = 1373,
-        StonehearthBunkerInConflictHordeAttacking = 1381,
-        StonehearthBunkerInConflictAllianceAttacking = 1377, // Unused
+        public static int StonehearthBunkerOwner = 1184;
+        public static int StonehearthBunkerAllianceControlled = 1364;
+        public static int StonehearthBunkerDestroyed = 1373;
+        public static int StonehearthBunkerInConflictHordeAttacking = 1381;
+        public static int StonehearthBunkerInConflictAllianceAttacking = 1377; // Unused
                                                              //Horde
                                                              //Iceblood Tower
-        IcebloodTowerOwner = 1187,
-        IcebloodTowerDestroyed = 1368,
-        IcebloodTowerHordeControlled = 1385,
-        IcebloodTowerInConflictAllianceAttacking = 1390,
-        IcebloodTowerInConflictHordeAttacking = 1395, // Unused
+        public static int IcebloodTowerOwner = 1187;
+        public static int IcebloodTowerDestroyed = 1368;
+        public static int IcebloodTowerHordeControlled = 1385;
+        public static int IcebloodTowerInConflictAllianceAttacking = 1390;
+        public static int IcebloodTowerInConflictHordeAttacking = 1395; // Unused
                                                       //Tower Point
-        TowerPointOwner = 1188,
-        TowerPointDestroyed = 1367,
-        TowerPointHordeControlled = 1384,
-        TowerPointInConflictAllianceAttacking = 1389,
-        TowerPointInConflictHordeAttacking = 1394, // Unused
+        public static int TowerPointOwner = 1188;
+        public static int TowerPointDestroyed = 1367;
+        public static int TowerPointHordeControlled = 1384;
+        public static int TowerPointInConflictAllianceAttacking = 1389;
+        public static int TowerPointInConflictHordeAttacking = 1394; // Unused
                                                    //Frostwolf West
-        WestFrostwolfTowerOwner = 1185,
-        WestFrostwolfTowerDestroyed = 1365,
-        WestFrostwolfTowerHordeControlled = 1382,
-        WestFrostwolfTowerInConflictAllianceAttacking = 1387,
-        WestFrostwolfTowerInConflictHordeAttacking = 1392, // Unused
+        public static int WestFrostwolfTowerOwner = 1185;
+        public static int WestFrostwolfTowerDestroyed = 1365;
+        public static int WestFrostwolfTowerHordeControlled = 1382;
+        public static int WestFrostwolfTowerInConflictAllianceAttacking = 1387;
+        public static int WestFrostwolfTowerInConflictHordeAttacking = 1392; // Unused
                                                            //Frostwolf East
-        EastFrostwolfTowerOwner = 1186,
-        EastFrostwolfTowerDestroyed = 1366,
-        EastFrostwolfTowerHordeControlled = 1383,
-        EastFrostwolfTowerInConflictAllianceAttacking = 1388,
-        EastFrostwolfTowerInConflictHordeAttacking = 1393, // Unused
+        public static int EastFrostwolfTowerOwner = 1186;
+        public static int EastFrostwolfTowerDestroyed = 1366;
+        public static int EastFrostwolfTowerHordeControlled = 1383;
+        public static int EastFrostwolfTowerInConflictAllianceAttacking = 1388;
+        public static int EastFrostwolfTowerInConflictHordeAttacking = 1393; // Unused
 
         //Mines
-        IrondeepMineOwner = 801,
-        IrondeepMineTroggControlled = 1360,
-        IrondeepMineAllianceControlled = 1358,
-        IrondeepMineHordeControlled = 1359,
+        public static int IrondeepMineOwner = 801;
+        public static int IrondeepMineTroggControlled = 1360;
+        public static int IrondeepMineAllianceControlled = 1358;
+        public static int IrondeepMineHordeControlled = 1359;
 
-        ColdtoothMineOwner = 804,
-        ColdtoothMineKoboldControlled = 1357,
-        ColdtoothMineAllianceControlled = 1355,
-        ColdtoothMineHordeControlled = 1356,
+        public static int ColdtoothMineOwner = 804;
+        public static int ColdtoothMineKoboldControlled = 1357;
+        public static int ColdtoothMineAllianceControlled = 1355;
+        public static int ColdtoothMineHordeControlled = 1356;
 
         //Turnins
-        IvusStormCrystalCount = 1043,
-        IvusStormCrystalMax = 1044,
-        LokholarStormpikeSoldiersBloodCount = 923,
-        LokholarStormpikeSoldiersBloodMax = 922,
+        public static int IvusStormCrystalCount = 1043;
+        public static int IvusStormCrystalMax = 1044;
+        public static int LokholarStormpikeSoldiersBloodCount = 923;
+        public static int LokholarStormpikeSoldiersBloodMax = 922;
 
         //Bosses
-        DrektharAlive = 601,
-        VandaarAlive = 602,
+        public static int DrektharAlive = 601;
+        public static int VandaarAlive = 602;
 
         //Captains
-        GalvagarAlive = 1352,
-        BalindaAlive = 1351,
+        public static int GalvagarAlive = 1352;
+        public static int BalindaAlive = 1351;
     }
 
     enum QuestIds

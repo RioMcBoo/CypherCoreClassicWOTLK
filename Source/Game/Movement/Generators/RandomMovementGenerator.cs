@@ -14,7 +14,7 @@ namespace Game.Movement
         TimeTracker _duration;
         Position _reference;
         float _wanderDistance;
-        uint _wanderSteps;
+        int _wanderSteps;
 
         public RandomMovementGenerator(float spawnDist = 0.0f, TimeSpan? duration = null)
         {
@@ -32,7 +32,11 @@ namespace Game.Movement
 
         public override void DoInitialize(Creature owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.TimedPaused);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending 
+                | MovementGeneratorFlags.Transitory 
+                | MovementGeneratorFlags.Deactivated 
+                | MovementGeneratorFlags.TimedPaused);
+
             AddFlag(MovementGeneratorFlags.Initialized);
 
             if (owner == null || !owner.IsAlive())
@@ -45,7 +49,7 @@ namespace Game.Movement
                 _wanderDistance = owner.GetWanderDistance();
 
             // Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
-            _wanderSteps = RandomHelper.URand(2, 10);
+            _wanderSteps = RandomHelper.IRand(2, 10);
 
             _timer.Reset(0);
             _path = null;
@@ -87,8 +91,11 @@ namespace Game.Movement
                 RemoveFlag(MovementGeneratorFlags.Interrupted);
 
             _timer.Update(diff);
-            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
+            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized())
+                || (_timer.Passed() && owner.MoveSpline.Finalized()))
+            {
                 SetRandomLocation(owner);
+            }
 
             return true;
         }
@@ -112,8 +119,10 @@ namespace Game.Movement
             }
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
+            {
                 if (owner.IsAIEnabled())
                     owner.GetAI().MovementInform(MovementGeneratorType.Random, 0);
+        }
         }
 
         public override void Pause(uint timer)
@@ -173,7 +182,8 @@ namespace Game.Movement
 
             bool result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
             // PATHFIND_FARFROMPOLY shouldn't be checked as creatures in water are most likely far from poly
-            if (!result || _path.GetPathType().HasFlag(PathType.NoPath) || _path.GetPathType().HasFlag(PathType.Shortcut))// || _path.GetPathType().HasFlag(PathType.FarFromPoly))
+            if (!result || _path.GetPathType().HasFlag(PathType.NoPath) 
+                || _path.GetPathType().HasFlag(PathType.Shortcut))// || _path.GetPathType().HasFlag(PathType.FarFromPoly))
             {
                 _timer.Reset(100);
                 return;
@@ -215,7 +225,7 @@ namespace Game.Movement
             {
                 // Creature has made all its steps, time for a little break
                 _timer.Reset(splineDuration + RandomHelper.URand(4, 10) * Time.InMilliseconds); // Retails seems to use rounded numbers so we do as well
-                _wanderSteps = RandomHelper.URand(2, 10);
+                _wanderSteps = RandomHelper.IRand(2, 10);
             }
 
             // Call for creature group update

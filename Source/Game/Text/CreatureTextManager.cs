@@ -32,7 +32,8 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 ceature texts. DB table `creature_texts` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 ceature texts. DB table `creature_texts` is empty.");
                 return;
             }
 
@@ -61,30 +62,44 @@ namespace Game
                 {
                     if (!CliDB.SoundKitStorage.ContainsKey(temp.sound))
                     {
-                        Log.outError(LogFilter.Sql, $"GossipManager: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Sound {temp.sound} but sound does not exist.");
+                        Log.outError(LogFilter.Sql, 
+                            $"GossipManager: Entry {temp.creatureId}, Group {temp.groupId} " +
+                            $"in table `creature_texts` has Sound {temp.sound} but sound does not exist.");
                         temp.sound = 0;
                     }
                 }
+
                 if (temp.SoundPlayType >= SoundKitPlayType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_text` has PlayType {temp.SoundPlayType} but does not exist.");
+                    Log.outError(LogFilter.Sql, 
+                        $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} " +
+                        $"in table `creature_text` has PlayType {temp.SoundPlayType} but does not exist.");
                     temp.SoundPlayType = SoundKitPlayType.Normal;
                 }
+
                 if (temp.lang != Language.Universal && !Global.LanguageMgr.IsLanguageExist(temp.lang))
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` using Language {temp.lang} but Language does not exist.");
+                    Log.outError(LogFilter.Sql, 
+                        $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} " +
+                        $"in table `creature_texts` using Language {temp.lang} but Language does not exist.");
                     temp.lang = Language.Universal;
                 }
+
                 if (temp.type >= ChatMsg.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Type {temp.type} but this Chat Type does not exist.");
+                    Log.outError(LogFilter.Sql, 
+                        $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} " +
+                        $"in table `creature_texts` has Type {temp.type} but this Chat Type does not exist.");
                     temp.type = ChatMsg.Say;
                 }
+
                 if (temp.emote != 0)
                 {
                     if (!CliDB.EmotesStorage.ContainsKey((int)temp.emote))
                     {
-                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Emote {temp.emote} but emote does not exist.");
+                        Log.outError(LogFilter.Sql, 
+                            $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} " +
+                            $"in table `creature_texts` has Emote {temp.emote} but emote does not exist.");
                         temp.emote = Emote.OneshotNone;
                     }
                 }
@@ -93,14 +108,19 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(temp.BroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_texts` has non-existing or incompatible BroadcastTextId {temp.BroadcastTextId}.");
+                        Log.outError(LogFilter.Sql, 
+                            $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} " +
+                            $"in table `creature_texts` has non-existing " +
+                            $"or incompatible BroadcastTextId {temp.BroadcastTextId}.");
                         temp.BroadcastTextId = 0;
                     }
                 }
 
                 if (temp.TextRange > CreatureTextRange.Personal)
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_text` has incorrect TextRange {temp.TextRange}.");
+                    Log.outError(LogFilter.Sql, 
+                        $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} " +
+                        $"in table `creature_text` has incorrect TextRange {temp.TextRange}.");
                     temp.TextRange = CreatureTextRange.Normal;
                 }
 
@@ -159,14 +179,20 @@ namespace Game
             var sList = mTextMap.LookupByKey(source.GetEntry());
             if (sList == null)
             {
-                Log.outError(LogFilter.Sql, "GossipManager: Could not find Text for Creature({0}) Entry {1} in 'creature_text' table. Ignoring.", source.GetName(), source.GetEntry());
+                Log.outError(LogFilter.Sql, 
+                    $"GossipManager: Could not find Text " +
+                    $"for Creature({source.GetName()}) Entry {source.GetEntry()} " +
+                    $"in 'creature_text' table. Ignoring.");
                 return 0;
             }
 
             var textGroupContainer = sList.LookupByKey(textGroup);
             if (textGroupContainer.Empty())
             {
-                Log.outError(LogFilter.ChatSystem, "GossipManager: Could not find TextGroup {0} for Creature({1}) GuidLow {2} Entry {3}. Ignoring.", textGroup, source.GetName(), source.GetGUID().ToString(), source.GetEntry());
+                Log.outError(LogFilter.ChatSystem, 
+                    $"GossipManager: Could not find TextGroup {textGroup} " +
+                    $"for Creature({source.GetName()}) GuidLow {source.GetGUID()} Entry {source.GetEntry()}. " +
+                    $"Ignoring.");
                 return 0;
             }
 
@@ -174,8 +200,10 @@ namespace Game
             var repeatGroup = source.GetTextRepeatGroup(textGroup);
 
             foreach (var entry in textGroupContainer)
+            {
                 if (!repeatGroup.Contains(entry.id))
                     tempGroup.Add(entry);
+            }
 
             if (tempGroup.Empty())
             {
@@ -376,14 +404,18 @@ namespace Game
             var textHolder = mTextMap.LookupByKey(sourceEntry);
             if (textHolder == null)
             {
-                Log.outDebug(LogFilter.Unit, "CreatureTextMgr.TextExist: Could not find Text for Creature (entry {0}) in 'creature_text' table.", sourceEntry);
+                Log.outDebug(LogFilter.Unit, 
+                    $"CreatureTextMgr.TextExist: Could not find Text " +
+                    $"for Creature (entry {sourceEntry}) in 'creature_text' table.");
                 return false;
             }
 
             var textEntryList = textHolder.LookupByKey(textGroup);
             if (textEntryList.Empty())
             {
-                Log.outDebug(LogFilter.Unit, "CreatureTextMgr.TextExist: Could not find TextGroup {0} for Creature (entry {1}).", textGroup, sourceEntry);
+                Log.outDebug(LogFilter.Unit, 
+                    $"CreatureTextMgr.TextExist: Could not find TextGroup {textGroup} " +
+                    $"for Creature (entry {sourceEntry}).");
                 return false;
             }
 

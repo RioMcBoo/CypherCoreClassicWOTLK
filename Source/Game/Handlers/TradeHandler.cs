@@ -17,7 +17,11 @@ namespace Game
         {
             info.Clear();   // reuse packet
             Player trader = GetPlayer().GetTrader();
-            info.PartnerIsSameBnetAccount = trader != null && trader.GetSession().GetBattlenetAccountId() == GetBattlenetAccountId();
+
+            info.PartnerIsSameBnetAccount = 
+                trader != null 
+                && trader.GetSession().GetBattlenetAccountId() == GetBattlenetAccountId();
+
             SendPacket(info);
         }
 
@@ -105,8 +109,10 @@ namespace Game
 
                     if (HasPermission(RBACPermissions.LogGmTrade))
                     {
-                        Log.outCommand(_player.GetSession().GetAccountId(), $"GM {GetPlayer().GetName()} (Account: {GetPlayer().GetSession().GetAccountId()}) " +
-                            $"trade: {myItems[i].GetTemplate().GetName()} (Entry: {myItems[i].GetEntry()} Count: {myItems[i].GetCount()}) " +
+                        Log.outCommand(_player.GetSession().GetAccountId(), 
+                            $"GM {GetPlayer().GetName()} (Account: {GetPlayer().GetSession().GetAccountId()}) " +
+                            $"trade: {myItems[i].GetTemplate().GetName()} " +
+                            $"(Entry: {myItems[i].GetEntry()} Count: {myItems[i].GetCount()}) " +
                             $"to player: {trader.GetName()} (Account: {trader.GetSession().GetAccountId()})");
                     }
 
@@ -124,8 +130,10 @@ namespace Game
 
                     if (HasPermission(RBACPermissions.LogGmTrade))
                     {
-                        Log.outCommand(_player.GetSession().GetAccountId(), $"GM {trader.GetName()} (Account: {trader.GetSession().GetAccountId()}) " +
-                            $"trade: {hisItems[i].GetTemplate().GetName()} (Entry: {hisItems[i].GetEntry()} Count: {hisItems[i].GetCount()}) " +
+                        Log.outCommand(_player.GetSession().GetAccountId(), 
+                            $"GM {trader.GetName()} (Account: {trader.GetSession().GetAccountId()}) " +
+                            $"trade: {hisItems[i].GetTemplate().GetName()} " +
+                            $"(Entry: {hisItems[i].GetEntry()} Count: {hisItems[i].GetCount()}) " +
                             $"to player: {GetPlayer().GetName()} (Account: {GetPlayer().GetSession().GetAccountId()})");
                     }
 
@@ -149,7 +157,9 @@ namespace Game
                 Item item = myTrade.GetItem((TradeSlots)i);
                 if (item != null)
                 {
-                    Log.outDebug(LogFilter.Network, $"player trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
+                    Log.outDebug(LogFilter.Network, 
+                        $"player trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
+
                     //Can return null
                     myItems[i] = item;
                     myItems[i].SetInTrade();
@@ -157,7 +167,9 @@ namespace Game
                 item = hisTrade.GetItem((TradeSlots)i);
                 if (item != null)
                 {
-                    Log.outDebug(LogFilter.Network, $"partner trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
+                    Log.outDebug(LogFilter.Network, 
+                        $"partner trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
+
                     hisItems[i] = item;
                     hisItems[i].SetInTrade();
                 }
@@ -340,7 +352,8 @@ namespace Game
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(his_spell_id, trader.GetMap().GetDifficultyID());
                     Item castItem = his_trade.GetSpellCastItem();
 
-                    if (spellEntry == null || my_trade.GetItem(TradeSlots.NonTraded) == null || (his_trade.HasSpellCastItem() && castItem == null))
+                    if (spellEntry == null || my_trade.GetItem(TradeSlots.NonTraded) == null 
+                        || (his_trade.HasSpellCastItem() && castItem == null))
                     {
                         his_trade.SetSpell(0);
 
@@ -377,8 +390,11 @@ namespace Game
                 // test if item will fit in each inventory
                 TradeStatusPkt myCanCompleteInfo = new();
                 TradeStatusPkt hisCanCompleteInfo = new();
-                hisCanCompleteInfo.BagResult = trader.CanStoreTradeItems(myItems, ref hisCanCompleteInfo.ItemID, out List<(ItemPos item, int count)>[] hisDest, hisItems);
-                myCanCompleteInfo.BagResult = GetPlayer().CanStoreTradeItems(hisItems, ref myCanCompleteInfo.ItemID, out List<(ItemPos item, int count)>[] myDest, myItems);
+                hisCanCompleteInfo.BagResult =
+                    trader.CanStoreTradeItems(myItems, ref hisCanCompleteInfo.ItemID, out var hisDest, hisItems);
+
+                myCanCompleteInfo.BagResult = 
+                    GetPlayer().CanStoreTradeItems(hisItems, ref myCanCompleteInfo.ItemID, out var myDest, myItems);
 
                 ClearAcceptTradeMode(myItems, hisItems);
 
@@ -431,14 +447,18 @@ namespace Game
                 {
                     if (my_trade.GetMoney() > 0)
                     {
-                        Log.outCommand(GetPlayer().GetSession().GetAccountId(), "GM {0} (Account: {1}) give money (Amount: {2}) to player: {3} (Account: {4})",
-                            GetPlayer().GetName(), GetPlayer().GetSession().GetAccountId(), my_trade.GetMoney(), trader.GetName(), trader.GetSession().GetAccountId());
+                        Log.outCommand(GetPlayer().GetSession().GetAccountId(), 
+                            $"GM {GetPlayer().GetName()} (Account: {GetPlayer().GetSession().GetAccountId()}) " +
+                            $"give money (Amount: {my_trade.GetMoney()}) " +
+                            $"to player: {trader.GetName()} (Account: {trader.GetSession().GetAccountId()})");
                     }
 
                     if (his_trade.GetMoney() > 0)
                     {
-                        Log.outCommand(GetPlayer().GetSession().GetAccountId(), "GM {0} (Account: {1}) give money (Amount: {2}) to player: {3} (Account: {4})",
-                            trader.GetName(), trader.GetSession().GetAccountId(), his_trade.GetMoney(), GetPlayer().GetName(), GetPlayer().GetSession().GetAccountId());
+                        Log.outCommand(GetPlayer().GetSession().GetAccountId(),
+                            $"GM {trader.GetName()} (Account: {trader.GetSession().GetAccountId()}) " +
+                            $"give money (Amount: {his_trade.GetMoney()}) " +
+                            $"to player: {GetPlayer().GetName()} (Account: {GetPlayer().GetSession().GetAccountId()})");
                     }
                 }                
 
@@ -553,7 +573,9 @@ namespace Game
 
             if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
             {
-                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeReq), WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeReq), 
+                    WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+
                 info.Status = TradeStatus.Failed;
                 SendTradeStatus(info);
                 return;
@@ -622,7 +644,9 @@ namespace Game
 
             if (pOther.GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
             {
-                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeOtherReq), WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeOtherReq), 
+                    WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+
                 info.Status = TradeStatus.Failed;
                 SendTradeStatus(info);
                 return;

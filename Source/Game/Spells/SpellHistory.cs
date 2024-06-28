@@ -520,7 +520,8 @@ namespace Game.Spells
                 if (!withoutCategoryCooldown)
                     cooldownEntry.CategoryEnd += cooldownMod;
 
-                // Because category cooldown existence is tied to regular cooldown, we cannot allow a situation where regular cooldown is shorter than category
+                // Because category cooldown existence is tied to regular cooldown,
+                // we cannot allow a situation where regular cooldown is shorter than category
                 if (cooldownEntry.CooldownEnd < cooldownEntry.CategoryEnd)
                     cooldownEntry.CooldownEnd = cooldownEntry.CategoryEnd;
             }
@@ -703,30 +704,38 @@ namespace Game.Spells
             DateTime now = GameTime.GetSystemTime();
             DateTime lockoutEnd = now + lockoutTime;
             for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
+            {
                 if (schoolMask.HasSchool(i))
                     _schoolLockouts[(int)i] = lockoutEnd;
+            }
 
             List<int> knownSpells = new();
             Player plrOwner = _owner.ToPlayer();
             if (plrOwner != null)
             {
                 foreach (var p in plrOwner.GetSpellMap())
+                {
                     if (p.Value.State != PlayerSpellState.Removed)
                         knownSpells.Add(p.Key);
+            }
             }
             else if (_owner.IsPet())
             {
                 Pet petOwner = _owner.ToPet();
                 foreach (var p in petOwner.m_spells)
+                {
                     if (p.Value.state != PetSpellState.Removed)
                         knownSpells.Add(p.Key);
+            }
             }
             else
             {
                 Creature creatureOwner = _owner.ToCreature();
                 for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
+                {
                     if (creatureOwner.m_spells[i] != 0)
                         knownSpells.Add(creatureOwner.m_spells[i]);
+            }
             }
 
             SpellCooldownPkt spellCooldown = new();
@@ -753,17 +762,23 @@ namespace Game.Spells
 
             Player player = GetPlayerOwner();
             if (player != null)
+            {
                 if (!spellCooldown.SpellCooldowns.Empty())
                     player.SendPacket(spellCooldown);
+        }
         }
 
         public bool IsSchoolLocked(SpellSchoolMask schoolMask)
         {
             DateTime now = GameTime.GetSystemTime();
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                if (Convert.ToBoolean((SpellSchoolMask)(1 << i) & schoolMask))
-                    if (_schoolLockouts[i] > now)
+            for (var i = SpellSchools.Normal; i < SpellSchools.Max; ++i)
+            {
+                if (schoolMask.HasSchool(i))
+                {
+                    if (_schoolLockouts[(int)i] > now)
                         return true;
+                }
+            }
 
             return false;
         }

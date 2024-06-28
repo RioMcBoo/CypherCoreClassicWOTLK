@@ -176,16 +176,20 @@ namespace Game.Maps
                     byte[] tilesData = reader.ReadArray<byte>(MapConst.MaxGrids * MapConst.MaxGrids);
                     Array.Reverse(tilesData);
                     for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
+                    {
                         for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
                             _gridFileExists[GetBitsetIndex(gx, gy)] = tilesData[GetBitsetIndex(gx, gy)] == 49; // char of 1
+                    }
 
                     return;
                 }
             }
 
             for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
+            {
                 for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
                     _gridFileExists[GetBitsetIndex(gx, gy)] = ExistMap(GetId(), gx, gy, false);
+        }
         }
 
         public static bool ExistMap(int mapid, int gx, int gy, bool log = true)
@@ -197,8 +201,13 @@ namespace Game.Maps
             {
                 if (log)
                 {
-                    Log.outError(LogFilter.Maps, $"Map file '{fileName}' does not exist!");
-                    Log.outError(LogFilter.Maps, $"Please place MAP-files (*.map) in the appropriate directory ({Global.WorldMgr.GetDataPath() + "/maps/"}), or correct the DataDir setting in your worldserver.conf file.");
+                    Log.outError(LogFilter.Maps, 
+                        $"Map file '{fileName}' does not exist!");
+
+                    Log.outError(LogFilter.Maps, 
+                        $"Please place MAP-files (*.map) in the appropriate directory " +
+                        $"({Global.WorldMgr.GetDataPath() + "/maps/"}), " +
+                        $"or correct the DataDir setting in your worldserver.conf file.");
                 }
             }
             else
@@ -208,7 +217,14 @@ namespace Game.Maps
                 if (header.mapMagic != MapConst.MapMagic || (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
                 {
                     if (log)
-                        Log.outError(LogFilter.Maps, $"Map file '{fileName}' is from an incompatible map version ({header.versionMagic}), {MapConst.MapVersionMagic} is expected. Please pull your source, recompile tools and recreate maps using the updated mapextractor, then replace your old map files with new files. If you still have problems search on forum for error TCE00018.");
+                    {
+                        Log.outError(LogFilter.Maps,
+                            $"Map file '{fileName}' is from an incompatible map version " +
+                            $"({header.versionMagic}), {MapConst.MapVersionMagic} is expected. " +
+                            $"Please pull your source, recompile tools and recreate maps using the updated mapextractor, " +
+                            $"then replace your old map files with new files. " +
+                            $"If you still have problems search on forum for error TCE00018.");
+                    }
                 }
                 else
                     ret = true;
@@ -416,9 +432,13 @@ namespace Game.Maps
 
             // delete those GridMap objects which have refcount = 0
             for (int x = 0; x < MapConst.MaxGrids; ++x)
+            {
                 for (int y = 0; y < MapConst.MaxGrids; ++y)
+                {
                     if (_loadedGrids[GetBitsetIndex(x, y)] && _referenceCountFromMap[x][y] == 0)
                         UnloadMapImpl(x, y);
+                }
+            }
 
             _cleanupTimer.Reset(CleanupInterval);
         }
@@ -454,6 +474,7 @@ namespace Game.Maps
             data.FloorZ = MapConst.InvalidHeight;
             if (gridMapHeight > MapConst.InvalidHeight && MathFunctions.fuzzyGe(z, gridMapHeight - MapConst.GroundHeightTolerance))
                 data.FloorZ = gridMapHeight;
+
             if (vmapData.floorZ > MapConst.InvalidHeight &&
                 MathFunctions.fuzzyGe(z, vmapData.floorZ - MapConst.GroundHeightTolerance) &&
                 (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || vmapData.floorZ > gridMapHeight))
@@ -575,6 +596,7 @@ namespace Game.Maps
                 {
                     if (GetId() == 530 && gridMapLiquid.entry == 2)
                         gridMapLiquid.entry = 15;
+
                     data.LiquidInfo = gridMapLiquid;
                     data.LiquidStatus = gridMapStatus;
                 }
@@ -790,8 +812,10 @@ namespace Game.Maps
             int areaId = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
             var area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area != null)
+            {
                 if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     return area.ParentAreaID;
+            }
 
             return areaId;
         }
@@ -803,8 +827,10 @@ namespace Game.Maps
             areaid = zoneid = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
             var area = CliDB.AreaTableStorage.LookupByKey(areaid);
             if (area != null)
+            {
                 if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     zoneid = area.ParentAreaID;
+        }
         }
 
         public float GetMinHeight(PhaseShift phaseShift, int mapId, float x, float y)

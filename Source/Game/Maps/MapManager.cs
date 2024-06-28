@@ -70,7 +70,9 @@ namespace Game.Entities
             // some instances only have one difficulty
             Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty);
 
-            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} map instance {instanceId} for {mapId} created with difficulty {difficulty}");
+            Log.outDebug(LogFilter.Maps, 
+                $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} " +
+                $"map instance {instanceId} for {mapId} created with difficulty {difficulty}");
 
             InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team, instanceLock);
             Cypher.Assert(map.IsDungeon());
@@ -92,7 +94,8 @@ namespace Game.Entities
 
         BattlegroundMap CreateBattleground(int mapId, int instanceId, Battleground bg)
         {
-            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateBattleground: map bg {instanceId} for {mapId} created.");
+            Log.outDebug(LogFilter.Maps, 
+                $"MapInstanced::CreateBattleground: map bg {instanceId} for {mapId} created.");
 
             BattlegroundMap map = new BattlegroundMap(mapId, i_gridCleanUpDelay, instanceId, Difficulty.None);
             Cypher.Assert(map.IsBattlegroundOrArena());
@@ -248,8 +251,11 @@ namespace Game.Entities
                 Map map = FindMap(mapId, newInstanceId);
 
                 // is is possible that instance id is already in use by another group for boss-based locks
-                if (!entries.IsInstanceIdBound() && instanceLock != null && map != null && map.ToInstanceMap().GetInstanceLock() != instanceLock)
+                if (!entries.IsInstanceIdBound() && instanceLock != null
+                    && map != null && map.ToInstanceMap().GetInstanceLock() != instanceLock)
+                {
                     return 0;
+                }
 
                 return newInstanceId;
             }
@@ -393,7 +399,8 @@ namespace Game.Entities
             Cypher.Assert(newInstanceId < _freeInstanceIds.Length && newInstanceId > 1);
             _freeInstanceIds[newInstanceId] = false;
 
-            // Find the lowest available id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()
+            // Find the lowest available id starting from the current NextInstanceId
+            // (which should be the lowest according to the logic in FreeInstanceId()
             int nextFreeId = -1;
             for (var i = _nextInstanceId++; i < _freeInstanceIds.Length; i++)
             {
@@ -418,7 +425,8 @@ namespace Game.Entities
 
         public void FreeInstanceId(int instanceId)
         {
-            // If freed instance id is lower than the next id available for new instances, use the freed one instead
+            // If freed instance id is lower than the next id available for new instances,
+            // use the freed one instead
             _nextInstanceId = Math.Min(instanceId, _nextInstanceId);
             _freeInstanceIds[instanceId] = true;
         }

@@ -210,9 +210,20 @@ namespace Scripts.OutdoorPVP.HellfirePeninsula
             m_HordeTowersControlled = count;
         }
 
-        HellfirePeninsulaControlZoneHandler GetControlZoneTowerNorthHandler() { return ControlZoneHandlers[(int)GameObjectIds.TowerN] as HellfirePeninsulaControlZoneHandler; }
-        HellfirePeninsulaControlZoneHandler GetControlZoneTowerSouthHandler() { return ControlZoneHandlers[(int)GameObjectIds.TowerS] as HellfirePeninsulaControlZoneHandler; }
-        HellfirePeninsulaControlZoneHandler GetControlZoneTowerWestHandler() { return ControlZoneHandlers[(int)GameObjectIds.TowerW] as HellfirePeninsulaControlZoneHandler; }
+        HellfirePeninsulaControlZoneHandler GetControlZoneTowerNorthHandler() 
+        { 
+            return ControlZoneHandlers[(int)GameObjectIds.TowerN] as HellfirePeninsulaControlZoneHandler; 
+        }
+
+        HellfirePeninsulaControlZoneHandler GetControlZoneTowerSouthHandler() 
+        {
+            return ControlZoneHandlers[(int)GameObjectIds.TowerS] as HellfirePeninsulaControlZoneHandler; 
+        }
+
+        HellfirePeninsulaControlZoneHandler GetControlZoneTowerWestHandler() 
+        { 
+            return ControlZoneHandlers[(int)GameObjectIds.TowerW] as HellfirePeninsulaControlZoneHandler; 
+        }
     }
 
     class HellfirePeninsulaControlZoneHandler : OutdoorPvPControlZoneHandler

@@ -517,7 +517,9 @@ namespace Game.Chat
             }
 
             string channelName = GetName(player.GetSession().GetSessionDbcLocale());
-            Log.outDebug(LogFilter.ChatSystem, "SMSG_CHANNEL_LIST {0} Channel: {1}", player.GetSession().GetPlayerInfo(), channelName);
+
+            Log.outDebug(LogFilter.ChatSystem, 
+                $"SMSG_CHANNEL_LIST {player.GetSession().GetPlayerInfo()} Channel: {channelName}");
 
             ChannelListResponse list = new();
             list.Display = true; // always true?
@@ -603,7 +605,10 @@ namespace Game.Chat
             }
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
-            SendToAll(new ChannelSayBuilder(this, lang, what, guid, _channelGuid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty, !playerInfo.IsModerator() && player != null ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
+
+            SendToAll(new ChannelSayBuilder(this, lang, what, guid, _channelGuid), 
+                !playerInfo.IsModerator() ? guid : ObjectGuid.Empty, 
+                !playerInfo.IsModerator() && player != null ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
         }
 
         public void AddonSay(ObjectGuid guid, string prefix, string what, bool isLogged)

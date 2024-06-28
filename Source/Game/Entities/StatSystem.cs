@@ -1286,8 +1286,10 @@ namespace Game.Entities
 
             float chance = (float)(3 * lvldif * skilldif) / plevel;
             if (!defense)
+            {
                 if (GetClass() == Class.Warrior || GetClass() == Class.Rogue)
                     chance += chance * 0.02f * GetStat(Stats.Intellect);
+            }
 
             chance = chance < 1.0f ? 1.0f : chance;                 //minimum chance to increase skill is 1%
 
@@ -1579,8 +1581,10 @@ namespace Game.Entities
                 UpdateDamagePhysical(WeaponAttackType.BaseAttack);
                 Item offhand = GetWeaponForAttack(WeaponAttackType.OffAttack, true);
                 if (offhand != null)
+                {
                     if (CanDualWield() || offhand.GetTemplate().HasFlag(ItemFlags3.AlwaysAllowDualWield))
                         UpdateDamagePhysical(WeaponAttackType.OffAttack);
+                }
 
                 if (HasAuraType(AuraType.OverrideSpellPowerByApPct))
                     UpdateSpellDamageAndHealingBonus();
@@ -1611,9 +1615,11 @@ namespace Game.Entities
 
             // add dynamic flat mods
             var mResbyIntellect = GetAuraEffectsByType(AuraType.HandleAuraModResistenceOfStatPercent);
-            foreach ( var aurEff in mResbyIntellect)
+            foreach (var aurEff in mResbyIntellect)
+            {
                 if (aurEff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
                     value += MathFunctions.CalculatePct(GetStat((Stats)aurEff.GetMiscValueB()), aurEff.GetAmount());
+            }
 
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
             value *= GetTotalAuraMultiplier(AuraType.ModBonusArmorPct);
@@ -1667,8 +1673,10 @@ namespace Game.Entities
                 {
                     short? highestRating = null;
                     for (byte dependentRating = 0; dependentRating < (int)CombatRating.Max; ++dependentRating)
+                    {
                         if ((aurEff.GetMiscValue() & (1 << dependentRating)) != 0)
                             highestRating = (short)Math.Max(highestRating.HasValue ? highestRating.Value : baseRatingValue[dependentRating], baseRatingValue[dependentRating]);
+                    }
 
                     if (highestRating != 0)
                         amount += MathFunctions.CalculatePct(highestRating.Value, aurEff.GetAmount());

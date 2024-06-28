@@ -208,6 +208,7 @@ namespace Game.Entities
 
             return null;
         }
+
         public SpellSchoolMask GetSchoolMask()
         {
             if (_spell != null)
@@ -284,7 +285,10 @@ namespace Game.Entities
             if (m_block != 0)
                 m_hitMask |= ProcFlagsHit.Block;
 
-            bool damageNullified = dmgInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || m_hitMask.HasAnyFlag(ProcFlagsHit.Immune | ProcFlagsHit.FullBlock);
+            bool damageNullified = 
+                dmgInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) 
+                || m_hitMask.HasAnyFlag(ProcFlagsHit.Immune | ProcFlagsHit.FullBlock);
+
             switch (dmgInfo.HitOutCome)
             {
                 case MeleeHitOutcome.Miss:
@@ -338,6 +342,7 @@ namespace Game.Entities
             amount = Math.Max(amount, -GetDamage());
             m_damage += amount;
         }
+
         public void AbsorbDamage(int amount)
         {
             amount = Math.Min(amount, GetDamage());
@@ -345,6 +350,7 @@ namespace Game.Entities
             m_damage -= amount;
             m_hitMask |= ProcFlagsHit.Absorb;
         }
+
         public void ResistDamage(int amount)
         {
             amount = Math.Min(amount, GetDamage());
@@ -356,6 +362,7 @@ namespace Game.Entities
                 m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
             }
         }
+
         void BlockDamage(int amount)
         {
             amount = Math.Min(amount, GetDamage());
@@ -417,6 +424,7 @@ namespace Game.Entities
             _effectiveHeal -= amount;
             _hitMask |= ProcFlagsHit.Absorb;
         }
+
         public void SetEffectiveHeal(int amount) { _effectiveHeal = amount; }
 
         public Unit GetHealer() { return _healer; }

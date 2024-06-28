@@ -446,8 +446,11 @@ namespace Game.Entities
             if (_nextGuid >= ObjectGuid.GetMaxCounter(_highGuid) - 1)
                 HandleCounterOverflow();
 
-            if (_highGuid == HighGuid.Creature || _highGuid == HighGuid.Vehicle || _highGuid == HighGuid.GameObject || _highGuid == HighGuid.Transport)
+            if (_highGuid == HighGuid.Creature || _highGuid == HighGuid.Vehicle 
+                || _highGuid == HighGuid.GameObject || _highGuid == HighGuid.Transport)
+            {
                 CheckGuidTrigger(_nextGuid);
+            }
 
             return _nextGuid++;
         }
@@ -456,17 +459,25 @@ namespace Game.Entities
 
         void HandleCounterOverflow()
         {
-            Log.outFatal(LogFilter.Server, "{0} guid overflow!! Can't continue, shutting down server. ", _highGuid);
+            Log.outFatal(LogFilter.Server,
+                $"{_highGuid} guid overflow!! Can't continue, shutting down server. ");
+
             Global.WorldMgr.StopNow();
         }
 
         void CheckGuidTrigger(long guidlow)
         {
-            if (!Global.WorldMgr.IsGuidAlert() && guidlow > WorldConfig.GetInt64Value(WorldCfg.RespawnGuidAlertLevel))
+            if (!Global.WorldMgr.IsGuidAlert()
+                && guidlow > WorldConfig.GetInt64Value(WorldCfg.RespawnGuidAlertLevel))
+            {
                 Global.WorldMgr.TriggerGuidAlert();
-            else if (!Global.WorldMgr.IsGuidWarning() && guidlow > WorldConfig.GetInt64Value(WorldCfg.RespawnGuidWarnLevel))
+            }
+            else if (!Global.WorldMgr.IsGuidWarning()
+                && guidlow > WorldConfig.GetInt64Value(WorldCfg.RespawnGuidWarnLevel))
+            {
                 Global.WorldMgr.TriggerGuidWarning();
         }
+    }
     }
 
     class ObjectGuidFactory
@@ -784,8 +795,12 @@ namespace Game.Entities
             if (split.Length != 3)
                 return ObjectGuid.FromStringFailed;
 
-            if (!int.TryParse(split[0], out int realmId) || !int.TryParse(split[1], out int arg1) || !long.TryParse(split[2], out long dbId))
+            if (!int.TryParse(split[0], out int realmId)
+                || !int.TryParse(split[1], out int arg1)
+                || !long.TryParse(split[2], out long dbId))
+            {
                 return ObjectGuid.FromStringFailed;
+            }
 
             return ObjectGuidFactory.CreateItem(realmId, dbId);
         }
@@ -801,9 +816,15 @@ namespace Game.Entities
             if (split.Length != 6)
                 return ObjectGuid.FromStringFailed;
 
-            if (!byte.TryParse(split[0], out byte subType) || !int.TryParse(split[1], out int realmId) || !ushort.TryParse(split[2], out ushort mapId) ||
-                !int.TryParse(split[3], out int serverId) || !int.TryParse(split[4], out int id) || !long.TryParse(split[5], out long counter))
+            if (!byte.TryParse(split[0], out byte subType)
+                || !int.TryParse(split[1], out int realmId)
+                || !ushort.TryParse(split[2], out ushort mapId)
+                || !int.TryParse(split[3], out int serverId)
+                || !int.TryParse(split[4], out int id)
+                || !long.TryParse(split[5], out long counter))
+            {
                 return ObjectGuid.FromStringFailed;
+            }
 
             return ObjectGuidFactory.CreateWorldObject(type, subType, realmId, mapId, serverId, id, counter);
         }
@@ -857,9 +878,15 @@ namespace Game.Entities
             if (split.Length != 6)
                 return ObjectGuid.FromStringFailed;
 
-            if (!int.TryParse(split[0], out int realmId) || !int.TryParse(split[1], out int builtIn) || !int.TryParse(split[2], out int trade) ||
-                !ushort.TryParse(split[3], out ushort zoneId) || !byte.TryParse(split[4], out byte factionGroupMask) || !long.TryParse(split[5], out long id))
+            if (!int.TryParse(split[0], out int realmId)
+                || !int.TryParse(split[1], out int builtIn)
+                || !int.TryParse(split[2], out int trade)
+                || !ushort.TryParse(split[3], out ushort zoneId)
+                || !byte.TryParse(split[4], out byte factionGroupMask)
+                || !long.TryParse(split[5], out long id))
+            {
                 return ObjectGuid.FromStringFailed;
+            }
 
             return ObjectGuidFactory.CreateChatChannel(realmId, builtIn != 0, trade != 0, zoneId, factionGroupMask, id);
         }
@@ -944,9 +971,16 @@ namespace Game.Entities
             if (split.Length != 7)
                 return ObjectGuid.FromStringFailed;
 
-            if (!byte.TryParse(split[0], out byte arg1) || !byte.TryParse(split[1], out byte arg2) || !byte.TryParse(split[2], out byte arg3) ||
-                !byte.TryParse(split[3], out byte arg4) || !byte.TryParse(split[4], out byte arg5) || !byte.TryParse(split[5], out byte arg6) || !long.TryParse(split[6], out long counter))
+            if (!byte.TryParse(split[0], out byte arg1)
+                || !byte.TryParse(split[1], out byte arg2)
+                || !byte.TryParse(split[2], out byte arg3)
+                || !byte.TryParse(split[3], out byte arg4)
+                || !byte.TryParse(split[4], out byte arg5)
+                || !byte.TryParse(split[5], out byte arg6)
+                || !long.TryParse(split[6], out long counter))
+            {
                 return ObjectGuid.FromStringFailed;
+            }
 
             return ObjectGuidFactory.CreateLFGObject(arg1, arg2, arg3, arg4, arg5 != 0, arg6, counter);
         }
@@ -979,8 +1013,12 @@ namespace Game.Entities
             if (split.Length != 3)
                 return ObjectGuid.FromStringFailed;
 
-            if (!int.TryParse(split[0], out int realmId) || !int.TryParse(split[1], out int arg1) || !long.TryParse(split[2], out long counter))
+            if (!int.TryParse(split[0], out int realmId)
+                || !int.TryParse(split[1], out int arg1)
+                || !long.TryParse(split[2], out long counter))
+            {
                 return ObjectGuid.FromStringFailed;
+            }
 
             return ObjectGuidFactory.CreateClient(type, realmId, arg1, counter);
         }
@@ -1012,15 +1050,28 @@ namespace Game.Entities
             {
                 case 0: // club
                     if (split.Length < 3)
+                    {
                         return ObjectGuid.FromStringFailed;
-                    if (!int.TryParse(split[0], out clubFinderId) || !long.TryParse(split[1], out dbId))
+                    }
+
+                    if (!int.TryParse(split[0], out clubFinderId)
+                        || !long.TryParse(split[1], out dbId))
+                    {
                         return ObjectGuid.FromStringFailed;
+                    }
                     break;
                 case 1: // guild
                     if (split.Length < 4)
+                    {
                         return ObjectGuid.FromStringFailed;
-                    if (!int.TryParse(split[0], out clubFinderId) || !int.TryParse(split[1], out realmId) || !long.TryParse(split[2], out dbId))
+                    }
+
+                    if (!int.TryParse(split[0], out clubFinderId)
+                        || !int.TryParse(split[1], out realmId)
+                        || !long.TryParse(split[2], out dbId))
+                    {
                         return ObjectGuid.FromStringFailed;
+                    }
                     break;
                 default:
                     return ObjectGuid.FromStringFailed;
@@ -1057,8 +1108,13 @@ namespace Game.Entities
             if (split.Length != 4)
                 return ObjectGuid.FromStringFailed;
 
-            if (!uint.TryParse(split[0], out uint arg1) || !ushort.TryParse(split[1], out ushort arg2) || !byte.TryParse(split[2], out byte arg3) || !uint.TryParse(split[0], out uint arg4))
+            if (!uint.TryParse(split[0], out uint arg1)
+                || !ushort.TryParse(split[1], out ushort arg2)
+                || !byte.TryParse(split[2], out byte arg3) ||
+                !uint.TryParse(split[0], out uint arg4))
+            {
                 return ObjectGuid.FromStringFailed;
+            }
 
             return ObjectGuidFactory.CreateWorldLayer(arg1, arg2, arg3, arg4);
         }
@@ -1074,8 +1130,14 @@ namespace Game.Entities
             if (split.Length != 5)
                 return ObjectGuid.FromStringFailed;
 
-            if (!int.TryParse(split[0], out int realmId) || !int.TryParse(split[1], out int arg2) || !byte.TryParse(split[2], out byte arg3) || !byte.TryParse(split[0], out byte arg4) || !long.TryParse(split[0], out long arg5))
+            if (!int.TryParse(split[0], out int realmId)
+                || !int.TryParse(split[1], out int arg2)
+                || !byte.TryParse(split[2], out byte arg3)
+                || !byte.TryParse(split[0], out byte arg4)
+                || !long.TryParse(split[0], out long arg5))
+            {
                 return ObjectGuid.FromStringFailed;
+            }
 
             return ObjectGuidFactory.CreateLMMLobby(realmId, arg2, arg3, arg4, arg5);
         }

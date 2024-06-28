@@ -160,7 +160,11 @@ namespace Game.Groups
                     if (group != null)
                         group.LoadMemberFromDB(result.Read<uint>(1), result.Read<byte>(2), result.Read<byte>(3), (LfgRoles)result.Read<byte>(4));
                     else
-                        Log.outError(LogFilter.Server, "GroupMgr:LoadGroups: Consistency failed, can't find group (storage id: {0})", result.Read<uint>(0));
+                    {
+                        Log.outError(LogFilter.Server,
+                            $"GroupMgr:LoadGroups: Consistency failed, " +
+                            $"can't find group (storage id: {result.Read<uint>(0)})");
+                    }
 
                     ++count;
                 }

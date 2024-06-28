@@ -58,7 +58,7 @@ namespace Game
         {
             if (packet.CurrentSheathState >= (int)SheathState.Max)
             {
-                Log.outError(LogFilter.Network, "Unknown sheath state {0} ??", packet.CurrentSheathState);
+                Log.outError(LogFilter.Network, $"Unknown sheath state {packet.CurrentSheathState} ??");
                 return;
             }
 

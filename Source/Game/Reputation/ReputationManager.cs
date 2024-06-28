@@ -80,7 +80,11 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(faction_id);
             if (factionEntry == null)
             {
-                Log.outError(LogFilter.Player, "ReputationMgr.GetReputation: Can't get reputation of {0} for unknown faction (faction id) #{1}.", _player.GetName(), faction_id);
+                Log.outError(LogFilter.Player, 
+                    $"ReputationMgr.GetReputation: " +
+                    $"Can't get reputation of {_player.GetName()} " +
+                    $"for unknown faction (faction id) #{faction_id}.");
+
                 return 0;
             }
 
@@ -298,7 +302,10 @@ namespace Game
             }
 
             if (faction != null)
-                setFactionStanding.Faction.Add(new FactionStandingData(faction.ReputationListID, getStandingForPacket(faction)));
+            {
+                setFactionStanding.Faction.Add(
+                    new FactionStandingData(faction.ReputationListID, getStandingForPacket(faction)));
+            }
 
             foreach (var state in _factions.Values)
             {
@@ -306,7 +313,10 @@ namespace Game
                 {
                     state.needSend = false;
                     if (faction == null || state.ReputationListID != faction.ReputationListID)
-                        setFactionStanding.Faction.Add(new FactionStandingData(state.ReputationListID, getStandingForPacket(state)));
+                    {
+                        setFactionStanding.Faction.Add(
+                            new FactionStandingData(state.ReputationListID, getStandingForPacket(state)));
+                    }
                 }
             }
 
@@ -592,9 +602,14 @@ namespace Game
 
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
+            {
                 // Never show factions of the opposing team
-                if (!((RaceMask)factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
+                if (!((RaceMask)factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace())
+                    && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
+                {
                     SetVisible(factionEntry);
+        }
+        }
         }
 
         public void SetVisible(FactionRecord factionEntry)
@@ -649,8 +664,10 @@ namespace Game
 
         void SetAtWar(FactionState faction, bool atWar)
         {
-            // Do not allow to declare war to our own faction. But allow for rival factions (eg Aldor vs Scryer).
-            if (atWar && faction.Flags.HasFlag(ReputationFlags.Peaceful) && GetRank(CliDB.FactionStorage.LookupByKey(faction.Id)) > ReputationRank.Hated)
+            // Do not allow to declare war to our own faction.
+            // But allow for rival factions (eg Aldor vs Scryer).
+            if (atWar && faction.Flags.HasFlag(ReputationFlags.Peaceful) 
+                && GetRank(CliDB.FactionStorage.LookupByKey(faction.Id)) > ReputationRank.Hated)
                 return;
 
             // already set
@@ -678,7 +695,8 @@ namespace Game
         void SetInactive(FactionState faction, bool inactive)
         {
             // always invisible or hidden faction can't be inactive
-            if (faction.Flags.HasAnyFlag(ReputationFlags.Hidden | ReputationFlags.Header) || !faction.Flags.HasFlag(ReputationFlags.Visible))
+            if (faction.Flags.HasAnyFlag(ReputationFlags.Hidden | ReputationFlags.Header) 
+                || !faction.Flags.HasFlag(ReputationFlags.Visible))
                 return;
 
             // already set
@@ -803,7 +821,9 @@ namespace Game
             for (int i = 0; i < 4; i++)
             {
                 var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
-                if ((raceMask.HasRace(_player.GetRace()) || (raceMask == RaceMask.None && factionEntry.ReputationClassMask(i) != ClassMask.None)) && (factionEntry.ReputationClassMask(i).HasClass(class_) || factionEntry.ReputationClassMask(i) == ClassMask.None))
+                if ((raceMask.HasRace(_player.GetRace()) 
+                    || (raceMask == RaceMask.None && factionEntry.ReputationClassMask(i) != ClassMask.None)) 
+                    && (factionEntry.ReputationClassMask(i).HasClass(class_) || factionEntry.ReputationClassMask(i) == ClassMask.None))
                     return i;
             }
 
@@ -864,8 +884,11 @@ namespace Game
             for (int i = 0; i < 4; i++)
             {
                 var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
-                if ((factionEntry.ReputationClassMask(i) == ClassMask.None || factionEntry.ReputationClassMask(i).HasClass(playerClass)) && (raceMask == RaceMask.None || raceMask.HasRace(race)))
+                if ((factionEntry.ReputationClassMask(i) == ClassMask.None || factionEntry.ReputationClassMask(i).HasClass(playerClass))
+                    && (raceMask == RaceMask.None || raceMask.HasRace(race)))
+                {
                     return factionEntry.ReputationBase[i];
+            }
             }
 
             return 0;

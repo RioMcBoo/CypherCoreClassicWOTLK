@@ -174,17 +174,17 @@ namespace Game.Chat
                         Global.WorldMgr.SetPlayerSecurityLimit(AccountTypes.Administrator);
                         break;
                     case "reset":
-                        Global.WorldMgr.SetPlayerAmountLimit(ConfigMgr.GetDefaultValue<uint>("PlayerLimit", 100));
+                        Global.WorldMgr.SetPlayerAmountLimit(ConfigMgr.GetDefaultValue("PlayerLimit", 100u));
                         Global.WorldMgr.LoadDBAllowedSecurityLevel();
                         break;
                     default:
-                        if (!int.TryParse(paramStr, out int value))
+                        if (!uint.TryParse(paramStr, out uint value))
                             return false;
 
                         if (value < 0)
                             Global.WorldMgr.SetPlayerSecurityLimit((AccountTypes)(-value));
                         else
-                            Global.WorldMgr.SetPlayerAmountLimit((uint)value);
+                            Global.WorldMgr.SetPlayerAmountLimit(value);
                         break;
                 }
             }
@@ -210,7 +210,7 @@ namespace Game.Chat
                     secName = "<unknown>";
                     break;
             }
-            handler.SendSysMessage("Player limits: amount {0}, min. security level {1}.", playerAmountLimit, secName);
+            handler.SendSysMessage($"Player limits: amount {playerAmountLimit}, min. security level {secName}.");
 
             return true;
         }

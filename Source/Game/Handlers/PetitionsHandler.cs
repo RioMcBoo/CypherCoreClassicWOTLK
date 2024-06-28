@@ -19,7 +19,9 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Petitioner, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandlePetitionBuyOpcode - {packet.Unit} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network,
+                    $"WORLD: HandlePetitionBuyOpcode - {packet.Unit} " +
+                    $"not found or you can't interact with him.");
                 return;
             }
 
@@ -96,7 +98,9 @@ namespace Game
             Petition petition = Global.PetitionMgr.GetPetition(packet.Item);
             if (petition == null)
             {
-                Log.outDebug(LogFilter.PlayerItems, $"Petition {packet.Item} is not found for player {GetPlayer().GetGUID().GetCounter()} {GetPlayer().GetName()}");
+                Log.outDebug(LogFilter.PlayerItems, 
+                    $"Petition {packet.Item} is not found for player " +
+                    $"{GetPlayer().GetGUID().GetCounter()} {GetPlayer().GetName()}");
                 return;
             }
 
@@ -112,7 +116,10 @@ namespace Game
             ServerPetitionShowSignatures signaturesPacket = new();
             signaturesPacket.Item = petition.PetitionGuid;
             signaturesPacket.Owner = petition.ownerGuid;
-            signaturesPacket.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(petition.ownerGuid));
+            signaturesPacket.OwnerAccountID = 
+                ObjectGuid.Create(HighGuid.WowAccount, 
+                Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(petition.ownerGuid));
+
             signaturesPacket.PetitionID = (int)petition.PetitionGuid.GetCounter();
 
             foreach (var signature in petition.Signatures)
@@ -171,7 +178,8 @@ namespace Game
             Petition petition = Global.PetitionMgr.GetPetition(packet.PetitionGuid);
             if (petition == null)
             {
-                Log.outDebug(LogFilter.Network, $"CMSG_PETITION_QUERY failed for petition {packet.PetitionGuid}");
+                Log.outDebug(LogFilter.Network, 
+                    $"CMSG_PETITION_QUERY failed for petition {packet.PetitionGuid}");
                 return;
             }
 
@@ -201,12 +209,14 @@ namespace Game
             Petition petition = Global.PetitionMgr.GetPetition(packet.PetitionGUID);
             if (petition == null)
             {
-                Log.outError(LogFilter.Network, $"Petition {packet.PetitionGUID} is not found for player {GetPlayer().GetGUID()} {GetPlayer().GetName()}");
+                Log.outError(LogFilter.Network, 
+                    $"Petition {packet.PetitionGUID} is not found for player " +
+                    $"{GetPlayer().GetGUID()} {GetPlayer().GetName()}");
                 return;
             }
 
             ObjectGuid ownerGuid = petition.ownerGuid;
-            int signs = petition.Signatures.Count;
+            uint signs = (uint)petition.Signatures.Count;
 
             if (ownerGuid == GetPlayer().GetGUID())
                 return;
@@ -232,7 +242,8 @@ namespace Game
             if (++signs > 10)                                          // client signs maximum
                 return;
 
-            // Client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
+            // Client doesn't allow to sign petition two times by one character,
+            // but not check sign by another character from same account
             // not allow sign another player from already sign player account
 
             PetitionSignResults signResult = new();
@@ -257,7 +268,9 @@ namespace Game
             // fill petition store
             petition.AddSignature(GetAccountId(), _player.GetGUID(), false);
 
-            Log.outDebug(LogFilter.Network, "PETITION SIGN: {0} by player: {1} ({2} Account: {3})", packet.PetitionGUID.ToString(), GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetAccountId());
+            Log.outDebug(LogFilter.Network, 
+                $"PETITION SIGN: {packet.PetitionGUID} by player: " +
+                $"{GetPlayer().GetName()} ({GetPlayer().GetGUID()} Account: {GetAccountId()})");
 
             signResult.Error = PetitionSigns.Ok;
             SendPacket(signResult);
@@ -266,7 +279,7 @@ namespace Game
             Item item = _player.GetItemByGuid(packet.PetitionGUID);
             if (item != null)
             {
-                item.SetPetitionNumSignatures((uint)signs);
+                item.SetPetitionNumSignatures(signs);
                 item.SetState(ItemUpdateState.Changed, _player);
             }
 
@@ -339,7 +352,9 @@ namespace Game
             Petition petition = Global.PetitionMgr.GetPetition(packet.Item);
             if (petition == null)
             {
-                Log.outError(LogFilter.Network, "Player {0} ({1}) tried to turn in petition ({2}) that is not present in the database", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.Item.ToString());
+                Log.outError(LogFilter.Network, 
+                    $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                    $"tried to turn in petition ({packet.Item}) that is not present in the database");
                 return;
             }
 
@@ -402,7 +417,9 @@ namespace Game
             Global.PetitionMgr.RemovePetition(packet.Item);
 
             // created
-            Log.outDebug(LogFilter.Network, $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) turning in petition {packet.Item}");
+            Log.outDebug(LogFilter.Network, 
+                $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                $"turning in petition {packet.Item}");
 
             resultPacket.Result = PetitionTurns.Ok;
             SendPacket(resultPacket);
@@ -419,7 +436,9 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags1.Petitioner, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandlePetitionShowListOpcode - {guid} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandlePetitionShowListOpcode - {guid} not found " +
+                    $"or you can't interact with him.");
                 return;
             }
 

@@ -129,8 +129,8 @@ namespace Game.Chat
         [Command("stats", RBACPermissions.CommandInstanceStats, true)]
         static bool HandleInstanceStatsCommand(CommandHandler handler)
         {
-            handler.SendSysMessage("instances loaded: {0}", Global.MapMgr.GetNumInstances());
-            handler.SendSysMessage("players in instances: {0}", Global.MapMgr.GetNumPlayersInInstances());
+            handler.SendSysMessage($"instances loaded: {Global.MapMgr.GetNumInstances()}");
+            handler.SendSysMessage($"players in instances: {Global.MapMgr.GetNumPlayersInInstances()}");
 
             InstanceLocksStatistics statistics = Global.InstanceLockMgr.GetStatistics();
 

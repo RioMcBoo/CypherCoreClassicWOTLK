@@ -61,8 +61,9 @@ namespace Game.Entities
 
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Player, "Corpse (guidlow {0}, owner {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})",
-                    guidlow, owner.GetName(), owner.GetPositionX(), owner.GetPositionY());
+                Log.outError(LogFilter.Player, 
+                    $"Corpse (guidlow {guidlow}, owner {owner.GetName()}) not created. " +
+                    $"Suggested coordinates isn't valid (X: {owner.GetPositionX()} Y: {owner.GetPositionY()})");
                 return false;
             }
 
@@ -196,8 +197,9 @@ namespace Game.Entities
 
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Player, "Corpse ({0}, owner: {1}) is not created, given coordinates are not valid (X: {2}, Y: {3}, Z: {4})",
-                    GetGUID().ToString(), GetOwnerGUID().ToString(), posX, posY, posZ);
+                Log.outError(LogFilter.Player, 
+                    $"Corpse ({GetGUID()}, owner: {GetOwnerGUID()}) is not created, " +
+                    $"given coordinates are not valid (X: {posX}, Y: {posY}, Z: {posZ})");
                 return false;
             }
 

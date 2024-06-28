@@ -227,6 +227,7 @@ namespace Game.Mails
             m_money = money;
             return this;
         }
+
         public MailDraft AddCOD(int COD)
         {
             m_COD = COD;

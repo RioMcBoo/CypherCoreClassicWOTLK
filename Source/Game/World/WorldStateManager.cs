@@ -47,13 +47,17 @@ namespace Game
                         {
                             if (!int.TryParse(mapIdToken, out int mapId))
                             {
-                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer MapID ({mapIdToken}), map ignored");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `world_state` contains a world state {id} " +
+                                    $"with non-integer MapID ({mapIdToken}), map ignored");
                                 continue;
                             }
 
                             if (mapId != AnyMap && !CliDB.MapStorage.ContainsKey(mapId))
                             {
-                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `world_state` contains a world state {id} " +
+                                    $"with invalid MapID ({mapId}), map ignored");
                                 continue;
                             }
 
@@ -63,7 +67,9 @@ namespace Game
 
                     if (!mapIds.IsEmpty() && worldState.MapIds.Empty())
                     {
-                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `world_state` contains a world state {id} " +
+                            $"with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
                         continue;
                     }
 
@@ -74,20 +80,26 @@ namespace Game
                         {
                             if (!int.TryParse(areaIdToken, out int areaId))
                             {
-                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer AreaID ({areaIdToken}), area ignored");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `world_state` contains a world state {id} " +
+                                    $"with non-integer AreaID ({areaIdToken}), area ignored");
                                 continue;
                             }
 
                             var areaTableEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
                             if (areaTableEntry == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid AreaID ({areaId}), area ignored");
+                                Log.outError(LogFilter.Sql,
+                                    $"Table `world_state` contains a world state {id} " +
+                                    $"with invalid AreaID ({areaId}), area ignored");
                                 continue;
                             }
 
                             if (!worldState.MapIds.Contains(areaTableEntry.ContinentID))
                             {
-                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with AreaID ({areaId}) not on any of required maps, area ignored");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `world_state` contains a world state {id} " +
+                                    $"with AreaID ({areaId}) not on any of required maps, area ignored");
                                 continue;
                             }
 
@@ -96,13 +108,17 @@ namespace Game
 
                         if (!areaIds.IsEmpty() && worldState.AreaIds.Empty())
                         {
-                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but no valid area id was found, ignored");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `world_state` contains a world state {id} " +
+                                $"with nonempty AreaIDs ({areaIds}) but no valid area id was found, ignored");
                             continue;
                         }
                     }
                     else if (!areaIds.IsEmpty())
                     {
-                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but is a realm wide world state, area requirement ignored");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) " +
+                            $"but is a realm wide world state, area requirement ignored");
                     }
 
                     worldState.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(4));
@@ -140,7 +156,9 @@ namespace Game
                         WorldStateTemplate worldState = _worldStateTemplates.LookupByKey(worldStateId);
                         if (worldState == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `world_state_value` contains a value for unknown world state {worldStateId}, ignored");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `world_state_value` contains a value " +
+                                $"for unknown world state {worldStateId}, ignored");
                             continue;
                         }
 

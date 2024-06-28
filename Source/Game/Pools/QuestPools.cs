@@ -17,8 +17,12 @@ namespace Game
 
         public static void RegeneratePool(QuestPool pool)
         {
-            Cypher.Assert(!pool.members.Empty(), $"Quest pool {pool.poolId} is empty");
-            Cypher.Assert(pool.numActive <= pool.members.Count, $"Quest Pool {pool.poolId} requests {pool.numActive} spawns, but has only {pool.members.Count} members.");
+            Cypher.Assert(!pool.members.Empty(), 
+                $"Quest pool {pool.poolId} is empty");
+
+            Cypher.Assert(pool.numActive <= pool.members.Count, 
+                $"Quest Pool {pool.poolId} requests {pool.numActive} spawns, " +
+                $"but has only {pool.members.Count} members.");
 
             int n = pool.members.Count - 1;
             pool.activeQuests.Clear();
@@ -67,7 +71,8 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT qpm.questId, qpm.poolId, qpm.poolIndex, qpt.numActive FROM quest_pool_members qpm LEFT JOIN quest_pool_template qpt ON qpm.poolId = qpt.poolId");
                 if (result.IsEmpty())
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest pools. DB table `quest_pool_members` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 quest pools. DB table `quest_pool_members` is empty.");
                     return;
                 }
 
@@ -75,7 +80,9 @@ namespace Game
                 {
                     if (result.IsNull(2))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `quest_pool_members` contains reference to non-existing pool {result.Read<uint>(1)}. Skipped.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `quest_pool_members` contains reference " +
+                            $"to non-existing pool {result.Read<uint>(1)}. Skipped.");
                         continue;
                     }
 
@@ -87,12 +94,17 @@ namespace Game
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                     if (quest == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `quest_pool_members` contains reference to non-existing quest %u. Skipped.", questId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `quest_pool_members` contains reference " +
+                            $"to non-existing quest {questId}. Skipped.");
                         continue;
                     }
+
                     if (!quest.IsDailyOrWeekly() && !quest.IsMonthly())
                     {
-                        Log.outError(LogFilter.Sql, "Table `quest_pool_members` contains reference to quest %u, which is neither daily, weekly nor monthly. Skipped.", questId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `quest_pool_members` contains reference to quest {questId}, " +
+                            $"which is neither daily, weekly nor monthly. Skipped.");
                         continue;
                     }
 
@@ -108,7 +120,8 @@ namespace Game
 
                     var members = pair.Item1[pair.Item2].members;
                     members.Add(poolIndex, questId);
-                } while (result.NextRow());
+                }
+                while (result.NextRow());
             }
 
             // load saved spawns from character DB
@@ -125,13 +138,16 @@ namespace Game
                         var it = lookup.LookupByKey(poolId);
                         if (it.Item1 == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `pool_quest_save` contains reference to non-existant quest pool %u. Deleted.", poolId);
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `pool_quest_save` contains reference " +
+                                $"to non-existant quest pool {poolId}. Deleted.");
                             unknownPoolIds.Add(poolId);
                             continue;
                         }
 
                         it.Item1[it.Item2].activeQuests.Add(questId);
-                    } while (result.NextRow());
+                    }
+                    while (result.NextRow());
 
                     SQLTransaction trans0 = new SQLTransaction();
                     foreach (uint poolId in unknownPoolIds)
@@ -154,7 +170,12 @@ namespace Game
                 QuestPool pool = pair.Value.Item1[pair.Value.Item2];
                 if (pool.members.Count < pool.numActive)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `quest_pool_template` contains quest pool {pool.poolId} requesting {pool.numActive} spawns, but only has {pool.members.Count} members. Requested spawns reduced.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `quest_pool_template` contains quest pool {pool.poolId} " +
+                        $"requesting {pool.numActive} spawns, " +
+                        $"but only has {pool.members.Count} members. " +
+                        $"Requested spawns reduced.");
+
                     pool.numActive = pool.members.Count;
                 }
 
@@ -168,7 +189,10 @@ namespace Game
                         var member = pool.members[i];
                         if (member.Empty())
                         {
-                            Log.outError(LogFilter.Sql, $"Table `quest_pool_members` contains no entries at index {i} for quest pool {pool.poolId}. Index removed.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `quest_pool_members` contains " +
+                                $"no entries at index {i} for quest pool {pool.poolId}. " +
+                                $"Index removed.");
                             pool.members.Remove(i);
                             continue;
                         }
@@ -187,10 +211,18 @@ namespace Game
                         {
                             bool otherStatus = pool.activeQuests.Contains(id);
                             if (status != otherStatus)
-                                Log.outWarn(LogFilter.Sql, $"Table `pool_quest_save` {(status ? "does not have" : "has")} quest {id} (in pool {pool.poolId}, index {i}) saved, but its index is{(status ? "" : " not")} " +
-                                    $"active (because quest {member[0]} is{(status ? "" : " not")} in the table). Set quest {id} to {(status ? "" : "in")}active.");
+                            {
+                                Log.outWarn(LogFilter.Sql, 
+                                    $"Table `pool_quest_save` {(status ? "does not have" : "has")} " +
+                                    $"quest {id} (in pool {pool.poolId}, index {i}) saved, " +
+                                    $"but its index is{(status ? "" : " not")} active " +
+                                    $"(because quest {member[0]} is{(status ? "" : " not")} in the table). " +
+                                    $"Set quest {id} to {(status ? "" : "in")}active.");
+                            }
+
                             if (otherStatus)
                                 pool.activeQuests.Remove(id);
+
                             if (status)
                                 accountedFor.Add(id);
                         }
@@ -201,7 +233,12 @@ namespace Game
 
                     // warn for any remaining active spawns (not part of the pool)
                     foreach (var quest in pool.activeQuests)
-                        Log.outWarn(LogFilter.Sql, $"Table `pool_quest_save` has saved quest {quest} for pool {pool.poolId}, but that quest is not part of the pool. Skipped.");
+                    {
+                        Log.outWarn(LogFilter.Sql,
+                            $"Table `pool_quest_save` has saved quest {quest} " +
+                            $"for pool {pool.poolId}, " +
+                            $"but that quest is not part of the pool. Skipped.");
+                    }
 
                     // only the previously-found spawns should actually be active
                     pool.activeQuests = accountedFor;
@@ -209,7 +246,11 @@ namespace Game
                     if (activeCount != pool.numActive)
                     {
                         doRegenerate = true;
-                        Log.outError(LogFilter.Sql, $"Table `pool_quest_save` has {activeCount} active members saved for pool {pool.poolId}, which requests {pool.numActive} active members. Pool spawns re-generated.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `pool_quest_save` " +
+                            $"has {activeCount} active members saved for pool {pool.poolId}, " +
+                            $"which requests {pool.numActive} active members. " +
+                            $"Pool spawns re-generated.");
                     }
                 }
 
@@ -225,7 +266,11 @@ namespace Game
                     {
                         if (_poolLookup.ContainsKey(quest))
                         {
-                            Log.outError(LogFilter.Sql, $"Table `quest_pool_members` lists quest {quest} as member of pool {pool.poolId}, but it is already a member of pool {_poolLookup[quest].poolId}. Skipped.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `quest_pool_members` lists quest {quest} " +
+                                $"as member of pool {pool.poolId}, " +
+                                $"but it is already a member of pool {_poolLookup[quest].poolId}. " +
+                                $"Skipped.");
                             continue;
                         }
                         _poolLookup[quest] = pool;

@@ -35,6 +35,7 @@ namespace Game.SupportSystem
         }
 
         public virtual string FormatViewMessageString(CommandHandler handler, bool detailed = false) { return ""; }
+        
         public virtual string FormatViewMessageString(CommandHandler handler, string closedName, string assignedToName, string unassignedName, string deletedName)
         {
             StringBuilder ss = new();
@@ -61,6 +62,7 @@ namespace Game.SupportSystem
         public int GetId() { return _id; }
         public ObjectGuid GetPlayerGuid() { return _playerGuid; }
         public Player GetPlayer() { return Global.ObjAccessor.FindConnectedPlayer(_playerGuid); }
+        
         public string GetPlayerName()
         {
             string name = "";
@@ -69,23 +71,29 @@ namespace Game.SupportSystem
 
             return name;
         }
+
         public Player GetAssignedPlayer() { return Global.ObjAccessor.FindConnectedPlayer(_assignedTo); }
         public ObjectGuid GetAssignedToGUID() { return _assignedTo; }
+        
         public string GetAssignedToName()
         {
             string name;
             if (!_assignedTo.IsEmpty())
+            {
                 if (Global.CharacterCacheStorage.GetCharacterNameByGuid(_assignedTo, out name))
                     return name;
+            }
 
             return "";
         }
+
         string GetComment() { return _comment; }
 
         public virtual void SetAssignedTo(ObjectGuid guid, bool IsAdmin = false) { _assignedTo = guid; }
         public virtual void SetUnassigned() { _assignedTo.Clear(); }
         public void SetClosedBy(ObjectGuid value) { _closedBy = value; }
         public void SetComment(string comment) { _comment = comment; }
+        
         public void SetPosition(int mapId, Vector3 pos)
         {
             _mapId = mapId;
@@ -340,10 +348,12 @@ namespace Game.SupportSystem
         string GetNote() { return _note; }
 
         public void SetFacing(float facing) { _facing = facing; }
+        
         public void SetTargetCharacterGuid(ObjectGuid targetCharacterGuid)
         {
             _targetCharacterGuid = targetCharacterGuid;
         }
+        
         public void SetReportType(ReportType reportType) { _reportType = reportType; }
         public void SetMajorCategory(ReportMajorCategory majorCategory) { _majorCategory = majorCategory; }
         public void SetMinorCategoryFlags(ReportMinorCategory minorCategoryFlags) { _minorCategoryFlags = minorCategoryFlags; }
@@ -445,7 +455,6 @@ namespace Game.SupportSystem
 
         string GetNote() { return _note; }
         public void SetNote(string note) { _note = note; }
-
         public void SetFacing(float facing) { _facing = facing; }
     }
 }

@@ -50,7 +50,9 @@ namespace Game
 
                 if (packet.Password.Length > 127)
                 {
-                    Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more than {127} characters long - blocked");
+                    Log.outError(LogFilter.Network, 
+                        $"Player {GetPlayer().GetGUID()} tried to create a channel " +
+                        $"with a password more than {127} characters long - blocked");
                     return;
                 }
                 if (!DisallowHyperlinksAndMaybeKick(packet.ChannelName))
@@ -142,7 +144,10 @@ namespace Game
         {
             if (packet.Name.Length >= 49)
             {
-                Log.outDebug(LogFilter.ChatSystem, "{0} {1} ChannelName: {2}, Name: {3}, Name too long.", packet.GetOpcode(), GetPlayerInfo(), packet.ChannelName, packet.Name);
+                Log.outDebug(LogFilter.ChatSystem, 
+                    $"{packet.GetOpcode()} {GetPlayerInfo()} " +
+                    $"ChannelName: {packet.ChannelName}, " +
+                    $"Name: {packet.Name}, Name too long.");
                 return;
             }            
 
@@ -190,12 +195,18 @@ namespace Game
         {
             if (packet.Password.Length > 31)
             {
-                Log.outDebug(LogFilter.ChatSystem, "{0} {1} ChannelName: {2}, Password: {3}, Password too long.",
-                packet.GetOpcode(), GetPlayerInfo(), packet.ChannelName, packet.Password);
+                Log.outDebug(LogFilter.ChatSystem, 
+                    $"{packet.GetOpcode()} {GetPlayerInfo()} " +
+                    $"ChannelName: {packet.ChannelName}, " +
+                    $"Password: {packet.Password}, " +
+                    $"Password too long.");
                 return;
             }
 
-            Log.outDebug(LogFilter.ChatSystem, "{0} {1} ChannelName: {2}, Password: {3}", packet.GetOpcode(), GetPlayerInfo(), packet.ChannelName, packet.Password);
+            Log.outDebug(LogFilter.ChatSystem, 
+                $"{packet.GetOpcode()} {GetPlayerInfo()} " +
+                $"ChannelName: {packet.ChannelName}, " +
+                $"Password: {packet.Password}");
 
             Channel channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
             if (channel != null)

@@ -21,19 +21,25 @@ namespace BNetServer.Networking
         {
             if (logonRequest.Program != "WoW")
             {
-                Log.outDebug(LogFilter.Session, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with game other than WoW (using {logonRequest.Program})!");
+                Log.outDebug(LogFilter.Session, 
+                    $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in " +
+                    $"with game other than WoW (using {logonRequest.Program})!");
                 return BattlenetRpcErrorCode.BadProgram;
             }
 
             if (logonRequest.Platform != "Win" && logonRequest.Platform != "Wn64" && logonRequest.Platform != "Mc64")
             {
-                Log.outDebug(LogFilter.Session, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in from an unsupported platform (using {logonRequest.Platform})!");
+                Log.outDebug(LogFilter.Session, 
+                    $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in " +
+                    $"from an unsupported platform (using {logonRequest.Platform})!");
                 return BattlenetRpcErrorCode.BadPlatform;
             }
 
             if (!SharedConst.IsValidLocale(logonRequest.Locale.ToEnum<Locale>()))
             {
-                Log.outDebug(LogFilter.Session, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with unsupported locale (using {logonRequest.Locale})!");
+                Log.outDebug(LogFilter.Session, 
+                    $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in " +
+                    $"with unsupported locale (using {logonRequest.Locale})!");
                 return BattlenetRpcErrorCode.BadLocale;
             }
 
@@ -57,7 +63,8 @@ namespace BNetServer.Networking
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginService.GetHostnameForClient(GetRemoteIpAddress())}:{Global.LoginService.GetPort()}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8(
+                $"https://{Global.LoginService.GetHostnameForClient(GetRemoteIpAddress())}:{Global.LoginService.GetPort()}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
@@ -130,19 +137,30 @@ namespace BNetServer.Networking
             // If the IP is 'locked', check that the player comes indeed from the correct IP address
             if (accountInfo.IsLockedToIP)
             {
-                Log.outDebug(LogFilter.Session, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is locked to IP: {accountInfo.LastIP} is logging in from IP: {ip_address}");
+                Log.outDebug(LogFilter.Session, 
+                    $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} " +
+                    $"is locked to IP: {accountInfo.LastIP} is logging in from IP: {ip_address}");
 
                 if (accountInfo.LastIP != ip_address)
                     return BattlenetRpcErrorCode.RiskAccountLocked;
             }
             else
             {
-                Log.outDebug(LogFilter.Session, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is not locked to ip");
+                Log.outDebug(LogFilter.Session, 
+                    $"Session.HandleVerifyWebCredentials: " +
+                    $"Account: {accountInfo.Login} is not locked to ip");
+
                 if (accountInfo.LockCountry.IsEmpty() || accountInfo.LockCountry == "00")
-                    Log.outDebug(LogFilter.Session, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is not locked to country");
+                {
+                    Log.outDebug(LogFilter.Session, 
+                        $"Session.HandleVerifyWebCredentials: " +
+                        $"Account: {accountInfo.Login} is not locked to country");
+                }
                 else if (!accountInfo.LockCountry.IsEmpty() && !ipCountry.IsEmpty())
                 {
-                    Log.outDebug(LogFilter.Session, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is locked to Country: {accountInfo.LockCountry} player Country: {ipCountry}");
+                    Log.outDebug(LogFilter.Session, 
+                        $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} " +
+                        $"is locked to Country: {accountInfo.LockCountry} player Country: {ipCountry}");
 
                     if (ipCountry != accountInfo.LockCountry)
                         return BattlenetRpcErrorCode.RiskAccountLocked;
@@ -154,12 +172,16 @@ namespace BNetServer.Networking
             {
                 if (accountInfo.IsPermanenetlyBanned)
                 {
-                    Log.outDebug(LogFilter.Session, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Banned account {accountInfo.Login} tried to login!");
+                    Log.outDebug(LogFilter.Session, 
+                        $"{GetClientInfo()} Session.HandleVerifyWebCredentials: " +
+                        $"Banned account {accountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountBanned;
                 }
                 else
                 {
-                    Log.outDebug(LogFilter.Session, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Temporarily banned account {accountInfo.Login} tried to login!");
+                    Log.outDebug(LogFilter.Session, 
+                        $"{GetClientInfo()} Session.HandleVerifyWebCredentials: " +
+                        $"Temporarily banned account {accountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountSuspended;
                 }
             }
@@ -196,7 +218,11 @@ namespace BNetServer.Networking
 
             if (request.Program != 0x576F57)
             {
-                Log.outDebug(LogFilter.Session, $"[Battlenet::HandleGenerateWebCredentials] {GetClientInfo()} attempted to generate web cretentials with game other than WoW (using {(request.Program >> 24) & 0xFF}{(request.Program >> 16) & 0xFF}{(request.Program >> 8) & 0xFF}{request.Program & 0xFF})!");
+                Log.outDebug(LogFilter.Session, 
+                    $"[Battlenet::HandleGenerateWebCredentials] {GetClientInfo()} " +
+                    $"attempted to generate web cretentials with game other than WoW " +
+                    $"(using {(request.Program >> 24) & 0xFF}{(request.Program >> 16) & 0xFF}" +
+                    $"{(request.Program >> 8) & 0xFF}{request.Program & 0xFF})!");
                 return BattlenetRpcErrorCode.BadProgram;
             }
 

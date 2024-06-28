@@ -29,7 +29,9 @@ public class Log
         // Bad config configuration, creating default config
         if (!loggers.ContainsKey(LogFilter.Server))
         {
-            Console.WriteLine("Wrong Loggers configuration. Review your Logger config section.\nCreating default loggers [Server (Info)] to console\n");
+            Console.WriteLine(
+                "Wrong Loggers configuration. Review your Logger config section.\n" +
+                "Creating default loggers [Server (Info)] to console\n");
 
             loggers.Clear();
             appenders.Clear();
@@ -70,7 +72,7 @@ public class Log
         return logLevel != LogLevel.Disabled && logLevel <= level;
     }
 
-    public static void outLog(LogFilter type, LogLevel level, string text, params object[] args)
+    public static void outLog(LogFilter type, LogLevel level, string text, params string[] args)
     {
         if (!ShouldLog(type, level))
             return;
@@ -86,7 +88,7 @@ public class Log
         outMessage(type, LogLevel.Info, text, args);
     }
 
-    public static void outWarn(LogFilter type, string text, params object[] args)
+    public static void outWarn(LogFilter type, string text, params string[] args)
     {
         if (!ShouldLog(type, LogLevel.Warn))
             return;
@@ -116,10 +118,11 @@ public class Log
         if (!ShouldLog(LogFilter.Server, LogLevel.Fatal))
             return;
 
-        outMessage(LogFilter.Server, LogLevel.Fatal, "CallingMember: {0} ExceptionMessage: {1}", memberName, ex.Message);
+        outMessage(LogFilter.Server, LogLevel.Fatal,
+            $"CallingMember: {memberName} ExceptionMessage: {ex.Message}");
     }
 
-    public static void outFatal(LogFilter type, string text, params object[] args)
+    public static void outFatal(LogFilter type, string text, params string[] args)
     {
         if (!ShouldLog(type, LogLevel.Fatal))
             return;
@@ -127,7 +130,7 @@ public class Log
         outMessage(type, LogLevel.Fatal, text, args);
     }
 
-    public static void outTrace(LogFilter type, string text, params object[] args)
+    public static void outTrace(LogFilter type, string text, params string[] args)
     {
         if (!ShouldLog(type, LogLevel.Trace))
             return;
@@ -135,22 +138,33 @@ public class Log
         outMessage(type, LogLevel.Trace, text, args);
     }
 
-    public static void outCommand(int accountId, string text, params object[] args)
+    public static void outCommand(int accountId, string text, params string[] args)
     {
         if (!ShouldLog(LogFilter.Commands, LogLevel.Info))
             return;
 
-        var msg = new LogMessage(LogLevel.Info, LogFilter.Commands, string.Format(text, args));
+        string result = args.Length > 0 ? string.Format(text, args) : text;
+
+        var msg = new LogMessage(LogLevel.Info, LogFilter.Commands, result);
         msg.dynamicName = accountId.ToString();
 
         Logger logger = GetLoggerByType(LogFilter.Commands);
         logger.write(msg);
     }
 
-    static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
+    static void outMessage(LogFilter type, LogLevel level, string text, params string[] args)
     {
         Logger logger = GetLoggerByType(type);
         logger.write(new LogMessage(level, type, string.Format(text, args)));
+    }
+
+    static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
+    {
+        Logger logger = GetLoggerByType(type);
+
+        string result = args.Length > 0 ? string.Format(text, args) : text;
+
+        logger.write(new LogMessage(level, type, result));
     }
 
     static byte NextAppenderId()
@@ -169,7 +183,9 @@ public class Log
 
         if (tokens.Length < 2)
         {
-            Console.WriteLine("Log.CreateAppenderFromConfig: Wrong configuration for appender {0}. Config line: {1}", name, options);
+            Console.WriteLine(
+                $"Log.CreateAppenderFromConfig: " +
+                $"Wrong configuration for appender {name}. Config line: {options}");
             return;
         }
 
@@ -179,7 +195,9 @@ public class Log
 
         if (level > LogLevel.Fatal)
         {
-            Console.WriteLine("Log.CreateAppenderFromConfig: Wrong Log Level {0} for appender {1}\n", level, name);
+            Console.WriteLine(
+                $"Log.CreateAppenderFromConfig: " +
+                $"Wrong Log Level {level} for appender {name}\n");
             return;
         }
 
@@ -202,7 +220,9 @@ public class Log
                     {
                         if (name != "Server")
                         {
-                            Console.WriteLine("Log.CreateAppenderFromConfig: Missing file name for appender {0}", name);
+                            Console.WriteLine(
+                                $"Log.CreateAppenderFromConfig: " +
+                                $"Missing file name for appender {name}");
                             return;
                         }
 
@@ -220,7 +240,9 @@ public class Log
                     break;
                 }
             default:
-                Console.WriteLine("Log.CreateAppenderFromConfig: Unknown type {0} for appender {1}", type, name);
+                Console.WriteLine(
+                    $"Log.CreateAppenderFromConfig: " +
+                    $"Unknown type {type} for appender {name}");
                 break;
         }
     }
@@ -235,7 +257,7 @@ public class Log
         string options = ConfigMgr.GetDefaultValue(appenderName, "");
         if (string.IsNullOrEmpty(options))
         {
-            Console.WriteLine("Log.CreateLoggerFromConfig: Missing config option Logger.{0}", name);
+            Console.WriteLine($"Log.CreateLoggerFromConfig: Missing config option Logger.{name}");
             return;
         }
         var tokens = new StringArray(options, ',');
@@ -243,14 +265,14 @@ public class Log
         LogFilter type = name.ToEnum<LogFilter>();        
         if (loggers.ContainsKey(type))
         {
-            Console.WriteLine("Error while configuring Logger {0}. Already defined", name);
+            Console.WriteLine($"Error while configuring Logger {name}. Already defined");
             return;
         }
 
         LogLevel level = (LogLevel)uint.Parse(tokens[0]);
         if (level > LogLevel.Fatal)
         {
-            Console.WriteLine("Log.CreateLoggerFromConfig: Wrong Log Level {0} for logger {1}", type, name);
+            Console.WriteLine($"Log.CreateLoggerFromConfig: Wrong Log Level {type} for logger {name}");
             return;
         }
 
@@ -266,7 +288,11 @@ public class Log
             var str = ss[i++];
             Appender appender = GetAppenderByName(str);
             if (appender == null)
-                Console.WriteLine("Error while configuring Appender {0} in Logger {1}. Appender does not exist", str, name);
+            {
+                Console.WriteLine(
+                    $"Error while configuring Appender {str} in Logger {name}. " +
+                    $"Appender does not exist");
+            }
             else
                 logger.addAppender(appender.getId(), appender);
         }

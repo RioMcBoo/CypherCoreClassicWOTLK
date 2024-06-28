@@ -163,7 +163,9 @@ namespace Game
                     ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
                     if (proto == null)
                     {
-                        Log.outError(LogFilter.Misc, $"AuctionHouseMgr.LoadAuctionItems: Unknown item (GUID: {itemGuid} item entry: #{itemEntry}) in auction, skipped.");
+                        Log.outError(LogFilter.Misc, 
+                            $"AuctionHouseMgr.LoadAuctionItems: " +
+                            $"Unknown item (GUID: {itemGuid} item entry: #{itemEntry}) in auction, skipped.");
                         continue;
                     }
 
@@ -785,12 +787,11 @@ namespace Game
 
             SQLTransaction trans = new();
 
-            foreach (var auction in _itemsByAuctionId.Values.ToList())
-            {
                 ///- filter auctions expired on next update
-                if (auction.EndTime > curTime.AddMinutes(1))
-                    continue;
+            var filteredList = _itemsByAuctionId.Values.Where(x => !(x.EndTime > curTime.AddMinutes(1)));
 
+            foreach (var auction in filteredList)
+            {
                 ///- Either cancel the auction if there was no bidder
                 if (auction.Bidder.IsEmpty())
                 {
@@ -1309,8 +1310,11 @@ namespace Game
                     if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(auction.Owner, out string ownerName))
                         ownerName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
 
-                    Log.outCommand(bidderAccId, $"GM {player.GetName()} (Account: {bidderAccId}) bought commodity in auction: {items[0].Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {items[0].Items[0].GetEntry()} " +
-                        $"Count: {boughtFromAuction}) and pay money: {auction.BuyoutOrUnitPrice * boughtFromAuction}. Original owner {ownerName} (Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner)})");
+                    Log.outCommand(bidderAccId, 
+                        $"GM {player.GetName()} (Account: {bidderAccId}) bought commodity in auction: " +
+                        $"{items[0].Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {items[0].Items[0].GetEntry()} " +
+                        $"Count: {boughtFromAuction}) and pay money: {auction.BuyoutOrUnitPrice * boughtFromAuction}. " +
+                        $"Original owner {ownerName} (Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner)})");
                 }
 
                 long auctionHouseCut = CalculateAuctionHouseCut(auction.BuyoutOrUnitPrice * boughtFromAuction);
@@ -1431,8 +1435,11 @@ namespace Game
 
                 int ownerAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner);
 
-                Log.outCommand(bidderAccId, $"GM {bidderName} (Account: {bidderAccId}) won item in auction: {auction.Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {auction.Items[0].GetEntry()}" +
-                    $" Count: {auction.GetTotalItemCount()}) and pay money: {auction.BidAmount}. Original owner {ownerName} (Account: {ownerAccId})");
+                Log.outCommand(bidderAccId, 
+                    $"GM {bidderName} (Account: {bidderAccId}) won item in auction: " +
+                    $"{auction.Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {auction.Items[0].GetEntry()}" +
+                    $" Count: {auction.GetTotalItemCount()}) and pay money: {auction.BidAmount}. " +
+                    $"Original owner {ownerName} (Account: {ownerAccId})");
             }
 
             // receiver exist

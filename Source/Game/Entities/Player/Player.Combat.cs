@@ -367,7 +367,8 @@ namespace Game.Entities
             if (duel == null)
                 return;
 
-            // Check if DuelComplete() has been called already up in the stack and in that case don't do anything else here
+            // Check if DuelComplete() has been called already up in the stack
+            // and in that case don't do anything else here
             if (duel.State == DuelState.Completed)
                 return;
 

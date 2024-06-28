@@ -794,7 +794,8 @@ namespace Scripts.Spells.Items
             if (player == null)
                 return;
 
-            player.m_Events.AddEventAtOffset(new PartyTimeEmoteEvent(player), RandomHelper.RAND(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15)));
+            player.m_Events.AddEventAtOffset(new PartyTimeEmoteEvent(player), 
+                RandomHelper.RAND(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15)));
         }
 
         public override void Register()

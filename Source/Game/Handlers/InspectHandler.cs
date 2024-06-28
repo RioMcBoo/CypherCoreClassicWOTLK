@@ -73,7 +73,10 @@ namespace Game
             Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Guid);
             if (player == null)
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleQueryInspectAchievements: [{0}] inspected unknown Player [{1}]", GetPlayer().GetGUID().ToString(), inspect.Guid.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleQueryInspectAchievements: " +
+                    $"[{GetPlayer().GetGUID()}] inspected unknown Player [{inspect.Guid}]");
+
                 return;
             }
 

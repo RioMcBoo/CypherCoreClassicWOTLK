@@ -273,7 +273,8 @@ namespace Game.Achievements
                     if (criteria == null)
                     {
                         // Removing non-existing criteria data for all characters
-                        Log.outError(LogFilter.Achievement, "Non-existing achievement criteria {0} data removed from table `character_achievement_progress`.", id);
+                        Log.outError(LogFilter.Achievement, 
+                            $"Non-existing achievement criteria {id} data removed from table `character_achievement_progress`.");
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA);
                         stmt.SetInt32(0, id);
@@ -470,7 +471,7 @@ namespace Game.Achievements
             if (!_owner.GetSession().PlayerLoading())
                 SendAchievementEarned(achievement);
 
-            Log.outDebug(LogFilter.Achievement, "PlayerAchievementMgr.CompletedAchievement({0}). {1}", achievement.Id, GetOwnerInfo());
+            Log.outDebug(LogFilter.Achievement, $"PlayerAchievementMgr.CompletedAchievement({achievement.Id}). {GetOwnerInfo()}");
 
             CompletedAchievementData ca = new();
             ca.Date = GameTime.GetGameTime();
@@ -611,7 +612,7 @@ namespace Game.Achievements
             if (achievement.Flags.HasAnyFlag(AchievementFlags.Hidden))
                 return;
 
-            Log.outDebug(LogFilter.Achievement, "PlayerAchievementMgr.SendAchievementEarned({0})", achievement.Id);
+            Log.outDebug(LogFilter.Achievement, $"PlayerAchievementMgr.SendAchievementEarned({achievement.Id})");
 
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
             {
@@ -776,7 +777,8 @@ namespace Game.Achievements
                     if (criteria == null)
                     {
                         // we will remove not existed criteria for all guilds
-                        Log.outError(LogFilter.Achievement, "Non-existing achievement criteria {0} data removed from table `guild_achievement_progress`.", id);
+                        Log.outError(LogFilter.Achievement, 
+                            $"Non-existing achievement criteria {id} data removed from table `guild_achievement_progress`.");
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD);
                         stmt.SetInt32(0, id);
@@ -821,7 +823,7 @@ namespace Game.Achievements
                 stmt.SetInt32(1, pair.Key);
                 stmt.SetInt64(2, pair.Value.Date);
                 foreach (var guid in pair.Value.CompletingPlayers)
-                    guidstr.AppendFormat("{0},", guid.GetCounter());
+                    guidstr.AppendFormat($"{guid.GetCounter()},");
 
                 stmt.SetString(3, guidstr.ToString());
                 trans.Append(stmt);
@@ -949,7 +951,7 @@ namespace Game.Achievements
 
         public override void CompletedAchievement(AchievementRecord achievement, Player referencePlayer)
         {
-            Log.outDebug(LogFilter.Achievement, "CompletedAchievement({0})", achievement.Id);
+            Log.outDebug(LogFilter.Achievement, $"CompletedAchievement({achievement.Id})");
 
             if (achievement.Flags.HasAnyFlag(AchievementFlags.Counter) || HasAchieved(achievement.Id))
                 return;
@@ -1200,7 +1202,8 @@ namespace Game.Achievements
             SQLResult result = DB.Characters.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 realm first completed achievements. DB table `character_achievement` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 realm first completed achievements. DB table `character_achievement` is empty.");
                 return;
             }
 
@@ -1211,7 +1214,8 @@ namespace Game.Achievements
                 if (achievement == null)
                 {
                     // Remove non-existing achievements from all characters
-                    Log.outError(LogFilter.Achievement, "Non-existing achievement {0} data has been removed from the table `character_achievement`.", achievementId);
+                    Log.outError(LogFilter.Achievement, 
+                        $"Non-existing achievement {achievementId} data has been removed from the table `character_achievement`.");
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEVMENT);
                     stmt.SetInt32(0, achievementId);

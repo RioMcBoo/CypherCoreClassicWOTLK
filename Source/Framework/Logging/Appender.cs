@@ -166,13 +166,13 @@ abstract class Appender
         StringBuilder ss = new();
 
         if (_flags.HasAnyFlag(AppenderFlags.PrefixTimestamp))
-            ss.AppendFormat("{0:MM/dd/yyyy HH:mm:ss} ", message.mtime);
+            ss.AppendFormat($"{message.mtime:MM/dd/yyyy HH:mm:ss}");
 
         if (_flags.HasAnyFlag(AppenderFlags.PrefixLogLevel))
-            ss.AppendFormat("{0}: ", message.level);
+            ss.AppendFormat($"{message.level}: ");
 
         if (_flags.HasAnyFlag(AppenderFlags.PrefixLogFilterType))
-            ss.AppendFormat("[{0}] ", message.type);
+            ss.AppendFormat($"[{message.type}] ");
 
         message.prefix = ss.ToString();
         _write(message);

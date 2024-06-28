@@ -476,24 +476,29 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                 {
                     case EventIds.Shadowflame:
                         DoCastVictim(SpellIds.Shadowflame);
-                        _events.ScheduleEvent(EventIds.Shadowflame, TimeSpan.FromSeconds(12));
+                        _events.ScheduleEvent(
+                            EventIds.Shadowflame, TimeSpan.FromSeconds(12));
                         break;
                     case EventIds.Fear:
                         DoCastVictim(SpellIds.Bellowingroar);
-                        _events.ScheduleEvent(EventIds.Fear, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                        _events.ScheduleEvent(
+                            EventIds.Fear, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
                         break;
                     case EventIds.Veilofshadow:
                         DoCastVictim(SpellIds.Veilofshadow);
-                        _events.ScheduleEvent(EventIds.Veilofshadow, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                        _events.ScheduleEvent(
+                            EventIds.Veilofshadow, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
                         break;
                     case EventIds.Cleave:
                         DoCastVictim(SpellIds.Cleave);
-                        _events.ScheduleEvent(EventIds.Cleave, TimeSpan.FromSeconds(7));
+                        _events.ScheduleEvent(
+                            EventIds.Cleave, TimeSpan.FromSeconds(7));
                         break;
                     case EventIds.Taillash:
                         // Cast Nyi since we need a better check for behind target
                         DoCastVictim(SpellIds.Taillash);
-                        _events.ScheduleEvent(EventIds.Taillash, TimeSpan.FromSeconds(10));
+                        _events.ScheduleEvent(
+                            EventIds.Taillash, TimeSpan.FromSeconds(10));
                         break;
                     case EventIds.Classcall:
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
@@ -543,7 +548,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                 default:
                                     break;
                             }
-                        _events.ScheduleEvent(EventIds.Classcall, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+
+                        _events.ScheduleEvent(
+                            EventIds.Classcall, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+
                         break;
                 }
 
@@ -554,7 +562,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             // Phase3 begins when health below 20 pct
             if (!Phase3 && HealthBelowPct(20))
             {
-                List<Creature> constructList = me.GetCreatureListWithEntryInGrid(CreatureIds.BoneConstruct, 500.0f);
+                List<Creature> constructList = 
+                    me.GetCreatureListWithEntryInGrid(CreatureIds.BoneConstruct, 500.0f);
+
                 foreach (var creature in constructList)
                 {
                     if (creature != null && !creature.IsAlive())

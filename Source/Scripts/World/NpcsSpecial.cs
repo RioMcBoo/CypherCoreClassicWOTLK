@@ -158,11 +158,14 @@ namespace Scripts.World.NpcsSpecial
             {
                 if (spawn.MyEntry == entry)
                 {
-                    Cypher.Assert(ObjectMgr.GetCreatureTemplate(spawn.OtherEntry) != null, $"Invalid creature entry {spawn.OtherEntry} in 'npc_air_force_bots' script");
+                    Cypher.Assert(ObjectMgr.GetCreatureTemplate(spawn.OtherEntry) != null, 
+                        $"Invalid creature entry {spawn.OtherEntry} in 'npc_air_force_bots' script");
                     return spawn;
                 }
             }
-            Cypher.Assert(false, $"Unhandled creature with entry {entry} is assigned 'npc_air_force_bots' script");
+
+            Cypher.Assert(false, 
+                $"Unhandled creature with entry {entry} is assigned 'npc_air_force_bots' script");
             return null;
         }
     }
@@ -195,7 +198,8 @@ namespace Scripts.World.NpcsSpecial
 
         public override void UpdateAI(uint diff)
         {
-            // Reset flags after a certain time has passed so that the next player has to start the 'event' again
+            // Reset flags after a certain time has passed
+            // so that the next player has to start the 'event' again
             if (me.HasNpcFlag(NPCFlags1.QuestGiver))
             {
                 if (ResetFlagTimer <= diff)
@@ -215,7 +219,8 @@ namespace Scripts.World.NpcsSpecial
             switch (emote)
             {
                 case TextEmotes.Chicken:
-                    if (player.GetQuestStatus(QuestCluck) == QuestStatus.None && RandomHelper.Rand32() % 30 == 1)
+                    if (player.GetQuestStatus(QuestCluck) == QuestStatus.None 
+                        && RandomHelper.Rand32() % 30 == 1)
                     {
                         me.SetNpcFlag(NPCFlags1.QuestGiver);
                         me.SetFaction(FactionTemplates.Friendly);
@@ -271,10 +276,13 @@ namespace Scripts.World.NpcsSpecial
 
         public override void ReceiveEmote(Player player, TextEmotes emote)
         {
-            if (me.IsWithinLOS(player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()) && me.IsWithinDistInMap(player, 30.0f))
+            if (me.IsWithinLOS(
+                player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()) 
+                && me.IsWithinDistInMap(player, 30.0f))
             {
                 // She responds to emotes not instantly but ~TimeSpan.FromMilliseconds(1500) later
-                // If you first /bow, then /wave before dancing flames bow back, it doesnt bow at all and only does wave
+                // If you first /bow, then /wave before dancing flames bow back,
+                // it doesnt bow at all and only does wave
                 // If you're performing emotes too fast, she will not respond to them
                 // Means she just replaces currently scheduled event with new after receiving new emote
                 _scheduler.CancelAll();
@@ -282,16 +290,20 @@ namespace Scripts.World.NpcsSpecial
                 switch (emote)
                 {
                     case TextEmotes.Kiss:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotShy));
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                            context => me.HandleEmoteCommand(Emote.OneshotShy));
                         break;
                     case TextEmotes.Wave:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotWave));
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                            context => me.HandleEmoteCommand(Emote.OneshotWave));
                         break;
                     case TextEmotes.Bow:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotBow));
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                            context => me.HandleEmoteCommand(Emote.OneshotBow));
                         break;
                     case TextEmotes.Joke:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotLaugh));
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                            context => me.HandleEmoteCommand(Emote.OneshotLaugh));
                         break;
                     case TextEmotes.Dance:
                         if (!player.HasAura(SpellFierySeduction))
@@ -317,7 +329,10 @@ namespace Scripts.World.NpcsSpecial
             _scheduler.Schedule(TimeSpan.FromSeconds(2), context =>
             {
                 me.CastSpell(null, SpellTorchTargetPicker);
-                _scheduler.Schedule(TimeSpan.FromSeconds(3), context => me.CastSpell(null, SpellTorchTargetPicker));
+
+                _scheduler.Schedule(TimeSpan.FromSeconds(3), 
+                    context => me.CastSpell(null, SpellTorchTargetPicker));
+
                 context.Repeat(TimeSpan.FromSeconds(5));
             });
         }
@@ -528,7 +543,9 @@ namespace Scripts.World.NpcsSpecial
         public void PatientDied(Position point)
         {
             Player player = ObjAccessor.GetPlayer(me, PlayerGUID);
-            if (player != null && ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) || (player.GetQuestStatus(6622) == QuestStatus.Incomplete)))
+            if (player != null && 
+                ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) 
+                || (player.GetQuestStatus(6622) == QuestStatus.Incomplete)))
             {
                 ++PatientDiedCount;
 
@@ -554,7 +571,8 @@ namespace Scripts.World.NpcsSpecial
         {
             if (player != null && PlayerGUID == player.GetGUID())
             {
-                if ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) || (player.GetQuestStatus(6622) == QuestStatus.Incomplete))
+                if ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) 
+                    || (player.GetQuestStatus(6622) == QuestStatus.Incomplete))
                 {
                     ++PatientSavedCount;
 
@@ -610,7 +628,8 @@ namespace Scripts.World.NpcsSpecial
                             patientEntry = DoctorConst.HordeSoldierId[RandomHelper.Rand32() % 3];
                             break;
                         default:
-                            Log.outError(LogFilter.Scripts, "Invalid entry for Triage doctor. Please check your database");
+                            Log.outError(LogFilter.Scripts, 
+                                "Invalid entry for Triage doctor. Please check your database");
                             return;
                     }
 
@@ -619,7 +638,8 @@ namespace Scripts.World.NpcsSpecial
                     Creature patient = me.SummonCreature(patientEntry, point, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
                     if (patient != null)
                     {
-                        //303, this flag appear to be required for client side item.spell to work (TargetSingleFriend)
+                        //303, this flag appear to be required for client side item.spell
+                        //to work (TargetSingleFriend)
                         patient.SetUnitFlag(UnitFlags.PlayerControlled);
 
                         Patients.Add(patient.GetGUID());
@@ -708,13 +728,16 @@ namespace Scripts.World.NpcsSpecial
             if (player == null || !me.IsAlive() || spellInfo.Id != 20804)
                 return;
 
-            if (player.GetQuestStatus(6624) == QuestStatus.Incomplete || player.GetQuestStatus(6622) == QuestStatus.Incomplete)
+            if (player.GetQuestStatus(6624) == QuestStatus.Incomplete
+                || player.GetQuestStatus(6622) == QuestStatus.Incomplete)
+            {
                 if (!DoctorGUID.IsEmpty())
                 {
                     Creature doctor = ObjectAccessor.GetCreature(me, DoctorGUID);
                     if (doctor != null)
                         doctor.GetAI<npc_doctor>().PatientSaved(me, player, Coord);
                 }
+            }
 
             //make uninteractible
             me.SetUninteractible(true);
@@ -1092,102 +1115,185 @@ namespace Scripts.World.NpcsSpecial
                 case TournamentPennantIds.NpcStormwindSteed:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionStormwind))
+                    {
                         return TournamentPennantIds.SpellStormwindChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfStormwind) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfStormwind))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfStormwind)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfStormwind))
+                    {
                         return TournamentPennantIds.SpellStormwindValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellStormwindAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcGnomereganMechanostrider:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionGnomeregan))
+                    {
                         return TournamentPennantIds.SpellGnomereganChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfGnomeregan) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfGnomeregan))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfGnomeregan)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfGnomeregan))
+                    {
                         return TournamentPennantIds.SpellGnomereganValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellGnomereganAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcDarkSpearRaptor:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionSenJin))
+                    {
                         return TournamentPennantIds.SpellSenJinChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSenJin) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSenJin))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSenJin)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSenJin))
+                    {
                         return TournamentPennantIds.SpellSenJinValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellSenJinAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcArgentHawkstriderAspirant:
                 case TournamentPennantIds.NpcSilvermoonHawkstrider:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionSilvermoon))
+                    {
                         return TournamentPennantIds.SpellSilvermoonChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSilvermoon) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSilvermoon))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSilvermoon)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSilvermoon))
+                    {
                         return TournamentPennantIds.SpellSilvermoonValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellSilvermoonAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcDarnassianNightsaber:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionDarnassus))
+                    {
                         return TournamentPennantIds.SpellDarnassusChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfDarnassus) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfDarnassus))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfDarnassus)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfDarnassus))
+                    {
                         return TournamentPennantIds.SpellDarnassusValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellDarnassusAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcExodarElekk:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionTheExodar))
+                    {
                         return TournamentPennantIds.SpellExodarChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfTheExodar) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfTheExodar))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfTheExodar)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfTheExodar))
+                    {
                         return TournamentPennantIds.SpellExodarValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellExodarAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcIronforgeRam:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionIronforge))
+                    {
                         return TournamentPennantIds.SpellIronforgeChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfIronforge) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfIronforge))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfIronforge)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfIronforge))
+                    {
                         return TournamentPennantIds.SpellIronforgeValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellIronforgeAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcForsakenWarhorse:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionUndercity))
+                    {
                         return TournamentPennantIds.SpellUndercityChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfUndercity) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfUndercity))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfUndercity)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfUndercity))
+                    {
                         return TournamentPennantIds.SpellUndercityValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellUndercityAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcOrgrimmarWolf:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionOrgrimmar))
+                    {
                         return TournamentPennantIds.SpellOrgrimmarChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfOrgrimmar) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfOrgrimmar))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfOrgrimmar)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfOrgrimmar))
+                    {
                         return TournamentPennantIds.SpellOrgrimmarValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellOrgrimmarAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcThunderBluffKodo:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionThunderBluff))
+                    {
                         return TournamentPennantIds.SpellThunderBluffChapion;
-                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfThunderBluff) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfThunderBluff))
+                    }
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfThunderBluff)
+                        || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfThunderBluff))
+                    {
                         return TournamentPennantIds.SpellThunderBluffValiant;
+                    }
                     else
+                    {
                         return TournamentPennantIds.SpellThunderBluffAspirant;
+                }
                 }
                 case TournamentPennantIds.NpcArgentWarhorse:
                 {
-                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionAlliance) || player.HasAchieved(TournamentPennantIds.AchievementChapionHorde))
-                        return player.GetClass() == Class.Deathknight ? TournamentPennantIds.SpellEbonBladeChapion : TournamentPennantIds.SpellArgentCrusadeChapion;
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionAlliance)
+                        || player.HasAchieved(TournamentPennantIds.AchievementChapionHorde))
+                    {
+                        return player.GetClass() == Class.Deathknight
+                            ? TournamentPennantIds.SpellEbonBladeChapion 
+                            : TournamentPennantIds.SpellArgentCrusadeChapion;
+                    }
                     else if (player.HasAchieved(TournamentPennantIds.AchievementArgentValor))
-                        return player.GetClass() == Class.Deathknight ? TournamentPennantIds.SpellEbonBladeValiant : TournamentPennantIds.SpellArgentCrusadeValiant;
+                    {
+                        return player.GetClass() == Class.Deathknight
+                            ? TournamentPennantIds.SpellEbonBladeValiant
+                            : TournamentPennantIds.SpellArgentCrusadeValiant;
+                    }
                     else
-                        return player.GetClass() == Class.Deathknight ? TournamentPennantIds.SpellEbonBladeAspirant : TournamentPennantIds.SpellArgentCrusadeAspirant;
+                    {
+                        return player.GetClass() == Class.Deathknight
+                            ? TournamentPennantIds.SpellEbonBladeAspirant
+                            : TournamentPennantIds.SpellArgentCrusadeAspirant;
+                    }
                 }
                 default:
                     return 0;
@@ -1543,7 +1649,10 @@ namespace Scripts.World.NpcsSpecial
                     Player owner = ObjAccessor.GetPlayer(me, summonerGUID);
                     if (owner != null)
                     {
-                        CreatureTextMgr.SendChat(me, SayRandom, owner, owner.GetGroup() != null ? ChatMsg.MonsterParty : ChatMsg.MonsterWhisper, Language.Addon, CreatureTextRange.Normal);
+                        CreatureTextMgr.SendChat(
+                            me, SayRandom, owner, 
+                            owner.GetGroup() != null ? ChatMsg.MonsterParty : ChatMsg.MonsterWhisper, 
+                            Language.Addon, CreatureTextRange.Normal);
                     }
                 });
             }
@@ -1582,7 +1691,8 @@ namespace Scripts.World.NpcsSpecial
                 {
                     _target = target.GetGUID();
                     me.SetWalk(true);
-                    me.GetMotionMaster().MovePoint(MoveidChase, target.GetNearPosition(3.0f, target.GetAbsoluteAngle(me)));
+                    me.GetMotionMaster().MovePoint(
+                        MoveidChase, target.GetNearPosition(3.0f, target.GetAbsoluteAngle(me)));
                     return;
                 }
 
@@ -1710,12 +1820,18 @@ namespace Scripts.World.NpcsSpecial
                 Aura ownerTired = owner.GetAura(ArgentSquireIds.SpellTiredPlayer);
                 if (ownerTired != null)
                 {
-                    Aura squireTired = me.AddAura(IsArgentSquire() ? ArgentSquireIds.AuraTiredS : ArgentSquireIds.AuraTiredG, me);
+                    Aura squireTired = 
+                        me.AddAura(IsArgentSquire() 
+                        ? ArgentSquireIds.AuraTiredS 
+                        : ArgentSquireIds.AuraTiredG, me);
+
                     if (squireTired != null)
                         squireTired.SetDuration(ownerTired.GetDuration());
                 }
 
-                if (owner.HasAchieved(ArgentSquireIds.AchievementPonyUp) && !me.HasAura(ArgentSquireIds.AuraTiredS) && !me.HasAura(ArgentSquireIds.AuraTiredG))
+                if (owner.HasAchieved(ArgentSquireIds.AchievementPonyUp) 
+                    && !me.HasAura(ArgentSquireIds.AuraTiredS) 
+                    && !me.HasAura(ArgentSquireIds.AuraTiredG))
                 {
                     me.SetNpcFlag(NPCFlags1.Banker | NPCFlags1.Mailbox | NPCFlags1.Vendor);
                     return;
@@ -1754,7 +1870,11 @@ namespace Scripts.World.NpcsSpecial
                 case ArgentSquireIds.GossipOptionMail:
                 {
                     me.RemoveNpcFlag(NPCFlags1.Banker | NPCFlags1.Vendor);
-                    int _mailAura = IsArgentSquire() ? ArgentSquireIds.AuraPostmanS : ArgentSquireIds.AuraPostmanG;
+                    int _mailAura = 
+                        IsArgentSquire() 
+                        ? ArgentSquireIds.AuraPostmanS 
+                        : ArgentSquireIds.AuraPostmanG;
+
                     if (!me.HasAura(_mailAura))
                         DoCastSelf(_mailAura);
 
@@ -1886,8 +2006,14 @@ namespace Scripts.World.NpcsSpecial
                 init.SetFacing(o);
             };
 
-            who.GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
-            who.m_Events.AddEvent(new CastFoodSpell(who, BountifulTableIds.ChairSpells.LookupByKey(who.GetEntry())), who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
+            who.GetMotionMaster().LaunchMoveSpline(
+                initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
+
+            who.m_Events.AddEvent(
+                new CastFoodSpell(
+                    who, BountifulTableIds.ChairSpells.LookupByKey(who.GetEntry())), 
+                who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
+
             Creature creature = who.ToCreature();
             if (creature != null)
                 creature.SetDisplayFromModel(0);

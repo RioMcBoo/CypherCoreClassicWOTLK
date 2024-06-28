@@ -63,7 +63,8 @@ namespace Game.Chat
                     ChannelManager mgr = ForTeam(team);
                     if (mgr == null)
                     {
-                        Log.outError(LogFilter.ServerLoading, $"Failed to load custom chat channel '{dbName}' from database - invalid team {team}. Deleted.");
+                        Log.outError(LogFilter.ServerLoading, 
+                            $"Failed to load custom chat channel '{dbName}' from database - invalid team {team}. Deleted.");
                         toDelete.Add((dbName, team));
                         continue;
                     }

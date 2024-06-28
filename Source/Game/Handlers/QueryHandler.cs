@@ -84,7 +84,9 @@ namespace Game
             }
             else
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (ENTRY: {packet.GameObjectID})");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: CMSG_GAMEOBJECT_QUERY - " +
+                    $"Missing gameobject info for (ENTRY: {packet.GameObjectID})");
 
                 QueryGameObjectResponse response = new();
                 response.GameObjectID = packet.GameObjectID;
@@ -112,7 +114,9 @@ namespace Game
             }
             else
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: CMSG_QUERY_CREATURE - NO CREATURE INFO! (ENTRY: {packet.CreatureID})");
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: CMSG_QUERY_CREATURE - " +
+                    $"NO CREATURE INFO! (ENTRY: {packet.CreatureID})");
 
                 QueryCreatureResponse response = new();
                 response.CreatureID = packet.CreatureID;
@@ -140,7 +144,11 @@ namespace Game
             }
 
             if (!response.Allow)
-                Log.outError(LogFilter.Sql, "HandleNpcTextQuery: no BroadcastTextID found for text {0} in `npc_text table`", packet.TextID);
+            {
+                Log.outError(LogFilter.Sql,
+                    $"HandleNpcTextQuery: no BroadcastTextID found " +
+                    $"for text {packet.TextID} in `npc_text table`");
+            }
 
             SendPacket(response);
         }
@@ -262,7 +270,9 @@ namespace Game
 
                 if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
                 {
-                    Log.outDebug(LogFilter.Network, "WORLD: Unknown quest {0} in CMSG_QUEST_NPC_QUERY by {1}", questID, GetPlayer().GetGUID());
+                    Log.outDebug(LogFilter.Network, 
+                        $"WORLD: Unknown quest {questID} " +
+                        $"in CMSG_QUEST_NPC_QUERY by {GetPlayer().GetGUID()}");
                     continue;
                 }
 
@@ -307,7 +317,9 @@ namespace Game
             {
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Success;
                 realmQueryResponse.NameInfo.IsInternalRealm = false;
-                realmQueryResponse.NameInfo.IsLocal = queryRealmName.VirtualRealmAddress == Global.WorldMgr.GetVirtualRealmAddress();
+
+                realmQueryResponse.NameInfo.IsLocal = 
+                    queryRealmName.VirtualRealmAddress == Global.WorldMgr.GetVirtualRealmAddress();
             }
             else
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Failure;

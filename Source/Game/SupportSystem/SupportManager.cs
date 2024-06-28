@@ -286,18 +286,24 @@ namespace Game.SupportSystem
             {
                 case "BugTicket":
                     foreach (var ticket in _bugTicketList.Values)
+                    {
                         if (!ticket.IsClosed())
                             handler.SendSysMessage(ticket.FormatViewMessageString(handler));
+                    }
                     break;
                 case "ComplaintTicket":
                     foreach (var ticket in _complaintTicketList.Values)
+                    {
                         if (!ticket.IsClosed())
                             handler.SendSysMessage(ticket.FormatViewMessageString(handler));
+                    }
                     break;
                 case "SuggestionTicket":
                     foreach (var ticket in _suggestionTicketList.Values)
+                    {
                         if (!ticket.IsClosed())
                             handler.SendSysMessage(ticket.FormatViewMessageString(handler));
+                    }
                     break;
             }
         }
@@ -309,18 +315,24 @@ namespace Game.SupportSystem
             {
                 case "BugTicket":
                     foreach (var ticket in _bugTicketList.Values)
+                    {
                         if (ticket.IsClosed())
                             handler.SendSysMessage(ticket.FormatViewMessageString(handler));
+                    }
                     break;
                 case "ComplaintTicket":
                     foreach (var ticket in _complaintTicketList.Values)
+                    {
                         if (ticket.IsClosed())
                             handler.SendSysMessage(ticket.FormatViewMessageString(handler));
+                    }
                     break;
                 case "SuggestionTicket":
                     foreach (var ticket in _suggestionTicketList.Values)
+                    {
                         if (ticket.IsClosed())
                             handler.SendSysMessage(ticket.FormatViewMessageString(handler));
+                    }
                     break;
             }
         }

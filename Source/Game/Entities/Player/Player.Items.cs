@@ -486,7 +486,9 @@ namespace Game.Entities
                 var cost = item.CalculateDurabilityRepairCost(discountMod);
                 if (!HasEnoughMoney(cost))
                 {
-                    Log.outDebug(LogFilter.PlayerItems, $"Player::DurabilityRepair: Player '{GetName()}' ({GetGUID()}) has not enough money to repair item");
+                    Log.outDebug(LogFilter.PlayerItems, 
+                        $"Player::DurabilityRepair: Player '{GetName()}' ({GetGUID()}) " +
+                        $"has not enough money to repair item");
                     return;
                 }
 
@@ -561,7 +563,8 @@ namespace Game.Entities
             dest = new();
             InventoryResult res;
 
-            Log.outDebug(LogFilter.Player, $"STORAGE: CanStoreItem bag = {pos.Container}, slot = {pos.Slot}, item = {pProto.GetId()}, count = {count}");
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: CanStoreItem bag = {pos.Container}, slot = {pos.Slot}, item = {pProto.GetId()}, count = {count}");
 
             #region Check for similar items 
             // can't store this amount similar items
@@ -722,7 +725,9 @@ namespace Game.Entities
                 if (items[i] == null)
                     continue;
 
-                Log.outDebug(LogFilter.Player, $"STORAGE: CanStoreTradeItems {i + 1}. item = {items[i].GetEntry()}, count = {items[i].GetCount()}");
+                Log.outDebug(LogFilter.Player, 
+                    $"STORAGE: CanStoreTradeItems {i + 1}. item = {items[i].GetEntry()}, count = {items[i].GetCount()}");
+
                 ItemTemplate pProto = items[i].GetTemplate();
 
                 // strange item
@@ -786,7 +791,9 @@ namespace Game.Entities
             if (pItem == null)
                 return null;
 
-            Log.outDebug(LogFilter.Player, $"STORAGE: StoreItem bag = {pos.Container}, slot = {pos.Slot}, item = {pItem.GetEntry()}, count = {count}, guid = {pItem.GetGUID()}");
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: StoreItem bag = {pos.Container}, slot = {pos.Slot}, " +
+                $"item = {pItem.GetEntry()}, count = {count}, guid = {pItem.GetGUID()}");
 
             Item pItem2 = GetItemByPos(pos);
 
@@ -906,7 +913,9 @@ namespace Game.Entities
 
         bool StoreNewItemInBestSlots(int itemId, int amount, ItemContext itemContext)
         {
-            Log.outDebug(LogFilter.Player, $"Player.StoreNewItemInBestSlots: Creating initial item, itemId = {itemId}, count = {amount}.");
+            Log.outDebug(LogFilter.Player, 
+                $"Player.StoreNewItemInBestSlots:" +
+                $" Creating initial item, itemId = {itemId}, count = {amount}.");
 
             List<(ItemPos item, int count)> Dest;
             InventoryResult msg;
@@ -937,7 +946,10 @@ namespace Game.Entities
             }
 
             // item can't be added
-            Log.outError(LogFilter.Player, $"Player.StoreNewItemInBestSlots: Player '{GetName()}' ({GetGUID()}) can't equip or store initial item (ItemID: {itemId}, Race: {GetRace()}, Class: {GetClass()}, InventoryResult: {msg}).");
+            Log.outError(LogFilter.Player, 
+                $"Player.StoreNewItemInBestSlots: Player '{GetName()}' ({GetGUID()}) " +
+                $"can't equip or store initial item " +
+                $"(ItemID: {itemId}, Race: {GetRace()}, Class: {GetClass()}, InventoryResult: {msg}).");
             return false;
         }
 
@@ -1228,13 +1240,18 @@ namespace Game.Entities
 
                     _ApplyItemMods(pItem, pos.Slot, true);
 
-                    if (pProto != null && IsInCombat() && (pProto.GetClass() == ItemClass.Weapon || pProto.GetInventoryType() == InventoryType.Relic) && m_weaponChangeTimer == 0)
+                    if (pProto != null && IsInCombat() && 
+                        (pProto.GetClass() == ItemClass.Weapon || pProto.GetInventoryType() == InventoryType.Relic) 
+                        && m_weaponChangeTimer == 0)
                     {
                         var cooldownSpell = GetClass() == Class.Rogue ? 6123 : 6119;
                         var spellProto = Global.SpellMgr.GetSpellInfo(cooldownSpell, Difficulty.None);
 
                         if (spellProto == null)
-                            Log.outError(LogFilter.Player, "Weapon switch cooldown spell {0} couldn't be found in Spell.dbc", cooldownSpell);
+                        {
+                            Log.outError(LogFilter.Player,
+                                $"Weapon switch cooldown spell {cooldownSpell} couldn't be found in Spell.dbc");
+                        }
                         else
                         {
                             m_weaponChangeTimer = spellProto.StartRecoveryTime;
@@ -1426,7 +1443,8 @@ namespace Game.Entities
             Item pItem = GetItemByPos(pos);
             if (pItem != null)
             {
-                Log.outDebug(LogFilter.Player, $"Player.RemoveItem: RemoveItem bag = {pos.Container}, slot = {pos.Slot}, item = {pItem.GetEntry()}");
+                Log.outDebug(LogFilter.Player, 
+                    $"Player.RemoveItem: RemoveItem bag = {pos.Container}, slot = {pos.Slot}, item = {pItem.GetEntry()}");
 
                 RemoveEnchantmentDurations(pItem);
                 RemoveItemDurations(pItem);
@@ -1537,7 +1555,9 @@ namespace Game.Entities
                     return;
             }
 
-            Log.outDebug(LogFilter.Player, $"STORAGE: SplitItem bag = {dst.Container}, slot = {dst.Slot}, item = {pSrcItem.GetEntry()}, count = {count}");
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: SplitItem bag = {dst.Container}, slot = {dst.Slot}, item = {pSrcItem.GetEntry()}, count = {count}");
+
             Item pNewItem = pSrcItem.CloneItem(count, this);
             if (pNewItem == null)
             {
@@ -1635,7 +1655,8 @@ namespace Game.Entities
                 }
             }
 
-            Log.outDebug(LogFilter.Player, $"Player.SwapItem: SwapItem bag = {dst.Container}, slot = {dst.Slot}, item = {pSrcItem.GetEntry()}");
+            Log.outDebug(LogFilter.Player, 
+                $"Player.SwapItem: SwapItem bag = {dst.Container}, slot = {dst.Slot}, item = {pSrcItem.GetEntry()}");
 
             if (!IsAlive())
             {
@@ -2106,7 +2127,7 @@ namespace Game.Entities
             if (m_itemDuration.Empty())
                 return;
 
-            Log.outDebug(LogFilter.Player, "Player:UpdateItemDuration({0}, {1})", time, realtimeonly);
+            Log.outDebug(LogFilter.Player, $"Player:UpdateItemDuration({time}, {realtimeonly})");
 
             foreach (var item in m_itemDuration)
             {
@@ -2526,7 +2547,8 @@ namespace Game.Entities
                 }
 
                 RemoveItemFromBuyBackSlot(slot, true);
-                Log.outDebug(LogFilter.Player, "STORAGE: AddItemToBuyBackSlot item = {0}, slot = {1}", pItem.GetEntry(), slot);
+                Log.outDebug(LogFilter.Player, 
+                    $"STORAGE: AddItemToBuyBackSlot item = {pItem.GetEntry()}, slot = {slot}");
 
                 m_items[slot] = pItem;
                 var time = GameTime.GetGameTime();
@@ -2567,7 +2589,9 @@ namespace Game.Entities
             Creature creature = GetNPCIfCanInteractWith(vendorGuid, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: BuyCurrencyFromVendorSlot - {0} not found or you can't interact with him.", vendorGuid.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: BuyCurrencyFromVendorSlot - {vendorGuid} not found or you can't interact with him.");
+
                 SendBuyError(BuyResult.DistanceTooFar, null, currency);
                 return false;
             }
@@ -2606,7 +2630,8 @@ namespace Game.Entities
                 iece = CliDB.ItemExtendedCostStorage.LookupByKey(crItem.ExtendedCost);
                 if (iece == null)
                 {
-                    Log.outError(LogFilter.Player, "Currency {0} have wrong ExtendedCost field value {1}", currency, crItem.ExtendedCost);
+                    Log.outError(LogFilter.Player, 
+                        $"Currency {currency} have wrong ExtendedCost field value {crItem.ExtendedCost}");
                     return false;
                 }
 
@@ -2730,14 +2755,19 @@ namespace Game.Entities
             Creature creature = GetNPCIfCanInteractWith(vendorguid, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, $"Player.BuyItemFromVendorSlot: Vendor {vendorguid} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, 
+                    $"Player.BuyItemFromVendorSlot: Vendor {vendorguid} not found or you can't interact with him.");
+
                 SendBuyError(BuyResult.DistanceTooFar, null, item);
                 return false;
             }
 
             if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(creature.GetEntry(), item, this, creature))
             {
-                Log.outDebug(LogFilter.Condition, $"Player.BuyItemFromVendorSlot: Player ({GetName()}) doesn't met for creature entry {creature.GetEntry()} item {item}.");
+                Log.outDebug(LogFilter.Condition, 
+                    $"Player.BuyItemFromVendorSlot: Player ({GetName()}) " +
+                    $"doesn't met for creature entry {creature.GetEntry()} item {item}.");
+
                 SendBuyError(BuyResult.CantFindItem, creature, item);
                 return false;
             }
@@ -2783,7 +2813,8 @@ namespace Game.Entities
                 }
             }
 
-            if (pProto.GetRequiredReputationFaction() != 0 && (GetReputationRank(pProto.GetRequiredReputationFaction()) < pProto.GetRequiredReputationRank()))
+            if (pProto.GetRequiredReputationFaction() != 0 
+                && (GetReputationRank(pProto.GetRequiredReputationFaction()) < pProto.GetRequiredReputationRank()))
             {
                 SendBuyError(BuyResult.ReputationRequire, creature, item);
                 return false;
@@ -2802,7 +2833,9 @@ namespace Game.Entities
                 var iece = CliDB.ItemExtendedCostStorage.LookupByKey(crItem.ExtendedCost);
                 if (iece == null)
                 {
-                    Log.outError(LogFilter.Player, $"Player.BuyItemFromVendorSlot: Item {pProto.GetId()} have wrong ExtendedCost field value {crItem.ExtendedCost}");
+                    Log.outError(LogFilter.Player, 
+                        $"Player.BuyItemFromVendorSlot: Item {pProto.GetId()} " +
+                        $"have wrong ExtendedCost field value {crItem.ExtendedCost}");
                     return false;
                 }
 
@@ -2873,7 +2906,10 @@ namespace Game.Entities
                 var maxCount = (long)(PlayerConst.MaxMoneyAmount / buyPricePerItem);
                 if (count > maxCount)
                 {
-                    Log.outError(LogFilter.Player, $"Player.BuyItemFromVendorSlot: Player {GetName()} tried to buy {count} item id {pProto.GetId()}, causing overflow.");
+                    Log.outError(LogFilter.Player, 
+                        $"Player.BuyItemFromVendorSlot: " +
+                        $"Player {GetName()} tried to buy {count} item id {pProto.GetId()}, causing overflow.");
+
                     count = (byte)maxCount;
                 }
                 price = (long)(buyPricePerItem * count); //it should not exceed MAX_MONEY_AMOUNT
@@ -2918,7 +2954,8 @@ namespace Game.Entities
 
             if (crItem.maxcount != 0) // bought
             {
-                if (pProto.GetQuality() > ItemQuality.Epic || (pProto.GetQuality() == ItemQuality.Epic && pProto.GetItemLevel() >= GuildConst.MinNewsItemLevel))
+                if (pProto.GetQuality() > ItemQuality.Epic || (pProto.GetQuality() == ItemQuality.Epic 
+                    && pProto.GetItemLevel() >= GuildConst.MinNewsItemLevel))
                 {
                     Guild guild = GetGuild();
                     if (guild != null)
@@ -2961,12 +2998,17 @@ namespace Game.Entities
             draft.SendMailTo(trans, new MailReceiver(this, GetGUID().GetCounter()), sender);
             DB.Characters.CommitTransaction(trans);
         }
-        public void SetBuybackPrice(int slot, uint price) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackPrice, slot), price); }
+
+        public void SetBuybackPrice(int slot, uint price) 
+        { 
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackPrice, slot), price); 
+        }
+
         public void SetBuybackTimestamp(int slot, long timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, slot), timestamp); }
 
         public Item GetItemFromBuyBackSlot(int slot)
         {
-            Log.outDebug(LogFilter.Player, "STORAGE: GetItemFromBuyBackSlot slot = {0}", slot);
+            Log.outDebug(LogFilter.Player, $"STORAGE: GetItemFromBuyBackSlot slot = {slot}");
             if (slot >= InventorySlots.BuyBackStart && slot < InventorySlots.BuyBackEnd)
                 return m_items[slot];
             return null;
@@ -2974,7 +3016,7 @@ namespace Game.Entities
 
         public void RemoveItemFromBuyBackSlot(int slot, bool del)
         {
-            Log.outDebug(LogFilter.Player, "STORAGE: RemoveItemFromBuyBackSlot slot = {0}", slot);
+            Log.outDebug(LogFilter.Player, $"STORAGE: RemoveItemFromBuyBackSlot slot = {slot}");
             if (slot >= InventorySlots.BuyBackStart && slot < InventorySlots.BuyBackEnd)
             {
                 Item pItem = m_items[slot];
@@ -3064,7 +3106,8 @@ namespace Game.Entities
             if (item.IsBroken())
                 return;
 
-            Log.outInfo(LogFilter.Player, $"Player._ApplyItemMods: Applying mods for item {item.GetGUID()}.");
+            Log.outInfo(LogFilter.Player, 
+                $"Player._ApplyItemMods: Applying mods for item {item.GetGUID()}.");
 
             if (item.GetSocketType(0) != 0)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
                 CorrectMetaGemEnchants(slot, apply);
@@ -3320,8 +3363,10 @@ namespace Game.Entities
 
             // Apply Spell Power from ScalingStatValue if set
             if (ssv != null)
+            {
                 if (ssv.getSpellBonus(proto.GetScalingStatValue()) is int spellbonus && spellbonus != 0)
                     ApplySpellPowerBonus(spellbonus, apply);
+            }
 
             for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
             {
@@ -3329,16 +3374,20 @@ namespace Game.Entities
                 var resistance = proto.GetResistance(school);
 
                 if (school == SpellSchools.Normal && ssv != null)
+                {
                     if (ssv.getArmorMod(proto.GetScalingStatValue()) is int ssvarmor && ssvarmor != 0)
                         resistance = ssvarmor;
+                }
 
                 if (resistance != 0)
                     HandleStatFlatModifier(UnitMods.Armor + (int)i, UnitModifierFlatType.Base, resistance, apply);
             }
 
             if (proto.GetShieldBlockValue(proto.GetItemLevel()) is int shieldBlockValue && shieldBlockValue != 0)
+            {
                 if (proto.GetClass() == ItemClass.Armor && proto.GetSubClass().Armor == ItemSubClassArmor.Shield)
-                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply? shieldBlockValue : 0);
+                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply ? shieldBlockValue : 0);
+            }
 
             var attType = GetAttackBySlot(slot, proto.GetInventoryType());
             if (attType != WeaponAttackType.Max)
@@ -3389,7 +3438,8 @@ namespace Game.Entities
                     }
                 }
 
-                Log.outDebug(LogFilter.Player, "WORLD: cast {0} Equip spellId - {1}", (item != null ? "item" : "itemset"), spellInfo.Id);
+                Log.outDebug(LogFilter.Player, 
+                    $"WORLD: cast {(item != null ? "item" : "itemset")} Equip spellId - {spellInfo.Id}");
 
                 CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(item));
             }
@@ -3431,6 +3481,7 @@ namespace Game.Entities
                     Aura itemAura = GetAura(effectData.SpellID, GetGUID(), pItem.GetGUID());
                     if (itemAura != null)
                         itemAura.AddProcCooldown(procEntry, now);
+                    
                     continue;
                 }
 
@@ -3695,6 +3746,7 @@ namespace Game.Entities
                 historyRecord.count += need_space;
                 if (historyRecord.item == null)                
                     historyRecord.item = pSrcItem;                
+                
                 history[pos] = historyRecord;
             }
 
@@ -3834,7 +3886,10 @@ namespace Game.Entities
                 return swap ? InventoryResult.CantSwap : InventoryResult.ItemNotFound;
             var count = pItem.GetCount();
 
-            Log.outDebug(LogFilter.Player, $"STORAGE: CanBankItem bag = {pos.Container}, slot = {pos.Slot}, item = {pItem.GetEntry()}, count = {count}");
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: CanBankItem bag = {pos.Container}, slot = {pos.Slot}, " +
+                $"item = {pItem.GetEntry()}, count = {count}");
+
             ItemTemplate pProto = pItem.GetTemplate();
             if (pProto == null)
                 return swap ? InventoryResult.CantSwap : InventoryResult.ItemNotFound;
@@ -3849,8 +3904,11 @@ namespace Game.Entities
             // Currency tokens are not supposed to be swapped out of their hidden bag
             if (pItem.IsCurrencyToken())
             {
-                Log.outError(LogFilter.Player, $"Possible hacking attempt: Player {GetName()} [guid: {GetGUID()}] tried to move token [guid: {pItem.GetGUID()}, " +
+                Log.outError(LogFilter.Player, 
+                    $"Possible hacking attempt: Player {GetName()} [guid: {GetGUID()}] " +
+                    $"tried to move token [guid: {pItem.GetGUID()}, " +
                     $"entry: {pProto.GetId()}] out of the currency bag!");
+
                 return InventoryResult.CantSwap;
             }
 
@@ -4327,18 +4385,26 @@ namespace Game.Entities
             if (slot != ItemSlot.Null)
             {
                 if (swap || GetItemByPos(slot) == null)
+                {
                     for (byte i = 0; i < 4; ++i)
+                    {
                         if (slots[i] == slot)
                             return slot;
+            }
+            }
             }
             else
             {
                 // search free slot at first
                 for (byte i = 0; i < 4; ++i)
+                {
                     if (slots[i] != ItemSlot.Null && GetItemByPos(slots[i]) == null)
+                    {
                         // in case 2hand equipped weapon (without titan grip) offhand slot empty but not free
                         if (slots[i] != EquipmentSlot.OffHand || !IsTwoHandUsed())
                             return slots[i];
+                }
+                }
 
                 // if not found free and can swap return slot with lower item level equipped
                 if (swap)
@@ -4396,7 +4462,9 @@ namespace Game.Entities
             dest = new();
             if (pItem != null)
             {
-                Log.outDebug(LogFilter.Player, $"STORAGE: CanEquipItem slot = {slot}, item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
+                Log.outDebug(LogFilter.Player, 
+                    $"STORAGE: CanEquipItem slot = {slot}, item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
+
                 ItemTemplate pProto = pItem.GetTemplate();
                 if (pProto != null)
                 {
@@ -4430,10 +4498,13 @@ namespace Game.Entities
                         {
                             if (IsInCombat())
                                 return InventoryResult.NotInCombat;
+
                             Battleground bg = GetBattleground();
                             if (bg != null)
+                            {
                                 if (bg.IsArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
                                     return InventoryResult.NotDuringArenaMatch;
+                        }
                         }
 
                         if (IsInCombat() && (pProto.GetClass() == ItemClass.Weapon || pProto.GetInventoryType() == InventoryType.Relic) && m_weaponChangeTimer != 0)
@@ -4441,13 +4512,17 @@ namespace Game.Entities
 
                         Spell currentGenericSpell = GetCurrentSpell(CurrentSpellTypes.Generic);
                         if (currentGenericSpell != null)
+                        {
                             if (!currentGenericSpell.GetSpellInfo().HasAttribute(SpellAttr6.AllowEquipWhileCasting))
                                 return InventoryResult.ClientLockedOut;
+                        }
 
                         Spell currentChanneledSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
                         if (currentChanneledSpell != null)
+                        {
                             if (!currentChanneledSpell.GetSpellInfo().HasAttribute(SpellAttr6.AllowEquipWhileCasting))
                                 return InventoryResult.ClientLockedOut;
+                    }
                     }
 
                     ContentTuningLevels? requiredLevels = null;
@@ -4455,8 +4530,13 @@ namespace Game.Entities
                     if (pItem.GetQuality() == ItemQuality.Heirloom)
                         requiredLevels = Global.DB2Mgr.GetContentTuningData(pItem.GetScalingContentTuningId(), 0, true);
 
-                    if (requiredLevels.HasValue && requiredLevels.Value.MaxLevel < SharedConst.DefaultMaxPlayerLevel && requiredLevels.Value.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
+                    if (requiredLevels.HasValue
+                        && requiredLevels.Value.MaxLevel < SharedConst.DefaultMaxPlayerLevel
+                        && requiredLevels.Value.MaxLevel < GetLevel()
+                        && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
+                    {
                         return InventoryResult.NotEquippable;
+                    }
 
                     byte eslot = FindEquipSlot(pItem, slot, swap);
                     if (eslot == ItemSlot.Null)
@@ -4476,6 +4556,7 @@ namespace Game.Entities
 
                     // check unique-equipped special item classes
                     if (pProto.GetClass() == ItemClass.Quiver)
+                    {
                         for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
                         {
                             Item pBag = GetItemByPos(i);
@@ -4485,13 +4566,18 @@ namespace Game.Entities
                                 {
                                     ItemTemplate pBagProto = pBag.GetTemplate();
                                     if (pBagProto != null)
+                                    {
                                         if (pBagProto.GetClass() == pProto.GetClass() && (!swap || pBag.InventorySlot != eslot))
+                                        {
                                             return (pBagProto.GetSubClass() == (uint)ItemSubClassQuiver.AmmoPouch)
                                                 ? InventoryResult.OnlyOneAmmo
                                                 : InventoryResult.OnlyOneQuiver;
                                 }
                             }
                         }
+                    }
+                        }
+                    }
 
                     InventoryType type = pProto.GetInventoryType();
 
@@ -4625,7 +4711,8 @@ namespace Game.Entities
             if (pItem == null)
                 return InventoryResult.Ok;
 
-            Log.outDebug(LogFilter.Player, $"STORAGE: CanUnequipItem slot = {pos}, item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: CanUnequipItem slot = {pos}, item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
 
             ItemTemplate pProto = pItem.GetTemplate();
             if (pProto == null)
@@ -4741,15 +4828,19 @@ namespace Game.Entities
             if (pItem == null)
                 return;
 
-            // check also  BIND_WHEN_PICKED_UP and BIND_QUEST_ITEM for .additem or .additemset case by GM (not binded at adding to inventory)
-            if (pItem.GetBonding() == ItemBondingType.OnEquip || pItem.GetBonding() == ItemBondingType.OnAcquire || pItem.GetBonding() == ItemBondingType.Quest)
+            // check also  BIND_WHEN_PICKED_UP and BIND_QUEST_ITEM for .additem or .additemset case by GM
+            // (not binded at adding to inventory)
+            if (pItem.GetBonding() == ItemBondingType.OnEquip 
+                || pItem.GetBonding() == ItemBondingType.OnAcquire 
+                || pItem.GetBonding() == ItemBondingType.Quest)
             {
                 pItem.SetBinding(true);
                 if (IsInWorld)
                     GetSession().GetCollectionMgr().AddItemAppearance(pItem);
             }
 
-            Log.outDebug(LogFilter.Player, "STORAGE: EquipItem slot = {0}, item = {1}", slot, pItem.GetEntry());
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: EquipItem slot = {slot}, item = {pItem.GetEntry()}");
 
             m_items[slot] = pItem;
             SetInvSlot(slot, pItem.GetGUID());
@@ -4769,9 +4860,12 @@ namespace Game.Entities
             Item pItem = GetItemByPos(itemPos);
             if (pItem != null)
             {
-                Log.outDebug(LogFilter.Player, $"STORAGE: DestroyItem bag = {itemPos.Container}, slot = {itemPos.Slot}, item = {pItem.GetEntry()}");
+                Log.outDebug(LogFilter.Player, 
+                    $"STORAGE: DestroyItem bag = {itemPos.Container}, slot = {itemPos.Slot}, item = {pItem.GetEntry()}");
+
                 // Also remove all contained items if the item is a bag.
-                // This if () prevents item saving crashes if the condition for a bag to be empty before being destroyed was bypassed somehow.
+                // This if () prevents item saving crashes if the condition for a bag
+                // to be empty before being destroyed was bypassed somehow.
                 if (pItem.IsNotEmptyBag())
                     for (byte i = 0; i < ItemConst.MaxBagSize; ++i)
                         DestroyItem(new(i, itemPos.Slot), update);
@@ -4866,7 +4960,9 @@ namespace Game.Entities
 
         public int DestroyItemCount(int itemEntry, int count, bool update, bool unequip_check = true)
         {
-            Log.outDebug(LogFilter.Player, $"STORAGE: DestroyItemCount item = {itemEntry}, count = {count}");
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: DestroyItemCount item = {itemEntry}, count = {count}");
+
             int remcount = 0;
 
             // in inventory
@@ -5136,7 +5232,8 @@ namespace Game.Entities
             if (pItem == null)
                 return;
 
-            Log.outDebug(LogFilter.Player, $"STORAGE: DestroyItemCount item (GUID: {pItem.GetGUID()}, Entry: {pItem.GetEntry()}) count = {count}");
+            Log.outDebug(LogFilter.Player, 
+                $"STORAGE: DestroyItemCount item (GUID: {pItem.GetGUID()}, Entry: {pItem.GetEntry()}) count = {count}");
 
             if (pItem.GetCount() <= count)
             {
@@ -5154,6 +5251,7 @@ namespace Game.Entities
                 pItem.SetState(ItemUpdateState.Changed, this);
             }
         }
+
         public void AutoStoreLoot(int loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false)
         {
             Loot loot = new(null, ObjectGuid.Empty, LootType.None, null);
@@ -5164,6 +5262,7 @@ namespace Game.Entities
         }
 
         public byte GetInventorySlotCount() { return m_activePlayerData.NumBackpackSlots; }
+        
         public void SetInventorySlotCount(byte slots)
         {
             //ASSERT(slots <= (INVENTORY_SLOT_ITEM_END - INVENTORY_SLOT_ITEM_START));
@@ -5209,12 +5308,26 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumBackpackSlots), slots);
         }
 
-        public byte GetBankBagSlotCount() { return m_playerData.NumBankSlots; }
-        public void SetBankBagSlotCount(byte count) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NumBankSlots), count); }
+        public byte GetBankBagSlotCount() 
+        { 
+            return m_playerData.NumBankSlots; 
+        }
+
+        public void SetBankBagSlotCount(byte count) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NumBankSlots), count); 
+        }
 
         //Loot
-        public ObjectGuid GetLootGUID() { return m_playerData.LootTargetGUID; }
-        public void SetLootGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LootTargetGUID), guid); }
+        public ObjectGuid GetLootGUID() 
+        { 
+            return m_playerData.LootTargetGUID; 
+        }
+
+        public void SetLootGUID(ObjectGuid guid) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LootTargetGUID), guid); 
+        }
 
         public void StoreLootItem(ObjectGuid lootWorldObjectGuid, byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
@@ -5263,7 +5376,8 @@ namespace Game.Entities
 
                 --loot.unlootedCount;
 
-                if (newitem != null && (newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel)))
+                if (newitem != null && 
+                    (newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel)))
                 {
                     Guild guild = GetGuild();
                     if (guild != null)
@@ -5341,7 +5455,9 @@ namespace Game.Entities
 
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-            bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow(GetLevel() / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+            bones.loot.gold = (uint)(RandomHelper.IRand(50, 150) * 0.016f * Math.Pow(GetLevel() / 5.76f, 2.5f) 
+                * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+
             bones.lootRecipient = looterPlr;
             looterPlr.SendLoot(bones.loot);
         }
@@ -5364,7 +5480,8 @@ namespace Game.Entities
             if (!GetLootGUID().IsEmpty() && !aeLooting)
                 _session.DoLootReleaseAll();
 
-            Log.outDebug(LogFilter.Loot, $"Player::SendLoot: Player: '{GetName()}' ({GetGUID()}), Loot: {loot.GetOwnerGUID()}");
+            Log.outDebug(LogFilter.Loot, 
+                $"Player::SendLoot: Player: '{GetName()}' ({GetGUID()}), Loot: {loot.GetOwnerGUID()}");
 
             if (!loot.GetOwnerGUID().IsItem() && !aeLooting)
                 SetLootGUID(loot.GetOwnerGUID());
@@ -5436,7 +5553,9 @@ namespace Game.Entities
                 var equipmentSetInfo = _equipmentSets.LookupByKey(newEqSet.Guid);
                 if (equipmentSetInfo == null || equipmentSetInfo.Data.Guid != newEqSet.Guid)
                 {
-                    Log.outError(LogFilter.Player, "Player {0} tried to save equipment set {1} (index: {2}), but that equipment set not found!", GetName(), newEqSet.Guid, newEqSet.SetID);
+                    Log.outError(LogFilter.Player, 
+                        $"Player {GetName()} tried to save equipment set {newEqSet.Guid} " +
+                        $"(index: {newEqSet.SetID}), but that equipment set not found!");
                     return;
                 }
             }
@@ -5460,7 +5579,10 @@ namespace Game.Entities
                 SendPacket(data);
             }
 
-            eqSlot.state = eqSlot.state == EquipmentSetUpdateState.New ? EquipmentSetUpdateState.New : EquipmentSetUpdateState.Changed;
+            eqSlot.state = 
+                eqSlot.state == EquipmentSetUpdateState.New 
+                ? EquipmentSetUpdateState.New 
+                : EquipmentSetUpdateState.Changed;
         }
 
         public void DeleteEquipmentSet(long id)
@@ -5486,8 +5608,10 @@ namespace Game.Entities
         public byte GetNextVoidStorageFreeSlot()
         {
             for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
+            {
                 if (_voidStorageItems[i] == null) // unused item
                     return i;
+            }
 
             return SharedConst.VoidStorageMaxSlot;
         }
@@ -5497,8 +5621,10 @@ namespace Game.Entities
             byte count = 0;
 
             for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
+            {
                 if (_voidStorageItems[i] == null)
                     count++;
+            }
 
             return count;
         }
@@ -5589,17 +5715,21 @@ namespace Game.Entities
                 {
                     Item item = GetItemByPos(i);
                     if (item != null)
+                    {
                         if (!callback(item))
                             return false;
+                }
                 }
 
                 for (byte i = ProfessionSlots.Start; i < ProfessionSlots.End; ++i)
                 {
                     Item pItem = GetItemByPos(i);
                     if (pItem != null)
+                    {
                         if (!callback(pItem))
                             return false;
                 }
+            }
             }
 
             if (location.HasAnyFlag(ItemSearchLocation.Inventory))
@@ -5609,24 +5739,30 @@ namespace Game.Entities
                 {
                     Item item = GetItemByPos(i);
                     if (item != null)
+                    {
                         if (!callback(item))
                             return false;
+                }
                 }
 
                 for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; i++)
                 {
                     Item item = GetItemByPos(i);
                     if (item != null)
+                    {
                         if (!callback(item))
                             return false;
+                }
                 }
 ;
                 for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; i++)
                 {
                     Item item = GetItemByPos(i);
                     if (item != null)
+                    {
                         if (!callback(item))
                             return false;
+                }
                 }
 
                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
@@ -5638,11 +5774,13 @@ namespace Game.Entities
                         {
                             Item pItem = bag.GetItemByPos(j);
                             if (pItem != null)
+                            {
                                 if (!callback(pItem))
                                     return false;
                         }
                     }
                 }
+            }
             }
 
             if (location.HasAnyFlag(ItemSearchLocation.Bank))
@@ -5651,8 +5789,10 @@ namespace Game.Entities
                 {
                     Item item = GetItemByPos(i);
                     if (item != null)
+                    {
                         if (!callback(item))
                             return false;
+                }
                 }
 
                 for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
@@ -5664,11 +5804,13 @@ namespace Game.Entities
                         {
                             Item pItem = bag.GetItemByPos(j);
                             if (pItem != null)
+                            {
                                 if (!callback(pItem))
                                     return false;
                         }
                     }
                 }
+            }
             }
 
             if (location.HasAnyFlag(ItemSearchLocation.ReagentBank))
@@ -5677,9 +5819,11 @@ namespace Game.Entities
                 {
                     Item item = GetItemByPos(i);
                     if (item != null)
+                    {
                         if (!callback(item))
                             return false;
                 }
+            }
             }
 
             return true;
@@ -5787,8 +5931,10 @@ namespace Game.Entities
                             if (checkDuplicateGuid)
                             {
                                 foreach (var slotData1 in bestItemLevels)
+                                {
                                     if (slotData1.guid == item.GetGUID())
                                         return;
+                            }
                             }
 
                             ref var slotData = ref bestItemLevels[slot];
@@ -5822,9 +5968,12 @@ namespace Game.Entities
                 {
                     var itemLevel = item.GetItemLevel(this);
                     totalItemLevel += itemLevel;
-                    if (!m_canTitanGrip && i == EquipmentSlot.MainHand && item.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand) // 2h weapon counts twice
+                    if (!m_canTitanGrip && i == EquipmentSlot.MainHand
+                        && item.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand) // 2h weapon counts twice
+                    {
                         totalItemLevel += itemLevel;
                 }
+            }
             }
 
             totalItemLevel /= 16.0f;

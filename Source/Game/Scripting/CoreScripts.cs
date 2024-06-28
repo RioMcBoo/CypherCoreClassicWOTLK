@@ -183,7 +183,7 @@ namespace Game.Scripting
             _mapEntry = CliDB.MapStorage.LookupByKey(mapId);
 
             if (_mapEntry == null)
-                Log.outError(LogFilter.Scripts, "Invalid MapScript for {0}; no such map ID.", mapId);
+                Log.outError(LogFilter.Scripts, $"Invalid MapScript for {mapId}; no such map ID.");
         }
 
         // Gets the MapEntry structure associated with this script. Can return NULL.
@@ -211,7 +211,7 @@ namespace Game.Scripting
         public WorldMapScript(string name, int mapId) : base(name, mapId)
         {
             if (GetEntry() != null && !GetEntry().IsWorldMap)
-                Log.outError(LogFilter.Scripts, "WorldMapScript for map {0} is invalid.", mapId);
+                Log.outError(LogFilter.Scripts, $"WorldMapScript for map {mapId} is invalid.");
 
             Global.ScriptMgr.AddScript(this);
         }
@@ -222,7 +222,7 @@ namespace Game.Scripting
         public InstanceMapScript(string name, int mapId) : base(name, mapId)
         {
             if (GetEntry() != null && !GetEntry().IsDungeon)
-                Log.outError(LogFilter.Scripts, "InstanceMapScript for map {0} is invalid.", mapId);
+                Log.outError(LogFilter.Scripts, $"InstanceMapScript for map {mapId} is invalid.");
 
             Global.ScriptMgr.AddScript(this);
         }
@@ -238,7 +238,7 @@ namespace Game.Scripting
         public BattlegroundMapScript(string name, int mapId) : base(name, mapId)
         {
             if (GetEntry() != null && GetEntry().IsBattleground)
-                Log.outError(LogFilter.Scripts, "BattlegroundMapScript for map {0} is invalid.", mapId);
+                Log.outError(LogFilter.Scripts, $"BattlegroundMapScript for map {mapId} is invalid.");
 
             Global.ScriptMgr.AddScript(this);
         }

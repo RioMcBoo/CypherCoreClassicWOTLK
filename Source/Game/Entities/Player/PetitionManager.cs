@@ -152,8 +152,10 @@ namespace Game.Entities
         public bool IsPetitionSignedByAccount(int accountId)
         {
             foreach (var signature in Signatures)
+            {
                 if (signature.AccountId == accountId)
                     return true;
+            }
 
             return false;
         }

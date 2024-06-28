@@ -35,7 +35,8 @@ namespace Game
         {
             if (NextGuildId < 0 && NextGuildId >= -2)
             {
-                Log.outError(LogFilter.Guild, "Guild ids overflow!! Can't continue, shutting down server. ");
+                Log.outError(LogFilter.Guild, 
+                    "Guild ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
             return unchecked(NextGuildId++);
@@ -362,7 +363,9 @@ namespace Game
 
                 if (result.IsEmpty())
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tab items. DB table `guild_bank_item` or `item_instance` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 guild bank tab items. DB table `guild_bank_item` " +
+                        "or `item_instance` is empty.");
                 }
                 else
                 {
@@ -440,7 +443,8 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild reward definitions. DB table `guild_rewards` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 guild reward definitions. DB table `guild_rewards` is empty.");
                 return;
             }
 
@@ -456,13 +460,16 @@ namespace Game
 
                 if (Global.ObjectMgr.GetItemTemplate(reward.ItemID) == null)
                 {
-                    Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing item entry {0}", reward.ItemID);
+                    Log.outError(LogFilter.ServerLoading, 
+                        $"Guild rewards constains not existing item entry {reward.ItemID}");
                     continue;
                 }
 
                 if (reward.MinGuildRep >= (int)ReputationRank.Max)
                 {
-                    Log.outError(LogFilter.ServerLoading, "Guild rewards contains wrong reputation standing {0}, max is {1}", reward.MinGuildRep, (int)ReputationRank.Max - 1);
+                    Log.outError(LogFilter.ServerLoading, 
+                        $"Guild rewards contains wrong reputation standing {reward.MinGuildRep}, " +
+                        $"max is {(int)ReputationRank.Max - 1}");
                     continue;
                 }
 
@@ -476,7 +483,8 @@ namespace Game
                         int requiredAchievementId = reqAchievementResult.Read<int>(0);
                         if (!CliDB.AchievementStorage.ContainsKey(requiredAchievementId))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing achievement entry {0}", requiredAchievementId);
+                            Log.outError(LogFilter.ServerLoading, 
+                                $"Guild rewards constains not existing achievement entry {requiredAchievementId}");
                             continue;
                         }
 

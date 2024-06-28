@@ -45,6 +45,7 @@ namespace Game.Entities
 
             m_lastHonorUpdateTime = now;
         }
+
         public bool RewardHonor(Unit victim, int groupsize, int honor = -1, bool pvptoken = false)
         {
             // do not reward honor in arenas, but enable onkill spellproc
@@ -382,8 +383,13 @@ namespace Game.Entities
         public bool InBattlegroundQueue(bool ignoreArena = false)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-                if (m_bgBattlegroundQueueID[i].bgQueueTypeId != default && (!ignoreArena || m_bgBattlegroundQueueID[i].bgQueueTypeId.BattlemasterListId != BattlegroundTypeId.AA))
+            {
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId != default
+                    && (!ignoreArena || m_bgBattlegroundQueueID[i].bgQueueTypeId.BattlemasterListId != BattlegroundTypeId.AA))
+                {
                     return true;
+                }
+            }
             return false;
         }
 
@@ -398,16 +404,22 @@ namespace Game.Entities
         public int GetBattlegroundQueueIndex(BattlegroundQueueTypeId bgQueueTypeId)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     return i;
+            }
+
             return SharedConst.MaxPlayerBGQueues;
         }
 
         public bool IsInvitedForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     return m_bgBattlegroundQueueID[i].invitedToInstance != 0;
+            }
+
             return false;
         }
 
@@ -432,7 +444,10 @@ namespace Game.Entities
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = val;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
                     m_bgBattlegroundQueueID[i].joinTime = (uint)GameTime.GetGameTime();
-                    m_bgBattlegroundQueueID[i].mercenary = HasAura(BattlegroundConst.SpellMercenaryContractHorde) || HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
+
+                    m_bgBattlegroundQueueID[i].mercenary = 
+                        HasAura(BattlegroundConst.SpellMercenaryContractHorde) || HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
+
                     return i;
                 }
             }
@@ -442,8 +457,11 @@ namespace Game.Entities
         public bool HasFreeBattlegroundQueueId()
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == default)
                     return true;
+            }
+
             return false;
         }
 
@@ -465,30 +483,40 @@ namespace Game.Entities
         public void SetInviteForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, int instanceId)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     m_bgBattlegroundQueueID[i].invitedToInstance = instanceId;
+        }
         }
 
         public bool IsInvitedForBattlegroundInstance(int instanceId)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].invitedToInstance == instanceId)
                     return true;
+            }
+
             return false;
         }
 
         void SetMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, bool mercenary)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     m_bgBattlegroundQueueID[i].mercenary = mercenary;
+        }
         }
 
         public bool IsMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     return m_bgBattlegroundQueueID[i].mercenary;
+            }
+
             return false;
         }
 
@@ -576,14 +604,18 @@ namespace Game.Entities
                     if (entry != null)
                         m_bgData.joinPos = entry.Loc;
                     else
-                        Log.outError(LogFilter.Player, "SetBattlegroundEntryPoint: Dungeon map {0} has no linked graveyard, setting home location as entry point.", GetMapId());
+                    {
+                        Log.outError(LogFilter.Player,
+                            $"SetBattlegroundEntryPoint: Dungeon map {GetMapId()} " +
+                            $"has no linked graveyard, setting home location as entry point.");
+                    }
                 }
                 // If new entry point is not BG or arena set it
                 else if (!GetMap().IsBattlegroundOrArena())
                     m_bgData.joinPos = new WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
             }
 
-            if (m_bgData.joinPos.GetMapId() == 0xFFFFFFFF) // In error cases use homebind position
+            if (m_bgData.joinPos.GetMapId() == -1) // In error cases use homebind position
                 m_bgData.joinPos = new WorldLocation(GetHomebind());
         }
 
@@ -657,7 +689,9 @@ namespace Game.Entities
             reportAfkResult.Offender = GetGUID();
             Battleground bg = GetBattleground();
             // Battleground also must be in progress!
-            if (bg == null || bg != reporter.GetBattleground() || GetEffectiveTeam() != reporter.GetEffectiveTeam() || bg.GetStatus() != BattlegroundStatus.InProgress)
+            if (bg == null || bg != reporter.GetBattleground() 
+                || GetEffectiveTeam() != reporter.GetEffectiveTeam() 
+                || bg.GetStatus() != BattlegroundStatus.InProgress)
             {
                 reporter.SendPacket(reportAfkResult);
                 return;
@@ -683,6 +717,7 @@ namespace Game.Entities
         }
 
         public bool GetRandomWinner() { return m_IsBGRandomWinner; }
+
         public void SetRandomWinner(bool isWinner)
         {
             m_IsBGRandomWinner = isWinner;
@@ -747,6 +782,7 @@ namespace Game.Entities
                 }
             }
         }
+
         public int GetArenaTeamId(byte slot) { return 0; }
         public void SetArenaTeamIdInvited(int ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         public int GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
@@ -777,8 +813,15 @@ namespace Game.Entities
         //OutdoorPVP
         public bool IsOutdoorPvPActive()
         {
-            return IsAlive() && !HasInvisibilityAura() && !HasStealthAura() && IsPvP() && !HasUnitMovementFlag(MovementFlag.Flying) && !IsInFlight();
+            return 
+                IsAlive() 
+                && !HasInvisibilityAura() 
+                && !HasStealthAura() 
+                && IsPvP()
+                && !HasUnitMovementFlag(MovementFlag.Flying) 
+                && !IsInFlight();
         }
+
         public OutdoorPvP GetOutdoorPvP()
         {
             return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(GetMap(), GetZoneId());

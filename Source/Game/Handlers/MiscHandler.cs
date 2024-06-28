@@ -56,7 +56,8 @@ namespace Game
 
             if (packet.Size > 0xFFFF)
             {
-                Log.outError(LogFilter.Network, "UpdateAccountData: Account data packet too big, size {0}", packet.Size);
+                Log.outError(LogFilter.Network, 
+                    $"UpdateAccountData: Account data packet too big, size {packet.Size}");
                 return;
             }
 
@@ -73,7 +74,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ObjectUpdateFailed, Processing = PacketProcessing.Inplace)]
         void HandleObjectUpdateFailed(ObjectUpdateFailed objectUpdateFailed)
         {
-            Log.outError(LogFilter.Network, "Object update failed for {0} for player {1} ({2})", objectUpdateFailed.ObjectGUID.ToString(), GetPlayerName(), GetPlayer().GetGUID().ToString());
+            Log.outError(LogFilter.Network,
+                $"Object update failed for {objectUpdateFailed.ObjectGUID} " +
+                $"for player {GetPlayerName()} ({GetPlayer().GetGUID()})");
 
             // If create object failed for current player then client will be stuck on loading screen
             if (GetPlayer().GetGUID() == objectUpdateFailed.ObjectGUID)
@@ -89,7 +92,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ObjectUpdateRescued, Processing = PacketProcessing.Inplace)]
         void HandleObjectUpdateRescued(ObjectUpdateRescued objectUpdateRescued)
         {
-            Log.outError(LogFilter.Network, "Object update rescued for {0} for player {1} ({2})", objectUpdateRescued.ObjectGUID.ToString(), GetPlayerName(), GetPlayer().GetGUID().ToString());
+            Log.outError(LogFilter.Network, 
+                $"Object update rescued for {objectUpdateRescued.ObjectGUID} " +
+                $"for player {GetPlayerName()} ({GetPlayer().GetGUID()})");
 
             // Client received values update after destroying object
             // re-register object in m_clientGUIDs to send DestroyObject on next visibility update
@@ -114,7 +119,11 @@ namespace Game
             if (GetPlayer() == null)                                        // ignore until not logged (check needed because STATUS_AUTHED)
             {
                 if (packet.Mask != 0)
-                    Log.outError(LogFilter.Network, "WorldSession.HandleSetActionBarToggles in not logged state with value: {0}, ignored", packet.Mask);
+                {
+                    Log.outError(LogFilter.Network,
+                        $"WorldSession.HandleSetActionBarToggles in not logged state " +
+                        $"with value: {packet.Mask}, ignored");
+                }
                 return;
             }
 
@@ -158,38 +167,49 @@ namespace Game
             Player player = GetPlayer();
             if (player.IsInFlight())
             {
-                Log.outDebug(LogFilter.Network, "HandleAreaTrigger: Player '{0}' (GUID: {1}) in flight, ignore Area Trigger ID:{2}",
-                    player.GetName(), player.GetGUID().ToString(), packet.AreaTriggerID);
+                Log.outDebug(LogFilter.Network, 
+                    $"HandleAreaTrigger: Player '{player.GetName()}' (GUID: {player.GetGUID()}) in flight, " +
+                    $"ignore Area Trigger ID:{packet.AreaTriggerID}");
                 return;
             }
 
             AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(packet.AreaTriggerID);
             if (atEntry == null)
             {
-                Log.outDebug(LogFilter.Network, "HandleAreaTrigger: Player '{0}' (GUID: {1}) send unknown (by DBC) Area Trigger ID:{2}",
-                    player.GetName(), player.GetGUID().ToString(), packet.AreaTriggerID);
+                Log.outDebug(LogFilter.Network, 
+                    $"HandleAreaTrigger: Player '{player.GetName()}' (GUID: {player.GetGUID()}) " +
+                    $"send unknown (by DBC) Area Trigger ID:{packet.AreaTriggerID}");
                 return;
             }
 
             if (packet.Entered && !player.IsInAreaTriggerRadius(atEntry))
             {
-                Log.outDebug(LogFilter.Network, "HandleAreaTrigger: Player '{0}' ({1}) too far, ignore Area Trigger ID: {2}",
-                    player.GetName(), player.GetGUID().ToString(), packet.AreaTriggerID);
+                Log.outDebug(LogFilter.Network, 
+                    $"HandleAreaTrigger: Player '{player.GetName()}' ({player.GetGUID()}) too far, " +
+                    $"ignore Area Trigger ID: {packet.AreaTriggerID}");
                 return;
             }
 
             if (player.IsDebugAreaTriggers)
-                player.SendSysMessage(packet.Entered ? CypherStrings.DebugAreatriggerEntered : CypherStrings.DebugAreatriggerLeft, packet.AreaTriggerID);
+            {
+                player.SendSysMessage(packet.Entered ? 
+                    CypherStrings.DebugAreatriggerEntered : CypherStrings.DebugAreatriggerLeft, packet.AreaTriggerID);
+            }
 
-            if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.AreatriggerClientTriggered, atEntry.Id, player))
+            if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(
+                ConditionSourceType.AreatriggerClientTriggered, atEntry.Id, player))
+            {
                 return;
+            }
 
             if (Global.ScriptMgr.OnAreaTrigger(player, atEntry, packet.Entered))
                 return;
 
             if (player.IsAlive() && packet.Entered)
             {
-                // not using Player.UpdateQuestObjectiveProgress, ObjectID in quest_objectives can be set to -1, areatrigger_involvedrelation then holds correct id
+                // not using Player.UpdateQuestObjectiveProgress,
+                // ObjectID in quest_objectives can be set to -1,
+                // areatrigger_involvedrelation then holds correct id
                 List<int> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
                 if (quests != null)
                 {
@@ -198,7 +218,8 @@ namespace Game
                     {
                         Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questId);
                         ushort slot = player.FindQuestSlot(questId);
-                        if (qInfo != null && slot < SharedConst.MaxQuestLogSize && player.GetQuestStatus(questId) == QuestStatus.Incomplete)
+                        if (qInfo != null && slot < SharedConst.MaxQuestLogSize 
+                            && player.GetQuestStatus(questId) == QuestStatus.Incomplete)
                         {
                             foreach (QuestObjective obj in qInfo.Objectives)
                             {
@@ -293,10 +314,16 @@ namespace Game
                             return;
                         }
 
-                        Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' has corpse in instance {at.target_mapId} and can enter.");
+                        Log.outDebug(LogFilter.Maps, 
+                            $"MAP: Player '{player.GetName()}' has corpse " +
+                            $"in instance {at.target_mapId} and can enter.");
                     }
                     else
-                        Log.outDebug(LogFilter.Maps, $"Map::CanPlayerEnter - player '{player.GetName()}' is dead but does not have a corpse!");
+                    {
+                        Log.outDebug(LogFilter.Maps, 
+                            $"Map::CanPlayerEnter - player '{player.GetName()}' " +
+                            $"is dead but does not have a corpse!");
+                }
                 }
 
                 TransferAbortParams denyReason = Map.PlayerCannotEnter(at.target_mapId, player);
@@ -305,36 +332,59 @@ namespace Game
                     switch (denyReason.Reason)
                     {
                         case TransferAbortReason.MapNotAllowed:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter map with id {at.target_mapId} which has no entry");
+                            Log.outDebug(LogFilter.Maps, 
+                                $"MAP: Player '{player.GetName()}' " +
+                                $"attempted to enter map " +
+                                $"with id {at.target_mapId} which has no entry");
                             break;
                         case TransferAbortReason.Difficulty:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter instance map {at.target_mapId} but the requested difficulty was not found");
+                            Log.outDebug(LogFilter.Maps, 
+                                $"MAP: Player '{player.GetName()}' " +
+                                $"attempted to enter instance map {at.target_mapId} " +
+                                $"but the requested difficulty was not found");
                             break;
                         case TransferAbortReason.NeedGroup:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' must be in a raid group to enter map {at.target_mapId}");
+                            Log.outDebug(LogFilter.Maps, 
+                                $"MAP: Player '{player.GetName()}' " +
+                                $"must be in a raid group to enter map {at.target_mapId}");
                             player.SendRaidGroupOnlyMessage(RaidGroupReason.Only, 0);
                             break;
                         case TransferAbortReason.LockedToDifferentInstance:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
+                            Log.outDebug(LogFilter.Maps, 
+                                $"MAP: Player '{player.GetName()}' " +
+                                $"cannot enter instance map {at.target_mapId} " +
+                                $"because their permanent bind is incompatible with their group's");
                             break;
                         case TransferAbortReason.AlreadyCompletedEncounter:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
+                            Log.outDebug(LogFilter.Maps, 
+                                $"MAP: Player '{player.GetName()}' " +
+                                $"cannot enter instance map {at.target_mapId} " +
+                                $"because their permanent bind is incompatible with their group's");
                             break;
                         case TransferAbortReason.TooManyInstances:
-                            Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' cannot enter instance map {1} because he has exceeded the maximum number of instances per hour.", player.GetName(), at.target_mapId);
+                            Log.outDebug(LogFilter.Maps, 
+                                $"MAP: Player '{player.GetName()}' " +
+                                $"cannot enter instance map {at.target_mapId} " +
+                                $"because he has exceeded the maximum number of instances per hour.");
                             break;
                         case TransferAbortReason.MaxPlayers:
                         case TransferAbortReason.ZoneInCombat:
                             break;
                         case TransferAbortReason.NotFound:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because instance is resetting.");
+                            Log.outDebug(LogFilter.Maps, 
+                                $"MAP: Player '{player.GetName()}' " +
+                                $"cannot enter instance map {at.target_mapId} " +
+                                $"because instance is resetting.");
                             break;
                         default:
                             break;
                     }
 
                     if (denyReason.Reason != TransferAbortReason.NeedGroup)
-                        player.SendTransferAborted(at.target_mapId, denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
+                    {
+                        player.SendTransferAborted(
+                            at.target_mapId, denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
+                    }
 
                     if (!player.IsAlive() && player.HasCorpse())
                     {
@@ -360,8 +410,12 @@ namespace Game
                 if (entranceLocation != null && player.GetMapId() != at.target_mapId)
                     player.TeleportTo(entranceLocation.Loc, TeleportToOptions.NotLeaveTransport);
                 else
-                    player.TeleportTo(at.target_mapId, at.target_X, at.target_Y, at.target_Z, at.target_Orientation, TeleportToOptions.NotLeaveTransport);
+                {
+                    player.TeleportTo(
+                        at.target_mapId, at.target_X, at.target_Y, at.target_Z, at.target_Orientation, 
+                        TeleportToOptions.NotLeaveTransport);
             }
+        }
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestPlayedTime, Processing = PacketProcessing.Inplace)]
@@ -379,7 +433,9 @@ namespace Game
         {
             if (packet.CUFProfiles.Count > PlayerConst.MaxCUFProfiles)
             {
-                Log.outError(LogFilter.Player, "HandleSaveCUFProfiles - {0} tried to save more than {1} CUF profiles. Hacking attempt?", GetPlayerName(), PlayerConst.MaxCUFProfiles);
+                Log.outError(LogFilter.Player, 
+                    $"HandleSaveCUFProfiles - {GetPlayerName()} tried to save more " +
+                    $"than {PlayerConst.MaxCUFProfiles} CUF profiles. Hacking attempt?");
                 return;
             }
 
@@ -534,16 +590,27 @@ namespace Game
         {
             if (farSight.Enable)
             {
-                Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer().m_activePlayerData.FarsightObject.ToString(), GetPlayer().GetGUID().ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"Added FarSight {GetPlayer().m_activePlayerData.FarsightObject} " +
+                    $"to player {GetPlayer().GetGUID()}");
+
                 WorldObject target = GetPlayer().GetViewpoint();
                 if (target != null)
+                {
                     GetPlayer().SetSeer(target);
+                }
                 else
-                    Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().m_activePlayerData.FarsightObject.ToString());
+                {
+                    Log.outDebug(LogFilter.Network,
+                        $"Player {GetPlayer().GetName()} (GUID: {GetPlayer().GetGUID()}) " +
+                        $"requests non-existing seer {GetPlayer().m_activePlayerData.FarsightObject}");
+            }
             }
             else
             {
-                Log.outDebug(LogFilter.Network, "Player {0} set vision to self", GetPlayer().GetGUID().ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"Player {GetPlayer().GetGUID()} set vision to self");
+
                 GetPlayer().SetSeer(GetPlayer());
             }
 
@@ -593,22 +660,25 @@ namespace Game
             DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((Difficulty)setDungeonDifficulty.DifficultyID);
             if (difficultyEntry == null)
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent an invalid instance mode {1}!",
-                    GetPlayer().GetGUID().ToString(), setDungeonDifficulty.DifficultyID);
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleSetDungeonDifficulty: {GetPlayer().GetGUID()} " +
+                    $"sent an invalid instance mode {setDungeonDifficulty.DifficultyID}!");
                 return;
             }
 
             if (difficultyEntry.InstanceType != MapTypes.Instance)
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent an non-dungeon instance mode {1}!",
-                    GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
+                Log.outDebug(LogFilter.Network,
+                    $"WorldSession.HandleSetDungeonDifficulty: {GetPlayer().GetGUID()} " +
+                    $"sent an non-dungeon instance mode {difficultyEntry.Id}!");
                 return;
             }
 
             if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect))
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent unselectable instance mode {1}!",
-                    GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleSetDungeonDifficulty: {GetPlayer().GetGUID()} " +
+                    $"sent unselectable instance mode {difficultyEntry.Id}!");
                 return;
             }
 
@@ -620,8 +690,10 @@ namespace Game
             Map map = GetPlayer().GetMap();
             if (map != null && map.Instanceable())
             {
-                Log.outDebug(LogFilter.Network, "WorldSession:HandleSetDungeonDifficulty: player (Name: {0}, {1}) tried to reset the instance while player is inside!",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession:HandleSetDungeonDifficulty: player " +
+                    $"(Name: {GetPlayer().GetName()}, {GetPlayer().GetGUID()}) " +
+                    $"tried to reset the instance while player is inside!");
                 return;
             }
 
@@ -652,29 +724,33 @@ namespace Game
             DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((Difficulty)setRaidDifficulty.DifficultyID);
             if (difficultyEntry == null)
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent an invalid instance mode {1}!",
-                    GetPlayer().GetGUID().ToString(), setRaidDifficulty.DifficultyID);
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleSetDungeonDifficulty: {GetPlayer().GetGUID()} " +
+                    $"sent an invalid instance mode {setRaidDifficulty.DifficultyID}!");
                 return;
             }
 
             if (difficultyEntry.InstanceType != MapTypes.Raid)
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent an non-dungeon instance mode {1}!",
-                    GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleSetDungeonDifficulty: {GetPlayer().GetGUID()} " +
+                    $"sent an non-dungeon instance mode {difficultyEntry.Id}!");
                 return;
             }
 
             if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect))
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent unselectable instance mode {1}!",
-                    GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleSetDungeonDifficulty: {GetPlayer().GetGUID()} " +
+                    $"sent unselectable instance mode {difficultyEntry.Id}!");
                 return;
             }
 
             if (difficultyEntry.HasFlag(DifficultyFlags.Legacy) != (setRaidDifficulty.Legacy != 0))
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent not matching legacy difficulty {1}!",
-                    GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession.HandleSetDungeonDifficulty: {GetPlayer().GetGUID()} " +
+                    $"sent not matching legacy difficulty {difficultyEntry.Id}!");
                 return;
             }
 
@@ -686,8 +762,10 @@ namespace Game
             Map map = GetPlayer().GetMap();
             if (map != null && map.Instanceable())
             {
-                Log.outDebug(LogFilter.Network, "WorldSession:HandleSetRaidDifficulty: player (Name: {0}, {1} tried to reset the instance while inside!",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WorldSession:HandleSetRaidDifficulty: player " +
+                    $"(Name: {GetPlayer().GetName()}, {GetPlayer().GetGUID()} " +
+                    $"tried to reset the instance while inside!");
                 return;
             }
 
@@ -741,8 +819,9 @@ namespace Game
         {
             if (!GetPlayer().HasPendingBind())
             {
-                Log.outInfo(LogFilter.Network, "InstanceLockResponse: Player {0} (guid {1}) tried to bind himself/teleport to graveyard without a pending bind!",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
+                Log.outInfo(LogFilter.Network, 
+                    $"InstanceLockResponse: Player {GetPlayer().GetName()} (guid {GetPlayer().GetGUID()}) " +
+                    $"tried to bind himself/teleport to graveyard without a pending bind!");
                 return;
             }
 
@@ -785,7 +864,8 @@ namespace Game
                     Log.outDebug(LogFilter.Warden, "NYI WARDEN_CMSG_MODULE_FAILED received!");
                     break;
                 default:
-                    Log.outDebug(LogFilter.Warden, "Got unknown warden opcode {0} of size {1}.", opcode, packet.Data.GetSize() - 1);
+                    Log.outDebug(LogFilter.Warden, 
+                        $"Got unknown warden opcode {opcode} of size {packet.Data.GetSize() - 1}.");
                     break;
             }
         }

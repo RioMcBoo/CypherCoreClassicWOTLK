@@ -129,7 +129,9 @@ namespace Game.Entities
 
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Transport, $"Transport (GUID: {guidlow}) not created. Suggested coordinates isn't valid (X: {x} Y: {y})");
+                Log.outError(LogFilter.Transport, 
+                    $"Transport (GUID: {guidlow}) not created. " +
+                    $"Suggested coordinates isn't valid (X: {x} Y: {y})");
                 return false;
             }
 
@@ -139,7 +141,8 @@ namespace Game.Entities
 
             if (goinfo == null)
             {
-                Log.outError(LogFilter.Sql, $"Transport not created: entry in `gameobject_template` not found, entry: {entry}");
+                Log.outError(LogFilter.Sql, 
+                    $"Transport not created: entry in `gameobject_template` not found, entry: {entry}");
                 return false;
             }
 
@@ -149,7 +152,9 @@ namespace Game.Entities
             TransportTemplate tInfo = Global.TransportMgr.GetTransportTemplate(entry);
             if (tInfo == null)
             {
-                Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) will not be created, missing `transport_template` entry.", entry, goinfo.name);
+                Log.outError(LogFilter.Sql, 
+                    $"Transport {entry} (name: {goinfo.name}) will not be created," +
+                    $" missing `transport_template` entry.");
                 return false;
             }
 
@@ -244,12 +249,17 @@ namespace Game.Entities
 
             if (eventToTriggerIndex != -1)
             {
-                while (eventToTriggerIndex < _transportInfo.Events.Count && _transportInfo.Events[eventToTriggerIndex].Timestamp < timer)
+                while (eventToTriggerIndex < _transportInfo.Events.Count 
+                    && _transportInfo.Events[eventToTriggerIndex].Timestamp < timer)
                 {
-                    TransportPathLeg leg = _transportInfo.GetLegForTime(_transportInfo.Events[eventToTriggerIndex].Timestamp);
+                    TransportPathLeg leg = 
+                        _transportInfo.GetLegForTime(_transportInfo.Events[eventToTriggerIndex].Timestamp);
+
                     if (leg != null)
+                    {
                         if (leg.MapId == GetMapId())
                             GameEvents.Trigger(_transportInfo.Events[eventToTriggerIndex].EventId, this, this);
+                    }
 
                     _eventsToTrigger.Set(eventToTriggerIndex, false);
                     ++eventToTriggerIndex;
@@ -261,7 +271,10 @@ namespace Game.Entities
             Position newPosition = _transportInfo.ComputePosition(timer, out moveState, out legIndex);
             if (newPosition != null)
             {
-                bool justStopped = _movementState == TransportMovementState.Moving && moveState != TransportMovementState.Moving;
+                bool justStopped = 
+                    _movementState == TransportMovementState.Moving 
+                    && moveState != TransportMovementState.Moving;
+
                 _movementState = moveState;
 
                 if (justStopped)
@@ -286,7 +299,10 @@ namespace Game.Entities
                 {
                     _positionChangeTimer.Reset(positionUpdateDelay);
                     if (_movementState == TransportMovementState.Moving || justStopped)
-                        UpdatePosition(newPosition.GetPositionX(), newPosition.GetPositionY(), newPosition.GetPositionZ(), newPosition.GetOrientation());
+                    {
+                        UpdatePosition(newPosition.GetPositionX(), newPosition.GetPositionY(),
+                            newPosition.GetPositionZ(), newPosition.GetOrientation());
+                    }
                     else
                     {
                         /* There are four possible scenarios that trigger loading/unloading passengers:
@@ -338,7 +354,8 @@ namespace Game.Entities
             {
                 passenger.SetTransport(null);
                 passenger.m_movementInfo.transport.Reset();
-                Log.outDebug(LogFilter.Transport, "Object {0} removed from transport {1}.", passenger.GetName(), GetName());
+                Log.outDebug(LogFilter.Transport, 
+                    $"Object {passenger.GetName()} removed from transport {GetName()}.");
 
                 Player plr = passenger.ToPlayer();
                 if (plr != null)
@@ -379,7 +396,9 @@ namespace Game.Entities
 
             if (!creature.IsPositionValid())
             {
-                Log.outError(LogFilter.Transport, "Creature (guidlow {0}, entry {1}) not created. Suggested coordinates aren't valid (X: {2} Y: {3})", creature.GetGUID().ToString(), creature.GetEntry(), creature.GetPositionX(), creature.GetPositionY());
+                Log.outError(LogFilter.Transport, 
+                    $"Creature (guidlow {creature.GetGUID()}, entry {creature.GetEntry()}) not created. " +
+                    $"Suggested coordinates aren't valid (X: {creature.GetPositionX()} Y: {creature.GetPositionY()})");
                 return null;
             }
 
@@ -417,7 +436,9 @@ namespace Game.Entities
 
             if (!go.IsPositionValid())
             {
-                Log.outError(LogFilter.Transport, "GameObject (guidlow {0}, entry {1}) not created. Suggested coordinates aren't valid (X: {2} Y: {3})", go.GetGUID().ToString(), go.GetEntry(), go.GetPositionX(), go.GetPositionY());
+                Log.outError(LogFilter.Transport, 
+                    $"GameObject (guidlow {go.GetGUID()}, entry {go.GetEntry()}) not created. " +
+                    $"Suggested coordinates aren't valid (X: {go.GetPositionX()} Y: {go.GetPositionY()})");
                 return null;
             }
 
@@ -513,8 +534,11 @@ namespace Game.Entities
                 return null;
 
             WorldObject phaseShiftOwner = this;
-            if (summoner != null && !(properties != null && properties.HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+            if (summoner != null && !(properties != null
+                && properties.HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+            {
                 phaseShiftOwner = summoner;
+            }
 
             if (phaseShiftOwner != null)
                 PhasingHandler.InheritPhaseShift(summon, phaseShiftOwner);
@@ -581,8 +605,11 @@ namespace Game.Entities
              */
             if (_staticPassengers.Empty() && newActive) // 1. and 2.
                 LoadStaticPassengers();
-            else if (!_staticPassengers.Empty() && !newActive && oldCell.DiffGrid(new Cell(GetPositionX(), GetPositionY()))) // 3.
+            else if (!_staticPassengers.Empty() && !newActive
+                && oldCell.DiffGrid(new Cell(GetPositionX(), GetPositionY()))) // 3.
+            {
                 UnloadStaticPassengers();
+            }
             else
                 UpdatePassengerPositions(_staticPassengers);
             // 4. is handed by grid unload
@@ -658,8 +685,10 @@ namespace Game.Entities
                         // will be relocated in UpdatePosition of the vehicle
                         Unit veh = obj.ToUnit().GetVehicleBase();
                         if (veh != null)
+                        {
                             if (veh.GetTransport() == this)
                                 continue;
+                        }
 
                         float destX, destY, destZ, destO;
                         obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
@@ -751,8 +780,10 @@ namespace Game.Entities
                 return;
 
             foreach (var playerReference in players)
+            {
                 if (playerReference.InSamePhase(this))
                     BuildFieldsUpdate(playerReference, data_map);
+            }
 
             ClearUpdateMask(true);
         }

@@ -636,7 +636,10 @@ namespace Game.DataStorage
 
                     if (!availableDb2Locales.Any())
                     {
-                        Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `hotfix_data` references unknown DB2 store " +
+                            $"by hash 0x{tableHash:X} and has no reference to `hotfix_blob` " +
+                            $"in hotfix id {id} with RecordID: {recordId}");
                         continue;
                     }
                 }
@@ -692,7 +695,9 @@ namespace Game.DataStorage
                 var storeItr = _storage.LookupByKey(tableHash);
                 if (storeItr != null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table hash 0x{tableHash:X} points to a loaded DB2 store {storeItr.GetName()}, fill related table instead of hotfix_blob");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table hash 0x{tableHash:X} points to a loaded DB2 store {storeItr.GetName()}, " +
+                        $"fill related table instead of hotfix_blob");
                     continue;
                 }
 
@@ -702,7 +707,9 @@ namespace Game.DataStorage
                 Locale locale = localeName.ToEnum<Locale>();
                 if (!SharedConst.IsValidLocale(locale))
                 {
-                    Log.outError(LogFilter.Sql, $"`hotfix_blob` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"`hotfix_blob` contains invalid locale: {localeName} " +
+                        $"at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
                     continue;
                 }
 
@@ -737,7 +744,9 @@ namespace Game.DataStorage
                 var allowedHotfixes = _allowedHotfixOptionalData.LookupByKey(tableHash);
                 if (allowedHotfixes.Empty())
                 {
-                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references DB2 store by hash 0x{tableHash:X} that is not allowed to have optional data");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `hotfix_optional_data` references DB2 store " +
+                        $"by hash 0x{tableHash:X} that is not allowed to have optional data");
                     continue;
                 }
 
@@ -745,7 +754,9 @@ namespace Game.DataStorage
                 var db2storage = _storage.LookupByKey(tableHash);
                 if (db2storage == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references unknown DB2 store by hash 0x{tableHash:X} with RecordID: {recordId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `hotfix_optional_data` references unknown DB2 store " +
+                        $"by hash 0x{tableHash:X} with RecordID: {recordId}");
                     continue;
                 }
 
@@ -754,7 +765,9 @@ namespace Game.DataStorage
 
                 if (!SharedConst.IsValidLocale(locale))
                 {
-                    Log.outError(LogFilter.Sql, $"`hotfix_optional_data` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"`hotfix_optional_data` contains invalid locale: {localeName} " +
+                        $"at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
                     continue;
                 }
 
@@ -767,16 +780,23 @@ namespace Game.DataStorage
                 {
                     return v.Item1 == optionalData.Key;
                 });
+
                 if (allowedHotfixItr == default)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references non-allowed optional data key 0x{optionalData.Key:X} for DB2 store by hash 0x{tableHash:X} and RecordID: {recordId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `hotfix_optional_data` references non-allowed " +
+                        $"optional data key 0x{optionalData.Key:X} for DB2 store " +
+                        $"by hash 0x{tableHash:X} and RecordID: {recordId}");
                     continue;
                 }
 
                 optionalData.Data = result.Read<byte[]>(4);
                 if (!allowedHotfixItr.Item2(optionalData.Data))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` contains invalid data for DB2 store 0x{tableHash:X}, RecordID: {recordId} and Key: 0x{optionalData.Key:X}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `hotfix_optional_data` contains invalid data " +
+                        $"for DB2 store 0x{tableHash:X}, RecordID: {recordId} " +
+                        $"and Key: 0x{optionalData.Key:X}");
                     continue;
                 }
 
@@ -1348,8 +1368,10 @@ namespace Game.DataStorage
         public LFGDungeonsRecord GetLfgDungeon(int mapId, Difficulty difficulty)
         {
             foreach (LFGDungeonsRecord dungeon in LFGDungeonsStorage.Values)
+            {
                 if (dungeon.MapID == mapId && dungeon.DifficultyID == difficulty)
                     return dungeon;
+            }
 
             return null;
         }
@@ -1488,13 +1510,17 @@ namespace Game.DataStorage
         public ResponseCodes ValidateName(string name, Locale locale)
         {
             foreach (var testName in _nameValidators[(int)locale])
+            {
                 if (testName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return ResponseCodes.CharNameProfane;
+            }
 
             // regexes at TOTAL_LOCALES are loaded from NamesReserved which is not locale specific
             foreach (var testName in _nameValidators[(int)Locale.Total])
+            {
                 if (testName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return ResponseCodes.CharNameReserved;
+            }
 
             return ResponseCodes.CharNameSuccess;
         }
@@ -1545,8 +1571,10 @@ namespace Game.DataStorage
         public PvpDifficultyRecord GetBattlegroundBracketById(int mapid, BattlegroundBracketId id)
         {
             foreach (var entry in PvpDifficultyStorage.Values)
+            {
                 if (entry.MapID == mapid && entry.BracketId == id)
                     return entry;
+            }
 
             return null;
         }
@@ -1645,6 +1673,7 @@ namespace Game.DataStorage
                 var raceMask = skllRaceClassInfo.RaceMask;
                 if (raceMask != RaceMask.None && !raceMask.HasRace(race))
                     continue;
+                
                 if (skllRaceClassInfo.ClassMask != ClassMask.None && !skllRaceClassInfo.ClassMask.HasClass(class_))
                     continue;
 
@@ -1693,12 +1722,14 @@ namespace Game.DataStorage
         {
             if (requiredTotemCategoryId == 0)
                 return true;
+            
             if (itemTotemCategoryId == 0)
                 return false;
 
             TotemCategoryRecord itemEntry = TotemCategoryStorage.LookupByKey(itemTotemCategoryId);
             if (itemEntry == null)
                 return false;
+            
             TotemCategoryRecord reqEntry = TotemCategoryStorage.LookupByKey(requiredTotemCategoryId);
             if (reqEntry == null)
                 return false;

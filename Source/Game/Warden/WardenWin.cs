@@ -126,7 +126,10 @@ namespace Game
             if (buff.ReadBytes(20) != WardenModuleWin.ClientKeySeedHash)
             {
                 string penalty = ApplyPenalty();
-                Log.outWarn(LogFilter.Warden, "{0} failed hash reply. Action: {0}", _session.GetPlayerInfo(), penalty);
+
+                Log.outWarn(LogFilter.Warden, 
+                    $"{_session.GetPlayerInfo()} failed hash reply. Action: {penalty}");
+
                 return;
             }
 
@@ -159,6 +162,7 @@ namespace Game
             int size = 1 + GetCheckPacketBaseSize(check.Type); // 1 byte check Type
             if (!check.Str.IsEmpty())
                 size += (check.Str.Length + 1); // 1 byte string length
+            
             if (!check.Data.Empty())
                 size += check.Data.Length;
 
@@ -167,7 +171,10 @@ namespace Game
         
         public override void RequestChecks()
         {
-            Log.outDebug(LogFilter.Warden, $"Request data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() != null && !_session.PlayerLoading()}");
+            Log.outDebug(LogFilter.Warden, 
+                $"Request data from {_session.GetPlayerName()} " +
+                $"(account {_session.GetAccountId()}) " +
+                $"- loaded: {_session.GetPlayer() != null && !_session.PlayerLoading()}");
 
             // If all checks for a category are done, fill its todo list again
             foreach (WardenCheckCategory category in Enum.GetValues<WardenCheckCategory>())
@@ -210,6 +217,7 @@ namespace Game
                 ushort thisSize = GetCheckPacketSize(Global.WardenCheckMgr.GetCheckData(id));
                 if ((expectedSize + thisSize) > 450) // warden packets are truncated to 512 bytes clientside
                     return true;
+                
                 expectedSize += thisSize;
                 return false;
             });
@@ -306,12 +314,17 @@ namespace Game
 
             if (buff.GetSize() == expectedSize)
             {
-                Log.outDebug(LogFilter.Warden, $"Finished building warden packet, size is {buff.GetSize()} bytes");
+                Log.outDebug(LogFilter.Warden, $"Finished building warden packet, " +
+                    $"size is {buff.GetSize()} bytes");
+
                 Log.outDebug(LogFilter.Warden, $"Sent checks: {idstring}");
             }
             else
             {
-                Log.outWarn(LogFilter.Warden, $"Finished building warden packet, size is {buff.GetSize()} bytes, but expected {expectedSize} bytes!");
+                Log.outWarn(LogFilter.Warden, $"Finished building warden packet, " +
+                    $"size is {buff.GetSize()} bytes, " +
+                    $"but expected {expectedSize} bytes!");
+
                 Log.outWarn(LogFilter.Warden, $"Sent checks: {idstring}");
             }
 
@@ -335,7 +348,8 @@ namespace Game
             if (!IsValidCheckSum(Checksum, buff.GetData(), Length))
             {
                 string penalty = ApplyPenalty();
-                Log.outWarn(LogFilter.Warden, "{0} failed checksum. Action: {1}", _session.GetPlayerInfo(), penalty);
+                Log.outWarn(LogFilter.Warden, 
+                    $"{_session.GetPlayerInfo()} failed checksum. Action: {penalty}");
                 return;
             }
 
@@ -346,7 +360,8 @@ namespace Game
                 if (result == 0x00)
                 {
                     string penalty = ApplyPenalty();
-                    Log.outWarn(LogFilter.Warden, "{0} failed timing check. Action: {1}", _session.GetPlayerInfo(), penalty);
+                    Log.outWarn(LogFilter.Warden, 
+                        $"{_session.GetPlayerInfo()} failed timing check. Action: {penalty}");
                     return;
                 }
 
@@ -355,10 +370,10 @@ namespace Game
                 uint ticksNow = GameTime.GetGameTimeMS();
                 uint ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
-                Log.outDebug(LogFilter.Warden, "ServerTicks {0}", ticksNow);         // Now
-                Log.outDebug(LogFilter.Warden, "RequestTicks {0}", _serverTicks);    // At request
-                Log.outDebug(LogFilter.Warden, "Ticks {0}", newClientTicks);         // At response
-                Log.outDebug(LogFilter.Warden, "Ticks diff {0}", ourTicks - newClientTicks);
+                Log.outDebug(LogFilter.Warden, $"ServerTicks {ticksNow}");         // Now
+                Log.outDebug(LogFilter.Warden, $"RequestTicks {_serverTicks}");    // At request
+                Log.outDebug(LogFilter.Warden, $"Ticks {newClientTicks}");         // At response
+                Log.outDebug(LogFilter.Warden, $"Ticks diff {ourTicks - newClientTicks}");
             }
 
             BigInteger rs;
@@ -415,7 +430,9 @@ namespace Game
                         if (result == 0)
                             buff.Skip(buff.ReadUInt8()); // discard attached string
 
-                        Log.outDebug(LogFilter.Warden, $"LUA_EVAL_CHECK CheckId {id} account Id {_session.GetAccountId()} got in-warden dummy response ({result})");
+                        Log.outDebug(LogFilter.Warden, 
+                            $"LUA_EVAL_CHECK CheckId {id} account Id {_session.GetAccountId()} " +
+                            $"got in-warden dummy response ({result})");
                         break;
                     }
                     case WardenCheckType.Mpq:
@@ -423,7 +440,9 @@ namespace Game
                         byte result = buff.ReadUInt8();
                         if (result != 0)
                         {
-                            Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK not 0x00 account id {_session.GetAccountId()}", _session.GetAccountId());
+                            Log.outDebug(LogFilter.Warden, 
+                                $"RESULT MPQ_CHECK not 0x00 account id {_session.GetAccountId()}");
+
                             checkFailed = id;
                             continue;
                         }

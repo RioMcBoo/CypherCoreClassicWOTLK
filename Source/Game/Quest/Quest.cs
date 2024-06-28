@@ -130,13 +130,18 @@ namespace Game
             if (idx >= SharedConst.QuestRewardDisplaySpellCount)
             {                
                 Log.outError(LogFilter.Sql, 
-                    $"Table `quest_reward_display_spell` has a Spell ({spellId}) set for quest {questId} at Index {idx} which is out of bounds. Skipped.");                
+                    $"Table `quest_reward_display_spell` " +
+                    $"has a Spell ({spellId}) set for quest {questId} " +
+                    $"at Index {idx} which is out of bounds. Skipped.");                
                 return;
             }
 
             if (Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None) == null)
             {
-                Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has non-existing Spell ({spellId}) set for quest {questId}. Skipped.");
+                Log.outError(LogFilter.Sql, 
+                    $"Table `quest_reward_display_spell` " +
+                    $"has non-existing Spell ({spellId}) " +
+                    $"set for quest {questId}. Skipped.");
                 return;
             }
 
@@ -158,7 +163,9 @@ namespace Game
                 ushort emoteId = fields.Read<ushort>(1 + i);
                 if (!CliDB.EmotesStorage.ContainsKey(emoteId))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `quest_details` has non-existing Emote{1 + i} ({emoteId}) set for quest {questId}. Skipped.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `quest_details` has non-existing Emote{1 + i} ({emoteId}) " +
+                        $"set for quest {questId}. Skipped.");
                     continue;
                 }
                 DetailsEmote[i] = emoteId;
@@ -175,10 +182,19 @@ namespace Game
             EmoteOnIncomplete = fields.Read<short>(2);
 
             if (!CliDB.EmotesStorage.ContainsKey(EmoteOnComplete))
-                Log.outError(LogFilter.Sql, $"Table `quest_request_items` has non-existing EmoteOnComplete ({EmoteOnComplete}) set for quest {questId}.");
+            {
+                Log.outError(LogFilter.Sql,
+                    $"Table `quest_request_items` " +
+                    $"has non-existing EmoteOnComplete ({EmoteOnComplete}) " +
+                    $"set for quest {questId}.");
+            }
 
             if (!CliDB.EmotesStorage.ContainsKey(EmoteOnIncomplete))
-                Log.outError(LogFilter.Sql, $"Table `quest_request_items` has non-existing EmoteOnIncomplete ({EmoteOnIncomplete}) set for quest {questId}.");
+            {
+                Log.outError(LogFilter.Sql,
+                    $"Table `quest_request_items` has non-existing EmoteOnIncomplete " +
+                    $"({EmoteOnIncomplete}) set for quest {questId}.");
+            }
 
             EmoteOnCompleteDelay = fields.Read<uint>(3);
             EmoteOnIncompleteDelay = fields.Read<uint>(4);
@@ -194,7 +210,10 @@ namespace Game
                 short emoteId = fields.Read<short>(1 + i);
                 if (emoteId < 0 || !CliDB.EmotesStorage.ContainsKey(emoteId))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `quest_offer_reward` has non-existing Emote{1 + i} ({emoteId}) set for quest {questId}. Skipped.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `quest_offer_reward` " +
+                        $"has non-existing Emote{1 + i} ({emoteId}) " +
+                        $"set for quest {questId}. Skipped.");
                     continue;
                 }
                 OfferRewardEmote[i] = emoteId;
@@ -311,12 +330,16 @@ namespace Game
             Locale locale = rawLocale.ToEnum<Locale>();
             if (locale >= Locale.Total)
             {
-                Log.outError(LogFilter.Sql, $"Table `quest_description_conditional` has invalid locale {rawLocale} set for quest {questId}. Skipped.");
+                Log.outError(LogFilter.Sql, 
+                    $"Table `quest_description_conditional` " +
+                    $"has invalid locale {rawLocale} set for quest {questId}. Skipped.");
                 return;
             }
 
             QuestConditionalText qct = ConditionalQuestDescription.Find(text => 
-                text.PlayerConditionId == playerConditionId && text.QuestgiverCreatureId == questgiverCreatureId);
+                text.PlayerConditionId == playerConditionId 
+                && text.QuestgiverCreatureId == questgiverCreatureId
+                );
 
             if (qct == null)
             {
@@ -340,12 +363,17 @@ namespace Game
             Locale locale = rawLocale.ToEnum<Locale>();
             if (locale >= Locale.Total)
             {
-                Log.outError(LogFilter.Sql, $"Table `quest_request_items_conditional` has invalid locale {rawLocale} set for quest {questId}. Skipped.");
+                Log.outError(LogFilter.Sql, 
+                    $"Table `quest_request_items_conditional` " +
+                    $"has invalid locale {rawLocale} " +
+                    $"set for quest {questId}. Skipped.");
                 return;
             }
 
             QuestConditionalText qct = ConditionalRequestItemsText.Find(text => 
-                text.PlayerConditionId == playerConditionId && text.QuestgiverCreatureId == questgiverCreatureId);
+                text.PlayerConditionId == playerConditionId 
+                && text.QuestgiverCreatureId == questgiverCreatureId
+                );
 
             if (qct == null)
             {
@@ -369,12 +397,16 @@ namespace Game
             Locale locale = rawLocale.ToEnum<Locale>();
             if (locale >= Locale.Total)
             {
-                Log.outError(LogFilter.Sql, $"Table `quest_offer_reward_conditional` has invalid locale {rawLocale} set for quest {questId}. Skipped.");
+                Log.outError(LogFilter.Sql, 
+                    $"Table `quest_offer_reward_conditional` " +
+                    $"has invalid locale {rawLocale} set for quest {questId}. Skipped.");
                 return;
             }
 
             QuestConditionalText qct = ConditionalOfferRewardText.Find(text => 
-                text.PlayerConditionId == playerConditionId && text.QuestgiverCreatureId == questgiverCreatureId);
+                text.PlayerConditionId == playerConditionId 
+                && text.QuestgiverCreatureId == questgiverCreatureId
+                );
 
             if (qct == null)
             {
@@ -398,12 +430,17 @@ namespace Game
             Locale locale = rawLocale.ToEnum<Locale>();
             if (locale >= Locale.Total)
             {
-                Log.outError(LogFilter.Sql, $"Table `quest_completion_log_conditional` has invalid locale {rawLocale} set for quest {questId}. Skipped.");
+                Log.outError(LogFilter.Sql,
+                    $"Table `quest_completion_log_conditional` " +
+                    $"has invalid locale {rawLocale} " +
+                    $"set for quest {questId}. Skipped.");
                 return;
             }
 
             QuestConditionalText qct = ConditionalQuestCompletionLog.Find(text => 
-                text.PlayerConditionId == playerConditionId && text.QuestgiverCreatureId == questgiverCreatureId);
+                text.PlayerConditionId == playerConditionId 
+                && text.QuestgiverCreatureId == questgiverCreatureId
+                );
 
             if (qct == null)
             {
@@ -459,7 +496,9 @@ namespace Game
 
         public int MoneyValue(Player player)
         {
-            QuestMoneyRewardRecord money = CliDB.QuestMoneyRewardStorage.LookupByKey(player.GetQuestLevel(this));
+            QuestMoneyRewardRecord money = 
+                CliDB.QuestMoneyRewardStorage.LookupByKey(player.GetQuestLevel(this));
+
             if (money != null)
                 return (int)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
             else
@@ -540,12 +579,14 @@ namespace Game
 
         public bool IsAutoAccept()
         {
-            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) && HasAnyFlag(QuestFlags.AutoAccept);
+            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) 
+                && HasAnyFlag(QuestFlags.AutoAccept);
         }
 
         public bool IsTurnIn()
         {
-            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoComplete) && Type == QuestType.TurnIn;
+            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoComplete) 
+                && Type == QuestType.TurnIn;
         }
 
         public bool IsRaidQuest(Difficulty difficulty)
@@ -586,7 +627,8 @@ namespace Game
         {
             // Dungeon Finder/Daily/Repeatable (if not weekly, monthly or seasonal) quests are never considered rewarded serverside.
             // This affects counters and client requests for completed quests.
-            return (!IsDFQuest() && !IsDaily() && (!IsRepeatable() || IsWeekly() || IsMonthly() || IsSeasonal()));
+            return (!IsDFQuest() && !IsDaily() 
+                && (!IsRepeatable() || IsWeekly() || IsMonthly() || IsSeasonal()));
         }
 
         public void InitializeQueryData()
@@ -765,7 +807,10 @@ namespace Game
 
         public void SetSpecialFlag(QuestSpecialFlags flag) { SpecialFlags |= flag; }
 
-        public bool HasQuestObjectiveType(QuestObjectiveType type) { return _usedQuestObjectiveTypes[(int)type]; }
+        public bool HasQuestObjectiveType(QuestObjectiveType type) 
+        { 
+            return _usedQuestObjectiveTypes[(int)type]; 
+        }
 
         public bool IsAutoPush() { return HasAnyFlag(QuestFlagsEx.AutoPush); }
         public bool IsWorldQuest() { return HasAnyFlag(QuestFlagsEx.IsWorldQuest); }
@@ -778,12 +823,14 @@ namespace Game
         public bool IsDaily() { return HasAnyFlag(QuestFlags.Daily); }
         public bool IsWeekly() { return HasAnyFlag(QuestFlags.Weekly); }
         public bool IsMonthly() { return HasAnyFlag(QuestSpecialFlags.Monthly); }
+        
         public bool IsSeasonal()
         {
             return (QuestSortID == -(int)QuestSort.Seasonal || QuestSortID == -(int)QuestSort.Special || QuestSortID == -(int)QuestSort.LunarFestival
                 || QuestSortID == -(int)QuestSort.Midsummer || QuestSortID == -(int)QuestSort.Brewfest || QuestSortID == -(int)QuestSort.LoveIsInTheAir
                 || QuestSortID == -(int)QuestSort.Noblegarden) && !IsRepeatable();
         }
+
         public bool IsDailyOrWeekly() { return HasAnyFlag(QuestFlags.Daily | QuestFlags.Weekly); }
         public bool IsDFQuest() { return HasAnyFlag(QuestSpecialFlags.DfQuest); }
         public bool IsPushedToPartyOnAccept() { return HasAnyFlag(QuestSpecialFlags.AutoPushToParty); }
@@ -946,6 +993,7 @@ namespace Game
         {
             Text = "";
         }
+
         public QuestGreeting(ushort emoteType, uint emoteDelay, string text)
         {
             EmoteType = emoteType;

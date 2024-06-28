@@ -29,13 +29,17 @@ namespace Game.DataStorage
 
                         if (!factionGroup.HasFlag(FactionMasks.Player) || !factionGroup.HasFlag(FactionMasks.Alliance | FactionMasks.Horde))
                         {
-                            Log.outError(LogFilter.Sql, $"Faction group {factionGroup} defined for character template {templateId} in `character_template_class` is invalid. Skipped.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Faction group {factionGroup} defined for character template {templateId} " +
+                                $"in `character_template_class` is invalid. Skipped.");
                             continue;
                         }
 
                         if (!CliDB.ChrClassesStorage.ContainsKey(classID))
                         {
-                            Log.outError(LogFilter.Sql, $"Class {classID} defined for character template {templateId} in `character_template_class` does not exists, skipped.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Class {classID} defined for character template {templateId} " +
+                                $"in `character_template_class` does not exists, skipped.");
                             continue;
                         }
 
@@ -45,7 +49,8 @@ namespace Game.DataStorage
                 }
                 else
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 character template classes. DB table `character_template_class` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 character template classes. DB table `character_template_class` is empty.");
                 }
             }
 
@@ -53,7 +58,8 @@ namespace Game.DataStorage
                 SQLResult templates = DB.World.Query("SELECT Id, Name, Description, Level FROM character_template");
                 if (templates.IsEmpty())
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 character templates. DB table `character_template` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 character templates. DB table `character_template` is empty.");
                     return;
                 }
 
@@ -68,7 +74,9 @@ namespace Game.DataStorage
 
                     if (templ.Classes.Empty())
                     {
-                        Log.outError(LogFilter.Sql, $"Character template {templ.TemplateSetId} does not have any classes defined in `character_template_class`. Skipped.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Character template {templ.TemplateSetId} does not have any classes " +
+                            $"defined in `character_template_class`. Skipped.");
                         continue;
                     }
 

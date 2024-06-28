@@ -20,7 +20,9 @@ namespace Game
 
             if (moveDismissVehicle.Status.Guid != vehicleGUID)
             {
-                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to dismiss a controlled vehicle ({vehicleGUID}) that he has no control over. Possible cheater or malformed packet.");
+                Log.outError(LogFilter.Network, 
+                    $"Player {GetPlayer().GetGUID()} tried to dismiss a controlled vehicle ({vehicleGUID}) " +
+                    $"that he has no control over. Possible cheater or malformed packet.");
                 return;
             }
 
@@ -37,8 +39,9 @@ namespace Game
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
             if (!seat.CanSwitchFromSeat)
             {
-                Log.outError(LogFilter.Network, "HandleRequestVehiclePrevSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags);
+                Log.outError(LogFilter.Network, 
+                    $"HandleRequestVehiclePrevSeat: {GetPlayer().GetGUID()} tried to switch seats " +
+                    $"but current seatflags {seat.Flags} don't permit that.");
                 return;
             }
 
@@ -55,8 +58,9 @@ namespace Game
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
             if (!seat.CanSwitchFromSeat)
             {
-                Log.outError(LogFilter.Network, "HandleRequestVehicleNextSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags);
+                Log.outError(LogFilter.Network, 
+                    $"HandleRequestVehicleNextSeat: {GetPlayer().GetGUID()} tried to switch seats " +
+                    $"but current seatflags {seat.Flags} don't permit that.");
                 return;
             }
 
@@ -73,8 +77,9 @@ namespace Game
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
             if (!seat.CanSwitchFromSeat)
             {
-                Log.outError(LogFilter.Network, "HandleMoveChangeVehicleSeats, {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags);
+                Log.outError(LogFilter.Network, 
+                    $"HandleMoveChangeVehicleSeats, {GetPlayer().GetGUID()} tried to switch seats " +
+                    $"but current seatflags {seat.Flags} don't permit that.");
                 return;
             }
 
@@ -94,10 +99,12 @@ namespace Game
                 {
                     Vehicle vehicle = vehUnit.GetVehicleKit();
                     if (vehicle != null)
+                    {
                         if (vehicle.HasEmptySeat((sbyte)packet.DstSeatIndex))
                             vehUnit.HandleSpellClick(GetPlayer(), (sbyte)packet.DstSeatIndex);
                 }
             }
+        }
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehicleSwitchSeat, Processing = PacketProcessing.Inplace)]
@@ -110,8 +117,9 @@ namespace Game
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
             if (!seat.CanSwitchFromSeat)
             {
-                Log.outError(LogFilter.Network, "HandleRequestVehicleSwitchSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags);
+                Log.outError(LogFilter.Network, 
+                    $"HandleRequestVehicleSwitchSeat: {GetPlayer().GetGUID()} tried to switch seats " +
+                    $"but current seatflags {seat.Flags} don't permit that.");
                 return;
             }
 
@@ -124,10 +132,12 @@ namespace Game
                 {
                     Vehicle vehicle = vehUnit.GetVehicleKit();
                     if (vehicle != null)
+                    {
                         if (vehicle.HasEmptySeat((sbyte)packet.SeatIndex))
                             vehUnit.HandleSpellClick(GetPlayer(), (sbyte)packet.SeatIndex);
                 }
             }
+        }
         }
 
         [WorldPacketHandler(ClientOpcodes.RideVehicleInteract)]
@@ -156,7 +166,8 @@ namespace Game
             Vehicle vehicle = GetPlayer().GetVehicleKit();
             if (vehicle == null)
             {
-                Log.outError(LogFilter.Network, "HandleEjectPassenger: {0} is not in a vehicle!", GetPlayer().GetGUID().ToString());
+                Log.outError(LogFilter.Network, 
+                    $"HandleEjectPassenger: {GetPlayer().GetGUID()} is not in a vehicle!");
                 return;
             }
 
@@ -165,13 +176,17 @@ namespace Game
                 Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Passenger);
                 if (unit == null)
                 {
-                    Log.outError(LogFilter.Network, "{0} tried to eject {1} from vehicle, but the latter was not found in world!", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
+                    Log.outError(LogFilter.Network, 
+                        $"{GetPlayer().GetGUID()} tried to eject {packet.Passenger} " +
+                        $"from vehicle, but the latter was not found in world!");
                     return;
                 }
 
                 if (!unit.IsOnVehicle(vehicle.GetBase()))
                 {
-                    Log.outError(LogFilter.Network, "{0} tried to eject {1}, but they are not in the same vehicle", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
+                    Log.outError(LogFilter.Network, 
+                        $"{GetPlayer().GetGUID()} tried to eject {packet.Passenger}," +
+                        $" but they are not in the same vehicle");
                     return;
                 }
 
@@ -180,11 +195,16 @@ namespace Game
                 if (seat.IsEjectable)
                     unit.ExitVehicle();
                 else
-                    Log.outError(LogFilter.Network, "{0} attempted to eject {1} from non-ejectable seat.", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
+                {
+                    Log.outError(LogFilter.Network, 
+                        $"{GetPlayer().GetGUID()} attempted to eject {packet.Passenger} from non-ejectable seat.");
             }
-
+            }
             else
-                Log.outError(LogFilter.Network, "HandleEjectPassenger: {0} tried to eject invalid {1}", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
+            {
+                Log.outError(LogFilter.Network,
+                    $"HandleEjectPassenger: {GetPlayer().GetGUID()} tried to eject invalid {packet.Passenger}");
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehicleExit, Processing = PacketProcessing.Inplace)]
@@ -199,8 +219,11 @@ namespace Game
                     if (seat.CanEnterOrExit)
                         GetPlayer().ExitVehicle();
                     else
-                        Log.outError(LogFilter.Network, "{0} tried to exit vehicle, but seatflags {1} (ID: {2}) don't permit that.",
-                        GetPlayer().GetGUID().ToString(), seat.Id, seat.Flags);
+                    {
+                        Log.outError(LogFilter.Network,
+                            $"{GetPlayer().GetGUID()} tried to exit vehicle, " +
+                            $"but seatflags {seat.Flags} (ID: {seat.Id}) don't permit that.");
+                    }
                 }
             }
         }

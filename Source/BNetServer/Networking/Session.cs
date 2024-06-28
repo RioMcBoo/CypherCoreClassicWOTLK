@@ -127,7 +127,10 @@ namespace BNetServer.Networking
                         handler.Invoke(this, header.Token, stream);
                     else
                     {
-                        Log.outError(LogFilter.ServiceProtobuf, $"{GetClientInfo()} tried to call not implemented methodId: {header.MethodId} for servicehash: {header.ServiceHash}");
+                        Log.outError(LogFilter.ServiceProtobuf, 
+                            $"{GetClientInfo()} tried to call not implemented methodId: " +
+                            $"{header.MethodId} for servicehash: {header.ServiceHash}");
+
                         SendResponse(header.Token, BattlenetRpcErrorCode.RpcNotImplemented);
                     }
                 }
@@ -258,7 +261,7 @@ namespace BNetServer.Networking
         public string DisplayName;
         public uint UnbanDate;
         public bool IsBanned;
-        public bool IsPermanenetlyBanned;
+        public bool IsPermanentlyBanned;
         public AccountTypes SecurityLevel;
 
         public Dictionary<uint, byte> CharacterCounts;
@@ -269,8 +272,8 @@ namespace BNetServer.Networking
             Id = fields.Read<int>(startColumn + 0);
             Name = fields.Read<string>(startColumn + 1);
             UnbanDate = fields.Read<uint>(startColumn + 2);
-            IsPermanenetlyBanned = fields.Read<int>(startColumn + 3) != 0;
-            IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;
+            IsPermanentlyBanned = fields.Read<int>(startColumn + 3) != 0;
+            IsBanned = IsPermanentlyBanned || UnbanDate > Time.UnixTime;
             SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 4);
 
             int hashPos = Name.IndexOf('#');

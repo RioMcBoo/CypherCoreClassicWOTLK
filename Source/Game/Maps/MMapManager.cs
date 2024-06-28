@@ -37,7 +37,7 @@ namespace Game
             string filename = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
             if (!File.Exists(filename))
             {
-                Log.outError(LogFilter.Maps, "Could not open mmap file {0}", filename);
+                Log.outError(LogFilter.Maps, $"Could not open mmap file {filename}");
                 return false;
             }
 
@@ -55,11 +55,14 @@ namespace Game
             Detour.dtNavMesh mesh = new();
             if (Detour.dtStatusFailed(mesh.init(Params)))
             {
-                Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
+                Log.outError(LogFilter.Maps, 
+                    $"MMAP:loadMapData: Failed to initialize dtNavMesh " +
+                    $"for mmap {mapId:D4} from file {filename}");
                 return false;
             }
 
-            Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
+            Log.outInfo(LogFilter.Maps, 
+                $"MMAP:loadMapData: Loaded {mapId:D4}.mmap");
 
             // store inside our map list
             loadedMMaps[mapId] = new MMapData(mesh);
@@ -96,7 +99,8 @@ namespace Game
 
             if (!File.Exists(fileName))
             { 
-                Log.outDebug(LogFilter.Maps, "MMAP:loadMap: Could not open mmtile file '{0}'", fileName);
+                Log.outDebug(LogFilter.Maps, 
+                    $"MMAP:loadMap: Could not open mmtile file '{fileName}'");
                 return false;
             }
 
@@ -104,13 +108,16 @@ namespace Game
             MmapTileHeader fileHeader = reader.Read<MmapTileHeader>();
             if (fileHeader.mmapMagic != MapConst.mmapMagic)
             {
-                Log.outError(LogFilter.Maps, "MMAP:loadMap: Bad header in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
+                Log.outError(LogFilter.Maps, 
+                    $"MMAP:loadMap: Bad header in mmap {mapId:D4}{x:D2}{y:D2}.mmtile");
                 return false;
             }
             if (fileHeader.mmapVersion != MapConst.mmapVersion)
             {
-                Log.outError(LogFilter.Maps, "MMAP:loadMap: {0:D4}{1:D2}{2:D2}.mmtile was built with generator v{3}, expected v{4}",
-                    mapId, x, y, fileHeader.mmapVersion, MapConst.mmapVersion);
+                Log.outError(LogFilter.Maps, 
+                    $"MMAP:loadMap: {mapId:D4}{x:D2}{y:D2}.mmtile " +
+                    $"was built with generator v{fileHeader.mmapVersion}, " +
+                    $"expected v{MapConst.mmapVersion}");
                 return false;
             }
 
@@ -124,11 +131,14 @@ namespace Game
             {
                 mmap.loadedTileRefs.Add(packedGridPos, tileRef);
                 ++loadedTiles;
-                Log.outInfo(LogFilter.Maps, "MMAP:loadMap: Loaded mmtile {0:D4}[{1:D2}, {2:D2}]", mapId, x, y);
+                Log.outInfo(LogFilter.Maps, 
+                    $"MMAP:loadMap: Loaded mmtile {mapId:D4}[{x:D2}, {y:D2}]");
                 return true;
             }
 
-            Log.outError(LogFilter.Maps, "MMAP:loadMap: Could not load {0:D4}{1:D2}{2:D2}.mmtile into navmesh", mapId, x, y);
+            Log.outError(LogFilter.Maps, 
+                $"MMAP:loadMap: Could not load {mapId:D4}{x:D2}{y:D2}.mmtile into navmesh");
+
             return false;
         }
 
@@ -145,11 +155,16 @@ namespace Game
             Detour.dtNavMeshQuery query = new();
             if (Detour.dtStatusFailed(query.init(mmap.navMesh, 1024)))
             {
-                Log.outError(LogFilter.Maps, $"MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {instanceMapId:D4} instanceId {instanceId}");
+                Log.outError(LogFilter.Maps, 
+                    $"MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery " +
+                    $"for mapId {instanceMapId:D4} instanceId {instanceId}");
                 return false;
             }
 
-            Log.outDebug(LogFilter.Maps, $"MMAP.GetNavMeshQuery: created dtNavMeshQuery for mapId {instanceMapId:D4} instanceId {instanceId}");
+            Log.outDebug(LogFilter.Maps, 
+                $"MMAP.GetNavMeshQuery: created dtNavMeshQuery " +
+                $"for mapId {instanceMapId:D4} instanceId {instanceId}");
+
             mmap.navMeshQueries.Add((instanceMapId, instanceId), query);
             return true;
         }
@@ -161,7 +176,10 @@ namespace Game
             if (mmap == null)
             {
                 // file may not exist, therefore not loaded
-                Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh map. {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
+                Log.outDebug(LogFilter.Maps, 
+                    $"MMAP:unloadMap: Asked to unload not loaded navmesh map. " +
+                    $"{mapId:D4}{x:D2}{y:D2}.mmtile");
+
                 return false;
             }
 
@@ -170,7 +188,10 @@ namespace Game
             if (!mmap.loadedTileRefs.ContainsKey(packedGridPos))
             {
                 // file may not exist, therefore not loaded
-                Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh tile. {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
+                Log.outDebug(LogFilter.Maps, 
+                    $"MMAP:unloadMap: Asked to unload not loaded navmesh tile. " +
+                    $"{mapId:D4}{x:D2}{y:D2}.mmtile");
+
                 return false;
             }
 
@@ -182,14 +203,17 @@ namespace Game
                 // this is technically a memory leak
                 // if the grid is later reloaded, dtNavMesh.addTile will return error but no extra memory is used
                 // we cannot recover from this error - assert out
-                Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
+                Log.outError(LogFilter.Maps, 
+                    $"MMAP:unloadMap: Could not unload " +
+                    $"{mapId:D4}{x:D2}{y:D2}.mmtile from navmesh");
                 Cypher.Assert(false);
             }
             else
             {
                 mmap.loadedTileRefs.Remove(packedGridPos);
                 --loadedTiles;
-                Log.outInfo(LogFilter.Maps, "MMAP:unloadMap: Unloaded mmtile {0:D4}[{1:D2}, {2:D2}] from {3:D4}", mapId, x, y, mapId);
+                Log.outInfo(LogFilter.Maps, 
+                    $"MMAP:unloadMap: Unloaded mmtile {mapId:D4}[{x:D2}, {y:D2}] from {mapId:D4}");
                 return true;
             }
 
@@ -201,7 +225,8 @@ namespace Game
             if (!loadedMMaps.ContainsKey(mapId))
             {
                 // file may not exist, therefore not loaded
-                Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh map {0:D4}", mapId);
+                Log.outDebug(LogFilter.Maps, 
+                    $"MMAP:unloadMap: Asked to unload not loaded navmesh map {mapId:D4}");
                 return false;
             }
 
@@ -212,16 +237,20 @@ namespace Game
                 uint x = (i.Key >> 16) & 0x0000FFFF;
                 uint y = i.Key & 0x0000FFFF;
                 if (Detour.dtStatusFailed(mmap.navMesh.removeTile(i.Value, out _)))
-                    Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
+                {
+                    Log.outError(LogFilter.Maps,
+                        $"MMAP:unloadMap: Could not unload {mapId:D4}{x:D2}{y:D2}.mmtile from navmesh");
+                }
                 else
                 {
                     --loadedTiles;
-                    Log.outInfo(LogFilter.Maps, "MMAP:unloadMap: Unloaded mmtile {0:D4} [{1:D2}, {2:D2}] from {3:D4}", mapId, x, y, mapId);
+                    Log.outInfo(LogFilter.Maps, 
+                        $"MMAP:unloadMap: Unloaded mmtile {mapId:D4} [{x:D2}, {y:D2}] from {mapId:D4}");
                 }
             }
 
             loadedMMaps.Remove(mapId);
-            Log.outInfo(LogFilter.Maps, "MMAP:unloadMap: Unloaded {0:D4}.mmap", mapId);
+            Log.outInfo(LogFilter.Maps, $"MMAP:unloadMap: Unloaded {mapId:D4}.mmap");
 
             return true;
         }
@@ -233,18 +262,22 @@ namespace Game
             if (mmap == null)
             {
                 // file may not exist, therefore not loaded
-                Log.outDebug(LogFilter.Maps, $"MMAP:unloadMapInstance: Asked to unload not loaded navmesh map {meshMapId}");
+                Log.outDebug(LogFilter.Maps, 
+                    $"MMAP:unloadMapInstance: Asked to unload not loaded navmesh map {meshMapId}");
                 return false;
             }
 
             if (!mmap.navMeshQueries.ContainsKey((instanceMapId, instanceId)))
             {
-                Log.outDebug(LogFilter.Maps, $"MMAP:unloadMapInstance: Asked to unload not loaded dtNavMeshQuery mapId {instanceMapId} instanceId {instanceId}");
+                Log.outDebug(LogFilter.Maps, 
+                    $"MMAP:unloadMapInstance: Asked to unload not loaded dtNavMeshQuery " +
+                    $"mapId {instanceMapId} instanceId {instanceId}");
                 return false;
             }
 
             mmap.navMeshQueries.Remove((instanceMapId, instanceId));
-            Log.outInfo(LogFilter.Maps, $"MMAP:unloadMapInstance: Unloaded mapId {instanceMapId} instanceId {instanceId}");
+            Log.outInfo(LogFilter.Maps, 
+                $"MMAP:unloadMapInstance: Unloaded mapId {instanceMapId} instanceId {instanceId}");
 
             return true;
         }

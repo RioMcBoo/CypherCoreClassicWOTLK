@@ -182,7 +182,10 @@ namespace Game.AI
         public TurretAI(Creature creature) : base(creature)
         {
             if (creature.m_spells[0] == 0)
-                Log.outError(LogFilter.Server, $"TurretAI set for creature with spell1=0. AI will do nothing ({creature.GetGUID()})");
+            {
+                Log.outError(LogFilter.Server, 
+                    $"TurretAI set for creature with spell1=0. AI will do nothing ({creature.GetGUID()})");
+            }
 
             var spellInfo = Global.SpellMgr.GetSpellInfo(creature.m_spells[0], creature.GetMap().GetDifficultyID());
             _minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;

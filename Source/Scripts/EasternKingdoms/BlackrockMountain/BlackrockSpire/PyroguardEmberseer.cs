@@ -232,8 +232,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             // Had to do this because CallForHelp will ignore any npcs without Los
             List<Creature> creatureList = me.GetCreatureListWithEntryInGrid(CreaturesIds.BlackhandIncarcerator, 60.0f);
             foreach (var creature in creatureList)
+            {
                 if (creature != null)
                     DoZoneInCombat(creature);    // GetAI().AttackStart(me.GetVictim());
+            }
 
             _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16), task =>
             {

@@ -87,11 +87,16 @@ namespace Game.Spells
                 _slot = slot;
                 GetTarget().SetVisibleAura(this);
                 _needClientUpdate = true;
-                Log.outDebug(LogFilter.Spells, "Aura: {0} Effect: {1} put to unit visible auras slot: {2}", GetBase().GetId(), GetEffectMask(), slot);
+                Log.outDebug(LogFilter.Spells,
+                    $"Aura: {GetBase().GetId()} Effect: {GetEffectMask()} " +
+                    $"put to unit visible auras slot: {slot}");
             }
             else
-                Log.outError(LogFilter.Spells, "Aura: {0} Effect: {1} could not find empty unit visible slot", GetBase().GetId(), GetEffectMask());
-
+            {
+                Log.outError(LogFilter.Spells,
+                    $"Aura: {GetBase().GetId()} Effect: {GetEffectMask()} " +
+                    $"could not find empty unit visible slot");
+            }
 
             _InitFlags(caster, effMask);
         }
@@ -149,8 +154,13 @@ namespace Game.Spells
                 _flags |= AuraFlags.Scalable;
 
             if (_flags.HasFlag(AuraFlags.Positive))
-                if (!GetBase().GetSpellInfo().IsPassive() && !GetBase().GetSpellInfo().HasAttribute(SpellAttr1.NoAuraIcon) && GetBase().GetOwner().GetGUID() == GetTarget().GetGUID())
+            {
+                if (!GetBase().GetSpellInfo().IsPassive() && !GetBase().GetSpellInfo().HasAttribute(SpellAttr1.NoAuraIcon) 
+                    && GetBase().GetOwner().GetGUID() == GetTarget().GetGUID())
+                {
                     _flags |= AuraFlags.Cancelable;
+                }
+            }
 
             if (GetBase().GetSpellInfo().IsPassive())
                 _flags |= AuraFlags.Passive;
@@ -161,13 +171,18 @@ namespace Game.Spells
             AuraEffect aurEff = GetBase().GetEffect(effIndex);
             if (aurEff == null)
             {
-                Log.outError(LogFilter.Spells, "Aura {0} has no effect at effectIndex {1} but _HandleEffect was called", GetBase().GetSpellInfo().Id, effIndex);
+                Log.outError(LogFilter.Spells, 
+                    $"Aura {GetBase().GetSpellInfo().Id} has no effect at effectIndex {effIndex} " +
+                    $"but _HandleEffect was called");
                 return;
             }
             Cypher.Assert(aurEff != null);
             Cypher.Assert(HasEffect(effIndex) == (!apply));
             Cypher.Assert(Convert.ToBoolean((1 << effIndex) & _effectsToApply));
-            Log.outDebug(LogFilter.Spells, "AuraApplication._HandleEffect: {0}, apply: {1}: amount: {2}", aurEff.GetAuraType(), apply, aurEff.GetAmount());
+
+            Log.outDebug(LogFilter.Spells, 
+                $"AuraApplication._HandleEffect: {aurEff.GetAuraType()}, " +
+                $"apply: {apply}: amount: {aurEff.GetAmount()}");
 
             if (apply)
             {
@@ -360,8 +375,10 @@ namespace Game.Spells
             m_lastProcSuccessTime = (DateTime.Now - TimeSpan.FromSeconds(120));
 
             foreach (SpellPowerRecord power in m_spellInfo.PowerCosts)
+            {
                 if (power != null && (power.ManaPerSecond != 0 || power.PowerPctPerSecond > 0.0f))
                     m_periodicCosts.Add(power);
+            }
 
             if (!m_periodicCosts.Empty())
                 m_timeCla = 1 * Time.InMilliseconds;
@@ -460,8 +477,9 @@ namespace Game.Spells
             // @todo Figure out why this happens
             if (app == null)
             {
-                Log.outError(LogFilter.Spells, "Aura._UnapplyForTarget, target: {0}, caster: {1}, spell: {2} was not found in owners application map!",
-                target.GetGUID().ToString(), caster != null ? caster.GetGUID().ToString() : "", auraApp.GetBase().GetSpellInfo().Id);
+                Log.outError(LogFilter.Spells, 
+                    $"Aura._UnapplyForTarget, target: {target.GetGUID()}, caster: {(caster != null ? caster.GetGUID().ToString() : "")}, " +
+                    $"spell: {auraApp.GetBase().GetSpellInfo().Id} was not found in owners application map!");
                 Cypher.Assert(false);
             }
 
@@ -544,6 +562,7 @@ namespace Game.Spells
                     targets.Remove(app.Value.GetTarget());
                 }
             }
+
             // register auras for units
             foreach (var unit in targets.Keys.ToList())
             {
@@ -554,8 +573,10 @@ namespace Game.Spells
                 {
                     // check target immunities (for new targets)
                     foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
+                    {
                         if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
                             targets[unit] &= ~(uint)(1 << spellEffectInfo.EffectIndex);
+                    }
 
                     if (targets[unit] == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
                         addUnit = false;
@@ -597,9 +618,11 @@ namespace Game.Spells
                     if (!m_owner.IsSelfOrInSameMap(unit))
                     {
                         // @todo There is a crash caused by shadowfiend load addon
-                        Log.outFatal(LogFilter.Spells, "Aura {0}: Owner {1} (map {2}) is not in the same map as target {3} (map {4}).", GetSpellInfo().Id,
-                            m_owner.GetName(), m_owner.IsInWorld ? m_owner.GetMap().GetId() : -1,
-                            unit.GetName(), unit.IsInWorld ? unit.GetMap().GetId() : -1);
+                        Log.outFatal(LogFilter.Spells, 
+                            $"Aura {GetSpellInfo().Id}: " +
+                            $"Owner {m_owner.GetName()} (map {(m_owner.IsInWorld ? m_owner.GetMap().GetId() : -1)}) " +
+                            $"is not in the same map as " +
+                            $"target {unit.GetName()} (map {(unit.IsInWorld ? unit.GetMap().GetId() : -1)}).");
                     }
 
                     if (aurApp != null)
@@ -772,7 +795,9 @@ namespace Game.Spells
 
             // IsPermanent() checks max duration (which we are supposed to calculate here)
             if (maxDuration != -1 && modOwner != null)
+            {
                 modOwner.ApplySpellMod(spellInfo, SpellModOp.Duration, ref maxDuration);
+            }
 
             return maxDuration;
         }
@@ -875,6 +900,7 @@ namespace Game.Spells
 
                 SetCharges((byte)charges);
             }
+
             return false;
         }
 
@@ -906,16 +932,22 @@ namespace Game.Spells
 
             List<AuraApplication> applications = GetApplicationList();
             foreach (var aurApp in applications)
+            {
                 if (!aurApp.HasRemoveMode())
                     HandleAuraSpecificMods(aurApp, caster, false, true);
+            }
 
             foreach (AuraEffect aurEff in GetAuraEffects())
+            {
                 if (aurEff != null)
                     aurEff.ChangeAmount(aurEff.CalculateAmount(caster), false, true);
+            }
 
             foreach (var aurApp in applications)
+            {
                 if (!aurApp.HasRemoveMode())
                     HandleAuraSpecificMods(aurApp, caster, true, true);
+            }
 
             SetNeedClientUpdateForTargets();
         }
@@ -935,6 +967,7 @@ namespace Game.Spells
                 if (modOwner != null)
                     modOwner.ApplySpellMod(m_spellInfo, SpellModOp.MaxAuraStacks, ref maxStackAmount);
             }
+
             return maxStackAmount;
         }
 
@@ -971,6 +1004,7 @@ namespace Game.Spells
                 // reset charges
                 SetCharges(CalcMaxCharges());
             }
+
             SetNeedClientUpdateForTargets();
             return false;
         }
@@ -994,6 +1028,7 @@ namespace Game.Spells
                 if (HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.IsAreaAuraEffect())
                     return true;
             }
+
             return false;
         }
 
@@ -1146,8 +1181,10 @@ namespace Game.Spells
         public bool HasEffectType(AuraType type)
         {
             foreach (var eff in GetAuraEffects())
+            {
                 if (eff != null && HasEffect(eff.GetEffIndex()) && eff.GetAuraType() == type)
                     return true;
+            }
 
             return false;
         }
@@ -1175,16 +1212,20 @@ namespace Game.Spells
             Cypher.Assert(!IsRemoved());
             Unit caster = GetCaster();
             foreach (AuraEffect effect in GetAuraEffects())
+            {
                 if (effect != null && !IsRemoved())
                     effect.RecalculateAmount(caster);
+        }
         }
 
         public void HandleAllEffects(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             Cypher.Assert(!IsRemoved());
             foreach (AuraEffect effect in GetAuraEffects())
+            {
                 if (effect != null && !IsRemoved())
                     effect.HandleEffect(aurApp, mode, apply);
+        }
         }
 
         public List<AuraApplication> GetApplicationList()
@@ -1260,11 +1301,14 @@ namespace Game.Spells
                             if (spell < 0)
                                 target.RemoveAurasDueToSpell(-spell);
                             else if (removeMode != AuraRemoveMode.Death)
+                            {
                                 target.CastSpell(target, spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                                     .SetOriginalCaster(GetCasterGUID())
                                     .SetOriginalCastId(GetCastId()));
                         }
                     }
+                    }
+
                     spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Aura, GetId());
                     if (spellTriggered != null)
                     {
@@ -1511,6 +1555,7 @@ namespace Game.Spells
             {
                 if (sameCaster && m_spellInfo.Id == existingSpellInfo.Id)
                     return false;
+
                 return true;
             }
 
@@ -1595,6 +1640,7 @@ namespace Game.Spells
                                 break;
                         }
                     }
+
                     return false;
                 }
 
@@ -1618,8 +1664,10 @@ namespace Game.Spells
             }
 
             if (HasEffectType(AuraType.ShowConfirmationPrompt) || HasEffectType(AuraType.ShowConfirmationPromptWithDifficulty))
+            {
                 if (existingAura.HasEffectType(AuraType.ShowConfirmationPrompt) || existingAura.HasEffectType(AuraType.ShowConfirmationPromptWithDifficulty))
                     return false;
+            }
 
             // spell of same spell rank chain
             if (m_spellInfo.IsRankOf(existingSpellInfo))
@@ -1627,9 +1675,11 @@ namespace Game.Spells
                 // don't allow passive area auras to stack
                 if (m_spellInfo.IsMultiSlotAura() && !IsArea())
                     return true;
+
                 if (!GetCastItemGUID().IsEmpty() && !existingAura.GetCastItemGUID().IsEmpty())
                     if (GetCastItemGUID() != existingAura.GetCastItemGUID() && m_spellInfo.HasAttribute(SpellCustomAttributes.EnchantProc))
                         return true;
+
                 // same spell with same caster should not stack
                 return false;
             }
@@ -1752,8 +1802,10 @@ namespace Game.Spells
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
                 if (eventSpellInfo != null)
+                {
                     if (eventSpellInfo.HasAttribute(SpellCustomAttributes.DontBreakStealth))
                         return 0;
+            }
             }
 
             // check if we have charges to proc with
@@ -1766,9 +1818,11 @@ namespace Game.Spells
                 {
                     Spell eventSpell = eventInfo.GetProcSpell();
                     if (eventSpell != null)
+                    {
                         if (!eventSpell.m_appliedMods.Contains(this))
                             return 0;
                 }
+            }
             }
 
             // check proc cooldown
@@ -1792,9 +1846,13 @@ namespace Game.Spells
             // At least one effect has to pass checks to proc aura
             uint procEffectMask = aurApp.GetEffectMask();
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+            {
                 if ((procEffectMask & (1u << i)) != 0)
+                {
                     if ((procEntry.DisableEffectsMask & (1u << i)) != 0 || !GetEffect(i).CheckEffectProc(aurApp, eventInfo))
                         procEffectMask &= ~(1u << i);
+                }
+            }
 
             if (procEffectMask == 0)
                 return 0;
@@ -1839,16 +1897,22 @@ namespace Game.Spells
             }
 
             if (m_spellInfo.HasAttribute(SpellAttr3.OnlyProcOutdoors))
+            {
                 if (!target.IsOutdoors())
                     return 0;
+            }
 
             if (m_spellInfo.HasAttribute(SpellAttr3.OnlyProcOnCaster))
+            {
                 if (target.GetGUID() != GetCasterGUID())
                     return 0;
+            }
 
             if (!m_spellInfo.HasAttribute(SpellAttr4.AllowProcWhileSitting))
+            {
                 if (!target.IsStandState())
                     return 0;
+            }
 
             bool success = RandomHelper.randChance(CalcProcChance(procEntry, eventInfo));
 
@@ -1940,7 +2004,10 @@ namespace Game.Spells
             m_loadedScripts = Global.ScriptMgr.CreateAuraScripts(m_spellInfo.Id, this);
             foreach (var script in m_loadedScripts)
             {
-                Log.outDebug(LogFilter.Spells, "Aura.LoadScripts: Script `{0}` for aura `{1}` is loaded now", script.GetScriptName(), m_spellInfo.Id);
+                Log.outDebug(LogFilter.Spells, 
+                    $"Aura.LoadScripts: Script `{script.GetScriptName()}` " +
+                    $"for aura `{m_spellInfo.Id}` is loaded now");
+                
                 script.Register();
             }
         }
@@ -1960,6 +2027,7 @@ namespace Game.Spells
 
                 auraScript._FinishScriptCall();
             }
+
             return result;
         }
 
@@ -1997,8 +2065,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectApply, aurApp);
 
                 foreach (var eff in auraScript.OnEffectApply)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, mode);
+                }
 
                 if (!preventDefault)
                     preventDefault = auraScript._IsDefaultActionPrevented();
@@ -2017,14 +2087,17 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectRemove, aurApp);
 
                 foreach (var eff in auraScript.OnEffectRemove)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, mode);
+                }
 
                 if (!preventDefault)
                     preventDefault = auraScript._IsDefaultActionPrevented();
 
                 auraScript._FinishScriptCall();
             }
+
             return preventDefault;
         }
 
@@ -2035,8 +2108,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterApply, aurApp);
 
                 foreach (var eff in auraScript.AfterEffectApply)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, mode);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2049,8 +2124,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterRemove, aurApp);
 
                 foreach (var eff in auraScript.AfterEffectRemove)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, mode);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2064,8 +2141,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectPeriodic, aurApp);
 
                 foreach (var eff in auraScript.OnEffectPeriodic)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff);
+                }
 
                 if (!preventDefault)
                     preventDefault = auraScript._IsDefaultActionPrevented();
@@ -2083,8 +2162,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectUpdatePeriodic);
 
                 foreach (var eff in auraScript.OnEffectUpdatePeriodic)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2112,8 +2193,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectCalcPeriodic);
 
                 foreach (var eff in auraScript.DoEffectCalcPeriodic)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, ref isPeriodic, ref amplitude);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2126,8 +2209,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectCalcSpellmod);
 
                 foreach (var eff in auraScript.DoEffectCalcSpellMod)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, ref spellMod);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2139,8 +2224,10 @@ namespace Game.Spells
             {
                 loadedScript._PrepareScriptCall(AuraScriptHookType.EffectCalcCritChance, aurApp);
                 foreach (var hook in loadedScript.DoEffectCalcCritChance)
+                {
                     if (hook.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         hook.Call(aurEff, victim, ref critChance);
+                }
 
                 loadedScript._FinishScriptCall();
             }
@@ -2152,8 +2239,10 @@ namespace Game.Spells
             {
                 script._PrepareScriptCall(AuraScriptHookType.EffectCalcDamageAndHealing, aurApp);
                 foreach (var effectCalcDamageAndHealing in script.DoEffectCalcDamageAndHealing)
+                {
                     if (effectCalcDamageAndHealing.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         effectCalcDamageAndHealing.Call(aurEff, victim, ref damageOrHealing, ref flatMod, ref pctMod);
+                }
 
                 script._FinishScriptCall();
             }
@@ -2166,8 +2255,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
 
                 foreach (var eff in auraScript.OnEffectAbsorb)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                }
 
                 defaultPrevented = auraScript._IsDefaultActionPrevented();
                 auraScript._FinishScriptCall();
@@ -2181,8 +2272,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorb, aurApp);
 
                 foreach (var eff in auraScript.AfterEffectAbsorb)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2194,8 +2287,10 @@ namespace Game.Spells
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
                 foreach (var eff in auraScript.OnEffectAbsorbHeal)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, healInfo, ref absorbAmount);
+                }
 
                 defaultPrevented = auraScript._IsDefaultActionPrevented();
                 auraScript._FinishScriptCall();
@@ -2208,8 +2303,10 @@ namespace Game.Spells
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorb, aurApp);
                 foreach (var eff in auraScript.AfterEffectAbsorbHeal)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, healInfo, ref absorbAmount);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2222,8 +2319,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectManaShield, aurApp);
 
                 foreach (var eff in auraScript.OnEffectManaShield)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2236,8 +2335,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterManaShield, aurApp);
 
                 foreach (var eff in auraScript.AfterEffectManaShield)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2250,8 +2351,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectSplit, aurApp);
 
                 foreach (var eff in auraScript.OnEffectSplit)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, dmgInfo, splitAmount);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2343,8 +2446,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.CheckEffectProc, aurApp);
 
                 foreach (var hook in auraScript.DoCheckEffectProc)
+                {
                     if (hook.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         result &= hook.Call(aurEff, eventInfo);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2360,14 +2465,17 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectProc, aurApp);
 
                 foreach (var eff in auraScript.OnEffectProc)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, eventInfo);
+                }
 
                 if (!preventDefault)
                     preventDefault = auraScript._IsDefaultActionPrevented();
 
                 auraScript._FinishScriptCall();
             }
+
             return preventDefault;
         }
 
@@ -2378,8 +2486,10 @@ namespace Game.Spells
                 auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterProc, aurApp);
 
                 foreach (var eff in auraScript.AfterEffectProc)
+                {
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, eventInfo);
+                }
 
                 auraScript._FinishScriptCall();
             }
@@ -2387,7 +2497,10 @@ namespace Game.Spells
 
         public virtual string GetDebugInfo()
         {
-            return $"Id: {GetId()} Name: '{GetSpellInfo().SpellName[Global.WorldMgr.GetDefaultDbcLocale()]}' Caster: {GetCasterGUID()}\nOwner: {(GetOwner() != null ? GetOwner().GetDebugInfo() : "NULL")}";
+            return 
+                $"Id: {GetId()} Name: '{GetSpellInfo().SpellName[Global.WorldMgr.GetDefaultDbcLocale()]}' " +
+                $"Caster: {GetCasterGUID()}\n" +
+                $"Owner: {(GetOwner() != null ? GetOwner().GetDebugInfo() : "NULL")}";
         }
         #endregion
 
@@ -2401,11 +2514,13 @@ namespace Game.Spells
         public int GetCastItemLevel() { return m_castItemLevel; }
         public SpellCastVisual GetSpellVisual() { return m_spellVisual; }
         public WorldObject GetOwner() { return m_owner; }
+
         public Unit GetUnitOwner()
         {
             Cypher.Assert(GetAuraType() == AuraObjectType.Unit);
             return m_owner.ToUnit();
         }
+
         public DynamicObject GetDynobjOwner()
         {
             Cypher.Assert(GetAuraType() == AuraObjectType.DynObj);
@@ -2432,6 +2547,7 @@ namespace Game.Spells
             Unit caster = GetCaster();
             UpdateTargetMap(caster, false);
         }
+
         public void ApplyForTargets()
         {
             Unit caster = GetCaster();
@@ -2462,6 +2578,7 @@ namespace Game.Spells
                 if (modOwner != null)
                     modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcCharges, ref maxProcCharges);
             }
+
             return (byte)maxProcCharges;
         }
 
@@ -2492,8 +2609,10 @@ namespace Game.Spells
         {
             uint effMask = 0;
             foreach (AuraEffect aurEff in GetAuraEffects())
+            {
                 if (aurEff != null)
                     effMask |= (uint)(1 << aurEff.GetEffIndex());
+            }
 
             return effMask;
         }
@@ -2544,6 +2663,7 @@ namespace Game.Spells
             }
             return (effMask & availableEffectMask);
         }
+
         public static Aura TryRefreshStackOrCreate(AuraCreateInfo createInfo, bool updateEffectMask = true)
         {
             Cypher.Assert(createInfo.Caster != null || !createInfo.CasterGUID.IsEmpty());
@@ -2619,10 +2739,14 @@ namespace Game.Spells
             // check if aura can be owned by owner
             Unit ownerUnit = createInfo.GetOwner().ToUnit();
             if (ownerUnit != null)
+            {
                 if (!ownerUnit.IsInWorld || ownerUnit.IsDuringRemoveFromWorld())
+                {
                     // owner not in world so don't allow to own not self casted single target auras
                     if (createInfo.CasterGUID != ownerUnit.GetGUID() && createInfo.GetSpellInfo().IsSingleTarget())
                         return null;
+                }
+            }
 
             Aura aura;
             switch (createInfo.GetOwner().GetTypeId())
@@ -2723,6 +2847,7 @@ namespace Game.Spells
             if (m_AuraDRGroup != DiminishingGroup.None)
                 target.ApplyDiminishingAura(m_AuraDRGroup, true);
         }
+
         public override void _UnapplyForTarget(Unit target, Unit caster, AuraApplication aurApp)
         {
             base._UnapplyForTarget(target, caster, aurApp);
@@ -2731,10 +2856,12 @@ namespace Game.Spells
             if (m_AuraDRGroup != DiminishingGroup.None)
                 target.ApplyDiminishingAura(m_AuraDRGroup, false);
         }
+
         public override void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             if (IsRemoved())
                 return;
+
             GetUnitOwner().RemoveOwnedAura(this, removeMode);
         }
 
@@ -2800,16 +2927,24 @@ namespace Game.Spells
                         break;
                     case SpellEffectName.ApplyAreaAuraPet:
                         if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
+                        { 
                             units.Add(GetUnitOwner());
+                        }
+
                         goto case SpellEffectName.ApplyAreaAuraOwner;
                     /* fallthrough */
                     case SpellEffectName.ApplyAreaAuraOwner:
                     {
                         Unit owner = GetUnitOwner().GetCharmerOrOwner();
                         if (owner != null)
+                        {
                             if (GetUnitOwner().IsWithinDistInMap(owner, radius))
+                            {
                                 if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, refe, condList))
                                     units.Add(owner);
+                            }
+                        }
+
                         break;
                     }
                     case SpellEffectName.ApplyAuraOnPet:
@@ -2897,6 +3032,7 @@ namespace Game.Spells
         {
             if (IsRemoved())
                 return;
+
             _Remove(removeMode);
         }
 

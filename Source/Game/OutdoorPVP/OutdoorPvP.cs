@@ -31,11 +31,12 @@ namespace Game.PvP
 
         public virtual void HandlePlayerLeaveZone(Player player, int zone)
         {
-            // remove the world state information from the player (we can't keep everyone up to date, so leave out those who are not in the concerning zones)
+            // remove the world state information from the player (we can't keep everyone up to date,
+            // so leave out those who are not in the concerning zones)
             if (!player.GetSession().PlayerLogout())
                 SendRemoveWorldStates(player);
             m_players[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
-            Log.outDebug(LogFilter.Outdoorpvp, "Player {0} left an outdoorpvp zone", player.GetName());
+            Log.outDebug(LogFilter.Outdoorpvp, $"Player {player.GetName()} left an outdoorpvp zone");
         }
 
         public virtual void HandlePlayerResurrects(Player player, int zone) { }
@@ -89,8 +90,10 @@ namespace Game.PvP
         public virtual bool HandleCustomSpell(Player player, int spellId, GameObject go)
         {
             foreach (var pair in m_capturePoints)
+            {
                 if (pair.Value.HandleCustomSpell(player, spellId, go))
                     return true;
+            }
 
             return false;
         }
@@ -98,8 +101,10 @@ namespace Game.PvP
         public virtual bool HandleOpenGo(Player player, GameObject go)
         {
             foreach (var pair in m_capturePoints)
+            {
                 if (pair.Value.HandleOpenGo(player, go) >= 0)
                     return true;
+            }
 
             return false;
         }
@@ -107,8 +112,10 @@ namespace Game.PvP
         public virtual bool HandleDropFlag(Player player, int id)
         {
             foreach (var pair in m_capturePoints)
+            {
                 if (pair.Value.HandleDropFlag(player, id))
                     return true;
+            }
 
             return false;
         }
@@ -160,7 +167,11 @@ namespace Game.PvP
         public void TeamApplyBuff(int teamIndex, int spellId, int spellId2)
         {
             TeamCastSpell(teamIndex, spellId);
-            TeamCastSpell((teamIndex == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance), spellId2 != 0 ? -spellId2 : -spellId);
+
+            TeamCastSpell(
+                teamIndex == BattleGroundTeamId.Alliance 
+                ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance, 
+                spellId2 != 0 ? -spellId2 : -spellId);
         }
 
         public void SendDefenseMessage(int zoneId, int id)
@@ -266,6 +277,7 @@ namespace Game.PvP
         {
             if (!player.IsOutdoorPvPActive())
                 return false;
+
             return false;
         }
 

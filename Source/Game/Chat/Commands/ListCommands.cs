@@ -43,13 +43,18 @@ namespace Game.Chat.Commands
             if (handler.GetSession() != null)
             {
                 Player player = handler.GetSession().GetPlayer();
-                stmt = new PreparedStatement(String.Format("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM creature WHERE id = '{3}' ORDER BY order_ ASC LIMIT {4}",
-                                player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), creatureId, count));
+                stmt = new PreparedStatement(
+                    $"SELECT guid, position_x, position_y, position_z, map, (" +
+                    $"POW(position_x - '{player.GetPositionX()}', 2) + " +
+                    $"POW(position_y - '{player.GetPositionY()}', 2) + " +
+                    $"POW(position_z - '{player.GetPositionZ()}', 2)) AS order_ " +
+                    $"FROM creature WHERE id = '{creatureId}' ORDER BY order_ ASC LIMIT {count}");
             }
             else
             {
-                stmt = new PreparedStatement(String.Format("SELECT guid, position_x, position_y, position_z, map FROM creature WHERE id = '{0}' LIMIT {1}",
-                    creatureId, count));
+                stmt = new PreparedStatement(
+                    $"SELECT guid, position_x, position_y, position_z, map " +
+                    $"FROM creature WHERE id = '{creatureId}' LIMIT {count}");
             }
 
             SQLResult result2 = DB.World.Query(stmt);
@@ -328,7 +333,7 @@ namespace Game.Chat.Commands
 
                                 if (hasItem == 1)
                                 {
-                                    SQLResult result2 = DB.Characters.Query("SELECT item_guid FROM mail_items WHERE mail_id = '{0}'", messageId);
+                                    SQLResult result2 = DB.Characters.Query($"SELECT item_guid FROM mail_items WHERE mail_id = '{messageId}'");
                                     {
                                         if (!result2.IsEmpty())
                                         {
@@ -399,7 +404,7 @@ namespace Game.Chat.Commands
 
             uint objectCount = 0;
             {
-                SQLResult result = DB.World.Query("SELECT COUNT(guid) FROM gameobject WHERE id='{0}'", gameObjectId);
+                SQLResult result = DB.World.Query($"SELECT COUNT(guid) FROM gameobject WHERE id='{gameObjectId}'");
             
                 if (!result.IsEmpty())
                     objectCount = result.Read<uint>(0);
@@ -409,13 +414,19 @@ namespace Game.Chat.Commands
             if (handler.GetSession() != null)
             {
                 Player player = handler.GetSession().GetPlayer();
-                stmt = new PreparedStatement(string.Format("SELECT guid, position_x, position_y, position_z, map, id, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE id = '{3}' ORDER BY order_ ASC LIMIT {4}",
-                    player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), gameObjectId, count));
+                stmt = new PreparedStatement(
+                    $"SELECT guid, position_x, position_y, position_z, map, id, (" +
+                    $"POW(position_x - '{player.GetPositionX()}', 2) + " +
+                    $"POW(position_y - '{player.GetPositionY()}', 2) + " +
+                    $"POW(position_z - '{player.GetPositionZ()}', 2)) AS order_ " +
+                    $"FROM gameobject WHERE id = '{gameObjectId}' " +
+                    $"ORDER BY order_ ASC LIMIT {count}");
             }
             else
             {
-                stmt = new PreparedStatement(string.Format("SELECT guid, position_x, position_y, position_z, map, id FROM gameobject WHERE id = '{0}' LIMIT {1}",
-                    gameObjectId, count));
+                stmt = new PreparedStatement(
+                    $"SELECT guid, position_x, position_y, position_z, map, id " +
+                    $"FROM gameobject WHERE id = '{gameObjectId}' LIMIT {count}");
             }
 
             {
@@ -548,7 +559,8 @@ namespace Game.Chat.Commands
             Map map = player.GetMap();
             int mapId = map.GetId();
             bool showAll = map.IsBattlegroundOrArena() || map.IsDungeon();
-            handler.SendSysMessage($"Listing all spawn points in map {mapId} ({map.GetMapName()}){(showAll ? "" : " within 5000yd")}:");
+            handler.SendSysMessage(
+                $"Listing all spawn points in map {mapId} ({map.GetMapName()}){(showAll ? "" : " within 5000yd")}:");
 
             foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
             {
@@ -561,8 +573,15 @@ namespace Game.Chat.Commands
                     continue;
 
                 if (showAll || data.SpawnPoint.IsInDist2d(player, 5000.0f))
-                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({cTemp.Name}) | X: {data.SpawnPoint.GetPositionX():3} | Y: {data.SpawnPoint.GetPositionY():3} | Z: {data.SpawnPoint.GetPositionZ():3}");
+                {
+                    handler.SendSysMessage(
+                        $"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({cTemp.Name}) " +
+                        $"| X: {data.SpawnPoint.GetPositionX():3} " +
+                        $"| Y: {data.SpawnPoint.GetPositionY():3} " +
+                        $"| Z: {data.SpawnPoint.GetPositionZ():3}");
+                }
             }
+
             foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
             {
                 SpawnData data = pair.Value;
@@ -574,7 +593,13 @@ namespace Game.Chat.Commands
                     continue;
 
                 if (showAll || data.SpawnPoint.IsInDist2d(player, 5000.0f))
-                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({goTemp.name}) | X: {data.SpawnPoint.GetPositionX():3} | Y: {data.SpawnPoint.GetPositionY():3} | Z: {data.SpawnPoint.GetPositionZ():3}");
+                {
+                    handler.SendSysMessage(
+                        $"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({goTemp.name}) " +
+                        $"| X: {data.SpawnPoint.GetPositionX():3} " +
+                        $"| Y: {data.SpawnPoint.GetPositionY():3} " +
+                        $"| Z: {data.SpawnPoint.GetPositionZ():3}");
+                }
             }
             return true;
         }

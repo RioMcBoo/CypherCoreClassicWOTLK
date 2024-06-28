@@ -224,7 +224,10 @@ namespace Game.Chat.Commands
             if (ip.IsEmpty())
                 return false;
 
-            SQLResult result = DB.Login.Query("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '{0}'", ip);
+            SQLResult result = DB.Login.Query(
+                $"SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), " +
+                $"banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '{ip}'");
+
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.BaninfoNoip);
@@ -240,7 +243,11 @@ namespace Game.Chat.Commands
 
         static bool HandleBanInfoHelper(int accountId, string accountName, CommandHandler handler)
         {
-            SQLResult result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{0}' ORDER BY bandate ASC", accountId);
+            SQLResult result = DB.Login.Query(
+                $"SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, " +
+                $"unbandate, banreason, bannedby FROM account_banned " +
+                $"WHERE id = '{accountId}' ORDER BY bandate ASC");
+
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.BaninfoNoaccountban, accountName);
@@ -479,7 +486,10 @@ namespace Game.Chat.Commands
                 {
                     uint accountid = result.Read<uint>(0);
                     {
-                        SQLResult banResult = DB.Login.Query("SELECT account.username FROM account, account_banned WHERE account_banned.id='{0}' AND account_banned.id=account.id", accountid);
+                        SQLResult banResult = DB.Login.Query(
+                            $"SELECT account.username FROM account, account_banned " +
+                            $"WHERE account_banned.id='{accountid}' " +
+                            $"AND account_banned.id=account.id");
                     
                         if (!banResult.IsEmpty())
                         {

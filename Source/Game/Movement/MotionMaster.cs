@@ -97,7 +97,11 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Initialize(), MotionMasterDelayedActionType.Initialize));
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Initialize(), MotionMasterDelayedActionType.Initialize
+                    ));
+
                 return;
             }
 
@@ -138,8 +142,11 @@ namespace Game.Movement
             List<MovementGeneratorInformation> list = new();
 
             if (_defaultGenerator != null)
-                list.Add(new MovementGeneratorInformation(_defaultGenerator.GetMovementGeneratorType(), ObjectGuid.Empty, ""));
-
+            {
+                list.Add(
+                    new MovementGeneratorInformation(
+                        _defaultGenerator.GetMovementGeneratorType(), ObjectGuid.Empty, ""));
+            }
             foreach (var movement in _generators)
             {
                 MovementGeneratorType type = movement.GetMovementGeneratorType();
@@ -152,7 +159,11 @@ namespace Game.Movement
                         {
                             Unit target = followInformation.GetTarget();
                             if (target != null)
-                                list.Add(new MovementGeneratorInformation(type, target.GetGUID(), target.GetName()));
+                            {
+                                list.Add(
+                                    new MovementGeneratorInformation(
+                                        type, target.GetGUID(), target.GetName()));
+                            }
                             else
                                 list.Add(new MovementGeneratorInformation(type, ObjectGuid.Empty));
                         }
@@ -293,7 +304,8 @@ namespace Game.Movement
             if (HasFlag(MotionMasterFlags.InitializationPending | MotionMasterFlags.Initializing))
                 return;
 
-            Cypher.Assert(!Empty(), $"MotionMaster:Update: update called without Initializing! ({_owner.GetGUID()})");
+            Cypher.Assert(!Empty(), 
+                $"MotionMaster:Update: update called without Initializing! ({_owner.GetGUID()})");
 
             AddFlag(MotionMasterFlags.Update);
 
@@ -313,7 +325,8 @@ namespace Game.Movement
 
             if (!top.Update(_owner, diff))
             {
-                Cypher.Assert(top == GetCurrentMovementGenerator(), $"MotionMaster::Update: top was modified while updating! ({_owner.GetGUID()})");
+                Cypher.Assert(top == GetCurrentMovementGenerator(), 
+                    $"MotionMaster::Update: top was modified while updating! ({_owner.GetGUID()})");
 
                 // Since all the actions that modify any slot are delayed, this movement is guaranteed to be top
                 Pop(true, true); // Natural, and only, call to MovementInform
@@ -333,7 +346,12 @@ namespace Game.Movement
                 return;
 
             if (HasFlag(MotionMasterFlags.Delayed))
-                _delayedActions.Enqueue(new DelayedAction(() => Add(movement, slot), MotionMasterDelayedActionType.Add));
+            {
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Add(movement, slot), MotionMasterDelayedActionType.Add
+                    ));
+            }
             else
                 DirectAdd(movement, slot);
         }
@@ -345,7 +363,11 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Remove(movement, slot), MotionMasterDelayedActionType.Remove));
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Remove(movement, slot), MotionMasterDelayedActionType.Remove
+                    ));
+
                 return;
             }
 
@@ -377,7 +399,11 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Remove(type, slot), MotionMasterDelayedActionType.RemoveType));
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Remove(type, slot), MotionMasterDelayedActionType.RemoveType
+                    ));
+
                 return;
             }
 
@@ -407,7 +433,11 @@ namespace Game.Movement
         {
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Clear(), MotionMasterDelayedActionType.Clear));
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Clear(), MotionMasterDelayedActionType.Clear
+                    ));
+
                 return;
             }
 
@@ -422,7 +452,11 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Clear(slot), MotionMasterDelayedActionType.ClearSlot));
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Clear(slot), MotionMasterDelayedActionType.ClearSlot
+                    ));
+
                 return;
             }
 
@@ -446,7 +480,11 @@ namespace Game.Movement
         {
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Clear(mode), MotionMasterDelayedActionType.ClearMode));
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Clear(mode), MotionMasterDelayedActionType.ClearMode
+                    ));
+
                 return;
             }
 
@@ -461,7 +499,11 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Clear(priority), MotionMasterDelayedActionType.ClearPriority));
+                _delayedActions.Enqueue(
+                    new DelayedAction(() => 
+                    Clear(priority), MotionMasterDelayedActionType.ClearPriority
+                    ));
+
                 return;
             }
 
@@ -531,7 +573,9 @@ namespace Game.Movement
             Creature owner = _owner.ToCreature();
             if (owner == null)
             {
-                Log.outError(LogFilter.Movement, $"MotionMaster::MoveTargetedHome: '{_owner.GetGUID()}', attempted to move towards target home.");
+                Log.outError(LogFilter.Movement, 
+                    $"MotionMaster::MoveTargetedHome: '{_owner.GetGUID()}', " +
+                    $"attempted to move towards target home.");
                 return;
             }
 
@@ -550,7 +594,10 @@ namespace Game.Movement
                 Add(new RandomMovementGenerator(wanderDistance, duration), slot);
         }
 
-        public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active) { MoveFollow(target, dist, new ChaseAngle(angle), duration, slot); }
+        public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active) 
+        { 
+            MoveFollow(target, dist, new ChaseAngle(angle), duration, slot); 
+        }
 
         public void MoveFollow(Unit target, float dist, ChaseAngle angle, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active)
         {
@@ -561,7 +608,11 @@ namespace Game.Movement
             Add(new FollowMovementGenerator(target, dist, angle, duration), slot);
         }
 
-        public void MoveChase(Unit target, float dist, float angle = 0.0f) { MoveChase(target, new ChaseRange(dist), new ChaseAngle(angle)); }
+        public void MoveChase(Unit target, float dist, float angle = 0.0f) 
+        { 
+            MoveChase(target, new ChaseRange(dist), new ChaseAngle(angle)); 
+        }
+
         public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null)
         {
             // Ignore movement request if target not exist
@@ -762,7 +813,9 @@ namespace Game.Movement
 
         public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
-            Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
+            Log.outDebug(LogFilter.Server, 
+                $"Unit ({_owner.GetGUID()}) jump to point (X: {x} Y: {y} Z: {z})");
+
             if (speedXY < 0.01f)
                 return;
 
@@ -796,7 +849,10 @@ namespace Game.Movement
 
         public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
-            Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
+            Log.outDebug(LogFilter.Movement, 
+                $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', " +
+                $"jumps to point Id: {id} ({pos})");
+
             if (speedXY < 0.01f)
                 return;
 
@@ -879,7 +935,8 @@ namespace Game.Movement
                     init.SetVelocity(speed.Value);
             };
 
-            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0, new GenericMovementGeneratorArgs() { Duration = duration }));
+            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0, 
+                new GenericMovementGeneratorArgs() { Duration = duration }));
         }
 
         public void MoveSmoothPath(int pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
@@ -907,15 +964,21 @@ namespace Game.Movement
             Creature owner = _owner.ToCreature();
             if (owner == null)
             {
-                Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: non-creature {0} tried to walk along DB spline chain. Ignoring.", _owner.GetGUID().ToString());
+                Log.outError(LogFilter.Misc, 
+                    $"MotionMaster.MoveAlongSplineChain: non-creature {_owner.GetGUID()} " +
+                    $"tried to walk along DB spline chain. Ignoring.");
                 return;
             }
+
             List<SplineChainLink> chain = Global.ScriptMgr.GetSplineChain(owner, (byte)dbChainId);
             if (chain.Empty())
             {
-                Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: creature with entry {0} tried to walk along non-existing spline chain with DB id {1}.", owner.GetEntry(), dbChainId);
+                Log.outError(LogFilter.Misc, 
+                    $"MotionMaster.MoveAlongSplineChain: creature with entry {owner.GetEntry()} " +
+                    $"tried to walk along non-existing spline chain with DB id {dbChainId}.");
                 return;
             }
+
             MoveAlongSplineChain(pointId, chain, walk);
         }
 
@@ -928,7 +991,9 @@ namespace Game.Movement
         {
             if (info.Empty())
             {
-                Log.outError(LogFilter.Movement, "MotionMaster.ResumeSplineChain: unit with entry {0} tried to resume a spline chain from empty info.", _owner.GetEntry());
+                Log.outError(LogFilter.Movement, 
+                    $"MotionMaster.ResumeSplineChain: unit with entry {_owner.GetEntry()} " +
+                    $"tried to resume a spline chain from empty info.");
                 return;
             }
 
@@ -938,7 +1003,9 @@ namespace Game.Movement
         public void MoveFall(int id = 0)
         {
             // Use larger distance for vmap height search than in most other cases
-            float tz = _owner.GetMapHeight(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
+            float tz = _owner.GetMapHeight(_owner.GetPositionX(), _owner.GetPositionY(), 
+                _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
+
             if (tz <= MapConst.InvalidHeight)
                 return;
 
@@ -975,7 +1042,10 @@ namespace Game.Movement
             Creature creature = _owner.ToCreature();
             if (creature != null)
             {
-                Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveSeekAssistance: '{creature.GetGUID()}', seeks assistance (X: {x}, Y: {y}, Z: {z})");
+                Log.outDebug(LogFilter.Movement, 
+                    $"MotionMaster::MoveSeekAssistance: '{creature.GetGUID()}', " +
+                    $"seeks assistance (X: {x}, Y: {y}, Z: {z})");
+
                 creature.AttackStop();
                 creature.CastStop();
                 creature.DoNotReacquireSpellFocusTarget();
@@ -983,7 +1053,11 @@ namespace Game.Movement
                 Add(new AssistanceMovementGenerator(EventId.AssistMove, x, y, z));
             }
             else
-                Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistance: {_owner.GetGUID()}, attempted to seek assistance");
+            {
+                Log.outError(LogFilter.Server, 
+                    $"MotionMaster::MoveSeekAssistance: {_owner.GetGUID()}, " +
+                    $"attempted to seek assistance");
+            }
         }
 
         public void MoveSeekAssistanceDistract(uint time)
@@ -991,7 +1065,11 @@ namespace Game.Movement
             if (_owner.IsCreature())
                 Add(new AssistanceDistractMovementGenerator(time, _owner.GetOrientation()));
             else
-                Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistanceDistract: {_owner.GetGUID()} attempted to call distract after assistance");
+            {
+                Log.outError(LogFilter.Server, 
+                    $"MotionMaster::MoveSeekAssistanceDistract: {_owner.GetGUID()} " +
+                    $"attempted to call distract after assistance");
+            }
         }
 
         public void MoveTaxiFlight(int path, int pathnode)
@@ -1000,10 +1078,16 @@ namespace Game.Movement
             {
                 if (path < CliDB.TaxiPathNodesByPath.Count)
                 {
-                    Log.outDebug(LogFilter.Server, $"MotionMaster::MoveTaxiFlight: {_owner.GetGUID()} taxi to Path Id: {path} (node {pathnode})");
+                    Log.outDebug(LogFilter.Server, 
+                        $"MotionMaster::MoveTaxiFlight: {_owner.GetGUID()} taxi " +
+                        $"to Path Id: {path} (node {pathnode})");
 
                     // Only one FLIGHT_MOTION_TYPE is allowed
-                    bool hasExisting = HasMovementGenerator(gen => gen.GetMovementGeneratorType() == MovementGeneratorType.Flight);
+                    bool hasExisting = 
+                        HasMovementGenerator(gen => 
+                        gen.GetMovementGeneratorType() == MovementGeneratorType.Flight
+                        );
+
                     Cypher.Assert(!hasExisting, "Duplicate flight path movement generator");
 
                     FlightPathMovementGenerator movement = new();
@@ -1011,11 +1095,18 @@ namespace Game.Movement
                     Add(movement);
                 }
                 else
-                    Log.outError(LogFilter.Movement, $"MotionMaster::MoveTaxiFlight: '{_owner.GetGUID()}', attempted taxi to non-existing path Id: {path} (node: {pathnode})");
-
+                {
+                    Log.outError(LogFilter.Movement,
+                        $"MotionMaster::MoveTaxiFlight: '{_owner.GetGUID()}', " +
+                        $"attempted taxi to non-existing path Id: {path} (node: {pathnode})");
+                }
             }
             else
-                Log.outError(LogFilter.Movement, $"MotionMaster::MoveTaxiFlight: '{_owner.GetGUID()}', attempted taxi to path Id: {path} (node: {pathnode})");
+            {
+                Log.outError(LogFilter.Movement,
+                    $"MotionMaster::MoveTaxiFlight: '{_owner.GetGUID()}', " +
+                    $"attempted taxi to path Id: {path} (node: {pathnode})");
+            }
         }
 
         public void MoveDistract(uint timer, float orientation)
@@ -1034,15 +1125,27 @@ namespace Game.Movement
             if (pathId == 0)
                 return;
 
-            Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {pathId} (repeatable: {repeatable})");
-            Add(new WaypointMovementGenerator(pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), MovementSlot.Default);
+            Log.outDebug(LogFilter.Movement, 
+                $"MotionMaster::MovePath: '{_owner.GetGUID()}', " +
+                $"starts moving over path Id: {pathId} (repeatable: {repeatable})");
+
+            Add(new WaypointMovementGenerator(
+                pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, 
+                wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), 
+                MovementSlot.Default);
         }
 
         public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
             (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
         {
-            Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {path.Id} (repeatable: {repeatable})");
-            Add(new WaypointMovementGenerator(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), MovementSlot.Default);
+            Log.outDebug(LogFilter.Movement, 
+                $"MotionMaster::MovePath: '{_owner.GetGUID()}', " +
+                $"starts moving over path Id: {path.Id} (repeatable: {repeatable})");
+
+            Add(new WaypointMovementGenerator(
+                path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, 
+                wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), 
+                MovementSlot.Default);
         }
 
         /// <summary>
@@ -1070,7 +1173,10 @@ namespace Game.Movement
         {
             if (IsInvalidMovementGeneratorType(type))
             {
-                Log.outDebug(LogFilter.Movement, $"MotionMaster::LaunchMoveSpline: '{_owner.GetGUID()}', tried to launch a spline with an invalid MovementGeneratorType: {type} (Id: {id}, Priority: {priority})");
+                Log.outDebug(LogFilter.Movement, 
+                    $"MotionMaster::LaunchMoveSpline: '{_owner.GetGUID()}', " +
+                    $"tried to launch a spline with an invalid MovementGeneratorType: {type} " +
+                    $"(Id: {id}, Priority: {priority})");
                 return;
             }
 
@@ -1292,8 +1398,15 @@ namespace Game.Movement
             return (movement == GetIdleMovementGenerator());
         }
 
-        public static bool IsInvalidMovementGeneratorType(MovementGeneratorType type) { return type == MovementGeneratorType.MaxDB || type >= MovementGeneratorType.Max; }
-        public static bool IsInvalidMovementSlot(MovementSlot slot) { return slot >= MovementSlot.Max; }
+        public static bool IsInvalidMovementGeneratorType(MovementGeneratorType type) 
+        { 
+            return type == MovementGeneratorType.MaxDB || type >= MovementGeneratorType.Max; 
+        }
+
+        public static bool IsInvalidMovementSlot(MovementSlot slot) 
+        { 
+            return slot >= MovementSlot.Max; 
+        }
 
         public static int SplineId
         {
@@ -1371,7 +1484,7 @@ namespace Game.Movement
         public bool IsAngleOkay(float relAngle)
         {
             float diff = Math.Abs(relAngle - RelativeAngle);
-            return (Math.Min(diff, (2 * MathF.PI) - diff) <= Tolerance);
+            return Math.Min(diff, (2 * MathF.PI) - diff) <= Tolerance;
         }
     }
 }

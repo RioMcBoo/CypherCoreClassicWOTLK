@@ -99,8 +99,10 @@ namespace Game
                     // Kick player if client response delays more than set in config
                     if (_clientResponseTimer > maxClientResponseDelay * Time.InMilliseconds)
                     {
-                        Log.outWarn(LogFilter.Warden, "{0} (latency: {1}, IP: {2}) exceeded Warden module response delay for more than {3} - disconnecting client",
-                                       _session.GetPlayerInfo(), _session.GetLatency(), _session.GetRemoteAddress(), Time.secsToTimeString(maxClientResponseDelay, TimeFormat.ShortText));
+                        Log.outWarn(LogFilter.Warden, 
+                            $"{_session.GetPlayerInfo()} (latency: {_session.GetLatency()}, IP: {_session.GetRemoteAddress()} exceeded Warden module ) " +
+                            $"response delay for more than {Time.secsToTimeString(maxClientResponseDelay, TimeFormat.ShortText)} - disconnecting client");
+                        
                         _session.KickPlayer("Warden::Update Warden module response delay exceeded");
                     }
                     else
@@ -175,7 +177,7 @@ namespace Game
                     string banReason = "Warden Anticheat Violation";
                     // Check can be NULL, for example if the client sent a wrong signature in the warden packet (CHECKSUM FAIL)
                     if (check != null)
-                        banReason += ": " + check.Comment + " (CheckId: " + check.CheckId + ")";
+                        banReason += $": {check.Comment} (CheckId: {check.CheckId})";
 
                     Global.WorldMgr.BanAccount(BanMode.Account, accountName, WorldConfig.GetUIntValue(WorldCfg.WardenClientBanDuration), banReason, "Server");
                     break;

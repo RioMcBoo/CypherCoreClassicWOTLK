@@ -30,7 +30,9 @@ namespace Game.Maps
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 transports templates. DB table `gameobject_template` has no transports!");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 transports templates. DB table `gameobject_template` has no transports!");
+
                 return;
             }
 
@@ -42,14 +44,19 @@ namespace Game.Maps
                 GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
                 if (goInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Transport {entry} has no associated GameObjectTemplate from `gameobject_template` , skipped.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Transport {entry} has no associated GameObjectTemplate " +
+                        $"from `gameobject_template` , skipped.");
+
                     continue;
                 }
 
                 if (!CliDB.TaxiPathNodesByPath.ContainsKey(goInfo.MoTransport.taxiPathID))
                 {
                     Log.outError(LogFilter.Sql, 
-                        $"Transport {entry} (name: {goInfo.name}) has an invalid path specified in `gameobject_template`.`data0` ({goInfo.MoTransport.taxiPathID}) field, skipped.");
+                        $"Transport {entry} (name: {goInfo.name}) has an invalid path specified " +
+                        $"in `gameobject_template`.`data0` ({goInfo.MoTransport.taxiPathID}) field, skipped.");
+
                     continue;
                 }
 
@@ -59,7 +66,10 @@ namespace Game.Maps
                 if (!CliDB.TaxiPathStorage.ContainsKey(goInfo.MoTransport.taxiPathID))
                 {
                     Log.outError(LogFilter.Sql, 
-                        $"Transport {entry} (name: {goInfo.name}) has an invalid path specified in `gameobject_template`.`Data0` ({goInfo.MoTransport.taxiPathID}) field, skipped.");
+                        $"Transport {entry} (name: {goInfo.name}) has an invalid path " +
+                        $"specified in `gameobject_template`.`Data0` " +
+                        $"({goInfo.MoTransport.taxiPathID}) field, skipped.");
+
                     continue;
                 }
 
@@ -75,7 +85,10 @@ namespace Game.Maps
 
                 if (!hasValidMaps)
                 {
-                    Log.outError(LogFilter.Sql, $"Transport {entry} (name: {goInfo.name}) is trying to spawn on a map which does not exist, skipped.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Transport {entry} (name: {goInfo.name}) is trying to spawn " +
+                        $"on a map which does not exist, skipped.");
+
                     _transportTemplates.Remove(entry);
                     continue;
                 }
@@ -123,25 +136,39 @@ namespace Game.Maps
                     TransportTemplate transportTemplate = GetTransportTemplate(entry);
                     if (transportTemplate == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown gameobject `entry` set, skipped.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `transports` have transport (GUID: {guid} Entry: {entry}) " +
+                            $"with unknown gameobject `entry` set, skipped.");
+
                         continue;
                     }
 
                     if ((phaseUseFlags & ~PhaseUseFlagsValues.All) != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown `phaseUseFlags` set, removed unknown value.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `transports` have transport (GUID: {guid} Entry: {entry}) " +
+                            $"with unknown `phaseUseFlags` set, removed unknown value.");
+
                         phaseUseFlags &= PhaseUseFlagsValues.All;
                     }
 
-                    if (phaseUseFlags.HasFlag(PhaseUseFlagsValues.AlwaysVisible) && phaseUseFlags.HasFlag(PhaseUseFlagsValues.Inverse))
+                    if (phaseUseFlags.HasFlag(PhaseUseFlagsValues.AlwaysVisible) 
+                        && phaseUseFlags.HasFlag(PhaseUseFlagsValues.Inverse))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE, removing PHASE_USE_FLAGS_INVERSE.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `transports` have transport (GUID: {guid} Entry: {entry}) " +
+                            $"has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE, " +
+                            $"removing PHASE_USE_FLAGS_INVERSE.");
+
                         phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
                     }
 
                     if (phaseGroupId != 0 && phaseId != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `transports` have transport (GUID: {guid} Entry: {entry}) " +
+                            $"with both `phaseid` and `phasegroup` set, `phasegroup` set to 0");
+
                         phaseGroupId = 0;
                     }
 
@@ -149,7 +176,10 @@ namespace Game.Maps
                     {
                         if (!CliDB.PhaseStorage.ContainsKey(phaseId))
                         {
-                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseid` {phaseId} does not exist, set to 0");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `transports` have transport (GUID: {guid} Entry: {entry}) " +
+                                $"with `phaseid` {phaseId} does not exist, set to 0");
+
                             phaseId = 0;
                         }
                     }
@@ -158,7 +188,10 @@ namespace Game.Maps
                     {
                         if (Global.DB2Mgr.GetPhasesForGroup(phaseGroupId) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseGroup` {phaseGroupId} does not exist, set to 0");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `transports` have transport (GUID: {guid} Entry: {entry}) " +
+                                $"with `phaseGroup` {phaseGroupId} does not exist, set to 0");
+
                             phaseGroupId = 0;
                         }
                     }
@@ -429,20 +462,27 @@ namespace Game.Maps
             TransportTemplate tInfo = GetTransportTemplate(entry);
             if (tInfo == null)
             {
-                Log.outError(LogFilter.Sql, "Transport {0} will not be loaded, `transport_template` missing", entry);
+                Log.outError(LogFilter.Sql, 
+                    $"Transport {entry} will not be loaded, `transport_template` missing");
+
                 return null;
             }
 
             if (!tInfo.MapIds.Contains(map.GetId()))
             {
-                Log.outError(LogFilter.Transport, $"Transport {entry} attempted creation on map it has no path for {map.GetId()}!");
+                Log.outError(LogFilter.Transport, 
+                    $"Transport {entry} attempted creation on map it has no path for {map.GetId()}!");
+
                 return null;
             }
 
             Position startingPosition = tInfo.ComputePosition(0, out _, out _);
             if (startingPosition == null)
             {
-                Log.outError(LogFilter.Sql, $"Transport {entry} will not be loaded, failed to compute starting position");
+                Log.outError(LogFilter.Sql, 
+                    $"Transport {entry} will not be loaded, " +
+                    $"failed to compute starting position");
+
                 return null;
             }
 
@@ -483,7 +523,10 @@ namespace Game.Maps
 
             // create transports
             foreach (var transport in mapTransports)
-                CreateTransport(transport.TransportGameObjectId, map, transport.SpawnId, transport.PhaseUseFlags, transport.PhaseId, transport.PhaseGroup);
+            {
+                CreateTransport(transport.TransportGameObjectId, map, transport.SpawnId,
+                    transport.PhaseUseFlags, transport.PhaseId, transport.PhaseGroup);
+            }
         }
 
         public TransportTemplate GetTransportTemplate(int entry)
@@ -577,15 +620,19 @@ namespace Game.Maps
             var pathSegment = leg.Segments[segmentIndex];
 
             if (!isOnPause)
+            {
                 distanceMoved += CalculateDistanceMoved(
                     (time - prevSegmentTime) * 0.001,
                     (pathSegment.SegmentEndArrivalTimestamp - prevSegmentTime) * 0.001,
                     segmentIndex == 0,
                     segmentIndex == leg.Segments.Count - 1);
+            }
 
             int splineIndex = 0;
             float splinePointProgress = 0;
-            leg.Spline.ComputeIndex((float)Math.Min(distanceMoved / leg.Spline.Length(), 1.0), ref splineIndex, ref splinePointProgress);
+
+            leg.Spline.ComputeIndex((float)Math.Min(distanceMoved / leg.Spline.Length(), 1.0), 
+                ref splineIndex, ref splinePointProgress);
 
             Vector3 pos, dir;
             leg.Spline.Evaluate_Percent(splineIndex, splinePointProgress, out pos);
@@ -619,8 +666,10 @@ namespace Game.Maps
 
             int segmentIndex = 0;
             for (; segmentIndex != leg.Segments.Count - 1; ++segmentIndex)
+            {
                 if (time < leg.Segments[segmentIndex].SegmentEndArrivalTimestamp + leg.Segments[segmentIndex].Delay)
                     break;
+            }
 
             return leg.Segments[segmentIndex].SegmentEndArrivalTimestamp + leg.Segments[segmentIndex].Delay;
         }

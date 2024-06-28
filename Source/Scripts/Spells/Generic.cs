@@ -3288,8 +3288,10 @@ namespace Scripts.Spells.Generic
 
             // on stack 15 cast the achievement crediting spell
             if (GetStackAmount() >= 15)
+            {
                 target.CastSpell(target, SpellTurkeyVengeance, new CastSpellExtraArgs(aurEff)
                     .SetOriginalCaster(GetCasterGUID()));
+        }
         }
 
         void OnPeriodic(AuraEffect aurEff)

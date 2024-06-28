@@ -17,7 +17,7 @@ namespace Framework.Configuration
             string path = AppContext.BaseDirectory + fileName;
             if (!File.Exists(path))
             {
-                Console.WriteLine("{0} doesn't exist!", fileName);
+                Console.WriteLine($"{fileName} doesn't exist!");
                 return false;
             }
 
@@ -38,7 +38,7 @@ namespace Framework.Configuration
             }
             catch
             {
-                Console.WriteLine("Error in {0} on Line {1}", fileName, lineCounter);
+                Console.WriteLine($"Error in {fileName} on Line {lineCounter}");
                 return false;
             }
 

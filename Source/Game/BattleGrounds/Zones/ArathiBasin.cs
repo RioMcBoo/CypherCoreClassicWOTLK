@@ -81,13 +81,13 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
                         {
                             if (team == BattleGroundTeamId.Alliance)
                             {
-                                SendBroadcastText((int)ABBattlegroundBroadcastTexts.AllianceNearVictory, ChatMsg.BgSystemNeutral);
-                                PlaySoundToAll((int)SoundIds.NearVictoryAlliance);
+                                SendBroadcastText(ABBattlegroundBroadcastTexts.AllianceNearVictory, ChatMsg.BgSystemNeutral);
+                                PlaySoundToAll(SoundIds.NearVictoryAlliance);
                             }
                             else
                             {
-                                SendBroadcastText((int)ABBattlegroundBroadcastTexts.HordeNearVictory, ChatMsg.BgSystemNeutral);
-                                PlaySoundToAll((int)SoundIds.NearVictoryHorde);
+                                SendBroadcastText(ABBattlegroundBroadcastTexts.HordeNearVictory, ChatMsg.BgSystemNeutral);
+                                PlaySoundToAll(SoundIds.NearVictoryHorde);
                             }
                             m_IsInformedNearVictory = true;
                         }
@@ -126,7 +126,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
         public override void StartingEventOpenDoors()
         {
             // Achievement: Let's Get This Done
-            TriggerGameEvent((int)ABEventIds.StartBattle);
+            TriggerGameEvent(ABEventIds.StartBattle);
         }
 
         public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
@@ -176,7 +176,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
                     GameObject capturePoint = map.GetGameObject(guid);
                     if (capturePoint != null)
                     {
-                        int wsValue = map.GetWorldStateValue((int)capturePoint.GetGoInfo().CapturePoint.worldState1);
+                        int wsValue = map.GetWorldStateValue(capturePoint.GetGoInfo().CapturePoint.worldState1);
                         switch ((BattlegroundCapturePointState)wsValue)
                         {
                             case BattlegroundCapturePointState.AllianceCaptured:
@@ -243,182 +243,182 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
                 case ABEventIds.ContestedBlacksmithAlliance:
                     UpdateWorldState(WorldStateIds.BlacksmithAllianceControlState, 1);
                     UpdateWorldState(WorldStateIds.BlacksmithHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedAlliance);
+                    PlaySoundToAll(SoundIds.NodeAssaultedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedBlacksmithAlliance:
                     UpdateWorldState(WorldStateIds.BlacksmithAllianceControlState, 2);
                     UpdateWorldState(WorldStateIds.BlacksmithHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureBlacksmithAlliance:
                     UpdateWorldState(WorldStateIds.BlacksmithAllianceControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     break;
                 case ABEventIds.ContestedBlacksmithHorde:
                     UpdateWorldState(WorldStateIds.BlacksmithAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.BlacksmithHordeControlState, 1);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedHorde);
+                    PlaySoundToAll(SoundIds.NodeAssaultedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedBlacksmithHorde:
                     UpdateWorldState(WorldStateIds.BlacksmithAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.BlacksmithHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureBlacksmithHorde:
                     UpdateWorldState(WorldStateIds.BlacksmithHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     break;
                 case ABEventIds.ContestedFarmAlliance:
                     UpdateWorldState(WorldStateIds.FarmAllianceControlState, 1);
                     UpdateWorldState(WorldStateIds.FarmHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedAlliance);
+                    PlaySoundToAll(SoundIds.NodeAssaultedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedFarmAlliance:
                     UpdateWorldState(WorldStateIds.FarmAllianceControlState, 2);
                     UpdateWorldState(WorldStateIds.FarmHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureFarmAlliance:
                     UpdateWorldState(WorldStateIds.FarmAllianceControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     break;
                 case ABEventIds.ContestedFarmHorde:
                     UpdateWorldState(WorldStateIds.FarmAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.FarmHordeControlState, 1);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedHorde);
+                    PlaySoundToAll(SoundIds.NodeAssaultedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedFarmHorde:
                     UpdateWorldState(WorldStateIds.FarmAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.FarmHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureFarmHorde:
                     UpdateWorldState(WorldStateIds.FarmHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     break;
                 case ABEventIds.ContestedGoldMineAlliance:
                     UpdateWorldState(WorldStateIds.GoldMineAllianceControlState, 1);
                     UpdateWorldState(WorldStateIds.GoldMineHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedAlliance);
+                    PlaySoundToAll(SoundIds.NodeAssaultedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedGoldMineAlliance:
                     UpdateWorldState(WorldStateIds.GoldMineAllianceControlState, 2);
                     UpdateWorldState(WorldStateIds.GoldMineHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureGoldMineAlliance:
                     UpdateWorldState(WorldStateIds.GoldMineAllianceControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     break;
                 case ABEventIds.ContestedGoldMineHorde:
                     UpdateWorldState(WorldStateIds.GoldMineAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.GoldMineHordeControlState, 1);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedHorde);
+                    PlaySoundToAll(SoundIds.NodeAssaultedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedGoldMineHorde:
                     UpdateWorldState(WorldStateIds.GoldMineAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.GoldMineHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureGoldMineHorde:
                     UpdateWorldState(WorldStateIds.GoldMineHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     break;
                 case ABEventIds.ContestedLumberMillAlliance:
                     UpdateWorldState(WorldStateIds.LumberMillAllianceControlState, 1);
                     UpdateWorldState(WorldStateIds.LumberMillHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedAlliance);
+                    PlaySoundToAll(SoundIds.NodeAssaultedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedLumberMillAlliance:
                     UpdateWorldState(WorldStateIds.LumberMillAllianceControlState, 2);
                     UpdateWorldState(WorldStateIds.LumberMillHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureLumberMillAlliance:
                     UpdateWorldState(WorldStateIds.LumberMillAllianceControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     break;
                 case ABEventIds.ContestedLumberMillHorde:
                     UpdateWorldState(WorldStateIds.LumberMillAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.LumberMillHordeControlState, 1);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedHorde);
+                    PlaySoundToAll(SoundIds.NodeAssaultedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedLumberMillHorde:
                     UpdateWorldState(WorldStateIds.LumberMillAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.LumberMillHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureLumberMillHorde:
                     UpdateWorldState(WorldStateIds.LumberMillHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     break;
                 case ABEventIds.ContestedStablesAlliance:
                     UpdateWorldState(WorldStateIds.StablesAllianceControlState, 1);
                     UpdateWorldState(WorldStateIds.StablesHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedAlliance);
+                    PlaySoundToAll(SoundIds.NodeAssaultedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedStablesAlliance:
                     UpdateWorldState(WorldStateIds.StablesAllianceControlState, 2);
                     UpdateWorldState(WorldStateIds.StablesHordeControlState, 0);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureStablesAlliance:
                     UpdateWorldState(WorldStateIds.StablesAllianceControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedAlliance);
+                    PlaySoundToAll(SoundIds.NodeCapturedAlliance);
                     break;
                 case ABEventIds.ContestedStablesHorde:
                     UpdateWorldState(WorldStateIds.StablesAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.StablesHordeControlState, 1);
-                    PlaySoundToAll((int)SoundIds.NodeAssaultedHorde);
+                    PlaySoundToAll(SoundIds.NodeAssaultedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesAssaulted, 1);
                     break;
                 case ABEventIds.DefendedStablesHorde:
                     UpdateWorldState(WorldStateIds.StablesAllianceControlState, 0);
                     UpdateWorldState(WorldStateIds.StablesHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     if (player != null)
                         UpdatePlayerScore(player, ScoreType.BasesDefended, 1);
                     break;
                 case ABEventIds.CaptureStablesHorde:
                     UpdateWorldState(WorldStateIds.StablesHordeControlState, 2);
-                    PlaySoundToAll((int)SoundIds.NodeCapturedHorde);
+                    PlaySoundToAll(SoundIds.NodeCapturedHorde);
                     break;
                 default:
                     Log.outWarn(LogFilter.Battleground, $"BattlegroundAB::ProcessEvent: Unhandled event {eventId}.");

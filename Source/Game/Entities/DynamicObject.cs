@@ -70,7 +70,9 @@ namespace Game.Entities
             Relocate(pos);
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Server, $"DynamicObject (spell {spell.Id}) not created. Suggested coordinates isn't valid (X: {GetPositionX()} Y: {GetPositionY()}).");
+                Log.outError(LogFilter.Server, 
+                    $"DynamicObject (spell {spell.Id}) not created. " +
+                    $"Suggested coordinates isn't valid (X: {GetPositionX()} Y: {GetPositionY()}).");
                 return false;
             }
 

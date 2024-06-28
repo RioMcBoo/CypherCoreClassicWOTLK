@@ -198,8 +198,7 @@ namespace Game.Maps
                             var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
                             VisitAllGrids(visitor);
                             SetGridState(GridState.Idle);
-                            Log.outDebug(LogFilter.Maps, "Grid[{0}, {1}] on map {2} moved to IDLE state", GetX(), GetY(),
-                                map.GetId());
+                            Log.outDebug(LogFilter.Maps, $"Grid[{GetX()}, {GetY()}] on map {map.GetId()} moved to IDLE state");
                         }
                         else
                             map.ResetGridExpiry(this, 0.1f);
@@ -208,8 +207,7 @@ namespace Game.Maps
                 case GridState.Idle:
                     map.ResetGridExpiry(this);
                     SetGridState(GridState.Removal);
-                    Log.outDebug(LogFilter.Maps, "Grid[{0}, {1}] on map {2} moved to REMOVAL state", GetX(), GetY(),
-                        map.GetId());
+                    Log.outDebug(LogFilter.Maps, $"Grid[{GetX()}, {GetY()}] on map {map.GetId()} moved to REMOVAL state");
                     break;
                 case GridState.Removal:
                     if (!GetGridInfoRef().GetUnloadLock())
@@ -220,8 +218,8 @@ namespace Game.Maps
                             if (!map.UnloadGrid(this, false))
                             {
                                 Log.outDebug(LogFilter.Maps,
-                                    "Grid[{0}, {1}] for map {2} differed unloading due to players or active objects nearby",
-                                    GetX(), GetY(), map.GetId());
+                                    $"Grid[{GetX()}, {GetY()}] for map {map.GetId()} " +
+                                    $"differed unloading due to players or active objects nearby");
                                 map.ResetGridExpiry(this);
                             }
                         }
@@ -233,8 +231,10 @@ namespace Game.Maps
         public void VisitAllGrids(Visitor visitor)
         {
             for (int x = 0; x < MapConst.MaxCells; ++x)
+            {
                 for (int y = 0; y < MapConst.MaxCells; ++y)
                     GetGridCell(x, y).Visit(visitor);
+        }
         }
 
         public void VisitGrid(int x, int y, Visitor visitor)
@@ -246,8 +246,10 @@ namespace Game.Maps
         {
             int count = 0;
             for (int x = 0; x < MapConst.MaxCells; ++x)
+            {
                 for (int y = 0; y < MapConst.MaxCells; ++y)
                     count += i_cells[x][y].GetWorldObjectCountInGrid<T>();
+            }
             return count;
         }
 
@@ -290,7 +292,7 @@ namespace Game.Maps
                     visitor.Visit(_objects.worldObjects);
                     break;
                 default:
-                    Log.outError(LogFilter.Server, "{0} called Visit with Unknown Mask {1}.", visitor.ToString(), visitor._mask);
+                    Log.outError(LogFilter.Server, $"{visitor} called Visit with Unknown Mask {visitor._mask}.");
                     break;
             }
         }

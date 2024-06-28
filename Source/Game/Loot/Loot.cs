@@ -454,9 +454,12 @@ namespace Game.Loots
                 // initialize item prototype and check enchant possibilities for this group
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(m_lootItem.itemid);
                 m_voteMask = RollMask.AllMask;
+
                 if (itemTemplate.HasFlag(ItemFlags2.CanOnlyRollGreed))
                     m_voteMask = m_voteMask & ~RollMask.Need;
+
                 var disenchant = GetItemDisenchantLoot();
+
                 if (disenchant == null || disenchant.SkillRequired > enchantingSkill)
                     m_voteMask = m_voteMask & ~RollMask.Disenchant;
 
@@ -750,7 +753,10 @@ namespace Game.Loots
             if (tab == null)
             {
                 if (!noEmptyError)
-                    Log.outError(LogFilter.Sql, "Table '{0}' loot id #{1} used but it doesn't have records.", store.GetName(), lootId);
+                {
+                    Log.outError(LogFilter.Sql,
+                        $"Table '{store.GetName()}' loot id #{lootId} used but it doesn't have records.");
+                }
                 return false;
             }
 
@@ -811,8 +817,10 @@ namespace Game.Loots
         public void Update()
         {
             foreach (var pair in _rolls.ToList())
+            {
                 if (pair.Value.UpdateRoll())
                     _rolls.Remove(pair.Key);
+        }
         }
 
         public void FillNotNormalLootFor(Player player)
@@ -991,8 +999,10 @@ namespace Game.Loots
                 return true;
 
             foreach (LootItem item in items)
+            {
                 if (!item.is_looted && item.follow_loot_rules && !item.freeforall && item.conditions.IsEmpty())
                     return true;
+            }
 
             return false;
         }
@@ -1002,8 +1012,10 @@ namespace Game.Loots
         {
             // quest items
             foreach (LootItem lootItem in items)
+            {
                 if (!lootItem.is_looted && !lootItem.follow_loot_rules && lootItem.GetAllowedLooters().Contains(player.GetGUID()))
                     return true;
+            }
 
             var ffaItems = GetPlayerFFAItems().LookupByKey(player.GetGUID());
             if (ffaItems != null)

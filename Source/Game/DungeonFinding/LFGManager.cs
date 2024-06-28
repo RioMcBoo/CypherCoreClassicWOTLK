@@ -103,7 +103,8 @@ namespace Game.DungeonFinding
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 lfg dungeon rewards. DB table `lfg_dungeon_rewards` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 lfg dungeon rewards. DB table `lfg_dungeon_rewards` is empty!");
                 return;
             }
 
@@ -118,25 +119,34 @@ namespace Game.DungeonFinding
 
                 if (GetLFGDungeonEntry(dungeonId) == 0)
                 {
-                    Log.outError(LogFilter.Sql, "Dungeon {0} specified in table `lfg_dungeon_rewards` does not exist!", dungeonId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Dungeon {dungeonId} specified in table `lfg_dungeon_rewards` does not exist!");
                     continue;
                 }
 
                 if (maxLevel == 0 || maxLevel > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 {
-                    Log.outError(LogFilter.Sql, "Level {0} specified for dungeon {1} in table `lfg_dungeon_rewards` can never be reached!", maxLevel, dungeonId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Level {maxLevel} specified for dungeon {dungeonId} " +
+                        $"in table `lfg_dungeon_rewards` can never be reached!");
+
                     maxLevel = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
                 }
 
                 if (firstQuestId == 0 || Global.ObjectMgr.GetQuestTemplate(firstQuestId) == null)
                 {
-                    Log.outError(LogFilter.Sql, "First quest {0} specified for dungeon {1} in table `lfg_dungeon_rewards` does not exist!", firstQuestId, dungeonId);
+                    Log.outError(LogFilter.Sql, 
+                        $"First quest {firstQuestId} specified for dungeon {dungeonId} " +
+                        $"in table `lfg_dungeon_rewards` does not exist!");
                     continue;
                 }
 
                 if (otherQuestId != 0 && Global.ObjectMgr.GetQuestTemplate(otherQuestId) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Other quest {0} specified for dungeon {1} in table `lfg_dungeon_rewards` does not exist!", otherQuestId, dungeonId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Other quest {otherQuestId} specified for dungeon {dungeonId} " +
+                        $"in table `lfg_dungeon_rewards` does not exist!");
+
                     otherQuestId = 0;
                 }
 
@@ -180,7 +190,8 @@ namespace Game.DungeonFinding
             SQLResult result = DB.World.Query("SELECT dungeonId, position_x, position_y, position_z, orientation, requiredItemLevel FROM lfg_dungeon_template");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 lfg dungeon templates. DB table `lfg_dungeon_template` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 lfg dungeon templates. DB table `lfg_dungeon_template` is empty!");
                 return;
             }
 
@@ -191,7 +202,8 @@ namespace Game.DungeonFinding
                 int dungeonId = result.Read<int>(0);
                 if (!LfgDungeonStore.ContainsKey(dungeonId))
                 {
-                    Log.outError(LogFilter.Sql, "table `lfg_entrances` contains coordinates for wrong dungeon {0}", dungeonId);
+                    Log.outError(LogFilter.Sql, 
+                        $"table `lfg_entrances` contains coordinates for wrong dungeon {dungeonId}");
                     continue;
                 }
 
@@ -219,7 +231,9 @@ namespace Game.DungeonFinding
                     AreaTriggerStruct at = Global.ObjectMgr.GetMapEntranceTrigger(dungeon.map);
                     if (at == null)
                     {
-                        Log.outError(LogFilter.Lfg, "LoadLFGDungeons: Failed to load dungeon {0} (Id: {1}), cant find areatrigger for map {2}", dungeon.name, dungeon.id, dungeon.map);
+                        Log.outError(LogFilter.Lfg, 
+                            $"LoadLFGDungeons: Failed to load dungeon {dungeon.name} (Id: {dungeon.id}), " +
+                            $"cant find areatrigger for map {dungeon.map}");
                         continue;
                     }
 
@@ -298,7 +312,10 @@ namespace Game.DungeonFinding
             {
                 byte newProposals = it.Value.FindGroups();
                 if (newProposals != 0)
-                    Log.outDebug(LogFilter.Lfg, "Update: Found {0} new groups in queue {1}", newProposals, it.Key);
+                {
+                    Log.outDebug(LogFilter.Lfg, 
+                        $"Update: Found {newProposals} new groups in queue {it.Key}");
+            }
             }
 
             if (lastProposalId != m_lfgProposalId)
@@ -457,7 +474,7 @@ namespace Game.DungeonFinding
                             isRaid = true;
                             break;
                         default:
-                            Log.outError(LogFilter.Lfg, "Wrong dungeon Type {0} for dungeon {1}", type, it);
+                            Log.outError(LogFilter.Lfg, $"Wrong dungeon Type {type} for dungeon {it}");
                             joinData.result = LfgJoinResult.InvalidSlot;
                             break;
                     }
@@ -480,7 +497,10 @@ namespace Game.DungeonFinding
             // Can't join. Send result
             if (joinData.result != LfgJoinResult.Ok)
             {
-                Log.outDebug(LogFilter.Lfg, "Join: [{0}] joining with {1} members. result: {2}", guid, grp != null ? grp.GetMembersCount() : 1, joinData.result);
+                Log.outDebug(LogFilter.Lfg, 
+                    $"Join: [{guid}] joining with {(grp != null ? grp.GetMembersCount() : 1)} members. " +
+                    $"Result: {joinData.result}");
+
                 if (!dungeons.Empty())                             // Only should show lockmap when have no dungeons available
                     joinData.lockmap.Clear();
                 player.GetSession().SendLfgJoinResult(joinData);
@@ -489,7 +509,8 @@ namespace Game.DungeonFinding
 
             if (isRaid)
             {
-                Log.outDebug(LogFilter.Lfg, "Join: [{0}] trying to join raid browser and it's disabled.", guid);
+                Log.outDebug(LogFilter.Lfg, 
+                    $"Join: [{guid}] trying to join raid browser and it's disabled.");
                 return;
             }
 
@@ -567,13 +588,18 @@ namespace Game.DungeonFinding
                 debugNames += player.GetName();
             }
             StringBuilder o = new();
-            o.AppendFormat("Join: [{0}] joined ({1}{2}) Members: {3}. Dungeons ({4}): ", guid, (grp != null ? "group" : "player"), debugNames, dungeons.Count, ConcatenateDungeons(dungeons));
+
+            o.AppendFormat(
+                $"Join: [{guid}] joined ({(grp != null ? "group" : "player")}{debugNames}) " +
+                $"Members: {dungeons.Count}. " +
+                $"Dungeons ({ConcatenateDungeons(dungeons)}): ");
+            
             Log.outDebug(LogFilter.Lfg, o.ToString());
         }
 
         public void LeaveLfg(ObjectGuid guid, bool disconnected = false)
         {
-            Log.outDebug(LogFilter.Lfg, "LeaveLfg: [{0}]", guid);
+            Log.outDebug(LogFilter.Lfg, $"LeaveLfg: [{guid}]");
 
             ObjectGuid gguid = guid.IsParty() ? guid : GetGroup(guid);
             LfgState state = GetState(guid);
@@ -998,7 +1024,9 @@ namespace Game.DungeonFinding
 
             player.accept = (LfgAnswer)Convert.ToInt32(accept);
 
-            Log.outDebug(LogFilter.Lfg, "UpdateProposal: Player [{0}] of proposal {1} selected: {2}", guid, proposalId, accept);
+            Log.outDebug(LogFilter.Lfg, 
+                $"UpdateProposal: Player [{guid}] of proposal {proposalId} selected: {accept}");
+
             if (!accept)
             {
                 RemoveProposal(new KeyValuePair<int, LfgProposal>(proposalId, proposal), LfgUpdateType.ProposalDeclined);
@@ -1092,7 +1120,9 @@ namespace Game.DungeonFinding
             LfgProposal proposal = itProposal.Value;
             proposal.state = LfgProposalState.Failed;
 
-            Log.outDebug(LogFilter.Lfg, "RemoveProposal: Proposal {0}, state FAILED, UpdateType {1}", itProposal.Key, type);
+            Log.outDebug(LogFilter.Lfg, 
+                $"RemoveProposal: Proposal {itProposal.Key}, state FAILED, UpdateType {type}");
+
             // Mark all people that didn't answered as no accept
             if (type == LfgUpdateType.ProposalFailed)
                 foreach (var it in proposal.players)
@@ -1129,12 +1159,16 @@ namespace Game.DungeonFinding
                     if (it.Value.accept == LfgAnswer.Deny)
                     {
                         updateData.updateType = type;
-                        Log.outDebug(LogFilter.Lfg, "RemoveProposal: [{0}] didn't accept. Removing from queue and compatible cache", guid);
+                        Log.outDebug(LogFilter.Lfg, 
+                            $"RemoveProposal: [{guid}] didn't accept. " +
+                            $"Removing from queue and compatible cache");
                     }
                     else
                     {
                         updateData.updateType = LfgUpdateType.RemovedFromQueue;
-                        Log.outDebug(LogFilter.Lfg, "RemoveProposal: [{0}] in same group that someone that didn't accept. Removing from queue and compatible cache", guid);
+                        Log.outDebug(LogFilter.Lfg, 
+                            $"RemoveProposal: [{guid}] in same group that someone that didn't accept. " +
+                            $"Removing from queue and compatible cache");
                     }
 
                     RestoreState(guid, "Proposal Fail (didn't accepted or in group with someone that didn't accept");
@@ -1148,7 +1182,7 @@ namespace Game.DungeonFinding
                 }
                 else
                 {
-                    Log.outDebug(LogFilter.Lfg, "RemoveProposal: Readding [{0}] to queue.", guid);
+                    Log.outDebug(LogFilter.Lfg, $"RemoveProposal: Readding [{guid}] to queue.");
                     SetState(guid, LfgState.Queued);
                     if (gguid != guid)
                     {
@@ -1265,14 +1299,19 @@ namespace Game.DungeonFinding
 
             if (dungeon == null)
             {
-                Log.outDebug(LogFilter.Lfg, "TeleportPlayer: Player {0} not in group/lfggroup or dungeon not found!", player.GetName());
+                Log.outDebug(LogFilter.Lfg, 
+                    $"TeleportPlayer: Player {player.GetName()} not in group/lfggroup or dungeon not found!");
+
                 player.GetSession().SendLfgTeleportError(LfgTeleportResult.NoReturnLocation);
                 return;
             }
 
             if (outt)
             {
-                Log.outDebug(LogFilter.Lfg, "TeleportPlayer: Player {0} is being teleported out. Current Map {1} - Expected Map {2}", player.GetName(), player.GetMapId(), dungeon.map);
+                Log.outDebug(LogFilter.Lfg, 
+                    $"TeleportPlayer: Player {player.GetName()} is being teleported out. " +
+                    $"Current Map {player.GetMapId()} - Expected Map {dungeon.map}");
+                
                 if (player.GetMapId() == dungeon.map)
                     player.TeleportToBGEntryPoint();
 
@@ -1332,7 +1371,9 @@ namespace Game.DungeonFinding
             if (error != LfgTeleportResult.None)
                 player.GetSession().SendLfgTeleportError(error);
 
-            Log.outDebug(LogFilter.Lfg, "TeleportPlayer: Player {0} is being teleported in to map {1} (x: {2}, y: {3}, z: {4}) Result: {5}", player.GetName(), dungeon.map, dungeon.x, dungeon.y, dungeon.z, error);
+            Log.outDebug(LogFilter.Lfg, 
+                $"TeleportPlayer: Player {player.GetName()} is being teleported " +
+                $"in to map {dungeon.map} (x: {dungeon.x}, y: {dungeon.y}, z: {dungeon.z}) Result: {error}");
         }
 
         /// <summary>
@@ -1369,7 +1410,10 @@ namespace Game.DungeonFinding
             int gDungeonId = GetDungeon(gguid);
             if (gDungeonId != dungeonId)
             {
-                Log.outDebug(LogFilter.Lfg, $"Group {gguid} finished dungeon {dungeonId} but queued for {gDungeonId}. Ignoring");
+                Log.outDebug(LogFilter.Lfg, 
+                    $"Group {gguid} finished dungeon {dungeonId} " +
+                    $"but queued for {gDungeonId}. Ignoring");
+
                 return;
             }
 
@@ -1402,7 +1446,8 @@ namespace Game.DungeonFinding
 
                 if (dungeon == null || (dungeon.type != LfgType.Random && !dungeon.seasonal))
                 {
-                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} dungeon {rDungeonId} is not random or seasonal");
+                    Log.outDebug(LogFilter.Lfg, 
+                        $"Group: {gguid}, Player: {guid} dungeon {rDungeonId} is not random or seasonal");
                     continue;
                 }
 
@@ -1426,7 +1471,10 @@ namespace Game.DungeonFinding
 
                 if (player.GetMapId() != mapId)
                 {
-                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} is in map {player.GetMapId()} and should be in {mapId} to get reward");
+                    Log.outDebug(LogFilter.Lfg, 
+                        $"Group: {gguid}, Player: {guid} is in map {player.GetMapId()} " +
+                        $"and should be in {mapId} to get reward");
+
                     continue;
                 }
 
@@ -1465,8 +1513,10 @@ namespace Game.DungeonFinding
                 }
 
                 // Give rewards
-                string doneString = done ? "" : "not";
-                Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} done dungeon {GetDungeon(gguid)}, {doneString} previously done.");
+                Log.outDebug(LogFilter.Lfg, 
+                    $"Group: {gguid}, Player: {guid} done dungeon {GetDungeon(gguid)}, " +
+                    $"{(done ? "" : "not")} previously done.");
+
                 LfgPlayerRewardData data = new(dungeon.Entry(), GetDungeon(gguid, false), done, quest);
                 player.GetSession().SendLfgPlayerReward(data);
             }
@@ -1519,7 +1569,7 @@ namespace Game.DungeonFinding
                 state = PlayersStore[guid].GetState();
             }
 
-            Log.outDebug(LogFilter.Lfg, "GetState: [{0}] = {1}", guid, state);
+            Log.outDebug(LogFilter.Lfg, $"GetState: [{guid}] = {state}");
             return state;
         }
 
@@ -1534,7 +1584,7 @@ namespace Game.DungeonFinding
                 state = PlayersStore[guid].GetOldState();
             }
 
-            Log.outDebug(LogFilter.Lfg, "GetOldState: [{0}] = {1}", guid, state);
+            Log.outDebug(LogFilter.Lfg, $"GetOldState: [{guid}] = {state}");
             return state;
         }
 
@@ -1543,7 +1593,7 @@ namespace Game.DungeonFinding
             Cypher.Assert(gguid.IsParty());
 
             bool active = GroupsStore[gguid].IsVoteKickActive();
-            Log.outInfo(LogFilter.Lfg, "Group: {0}, Active: {1}", gguid.ToString(), active);
+            Log.outInfo(LogFilter.Lfg, $"Group: {gguid}, Active: {active}");
 
             return active;
         }
@@ -1554,7 +1604,7 @@ namespace Game.DungeonFinding
                 return 0;
 
             int dungeon = GroupsStore[guid].GetDungeon(asId);
-            Log.outDebug(LogFilter.Lfg, "GetDungeon: [{0}] asId: {1} = {2}", guid, asId, dungeon);
+            Log.outDebug(LogFilter.Lfg, $"GetDungeon: [{guid}] asId: {asId} = {dungeon}");
             return dungeon;
         }
 
@@ -1572,20 +1622,20 @@ namespace Game.DungeonFinding
                     mapId = dungeon.map;
             }
 
-            Log.outError(LogFilter.Lfg, "GetDungeonMapId: [{0}] = {1} (DungeonId = {2})", guid, mapId, dungeonId);
+            Log.outError(LogFilter.Lfg, $"GetDungeonMapId: [{guid}] = {mapId} (DungeonId = {dungeonId})");
             return mapId;
         }
 
         public LfgRoles GetRoles(ObjectGuid guid)
         {
             LfgRoles roles = PlayersStore[guid].GetRoles();
-            Log.outDebug(LogFilter.Lfg, "GetRoles: [{0}] = {1}", guid, roles);
+            Log.outDebug(LogFilter.Lfg, $"GetRoles: [{guid}] = {roles}");
             return roles;
         }
 
         public List<int> GetSelectedDungeons(ObjectGuid guid)
         {
-            Log.outDebug(LogFilter.Lfg, "GetSelectedDungeons: [{0}]", guid);
+            Log.outDebug(LogFilter.Lfg, $"GetSelectedDungeons: [{guid}]");
             return PlayersStore[guid].GetSelectedDungeons();
         }
 
@@ -1611,7 +1661,7 @@ namespace Game.DungeonFinding
             Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
             if (player == null)
             {
-                Log.outWarn(LogFilter.Lfg, "{0} not ingame while retrieving his LockedDungeons.", guid.ToString());
+                Log.outWarn(LogFilter.Lfg, $"{guid} not ingame while retrieving his LockedDungeons.");
                 return lockDic;
             }
 
@@ -1680,7 +1730,7 @@ namespace Game.DungeonFinding
         public byte GetKicksLeft(ObjectGuid guid)
         {
             byte kicks = GroupsStore[guid].GetKicksLeft();
-            Log.outDebug(LogFilter.Lfg, "GetKicksLeft: [{0}] = {1}", guid, kicks);
+            Log.outDebug(LogFilter.Lfg, $"GetKicksLeft: [{guid}] = {kicks}");
             return kicks;
         }
 
@@ -1719,7 +1769,8 @@ namespace Game.DungeonFinding
             Cypher.Assert(gguid.IsParty());
 
             var data = GroupsStore[gguid];
-            Log.outInfo(LogFilter.Lfg, "Group: {0}, New state: {1}, Previous: {2}", gguid.ToString(), active, data.IsVoteKickActive());
+            Log.outInfo(LogFilter.Lfg, 
+                $"Group: {gguid}, New state: {active}, Previous: {data.IsVoteKickActive()}");
 
             data.SetVoteKick(active);
         }
@@ -1727,27 +1778,29 @@ namespace Game.DungeonFinding
         void SetDungeon(ObjectGuid guid, int dungeon)
         {
             AddPlayerData(guid);
-            Log.outDebug(LogFilter.Lfg, "SetDungeon: [{0}] dungeon {1}", guid, dungeon);
+            Log.outDebug(LogFilter.Lfg, $"SetDungeon: [{guid}] dungeon {dungeon}");
             GroupsStore[guid].SetDungeon(dungeon);
         }
 
         void SetRoles(ObjectGuid guid, LfgRoles roles)
         {
             AddPlayerData(guid);
-            Log.outDebug(LogFilter.Lfg, "SetRoles: [{0}] roles: {1}", guid, roles);
+            Log.outDebug(LogFilter.Lfg, $"SetRoles: [{guid}] roles: {roles}");
             PlayersStore[guid].SetRoles(roles);
         }
 
         public void SetSelectedDungeons(ObjectGuid guid, List<int> dungeons)
         {
             AddPlayerData(guid);
-            Log.outDebug(LogFilter.Lfg, "SetSelectedDungeons: [{0}] Dungeons: {1}", guid, ConcatenateDungeons(dungeons));
+            Log.outDebug(LogFilter.Lfg, $"SetSelectedDungeons: [{guid}] " +
+                $"Dungeons: {ConcatenateDungeons(dungeons)}");
+
             PlayersStore[guid].SetSelectedDungeons(dungeons);
         }
 
         void DecreaseKicksLeft(ObjectGuid guid)
         {
-            Log.outDebug(LogFilter.Lfg, "DecreaseKicksLeft: [{0}]", guid);
+            Log.outDebug(LogFilter.Lfg, $"DecreaseKicksLeft: [{guid}]");
             GroupsStore[guid].DecreaseKicksLeft();
         }
 
@@ -1766,13 +1819,13 @@ namespace Game.DungeonFinding
 
         void RemovePlayerData(ObjectGuid guid)
         {
-            Log.outDebug(LogFilter.Lfg, "RemovePlayerData: [{0}]", guid);
+            Log.outDebug(LogFilter.Lfg, $"RemovePlayerData: [{guid}]");
             PlayersStore.Remove(guid);
         }
 
         public void RemoveGroupData(ObjectGuid guid)
         {
-            Log.outDebug(LogFilter.Lfg, "RemoveGroupData: [{0}]", guid);
+            Log.outDebug(LogFilter.Lfg, $"RemoveGroupData: [{guid}]");
             var it = GroupsStore.LookupByKey(guid);
             if (it == null)
                 return;
@@ -1962,7 +2015,11 @@ namespace Game.DungeonFinding
                 if (state != LfgState.Queued)
                 {
                     if (state != LfgState.Proposal)
-                        Log.outDebug(LogFilter.Lfg, "Unexpected state found while trying to form new group. Guid: {0}, State: {1}", guid.ToString(), state);
+                    {
+                        Log.outDebug(LogFilter.Lfg,
+                            $"Unexpected state found while trying to form new group. " +
+                            $"Guid: {guid}, State: {state}");
+                    }
 
                     return false;
                 }
@@ -2081,8 +2138,10 @@ namespace Game.DungeonFinding
             {
                 LFGDungeonData dungeon = GetLFGDungeon(dungeonId);
                 if (dungeon != null)
+                {
                     if (dungeon.map == map && dungeon.difficulty == difficulty)
                         return true;
+            }
             }
 
             return false;

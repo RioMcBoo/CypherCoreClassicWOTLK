@@ -126,7 +126,9 @@ namespace Game.Conditions
             // object not present, return false
             if (needsObject && obj == null)
             {
-                Log.outDebug(LogFilter.Condition, "Condition object not found for condition (Entry: {0} Type: {1} Group: {2})", SourceEntry, SourceType, SourceGroup);
+                Log.outDebug(LogFilter.Condition, 
+                    $"Condition object not found for condition " +
+                    $"(Entry: {SourceEntry} Type: {SourceType} Group: {SourceGroup})");
                 return false;
             }
 

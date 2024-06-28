@@ -28,9 +28,10 @@ namespace Game.Entities
                 {
                     if (item.IsInWorld)
                     {
-                        Log.outFatal(LogFilter.PlayerItems, "Item {0} (slot {1}, bag slot {2}) in bag {3} (slot {4}, bag slot {5}, m_bagslot {6}) is to be deleted but is still in world.",
-                            item.GetEntry(), item.InventorySlot, item.InventoryBagSlot,
-                            GetEntry(), InventorySlot, InventoryBagSlot, i);
+                        Log.outFatal(LogFilter.PlayerItems, 
+                            $"Item {item.GetEntry()} (slot {item.InventorySlot}, bag slot {item.InventoryBagSlot}) " +
+                            $"in bag {GetEntry()} (slot {InventorySlot}, bag slot {InventoryBagSlot}, m_bagslot {i}) " +
+                            $"is to be deleted but is still in world.");
                         item.RemoveFromWorld();
                     }
                     m_bagslot[i].Dispose();

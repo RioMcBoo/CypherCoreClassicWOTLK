@@ -162,23 +162,29 @@ namespace Game.Entities
             PlayerInfo info = ObjectMgr.GetPlayerInfo(createInfo.RaceId, createInfo.ClassId);
             if (info == null)
             {
-                Log.outError(LogFilter.Player, "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid race/class pair ({2}/{3}) - refusing to do so.",
-                    GetSession().GetAccountId(), GetName(), createInfo.RaceId, createInfo.ClassId);
+                Log.outError(LogFilter.Player, 
+                    $"PlayerCreate: Possible hacking-attempt:" +
+                    $" Account {GetSession().GetAccountId()} tried creating a character named '{GetName()}' " +
+                    $"with an invalid race/class pair ({createInfo.RaceId}/{createInfo.ClassId}) - refusing to do so.");
                 return false;
             }
 
             var cEntry = CliDB.ChrClassesStorage.LookupByKey((int)createInfo.ClassId);
             if (cEntry == null)
             {
-                Log.outError(LogFilter.Player, "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid character class ({2}) - refusing to do so (wrong DBC-files?)",
-                    GetSession().GetAccountId(), GetName(), createInfo.ClassId);
+                Log.outError(LogFilter.Player, 
+                    $"PlayerCreate: Possible hacking-attempt: " +
+                    $"Account {GetSession().GetAccountId()} tried creating a character named '{GetName()}' " +
+                    $"with an invalid character class ({createInfo.ClassId}) - refusing to do so (wrong DBC-files?)");
                 return false;
             }
 
             if (!GetSession().ValidateAppearance(createInfo.RaceId, createInfo.ClassId, createInfo.Sex, createInfo.Customizations))
             {
-                Log.outError(LogFilter.Player, "Player.Create: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with invalid appearance attributes - refusing to do so",
-                    GetSession().GetAccountId(), GetName());
+                Log.outError(LogFilter.Player, 
+                    $"Player.Create: Possible hacking-attempt: " +
+                    $"Account {GetSession().GetAccountId()} tried creating a character named '{GetName()}' " +
+                    $"with invalid appearance attributes - refusing to do so.");
                 return false;
             }
 
@@ -215,8 +221,10 @@ namespace Game.Entities
 
             if (!IsValidGender(createInfo.Sex))
             {
-                Log.outError(LogFilter.Player, "Player:Create: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid gender ({2}) - refusing to do so",
-                GetSession().GetAccountId(), GetName(), createInfo.Sex);
+                Log.outError(LogFilter.Player, 
+                    $"Player:Create: Possible hacking-attempt: Account {GetSession().GetAccountId()} " +
+                    $"tried creating a character named '{GetName()}' " +
+                    $"with an invalid gender ({createInfo.Sex}) - refusing to do so.");
                 return false;
             }
 
@@ -372,8 +380,10 @@ namespace Game.Entities
             {
                 Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
                 if (aura != null)
+                {
                     if (!aura.IsPermanent())
                         aura.SetDuration(aura.GetSpellInfo().GetMaxDuration());
+            }
             }
 
             AIUpdateTick(diff);
@@ -475,7 +485,7 @@ namespace Game.Entities
                     // m_nextSave reset in SaveToDB call
                     ScriptMgr.OnPlayerSave(this);
                     SaveToDB();
-                    Log.outDebug(LogFilter.Player, "Player '{0}' (GUID: {1}) saved", GetName(), GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, $"Player '{GetName()}' (GUID: {GetGUID()}) saved");
                 }
                 else
                     m_nextSave -= diff;
@@ -574,7 +584,8 @@ namespace Game.Entities
             {
                 if (!oldIsAlive)
                 {
-                    Log.outError(LogFilter.Player, "Player.setDeathState: Attempted to kill a dead player '{0}' ({1})", GetName(), GetGUID().ToString());
+                    Log.outError(LogFilter.Player, 
+                        $"Player.setDeathState: Attempted to kill a dead player '{GetName()}' ({GetGUID()})");
                     return;
                 }
 
@@ -672,8 +683,10 @@ namespace Game.Entities
 
             // Remove items from world before self - player must be found in Item.RemoveFromObjectUpdate
             for (byte i = (int)PlayerSlots.Start; i < (int)PlayerSlots.End; ++i)
+            {
                 if (m_items[i] != null)
                     m_items[i].RemoveFromWorld();
+            }
 
             // Do not add/remove the player from the object storage
             // It will crash when updating the ObjectAccessor
@@ -683,8 +696,9 @@ namespace Game.Entities
             WorldObject viewpoint = GetViewpoint();
             if (viewpoint != null)
             {
-                Log.outError(LogFilter.Player, "Player {0} has viewpoint {1} {2} when removed from world",
-                    GetName(), viewpoint.GetEntry(), viewpoint.GetTypeId());
+                Log.outError(LogFilter.Player,
+                    $"Player {GetName()} has viewpoint {viewpoint.GetEntry()} {viewpoint.GetTypeId()} " +
+                    $"when removed from world");
                 SetViewpoint(viewpoint, false);
             }
         }
@@ -1107,7 +1121,10 @@ namespace Game.Entities
                     // Temporary for issue https://github.com/TrinityCore/TrinityCore/issues/24876
                     if (!GetCharmedGUID().IsEmpty() && !charm.HasAuraTypeWithCaster(AuraType.ControlVehicle, GetGUID()))
                     {
-                        Log.outFatal(LogFilter.Player, $"Player::StopCastingCharm Player '{GetName()}' ({GetGUID()}) is not able to uncharm vehicle ({GetCharmedGUID()}) because of missing SPELL_AURA_CONTROL_VEHICLE");
+                        Log.outFatal(LogFilter.Player, 
+                            $"Player::StopCastingCharm Player '{GetName()}' ({GetGUID()}) " +
+                            $"is not able to uncharm vehicle " +
+                            $"({GetCharmedGUID()}) because of missing SPELL_AURA_CONTROL_VEHICLE");
 
                         // attempt to recover from missing HandleAuraControlVehicle unapply handling
                         // THIS IS A HACK, NEED TO FIND HOW IS IT EVEN POSSBLE TO NOT HAVE THE AURA
@@ -1120,10 +1137,19 @@ namespace Game.Entities
 
             if (!GetCharmedGUID().IsEmpty())
             {
-                Log.outFatal(LogFilter.Player, "Player {0} (GUID: {1} is not able to uncharm unit (GUID: {2} Entry: {3}, Type: {4})", GetName(), GetGUID(), GetCharmedGUID(), charm.GetEntry(), charm.GetTypeId());
+                Log.outFatal(LogFilter.Player,
+                    $"Player {GetName()} (GUID: {GetGUID()} " +
+                    $"is not able to uncharm unit (GUID: {GetCharmedGUID()} " +
+                    $"Entry: {charm.GetEntry()}, Type: {charm.GetTypeId()})");
+
                 if (!charm.GetCharmerGUID().IsEmpty())
                 {
-                    Log.outFatal(LogFilter.Player, $"Player::StopCastingCharm: Charmed unit has charmer {charm.GetCharmerGUID()}\nPlayer debug info: {GetDebugInfo()}\nCharm debug info: {charm.GetDebugInfo()}");
+                    Log.outFatal(LogFilter.Player,
+                        $"Player::StopCastingCharm: " +
+                        $"Charmed unit has charmer {charm.GetCharmerGUID()}\n" +
+                        $"Player debug info: {GetDebugInfo()}\n" +
+                        $"Charm debug info: {charm.GetDebugInfo()}");
+
                     Cypher.Assert(false);
                 }
 
@@ -1140,7 +1166,9 @@ namespace Game.Entities
             CharmInfo charmInfo = charm.GetCharmInfo();
             if (charmInfo == null)
             {
-                Log.outError(LogFilter.Player, "Player:CharmSpellInitialize(): the player's charm ({0}) has no charminfo!", charm.GetGUID());
+                Log.outError(LogFilter.Player, 
+                    $"Player:CharmSpellInitialize(): " +
+                    $"the player's charm ({charm.GetGUID()}) has no charminfo!");
                 return;
             }
 
@@ -1179,7 +1207,9 @@ namespace Game.Entities
             CharmInfo charmInfo = charm.GetCharmInfo();
             if (charmInfo == null)
             {
-                Log.outError(LogFilter.Player, "Player:PossessSpellInitialize(): charm ({0}) has no charminfo!", charm.GetGUID());
+                Log.outError(LogFilter.Player, 
+                    $"Player:PossessSpellInitialize(): " +
+                    $"charm ({charm.GetGUID()}) has no charminfo!");
                 return;
             }
 
@@ -1225,7 +1255,9 @@ namespace Game.Entities
 
                 if (!ConditionMgr.IsObjectMeetingVehicleSpellConditions(vehicle.GetEntry(), spellId, this, vehicle))
                 {
-                    Log.outDebug(LogFilter.Condition, "VehicleSpellInitialize: conditions not met for Vehicle entry {0} spell {1}", vehicle.ToCreature().GetEntry(), spellId);
+                    Log.outDebug(LogFilter.Condition, 
+                        $"VehicleSpellInitialize: conditions not met for Vehicle entry " +
+                        $"{vehicle.ToCreature().GetEntry()} spell {spellId}");
                     continue;
                 }
 
@@ -1533,13 +1565,19 @@ namespace Game.Entities
         {
             if (button >= PlayerConst.MaxActionButtons)
             {
-                Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Action {action} not added into button {button} for player {GetName()} ({GetGUID()}): button must be < {PlayerConst.MaxActionButtons}");
+                Log.outError(LogFilter.Player, 
+                    $"Player::IsActionButtonDataValid: Action {action} not added into button {button} " +
+                    $"for player {GetName()} ({GetGUID()}): " +
+                    $"button must be < {PlayerConst.MaxActionButtons}");
                 return false;
             }
 
             if (action >= PlayerConst.MaxActionButtonActionValue)
             {
-                Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Action {action} not added into button {button} for player {GetName()} ({GetGUID()}): action must be < {PlayerConst.MaxActionButtonActionValue}");
+                Log.outError(LogFilter.Player, 
+                    $"Player::IsActionButtonDataValid: Action {action} not added into button {button} " +
+                    $"for player {GetName()} ({GetGUID()}): " +
+                    $"action must be < {PlayerConst.MaxActionButtonActionValue}");
                 return false;
             }
 
@@ -1548,14 +1586,22 @@ namespace Game.Entities
                 case ActionButtonType.Spell:
                     if (!SpellMgr.HasSpellInfo(action, Difficulty.None))
                     {
-                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Spell action {action} not added into button {button} for player {GetName()} ({GetGUID()}): spell not exist");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::IsActionButtonDataValid: " +
+                            $"Spell action {action} not added into button {button} " +
+                            $"for player {GetName()} ({GetGUID()}): " +
+                            $"spell not exist");
                         return false;
                     }
                     break;
                 case ActionButtonType.Item:
                     if (ObjectMgr.GetItemTemplate(action) == null)
                     {
-                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Item action {action} not added into button {button} for player {GetName()} ({GetGUID()}): item not exist");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::IsActionButtonDataValid: " +
+                            $"Item action {action} not added into button {button} " +
+                            $"for player {GetName()} ({GetGUID()}): " +
+                            $"item not exist");
                         return false;
                     }
                     break;
@@ -1563,7 +1609,11 @@ namespace Game.Entities
                 {
                     if (GetSession().GetBattlePetMgr().GetPet(ObjectGuid.Create(HighGuid.BattlePet, action)) == null)
                     {
-                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Companion action {action} not added into button {button} for player {GetName()} ({GetGUID()}): companion does not exist");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::IsActionButtonDataValid: " +
+                            $"Companion action {action} not added into button {button} " +
+                            $"for player {GetName()} ({GetGUID()}): " +
+                            $"companion does not exist");
                         return false;
                     }
                     break;
@@ -1572,13 +1622,21 @@ namespace Game.Entities
                     var mount = CliDB.MountStorage.LookupByKey(action);
                     if (mount == null)
                     {
-                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Mount action {action} not added into button {button} for player {GetName()} ({GetGUID()}): mount does not exist");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::IsActionButtonDataValid: " +
+                            $"Mount action {action} not added into button {button} " +
+                            $"for player {GetName()} ({GetGUID()}): " +
+                            $"mount does not exist");
                         return false;
                     }
 
                     if (!HasSpell(mount.SourceSpellID))
                     {
-                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Mount action {action} not added into button {button} for player {GetName()} ({GetGUID()}): Player does not know this mount");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::IsActionButtonDataValid: " +
+                            $"Mount action {action} not added into button {button} " +
+                            $"for player {GetName()} ({GetGUID()}): " +
+                            $"Player does not know this mount");
                         return false;
                     }
                     break;
@@ -1611,7 +1669,11 @@ namespace Game.Entities
             // set data and update to CHANGED if not NEW
             ab.SetActionAndType(action, type);
 
-            Log.outDebug(LogFilter.Player, $"Player::AddActionButton: Player '{GetName()}' ({GetGUID()}) added action '{action}' (Type {type}) to button '{button}'");
+            Log.outDebug(LogFilter.Player, 
+                $"Player::AddActionButton: " +
+                $"Player '{GetName()}' ({GetGUID()}) " +
+                $"added action '{action}' (Type {type}) to button '{button}'");
+
             return ab;
         }
 
@@ -1626,7 +1688,8 @@ namespace Game.Entities
             else
                 button.uState = ActionButtonUpdateState.Deleted;    // saved, will deleted at next save
 
-            Log.outDebug(LogFilter.Player, "Action Button '{0}' Removed from Player '{1}'", button, GetGUID().ToString());
+            Log.outDebug(LogFilter.Player, 
+                $"Action Button '{button}' Removed from Player '{GetGUID()}'");
         }
 
         public ActionButton GetActionButton(byte _button)
@@ -1858,14 +1921,17 @@ namespace Game.Entities
         {
             if (!GridDefines.IsValidMapCoord(mapid, x, y, z, orientation))
             {
-                Log.outError(LogFilter.Maps, "TeleportTo: invalid map ({0}) or invalid coordinates (X: {1}, Y: {2}, Z: {3}, O: {4}) given when teleporting player (GUID: {5}, name: {6}, map: {7}, {8}).",
-                    mapid, x, y, z, orientation, GetGUID().ToString(), GetName(), GetMapId(), GetPosition().ToString());
+                Log.outError(LogFilter.Maps, 
+                    $"TeleportTo: invalid map ({mapid}) or invalid coordinates (X: {x}, Y: {y}, Z: {z}, O: {orientation}) " +
+                    $"given when teleporting player (GUID: {GetGUID()}, name: {GetName()}, map: {GetMapId()}, {GetPosition()}).");
                 return false;
             }
 
             if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) && DisableMgr.IsDisabledFor(DisableType.Map, mapid, this))
             {
-                Log.outError(LogFilter.Maps, "Player (GUID: {0}, name: {1}) tried to enter a forbidden map {2}", GetGUID().ToString(), GetName(), mapid);
+                Log.outError(LogFilter.Maps, 
+                    $"Player (GUID: {GetGUID()}, name: {GetName()}) tried to enter a forbidden map {mapid}");
+
                 SendTransferAborted(mapid, TransferAbortReason.MapNotAllowed);
                 return false;
             }
@@ -1883,7 +1949,9 @@ namespace Game.Entities
             // client without expansion support
             if (GetSession().GetExpansion() < mEntry.Expansion)
             {
-                Log.outDebug(LogFilter.Maps, "Player {0} using client without required expansion tried teleport to non accessible map {1}", GetName(), mapid);
+                Log.outDebug(LogFilter.Maps, 
+                    $"Player {GetName()} using client without required expansion " +
+                    $"tried teleport to non accessible map {mapid}");
 
                 ITransport _transport = GetTransport();
                 if (_transport != null)
@@ -1896,7 +1964,7 @@ namespace Game.Entities
                 return false;                                       // normal client can't teleport to this map...
             }
             else
-                Log.outDebug(LogFilter.Maps, "Player {0} is being teleported to map {1}", GetName(), mapid);
+                Log.outDebug(LogFilter.Maps, $"Player {GetName()} is being teleported to map {mapid}");
 
             if (m_vehicle != null)
                 ExitVehicle();
@@ -2023,7 +2091,8 @@ namespace Game.Entities
                         LeaveBattleground(false);                   // don't teleport to entry point
                 }
 
-                // remove arena spell coldowns/buffs now to also remove pet's cooldowns before it's temporarily unsummoned
+                // remove arena spell coldowns/buffs now to also remove pet's cooldowns
+                // before it's temporarily unsummoned
                 if (mEntry.IsBattleArena && !IsGameMaster())
                 {
                     RemoveArenaSpellCooldowns(true);
@@ -2093,7 +2162,8 @@ namespace Game.Entities
                 }
 
                 // move packet sent by client always after far teleport
-                // code for finish transfer to new map called in WorldSession.HandleMoveWorldportAckOpcode at client packet
+                // code for finish transfer to new map
+                // called in WorldSession.HandleMoveWorldportAckOpcode at client packet
                 SetSemaphoreTeleportFar(true);
 
             }
@@ -2138,7 +2208,11 @@ namespace Game.Entities
                         startLevel = Math.Max(charTemplate.Level, startLevel);
                 }
                 else
-                    Log.outWarn(LogFilter.Cheat, $"Account: {GetSession().GetAccountId()} (IP: {GetSession().GetRemoteAddress()}) tried to use a character template without given permission. Possible cheating attempt.");
+                {
+                    Log.outWarn(LogFilter.Cheat, 
+                        $"Account: {GetSession().GetAccountId()} (IP: {GetSession().GetRemoteAddress()}) " +
+                        $"tried to use a character template without given permission. Possible cheating attempt.");
+            }
             }
 
             if (GetSession().HasPermission(RBACPermissions.UseStartGmLevel))
@@ -2153,8 +2227,13 @@ namespace Game.Entities
             {
                 if (check)
                 {
-                    Log.outDebug(LogFilter.Unit, "Player.ValidateMovementInfo: Violation of MovementFlags found ({0}). MovementFlags: {1}, MovementFlags2: {2} for player {3}. Mask {4} will be removed.",
-                        check, mi.GetMovementFlags(), mi.GetMovementFlags2(), GetGUID().ToString(), maskToRemove);
+                    Log.outDebug(LogFilter.Unit, 
+                        $"Player.ValidateMovementInfo: " +
+                        $"Violation of MovementFlags found ({check}). " +
+                        $"MovementFlags: {mi.GetMovementFlags()}, " +
+                        $"MovementFlags2: {mi.GetMovementFlags2()} for player {GetGUID()}. " +
+                        $"Mask {maskToRemove} will be removed.");
+
                     mi.RemoveMovementFlag(maskToRemove);
                 }
             });
@@ -2225,7 +2304,7 @@ namespace Game.Entities
         {
             // calculate total z distance of the fall
             float z_diff = m_lastFallZ - movementInfo.Pos.posZ;
-            Log.outDebug(LogFilter.Server, "zDiff = {0}", z_diff);
+            Log.outDebug(LogFilter.Server, $"zDiff = {z_diff}");
 
             //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
             // 14.57 can be calculated by resolving damageperc formula below to 0
@@ -2266,7 +2345,10 @@ namespace Game.Entities
                     }
 
                     //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-                    Log.outDebug(LogFilter.Player, $"FALLDAMAGE z={movementInfo.Pos.GetPositionZ()} sz={height} pZ={GetPositionZ()} FallTime={movementInfo.jump.fallTime} mZ={height} damage={damage} SF={safe_fall}\nPlayer debug info:\n{GetDebugInfo()}");
+                    Log.outDebug(LogFilter.Player, 
+                        $"FALLDAMAGE z={movementInfo.Pos.GetPositionZ()} sz={height} pZ={GetPositionZ()} " +
+                        $"FallTime={movementInfo.jump.fallTime} mZ={height} damage={damage} SF={safe_fall}\n" +
+                        $"Player debug info:\n{GetDebugInfo()}");
                 }
             }
         }
@@ -2323,8 +2405,10 @@ namespace Game.Entities
                 return false;
 
             if (trigger.PhaseID != 0 || trigger.PhaseGroupID != 0 || trigger.PhaseUseFlags != 0)
+            {
                 if (!PhasingHandler.InDbPhaseShift(this, (PhaseUseFlagsValues)trigger.PhaseUseFlags, trigger.PhaseID, trigger.PhaseGroupID))
                     return false;
+            }
 
             if (trigger.Radius > 0.0f)
             {
@@ -2399,6 +2483,7 @@ namespace Game.Entities
 
         //GM
         public bool IsDeveloper() { return HasPlayerFlag(PlayerFlags.Developer); }
+
         public void SetDeveloper(bool on)
         {
             if (on)
@@ -2406,7 +2491,9 @@ namespace Game.Entities
             else
                 RemovePlayerFlag(PlayerFlags.Developer);
         }
+
         public bool IsAcceptWhispers() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers); }
+
         public void SetAcceptWhispers(bool on)
         {
             if (on)
@@ -2414,9 +2501,11 @@ namespace Game.Entities
             else
                 m_ExtraFlags &= ~PlayerExtraFlags.AcceptWhispers;
         }
+
         public bool IsGameMaster() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMOn); }
         public bool IsGameMasterAcceptingWhispers() { return IsGameMaster() && IsAcceptWhispers(); }
         public bool CanBeGameMaster() { return GetSession().HasPermission(RBACPermissions.CommandGm); }
+
         public void SetGameMaster(bool on)
         {
             if (on)
@@ -2463,7 +2552,9 @@ namespace Game.Entities
 
             UpdateObjectVisibility();
         }
+
         public bool IsGMChat() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMChat); }
+
         public void SetGMChat(bool on)
         {
             if (on)
@@ -2471,7 +2562,9 @@ namespace Game.Entities
             else
                 m_ExtraFlags &= ~PlayerExtraFlags.GMChat;
         }
+
         public bool IsTaxiCheater() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.TaxiCheat); }
+
         public void SetTaxiCheater(bool on)
         {
             if (on)
@@ -2479,7 +2572,9 @@ namespace Game.Entities
             else
                 m_ExtraFlags &= ~PlayerExtraFlags.TaxiCheat;
         }
+
         public bool IsGMVisible() { return !m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMInvisible); }
+
         public void SetGMVisible(bool on)
         {
             if (on)
@@ -2517,8 +2612,10 @@ namespace Game.Entities
                     PrepareQuestMenu(source.GetGUID());
             }
             else if (source.IsTypeId(TypeId.GameObject))
+            {
                 if (source.ToGameObject().GetGoType() == GameObjectTypes.QuestGiver)
                     PrepareQuestMenu(source.GetGUID());
+            }
 
             foreach (var gossipMenuItem in menuItemBounds)
             {
@@ -2582,7 +2679,11 @@ namespace Game.Entities
                         default:
                             if (gossipMenuItem.OptionNpc >= GossipOptionNpc.Max)
                             {
-                                Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuID}.");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Creature entry {creature.GetEntry()} " +
+                                    $"has an unknown gossip option icon {gossipMenuItem.OptionNpc} " +
+                                    $"for menu {gossipMenuItem.MenuID}.");
+
                                 canTalk = false;
                             }
                             break;                                         // NYI
@@ -2651,7 +2752,9 @@ namespace Game.Entities
             {
                 if (gossipOptionNpc != GossipOptionNpc.None)
                 {
-                    Log.outError(LogFilter.Player, "Player guid {0} request invalid gossip option for GameObject entry {1}", GetGUID().ToString(), source.GetEntry());
+                    Log.outError(LogFilter.Player, 
+                        $"Player guid {GetGUID()} request invalid gossip option " +
+                        $"for GameObject entry {source.GetEntry()}");
                     return;
                 }
             }
@@ -2702,7 +2805,8 @@ namespace Game.Entities
 
                     if (bgTypeId == BattlegroundTypeId.None)
                     {
-                        Log.outError(LogFilter.Player, "a user (guid {0}) requested Battlegroundlist from a npc who is no battlemaster", GetGUID().ToString());
+                        Log.outError(LogFilter.Player, 
+                            $"a user (guid {GetGUID()}) requested Battlegroundlist from a npc who is no battlemaster");
                         return;
                     }
 
@@ -2938,7 +3042,7 @@ namespace Game.Entities
                     if (ch.IsConstant())
                         cMgr.LeftChannel(ch.GetChannelId(), ch.GetZoneEntry());
             }
-            Log.outDebug(LogFilter.ChatSystem, "Player {0}: channels cleaned up!", GetName());
+            Log.outDebug(LogFilter.ChatSystem, $"Player {GetName()}: channels cleaned up!");
         }
 
         void UpdateLocalChannels(int newZone)
@@ -3132,6 +3236,7 @@ namespace Game.Entities
                 Log.outDebug(LogFilter.Maps, "PLAYER: Player '{0}' (GUID: {1}) will be teleported to homebind in 60 seconds", GetName(), GetGUID().ToString());
             }
         }
+
         public void SetHomebind(WorldLocation loc, int areaId)
         {
             homebind.WorldRelocate(loc);
@@ -3148,6 +3253,7 @@ namespace Game.Entities
             stmt.SetInt64(6, GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
         }
+
         public void SetBindPoint(ObjectGuid guid)
         {
             NPCInteractionOpenResult npcInteraction = new();
@@ -3156,6 +3262,7 @@ namespace Game.Entities
             npcInteraction.Success = true;
             SendPacket(npcInteraction);
         }
+
         public void SendBindPointUpdate()
         {
             BindPointUpdate packet = new();
@@ -3269,6 +3376,7 @@ namespace Game.Entities
             _resurrectionData.Mana = mana;
             _resurrectionData.Aura = appliedAura;
         }
+
         public void ClearResurrectRequestData()
         {
             _resurrectionData = null;
@@ -3283,6 +3391,7 @@ namespace Game.Entities
         }
 
         public bool IsResurrectRequested() { return _resurrectionData != null; }
+
         public void ResurrectUsingRequestData()
         {
             // Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
@@ -3794,7 +3903,10 @@ namespace Game.Entities
             {
                 if (type == EnviromentalDamage.Fall)                               // DealDamage not apply item durability loss at self damage
                 {
-                    Log.outDebug(LogFilter.Player, $"Player::EnvironmentalDamage: Player '{GetName()}' ({GetGUID()}) fall to death, losing {WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath)} durability");
+                    Log.outDebug(LogFilter.Player, 
+                        $"Player::EnvironmentalDamage: Player '{GetName()}' ({GetGUID()}) fall to death, " +
+                        $"losing {WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath)} durability");
+
                     DurabilityLossAll(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath), false);
                     // durability lost message
                     SendDurabilityLoss(this, (int)(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath) * 100.0f));
@@ -3823,7 +3935,8 @@ namespace Game.Entities
         public override bool CanNeverSee(WorldObject obj)
         {
             // the intent is to delay sending visible objects until client is ready for them
-            // some gameobjects dont function correctly if they are sent before TransportServerTime is correctly set (after CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE)
+            // some gameobjects dont function correctly if they are sent
+            // before TransportServerTime is correctly set (after CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE)
             return !HasPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime) || base.CanNeverSee(obj);
         }
 
@@ -3835,8 +3948,10 @@ namespace Game.Entities
 
             ObjectGuid guid = m_activePlayerData.FarsightObject;
             if (!guid.IsEmpty())
+            {
                 if (obj.GetGUID() == guid)
                     return true;
+            }
 
             return false;
         }
@@ -3851,8 +3966,10 @@ namespace Game.Entities
 
             Player seerPlayer = seer.ToPlayer();
             if (seerPlayer != null)
+            {
                 if (IsGroupVisibleFor(seerPlayer))
                     return true;
+            }
 
             return false;
         }
@@ -3888,7 +4005,8 @@ namespace Game.Entities
             WorldLocation corpseLocation = GetCorpseLocation();
             if (corpseLocation.GetMapId() == GetMapId())
             {
-                Log.outError(LogFilter.Player, "BuildPlayerRepop: player {0} ({1}) already has a corpse", GetName(), GetGUID().ToString());
+                Log.outError(LogFilter.Player, 
+                    $"BuildPlayerRepop: player {GetName()} ({GetGUID()}) already has a corpse");
                 return;
             }
 
@@ -3896,7 +4014,8 @@ namespace Game.Entities
             Corpse corpse = CreateCorpse();
             if (corpse == null)
             {
-                Log.outError(LogFilter.Player, "Error creating corpse for Player {0} ({1})", GetName(), GetGUID().ToString());
+                Log.outError(LogFilter.Player, 
+                    $"Error creating corpse for Player {GetName()} ({GetGUID()})");
                 return;
             }
             GetMap().AddToMap(corpse);
@@ -4359,8 +4478,10 @@ namespace Game.Entities
         {
             _corpseLocation = new WorldLocation();
             if (GetMap().ConvertCorpseToBones(GetGUID()) != null)
+            {
                 if (triggerSave && !GetSession().PlayerLogoutWithSave())   // at logout we will already store the player
                     SaveToDB();                                             // prevent loading as ghost without corpse
+        }
         }
 
         public Corpse GetCorpse() { return GetMap().GetCorpseByPlayer(GetGUID()); }
@@ -4421,6 +4542,7 @@ namespace Game.Entities
         {
             return _corpseLocation != null && _corpseLocation.GetMapId() != -1;
         }
+
         public WorldLocation GetCorpseLocation() { return _corpseLocation; }
 
         public uint GetCorpseReclaimDelay(bool pvp)
@@ -4439,6 +4561,7 @@ namespace Game.Entities
             ulong count = (ulong)((now < m_deathExpireTime - 1) ? (m_deathExpireTime - 1 - now) / PlayerConst.DeathExpireStep : 0);
             return PlayerConst.copseReclaimDelay[count];
         }
+
         void UpdateCorpseReclaimDelay()
         {
             bool pvp = m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.PVPDeath);
@@ -4459,6 +4582,7 @@ namespace Game.Entities
             else
                 m_deathExpireTime = now + PlayerConst.DeathExpireStep;
         }
+
         int CalculateCorpseReclaimDelay(bool load = false)
         {
             Corpse corpse = GetCorpse();
@@ -4496,6 +4620,7 @@ namespace Game.Entities
 
             return (int)(delay * Time.InMilliseconds);
         }
+
         void SendCorpseReclaimDelay(int delay)
         {
             CorpseReclaimDelay packet = new();
@@ -4557,8 +4682,10 @@ namespace Game.Entities
             pet.Relocate(x, y, z, ang);
             if (!pet.IsPositionValid())
             {
-                Log.outError(LogFilter.Server, "Pet (guidlow {0}, entry {1}) not summoned. Suggested coordinates isn't valid (X: {2} Y: {3})",
-                    pet.GetGUID().ToString(), pet.GetEntry(), pet.GetPositionX(), pet.GetPositionY());
+                Log.outError(LogFilter.Server, 
+                    $"Pet (guidlow {pet.GetGUID()}, entry {pet.GetEntry()}) not summoned. " +
+                    $"Suggested coordinates isn't valid (X: {pet.GetPositionX()} Y: {pet.GetPositionY()})");
+
                 pet.Dispose();
                 return null;
             }
@@ -4567,7 +4694,7 @@ namespace Game.Entities
             var petNumber = ObjectMgr.GeneratePetNumber();
             if (!pet.Create(map.GenerateLowGuid(HighGuid.Pet), map, entry, petNumber))
             {
-                Log.outError(LogFilter.Server, "no such creature entry {0}", entry);
+                Log.outError(LogFilter.Server, $"no such creature entry {entry}");
                 pet.Dispose();
                 return null;
             }
@@ -4907,8 +5034,10 @@ namespace Game.Entities
         {
             PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(conditionId);
             if (playerCondition != null)
+            {
                 if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
                     return false;
+            }
 
             return true;
         }
@@ -4988,7 +5117,8 @@ namespace Game.Entities
                     return true;
 
                 area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-            } while (area != null);
+            }
+            while (area != null);
 
             return false;
         }
@@ -5067,13 +5197,14 @@ namespace Game.Entities
 
             return Team.Alliance;
         }
+
         public static int TeamIdForRace(Race race)
         {
             ChrRacesRecord rEntry = CliDB.ChrRacesStorage.LookupByKey((int)race);
             if (rEntry != null)
                 return rEntry.Alliance;
 
-            Log.outError(LogFilter.Player, "Race ({0}) not found in DBC: wrong DBC files?", race);
+            Log.outError(LogFilter.Player, $"Race ({race}) not found in DBC: wrong DBC files?");
             return BattleGroundTeamId.Neutral;
         }
 
@@ -5141,6 +5272,7 @@ namespace Game.Entities
         //LoginFlag
         public bool HasAtLoginFlag(AtLoginFlags f) { return Convert.ToBoolean(atLoginFlags & f); }
         public void SetAtLoginFlag(AtLoginFlags f) { atLoginFlags |= f; }
+
         public void RemoveAtLoginFlag(AtLoginFlags flags, bool persist = false)
         {
             atLoginFlags &= ~flags;
@@ -5170,6 +5302,7 @@ namespace Game.Entities
 
             CharacterCacheStorage.UpdateCharacterGuildId(GetGUID(), guildId);
         }
+
         public void SetGuildRank(byte rankId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildRankID), rankId); }
         public int GetGuildRank() { return m_playerData.GuildRankID; }
         public void SetGuildLevel(int level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), level); }
@@ -5253,8 +5386,10 @@ namespace Game.Entities
             // Only health and mana are set to maximum.
             SetFullHealth();
             foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
+            {
                 if (powerType.HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
                     SetFullPower(powerType.PowerTypeEnum);
+            }
 
             // update level to hunter/summon pet
             Pet pet = GetPet();
@@ -5340,7 +5475,8 @@ namespace Game.Entities
             ChrModelRecord model = DB2Mgr.GetChrModel(GetRace(), GetNativeGender());
             if (model == null)
             {
-                Log.outError(LogFilter.Player, $"Player {GetGUID()} has incorrect race/gender pair. Can't init display ids.");
+                Log.outError(LogFilter.Player, 
+                    $"Player {GetGUID()} has incorrect race/gender pair. Can't init display ids.");
                 return;
             }
 
@@ -5488,8 +5624,10 @@ namespace Game.Entities
             {
                 var bindableSpells = DB2Mgr.GetGlyphBindableSpells(glyphId);
                 foreach (var bindableSpell in bindableSpells)
+                {
                     if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
                         activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
+            }
             }
 
             activeGlyphs.IsFullUpdate = true;
@@ -5525,6 +5663,7 @@ namespace Game.Entities
             var mapDifficulty = GetMap().GetMapDifficulty();
             if (mapDifficulty != null)
                 worldServerInfo.InstanceGroupSize = mapDifficulty.MaxPlayers;
+            
             worldServerInfo.IsTournamentRealm = false;             // @todo
             worldServerInfo.RestrictedAccountMaxLevel = null; // @todo
             worldServerInfo.RestrictedAccountMaxMoney = null; // @todo
@@ -6090,7 +6229,8 @@ namespace Game.Entities
 
         public override void UpdateObjectVisibility(bool forced = true)
         {
-            // Prevent updating visibility if player is not in world (example: LoadFromDB sets drunkstate which updates invisibility while player is not in map)
+            // Prevent updating visibility if player is not in world
+            // (example: LoadFromDB sets drunkstate which updates invisibility while player is not in map)
             if (!IsInWorld)
                 return;
 
@@ -6265,7 +6405,8 @@ namespace Game.Entities
             if (areaEntry == null)
             {
                 Log.outError(LogFilter.Player, 
-                    $"Player '{GetName()}' ({GetGUID()}) discovered unknown area (x: {GetPositionX()} y: {GetPositionY()} z: {GetPositionZ()} map: {GetMapId()}).");
+                    $"Player '{GetName()}' ({GetGUID()}) discovered unknown area " +
+                    $"(x: {GetPositionX()} y: {GetPositionY()} z: {GetPositionZ()} map: {GetMapId()}).");
                 return;
             }
 
@@ -6356,10 +6497,12 @@ namespace Game.Entities
 
             SendSysMessage(result, args);
         }
+
         public void SendSysMessage(string str, params object[] args)
         {
             new CommandHandler(_session).SendSysMessage(string.Format(str, args));
         }
+
         public void SendBuyError(BuyResult msg, Creature creature, int item)
         {
             BuyFailed packet = new();
@@ -6368,6 +6511,7 @@ namespace Game.Entities
             packet.Reason = msg;
             SendPacket(packet);
         }
+
         public void SendSellError(SellResult msg, Creature creature, ObjectGuid guid)
         {
             SellResponse sellResponse = new();
@@ -6403,6 +6547,7 @@ namespace Game.Entities
         {
             Talk(textId, ChatMsg.Say, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
         }
+
         public override void Yell(string text, Language language, WorldObject obj = null)
         {
             ScriptMgr.OnPlayerChat(this, ChatMsg.Yell, language, text);
@@ -6411,22 +6556,27 @@ namespace Game.Entities
             data.Initialize(ChatMsg.Yell, language, this, this, text);
             SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), true);
         }
+
         public override void Yell(int textId, WorldObject target = null)
         {
             Talk(textId, ChatMsg.Yell, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), target);
         }
+
         public override void TextEmote(string text, WorldObject obj = null, bool something = false)
         {
             ScriptMgr.OnPlayerChat(this, ChatMsg.Emote, Language.Universal, text);
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
-            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat), true);
+            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, 
+                !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat), true);
         }
+
         public override void TextEmote(int textId, WorldObject target = null, bool isBossEmote = false)
         {
             Talk(textId, ChatMsg.Emote, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), target);
         }
+
         public void WhisperAddon(string text, string prefix, bool isLogged, Player receiver)
         {
             ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, text, receiver);
@@ -6438,6 +6588,7 @@ namespace Game.Entities
             data.Initialize(ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, this, this, text, 0, "", Locale.enUS, prefix);
             receiver.SendPacket(data);
         }
+
         public override void Whisper(string text, Language language, Player target = null, bool something = false)
         {
             bool isAddonMessage = language == Language.Addon;
@@ -6481,7 +6632,7 @@ namespace Game.Entities
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
             if (bct == null)
             {
-                Log.outError(LogFilter.Unit, "WorldObject.Whisper: `broadcast_text` was not {0} found", textId);
+                Log.outError(LogFilter.Unit, $"WorldObject.Whisper: `broadcast_text` was not {textId} found");
                 return;
             }
 
@@ -6490,14 +6641,17 @@ namespace Game.Entities
             packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
             target.SendPacket(packet);
         }
+
         public bool CanUnderstandLanguage(Language language)
         {
             if (IsGameMaster())
                 return true;
 
             foreach (var languageDesc in LanguageMgr.GetLanguageDescById(language))
+            {
                 if (languageDesc.SkillId != 0 && HasSkill((SkillType)languageDesc.SkillId))
                     return true;
+            }
 
             if (HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, (int)language))
                 return true;
@@ -6535,6 +6689,7 @@ namespace Game.Entities
             if (sequence != null)
                 _cinematicMgr.BeginCinematic(sequence);
         }
+
         public void SendMovieStart(int movieId)
         {
             SetMovie(movieId);
@@ -6635,7 +6790,9 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.HandleBaseModFlatValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, 
+                    $"Player.HandleBaseModFlatValue: Invalid BaseModGroup ({modGroup}) " +
+                    $"for player '{GetName()}' ({GetGUID()})");
                 return;
             }
             m_auraBaseFlatMod[(int)modGroup] += apply ? amount : -amount;
@@ -6646,7 +6803,9 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.ApplyBaseModPctValue: Invalid BaseModGroup/BaseModType ({modGroup}/{BaseModType.FlatMod}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, 
+                    $"Player.ApplyBaseModPctValue: Invalid BaseModGroup/BaseModType ({modGroup}/{BaseModType.FlatMod}) " +
+                    $"for player '{GetName()}' ({GetGUID()})");
                 return;
             }
 
@@ -6746,7 +6905,9 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End || modType >= BaseModType.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.GetBaseModValue: Invalid BaseModGroup/BaseModType ({modGroup}/{modType}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, 
+                    $"Player.GetBaseModValue: Invalid BaseModGroup/BaseModType ({modGroup}/{modType}) " +
+                    $"for player '{GetName()}' ({GetGUID()})");
                 return 0.0f;
             }
 
@@ -6757,7 +6918,9 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.GetTotalBaseModValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, 
+                    $"Player.GetTotalBaseModValue: Invalid BaseModGroup ({modGroup}) " +
+                    $"for player '{GetName()}' ({GetGUID()})");
                 return 0.0f;
             }
 
@@ -6806,6 +6969,7 @@ namespace Game.Entities
 
             SendMessageToSet(data, true);
         }
+
         public static DrunkenState GetDrunkenstateByValue(byte value)
         {
             if (value >= 90)
@@ -6869,15 +7033,19 @@ namespace Game.Entities
 
                 Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
                 if (spell != null)
+                {
                     if (spell.m_spellInfo.Id != spellid)
                         InterruptSpell(CurrentSpellTypes.Generic, false);
+                }
 
                 InterruptSpell(CurrentSpellTypes.AutoRepeat, false);
 
                 spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
                 if (spell != null)
+                {
                     if (spell.m_spellInfo.Id != spellid)
                         InterruptSpell(CurrentSpellTypes.Channeled, true);
+            }
             }
 
             var sourcenode = nodes[0];
@@ -7038,7 +7206,7 @@ namespace Game.Entities
             if (sourceNode == 0)
                 return;
 
-            Log.outDebug(LogFilter.Unit, "WORLD: Restart character {0} taxi flight", GetGUID().ToString());
+            Log.outDebug(LogFilter.Unit, $"WORLD: Restart character {GetGUID()} taxi flight");
 
             int mountDisplayId = ObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
             if (mountDisplayId == 0)
@@ -7107,8 +7275,10 @@ namespace Game.Entities
 
                             // level difference must be small enough to get RaF bonus, UNLESS we are lower level
                             if (player.GetLevel() < GetLevel())
+                            {
                                 if (GetLevel() - player.GetLevel() > WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevelDifference))
                                     continue;
+                            }
                         }
 
                         bool ARecruitedB = (player.GetSession().GetRecruiterId() == GetSession().GetAccountId());
@@ -7234,7 +7404,10 @@ namespace Game.Entities
             return false;
         }
 
-        void SetActiveCombatTraitConfigID(int traitConfigId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), traitConfigId); }
+        void SetActiveCombatTraitConfigID(int traitConfigId) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), traitConfigId); 
+        }
 
         void InitPrimaryProfessions()
         {
@@ -7243,7 +7416,10 @@ namespace Game.Entities
 
         public int GetFreePrimaryProfessionPoints() { return m_activePlayerData.CharacterPoints; }
 
-        void SetFreePrimaryProfessions(ushort profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
+        void SetFreePrimaryProfessions(ushort profs)
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); 
+        }
 
         public bool HaveAtClient(WorldObject u)
         {
@@ -7289,18 +7465,29 @@ namespace Game.Entities
             packet.Index = title.MaskID;
             SendPacket(packet);
         }
-        public void SetChosenTitle(int title) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerTitle), title); }
-        public void SetKnownTitles(int index, ulong mask) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.KnownTitles, index), mask); }
+
+        public void SetChosenTitle(int title) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerTitle), title); 
+        }
+
+        public void SetKnownTitles(int index, ulong mask) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.KnownTitles, index), mask); 
+        }
 
         public void SetViewpoint(WorldObject target, bool apply)
         {
             if (apply)
             {
-                Log.outDebug(LogFilter.Maps, "Player.CreateViewpoint: Player {0} create seer {1} (TypeId: {2}).", GetName(), target.GetEntry(), target.GetTypeId());
+                Log.outDebug(LogFilter.Maps, 
+                    $"Player.CreateViewpoint: Player {GetName()} " +
+                    $"create seer {target.GetEntry()} (TypeId: {target.GetTypeId()}).");
 
                 if (m_activePlayerData.FarsightObject != ObjectGuid.Empty)
                 {
-                    Log.outFatal(LogFilter.Player, "Player.CreateViewpoint: Player {0} cannot add new viewpoint!", GetName());
+                    Log.outFatal(LogFilter.Player, 
+                        $"Player.CreateViewpoint: Player {GetName()} cannot add new viewpoint!");
                     return;
 
                 }
@@ -7317,11 +7504,13 @@ namespace Game.Entities
             }
             else
             {
-                Log.outDebug(LogFilter.Maps, "Player.CreateViewpoint: Player {0} remove seer", GetName());
+                Log.outDebug(LogFilter.Maps, 
+                    $"Player.CreateViewpoint: Player {GetName()} remove seer");
 
                 if (target.GetGUID() != m_activePlayerData.FarsightObject)
                 {
-                    Log.outFatal(LogFilter.Player, "Player.CreateViewpoint: Player {0} cannot remove current viewpoint!", GetName());
+                    Log.outFatal(LogFilter.Player, 
+                        $"Player.CreateViewpoint: Player {GetName()} cannot remove current viewpoint!");
                     return;
                 }
 
@@ -7335,6 +7524,7 @@ namespace Game.Entities
                 SetSeer(this);
             }
         }
+
         public WorldObject GetViewpoint()
         {
             ObjectGuid guid = m_activePlayerData.FarsightObject;
@@ -7353,7 +7543,9 @@ namespace Game.Entities
             if (target.HasUnitState(UnitState.Charmed) && (GetGUID() != target.GetCharmerGUID()))
             {
                 // this should never happen, otherwise m_unitBeingMoved might be left dangling!
-                Log.outError(LogFilter.Player, $"Player '{GetName()}' attempt to client control '{target.GetName()}', which is charmed by GUID {target.GetCharmerGUID()}");
+                Log.outError(LogFilter.Player, 
+                    $"Player '{GetName()}' attempt to client control '{target.GetName()}', " +
+                    $"which is charmed by GUID {target.GetCharmerGUID()}");
                 return;
             }
 
@@ -7492,6 +7684,7 @@ namespace Game.Entities
             RestInfo restInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type);
             SetUpdateFieldValue(restInfo.ModifyValue(restInfo.StateID), (byte)state);
         }
+
         public void SetRestThreshold(RestTypes type, int threshold)
         {
             RestInfo restInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type);
@@ -7771,10 +7964,12 @@ namespace Game.Entities
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, false, 0, "", null, null, sender, action);
         }
+
         public void AddGossipItem(GossipOptionNpc optionNpc, string text, int sender, int action, string popupText, uint popupMoney, bool coded)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, coded, popupMoney, popupText, null, null, sender, action);
         }
+
         public void AddGossipItem(int gossipMenuID, int gossipMenuItemID, int sender, int action)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);

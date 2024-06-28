@@ -19,8 +19,11 @@ namespace Game
                 handler.Invoke(this, request.Method, new CodedInputStream(request.Data));
             else
             {
-                SendBattlenetResponse(request.Method.GetServiceHash(), request.Method.GetMethodId(), request.Method.Token, BattlenetRpcErrorCode.RpcNotImplemented);
-                Log.outDebug(LogFilter.SessionRpc, "{0} tried to call invalid service {1}", GetPlayerInfo(), request.Method.GetServiceHash());
+                SendBattlenetResponse(request.Method.GetServiceHash(), request.Method.GetMethodId(), 
+                    request.Method.Token, BattlenetRpcErrorCode.RpcNotImplemented);
+
+                Log.outDebug(LogFilter.SessionRpc, 
+                    $"{GetPlayerInfo()} tried to call invalid service {request.Method.GetServiceHash()}");
             }
         }
 

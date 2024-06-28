@@ -194,7 +194,10 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 
                 for (var i = 0; i < 4; ++i)
                 {
-                    Creature creature = me.SummonCreature(AddList[i], MiscConst.Locations[i], TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
+                    Creature creature = 
+                        me.SummonCreature(AddList[i], MiscConst.Locations[i], 
+                        TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
+
                     if (creature != null)
                     {
                         AddGUID[i] = creature.GetGUID();
@@ -206,7 +209,10 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             {
                 for (byte i = 0; i < 4; ++i)
                 {
-                    Creature creature = me.SummonCreature(AddId[i], MiscConst.Locations[i], TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
+                    Creature creature = 
+                        me.SummonCreature(AddId[i], MiscConst.Locations[i], 
+                        TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
+
                     if (creature != null)
                         AddGUID[i] = creature.GetGUID();
                 }
@@ -366,8 +372,11 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
+                {
                     if (target.GetPowerType() == PowerType.Mana)
                         DoCast(target, SpellIds.Manaburn);
+                }
+
                 ManaBurn_Timer = 5000;                          // 3 sec cast
             }
             else ManaBurn_Timer -= diff;
@@ -506,7 +515,9 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
             if (DispelMagic_Timer <= diff)
             {
-                Unit target = RandomHelper.RAND(SelectGuestTarget(), SelectTarget(SelectTargetMethod.Random, 0, 100, true));
+                Unit target = 
+                    RandomHelper.RAND(SelectGuestTarget(), SelectTarget(SelectTargetMethod.Random, 0, 100, true));
+
                 if (target != null)
                     DoCast(target, SpellIds.Dispelmagic);
 

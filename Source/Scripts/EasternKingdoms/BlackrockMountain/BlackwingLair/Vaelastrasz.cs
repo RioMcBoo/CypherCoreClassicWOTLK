@@ -97,7 +97,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
             {
                 //selects a random target that isn't the current victim and is a mana user (selects mana users) but not pets
                 //it also ignores targets who have the aura. We don't want to place the debuff on the same target twice.
-                Unit target = SelectTarget(SelectTargetMethod.Random, 1, u => { return u != null && !u.IsPet() && u.GetPowerType() == PowerType.Mana && !u.HasAura(SpellIds.Burningadrenaline); });
+                Unit target = SelectTarget(SelectTargetMethod.Random, 1, u => 
+                { 
+                    return u != null && !u.IsPet() && u.GetPowerType() == PowerType.Mana 
+                    && !u.HasAura(SpellIds.Burningadrenaline); 
+                });
+
                 if (target != null)
                     me.CastSpell(target, SpellIds.Burningadrenaline, true);
 

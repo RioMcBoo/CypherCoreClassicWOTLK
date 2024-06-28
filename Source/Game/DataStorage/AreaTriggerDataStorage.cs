@@ -38,13 +38,17 @@ namespace Game.DataStorage
 
                         if (action.ActionType >= AreaTriggerActionTypes.Max)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_template_actions` has invalid ActionType ({action.ActionType}, for AreaTriggerId ({areaTriggerId.Id},{areaTriggerId.IsCustom}) and Param {action.Param}");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `areatrigger_template_actions` has invalid ActionType ({action.ActionType}, " +
+                                $"for AreaTriggerId ({areaTriggerId.Id},{areaTriggerId.IsCustom}) and Param {action.Param}");
                             continue;
                         }
 
                         if (action.TargetType >= AreaTriggerActionUserTypes.Max)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_template_actions` has invalid TargetType ({action.TargetType} for AreaTriggerId ({areaTriggerId.Id},{areaTriggerId.IsCustom}) and Param {action.Param}");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `areatrigger_template_actions` has invalid TargetType ({action.TargetType} " +
+                                $"for AreaTriggerId ({areaTriggerId.Id},{areaTriggerId.IsCustom}) and Param {action.Param}");
                             continue;
                         }
 
@@ -53,7 +57,10 @@ namespace Game.DataStorage
                         {
                             if (Global.ObjectMgr.GetWorldSafeLoc(action.Param) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Table `areatrigger_template_actions` has invalid (Id: {areaTriggerId}, for AreaTriggerId ({areaTriggerId.Id},{areaTriggerId.IsCustom}) with TargetType=Teleport and Param ({action.Param}) not a valid world safe loc entry");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `areatrigger_template_actions` has invalid (Id: {areaTriggerId}, " +
+                                    $"for AreaTriggerId ({areaTriggerId.Id},{areaTriggerId.IsCustom}) " +
+                                    $"with TargetType=Teleport and Param ({action.Param}) not a valid world safe loc entry");
                                 continue;
                             }
                         }
@@ -64,7 +71,8 @@ namespace Game.DataStorage
                 }
                 else
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates actions. DB table `areatrigger_template_actions` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 AreaTrigger templates actions. DB table `areatrigger_template_actions` is empty.");
                 }
             }
 
@@ -82,13 +90,18 @@ namespace Game.DataStorage
                         if (!vertices.IsNull(5) && !vertices.IsNull(6))
                             verticesTargetByCreateProperties.Add(createPropertiesId, new Vector2(vertices.Read<float>(5), vertices.Read<float>(6)));
                         else if (vertices.IsNull(5) != vertices.IsNull(6))
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has listed invalid target vertices (AreaTriggerCreatePropertiesId: (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}), Index: {vertices.Read<uint>(1)}).");
+                            Log.outError(LogFilter.Sql,
+                                $"Table `areatrigger_create_properties_polygon_vertex` " +
+                                $"has listed invalid target vertices (AreaTriggerCreatePropertiesId: (Id: {createPropertiesId.Id}, " +
+                                $"IsCustom: {createPropertiesId.IsCustom}), Index: {vertices.Read<uint>(1)}).");
                     }
                     while (vertices.NextRow());
                 }
                 else
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger polygon polygon vertices. DB table `areatrigger_create_properties_polygon_vertex` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 AreaTrigger polygon polygon vertices. " +
+                        "DB table `areatrigger_create_properties_polygon_vertex` is empty.");
                 }
             }
 
@@ -107,7 +120,9 @@ namespace Game.DataStorage
                 }
                 else
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger splines. DB table `areatrigger_create_properties_spline_point` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 AreaTrigger splines. " +
+                        "DB table `areatrigger_create_properties_spline_point` is empty.");
                 }
             }
 
@@ -155,13 +170,18 @@ namespace Game.DataStorage
 
                         if (areaTriggerId.Id != 0 && createProperties.Template == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` references invalid AreaTrigger (Id: {areaTriggerId.Id}, IsCustom: {areaTriggerId.IsCustom}) for AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom})");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `areatrigger_create_properties` references invalid AreaTrigger (Id: {areaTriggerId.Id}, " +
+                                $"IsCustom: {areaTriggerId.IsCustom}) for AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                                $"IsCustom: {createPropertiesId.IsCustom})");
                             continue;
                         }
 
                         if (shape >= AreaTriggerShapeType.Max)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid shape {shape}.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `areatrigger_create_properties` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                                $"IsCustom: {createPropertiesId.IsCustom}) with invalid shape {shape}.");
                             continue;
                         }
 
@@ -169,7 +189,10 @@ namespace Game.DataStorage
                         {
                             if (value != 0 && !CliDB.CurveStorage.ContainsKey(value))
                             {
-                                Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has listed AreaTrigger (Id: {areaTriggerId.Id}, IsCustom: {areaTriggerId.IsCustom}) for AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid Curve ({value}), set to 0!");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `areatrigger_create_properties` has listed AreaTrigger (Id: {areaTriggerId.Id}, " +
+                                    $"IsCustom: {areaTriggerId.IsCustom}) for AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                                    $"IsCustom: {createPropertiesId.IsCustom}) with invalid Curve ({value}), set to 0!");
                                 return 0;
                             }
 
@@ -211,7 +234,11 @@ namespace Game.DataStorage
                         createProperties.Shape.PolygonVerticesTarget = verticesTargetByCreateProperties[createProperties.Id];
                         if (!createProperties.Shape.PolygonVerticesTarget.Empty() && createProperties.Shape.PolygonVertices.Count != createProperties.Shape.PolygonVerticesTarget.Count)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has invalid target vertices, either all or none vertices must have a corresponding target vertex (AreaTriggerCreatePropertiesId: (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom})).");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `areatrigger_create_properties_polygon_vertex` " +
+                                $"has invalid target vertices, either all or none vertices " +
+                                $"must have a corresponding target vertex (AreaTriggerCreatePropertiesId: " +
+                                $"(Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom})).");
                             createProperties.Shape.PolygonVerticesTarget.Clear();
                         }
 
@@ -223,7 +250,9 @@ namespace Game.DataStorage
                 }
                 else
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger create properties. DB table `areatrigger_create_properties` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 AreaTrigger create properties. " +
+                        "DB table `areatrigger_create_properties` is empty.");
                 }
             }
 
@@ -240,7 +269,10 @@ namespace Game.DataStorage
                         var createProperties = _areaTriggerCreateProperties.LookupByKey(createPropertiesId);
                         if (createProperties == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` reference invalid AreaTriggerCreatePropertiesId: (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom})");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `areatrigger_create_properties_orbit` reference invalid " +
+                                $"AreaTriggerCreatePropertiesId: (Id: {createPropertiesId.Id}, " +
+                                $"IsCustom: {createPropertiesId.IsCustom})");
                             continue;
                         }
 
@@ -252,7 +284,11 @@ namespace Game.DataStorage
                         {
                             if (!float.IsFinite(value))
                             {
-                                Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` has listed areatrigger (AreaTriggerCreatePropertiesId: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid Float ({value}), set to 0!");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `areatrigger_create_properties_orbit` has listed areatrigger " +
+                                    $"(AreaTriggerCreatePropertiesId: {createPropertiesId.Id}, " +
+                                    $"IsCustom: {createPropertiesId.IsCustom}) " +
+                                    $"with invalid Float ({value}), set to 0!");
                                 return 0;
                             }
 
@@ -274,7 +310,9 @@ namespace Game.DataStorage
                 }
                 else
                 {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates circular movement infos. DB table `areatrigger_create_properties_orbit` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 AreaTrigger templates circular movement infos. " +
+                        "DB table `areatrigger_create_properties_orbit` is empty.");
                 }
             }
 
@@ -303,50 +341,66 @@ namespace Game.DataStorage
                     AreaTriggerCreateProperties createProperties = GetAreaTriggerCreateProperties(createPropertiesId);
                     if (createProperties == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) that doesn't exist for SpawnId {spawnId}");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                            $"IsCustom: {createPropertiesId.IsCustom}) that doesn't exist for SpawnId {spawnId}");
                         continue;
                     }
 
                     if (createProperties.Flags != AreaTriggerCreatePropertiesFlag.None)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with non - zero flags");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                            $"IsCustom: {createPropertiesId.IsCustom}) with non - zero flags");
                         continue;
                     }
 
                     if (createProperties.ScaleCurveId != 0 || createProperties.MorphCurveId != 0 || createProperties.FacingCurveId != 0 || createProperties.MoveCurveId != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with curve values");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                            $"IsCustom: {createPropertiesId.IsCustom}) with curve values");
                         continue;
                     }
 
                     if (createProperties.TimeToTarget != 0 || createProperties.TimeToTargetScale != 0 || createProperties.FacingCurveId != 0 || createProperties.MoveCurveId != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with time to target values");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                            $"IsCustom: {createPropertiesId.IsCustom}) with time to target values");
                         continue;
                     }
 
                     if (createProperties.OrbitInfo != null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with orbit info");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                            $"IsCustom: {createPropertiesId.IsCustom}) with orbit info");
                         continue;
                     }
 
                     if (createProperties.HasSplines())
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with splines");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, " +
+                            $"IsCustom: {createPropertiesId.IsCustom}) with splines");
                         continue;
                     }
 
                     if (!GridDefines.IsValidMapCoord(location))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed an invalid position: SpawnId: {spawnId}, MapId {location.GetMapId()}, Position {location}");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `areatrigger` has listed an invalid position: SpawnId: {spawnId}, " +
+                            $"MapId {location.GetMapId()}, Position {location}");
                         continue;
                     }
 
                     var difficulties = Global.ObjectMgr.ParseSpawnDifficulties(result.Read<string>(4), "areatrigger", spawnId, location.GetMapId(), spawnMasks[location.GetMapId()]);
                     if (difficulties.Empty())
                     {
-                        Log.outDebug(LogFilter.Sql, $"Table `areatrigger` has areatrigger (GUID: {spawnId}) that is not spawned in any difficulty, skipped.");
+                        Log.outDebug(LogFilter.Sql, 
+                            $"Table `areatrigger` has areatrigger (GUID: {spawnId}) " +
+                            $"that is not spawned in any difficulty, skipped.");
                         continue;
                     }
 
@@ -365,7 +419,9 @@ namespace Game.DataStorage
                         spawn.SpellForVisuals = result.Read<int>(12);
                         if (!Global.SpellMgr.HasSpellInfo(spawn.SpellForVisuals.Value, Difficulty.None))
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger` has areatrigger (GUID: {spawnId}) with invalid SpellForVisual {spawn.SpellForVisuals}, set to none.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `areatrigger` has areatrigger (GUID: {spawnId}) " +
+                                $"with invalid SpellForVisual {spawn.SpellForVisuals}, set to none.");
                             spawn.SpellForVisuals = null;
                         }
                     }

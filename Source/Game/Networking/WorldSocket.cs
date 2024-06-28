@@ -96,7 +96,8 @@ namespace Game.Networking
 
                 if (banned)
                 {
-                    Log.outError(LogFilter.Network, "WorldSocket.Connect: Sent Auth Response (IP {0} banned).", GetRemoteIpAddress().ToString());
+                    Log.outError(LogFilter.Network, 
+                        $"WorldSocket.Connect: Sent Auth Response (IP {GetRemoteIpAddress()} banned).");
                     CloseSocket();
                     return;
                 }
@@ -158,7 +159,8 @@ namespace Game.Networking
                     if (z_res1 != 0)
                     {
                         CloseSocket();
-                        Log.outError(LogFilter.Network, "Can't initialize packet compression (zlib: deflateInit2_) Error code: {0}", z_res1);
+                        Log.outError(LogFilter.Network,
+                            $"Can't initialize packet compression (zlib: deflateInit2_) Error code: {z_res1}");
                         return;
                     }
 
@@ -240,7 +242,9 @@ namespace Game.Networking
 
             if (!_worldCrypt.Decrypt(_packetBuffer.GetData(), header.Tag))
             {
-                Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): client {GetRemoteIpAddress()} failed to decrypt packet (size: {header.Size})");
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.ReadData(): client {GetRemoteIpAddress()} " +
+                    $"failed to decrypt packet (size: {header.Size})");
                 return ReadDataHandlerResult.Error;
             }
 
@@ -249,8 +253,13 @@ namespace Game.Networking
 
             if (packet.GetOpcode() >= (int)ClientOpcodes.Max)
             {
-                Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): client {GetRemoteIpAddress()} sent wrong opcode (opcode: {packet.GetOpcode()})");
-                Log.outError(LogFilter.Network, $"Header: {_headerBuffer.GetData().ToHexString()} Data: {_packetBuffer.GetData().ToHexString()}");
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.ReadData(): client {GetRemoteIpAddress()} " +
+                    $"sent wrong opcode (opcode: {packet.GetOpcode()})");
+
+                Log.outError(LogFilter.Network, 
+                    $"Header: {_headerBuffer.GetData().ToHexString()} Data: {_packetBuffer.GetData().ToHexString()}");
+
                 return ReadDataHandlerResult.Error;
             }
 
@@ -260,7 +269,10 @@ namespace Game.Networking
 
             if (opcode != ClientOpcodes.HotfixRequest && !header.IsValidSize())
             {
-                Log.outError(LogFilter.Network, $"WorldSocket.ReadHeaderHandler(): client {GetRemoteIpAddress()} sent malformed packet (size: {header.Size})");
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.ReadHeaderHandler(): client {GetRemoteIpAddress()} " +
+                    $"sent malformed packet (size: {header.Size})");
+
                 return ReadDataHandlerResult.Error;
             }
 
@@ -275,7 +287,10 @@ namespace Game.Networking
                 case ClientOpcodes.AuthSession:
                     if (_worldSession != null)
                     {
-                        Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): received duplicate CMSG_AUTH_SESSION from {_worldSession.GetPlayerInfo()}");
+                        Log.outError(LogFilter.Network, 
+                            $"WorldSocket.ReadData(): received duplicate CMSG_AUTH_SESSION " +
+                            $"from {_worldSession.GetPlayerInfo()}");
+
                         return ReadDataHandlerResult.Error;
                     }
 
@@ -286,7 +301,10 @@ namespace Game.Networking
                 case ClientOpcodes.AuthContinuedSession:
                     if (_worldSession != null)
                     {
-                        Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): received duplicate CMSG_AUTH_CONTINUED_SESSION from {_worldSession.GetPlayerInfo()}");
+                        Log.outError(LogFilter.Network, 
+                            $"WorldSocket.ReadData(): received duplicate CMSG_AUTH_CONTINUED_SESSION " +
+                            $"from {_worldSession.GetPlayerInfo()}");
+
                         return ReadDataHandlerResult.Error;
                     }
 
@@ -301,7 +319,10 @@ namespace Game.Networking
                         return ReadDataHandlerResult.Ok;
                     }
 
-                    Log.outError(LogFilter.Network, $"WorldSocket::ReadDataHandler: client {GetRemoteIpAddress()} sent CMSG_KEEP_ALIVE without being authenticated");
+                    Log.outError(LogFilter.Network, 
+                        $"WorldSocket::ReadDataHandler: client {GetRemoteIpAddress()} " +
+                        $"sent CMSG_KEEP_ALIVE without being authenticated");
+
                     return ReadDataHandlerResult.Error;
                 case ClientOpcodes.LogDisconnect:
                     break;
@@ -327,7 +348,8 @@ namespace Game.Networking
 
                         if (!PacketManager.ContainsHandler(opcode))
                         {
-                            Log.outError(LogFilter.Network, $"No defined handler for opcode {opcode} sent by {_worldSession.GetPlayerInfo()}");
+                            Log.outError(LogFilter.Network, 
+                                $"No defined handler for opcode {opcode} sent by {_worldSession.GetPlayerInfo()}");
                             break;
                         }
 
@@ -419,7 +441,8 @@ namespace Game.Networking
             int z_res = ZLib.deflate(_compressionStream, 2);
             if (z_res != 0)
             {
-                Log.outError(LogFilter.Network, "Can't compress packet data (zlib: deflate) Error code: {0} msg: {1}", z_res, _compressionStream.msg);
+                Log.outError(LogFilter.Network, 
+                    $"Can't compress packet data (zlib: deflate) Error code: {z_res} msg: {_compressionStream}");
                 return 0;
             }
 
@@ -478,7 +501,10 @@ namespace Game.Networking
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
-                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.WorldMgr.GetRealm().Build} ({GetRemoteIpAddress()}).");
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.HandleAuthSessionCallback: " +
+                    $"Missing auth seed for realm build {Global.WorldMgr.GetRealm().Build} ({GetRemoteIpAddress()}).");
+
                 CloseSocket();
                 return;
             }
@@ -496,7 +522,11 @@ namespace Game.Networking
                 digestKeyHash.Finish(buildInfo.Mac64AuthSeed);
             else
             {
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.HandleAuthSession: " +
+                    $"Authentication failed for account: {account.game.Id} ('{authSession.RealmJoinTicket}') " +
+                    $"address: {address}");
+
                 CloseSocket();
                 return;
             }
@@ -509,7 +539,11 @@ namespace Game.Networking
             // Check that Key and account name are the same on client and server
             if (!hmac.Digest.Compare(authSession.Digest))
             {
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.HandleAuthSession: " +
+                    $"Authentication failed for account: {account.game.Id} ('{authSession.RealmJoinTicket}') " +
+                    $"address: {address}");
+
                 CloseSocket();
                 return;
             }
@@ -555,7 +589,9 @@ namespace Game.Networking
             if (Global.WorldMgr.IsClosed())
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: World closed, denying client ({0}).", GetRemoteIpAddress());
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.HandleAuthSession: World closed, denying client ({GetRemoteIpAddress()}).");
+
                 CloseSocket();
                 return;
             }
@@ -563,8 +599,11 @@ namespace Game.Networking
             if (authSession.RealmID != Global.WorldMgr.GetRealm().Id.Index)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Client {0} requested connecting with realm id {1} but this realm has id {2} set in config.",
-                    GetRemoteIpAddress().ToString(), authSession.RealmID, Global.WorldMgr.GetRealm().Id.Index);
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.HandleAuthSession: Client {GetRemoteIpAddress()} requested connecting " +
+                    $"with realm id {authSession.RealmID} " +
+                    $"but this realm has id {Global.WorldMgr.GetRealm().Id.Index} set in config.");
+
                 CloseSocket();
                 return;
             }
@@ -574,7 +613,10 @@ namespace Game.Networking
             if (wardenActive && account.game.OS != "Win" && account.game.OS != "Wn64" && account.game.OS != "Mc64")
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Client {0} attempted to log in using invalid client OS ({1}).", address, account.game.OS);
+                Log.outError(LogFilter.Network, 
+                    $"WorldSocket.HandleAuthSession: " +
+                    $"Client {address} attempted to log in using invalid client OS ({account.game.OS}).");
+
                 CloseSocket();
                 return;
             }
@@ -585,7 +627,9 @@ namespace Game.Networking
                 if (account.battleNet.LastIP != address.Address.ToString())
                 {
                     SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
-                    Log.outDebug(LogFilter.Network, "HandleAuthSession: Sent Auth Response (Account IP differs).");
+                    Log.outDebug(LogFilter.Network, 
+                        "HandleAuthSession: Sent Auth Response (Account IP differs).");
+
                     // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
                     Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                     CloseSocket();
@@ -597,7 +641,12 @@ namespace Game.Networking
                 if (account.battleNet.LockCountry != _ipCountry)
                 {
                     SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
-                    Log.outDebug(LogFilter.Network, "WorldSocket.HandleAuthSession: Sent Auth Response (Account country differs. Original country: {0}, new country: {1}).", account.battleNet.LockCountry, _ipCountry);
+                    Log.outDebug(LogFilter.Network,
+                        $"WorldSocket.HandleAuthSession: " +
+                        $"Sent Auth Response (Account country differs. " +
+                        $"Original country: {account.battleNet.LockCountry}, " +
+                        $"new country: {_ipCountry}).");
+
                     // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
                     Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                     CloseSocket();
@@ -620,7 +669,9 @@ namespace Game.Networking
             if (account.IsBanned()) // if account banned
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.GameAccountBanned);
-                Log.outError(LogFilter.Network, "WorldSocket:HandleAuthSession: Sent Auth Response (Account banned).");
+                Log.outError(LogFilter.Network, 
+                    "WorldSocket:HandleAuthSession: Sent Auth Response (Account banned).");
+
                 Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                 CloseSocket();
                 return;
@@ -631,13 +682,17 @@ namespace Game.Networking
             if (allowedAccountType > AccountTypes.Player && account.game.Security < allowedAccountType)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.ServerIsPrivate);
-                Log.outInfo(LogFilter.Network, "WorldSocket:HandleAuthSession: User tries to login but his security level is not enough");
+                Log.outInfo(LogFilter.Network, 
+                    "WorldSocket:HandleAuthSession: User tries to login but his security level is not enough");
+
                 Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                 CloseSocket();
                 return;
             }
 
-            Log.outDebug(LogFilter.Network, "WorldSocket:HandleAuthSession: Client '{0}' authenticated successfully from {1}.", authSession.RealmJoinTicket, address);
+            Log.outDebug(LogFilter.Network,
+                $"WorldSocket:HandleAuthSession: " +
+                $"Client '{authSession.RealmJoinTicket}' authenticated successfully from {address}.");
 
             if (WorldConfig.GetBoolValue(WorldCfg.AllowLogginIpAddressesInDatabase))
             {
@@ -714,7 +769,10 @@ namespace Game.Networking
 
             if (!hmac.Digest.Compare(authSession.Digest))
             {
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthContinuedSession: Authentication failed for account: {0} ('{1}') address: {2}", accountId, login, GetRemoteIpAddress());
+                Log.outError(LogFilter.Network,
+                    $"WorldSocket.HandleAuthContinuedSession: " +
+                    $"Authentication failed for account: {accountId} ('{login}') address: {GetRemoteIpAddress()}");
+
                 CloseSocket();
                 return;
             }
@@ -753,7 +811,9 @@ namespace Game.Networking
                             break;
                         case ConnectToSerial.WorldAttempt5:
                             {
-                                Log.outError(LogFilter.Network, "{0} failed to connect 5 times to world socket, aborting login", _worldSession.GetPlayerInfo());
+                                Log.outError(LogFilter.Network, 
+                                    $"{_worldSession.GetPlayerInfo()} failed to connect 5 times to world socket, aborting login");
+
                                 _worldSession.AbortLogin(LoginFailureReason.NoWorld);
                                 break;
                             }
@@ -809,7 +869,10 @@ namespace Game.Networking
                         {
                             if (_worldSession != null && !_worldSession.HasPermission(RBACPermissions.SkipCheckOverspeedPing))
                             {
-                                Log.outError(LogFilter.Network, "WorldSocket:HandlePing: {0} kicked for over-speed pings (address: {1})", _worldSession.GetPlayerInfo(), GetRemoteIpAddress());
+                                Log.outError(LogFilter.Network, 
+                                    $"WorldSocket:HandlePing: " +
+                                    $"{_worldSession.GetPlayerInfo()} kicked for over-speed pings " +
+                                    $"(address: {GetRemoteIpAddress()})");
                                 //return ReadDataHandlerResult.Error;
                             }
                         }
@@ -825,7 +888,10 @@ namespace Game.Networking
                     _worldSession.SetLatency(ping.Latency);
                 else
                 {
-                    Log.outError(LogFilter.Network, "WorldSocket:HandlePing: peer sent CMSG_PING, but is not authenticated or got recently kicked, address = {0}", GetRemoteIpAddress());
+                    Log.outError(LogFilter.Network, 
+                        $"WorldSocket:HandlePing: " +
+                        $"peer sent CMSG_PING, but is not authenticated or got recently kicked, " +
+                        $"address = {GetRemoteIpAddress()}");
                     return false;
                 }
             }

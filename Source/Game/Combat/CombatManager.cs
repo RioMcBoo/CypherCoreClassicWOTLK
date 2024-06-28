@@ -73,16 +73,21 @@ namespace Game.Combat
         public bool HasPvECombat()
         {
             foreach (var (_, refe) in _pveRefs)
+            {
                 if (!refe.IsSuppressedFor(_owner))
                     return true;
+            }
+
             return false;
         }
 
         public bool HasPvECombatWithPlayers()
         {
             foreach (var reference in _pveRefs)
+            {
                 if (!reference.Value.IsSuppressedFor(_owner) && reference.Value.GetOther(_owner).IsPlayer())
                     return true;
+            }
 
             return false;
         }
@@ -90,8 +95,10 @@ namespace Game.Combat
         public bool HasPvPCombat()
         {
             foreach (var pair in _pvpRefs)
+            {
                 if (!pair.Value.IsSuppressedFor(_owner))
                     return true;
+            }
 
             return false;
         }
@@ -99,12 +106,16 @@ namespace Game.Combat
         public Unit GetAnyTarget()
         {
             foreach (var pair in _pveRefs)
+            {
                 if (!pair.Value.IsSuppressedFor(_owner))
                     return pair.Value.GetOther(_owner);
+            }
 
             foreach (var pair in _pvpRefs)
+            {
                 if (!pair.Value.IsSuppressedFor(_owner))
                     return pair.Value.GetOther(_owner);
+            }
 
             return null;
         }
@@ -182,6 +193,7 @@ namespace Game.Combat
                     SetInCombatWith(target);
                 }
             }
+
             foreach (var refe in mgr._pvpRefs)
             {
                 Unit target = refe.Value.GetOther(who);
@@ -221,8 +233,10 @@ namespace Game.Combat
         public void SuppressPvPCombat(Func<Unit, bool> unitFilter = null)
         {
             foreach (var (_, combatRef) in _pvpRefs)
+            {
                 if (unitFilter == null || unitFilter(combatRef.GetOther(_owner)))
                     combatRef.Suppress(_owner);
+            }
 
             if (UpdateOwnerCombatState())
             {
@@ -240,8 +254,10 @@ namespace Game.Combat
 
             List<CombatReference> combatReferencesToRemove = new();
             foreach (var (_, combatRef) in _pveRefs)
+            {
                 if (unitFilter == null || unitFilter(combatRef.GetOther(_owner)))
                     combatReferencesToRemove.Add(combatRef);
+            }
 
             foreach (CombatReference combatRef in combatReferencesToRemove)
                 combatRef.EndCombat();
@@ -272,8 +288,10 @@ namespace Game.Combat
         {
             List<CombatReference> combatReferencesToRemove = new();
             foreach (var (_, combatRef) in _pvpRefs)
+            {
                 if (unitFilter == null || unitFilter(combatRef.GetOther(_owner)))
                     combatReferencesToRemove.Add(combatRef);
+            }
 
             foreach (CombatReference combatRef in combatReferencesToRemove)
                 combatRef.EndCombat();
@@ -396,6 +414,7 @@ namespace Game.Combat
                 if (firstAI != null)
                     firstAI.JustExitedCombat();
             }
+
             if (needSecondAI)
             {
                 UnitAI secondAI = second.GetAI();
@@ -412,6 +431,7 @@ namespace Game.Combat
                 _suppressFirst = false;
                 needFirstAI = first.GetCombatManager().UpdateOwnerCombatState();
             }
+
             if (_suppressSecond)
             {
                 _suppressSecond = false;

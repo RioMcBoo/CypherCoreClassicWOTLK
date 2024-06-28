@@ -86,14 +86,20 @@ namespace Game.Entities
             RelocateStationaryPosition(pos);
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (AreaTriggerCreatePropertiesId: (Id: {areaTriggerCreatePropertiesId.Id}, IsCustom: {areaTriggerCreatePropertiesId.IsCustom})) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
+                Log.outError(LogFilter.AreaTrigger, 
+                    $"AreaTrigger (AreaTriggerCreatePropertiesId: (Id: {areaTriggerCreatePropertiesId.Id}, " +
+                    $"IsCustom: {areaTriggerCreatePropertiesId.IsCustom})) not created. " +
+                    $"Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
                 return false;
             }
 
             _areaTriggerCreateProperties = Global.AreaTriggerDataStorage.GetAreaTriggerCreateProperties(areaTriggerCreatePropertiesId);
             if (_areaTriggerCreateProperties == null)
             {
-                Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (AreaTriggerCreatePropertiesId: (Id: {areaTriggerCreatePropertiesId.Id}, IsCustom: {areaTriggerCreatePropertiesId.IsCustom})) not created. Invalid areatrigger create properties id");
+                Log.outError(LogFilter.AreaTrigger, 
+                    $"AreaTrigger (AreaTriggerCreatePropertiesId: (Id: {areaTriggerCreatePropertiesId.Id}, " +
+                    $"IsCustom: {areaTriggerCreatePropertiesId.IsCustom})) not created. " +
+                    $"Invalid areatrigger create properties id");
                 return false;
             }
 
@@ -1236,7 +1242,10 @@ namespace Game.Entities
                 float progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MoveCurveId, currentTimePercent);
                 if (progress < 0.0f || progress > 1.0f)
                 {
-                    Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (Id: {GetEntry()}, AreaTriggerCreatePropertiesId: (Id: {createProperties.Id.Id}, IsCustom: {createProperties.Id.IsCustom})) has wrong progress ({progress}) caused by curve calculation (MoveCurveId: {createProperties.MoveCurveId})");
+                    Log.outError(LogFilter.AreaTrigger,
+                        $"AreaTrigger (Id: {GetEntry()}, AreaTriggerCreatePropertiesId: (Id: {createProperties.Id.Id}, " +
+                        $"IsCustom: {createProperties.Id.IsCustom})) has wrong progress ({progress}) " +
+                        $"caused by curve calculation (MoveCurveId: {createProperties.MoveCurveId})");
                 }
                 else
                     currentTimePercent = progress;

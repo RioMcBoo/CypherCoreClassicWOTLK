@@ -45,25 +45,30 @@ namespace Game.Achievements
         {
             if (type >= CriteriaType.Count)
             {
-                Log.outDebug(LogFilter.Achievement, "UpdateCriteria: Wrong criteria Type {0}", type);
+                Log.outDebug(LogFilter.Achievement, 
+                    $"UpdateCriteria: Wrong criteria Type {type}");
                 return;
             }
 
             if (referencePlayer == null)
             {
-                Log.outDebug(LogFilter.Achievement, "UpdateCriteria: Player is NULL! Cant update criteria");
+                Log.outDebug(LogFilter.Achievement, 
+                    "UpdateCriteria: Player is NULL! Cant update criteria");
                 return;
             }
 
             // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
             if (referencePlayer.IsGameMaster() || referencePlayer.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
             {
-                Log.outDebug(LogFilter.Achievement, $"CriteriaHandler::UpdateCriteria: [Player {referencePlayer.GetName()} {(referencePlayer.IsGameMaster() ? "GM mode on" : "disallowed by RBAC")}]" +
+                Log.outDebug(LogFilter.Achievement, 
+                    $"CriteriaHandler::UpdateCriteria: " +
+                    $"[Player {referencePlayer.GetName()} {(referencePlayer.IsGameMaster() ? "GM mode on" : "disallowed by RBAC")}]" +
                     $" {GetOwnerInfo()}, {type} ({(uint)type}), {miscValue1}, {miscValue2}, {miscValue3}");
                 return;
             }
 
-            Log.outDebug(LogFilter.Achievement, "UpdateCriteria({0}, {1}, {2}, {3}) {4}", type, type, miscValue1, miscValue2, miscValue3, GetOwnerInfo());
+            Log.outDebug(LogFilter.Achievement, 
+                $"UpdateCriteria({type}, {miscValue1}, {miscValue2}, {miscValue3}) {GetOwnerInfo()}");
 
             List<Criteria> criteriaList = GetCriteriaByType(type, (int)miscValue1);
             foreach (Criteria criteria in criteriaList)
@@ -545,7 +550,8 @@ namespace Game.Achievements
 
         public void SetCriteriaProgress(Criteria criteria, long changeValue, Player referencePlayer, ProgressType progressType = ProgressType.Set)
         {
-            Log.outDebug(LogFilter.Achievement, $"SetCriteriaProgress({criteria.Id}, {changeValue}) for {GetOwnerInfo()}.");
+            Log.outDebug(LogFilter.Achievement, 
+                $"SetCriteriaProgress({criteria.Id}, {changeValue}) for {GetOwnerInfo()}.");
 
             CriteriaProgress progress = GetCriteriaProgress(criteria);
             if (progress == null)
@@ -640,8 +646,10 @@ namespace Game.Achievements
                     return tree.Criteria == null || !IsCompletedCriteria(tree.Criteria, requiredCount);
                 case CriteriaTreeOperator.CompleteAll:
                     foreach (CriteriaTree node in tree.Children)
+                    {
                         if (!IsCompletedCriteriaTree(node))
                             return false;
+                    }
                     return true;
                 case CriteriaTreeOperator.Sum:
                 {
@@ -666,8 +674,10 @@ namespace Game.Achievements
                         {
                             CriteriaProgress criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
                             if (criteriaProgress != null)
+                            {
                                 if (criteriaProgress.Counter > progress)
                                     progress = criteriaProgress.Counter;
+                        }
                         }
                     });
                     return progress >= requiredCount;
@@ -681,9 +691,13 @@ namespace Game.Achievements
                         {
                             CriteriaProgress criteriaProgress = GetCriteriaProgress(node.Criteria);
                             if (criteriaProgress != null)
+                            {
                                 if (criteriaProgress.Counter >= 1)
+                                {
                                     if (++progress >= requiredCount)
                                         return true;
+                        }
+                    }
                         }
                     }
 
@@ -693,9 +707,13 @@ namespace Game.Achievements
                 {
                     long progress = 0;
                     foreach (CriteriaTree node in tree.Children)
+                    {
                         if (IsCompletedCriteriaTree(node))
+                        {
                             if (++progress >= requiredCount)
                                 return true;
+                        }
+                    }
 
                     return false;
                 }
@@ -725,8 +743,9 @@ namespace Game.Achievements
             if ((tree.Entry.HasFlag(CriteriaTreeFlags.HordeOnly) && referencePlayer.GetTeam() != Team.Horde) ||
                 (tree.Entry.HasFlag(CriteriaTreeFlags.AllianceOnly) && referencePlayer.GetTeam() != Team.Alliance))
             {
-                Log.outTrace(LogFilter.Achievement, "CriteriaHandler.CanUpdateCriteriaTree: (Id: {0} Type {1} CriteriaTree {2}) Wrong faction",
-                    criteria.Id, criteria.Entry.Type, tree.Entry.Id);
+                Log.outTrace(LogFilter.Achievement, 
+                    $"CriteriaHandler.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} " +
+                    $"CriteriaTree {tree.Entry.Id}) Wrong faction");
                 return false;
             }
 
@@ -847,7 +866,8 @@ namespace Game.Achievements
         {
             if (Global.DisableMgr.IsDisabledFor(DisableType.Criteria, criteria.Id, null))
             {
-                Log.outError(LogFilter.Achievement, "CanUpdateCriteria: (Id: {0} Type {1}) Disabled", criteria.Id, criteria.Entry.Type);
+                Log.outError(LogFilter.Achievement, 
+                    $"CanUpdateCriteria: (Id: {criteria.Id} Type {criteria.Entry.Type}) Disabled");
                 return false;
             }
 
@@ -866,19 +886,22 @@ namespace Game.Achievements
 
             if (!RequirementsSatisfied(criteria, miscValue1, miscValue2, miscValue3, refe, referencePlayer))
             {
-                Log.outTrace(LogFilter.Achievement, "CanUpdateCriteria: (Id: {0} Type {1}) Requirements not satisfied", criteria.Id, criteria.Entry.Type);
+                Log.outTrace(LogFilter.Achievement, 
+                    $"CanUpdateCriteria: (Id: {criteria.Id} Type {criteria.Entry.Type}) Requirements not satisfied");
                 return false;
             }
 
             if (criteria.Modifier != null && !ModifierTreeSatisfied(criteria.Modifier, miscValue1, miscValue2, refe, referencePlayer))
             {
-                Log.outTrace(LogFilter.Achievement, "CanUpdateCriteria: (Id: {0} Type {1}) Requirements have not been satisfied", criteria.Id, criteria.Entry.Type);
+                Log.outTrace(LogFilter.Achievement, 
+                    $"CanUpdateCriteria: (Id: {criteria.Id} Type {criteria.Entry.Type}) Requirements have not been satisfied");
                 return false;
             }
 
             if (!ConditionsSatisfied(criteria, referencePlayer))
             {
-                Log.outTrace(LogFilter.Achievement, "CanUpdateCriteria: (Id: {0} Type {1}) Conditions have not been satisfied", criteria.Id, criteria.Entry.Type);
+                Log.outTrace(LogFilter.Achievement, 
+                    $"CanUpdateCriteria: (Id: {criteria.Id} Type {criteria.Entry.Type}) Conditions have not been satisfied");
                 return false;
             }
 
@@ -1234,16 +1257,22 @@ namespace Game.Achievements
                     return tree.Entry.Type != 0 && !ModifierSatisfied(tree.Entry, miscValue1, miscValue2, refe, referencePlayer);
                 case ModifierTreeOperator.All:
                     foreach (ModifierTreeNode node in tree.Children)
+                    {
                         if (!ModifierTreeSatisfied(node, miscValue1, miscValue2, refe, referencePlayer))
                             return false;
+                    }
                     return true;
                 case ModifierTreeOperator.Some:
                 {
                     sbyte requiredAmount = Math.Max(tree.Entry.Amount, (sbyte)1);
                     foreach (ModifierTreeNode node in tree.Children)
+                    {
                         if (ModifierTreeSatisfied(node, miscValue1, miscValue2, refe, referencePlayer))
+                        {
                             if (--requiredAmount == 0)
                                 return true;
+                        }
+                    }
 
                     return false;
                 }
@@ -1435,8 +1464,10 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.BattlePetTeamLevel: // 34
                     foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                    {
                         if (slot.Pet.Level < reqValue)
                             return false;
+                    }
                     break;
                 case ModifierTreeType.PlayerIsNotInParty: // 35
                     if (referencePlayer.GetGroup() != null)
@@ -1808,8 +1839,10 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerHasCompletedQuest: // 110
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(reqValue);
                     if (questBit != 0)
+                    {
                         if ((referencePlayer.m_activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) == 0)
                             return false;
+                    }
                     break;
                 case ModifierTreeType.PlayerIsReadyToTurnInQuest: // 111
                     if (referencePlayer.GetQuestStatus(reqValue) != QuestStatus.Complete)
@@ -1949,8 +1982,10 @@ namespace Game.Achievements
                 {
                     uint count = 0;
                     foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                    {
                         if (slot.Pet.Species == secondaryAsset)
                             ++count;
+                    }
 
                     if (count < reqValue)
                         return false;
@@ -1963,8 +1998,10 @@ namespace Game.Achievements
                     {
                         BattlePetSpeciesRecord species = CliDB.BattlePetSpeciesStorage.LookupByKey(slot.Pet.Species);
                         if (species != null)
+                        {
                             if (species.PetTypeEnum == secondaryAsset)
                                 ++count;
+                    }
                     }
 
                     if (count < reqValue)
@@ -1978,8 +2015,10 @@ namespace Game.Achievements
                 {
                     uint count = 0;
                     foreach (var slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                    {
                         if (slot.Pet.Health > 0)
                             ++count;
+                    }
 
                     if (count < reqValue)
                         return false;
@@ -2169,8 +2208,10 @@ namespace Game.Achievements
                     if (group != null)
                     {
                         for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+                        {
                             if (itr.GetSource() != referencePlayer && referencePlayer.m_playerData.VirtualPlayerRealm == itr.GetSource().m_playerData.VirtualPlayerRealm)
                                 ++memberCount;
+                    }
                     }
 
                     if (memberCount < reqValue)
@@ -2237,8 +2278,10 @@ namespace Game.Achievements
                     {
                         uint membersWithAchievement = 0;
                         for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+                        {
                             if (itr.GetSource().HasAchieved(secondaryAsset))
                                 ++membersWithAchievement;
+                        }
 
                         if (membersWithAchievement > reqValue)
                             return false;
@@ -2262,11 +2305,14 @@ namespace Game.Achievements
                             {
                                 var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(itemModifiedAppearance.Id);
                                 if (itemModifiedAppearaceExtra != null)
+                                {
                                     if (itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
                                         itemSubclass = itemModifiedAppearaceExtra.DisplayWeaponSubclassID.Weapon;
                             }
                         }
                     }
+                    }
+
                     if (itemSubclass != (ItemSubClassWeapon)reqValue)
                         return false;
                     break;
@@ -2287,11 +2333,14 @@ namespace Game.Achievements
                             {
                                 var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(itemModifiedAppearance.Id);
                                 if (itemModifiedAppearaceExtra != null)
+                                {
                                     if (itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
                                         itemSubclass = itemModifiedAppearaceExtra.DisplayWeaponSubclassID.Weapon;
                             }
                         }
                     }
+                    }
+
                     if (itemSubclass != (ItemSubClassWeapon)reqValue)
                         return false;
                     break;
@@ -2377,8 +2426,10 @@ namespace Game.Achievements
                         return false;
 
                     foreach (var questLineQuest in questLineQuests)
+                    {
                         if (!referencePlayer.GetQuestRewardStatus(questLineQuest.QuestID))
                             return false;
+                    }
                     break;
                 }
                 case ModifierTreeType.PlayerHasCompletedQuestlineQuestCount: // 242
@@ -2389,8 +2440,10 @@ namespace Game.Achievements
 
                     uint completedQuests = 0;
                     foreach (var questLineQuest in questLineQuests)
+                    {
                         if (referencePlayer.GetQuestRewardStatus(questLineQuest.QuestID))
                             ++completedQuests;
+                    }
 
                     if (completedQuests < reqValue)
                         return false;
@@ -2404,8 +2457,10 @@ namespace Game.Achievements
 
                     int completedQuests = 0;
                     foreach (var questLineQuest in questLineQuests)
+                    {
                         if (referencePlayer.GetQuestRewardStatus(questLineQuest.QuestID))
                             ++completedQuests;
+                    }
 
                     if (MathFunctions.GetPctOf(completedQuests, questLineQuests.Count) < reqValue)
                         return false;
@@ -2695,8 +2750,11 @@ namespace Game.Achievements
 
                     var areas = Global.DB2Mgr.GetAreasForGroup(reqValue);
                     foreach (var areaInGroup in areas)
+                    {
                         if (Global.DB2Mgr.IsInArea(refe.GetAreaId(), areaInGroup))
                             return true;
+                    }
+
                     return false;
                 }
                 case ModifierTreeType.PlayerIsInChromieTime: // 300 not used in WOTLK
@@ -2719,8 +2777,10 @@ namespace Game.Achievements
                     if (group != null)
                     {
                         for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+                        {
                             if (!itr.GetSource().HasAchieved(reqValue))
                                 return false;
+                    }
                     }
                     else if (!referencePlayer.HasAchieved(reqValue))
                         return false;
@@ -2896,11 +2956,15 @@ namespace Game.Achievements
                             }
 
                             foreach (var traitEntry in traitConfig.Entries)
+                            {
                                 if (traitEntry.TraitNodeEntryID == reqValue)
                                     return true;
                         }
+                        }
+
                         return false;
                     }
+
                     if (!hasTraitNodeEntry())
                         return false;
                     break;
@@ -2919,11 +2983,14 @@ namespace Game.Achievements
                             }
 
                             foreach (var traitEntry in traitConfig.Entries)
+                            {
                                 if (traitEntry.TraitNodeEntryID == secondaryAsset)
                                     return (short)traitEntry.Rank;
                         }
+                        }
                         return null;
                     })();
+
                     if (!traitNodeEntryRank.HasValue || traitNodeEntryRank < reqValue)
                         return false;
                     break;
@@ -2961,8 +3028,10 @@ namespace Game.Achievements
                             continue;
 
                         foreach (TraitEntry traitEntry in traitConfig.Entries)
+                        {
                             if (CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.NodeEntryType == TraitNodeEntryType.ProfPath)
                                 ranks += (uint)(traitEntry.Rank + traitEntry.GrantedRanks);
+                    }
                     }
 
                     if (ranks < reqValue)
@@ -3134,8 +3203,10 @@ namespace Game.Achievements
 
             Dictionary<int /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
             foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
+            {
                 if (achievement.CriteriaTree != 0)
                     achievementCriteriaTreeIds[achievement.CriteriaTree] = achievement;
+            }
 
             Dictionary<int, ScenarioStepRecord> scenarioCriteriaTreeIds = new();
             foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
@@ -3198,9 +3269,17 @@ namespace Game.Achievements
             int questObjectiveCriterias = 0;
             foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
             {
-                Cypher.Assert(criteriaEntry.Type < CriteriaType.Count, $"CriteriaType.Count must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
-                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CriteriaStartEvent.Count must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
-                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
+                Cypher.Assert(criteriaEntry.Type < CriteriaType.Count, 
+                    $"CriteriaType.Count must be greater than or equal to {criteriaEntry.Type + 1} " +
+                    $"but is currently equal to {CriteriaType.Count}");
+
+                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, 
+                    $"CriteriaStartEvent.Count must be greater than or equal to {criteriaEntry.StartEvent + 1} " +
+                    $"but is currently equal to {CriteriaStartEvent.Count}");
+
+                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, 
+                    $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} " +
+                    $"but is currently equal to {CriteriaFailEvent.Count}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
                 if (treeList.Empty())
@@ -3257,8 +3336,11 @@ namespace Game.Achievements
                                 {
                                     bool valid = true;
                                     for (byte i = 0; i < j; ++i)
+                                    {
                                         if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
                                             valid = false;
+                                    }
+
                                     if (valid)
                                         _criteriasByAsset[(int)criteriaEntry.Type].Add(worldOverlayEntry.AreaID[j], criteria);
                                 }
@@ -3305,7 +3387,8 @@ namespace Game.Achievements
             SQLResult result = DB.World.Query("SELECT criteria_id, Type, value1, value2, ScriptName FROM criteria_data");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");
                 return;
             }
 
@@ -3317,7 +3400,9 @@ namespace Game.Achievements
                 Criteria criteria = GetCriteria(criteria_id);
                 if (criteria == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` contains data for non-existing criteria (Entry: {0}). Ignored.", criteria_id);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `criteria_data` contains data for non-existing criteria " +
+                        $"(Entry: {criteria_id}). Ignored.");
                     continue;
                 }
 
@@ -3327,7 +3412,11 @@ namespace Game.Achievements
                 if (!scriptName.IsEmpty())
                 {
                     if (dataType != CriteriaDataType.Script)
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` contains a ScriptName for non-scripted data Type (Entry: {0}, Type {1}), useless data.", criteria_id, dataType);
+                    {
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` contains a ScriptName for non-scripted data Type " +
+                            $"(Entry: {criteria_id}, Type {dataType}), useless data.");
+                    }
                     else
                         scriptId = Global.ObjectMgr.GetScriptId(scriptName);
                 }
@@ -3615,7 +3704,9 @@ namespace Game.Achievements
         {
             if (DataType >= CriteriaDataType.Max)
             {
-                Log.outError(LogFilter.Sql, "Table `criteria_data` for criteria (Entry: {0}) has wrong data Type ({1}), ignored.", criteria.Id, DataType);
+                Log.outError(LogFilter.Sql, 
+                    $"Table `criteria_data` for criteria (Entry: {criteria.Id}) " +
+                    $"has wrong data Type ({DataType}), ignored.");
                 return false;
             }
 
@@ -3651,7 +3742,9 @@ namespace Game.Achievements
                 default:
                     if (DataType != CriteriaDataType.Script)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria Type (Entry: {0} Type: {1}), ignored.", criteria.Id, criteria.Entry.Type);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` has data for non-supported criteria Type " +
+                            $"(Entry: {criteria.Id} Type: {criteria.Entry.Type}), ignored.");
                         return false;
                     }
                     break;
@@ -3665,36 +3758,46 @@ namespace Game.Achievements
                 case CriteriaDataType.TCreature:
                     if (Creature.Id == 0 || Global.ObjectMgr.GetCreatureTemplate(Creature.Id) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_CREATURE ({2}) has non-existing creature id in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Creature.Id);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_CREATURE ({DataType}) " +
+                            $"has non-existing creature id in value1 ({Creature.Id}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.TPlayerClassRace:
                     if (ClassRace.ClassId == 0 && ClassRace.RaceId == 0)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({DataType}) " +
+                            $"must not have 0 in either value field, ignored.");
                         return false;
                     }
                     if ((Class)ClassRace.ClassId != Class.None && !ClassMask.Playable.HasClass((Class)ClassRace.ClassId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({DataType}) " +
+                            $"has non-existing class in value1 ({ClassRace.ClassId}), ignored.");
                         return false;
                     }
                     if (!RaceMask.Playable.HasRace((Race)ClassRace.RaceId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({DataType}) " +
+                            $"has non-existing race in value2 ({ClassRace.RaceId}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.TPlayerLessHealth:
                     if (Health.Percent < 1 || Health.Percent > 100)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_PLAYER_LESS_HEALTH ({2}) has wrong percent value in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Health.Percent);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_PLAYER_LESS_HEALTH ({DataType}) " +
+                            $"has wrong percent value in value1 ({Health.Percent}), ignored.");
                         return false;
                     }
                     return true;
@@ -3704,20 +3807,26 @@ namespace Game.Achievements
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(Aura.SpellId, Difficulty.None);
                     if (spellEntry == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type {2} has wrong spell id in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type {DataType} " +
+                            $"has wrong spell id in value1 ({Aura.SpellId}), ignored.");
                         return false;
                     }
                     if (spellEntry.GetEffects().Count <= Aura.EffectIndex)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type {2} has wrong spell effect index in value2 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Aura.EffectIndex);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type {DataType} " +
+                            $"has wrong spell effect index in value2 ({Aura.EffectIndex}), ignored.");
                         return false;
                     }
                     if (spellEntry.GetEffect(Aura.EffectIndex).ApplyAuraName == 0)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type {2} has non-aura spell effect (ID: {3} Effect: {4}), ignores.",
-                            criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId, Aura.EffectIndex);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type {DataType} " +
+                            $"has non-aura spell effect (ID: {Aura.SpellId} Effect: {Aura.EffectIndex}), ignores.");
                         return false;
                     }
                     return true;
@@ -3725,64 +3834,80 @@ namespace Game.Achievements
                 case CriteriaDataType.Value:
                     if (Value.ComparisonType >= (int)ComparisionType.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_VALUE ({2}) has wrong ComparisionType in value2 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Value.ComparisonType);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_VALUE ({DataType}) " +
+                            $"has wrong ComparisionType in value2 ({Value.ComparisonType}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.TLevel:
                     if (Level.Min > SharedConst.GTMaxLevel)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_LEVEL ({2}) has wrong minlevel in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Level.Min);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_T_LEVEL ({DataType}) " +
+                            $"has wrong minlevel in value1 ({Level.Min}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.TGender:
                     if (Gender.Gender > (int)Framework.Constants.Gender.None)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_GENDER ({2}) has wrong gender in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Gender.Gender);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_T_GENDER ({DataType}) " +
+                            $"has wrong gender in value1 ({Gender.Gender}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.Script:
                     if (ScriptId == 0)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_SCRIPT ({2}) does not have ScriptName set, ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_SCRIPT ({DataType}) " +
+                            $"does not have ScriptName set, ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.MapPlayerCount:
                     if (MapPlayers.MaxCount <= 0)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT ({2}) has wrong max players count in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, MapPlayers.MaxCount);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT ({DataType}) " +
+                            $"has wrong max players count in value1 ({MapPlayers.MaxCount}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.TTeam:
                     if (TeamId.Team != (int)Team.Alliance && TeamId.Team != (int)Team.Horde)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_TEAM ({2}) has unknown team in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, TeamId.Team);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_T_TEAM ({DataType}) " +
+                            $"has unknown team in value1 ({TeamId.Team}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.SDrunk:
                     if (Drunk.State >= 4)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_DRUNK ({2}) has unknown drunken state in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Drunk.State);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_S_DRUNK ({DataType}) " +
+                            $"has unknown drunken state in value1 ({Drunk.State}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.Holiday:
                     if (!CliDB.HolidaysStorage.ContainsKey(Holiday.Id))
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data`(Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_HOLIDAY ({2}) has unknown holiday in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, Holiday.Id);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data`(Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_HOLIDAY ({DataType}) " +
+                            $"has unknown holiday in value1 ({Holiday.Id}), ignored.");
                         return false;
                     }
                     return true;
@@ -3791,8 +3916,10 @@ namespace Game.Achievements
                     var events = Global.GameEventMgr.GetEventMap();
                     if (GameEvent.Id < 1 || GameEvent.Id >= events.Length)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_GAME_EVENT ({2}) has unknown game_event in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, GameEvent.Id);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_GAME_EVENT ({DataType}) " +
+                            $"has unknown game_event in value1 ({GameEvent.Id}), ignored.");
                         return false;
                     }
                     return true;
@@ -3802,57 +3929,73 @@ namespace Game.Achievements
                 case CriteriaDataType.SEquippedItem:
                     if (EquippedItem.ItemQuality >= (uint)ItemQuality.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Table `achievement_criteria_requirement` (Entry: {0} Type: {1}) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPED_ITEM ({2}) has unknown quality state in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, EquippedItem.ItemQuality);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `achievement_criteria_requirement` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPED_ITEM ({DataType}) " +
+                            $"has unknown quality state in value1 ({EquippedItem.ItemQuality}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.MapId:
                     if (!CliDB.MapStorage.ContainsKey(MapId.Id))
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_MAP_ID ({2}) contains an unknown map entry in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, MapId.Id);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_MAP_ID ({DataType}) " +
+                            $"contains an unknown map entry in value1 ({MapId.Id}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.SPlayerClassRace:
                     if (ClassRace.ClassId == 0 && ClassRace.RaceId == 0)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({DataType}) " +
+                            $"must not have 0 in either value field, ignored.");
                         return false;
                     }
                     if ((Class)ClassRace.ClassId != Class.None && !ClassMask.Playable.HasClass((Class)ClassRace.ClassId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({DataType}) " +
+                            $"has non-existing class in value1 ({ClassRace.ClassId}), ignored.");
                         return false;
                     }
                     if (ClassRace.RaceId != 0 && !RaceMask.Playable.HasRace((Race)ClassRace.RaceId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({DataType}) " +
+                            $"has non-existing race in value2 ({ClassRace.RaceId}), ignored.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.SKnownTitle:
                     if (!CliDB.CharTitlesStorage.ContainsKey(KnownTitle.Id))
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_KNOWN_TITLE ({2}) contains an unknown title_id in value1 ({3}), ignore.",
-                            criteria.Id, criteria.Entry.Type, DataType, KnownTitle.Id);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_S_KNOWN_TITLE ({DataType}) " +
+                            $"contains an unknown title_id in value1 ({KnownTitle.Id}), ignore.");
                         return false;
                     }
                     return true;
                 case CriteriaDataType.SItemQuality:
                     if (itemQuality.Quality >= (uint)ItemQuality.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_ITEM_QUALITY ({2}) contains an unknown quality state value in value1 ({3}), ignored.",
-                            criteria.Id, criteria.Entry.Type, DataType, itemQuality.Quality);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                            $"for data Type CRITERIA_DATA_TYPE_S_ITEM_QUALITY ({DataType}) " +
+                            $"contains an unknown quality state value in value1 ({itemQuality.Quality}), ignored.");
                         return false;
                     }
                     return true;
                 default:
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) contains data of a non-supported data Type ({2}), ignored.", criteria.Id, criteria.Entry.Type, DataType);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `criteria_data` (Entry: {criteria.Id} Type: {criteria.Entry.Type}) " +
+                        $"contains data of a non-supported data Type ({DataType}), ignored.");
                     return false;
             }
         }
@@ -3948,15 +4091,20 @@ namespace Game.Achievements
                     Map map = source.GetMap();
                     if (!map.IsDungeon())
                     {
-                        Log.outError(LogFilter.Achievement, $"Achievement system call AchievementCriteriaDataType.InstanceScript ({CriteriaDataType.InstanceScript}) " +
-                            $"for achievement criteria {criteriaId} for non-dungeon/non-raid map {map.GetId()}.");
+                        Log.outError(LogFilter.Achievement, 
+                            $"Achievement system call AchievementCriteriaDataType. " +
+                            $"InstanceScript ({CriteriaDataType.InstanceScript}) " +
+                            $"for achievement criteria {criteriaId} " +
+                            $"for non-dungeon/non-raid map {map.GetId()}.");
                         return false;
                     }
                     InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
                     if (instance == null)
                     {
-                        Log.outError(LogFilter.Achievement, $"Achievement system call criteria_data_INSTANCE_SCRIPT ({CriteriaDataType.InstanceScript}) for " +
-                            $"achievement criteria {criteriaId} for map {map.GetId()} but map does not have a instance script.");
+                        Log.outError(LogFilter.Achievement, 
+                            $"Achievement system call criteria_data_INSTANCE_SCRIPT " +
+                            $"({CriteriaDataType.InstanceScript}) for achievement criteria {criteriaId} " +
+                            $"for map {map.GetId()} but map does not have a instance script.");
                         return false;
                     }
 
@@ -3973,7 +4121,9 @@ namespace Game.Achievements
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
                     if (itemTemplate == null)
                         return false;
-                    return itemTemplate.GetItemLevel() >= EquippedItem.ItemLevel && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
+
+                    return itemTemplate.GetItemLevel() >= EquippedItem.ItemLevel 
+                        && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
                 }
                 case CriteriaDataType.MapId:
                     return source.GetMapId() == MapId.Id;

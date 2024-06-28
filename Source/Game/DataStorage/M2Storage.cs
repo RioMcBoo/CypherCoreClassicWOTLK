@@ -152,7 +152,7 @@ namespace Game.DataStorage
             uint oldMSTime = Time.GetMSTime();
             foreach (CinematicCameraRecord cameraEntry in CliDB.CinematicCameraStorage.Values)
             {
-                string filename = dataPath + "/cameras/" + $"FILE{cameraEntry.FileDataID:X8}.xxx";
+                string filename = $@"{dataPath}/cameras/FILE{cameraEntry.FileDataID:X8}.xxx";
 
                 try
                 {
@@ -160,7 +160,8 @@ namespace Game.DataStorage
                     // Check file has correct magic (MD21)
                     if (m2file.ReadUInt32() != 0x3132444D) //"MD21"
                     {
-                        Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. File identifier not found.", filename);
+                        Log.outError(LogFilter.ServerLoading, 
+                            $"Camera file {filename} is damaged. File identifier not found.");
                         continue;
                     }
 
@@ -178,11 +179,13 @@ namespace Game.DataStorage
                 }
                 catch (EndOfStreamException)
                 {
-                    Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. Camera references position beyond file end", filename);
+                    Log.outError(LogFilter.ServerLoading, 
+                        $"Camera file {filename} is damaged. " +
+                        $"Camera references position beyond file end");
                 }
                 catch (FileNotFoundException)
                 {
-                    Log.outError(LogFilter.ServerLoading, "File {0} not found!!!!", filename);
+                    Log.outError(LogFilter.ServerLoading, $"File {filename} not found!!!!");
                 }
             }
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));

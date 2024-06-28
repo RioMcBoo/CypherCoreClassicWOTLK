@@ -162,7 +162,9 @@ namespace Game.Entities
                 }
                 default:
                     UnSummon();
-                    Log.outError(LogFilter.Unit, "Temporary summoned creature (entry: {0}) have unknown Type {1} of ", GetEntry(), m_type);
+                    Log.outError(LogFilter.Unit, 
+                        $"Temporary summoned creature (entry: {GetEntry()}) " +
+                        $"have unknown Type {m_type} of ");
                     break;
             }
         }
@@ -344,13 +346,20 @@ namespace Game.Entities
             {
                 Unit owner = GetSummonerUnit();
                 if (owner != null)
+                {
                     foreach (ObjectGuid summonSlot in owner.m_SummonSlot)
+                    {
                         if (summonSlot == GetGUID())
                             summonSlot.Clear();
             }
+                }
+            }
 
             if (!GetOwnerGUID().IsEmpty())
-                Log.outError(LogFilter.Unit, "Unit {0} has owner guid when removed from world", GetEntry());
+            {
+                Log.outError(LogFilter.Unit,
+                    $"Unit {GetEntry()} has owner guid when removed from world");
+            }
 
             base.RemoveFromWorld();
         }
@@ -388,25 +397,41 @@ namespace Game.Entities
             if (otherSummon == null)
                 return false;
 
-            SpellInfo mySummonSpell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, Difficulty.None);
+            SpellInfo mySummonSpell = 
+                Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, Difficulty.None);
+
             if (mySummonSpell == null)
                 return false;
 
-            SpellInfo otherSummonSpell = Global.SpellMgr.GetSpellInfo(otherSummon.m_unitData.CreatedBySpell, Difficulty.None);
+            SpellInfo otherSummonSpell = 
+                Global.SpellMgr.GetSpellInfo(otherSummon.m_unitData.CreatedBySpell, Difficulty.None);
+            
             if (otherSummonSpell == null)
                 return false;
 
             foreach (var myTotemCategory in mySummonSpell.TotemCategory)
+            {
                 if (myTotemCategory != 0)
+                {
                     foreach (var otherTotemCategory in otherSummonSpell.TotemCategory)
+                    {
                         if (otherTotemCategory != 0 && Global.DB2Mgr.IsTotemCategoryCompatibleWith(myTotemCategory, otherTotemCategory, false))
                             return true;
+                    }
+                }
+            }
 
             foreach (int myTotemId in mySummonSpell.Totem)
+            {
                 if (myTotemId != 0)
+                {
                     foreach (int otherTotemId in otherSummonSpell.Totem)
+                    {
                         if (otherTotemId != 0 && myTotemId == otherTotemId)
                             return true;
+                    }
+                }
+            }
 
             return false;
         }
@@ -605,7 +630,9 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Unit, $"Unknown Type pet {GetEntry()} is summoned by player class {GetOwner().GetClass()}");
+                    Log.outError(LogFilter.Unit, 
+                        $"Unknown Type pet {GetEntry()} is summoned " +
+                        $"by player class {GetOwner().GetClass()}");
                 }
             }
 

@@ -53,7 +53,9 @@ namespace Game.Arenas
         {
             if (NextArenaTeamId < 0 && NextArenaTeamId >= -2)
             {
-                Log.outError(LogFilter.Battleground, "Arena team ids overflow!! Can't continue, shutting down server. ");
+                Log.outError(LogFilter.Battleground, 
+                    "Arena team ids overflow!! " +
+                    "Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
             return unchecked(NextArenaTeamId++);

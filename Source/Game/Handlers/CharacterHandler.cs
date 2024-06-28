@@ -75,13 +75,15 @@ namespace Game
                     if (!customizationsForChar.Empty())
                         charInfo.Customizations = new Array<ChrCustomizationChoice>(customizationsForChar.ToArray());
 
-                    Log.outInfo(LogFilter.Network, "Loading Character {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
+                    Log.outInfo(LogFilter.Network, 
+                        $"Loading Character {charInfo.Guid} from account {GetAccountId()}.");
 
                     if (!charResult.IsDeletedCharacters)
                     {
                         if (!ValidateAppearance((Race)charInfo.RaceId, charInfo.ClassId, (Gender)charInfo.SexId, charInfo.Customizations))
                         {
-                            Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), forcing recustomize", charInfo.Guid.ToString());
+                            Log.outError(LogFilter.Player, 
+                                $"Player {charInfo.Guid} has wrong Appearance values (Hair/Skin/Color), forcing recustomize");
 
                             charInfo.Customizations.Clear();
 
@@ -150,7 +152,8 @@ namespace Game
                 {
                     EnumCharactersResult.CharacterInfo charInfo = new(result.GetFields());
 
-                    Log.outInfo(LogFilter.Network, "Loading undeleted char guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
+                    Log.outInfo(LogFilter.Network, 
+                        $"Loading undeleted char guid {charInfo.Guid} from account {GetAccountId()}.");
 
                     if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                         Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, true);
@@ -299,7 +302,9 @@ namespace Game
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)charCreate.CreateInfo.ClassId);
             if (classEntry == null)
             {
-                Log.outError(LogFilter.Network, "Class ({0}) not found in DBC while creating new char for account (ID: {1}): wrong DBC files or cheater?", charCreate.CreateInfo.ClassId, GetAccountId());
+                Log.outError(LogFilter.Network, 
+                    $"Class ({charCreate.CreateInfo.ClassId}) not found in DBC while creating new char " +
+                    $"for account (ID: {GetAccountId()}): wrong DBC files or cheater?");
                 SendCharCreate(ResponseCodes.CharCreateFailed);
                 return;
             }
@@ -307,7 +312,9 @@ namespace Game
             ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)charCreate.CreateInfo.RaceId);
             if (raceEntry == null)
             {
-                Log.outError(LogFilter.Network, "Race ({0}) not found in DBC while creating new char for account (ID: {1}): wrong DBC files or cheater?", charCreate.CreateInfo.RaceId, GetAccountId());
+                Log.outError(LogFilter.Network, 
+                    $"Race ({charCreate.CreateInfo.RaceId}) not found in DBC while creating new char " +
+                    $"for account (ID: {GetAccountId()}): wrong DBC files or cheater?");
                 SendCharCreate(ResponseCodes.CharCreateFailed);
                 return;
             }
@@ -316,14 +323,18 @@ namespace Game
             RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
             if (raceExpansionRequirement == null)
             {
-                Log.outError(LogFilter.Cheat, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
+                Log.outError(LogFilter.Cheat, 
+                    $"Account {GetAccountId()} tried to create character " +
+                    $"with unavailable race {charCreate.CreateInfo.RaceId}");
                 SendCharCreate(ResponseCodes.CharCreateFailed);
                 return;
             }
 
             if (raceExpansionRequirement.Expansion > GetAccountExpansion())
             {
-                Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
+                Log.outError(LogFilter.Cheat, 
+                    $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion " +
+                    $"{raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansion);
                 return;
             }
@@ -342,8 +353,11 @@ namespace Game
             {
                 if (raceClassExpansionRequirement.ActiveExpansionLevel > GetExpansion() || raceClassExpansionRequirement.AccountExpansionLevel > GetAccountExpansion())
                 {
-                    Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
-                        $"(had {GetExpansion()}/{GetAccountExpansion()}, required {raceClassExpansionRequirement.ActiveExpansionLevel}/{raceClassExpansionRequirement.AccountExpansionLevel})");
+                    Log.outError(LogFilter.Cheat, 
+                        $"Account:[{GetAccountId()}] tried to create character " +
+                        $"with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
+                        $"(had {GetExpansion()}/{GetAccountExpansion()}, " +
+                        $"required {raceClassExpansionRequirement.ActiveExpansionLevel}/{raceClassExpansionRequirement.AccountExpansionLevel})");
                     SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                     return;
                 }
@@ -355,14 +369,22 @@ namespace Game
                 {
                     if (classExpansionRequirement.MinActiveExpansionLevel > GetExpansion() || classExpansionRequirement.AccountExpansionLevel > GetAccountExpansion())
                     {
-                        Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
-                            $"(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
+                        Log.outError(LogFilter.Cheat, 
+                            $"Account:[{GetAccountId()}] tried to create character " +
+                            $"with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
+                            $"(had {GetExpansion()}/{GetAccountExpansion()}, " +
+                            $"required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
                         SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                         return;
                     }
                 }
                 else
-                    Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
+                {
+                    Log.outError(LogFilter.Cheat, 
+                        $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination " +
+                        $"that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
+                }
+
                 SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                 return;
             }
@@ -371,7 +393,10 @@ namespace Game
             {
                 if (raceEntry.HasFlag(ChrRacesFlag.NPCOnly))
                 {
-                    Log.outError(LogFilter.Network, $"Race ({charCreate.CreateInfo.RaceId}) was not playable but requested while creating new char for account (ID: {GetAccountId()}): wrong DBC files or cheater?");
+                    Log.outError(LogFilter.Network, 
+                        $"Race ({charCreate.CreateInfo.RaceId}) was not playable but requested " +
+                        $"while creating new char for account " +
+                        $"(ID: {GetAccountId()}): wrong DBC files or cheater?");
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
                     return;
                 }
@@ -397,7 +422,8 @@ namespace Game
             // prevent character creating with invalid name
             if (!ObjectManager.NormalizePlayerName(ref charCreate.CreateInfo.Name))
             {
-                Log.outError(LogFilter.Network, "Account:[{0}] but tried to Create character with empty [name] ", GetAccountId());
+                Log.outError(LogFilter.Network, 
+                    $"Account:[{GetAccountId()}] but tried to Create character with empty [name] ");
                 SendCharCreate(ResponseCodes.CharNameNoName);
                 return;
             }
@@ -610,7 +636,10 @@ namespace Game
                     {
                         if (success)
                         {
-                            Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
+                            Log.outInfo(LogFilter.Player, 
+                                $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) " +
+                                $"Create Character: {createInfo.Name} {newChar.GetGUID()}");
+
                             Global.ScriptMgr.OnPlayerCreate(newChar);
                             Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), (byte)newChar.GetNativeGender(), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
 
@@ -684,8 +713,9 @@ namespace Game
                 return;
             }
 
-            string IP_str = GetRemoteAddress();
-            Log.outInfo(LogFilter.Player, "Account: {0}, IP: {1} deleted character: {2}, {3}, Level: {4}", accountId, IP_str, name, charDelete.Guid.ToString(), level);
+            Log.outInfo(LogFilter.Player, 
+                $"Account: {accountId}, IP: {GetRemoteAddress()} " +
+                $"deleted character: {name}, {charDelete.Guid}, Level: {level}");
 
             // To prevent hook failure, place hook before removing reference from DB
             Global.ScriptMgr.OnPlayerDelete(charDelete.Guid, initAccountId); // To prevent race conditioning, but as it also makes sense, we hand the accountId over for successful delete.
@@ -702,13 +732,15 @@ namespace Game
         {
             if (!Player.IsValidRace(packet.Race))
             {
-                Log.outError(LogFilter.Network, "Invalid race ({0}) sent by accountId: {1}", packet.Race, GetAccountId());
+                Log.outError(LogFilter.Network, 
+                    $"Invalid race ({packet.Race}) sent by accountId: {GetAccountId()}");
                 return;
             }
 
             if (!Player.IsValidGender(packet.Sex))
             {
-                Log.outError(LogFilter.Network, "Invalid gender ({0}) sent by accountId: {1}", packet.Sex, GetAccountId());
+                Log.outError(LogFilter.Network, 
+                    $"Invalid gender ({packet.Sex}) sent by accountId: {GetAccountId()}");
                 return;
             }
 
@@ -741,17 +773,20 @@ namespace Game
         {
             if (PlayerLoading() || GetPlayer() != null)
             {
-                Log.outError(LogFilter.Network, "Player tries to login again, AccountId = {0}", GetAccountId());
+                Log.outError(LogFilter.Network, $"Player tries to login again, AccountId = {GetAccountId()}");
                 KickPlayer("WorldSession::HandlePlayerLoginOpcode Another client logging in");
                 return;
             }
 
             m_playerLoading = playerLogin.Guid;
-            Log.outDebug(LogFilter.Network, "Character {0} logging in", playerLogin.Guid.ToString());
+            Log.outDebug(LogFilter.Network, $"Character {playerLogin.Guid} logging in");
 
             if (!_legitCharacters.Contains(playerLogin.Guid))
             {
-                Log.outError(LogFilter.Network, "Account ({0}) can't login with that character ({1}).", GetAccountId(), playerLogin.Guid.ToString());
+                Log.outError(LogFilter.Network,
+                    $"Account ({GetAccountId()}) can't login " +
+                    $"with that character ({playerLogin.Guid}).");
+
                 KickPlayer("WorldSession::HandlePlayerLoginOpcode Trying to login with a character of another account");
                 return;
             }
@@ -772,7 +807,9 @@ namespace Game
 
             SendPacket(new ResumeComms(ConnectionType.Instance));
 
-            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(holder)).AfterComplete(holder => HandlePlayerLogin((LoginQueryHolder)holder));
+            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(holder)).AfterComplete(holder => 
+            HandlePlayerLogin((LoginQueryHolder)holder)
+            );
         }
 
         public void HandlePlayerLogin(LoginQueryHolder holder)
@@ -816,7 +853,8 @@ namespace Game
             // Send PVPSeason
             {
                 SeasonInfo seasonInfo = new();
-                seasonInfo.PreviousArenaSeason = (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));
+                seasonInfo.PreviousArenaSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) 
+                    - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0);
 
                 if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress))
                     seasonInfo.CurrentArenaSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
@@ -891,8 +929,9 @@ namespace Game
                 else
                 {
                     // remove wrong guild data
-                    Log.outError(LogFilter.Server, "Player {0} ({1}) marked as member of not existing guild (id: {2}), removing guild membership for player.", pCurrChar.GetName(), pCurrChar.GetGUID().ToString(),
-                        pCurrChar.GetGuildId());
+                    Log.outError(LogFilter.Server, 
+                        $"Player {pCurrChar.GetName()} ({pCurrChar.GetGUID()}) marked as member of not existing guild " +
+                        $"(id: {pCurrChar.GetGuildId()}), removing guild membership for player.");
                     pCurrChar.SetInGuild(0);
                 }
             }
@@ -1071,7 +1110,12 @@ namespace Game
                 SendNotification(CypherStrings.GmOn);
 
             string IP_str = GetRemoteAddress();
-            Log.outDebug(LogFilter.Network, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Login Character: [{pCurrChar.GetName()}] ({pCurrChar.GetGUID()}) Level: {pCurrChar.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
+            Log.outDebug(LogFilter.Network, 
+                $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) " +
+                $"Login Character: [{pCurrChar.GetName()}] ({pCurrChar.GetGUID()}) " +
+                $"Level: {pCurrChar.GetLevel()}, " +
+                $"XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} " +
+                $"({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
             if (!pCurrChar.IsStandState() && !pCurrChar.HasUnitState(UnitState.Stunned))
                 pCurrChar.SetStandState(UnitStandStateType.Stand);
@@ -1168,7 +1212,8 @@ namespace Game
                     byte index = (byte)(packet.TutorialBit >> 5);
                     if (index >= SharedConst.MaxAccountTutorialValues)
                     {
-                        Log.outError(LogFilter.Network, "CMSG_TUTORIAL_FLAG received bad TutorialBit {0}.", packet.TutorialBit);
+                        Log.outError(LogFilter.Network, 
+                            $"CMSG_TUTORIAL_FLAG received bad TutorialBit {packet.TutorialBit}.");
                         return;
                     }
                     uint flag = GetTutorialInt(index);
@@ -1185,7 +1230,8 @@ namespace Game
                         SetTutorialInt(i, 0x00000000);
                     break;
                 default:
-                    Log.outError(LogFilter.Network, "CMSG_TUTORIAL_FLAG received unknown TutorialAction {0}.", packet.Action);
+                    Log.outError(LogFilter.Network, 
+                        $"CMSG_TUTORIAL_FLAG received unknown TutorialAction {packet.Action}.");
                     return;
             }
         }
@@ -1248,8 +1294,11 @@ namespace Game
         {
             if (!_legitCharacters.Contains(request.RenameInfo.Guid))
             {
-                Log.outError(LogFilter.Network, "Account {0}, IP: {1} tried to rename character {2}, but it does not belong to their account!",
-                    GetAccountId(), GetRemoteAddress(), request.RenameInfo.Guid.ToString());
+                Log.outError(LogFilter.Network, 
+                    $"Account {GetAccountId()}, IP: {GetRemoteAddress()} " +
+                    $"tried to rename character {request.RenameInfo.Guid}, " +
+                    $"but it does not belong to their account!");
+
                 KickPlayer("WorldSession::HandleCharRenameOpcode rename character from a different account");
                 return;
             }
@@ -1316,8 +1365,10 @@ namespace Game
 
             DB.Characters.CommitTransaction(trans);
 
-            Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] ({3}) Changed name to: {4}",
-                GetAccountId(), GetRemoteAddress(), oldName, renameInfo.Guid.ToString(), renameInfo.NewName);
+            Log.outInfo(LogFilter.Player, 
+                $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) " +
+                $"Character:[{oldName}] ({renameInfo.Guid}) " +
+                $"Changed name to: {renameInfo.NewName}");
 
             SendCharRename(ResponseCodes.Success, renameInfo);
 
@@ -1447,8 +1498,11 @@ namespace Game
         {
             if (!_legitCharacters.Contains(packet.CustomizeInfo.CharGUID))
             {
-                Log.outError(LogFilter.Network, "Account {0}, IP: {1} tried to customise {2}, but it does not belong to their account!",
-                    GetAccountId(), GetRemoteAddress(), packet.CustomizeInfo.CharGUID.ToString());
+                Log.outError(LogFilter.Network, 
+                    $"Account {GetAccountId()}, IP: {GetRemoteAddress()} " +
+                    $"tried to customise {packet.CustomizeInfo.CharGUID}, " +
+                    $"but it does not belong to their account!");
+
                 KickPlayer("WorldSession::HandleCharCustomize Trying to customise character of another account");
                 return;
             }
@@ -1554,8 +1608,10 @@ namespace Game
 
             SendCharCustomize(ResponseCodes.Success, customizeInfo);
 
-            Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}), Character[{2}] ({3}) Customized to: {4}",
-                GetAccountId(), GetRemoteAddress(), oldName, customizeInfo.CharGUID.ToString(), customizeInfo.CharName);
+            Log.outInfo(LogFilter.Player, 
+                $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}), " +
+                $"Character[{oldName}] ({customizeInfo.CharGUID}) " +
+                $"Customized to: {customizeInfo.CharName}");
         }
 
         [WorldPacketHandler(ClientOpcodes.SaveEquipmentSet)]
@@ -1658,7 +1714,9 @@ namespace Game
             ObjectGuid ignoredItemGuid = new(0x0C00040000000000, -1);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
-                Log.outDebug(LogFilter.Player, $"{useEquipmentSet.Items[i].Item}: BagSlot: {useEquipmentSet.Items[i].ContainerSlot}, Slot: {useEquipmentSet.Items[i].Slot}");
+                Log.outDebug(LogFilter.Player, 
+                    $"{useEquipmentSet.Items[i].Item}: BagSlot: {useEquipmentSet.Items[i].ContainerSlot}, " +
+                    $"Slot: {useEquipmentSet.Items[i].Slot}");
 
                 // check if item slot is set to "ignored" (raw value == 1), must not be unequipped then
                 if (useEquipmentSet.Items[i].Item == ignoredItemGuid)
@@ -1712,8 +1770,11 @@ namespace Game
         {
             if (!_legitCharacters.Contains(packet.RaceOrFactionChangeInfo.Guid))
             {
-                Log.outError(LogFilter.Network, "Account {0}, IP: {1} tried to factionchange character {2}, but it does not belong to their account!",
-                    GetAccountId(), GetRemoteAddress(), packet.RaceOrFactionChangeInfo.Guid.ToString());
+                Log.outError(LogFilter.Network, 
+                    $"Account {GetAccountId()}, IP: {GetRemoteAddress()} " +
+                    $"tried to factionchange character {packet.RaceOrFactionChangeInfo.Guid}, " +
+                    $"but it does not belong to their account!");
+
                 KickPlayer("WorldSession::HandleCharFactionOrRaceChange Trying to change faction of character of another account");
                 return;
             }
@@ -2241,7 +2302,9 @@ namespace Game
 
             DB.Characters.CommitTransaction(trans);
 
-            Log.outDebug(LogFilter.Player, "{0} (IP: {1}) changed race from {2} to {3}", GetPlayerInfo(), GetRemoteAddress(), oldRace, factionChangeInfo.RaceID);
+            Log.outDebug(LogFilter.Player, 
+                $"{GetPlayerInfo()} (IP: {GetRemoteAddress()}) " +
+                $"changed race from {oldRace} to {factionChangeInfo.RaceID}");
 
             SendCharFactionChange(ResponseCodes.Success, factionChangeInfo);
         }
@@ -2396,8 +2459,11 @@ namespace Game
             // release spirit after he's killed but before he is updated
             if (GetPlayer().GetDeathState() == DeathState.JustDied)
             {
-                Log.outDebug(LogFilter.Network, "HandleRepopRequestOpcode: got request after player {0} ({1}) was killed and before he was updated",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"HandleRepopRequestOpcode: " +
+                    $"got request after player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                    $"was killed and before he was updated");
+
                 GetPlayer().KillPlayer();
             }
 
@@ -2436,8 +2502,10 @@ namespace Game
 
             if (graveyardIds.Empty())
             {
-                Log.outDebug(LogFilter.Network, "No graveyards found for zone {0} for player {1} (team {2}) in CMSG_REQUEST_CEMETERY_LIST",
-                    zoneId, m_GUIDLow, team);
+                Log.outDebug(LogFilter.Network, 
+                    $"No graveyards found for zone {zoneId} " +
+                    $"for player {m_GUIDLow} (team {team}) " +
+                    $"in CMSG_REQUEST_CEMETERY_LIST");
                 return;
             }
 

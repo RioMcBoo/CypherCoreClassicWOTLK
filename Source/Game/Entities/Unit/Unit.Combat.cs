@@ -28,13 +28,18 @@ namespace Game.Entities
 
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
             if (spell != null)
+            {
                 if (spell.GetState() == SpellState.Preparing
                     && spell.m_spellInfo.HasAttribute(SpellAttr0.NotInCombatOnlyPeaceful)
                     && spell.m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Combat))
                     InterruptNonMeleeSpells(false);
+            }
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
-            ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EnterCombat), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+
+            ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EnterCombat), 
+                new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, 
+                ProcFlagsHit.None, null, null, null);
 
             if (!IsInteractionAllowedInCombat())
                 UpdateNearbyPlayersInteractions();
@@ -127,8 +132,10 @@ namespace Game.Entities
                 return true;
 
             foreach (var unit in m_Controlled)
+            {
                 if (unit.IsAttackingPlayer())
                     return true;
+            }
 
             for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
             {
@@ -136,9 +143,11 @@ namespace Game.Entities
                 {
                     Creature summon = GetMap().GetCreature(m_SummonSlot[i]);
                     if (summon != null)
+                    {
                         if (summon.IsAttackingPlayer())
                             return true;
                 }
+            }
             }
 
             return false;
@@ -196,8 +205,10 @@ namespace Game.Entities
             // iterate attackers
             List<Unit> toRemove = new();
             foreach (Unit attacker in GetAttackers())
+            {
                 if (!attacker.IsValidAttackTarget(this))
                     toRemove.Add(attacker);
+            }
 
             foreach (Unit attacker in toRemove)
                 attacker.AttackStop();
@@ -205,8 +216,10 @@ namespace Game.Entities
             // remove our own victim
             Unit victim = GetVictim();
             if (victim != null)
+            {
                 if (!IsValidAttackTarget(victim))
                     AttackStop();
+        }
         }
 
         public void StopAttackFaction(int factionId)
@@ -241,8 +254,10 @@ namespace Game.Entities
 
             List<CombatReference> refsToEnd = new();
             foreach (var pair in m_combatManager.GetPvECombatRefs())
+            {
                 if (pair.Value.GetOther(this).GetFactionTemplateEntry().Faction == factionId)
                     refsToEnd.Add(pair.Value);
+            }
 
             foreach (CombatReference refe in refsToEnd)
                 refe.EndCombat();
@@ -308,7 +323,9 @@ namespace Game.Entities
                     return false;
             }
 
-            // remove SPELL_AURA_MOD_UNATTACKABLE at attack (in case non-interruptible spells stun aura applied also that not let attack)
+            // remove SPELL_AURA_MOD_UNATTACKABLE at attack
+            // (in case non-interruptible spells stun aura applied also that not let attack)
+
             if (HasAuraType(AuraType.ModUnattackable))
                 RemoveAurasByType(AuraType.ModUnattackable);
 
@@ -402,11 +419,20 @@ namespace Game.Entities
         {
             SendMessageToSet(new SAttackStop(this, victim), true);
 
+            string UnitTypeAttaker = IsTypeId(TypeId.Player) ? "Player" : "Creature";
+            string UnitTypeVictim = IsTypeId(TypeId.Player) ? "Player" : "Creature";
+
             if (victim != null)
-                Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking {2} {3}", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString(),
-                    (victim.IsTypeId(TypeId.Player) ? "player" : "creature"), victim.GetGUID().ToString());
+            {
+                Log.outInfo(LogFilter.Unit, 
+                    $"{UnitTypeAttaker} {GetGUID()} " +
+                    $"stopped attacking {UnitTypeVictim} {victim.GetGUID()}");
+            }
             else
-                Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString());
+            {
+                Log.outInfo(LogFilter.Unit, 
+                    $"{UnitTypeAttaker} {GetGUID()} stopped attacking");
+        }
         }
 
         public ObjectGuid GetTarget() { return m_unitData.Target; }
@@ -542,8 +568,11 @@ namespace Game.Entities
             if (HasUnitState(UnitState.Casting))
             {
                 Spell channeledSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
-                if (channeledSpell == null || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                if (channeledSpell == null
+                    || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                {
                     return;
+            }
             }
 
             Unit victim = GetVictim();
@@ -678,8 +707,10 @@ namespace Game.Entities
 
                     DamageInfo dmgInfo = new(damageInfo);
                     ProcSkillsAndAuras(damageInfo.Attacker, damageInfo.Target, damageInfo.ProcAttacker, damageInfo.ProcVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
-                    Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: {0} attacked {1} for {2} dmg, absorbed {3}, blocked {4}, resisted {5}.",
-                        GetGUID().ToString(), victim.GetGUID().ToString(), damageInfo.Damage, damageInfo.Absorb, damageInfo.Blocked, damageInfo.Resist);
+                    
+                    Log.outDebug(LogFilter.Unit, 
+                        $"AttackerStateUpdate: {GetGUID()} attacked {victim.GetGUID()} for {damageInfo.Damage} " +
+                        $"dmg, absorbed {damageInfo.Absorb}, blocked {damageInfo.Blocked}, resisted {damageInfo.Resist}.");
                 }
                 else
                 {
@@ -703,6 +734,7 @@ namespace Game.Entities
             {
                 Unit magnet = i.GetCaster();
                 if (magnet != null)
+                {
                     if (IsValidAttackTarget(magnet, spellInfo) && magnet.IsWithinLOSInMap(this)
                        && (spellInfo == null || (spellInfo.CheckExplicitTarget(this, magnet) == SpellCastResult.SpellCastOk
                        && spellInfo.CheckTarget(this, magnet, false) == SpellCastResult.SpellCastOk)))
@@ -710,6 +742,7 @@ namespace Game.Entities
                         i.GetBase().DropCharge(AuraRemoveMode.Expire);
                         return magnet;
                     }
+            }
             }
             return victim;
         }
@@ -773,7 +806,8 @@ namespace Game.Entities
 
             Player myPlayerOwner = GetCharmerOrOwnerPlayerOrPlayerItself();
             Player targetPlayerOwner = target.GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (myPlayerOwner != null && targetPlayerOwner != null && !(myPlayerOwner.duel != null && myPlayerOwner.duel.Opponent == targetPlayerOwner))
+            if (myPlayerOwner != null && targetPlayerOwner != null 
+                && !(myPlayerOwner.duel != null && myPlayerOwner.duel.Opponent == targetPlayerOwner))
             {
                 myPlayerOwner.UpdatePvP(true);
                 myPlayerOwner.SetContestedPvP(targetPlayerOwner);
@@ -937,16 +971,31 @@ namespace Game.Entities
                 // proc only once for victim
                 Unit owner = attacker.GetOwner();
                 if (owner != null)
-                    ProcSkillsAndAuras(owner, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                {
+                    ProcSkillsAndAuras(owner, victim, 
+                        new ProcFlagsInit(ProcFlags.Kill), 
+                        new ProcFlagsInit(ProcFlags.None),
+                        ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                }
             }
 
             if (!victim.IsCritter())
             {
-                ProcSkillsAndAuras(attacker, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.Heartbeat), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                ProcSkillsAndAuras(attacker, victim, 
+                    new ProcFlagsInit(ProcFlags.Kill), 
+                    new ProcFlagsInit(ProcFlags.Heartbeat), 
+                    ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
                 foreach (Player tapper in tappers)
+                {
                     if (tapper.IsAtGroupRewardDistance(victim))
-                        Unit.ProcSkillsAndAuras(tapper, victim, new ProcFlagsInit(ProcFlags.None, ProcFlags2.TargetDies), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                    {
+                        ProcSkillsAndAuras(tapper, victim, 
+                            new ProcFlagsInit(ProcFlags.None, ProcFlags2.TargetDies), 
+                            new ProcFlagsInit(), 
+                            ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                    }
+                }
             }
 
             // Proc auras on death - must be before aura/combat remove
@@ -991,7 +1040,8 @@ namespace Game.Entities
                 plrVictim.SetPvPDeath(player != null);
 
                 // only if not player and not controlled by player pet. And not at BG
-                if ((durabilityLoss && player == null && !victim.ToPlayer().InBattleground()) || (player != null && WorldConfig.GetBoolValue(WorldCfg.DurabilityLossInPvp)))
+                if ((durabilityLoss && player == null && !victim.ToPlayer().InBattleground()) 
+                    || (player != null && WorldConfig.GetBoolValue(WorldCfg.DurabilityLossInPvp)))
                 {
                     double baseLoss = WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath);
                     var loss = (int)(baseLoss - (baseLoss * plrVictim.GetTotalAuraMultiplier(AuraType.ModDurabilityLoss)));
@@ -1025,7 +1075,8 @@ namespace Game.Entities
                     else
                         creature.AllLootRemovedFromCorpse();
 
-                    if (creature.CanHaveLoot() && LootStorage.Skinning.HaveLootFor(creature.GetCreatureDifficulty().SkinLootID))
+                    if (creature.CanHaveLoot() 
+                        && LootStorage.Skinning.HaveLootFor(creature.GetCreatureDifficulty().SkinLootID))
                     {
                         creature.SetDynamicFlag(UnitDynFlags.CanSkin);
                         creature.SetUnitFlag(UnitFlags.Skinnable);
@@ -1071,7 +1122,8 @@ namespace Game.Entities
                     bf.HandleKill(player, victim);
             }
 
-            // battleground things (do this at the end, so the death state flag will be properly set to handle in the bg->handlekill)
+            // battleground things (do this at the end, so the death state flag
+            // will be properly set to handle in the bg->handlekill)
             if (attacker != null)
             {
                 BattlegroundMap bgMap = victim.GetMap().ToBattlegroundMap();
@@ -1130,7 +1182,10 @@ namespace Game.Entities
             }
         }
 
-        public void KillSelf(bool durabilityLoss = true, bool skipSettingDeathState = false) { Kill(this, this, durabilityLoss, skipSettingDeathState); }
+        public void KillSelf(bool durabilityLoss = true, bool skipSettingDeathState = false) 
+        { 
+            Kill(this, this, durabilityLoss, skipSettingDeathState); 
+        }
 
         public virtual bool CanUseAttackType(WeaponAttackType? attacktype)
         {
@@ -1256,7 +1311,9 @@ namespace Game.Entities
                     damageInfo.Damage *= 2;
 
                     // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                    float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)damageInfo.DamageSchoolMask) - 1.0f) * 100;
+                    float mod = 
+                        (GetTotalAuraMultiplierByMiscMask(
+                            AuraType.ModCritDamageBonus, (uint)damageInfo.DamageSchoolMask) - 1.0f) * 100;
 
                     if (mod != 0)
                         MathFunctions.AddPct(ref damageInfo.Damage, mod);
@@ -1414,7 +1471,9 @@ namespace Game.Entities
             }
 
             // 4. GLANCING
-            // Max 40% Chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
+            // Max 40% Chance to score a glancing blow against mobs that are higher level
+            // (can do only players and pets and not with ranged weapon)
+
             if ((IsTypeId(TypeId.Player) || IsPet()) &&
                 !victim.IsTypeId(TypeId.Player) && !victim.IsPet() &&
                 attackerLevel + 3 < victimLevel)
@@ -1444,13 +1503,14 @@ namespace Game.Entities
             if (attackerLevel >= victimLevel + 4 &&
                 // can be from by creature (if can) or from controlled player that considered as creature
                 !IsControlledByPlayer() &&
-                !(GetTypeId() == TypeId.Unit && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrushingBlows)))
+                !(GetTypeId() == TypeId.Unit 
+                && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrushingBlows)))
             {
                 // add 2% Chance per level, min. is 15%
                 tmp = attackerLevel - victimLevel * 1000 - 1500;
                 if (roll < (sum += tmp))
                 {
-                    Log.outDebug(LogFilter.Unit, "RollMeleeOutcomeAgainst: CRUSHING <{0}, {1})", sum - tmp, sum);
+                    Log.outDebug(LogFilter.Unit, $"RollMeleeOutcomeAgainst: CRUSHING <{sum - tmp}, {sum})");
                     return MeleeHitOutcome.Crushing;
                 }
             }
@@ -1469,7 +1529,10 @@ namespace Game.Entities
                 CalculateMinMaxDamage(attType, normalized, addTotalPct, out minDamage, out maxDamage);
                 if (IsInFeralForm() && attType == WeaponAttackType.BaseAttack)
                 {
-                    CalculateMinMaxDamage(WeaponAttackType.OffAttack, normalized, addTotalPct, out float minOffhandDamage, out float maxOffhandDamage);
+                    CalculateMinMaxDamage(
+                        WeaponAttackType.OffAttack, normalized, addTotalPct, 
+                        out float minOffhandDamage, out float maxOffhandDamage);
+
                     minDamage += minOffhandDamage;
                     maxDamage += maxOffhandDamage;
                 }
@@ -1564,6 +1627,7 @@ namespace Game.Entities
                 float ap = m_unitData.RangedAttackPower + m_unitData.RangedAttackPowerModPos + m_unitData.RangedAttackPowerModNeg;
                 if (ap < 0)
                     return 0.0f;
+
                 return ap * (1.0f + m_unitData.RangedAttackPowerMultiplier);
             }
             else
@@ -1571,6 +1635,7 @@ namespace Game.Entities
                 float ap = m_unitData.AttackPower + m_unitData.AttackPowerModPos + m_unitData.AttackPowerModNeg;
                 if (ap < 0)
                     return 0.0f;
+
                 return ap * (1.0f + m_unitData.AttackPowerMultiplier);
             }
         }
@@ -1692,6 +1757,7 @@ namespace Game.Entities
         public virtual void UpdateNearbyPlayersInteractions()
         {
             for (int i = 0; i < m_unitData.NpcFlags.GetSize(); ++i)
+            {
                 if (m_unitData.NpcFlags[i] != 0)
                 {
                     m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, i);
@@ -1699,4 +1765,5 @@ namespace Game.Entities
                 }
         }
     }
+}
 }

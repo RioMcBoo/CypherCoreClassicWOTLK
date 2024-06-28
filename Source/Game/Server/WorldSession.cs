@@ -48,7 +48,7 @@ namespace Game
 
             m_Address = sock.GetRemoteIpAddress().Address.ToString();
             ResetTimeOutTime(false);
-            DB.Login.Execute("UPDATE account SET online = 1 WHERE id = {0};", GetAccountId());     // One-time query
+            DB.Login.Execute($"UPDATE account SET online = 1 WHERE id = {GetAccountId()};");     // One-time query
         }
 
         public void Dispose()
@@ -70,7 +70,7 @@ namespace Game
             // empty incoming packet queue
             _recvQueue.Clear();
 
-            DB.Login.Execute("UPDATE account SET online = 0 WHERE id = {0};", GetAccountId());     // One-time query
+            DB.Login.Execute($"UPDATE account SET online = 0 WHERE id = {GetAccountId()};");     // One-time query
         }
 
         public void LogoutPlayer(bool save)
@@ -198,7 +198,11 @@ namespace Game
                 // calls to GetMap in this case may cause crashes
                 _player.SetDestroyedObject(true);
                 _player.CleanupsBeforeDelete();
-                Log.outInfo(LogFilter.Player, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Logout Character:[{_player.GetName()}] ({_player.GetGUID()}) Level: {_player.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
+                Log.outInfo(LogFilter.Player, 
+                    $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) " +
+                    $"Logout Character:[{_player.GetName()}] ({_player.GetGUID()}) " +
+                    $"Level: {_player.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} " +
+                    $"({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
                 Map map = GetPlayer().GetMap();
                 if (map != null)
@@ -211,7 +215,8 @@ namespace Game
                 LogoutComplete logoutComplete = new();
                 SendPacket(logoutComplete);
 
-                //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+                //! Since each account can only have one online character at any given time,
+                //ensure all characters for active account are marked as offline
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ACCOUNT_ONLINE);
                 stmt.SetInt32(0, GetAccountId());
                 DB.Characters.Execute(stmt);
@@ -259,7 +264,10 @@ namespace Game
                                         firstDelayedPacket = packet;
 
                                     QueuePacket(packet);
-                                    Log.outDebug(LogFilter.Network, "Re-enqueueing packet with opcode {0} with with status OpcodeStatus.Loggedin. Player is currently not in world yet.", (ClientOpcodes)packet.GetOpcode());
+
+                                    Log.outDebug(LogFilter.Network, 
+                                        $"Re-enqueueing packet with opcode {(ClientOpcodes)packet.GetOpcode()} " +
+                                        $"with with status OpcodeStatus.Loggedin. Player is currently not in world yet.");
                                 }
                                 break;
                             }
@@ -295,18 +303,23 @@ namespace Game
                                 handler.Invoke(this, packet);
                             break;
                         default:
-                            Log.outError(LogFilter.Network, "Received not handled opcode {0} from {1}", (ClientOpcodes)packet.GetOpcode(), GetPlayerInfo());
+                            Log.outError(LogFilter.Network, 
+                                $"Received not handled opcode {(ClientOpcodes)packet.GetOpcode()} from {GetPlayerInfo()}");
                             break;
                     }
                 }
                 catch (InternalBufferOverflowException ex)
                 {
-                    Log.outError(LogFilter.Network, "InternalBufferOverflowException: {0} while parsing {1} from {2}.", ex.Message, (ClientOpcodes)packet.GetOpcode(), GetPlayerInfo());
+                    Log.outError(LogFilter.Network, 
+                        $"InternalBufferOverflowException: {ex.Message} " +
+                        $"while parsing {(ClientOpcodes)packet.GetOpcode()} from {GetPlayerInfo()}.");
                 }
                 catch (EndOfStreamException)
                 {
-                    Log.outError(LogFilter.Network, "WorldSession:Update EndOfStreamException occured while parsing a packet (opcode: {0}) from client {1}, accountid={2}. Skipped packet.",
-                        (ClientOpcodes)packet.GetOpcode(), GetRemoteAddress(), GetAccountId());
+                    Log.outError(LogFilter.Network, 
+                        $"WorldSession:Update EndOfStreamException occured while parsing a packet " +
+                        $"(opcode: {(ClientOpcodes)packet.GetOpcode()}) from client {GetRemoteAddress()}, " +
+                        $"accountid={GetAccountId()}. Skipped packet.");
                 }
 
                 processedPackets++;
@@ -353,6 +366,7 @@ namespace Game
                             m_Socket[(int)ConnectionType.Realm].CloseSocket();
                             m_Socket[(int)ConnectionType.Realm] = null;
                         }
+
                         if (m_Socket[(int)ConnectionType.Instance] != null)
                         {
                             m_Socket[(int)ConnectionType.Instance].CloseSocket();
@@ -375,7 +389,9 @@ namespace Game
 
         void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
         {
-            Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
+            Log.outError(LogFilter.Network, 
+                $"Received unexpected opcode {(ClientOpcodes)packet.GetOpcode()} " +
+                $"Status: {status} Reason: {reason} from {GetPlayerInfo()}");
         }
 
         public void SendPacket(ServerPacket packet)
@@ -385,20 +401,23 @@ namespace Game
 
             if (packet.GetOpcode() == ServerOpcodes.Unknown || packet.GetOpcode() == ServerOpcodes.Max)
             {
-                Log.outError(LogFilter.Network, "Prevented sending of UnknownOpcode to {0}", GetPlayerInfo());
+                Log.outError(LogFilter.Network, $"Prevented sending of UnknownOpcode to {GetPlayerInfo()}");
                 return;
             }
 
             ConnectionType conIdx = packet.GetConnection();
             if (conIdx != ConnectionType.Instance && PacketManager.IsInstanceOnlyOpcode(packet.GetOpcode()))
             {
-                Log.outError(LogFilter.Network, "Prevented sending of instance only opcode {0} with connection Type {1} to {2}", packet.GetOpcode(), packet.GetConnection(), GetPlayerInfo());
+                Log.outError(LogFilter.Network, 
+                    $"Prevented sending of instance only opcode {packet.GetOpcode()} " +
+                    $"with connection Type {packet.GetConnection()} to {GetPlayerInfo()}");
                 return;
             }
 
             if (m_Socket[(int)conIdx] == null)
             {
-                Log.outError(LogFilter.Network, "Prevented sending of {0} to non existent socket {1} to {2}", packet.GetOpcode(), conIdx, GetPlayerInfo());
+                Log.outError(LogFilter.Network,
+                    $"Prevented sending of {packet.GetOpcode()} to non existent socket {conIdx} to {GetPlayerInfo()}");
                 return;
             }
 
@@ -438,8 +457,10 @@ namespace Game
             accountDataTimes.PlayerGuid = playerGuid;
             accountDataTimes.ServerTime = GameTime.GetGameTime();
             for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
+            {
                 if (mask.HasType(i))
                     accountDataTimes.AccountTimes[(int)i] = GetAccountData(i).Time;
+            }
 
             SendPacket(accountDataTimes);
         }
@@ -450,6 +471,7 @@ namespace Game
             {
                 for (var i = 0; i < SharedConst.MaxAccountTutorialValues; i++)
                     tutorials[i] = result.Read<uint>(i);
+
                 tutorialsChanged |= TutorialsFlag.LoadedFromDB;
             }
 
@@ -508,26 +530,30 @@ namespace Game
         void LoadAccountData(SQLResult result, AccountDataTypeMask mask)
         {
             for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
+            {
                 if (mask.HasType(i))
                     _accountData[(int)i] = new AccountData();
+            }
 
             if (result.IsEmpty())
                 return;
+
+            string accountType = mask == AccountDataTypeMask.GlobalCacheMask ? "account_data" : "character_account_data";
 
             do
             {
                 AccountDataTypes type = (AccountDataTypes)result.Read<byte>(0);
                 if (type >=AccountDataTypes.Max)
                 {
-                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account data Type ({1}), ignore.",
-                        mask == AccountDataTypeMask.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                    Log.outError(LogFilter.Server, 
+                        $"Table `{accountType}` have invalid account data Type ({type}), ignore.");
                     continue;
                 }
 
                 if (!mask.HasType(type))
                 {
-                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account data Type ({1}), ignore.",
-                        mask == AccountDataTypeMask.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                    Log.outError(LogFilter.Server, 
+                        $"Table `{accountType}` have non appropriate for table  account data Type ({type}), ignore.");
                     continue;
                 }
 
@@ -585,7 +611,9 @@ namespace Game
             if (Hyperlink.CheckAllLinks(str))
                 return true;
 
-            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} sent a message with an invalid link:\n{str}");
+            Log.outError(LogFilter.Network, 
+                $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} " +
+                $"sent a message with an invalid link:\n{str}");
 
             if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
                 KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
@@ -598,7 +626,9 @@ namespace Game
             if (!str.Contains('|'))
                 return true;
 
-            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) sent a message which illegally contained a hyperlink:\n{str}");
+            Log.outError(LogFilter.Network, 
+                $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                $"sent a message which illegally contained a hyperlink:\n{str}");
 
             if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
                 KickPlayer("WorldSession::DisallowHyperlinksAndMaybeKick Illegal chat link");
@@ -638,11 +668,11 @@ namespace Game
             StringBuilder ss = new();
             ss.Append("[Player: ");
             if (!m_playerLoading.IsEmpty())
-                ss.AppendFormat("Logging in: {0}, ", m_playerLoading.ToString());
+                ss.AppendFormat($"Logging in: {m_playerLoading}, ");
             else if (_player != null)
-                ss.AppendFormat("{0} {1}, ", _player.GetName(), _player.GetGUID().ToString());
+                ss.AppendFormat($"{_player.GetName()} {_player.GetGUID()}, ");
 
-            ss.AppendFormat("Account: {0}]", GetAccountId());
+            ss.AppendFormat($"Account: {GetAccountId()}]");
             return ss.ToString();
         }
 
@@ -658,6 +688,7 @@ namespace Game
         public bool PlayerLogout() { return m_playerLogout; }
         public bool PlayerLogoutWithSave() { return m_playerLogout && m_playerSave; }
         public bool PlayerRecentlyLoggedOut() { return m_playerRecentlyLogout; }
+        
         public bool PlayerDisconnected()
         {
             return !(m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() &&
@@ -742,8 +773,9 @@ namespace Game
             var id = GetAccountId();
             AccountTypes secLevel = GetSecurity();
 
-            Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
-                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
+            Log.outDebug(LogFilter.Rbac, 
+                $"WorldSession.LoadPermissions [AccountId: {id}, Name: {_accountName}, " +
+                $"realmId: {Global.WorldMgr.GetRealm().Id.Index}, secLevel: {secLevel}]");
 
             _RBACData = new RBACData(id, _accountName, Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
             _RBACData.LoadFromDB();
@@ -754,8 +786,9 @@ namespace Game
             var id = GetAccountId();
             AccountTypes secLevel = GetSecurity();
 
-            Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
-                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
+            Log.outDebug(LogFilter.Rbac, 
+                $"WorldSession.LoadPermissions [AccountId: {id}, Name: {_accountName}, " +
+                $"realmId: {Global.WorldMgr.GetRealm().Id.Index}, secLevel: {secLevel}]");
 
             _RBACData = new RBACData(id, _accountName, Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
             return _RBACData.LoadFromDBAsync();
@@ -839,16 +872,20 @@ namespace Game
                 LoadPermissions();
 
             bool hasPermission = _RBACData.HasPermission(permission);
-            Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+            
+            Log.outDebug(LogFilter.Rbac, 
+                $"WorldSession:HasPermission [AccountId: {_RBACData.GetId()}, Name: {_RBACData.GetName()}, " +
+                $"realmId: {Global.WorldMgr.GetRealm().Id.Index}]");
 
             return hasPermission;
         }
 
         public void InvalidateRBACData()
         {
-            Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+            Log.outDebug(LogFilter.Rbac, 
+                $"WorldSession:Invalidaterbac:RBACData [AccountId: {_RBACData.GetId()}, Name: {_RBACData.GetName()}, " +
+                $"realmId: {Global.WorldMgr.GetRealm().Id.Index}]");
+
             _RBACData = null;
         }
 
@@ -903,6 +940,7 @@ namespace Game
 
         public uint GetLatency() { return m_latency; }
         public void SetLatency(uint latency) { m_latency = latency; }
+
         public void ResetTimeOutTime(bool onlyActive)
         {
             if (GetPlayer() != null)
@@ -910,6 +948,7 @@ namespace Game
             else if (!onlyActive)
                 m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
         }
+
         bool IsConnectionIdle()
         {
             return m_timeOutTime < GameTime.GetGameTime() && !m_inQueue;
@@ -1012,6 +1051,7 @@ namespace Game
             {
                 return (long)(((ulong)AccountId & 0xFFFFFFFF) | (((ulong)ConnectionType & 1) << 32) | ((ulong)Key << 33));
             }
+
             set
             {
                 AccountId = (int)((ulong)value & 0xFFFFFFFF);
@@ -1032,6 +1072,7 @@ namespace Game
             Session = s;
             _policy = (Policy)WorldConfig.GetIntValue(WorldCfg.PacketSpoofPolicy);
         }
+
         //todo fix me
         public bool EvaluateOpcode(WorldPacket packet, long time)
         {
@@ -1055,8 +1096,10 @@ namespace Game
             if (++packetCounter.amountCounter <= maxPacketCounterAllowed)
                 return true;
 
-            Log.outWarn(LogFilter.Network, "AntiDOS: Account {0}, IP: {1}, Ping: {2}, Character: {3}, flooding packet (opc: {4} (0x{4}), count: {5})",
-                Session.GetAccountId(), Session.GetRemoteAddress(), Session.GetLatency(), Session.GetPlayerName(), packet.GetOpcode(), packetCounter.amountCounter);
+            Log.outWarn(LogFilter.Network, 
+                $"AntiDOS: Account {Session.GetAccountId()}, IP: {Session.GetRemoteAddress()}, Ping: {Session.GetLatency()}, " +
+                $"Character: {Session.GetPlayerName()}, flooding packet (opc: {packet.GetOpcode()} (0x{packet.GetOpcode():X}), " +
+                $"count: {packetCounter.amountCounter})");
 
             switch (_policy)
             {
@@ -1080,7 +1123,7 @@ namespace Game
                             break;
                     }
                     Global.WorldMgr.BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding/Spoofing", "Server: AutoDOS");
-                    Log.outInfo(LogFilter.Network, "AntiDOS: Player automatically banned for {0} seconds.", duration);
+                    Log.outInfo(LogFilter.Network, $"AntiDOS: Player automatically banned for {duration} seconds.");
                     return false;
             }
             return true;

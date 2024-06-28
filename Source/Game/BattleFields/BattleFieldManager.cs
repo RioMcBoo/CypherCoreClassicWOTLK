@@ -59,12 +59,16 @@ namespace Game.BattleFields
 
                 if (!bf.SetupBattlefield())
                 {
-                    Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {(BattleFieldTypes)i} on map {map.GetId()} instance id {map.GetInstanceId()} failed.");
+                    Log.outInfo(LogFilter.Battlefield, 
+                        $"Setting up battlefield with TypeId {(BattleFieldTypes)i} " +
+                        $"on map {map.GetId()} instance id {map.GetInstanceId()} failed.");
                     continue;
                 }
 
                 _battlefieldsByMap.Add(map, bf);
-                Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {(BattleFieldTypes)i} on map {map.GetId()} instance id {map.GetInstanceId()} succeeded.");
+                Log.outInfo(LogFilter.Battlefield, 
+                    $"Setting up battlefield with TypeId {(BattleFieldTypes)i} " +
+                    $"on map {map.GetId()} instance id {map.GetInstanceId()} succeeded.");
             }
         }
 
@@ -88,7 +92,8 @@ namespace Game.BattleFields
                 return;
 
             bf.HandlePlayerEnterZone(player, zoneId);
-            Log.outDebug(LogFilter.Battlefield, "Player {0} entered battlefield id {1}", player.GetGUID().ToString(), bf.GetTypeId());
+            Log.outDebug(LogFilter.Battlefield, 
+                $"Player {player.GetGUID()} entered battlefield id {bf.GetTypeId()}");
         }
 
         public void HandlePlayerLeaveZone(Player player, int zoneId)
@@ -102,7 +107,8 @@ namespace Game.BattleFields
                 return;
 
             bf.HandlePlayerLeaveZone(player, zoneId);
-            Log.outDebug(LogFilter.Battlefield, "Player {0} left battlefield id {1}", player.GetGUID().ToString(), bf.GetTypeId());
+            Log.outDebug(LogFilter.Battlefield, 
+                $"Player {player.GetGUID()} left battlefield id {bf.GetTypeId()}");
         }
 
         public bool IsWorldPvpArea(int zoneId)

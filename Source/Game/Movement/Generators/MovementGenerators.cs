@@ -65,7 +65,9 @@ namespace Game.Movement
 
         public virtual string GetDebugInfo()
         {
-            return $"Mode: {Mode} Priority: {Priority} Flags: {Flags} BaseUniteState: {BaseUnitState}";
+            return 
+                $"Mode: {Mode} Priority: {Priority} Flags: {Flags} " +
+                $"BaseUniteState: {BaseUnitState}";
         }
     }
     

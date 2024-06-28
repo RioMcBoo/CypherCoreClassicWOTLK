@@ -116,7 +116,11 @@ namespace Game.Movement
             if (_path == null || _path.Nodes.Empty())
                 return false;
 
-            Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator::GetResetPosition: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
+            Cypher.Assert(_currentNode < _path.Nodes.Count, 
+                $"WaypointMovementGenerator::GetResetPosition: " +
+                $"tried to reference a node id ({_currentNode}) " +
+                $"which is not included in path ({_path.Id})");
+
             WaypointNode waypoint = _path.Nodes.ElementAt(_currentNode);
 
             x = waypoint.X;
@@ -139,7 +143,10 @@ namespace Game.Movement
 
             if (_path == null)
             {
-                Log.outError(LogFilter.Sql, $"WaypointMovementGenerator::DoInitialize: couldn't load path for creature ({owner.GetGUID()}) (_pathId: {_pathId})");
+                Log.outError(LogFilter.Sql, 
+                    $"WaypointMovementGenerator::DoInitialize: " +
+                    $"couldn't load path for creature " +
+                    $"({owner.GetGUID()}) (_pathId: {_pathId})");
                 return;
             }
 
@@ -166,8 +173,11 @@ namespace Game.Movement
             if (owner == null || !owner.IsAlive())
                 return true;
 
-            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused) || _path == null || _path.Nodes.Empty())
+            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused) 
+                || _path == null || _path.Nodes.Empty())
+            {
                 return true;
+            }
 
             if (_duration != null)
             {
@@ -286,7 +296,11 @@ namespace Game.Movement
             if (_path == null || _path.Nodes.Empty())
                 return;
 
-            Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
+            Cypher.Assert(_currentNode < _path.Nodes.Count, 
+                $"WaypointMovementGenerator.OnArrived: " +
+                $"tried to reference a node id ({_currentNode}) " +
+                $"which is not included in path ({_path.Id})");
+
             WaypointNode waypoint = _path.Nodes.ElementAt(_currentNode);
             if (waypoint.Delay != 0)
             {
@@ -316,10 +330,15 @@ namespace Game.Movement
         void StartMove(Creature owner, bool relaunch = false)
         {
             // sanity checks
-            if (owner == null || !owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized) || _path == null || _path.Nodes.Empty() || (relaunch && (HasFlag(MovementGeneratorFlags.InformEnabled) || !HasFlag(MovementGeneratorFlags.Initialized))))
+            if (owner == null || !owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized) 
+                || _path == null || _path.Nodes.Empty() || 
+                (relaunch && (HasFlag(MovementGeneratorFlags.InformEnabled) || !HasFlag(MovementGeneratorFlags.Initialized))))
+            {
                 return;
+            }
 
-            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || (owner.IsFormationLeader() && !owner.IsFormationLeaderMoveAllowed())) // if cannot move OR cannot move because of formation
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() 
+                || (owner.IsFormationLeader() && !owner.IsFormationLeaderMoveAllowed())) // if cannot move OR cannot move because of formation
             {
                 _nextMoveTime.Reset(1000); // delay 1s
                 return;
@@ -331,7 +350,11 @@ namespace Game.Movement
             {
                 if (ComputeNextNode())
                 {
-                    Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
+                    Cypher.Assert(_currentNode < _path.Nodes.Count,
+                        $"WaypointMovementGenerator.StartMove: " +
+                        $"tried to reference a node id ({_currentNode}) " +
+                        $"which is not included in path ({_path.Id})");
+
                     // inform AI
                     CreatureAI ai = owner.GetAI();
                     if (ai != null)
@@ -380,7 +403,11 @@ namespace Game.Movement
                     ai.WaypointStarted(_path.Nodes[_currentNode].Id, _path.Id);
             }
 
-            Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
+            Cypher.Assert(_currentNode < _path.Nodes.Count, 
+                $"WaypointMovementGenerator.StartMove: " +
+                $"tried to reference a node id ({_currentNode}) " +
+                $"which is not included in path ({_path.Id})");
+
             WaypointNode waypoint = _path.Nodes[_currentNode];
 
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled | MovementGeneratorFlags.TimedPaused);

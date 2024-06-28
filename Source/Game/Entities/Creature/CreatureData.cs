@@ -91,8 +91,10 @@ namespace Game.Entities
         public CreatureModel GetFirstValidModel()
         {
             foreach (CreatureModel model in Models)
+            {
                 if (model.CreatureDisplayID != 0)
                     return model;
+            }
 
             return null;
         }
@@ -100,8 +102,10 @@ namespace Game.Entities
         public CreatureModel GetModelWithDisplayId(int displayId)
         {
             foreach (CreatureModel model in Models)
+            {
                 if (displayId == model.CreatureDisplayID)
                     return model;
+            }
 
             return null;
         }
@@ -134,10 +138,14 @@ namespace Game.Entities
         {
             return creatureDifficulty.TypeFlags.HasFlag(CreatureTypeFlags.TameableExotic);
         }
+
         public bool IsTameable(bool canTameExotic, CreatureDifficulty creatureDifficulty)
         {
-            if (CreatureType != CreatureType.Beast || Family == CreatureFamily.None || !creatureDifficulty.TypeFlags.HasFlag(CreatureTypeFlags.Tameable))
+            if (CreatureType != CreatureType.Beast || Family == CreatureFamily.None
+                || !creatureDifficulty.TypeFlags.HasFlag(CreatureTypeFlags.Tameable))
+            {
                 return false;
+            }
 
             // if can tame exotic then can tame any tameable
             return canTameExotic || !IsExotic(creatureDifficulty);
@@ -342,7 +350,8 @@ namespace Game.Entities
 
         public override string ToString()
         {
-            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}, Random: {Random}, InteractionPauseTimer: {InteractionPauseTimer}";
+            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, " +
+                $"Chase: {Chase}, Random: {Random}, InteractionPauseTimer: {InteractionPauseTimer}";
         }
     }
 

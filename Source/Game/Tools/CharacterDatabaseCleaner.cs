@@ -55,10 +55,10 @@ namespace Game
 
         static void CheckUnique(string column, string table, CheckFor check)
         {
-            SQLResult result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
+            SQLResult result = DB.Characters.Query($"SELECT DISTINCT {column} FROM {table}");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.Sql, "Table {0} is empty.", table);
+                Log.outInfo(LogFilter.Sql, $"Table {table} is empty.");
                 return;
             }
 
@@ -71,7 +71,7 @@ namespace Game
                 {
                     if (!found)
                     {
-                        ss.AppendFormat("DELETE FROM {0} WHERE {1} IN(", table, column);
+                        ss.AppendFormat($"DELETE FROM {table} WHERE {column} IN(");
                         found = true;
                     }
                     else
@@ -131,7 +131,7 @@ namespace Game
 
         static void CleanCharacterTalent()
         {
-            DB.Characters.DirectExecute("DELETE FROM character_talent WHERE talentGroup > {0}", PlayerConst.MaxSpecializations);
+            DB.Characters.DirectExecute($"DELETE FROM character_talent WHERE talentGroup > {PlayerConst.MaxSpecializations}");
             CheckUnique("talentId", "character_talent", TalentCheck);
         }
 

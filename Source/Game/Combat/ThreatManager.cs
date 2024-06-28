@@ -105,8 +105,10 @@ namespace Game.Combat
         public Unit GetAnyTarget()
         {
             foreach (ThreatReference refe in _sortedThreatList)
+            {
                 if (!refe.IsOffline())
                     return refe.GetVictim();
+            }
 
             return null;
         }
@@ -117,8 +119,10 @@ namespace Game.Combat
                 return _sortedThreatList.Empty();
 
             foreach (ThreatReference refe in _sortedThreatList)
+            {
                 if (refe.IsAvailable())
                     return false;
+            }
 
             return true;
         }
@@ -132,7 +136,10 @@ namespace Game.Combat
             return (includeOffline || refe.IsAvailable());
         }
 
-        public bool IsThreatenedBy(Unit who, bool includeOffline = false) { return IsThreatenedBy(who.GetGUID(), includeOffline); }
+        public bool IsThreatenedBy(Unit who, bool includeOffline = false) 
+        { 
+            return IsThreatenedBy(who.GetGUID(), includeOffline); 
+        }
 
         public float GetThreat(Unit who, bool includeOffline = false)
         {
@@ -154,8 +161,10 @@ namespace Game.Combat
                 return !_threatenedByMe.Empty();
 
             foreach (var pair in _threatenedByMe)
+            {
                 if (pair.Value.IsAvailable())
                     return true;
+            }
 
             return false;
         }
@@ -169,7 +178,10 @@ namespace Game.Combat
             return (includeOffline || refe.IsAvailable());
         }
 
-        public bool IsThreateningTo(Unit who, bool includeOffline = false) { return IsThreateningTo(who.GetGUID(), includeOffline); }
+        public bool IsThreateningTo(Unit who, bool includeOffline = false) 
+        { 
+            return IsThreateningTo(who.GetGUID(), includeOffline);
+        }
 
         public void EvaluateSuppressed(bool canExpire = false)
         {
@@ -211,7 +223,8 @@ namespace Game.Combat
             }
 
             // If victim is personal spawn, redirect all aggro to summoner
-            if (target.IsPrivateObject() && (!GetOwner().IsPrivateObject() || !GetOwner().CheckPrivateObjectOwnerVisibility(target)))
+            if (target.IsPrivateObject() && 
+                (!GetOwner().IsPrivateObject() || !GetOwner().CheckPrivateObjectOwnerVisibility(target)))
             {
                 Unit privateObjectOwner = Global.ObjAccessor.GetUnit(GetOwner(), target.GetPrivateObjectOwner());
                 if (privateObjectOwner != null)
@@ -221,7 +234,8 @@ namespace Game.Combat
                 }
             }
 
-            // if we cannot actually have a threat list, we instead just set combat state and avoid creating threat refs altogether
+            // if we cannot actually have a threat list,
+            // we instead just set combat state and avoid creating threat refs altogether
             if (!CanHaveThreatList())
             {
                 CombatManager combatMgr = _owner.GetCombatManager();
@@ -251,7 +265,9 @@ namespace Game.Combat
                 if (!redirInfo.Empty())
                 {
                     float origAmount = amount;
-                    // intentional iteration by index - there's a nested AddThreat call further down that might cause AI calls which might modify redirect info through spells
+                    // intentional iteration by index - there's a nested AddThreat call
+                    // further down that might cause AI calls
+                    // which might modify redirect info through spells
                     for (var i = 0; i < redirInfo.Count; ++i)
                     {
                         var pair = redirInfo[i]; // (victim,pct)
@@ -282,7 +298,8 @@ namespace Game.Combat
             var targetRefe = _myThreatListEntries.LookupByKey(target.GetGUID());
             if (targetRefe != null)
             {
-                // SUPPRESSED threat states don't go back to ONLINE until threat is caused by them (retail behavior)
+                // SUPPRESSED threat states don't go back to ONLINE until threat
+                // is caused by them (retail behavior)
                 if (targetRefe.GetOnlineState() == OnlineState.Suppressed)
                 {
                     if (!targetRefe.ShouldBeSuppressed())
@@ -297,12 +314,15 @@ namespace Game.Combat
                 return;
             }
 
-            // ok, we're now in combat - create the threat list reference and push it to the respective managers
+            // ok, we're now in combat - create the threat list reference
+            // and push it to the respective managers
             ThreatReference newRefe = new(this, target);
             PutThreatListRef(target.GetGUID(), newRefe);
             target.GetThreatManager().PutThreatenedByMeRef(_owner.GetGUID(), newRefe);
 
-            // afterwards, we evaluate whether this is an online reference (it might not be an acceptable target, but we need to add it to our threat list before we check!)
+            // afterwards, we evaluate whether this is an online reference
+            // (it might not be an acceptable target,
+            // but we need to add it to our threat list before we check!)
             newRefe.UpdateOffline();
             if (newRefe.IsOnline()) // we only add the threat if the ref is currently available
                 newRefe.AddThreat(amount);
@@ -491,7 +511,9 @@ namespace Game.Combat
                 // otherwise the next highest target may still be a melee above 110% and we need to look further
             }
             // we should have found the old victim at some point in the loop above, so execution should never get to this point
-            Cypher.Assert(false, "Current victim not found in sorted threat list even though it has a reference - manager desync!");
+            Cypher.Assert(false, 
+                "Current victim not found in sorted threat list " +
+                "even though it has a reference - manager desync!");
             return null;
         }
 
@@ -530,8 +552,10 @@ namespace Game.Combat
             {
                 SpellThreatEntry threatEntry = Global.SpellMgr.GetSpellThreatEntry(spell.Id);
                 if (threatEntry != null)
+                {
                     if (threatEntry.pctMod != 1.0f) // flat/AP modifiers handled in Spell::HandleThreatSpells
                         threat *= threatEntry.pctMod;
+                }
 
                 Player modOwner = victim.GetSpellModOwner();
                 if (modOwner != null)
@@ -582,7 +606,8 @@ namespace Game.Combat
 
         public void ForwardThreatForAssistingMe(Unit assistant, float baseAmount, SpellInfo spell = null, bool ignoreModifiers = false)
         {
-            if (spell != null && (spell.HasAttribute(SpellAttr1.NoThreat) || spell.HasAttribute(SpellAttr4.NoHelpfulThreat))) // shortcut, none of the calls would do anything
+            if (spell != null 
+                && (spell.HasAttribute(SpellAttr1.NoThreat) || spell.HasAttribute(SpellAttr4.NoHelpfulThreat))) // shortcut, none of the calls would do anything
                 return;
 
             if (_threatenedByMe.Empty())
@@ -614,8 +639,10 @@ namespace Game.Combat
         {
             List<ThreatReference> threatReferencesToRemove = new();
             foreach (var (_, refe) in _threatenedByMe)
+            {
                 if (unitFilter == null || unitFilter(refe.GetOwner()))
                     threatReferencesToRemove.Add(refe);
+            }
 
             foreach (ThreatReference refe in threatReferencesToRemove)
                 refe._mgr.ClearThreat(_owner);
@@ -641,6 +668,7 @@ namespace Game.Combat
         {
             for (byte i = 0; i < (int)SpellSchools.Max; ++i)
                 _singleSchoolModifiers[i] = _owner.GetTotalAuraMultiplierByMiscMask(AuraType.ModThreat, 1u << i);
+            
             _multiSchoolModifiers.Clear();
         }
 
@@ -731,7 +759,9 @@ namespace Game.Combat
         void PutThreatListRef(ObjectGuid guid, ThreatReference refe)
         {
             NeedClientUpdate = true;
-            Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), $"Duplicate threat reference being inserted on {_owner.GetGUID()} for {guid}!");
+            Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), 
+                $"Duplicate threat reference being inserted on {_owner.GetGUID()} for {guid}!");
+
             _myThreatListEntries[guid] = refe;
             _sortedThreatList.Add(refe);
             _sortedThreatList.Sort();
@@ -755,7 +785,9 @@ namespace Game.Combat
 
         void PutThreatenedByMeRef(ObjectGuid guid, ThreatReference refe)
         {
-            Cypher.Assert(!_threatenedByMe.ContainsKey(guid), $"Duplicate threatened-by-me reference being inserted on {_owner.GetGUID()} for {guid}!");
+            Cypher.Assert(!_threatenedByMe.ContainsKey(guid), 
+                $"Duplicate threatened-by-me reference being inserted on {_owner.GetGUID()} for {guid}!");
+            
             _threatenedByMe[guid] = refe;
         }
 

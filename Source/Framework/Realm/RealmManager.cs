@@ -125,9 +125,9 @@ public class RealmManager : Singleton<RealmManager>
                     _subRegions.Add(subRegion);
 
                 if (!existingRealms.ContainsKey(realm.Id))
-                    Log.outInfo(LogFilter.Realmlist, "Added realm \"{0}\" at {1}:{2}", realm.Name, realm.Addresses[0].ToString(), realm.Port);
+                    Log.outInfo(LogFilter.Realmlist, $"Added realm \"{realm.Name}\" at {realm.Addresses[0]}:{realm.Port}");
                 else
-                    Log.outDebug(LogFilter.Realmlist, "Updating realm \"{0}\" at {1}:{2}", realm.Name, realm.Addresses[0].ToString(), realm.Port);
+                    Log.outDebug(LogFilter.Realmlist, $"Updating realm \"{realm.Name}\" at {realm.Addresses[0]}:{realm.Port}");
 
                 existingRealms.Remove(realm.Id);
             }
@@ -135,7 +135,7 @@ public class RealmManager : Singleton<RealmManager>
         }
 
         foreach (var pair in existingRealms)
-            Log.outInfo(LogFilter.Realmlist, "Removed realm \"{0}\".", pair.Value);
+            Log.outInfo(LogFilter.Realmlist, $"Removed realm \"{pair.Value}\".");
     }
 
     public Realm GetRealm(RealmId id)
@@ -245,7 +245,11 @@ public class RealmManager : Singleton<RealmManager>
             RealmListUpdate realmListUpdate = new();
             realmListUpdate.Update.WowRealmAddress = (int)realm.Value.Id.GetAddress();
             realmListUpdate.Update.CfgTimezonesID = 1;
-            realmListUpdate.Update.PopulationState = (realm.Value.Flags.HasAnyFlag(RealmFlags.Offline) ? 0 : Math.Max((int)realm.Value.PopulationLevel, 1));
+            realmListUpdate.Update.PopulationState = 
+                realm.Value.Flags.HasAnyFlag(RealmFlags.Offline) 
+                ? 0 
+                : Math.Max((int)realm.Value.PopulationLevel, 1);
+
             realmListUpdate.Update.CfgCategoriesID = realm.Value.Timezone;
 
             RealmBuildInfo buildInfo = GetBuildInfo(realm.Value.Build);

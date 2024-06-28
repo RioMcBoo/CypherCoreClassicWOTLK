@@ -37,8 +37,10 @@ namespace Game.Scenarios
             var scenarioData = _scenarioData.LookupByKey(scenarioID);
             if (scenarioData == null)
             {
-                Log.outError(LogFilter.Scenario, "Table `scenarios` contained data linking scenario (Id: {0}) to map (Id: {1}), difficulty (Id: {2}) but no scenario data was found related to that scenario Id.", 
-                    scenarioID, map.GetId(), map.GetDifficultyID());
+                Log.outError(LogFilter.Scenario, 
+                    $"Table `scenarios` contained data linking scenario (Id: {scenarioID}) " +
+                    $"to map (Id: {map.GetId()}), difficulty (Id: {map.GetDifficultyID()}) " +
+                    $"but no scenario data was found related to that scenario Id.");
                 return null;
             }
 
@@ -54,7 +56,8 @@ namespace Game.Scenarios
             SQLResult result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenarios. DB table `scenarios` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 scenarios. DB table `scenarios` is empty!");
                 return;
             }
 
@@ -66,14 +69,20 @@ namespace Game.Scenarios
                 int scenarioAllianceId = result.Read<int>(2);
                 if (scenarioAllianceId > 0 && !_scenarioData.ContainsKey(scenarioAllianceId))
                 {
-                    Log.outError(LogFilter.Sql, "ScenarioMgr.LoadDBData: DB Table `scenarios`, column scenario_A contained an invalid scenario (Id: {0})!", scenarioAllianceId);
+                    Log.outError(LogFilter.Sql, 
+                        $"ScenarioMgr.LoadDBData: " +
+                        $"DB Table `scenarios`, column scenario_A contained " +
+                        $"an invalid scenario (Id: {scenarioAllianceId})!");
                     continue;
                 }
 
                 int scenarioHordeId = result.Read<int>(3);
                 if (scenarioHordeId > 0 && !_scenarioData.ContainsKey(scenarioHordeId))
                 {
-                    Log.outError(LogFilter.Sql, "ScenarioMgr.LoadDBData: DB Table `scenarios`, column scenario_H contained an invalid scenario (Id: {0})!", scenarioHordeId);
+                    Log.outError(LogFilter.Sql, 
+                        $"ScenarioMgr.LoadDBData: " +
+                        $"DB Table `scenarios`, column scenario_H contained " +
+                        $"an invalid scenario (Id: {scenarioHordeId})!");
                     continue;
                 }
 
@@ -141,7 +150,8 @@ namespace Game.Scenarios
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenario POI definitions. DB table `scenario_poi` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 scenario POI definitions. DB table `scenario_poi` is empty.");
                 return;
             }
 
@@ -183,7 +193,11 @@ namespace Game.Scenarios
                 int navigationPlayerConditionID = result.Read<int>(9);
 
                 if (Global.CriteriaMgr.GetCriteriaTree(criteriaTreeID) == null)
-                    Log.outError(LogFilter.Sql, $"`scenario_poi` CriteriaTreeID ({criteriaTreeID}) Idx1 ({idx1}) does not correspond to a valid criteria tree");
+                {
+                    Log.outError(LogFilter.Sql,
+                        $"`scenario_poi` CriteriaTreeID ({criteriaTreeID}) " +
+                        $"Idx1 ({idx1}) does not correspond to a valid criteria tree");
+                }
 
                 var blobs = allPoints.LookupByKey(criteriaTreeID);
                 if (blobs != null)
@@ -197,7 +211,9 @@ namespace Game.Scenarios
                     }
                 }
 
-                Log.outError(LogFilter.Sql, $"Table scenario_poi references unknown scenario poi points for criteria tree id {criteriaTreeID} POI id {blobIndex}");
+                Log.outError(LogFilter.Sql, 
+                    $"Table scenario_poi references unknown scenario poi points " +
+                    $"for criteria tree id {criteriaTreeID} POI id {blobIndex}");
 
             } while (result.NextRow());
 

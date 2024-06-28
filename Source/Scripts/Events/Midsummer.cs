@@ -20,7 +20,9 @@ namespace Scripts.Events
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellTorchTossingTraining, SpellTorchTossingPractice, SpellTorchTossingTrainingSuccessAlliance, SpellTorchTossingTrainingSuccessHorde);
+            return ValidateSpellInfo(
+                SpellTorchTossingTraining, SpellTorchTossingPractice, 
+                SpellTorchTossingTrainingSuccessAlliance, SpellTorchTossingTrainingSuccessHorde);
         }
 
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -100,7 +102,9 @@ namespace Scripts.Events
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellRibbonPolePeriodicVisual, SpellBurningHotPoleDance, SpellHasFullMidsummerSet, SpellRibbonDance);
+            return ValidateSpellInfo(
+                SpellRibbonPolePeriodicVisual, SpellBurningHotPoleDance, 
+                SpellHasFullMidsummerSet, SpellRibbonDance);
         }
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -182,8 +186,11 @@ namespace Scripts.Events
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(JugglingTorch.SpellJuggleTorchSlow, JugglingTorch.SpellJuggleTorchMedium, JugglingTorch.SpellJuggleTorchFast, JugglingTorch.SpellJuggleTorchSelf,
-                JugglingTorch.SpellJuggleTorchShadowSlow, JugglingTorch.SpellJuggleTorchShadowMedium, JugglingTorch.SpellJuggleTorchShadowFast, JugglingTorch.SpellJuggleTorchShadowSelf);
+            return ValidateSpellInfo(
+                JugglingTorch.SpellJuggleTorchSlow, JugglingTorch.SpellJuggleTorchMedium, 
+                JugglingTorch.SpellJuggleTorchFast, JugglingTorch.SpellJuggleTorchSelf,
+                JugglingTorch.SpellJuggleTorchShadowSlow, JugglingTorch.SpellJuggleTorchShadowMedium, 
+                JugglingTorch.SpellJuggleTorchShadowFast, JugglingTorch.SpellJuggleTorchShadowSelf);
         }
 
         void HandleDummy(int effIndex)
@@ -243,8 +250,11 @@ namespace Scripts.Events
             if (player == null)
                 return;
 
-            if (player.GetQuestStatus(JugglingTorch.QuestTorchCatchingA) == QuestStatus.Rewarded || player.GetQuestStatus(JugglingTorch.QuestTorchCatchingH) == QuestStatus.Rewarded)
+            if (player.GetQuestStatus(JugglingTorch.QuestTorchCatchingA) == QuestStatus.Rewarded
+                || player.GetQuestStatus(JugglingTorch.QuestTorchCatchingH) == QuestStatus.Rewarded)
+            {
                 player.CastSpell(player, JugglingTorch.SpellGiveTorch);
+        }
         }
 
         public override void Register()
@@ -320,7 +330,10 @@ namespace Scripts.Events
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(FlingTorch.SpellFlingTorchTriggered, FlingTorch.SpellTorchCatchingSuccessAlliance, FlingTorch.SpellTorchCatchingSuccessHorde, FlingTorch.SpellTorchCatchingRemoveTorches, FlingTorch.SpellFlingTorchShadow);
+            return ValidateSpellInfo(
+                FlingTorch.SpellFlingTorchTriggered, FlingTorch.SpellTorchCatchingSuccessAlliance, 
+                FlingTorch.SpellTorchCatchingSuccessHorde, FlingTorch.SpellTorchCatchingRemoveTorches, 
+                FlingTorch.SpellFlingTorchShadow);
         }
 
         void HandleScriptEffect(int effIndex)
@@ -338,10 +351,16 @@ namespace Scripts.Events
 
             byte requiredCatches = 0;
             // Number of required catches depends on quest - 4 for the normal quest, 10 for the daily version
-            if (player.GetQuestStatus(JugglingTorch.QuestTorchCatchingA) == QuestStatus.Incomplete || player.GetQuestStatus(JugglingTorch.QuestTorchCatchingH) == QuestStatus.Incomplete)
+            if (player.GetQuestStatus(JugglingTorch.QuestTorchCatchingA) == QuestStatus.Incomplete
+                || player.GetQuestStatus(JugglingTorch.QuestTorchCatchingH) == QuestStatus.Incomplete)
+            {
                 requiredCatches = 3;
-            else if (player.GetQuestStatus(JugglingTorch.QuestMoreTorchCatchingA) == QuestStatus.Incomplete || player.GetQuestStatus(JugglingTorch.QuestMoreTorchCatchingH) == QuestStatus.Incomplete)
+            }
+            else if (player.GetQuestStatus(JugglingTorch.QuestMoreTorchCatchingA) == QuestStatus.Incomplete
+                || player.GetQuestStatus(JugglingTorch.QuestMoreTorchCatchingH) == QuestStatus.Incomplete)
+            {
                 requiredCatches = 9;
+            }
 
             // Used quest item without being on quest - do nothing
             if (requiredCatches == 0)
@@ -349,7 +368,9 @@ namespace Scripts.Events
 
             if (player.GetAuraCount(FlingTorch.SpellTorchesCaught) >= requiredCatches)
             {
-                player.CastSpell(player, (player.GetTeam() == Team.Alliance) ? FlingTorch.SpellTorchCatchingSuccessAlliance : FlingTorch.SpellTorchCatchingSuccessHorde);
+                player.CastSpell(player, (player.GetTeam() == Team.Alliance) ? 
+                    FlingTorch.SpellTorchCatchingSuccessAlliance : FlingTorch.SpellTorchCatchingSuccessHorde);
+
                 player.CastSpell(player, FlingTorch.SpellTorchCatchingRemoveTorches);
                 player.RemoveAura(FlingTorch.SpellTorchesCaught);
             }

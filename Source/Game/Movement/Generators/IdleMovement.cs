@@ -118,6 +118,7 @@ namespace Game.Movement
                 init.MoveTo(owner.GetPosition(), false);
                 if (!owner.GetTransGUID().IsEmpty())
                     init.DisableTransportPathTransformations();
+
                 init.SetFacing(newAngle);
                 init.Launch();
 

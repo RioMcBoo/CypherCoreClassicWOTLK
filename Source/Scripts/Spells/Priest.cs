@@ -390,7 +390,8 @@ namespace Scripts.Spells.Priest
             if (!caster.HasAura(SpellIds.Atonement))
                 return false;
 
-            // only apply Trinity if the Priest has both Trinity and Atonement and the triggering spell is Power Word: Shield.
+            // only apply Trinity if the Priest has both Trinity and Atonement
+            // and the triggering spell is Power Word: Shield.
             if (caster.HasAura(SpellIds.Trinity))
             {
                 if (GetSpellInfo().Id != SpellIds.PowerWordShield)
@@ -511,8 +512,13 @@ namespace Scripts.Spells.Priest
         {
             AuraEffect benediction = GetCaster().GetAuraEffect(SpellIds.Benediction, 0);
             if (benediction != null)
+            {
                 if (RandomHelper.randChance(benediction.GetAmount()))
-                    GetCaster().CastSpell(GetHitUnit(), SpellIds.Renew, TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
+                {
+                    GetCaster().CastSpell(GetHitUnit(), SpellIds.Renew, 
+                        TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
+        }
+            }
         }
 
         public override void Register()
@@ -624,7 +630,8 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DivineImageSummon, SpellIds.DivineImageEmpower, SpellIds.DivineImageEmpowerStack);
+            return ValidateSpellInfo(SpellIds.DivineImageSummon, SpellIds.DivineImageEmpower, 
+                SpellIds.DivineImageEmpowerStack);
         }
 
         static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -812,7 +819,8 @@ namespace Scripts.Spells.Priest
 
         public override void OnUnitExit(Unit unit)
         {
-            // Note: this ensures any unit receives a second hit if they happen to be inside the At when Divine Star starts its return path.
+            // Note: this ensures any unit receives a second hit
+            // if they happen to be inside the At when Divine Star starts its return path.
             HandleUnitEnterExit(unit);
         }
 
@@ -828,11 +836,21 @@ namespace Scripts.Spells.Priest
             TriggerCastFlags TriggerFlags = TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress;
 
             if (caster.IsValidAttackTarget(unit))
-                caster.CastSpell(unit, at.GetSpellId() == SpellIds.DivineStarShadow ? SpellIds.DivineStarShadowDamage : SpellIds.DivineStarHolyDamage,
+            {
+                caster.CastSpell(unit, 
+                    at.GetSpellId() == SpellIds.DivineStarShadow 
+                    ? SpellIds.DivineStarShadowDamage 
+                    : SpellIds.DivineStarHolyDamage,
                     TriggerFlags);
+            }
             else if (caster.IsValidAssistTarget(unit))
-                caster.CastSpell(unit, at.GetSpellId() == SpellIds.DivineStarShadow ? SpellIds.DivineStarShadowHeal : SpellIds.DivineStarHolyHeal,
+            {
+                caster.CastSpell(unit, 
+                    at.GetSpellId() == SpellIds.DivineStarShadow 
+                    ? SpellIds.DivineStarShadowHeal 
+                    : SpellIds.DivineStarHolyHeal,
                     TriggerFlags);
+            }
 
             _affectedUnits.Add(unit.GetGUID());
         }
@@ -894,10 +912,14 @@ namespace Scripts.Spells.Priest
 
             SpellInfo renewSpellInfo = SpellMgr.GetSpellInfo(SpellIds.Renew, GetCastDifficulty());
             SpellEffectInfo renewEffect = renewSpellInfo.GetEffect(0);
-            int estimatedTotalHeal = (int)AuraEffect.CalculateEstimatedfTotalPeriodicAmount(caster, target, renewSpellInfo, renewEffect, renewEffect.CalcValue(caster), 1);
+            int estimatedTotalHeal = 
+                (int)AuraEffect.CalculateEstimatedfTotalPeriodicAmount(
+                    caster, target, renewSpellInfo, renewEffect, renewEffect.CalcValue(caster), 1);
+
             int healAmount = MathFunctions.CalculatePct(estimatedTotalHeal, aurEff.GetAmount());
 
-            caster.CastSpell(target, SpellIds.EmpoweredRenewHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+            caster.CastSpell(target, SpellIds.EmpoweredRenewHeal, 
+                new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
         }
 
         public override void Register()
@@ -1080,13 +1102,23 @@ namespace Scripts.Spells.Priest
             if (caster != null)
             {
                 if (caster.IsValidAttackTarget(unit))
-                    caster.CastSpell(unit, at.GetSpellId() == SpellIds.HaloShadow ? SpellIds.HaloShadowDamage : SpellIds.HaloHolyDamage,
+                {
+                    caster.CastSpell(unit, 
+                        at.GetSpellId() == SpellIds.HaloShadow 
+                        ? SpellIds.HaloShadowDamage 
+                        : SpellIds.HaloHolyDamage,
                         TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
+                }
                 else if (caster.IsValidAssistTarget(unit))
-                    caster.CastSpell(unit, at.GetSpellId() == SpellIds.HaloShadow ? SpellIds.HaloShadowHeal : SpellIds.HaloHolyHeal,
+                {
+                    caster.CastSpell(unit, 
+                        at.GetSpellId() == SpellIds.HaloShadow 
+                        ? SpellIds.HaloShadowHeal 
+                        : SpellIds.HaloHolyHeal,
                         TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
             }
         }
+    }
     }
 
     [Script] // 391154 - Holy Mending
@@ -1104,7 +1136,8 @@ namespace Scripts.Spells.Priest
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.HolyMendingHeal, new CastSpellExtraArgs(aurEff));
+            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.HolyMendingHeal, 
+                new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1152,7 +1185,8 @@ namespace Scripts.Spells.Priest
                     cdReductionEffIndex = 1;
                     break;
                 default:
-                    Log.outWarn(LogFilter.Spells, $"HolyWords aura has been proced by an unknown spell: {GetSpellInfo().Id}");
+                    Log.outWarn(LogFilter.Spells, 
+                        $"HolyWords aura has been proced by an unknown spell: {GetSpellInfo().Id}");
                     return;
             }
 
@@ -1197,12 +1231,16 @@ namespace Scripts.Spells.Priest
             // amount of Prayer of Mending is SpellIds.HolyWordSalvation's 1.
             args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValue());
 
-            int basePoints = caster.SpellHealingBonusDone(target, _spellInfoHeal, _healEffectDummy.CalcValue(caster), DamageEffectType.Heal, _healEffectDummy);
+            int basePoints 
+                = caster.SpellHealingBonusDone(
+                target, _spellInfoHeal, _healEffectDummy.CalcValue(caster), DamageEffectType.Heal, _healEffectDummy);
+           
             args.AddSpellMod(SpellValueMod.BasePoint0, basePoints);
             caster.CastSpell(target, SpellIds.PrayerOfMendingAura, args);
 
             // a full duration Renew is triggered.
-            caster.CastSpell(target, SpellIds.Renew, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(GetSpell()));
+            caster.CastSpell(target, SpellIds.Renew, 
+                new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(GetSpell()));
         }
 
         public override void Register()
@@ -1229,9 +1267,12 @@ namespace Scripts.Spells.Priest
         void ReduceCooldown()
         {
             // cooldown reduced by SpellIds.HolyWordSalvation's Seconds(2).
-            int cooldownReduction = SpellMgr.GetSpellInfo(SpellIds.HolyWordSalvation, GetCastDifficulty()).GetEffect(2).CalcValue(GetCaster());
+            int cooldownReduction = 
+                SpellMgr.GetSpellInfo(
+                    SpellIds.HolyWordSalvation, GetCastDifficulty()).GetEffect(2).CalcValue(GetCaster());
 
-            GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.HolyWordSalvation, TimeSpan.FromSeconds(-cooldownReduction), true);
+            GetCaster().GetSpellHistory().ModifyCooldown(
+                SpellIds.HolyWordSalvation, TimeSpan.FromSeconds(-cooldownReduction), true);
         }
 
         public override void Register()
@@ -1365,7 +1406,8 @@ namespace Scripts.Spells.Priest
 
         void RemoveEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death || GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death 
+                || GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
             {
                 Unit caster = GetCaster();
                 if (caster != null)
@@ -1457,12 +1499,18 @@ namespace Scripts.Spells.Priest
             if (target != null)
             {
                 if (caster.IsFriendlyTo(target))
-                    caster.CastSpell(target, _healingSpellId, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD)
+                {
+                    caster.CastSpell(target, _healingSpellId,
+                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD)
                         .SetTriggeringSpell(GetSpell()));
+                }
                 else
-                    caster.CastSpell(target, _damageSpellId, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD)
+                {
+                    caster.CastSpell(target, _damageSpellId, 
+                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD)
                         .SetTriggeringSpell(GetSpell()));
             }
+        }
         }
 
         public override void Register()
@@ -1547,7 +1595,13 @@ namespace Scripts.Spells.Priest
 
             // Note: Essence Devourer talent.
             if (summoner.HasAura(SpellIds.EssenceDevourer))
-                summoner.CastSpell(null, target.GetEntry() == NpcPriestShadowfiend ? SpellIds.EssenceDevourerShadowfiendHeal : SpellIds.EssenceDevourerMindbenderHeal, aurEff);
+            {
+                summoner.CastSpell(null,
+                    target.GetEntry() == NpcPriestShadowfiend 
+                    ? SpellIds.EssenceDevourerShadowfiendHeal 
+                    : SpellIds.EssenceDevourerMindbenderHeal, 
+                    aurEff);
+            }
         }
 
         public override void Register()
@@ -1649,7 +1703,8 @@ namespace Scripts.Spells.Priest
 
             if (targets.Count > maxTargets)
             {
-                // priority is: a) no Atonement b) injured c) anything else (excluding explicit target which is always added).
+                // priority is: a) no Atonement b) injured c) anything else
+                // (excluding explicit target which is always added).
                 targets.Sort((lhs, rhs) =>
                 {
                     if (lhs == explTarget) // explTarget > anything: always true
@@ -2066,7 +2121,8 @@ namespace Scripts.Spells.Priest
         {
             CastSpellExtraArgs args = new(aurEff);
             args.SetTriggeringSpell(eventInfo.GetProcSpell());
-            args.AddSpellMod(SpellValueMod.BasePoint0, SpellMgr.GetSpellInfo(SpellIds.PrayerOfMending, GetCastDifficulty()).GetEffect(0).CalcValue(GetCaster()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, SpellMgr.GetSpellInfo(
+                SpellIds.PrayerOfMending, GetCastDifficulty()).GetEffect(0).CalcValue(GetCaster()));
 
             GetTarget().CastSpell(GetTarget(), SpellIds.Holy101ClassSet2PChooser, args);
         }
@@ -2144,7 +2200,10 @@ namespace Scripts.Spells.Priest
         void HandleEffectDummy(int effIndex)
         {
             if (GetOriginalCaster().HasAura(SpellIds.Holy101ClassSet4P))
-                GetOriginalCaster().CastSpell(GetOriginalCaster(), SpellIds.Holy101ClassSet4PEffect, TriggerCastFlags.IgnoreGCD);
+            {
+                GetOriginalCaster().CastSpell(
+                    GetOriginalCaster(), SpellIds.Holy101ClassSet4PEffect, TriggerCastFlags.IgnoreGCD);
+            }
         }
 
         public override void Register()
@@ -2167,7 +2226,10 @@ namespace Scripts.Spells.Priest
                 return;
 
             if (GetCaster().HasAura(SpellIds.Holy101ClassSet4P))
-                GetCaster().CastSpell(GetCaster(), SpellIds.Holy101ClassSet4PEffect, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD).SetTriggeringAura(aurEff));
+            {
+                GetCaster().CastSpell(GetCaster(), SpellIds.Holy101ClassSet4PEffect,
+                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD).SetTriggeringAura(aurEff));
+            }
         }
 
         public override void Register()
@@ -2191,7 +2253,10 @@ namespace Scripts.Spells.Priest
             Unit target = GetHitUnit();
 
             if (target.HasAura(SpellIds.PurgeTheWickedPeriodic, caster.GetGUID()))
-                caster.CastSpell(target, SpellIds.PurgeTheWickedDummy, TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
+            {
+                caster.CastSpell(target, SpellIds.PurgeTheWickedDummy,
+                    TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
+            }
         }
 
         public override void Register()
@@ -2216,7 +2281,8 @@ namespace Scripts.Spells.Priest
 
             targets.RemoveAll(obj =>
             {
-                // Note: we must Remove any non-unit target, the explicit target and any other target that may be under any crowd control aura.
+                // Note: we must Remove any non-unit target, the explicit target
+                // and any other target that may be under any crowd control aura.
                 Unit target = obj.ToUnit();
                 return target == null || target == explTarget || target.HasBreakableByDamageCrowdControlAura();
             });
@@ -2224,7 +2290,8 @@ namespace Scripts.Spells.Priest
             if (targets.Empty())
                 return;
 
-            // Note: there's no SpellEffectDummy with BasePoints 1 in any of the spells related to use as reference so we hardcode the value.
+            // Note: there's no SpellEffectDummy with BasePoints 1
+            // in any of the spells related to use as reference so we hardcode the value.
             int spreadCount = 1;
 
             // Note: we must sort our list of targets whose priority is 1) aura, 2) distance, and 3) duration.
@@ -2250,7 +2317,10 @@ namespace Scripts.Spells.Priest
 
             // Note: Revel in Purity talent.
             if (caster.HasAura(SpellIds.RevelInPurity))
-                spreadCount += SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None).GetEffect(1).CalcValue(GetCaster());
+            {
+                spreadCount += 
+                    SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None).GetEffect(1).CalcValue(GetCaster());
+            }
 
             if (targets.Count > spreadCount)
                 targets.Resize(spreadCount);
@@ -2261,7 +2331,8 @@ namespace Scripts.Spells.Priest
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
 
-            caster.CastSpell(target, SpellIds.PurgeTheWickedPeriodic, TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
+            caster.CastSpell(target, SpellIds.PurgeTheWickedPeriodic, 
+                TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
         }
 
         public override void Register()
@@ -2292,9 +2363,12 @@ namespace Scripts.Spells.Priest
 
             Unit target = ObjAccessor.GetUnit(caster, _raptureTarget);
             if (target != null)
+            {
                 caster.CastSpell(target, SpellIds.PowerWordShield,
-                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress)
-                    .SetTriggeringSpell(GetSpell()));
+                    new CastSpellExtraArgs(
+                        TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost 
+                        | TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
+            }
         }
 
         public override void Register()
@@ -2399,7 +2473,10 @@ namespace Scripts.Spells.Priest
 
                 // Handle Masochism talent
                 if (caster.HasAura(SpellIds.MasochismTalent) && caster.GetGUID() == target.GetGUID())
-                    caster.CastSpell(caster, SpellIds.MasochismPeriodicHeal, new CastSpellExtraArgs(GetSpell()).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
+                {
+                    caster.CastSpell(caster, SpellIds.MasochismPeriodicHeal,
+                        new CastSpellExtraArgs(GetSpell()).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
+                }
                 else if (target.IsInCombat() && periodicAmount != 0)
                 {
                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
@@ -2592,7 +2669,8 @@ namespace Scripts.Spells.Priest
 
             int healAmount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
 
-            caster.CastSpell(oldTarget, SpellIds.TrailOfLightHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+            caster.CastSpell(oldTarget, SpellIds.TrailOfLightHeal, 
+                new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
         }
 
         public override void Register()

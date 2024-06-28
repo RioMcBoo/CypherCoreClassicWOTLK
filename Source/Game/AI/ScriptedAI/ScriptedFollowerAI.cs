@@ -93,7 +93,9 @@ namespace Game.AI
                 {
                     if (HasFollowState(FollowState.Complete) && !HasFollowState(FollowState.PostEvent))
                     {
-                        Log.outDebug(LogFilter.ScriptsAi, $"FollowerAI::UpdateAI: is set completed, despawns. ({me.GetGUID()})");
+                        Log.outDebug(LogFilter.ScriptsAi, 
+                            $"FollowerAI::UpdateAI: is set completed, despawns. ({me.GetGUID()})");
+
                         me.DespawnOrUnsummon();
                         return;
                     }
@@ -140,7 +142,10 @@ namespace Game.AI
 
                     if (maxRangeExceeded || questAbandoned)
                     {
-                        Log.outDebug(LogFilter.ScriptsAi, $"FollowerAI::UpdateAI: failed because player/group was to far away or not found ({me.GetGUID()})");
+                        Log.outDebug(LogFilter.ScriptsAi, 
+                            $"FollowerAI::UpdateAI: failed because player/group was " +
+                            $"to far away or not found ({me.GetGUID()})");
+
                         me.DespawnOrUnsummon();
                         return;
                     }
@@ -170,13 +175,19 @@ namespace Game.AI
 
             if (me.IsEngaged())
             {
-                Log.outDebug(LogFilter.Scripts, $"FollowerAI::StartFollow: attempt to StartFollow while in combat. ({me.GetGUID()})");
+                Log.outDebug(LogFilter.Scripts, 
+                    $"FollowerAI::StartFollow: attempt " +
+                    $"to StartFollow while in combat. ({me.GetGUID()})");
+
                 return;
             }
 
             if (HasFollowState(FollowState.Inprogress))
             {
-                Log.outError(LogFilter.Scenario, $"FollowerAI::StartFollow: attempt to StartFollow while already following. ({me.GetGUID()})");
+                Log.outError(LogFilter.Scenario, 
+                    $"FollowerAI::StartFollow: attempt " +
+                    $"to StartFollow while already following. ({me.GetGUID()})");
+
                 return;
             }
 
@@ -198,7 +209,9 @@ namespace Game.AI
 
             me.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
 
-            Log.outDebug(LogFilter.Scripts, $"FollowerAI::StartFollow: start follow {player.GetName()} - {_leaderGUID} ({me.GetGUID()})");
+            Log.outDebug(LogFilter.Scripts, 
+                $"FollowerAI::StartFollow: start follow " +
+                $"{player.GetName()} - {_leaderGUID} ({me.GetGUID()})");
         }
 
         public void SetFollowPaused(bool paused)
@@ -256,7 +269,10 @@ namespace Game.AI
                             Player member = groupRef.GetSource();
                             if (member != null && me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
                             {
-                                Log.outDebug(LogFilter.Scripts, $"FollowerAI::GetLeaderForFollower: GetLeader changed and returned new leader. ({me.GetGUID()})");
+                                Log.outDebug(LogFilter.Scripts, 
+                                    $"FollowerAI::GetLeaderForFollower: " +
+                                    $"GetLeader changed and returned new leader. ({me.GetGUID()})");
+
                                 _leaderGUID = member.GetGUID();
                                 return member;
                             }
@@ -265,7 +281,10 @@ namespace Game.AI
                 }
             }
 
-            Log.outDebug(LogFilter.Scripts, $"FollowerAI::GetLeaderForFollower: GetLeader can not find suitable leader. ({me.GetGUID()})");
+            Log.outDebug(LogFilter.Scripts, 
+                $"FollowerAI::GetLeaderForFollower: " +
+                $"GetLeader can not find suitable leader. ({me.GetGUID()})");
+
             return null;
         }
 

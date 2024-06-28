@@ -66,8 +66,12 @@ namespace Game.Spells
         {
             data.Flags = m_targetMask;
 
-            if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.Unit | SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitMinipet))
+            if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.Unit
+                | SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.Gameobject
+                | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitMinipet))
+            {
                 data.Unit = m_objectTargetGUID;
+            }
 
             if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.Item | SpellCastTargetFlags.TradeItem) && m_itemTarget != null)
                 data.Item = m_itemTarget.GetGUID();
@@ -84,7 +88,7 @@ namespace Game.Spells
                 data.SrcLocation = target;
             }
 
-            if (Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.DestLocation))
+            if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.DestLocation))
             {
                 TargetLocation target = new();
                 target.Transport = m_dst.TransportGUID; // relative position guid here - transport for example
@@ -96,7 +100,7 @@ namespace Game.Spells
                 data.DstLocation = target;
             }
 
-            if (Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.String))
+            if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.String))
                 data.Name = m_strTarget;
         }
 
@@ -307,7 +311,10 @@ namespace Game.Spells
 
         public void Update(WorldObject caster)
         {
-            m_objectTarget = (m_objectTargetGUID == caster.GetGUID()) ? caster : Global.ObjAccessor.GetWorldObject(caster, m_objectTargetGUID);
+            m_objectTarget = 
+                m_objectTargetGUID == caster.GetGUID()
+                ? caster 
+                : Global.ObjAccessor.GetWorldObject(caster, m_objectTargetGUID);
 
             m_itemTarget = null;
             if (caster is Player)
@@ -359,8 +366,8 @@ namespace Game.Spells
         public Item GetItemTarget() { return m_itemTarget; }
         public int GetItemTargetEntry() { return m_itemTargetEntry; }
 
-        public bool HasSrc() { return Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.SourceLocation); }
-        public bool HasDst() { return Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.DestLocation); }
+        public bool HasSrc() { return m_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation); }
+        public bool HasDst() { return m_targetMask.HasAnyFlag(SpellCastTargetFlags.DestLocation); }
         public bool HasTraj() { return m_speed != 0; }
 
         public float GetPitch() { return m_pitch; }

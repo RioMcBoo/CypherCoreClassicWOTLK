@@ -134,7 +134,8 @@ namespace Game.AI
                             {
                                 Unit ally = Global.ObjAccessor.GetUnit(me, tar);
 
-                                //only buff targets that are in combat, unless the spell can only be cast while out of combat
+                                //only buff targets that are in combat,
+                                //unless the spell can only be cast while out of combat
                                 if (ally == null)
                                     continue;
 
@@ -287,8 +288,10 @@ namespace Game.AI
             // Check pet attackers first so we don't drag a bunch of targets to the owner
             Unit myAttacker = me.GetAttackerForHelper();
             if (myAttacker != null)
+            {
                 if (!myAttacker.HasBreakableByDamageCrowdControlAura())
                     return myAttacker;
+            }
 
             // Not sure why we wouldn't have an owner but just in case...
             if (me.GetCharmerOrOwner() == null)
@@ -297,8 +300,10 @@ namespace Game.AI
             // Check owner attackers
             Unit ownerAttacker = me.GetCharmerOrOwner().GetAttackerForHelper();
             if (ownerAttacker != null)
+            {
                 if (!ownerAttacker.HasBreakableByDamageCrowdControlAura())
                     return ownerAttacker;
+            }
 
             // Check owner victim
             // 3.0.2 - Pets now start attacking their owners victim in defensive mode as soon as the hunter does
@@ -334,7 +339,9 @@ namespace Game.AI
 
             if (me.GetCharmInfo() == null)
             {
-                Log.outWarn(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::HandleReturnMovement(). Debug info: {GetDebugInfo()}");
+                Log.outWarn(LogFilter.ScriptsAi, 
+                    $"me.GetCharmInfo() is NULL in PetAI::HandleReturnMovement(). " +
+                    $"Debug info: {GetDebugInfo()}");
                 return;
             }
 
@@ -369,7 +376,9 @@ namespace Game.AI
                 }
             }
 
-            me.RemoveUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates that we're actively going after a target - we're returning, so remove it
+            // on player pets, this flag indicates that we're actively going
+            // after a target - we're returning, so remove it
+            me.RemoveUnitFlag(UnitFlags.PetInCombat);
         }
 
         void DoAttack(Unit target, bool chase)
@@ -379,7 +388,9 @@ namespace Game.AI
 
             if (me.Attack(target, true))
             {
-                me.SetUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates we're actively going after a target - that's what we're doing, so set it
+                // on player pets, this flag indicates we're actively going
+                // after a target - that's what we're doing, so set it
+                me.SetUnitFlag(UnitFlags.PetInCombat);
 
                 // Play sound to let the player know the pet is attacking something it picked on its own
                 if (me.HasReactState(ReactStates.Aggressive) && !me.GetCharmInfo().IsCommandAttack())
@@ -398,7 +409,8 @@ namespace Game.AI
                     float chaseDistance = me.GetPetChaseDistance();
                     float angle = chaseDistance == 0.0f ? MathF.PI : 0.0f;
                     float tolerance = chaseDistance == 0.0f ? MathFunctions.PiOver4 : (MathF.PI * 2);
-                    me.GetMotionMaster().MoveChase(target, new ChaseRange(0.0f, chaseDistance), new ChaseAngle(angle, tolerance));
+                    me.GetMotionMaster().MoveChase(target, 
+                        new ChaseRange(0.0f, chaseDistance), new ChaseAngle(angle, tolerance));
                 }
                 else
                 {
@@ -434,7 +446,9 @@ namespace Game.AI
                 {
                     // If data is owner's GUIDLow then we've reached follow point,
                     // otherwise we're probably chasing a creature
-                    if (me.GetCharmerOrOwner() != null && me.GetCharmInfo() != null && id == me.GetCharmerOrOwner().GetGUID().GetCounter() && me.GetCharmInfo().IsReturning())
+                    if (me.GetCharmerOrOwner() != null && me.GetCharmInfo() != null 
+                        && id == me.GetCharmerOrOwner().GetGUID().GetCounter() 
+                        && me.GetCharmInfo().IsReturning())
                     {
                         ClearCharmInfoFlags();
                         me.GetCharmInfo().SetIsFollowing(true);
@@ -466,7 +480,9 @@ namespace Game.AI
 
             if (me.GetCharmInfo() == null)
             {
-                Log.outWarn(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {GetDebugInfo()}");
+                Log.outWarn(LogFilter.ScriptsAi, 
+                    $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). " +
+                    $"Debug info: {GetDebugInfo()}");
                 return false;
             }
 
@@ -544,8 +560,10 @@ namespace Game.AI
             // dont allow pets to follow targets far away from owner
             Unit owner = me.GetCharmerOrOwner();
             if (owner != null)
+            {
                 if (owner.GetExactDist(me) >= (owner.GetVisibilityRange() - 10.0f))
                     return true;
+            }
 
             return !me.IsValidAttackTarget(me.GetVictim());
         }

@@ -44,13 +44,15 @@ namespace Game.Entities
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellRank[rank], Difficulty.None);
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Spells, $"Player.AddTalent: Spell (ID: {talent.SpellRank[rank]}) does not exist.");
+                Log.outError(LogFilter.Spells, 
+                    $"Player.AddTalent: Spell (ID: {talent.SpellRank[rank]}) does not exist.");
                 return false;
             }
 
             if (!Global.SpellMgr.IsSpellValid(spellInfo, this, false))
             {
-                Log.outError(LogFilter.Spells, $"Player.AddTalent: Spell (ID: {spellInfo.Id}) is invalid");
+                Log.outError(LogFilter.Spells, 
+                    $"Player.AddTalent: Spell (ID: {spellInfo.Id}) is invalid");
                 return false;
             }
 
@@ -100,8 +102,10 @@ namespace Game.Entities
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellToRemove.GetEffects())
+                {
                     if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                         RemoveSpell(spellEffectInfo.TriggerSpell, true);
+            }
             }
 
             if (talent.OverridesSpellID != default)
@@ -160,7 +164,8 @@ namespace Game.Entities
                 if (talentInfo.PrereqTalent[i] == default)
                     continue;
                 
-                if (!talentMap.TryGetValue(talentInfo.PrereqTalent[i], out itr) || itr.Rank < talentInfo.PrereqRank[i])
+                if (!talentMap.TryGetValue(talentInfo.PrereqTalent[i], out itr) 
+                    || itr.Rank < talentInfo.PrereqRank[i])
                     return false;
             }
 
@@ -187,14 +192,18 @@ namespace Game.Entities
             var spellid = talentInfo.SpellRank[requestedRank];
             if (spellid == 0)
             {
-                Log.outError(LogFilter.Player, $"Player::LearnTalent: Talent.dbc has no spellInfo for talent: {talentId} (spell id = 0).");
+                Log.outError(LogFilter.Player, 
+                    $"Player::LearnTalent: Talent.dbc has no spellInfo " +
+                    $"for talent: {talentId} (spell id = 0).");
                 return false;
             }
 
             if (!AddTalent(talentInfo, requestedRank, GetActiveTalentGroup(), true))
                 return false;
 
-            Log.outDebug(LogFilter.Misc, $"Player::LearnTalent: TalentID: {talentId} Spell: {spellid} Group: {GetActiveTalentGroup()}\n");
+            Log.outDebug(LogFilter.Misc, 
+                $"Player::LearnTalent: TalentID: {talentId} Spell: {spellid} " +
+                $"Group: {GetActiveTalentGroup()}\n");
 
             // update free talent points
             int freeTalentPoints = CalculateTalentsPoints() - GetSpentTalentPointsCount();
@@ -225,6 +234,7 @@ namespace Game.Entities
         void SetActiveTalentGroup(int group) { _specializationInfo.ActiveGroup = (byte)group; }
 
         byte GetBonusTalentGroupCount() { return _specializationInfo.BonusGroups; }
+        
         public void SetBonusTalentGroupCount(int amount)
         {
             if (_specializationInfo.BonusGroups == amount)
@@ -239,10 +249,20 @@ namespace Game.Entities
         }
 
         // Loot Spec
-        public void SetLootSpecId(ChrSpecialization id) { SetLootSpecId((int)id); }
-        public void SetLootSpecId(int id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
+        public void SetLootSpecId(ChrSpecialization id) 
+        { 
+            SetLootSpecId((int)id); 
+        }
+        
+        public void SetLootSpecId(int id) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); 
+        }
 
-        public ChrSpecialization GetLootSpecId() { return (ChrSpecialization)m_activePlayerData.LootSpecID.GetValue(); }
+        public ChrSpecialization GetLootSpecId() 
+        { 
+            return (ChrSpecialization)m_activePlayerData.LootSpecID.GetValue(); 
+        }
 
         public ChrSpecialization GetDefaultSpecId()
         {
@@ -303,8 +323,10 @@ namespace Game.Entities
 
                     // search for spells that the talent teaches and unlearn them
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    {
                         if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                             RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                }
                 }
 
                 if (talentEntry.OverridesSpellID != 0)
@@ -334,8 +356,10 @@ namespace Game.Entities
                     continue;
 
                 var spellInfo = Global.SpellMgr.GetSpellInfo(talentEntry.SpellRank[talent.Value.Rank], Difficulty.None);
+                {
                     if (spellInfo == null)
                         continue;
+                }
 
                 LearnSpell(spellInfo.Id, true);     // add the talent to the PlayerSpellMap
 
@@ -372,6 +396,7 @@ namespace Game.Entities
             }
 
             var shapeshiftAuras = GetAuraEffectsByType(AuraType.ModShapeshift);
+            
             foreach (AuraEffect aurEff in shapeshiftAuras)
             {
                 aurEff.HandleShapeshiftBoosts(this, false);
@@ -553,7 +578,9 @@ namespace Game.Entities
                     if (talentInfo == null)
                     {
                         Log.outError(LogFilter.Player, 
-                            $"Player::SendTalentsInfoData: Player '{GetName()}' ({GetGuild()}) has unknown talent id: {pair.Key}.");
+                            $"Player::SendTalentsInfoData: " +
+                            $"Player '{GetName()}' ({GetGuild()}) " +
+                            $"has unknown talent id: {pair.Key}.");
                         continue;
                     }
 
@@ -561,7 +588,9 @@ namespace Game.Entities
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, 
-                            $"Player::SendTalentsInfoData: Player '{GetName()}' ({GetGuild()}) has unknown talent spell: {talentInfo.SpellID}.");
+                            $"Player::SendTalentsInfoData: " +
+                            $"Player '{GetName()}' ({GetGuild()}) " +
+                            $"has unknown talent spell: {talentInfo.SpellID}.");
                         continue;
                     }
 

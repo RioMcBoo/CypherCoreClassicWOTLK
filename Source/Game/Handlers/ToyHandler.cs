@@ -56,7 +56,9 @@ namespace Game
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.Cast.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, "HandleUseToy: unknown spell id: {0} used by Toy Item entry {1}", packet.Cast.SpellID, itemId);
+                Log.outError(LogFilter.Network, 
+                    $"HandleUseToy: unknown spell id: " +
+                    $"{packet.Cast.SpellID} used by Toy Item entry {itemId}");
                 return;
             }
 

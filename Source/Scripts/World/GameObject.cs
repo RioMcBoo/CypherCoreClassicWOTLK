@@ -94,9 +94,13 @@ namespace Scripts.World.GameObjects
                         if (spellId != 0)
                             creature.CastSpell(player, spellId, false);
                         else
-                            Log.outError(LogFilter.Scripts, $"go_ethereum_prison summoned Creature (entry {creature.GetEntry()})but faction ({creature.GetFaction()})are not expected by script.");
+                        {
+                            Log.outError(LogFilter.Scripts,
+                                $"go_ethereum_prison summoned Creature (entry {creature.GetEntry()}) " +
+                                $"but faction ({creature.GetFaction()})are not expected by script.");
                     }
                 }
+            }
             }
 
             return false;
@@ -167,7 +171,9 @@ namespace Scripts.World.GameObjects
             if (player.GetQuestRewardStatus(QuestTeleCrystalFlag))
                 return false;
 
-            player.GetSession().SendNotification("This teleport crystal cannot be used until the teleport crystal in Dalaran has been used at least once.");
+            player.GetSession().SendNotification(
+                "This teleport crystal cannot be used until the teleport crystal " +
+                "in Dalaran has been used at least once.");
             return true;
         }
     }

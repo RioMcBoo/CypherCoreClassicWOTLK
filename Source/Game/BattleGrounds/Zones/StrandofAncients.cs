@@ -79,7 +79,10 @@ namespace Game.BattleGrounds.Zones
 
             if (AddCreature(SAMiscConst.NpcEntries[SACreatureTypes.Kanrethad], SACreatureTypes.Kanrethad, SAMiscConst.NpcSpawnlocs[SACreatureTypes.Kanrethad]) == null)
             {
-                Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn Kanrethad, aborted. Entry: {SAMiscConst.NpcEntries[SACreatureTypes.Kanrethad]}");
+                Log.outError(LogFilter.Battleground, 
+                    $"SOTA: couldn't spawn Kanrethad, aborted. " +
+                    $"Entry: {SAMiscConst.NpcEntries[SACreatureTypes.Kanrethad]}");
+
                 return false;
             }
 
@@ -87,7 +90,9 @@ namespace Game.BattleGrounds.Zones
             {
                 if (!AddObject(i, SAMiscConst.ObjEntries[i], SAMiscConst.ObjSpawnlocs[i], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay))
                 {
-                    Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn BG_SA_PORTAL_DEFFENDER_RED, Entry: {SAMiscConst.ObjEntries[i]}");
+                    Log.outError(LogFilter.Battleground, 
+                        $"SOTA: couldn't spawn BG_SA_PORTAL_DEFFENDER_RED, " +
+                        $"Entry: {SAMiscConst.ObjEntries[i]}");
                     continue;
                 }
             }
@@ -111,7 +116,9 @@ namespace Game.BattleGrounds.Zones
                   SAMiscConst.ObjSpawnlocs[i].GetPositionZ() + (Attackers != 0 ? -3.750f : 0),
                   SAMiscConst.ObjSpawnlocs[i].GetOrientation(), 0, 0, 0, 0, BattlegroundConst.RespawnOneDay))
                 {
-                    Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn one of the BG_SA_BOAT, Entry: {boatid}");
+                    Log.outError(LogFilter.Battleground, 
+                        $"SOTA: couldn't spawn one of the BG_SA_BOAT, Entry: {boatid}");
+
                     continue;
                 }
             }
@@ -120,7 +127,9 @@ namespace Game.BattleGrounds.Zones
             {
                 if (!AddObject(i, SAMiscConst.ObjEntries[i], SAMiscConst.ObjSpawnlocs[i], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay))
                 {
-                    Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn Sigil, Entry: {SAMiscConst.ObjEntries[i]}");
+                    Log.outError(LogFilter.Battleground, 
+                        $"SOTA: couldn't spawn Sigil, Entry: {SAMiscConst.ObjEntries[i]}");
+
                     continue;
                 }
             }
@@ -137,7 +146,9 @@ namespace Game.BattleGrounds.Zones
             {
                 if (AddCreature(SAMiscConst.NpcEntries[i], i, SAMiscConst.NpcSpawnlocs[i], Attackers == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance, 600) == null)
                 {
-                    Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn Cannon or demolisher, Entry: {SAMiscConst.NpcEntries[i]}, Attackers: {(Attackers == BattleGroundTeamId.Alliance ? "Horde(1)" : "Alliance(0)")}");
+                    Log.outError(LogFilter.Battleground, 
+                        $"SOTA: couldn't spawn Cannon or demolisher, Entry: {SAMiscConst.NpcEntries[i]}, " +
+                        $"Attackers: {(Attackers == BattleGroundTeamId.Alliance ? "Horde(1)" : "Alliance(0)")}");
                     continue;
                 }
             }
@@ -174,7 +185,11 @@ namespace Game.BattleGrounds.Zones
                 }
                 else
                 {
-                    GraveyardStatus[i] = ((Attackers == BattleGroundTeamId.Horde) ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde);
+                    GraveyardStatus[i] = 
+                        Attackers == BattleGroundTeamId.Horde 
+                        ? BattleGroundTeamId.Alliance 
+                        : BattleGroundTeamId.Horde;
+
                     if (!AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), SAMiscConst.GYOrientation[i], Attackers == BattleGroundTeamId.Horde ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde))
                         Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn GY: {i}");
                 }
@@ -185,7 +200,10 @@ namespace Game.BattleGrounds.Zones
             {
                 if (!AddObject(i, (SAMiscConst.ObjEntries[i] - (Attackers == BattleGroundTeamId.Alliance ? 1 : 0)), SAMiscConst.ObjSpawnlocs[i], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay))
                 {
-                    Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn Central Flag Entry: {SAMiscConst.ObjEntries[i] - (Attackers == BattleGroundTeamId.Alliance ? 1 : 0)}");
+                    Log.outError(LogFilter.Battleground, 
+                        $"SOTA: couldn't spawn Central Flag Entry: " +
+                        $"{SAMiscConst.ObjEntries[i] - (Attackers == BattleGroundTeamId.Alliance ? 1 : 0)}");
+
                     continue;
                 }
                 GetBGObject(i).SetFaction(atF);
@@ -197,7 +215,10 @@ namespace Game.BattleGrounds.Zones
             {
                 if (!AddObject(i, SAMiscConst.ObjEntries[SAObjectTypes.Bomb], SAMiscConst.ObjSpawnlocs[i], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay))
                 {
-                    Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn SA Bomb Entry: {SAMiscConst.ObjEntries[SAObjectTypes.Bomb] + i}");
+                    Log.outError(LogFilter.Battleground, 
+                        $"SOTA: couldn't spawn SA Bomb Entry: " +
+                        $"{SAMiscConst.ObjEntries[SAObjectTypes.Bomb] + i}");
+
                     continue;
                 }
                 GetBGObject(i).SetFaction(atF);
@@ -751,7 +772,8 @@ namespace Game.BattleGrounds.Zones
             WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(SAMiscConst.GYEntries[i]);
             if (sg == null)
             {
-                Log.outError(LogFilter.Battleground, $"CaptureGraveyard: non-existant GY entry: {SAMiscConst.GYEntries[i]}");
+                Log.outError(LogFilter.Battleground, 
+                    $"CaptureGraveyard: non-existant GY entry: {SAMiscConst.GYEntries[i]}");
                 return;
             }
 

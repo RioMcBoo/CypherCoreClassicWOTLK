@@ -50,7 +50,9 @@ namespace Game.Entities
             {
                 if (IsTypeId(TypeId.Corpse))
                 {
-                    Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() Corpse Type: {0} ({1}) deleted but still in map!!", ToCorpse().GetCorpseType(), GetGUID().ToString());
+                    Log.outFatal(LogFilter.Misc, 
+                        $"WorldObject.Dispose() Corpse Type: {ToCorpse().GetCorpseType()} ({GetGUID()}) deleted but still in map!!");
+
                     Cypher.Assert(false);
                 }
                 ResetMap();
@@ -58,16 +60,22 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
-                Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in world!!", GetGUID().ToString());
+                Log.outFatal(LogFilter.Misc, 
+                    $"WorldObject.Dispose() {GetGUID()} deleted but still in world!!");
+
                 Item item = ToItem();
+
                 if (item != null)
-                    Log.outFatal(LogFilter.Misc, "Item slot {0}", item.InventorySlot);
+                    Log.outFatal(LogFilter.Misc, $"Item slot {item.InventorySlot}");
+
                 Cypher.Assert(false);
             }
 
             if (m_objectUpdated)
             {
-                Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in update list!!", GetGUID().ToString());
+                Log.outFatal(LogFilter.Misc, 
+                    $"WorldObject.Dispose() {GetGUID()} deleted but still in update list!!");
+
                 Cypher.Assert(false);
             }
         }
@@ -115,8 +123,10 @@ namespace Game.Entities
 
             var area = CliDB.AreaTableStorage.LookupByKey(m_areaId);
             if (area != null)
+            {
                 if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     m_zoneId = area.ParentAreaID;
+            }
 
             m_outdoors = data.outdoors;
             m_staticFloorZ = data.FloorZ;
@@ -375,8 +385,10 @@ namespace Game.Entities
                 data.FlushBits();
 
                 if (movementForces != null)
+                {
                     foreach (MovementForce force in movementForces.GetForces())
-                        force.Write(data,unit);
+                        force.Write(data, unit);
+                }
 
                 // HasMovementSpline - marks that spline data is present in packet
                 if (HasSpline)
@@ -953,6 +965,7 @@ namespace Game.Entities
 
             if (percent == -100.0f)
                 percent = -99.99f;
+
             value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));
 
             SetUpdateFieldValue(updateField, (T)value);
@@ -964,6 +977,7 @@ namespace Game.Entities
 
             if (percent == -100.0f)
                 percent = -99.99f;
+
             value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));
 
             SetUpdateFieldValue(ref oldValue, (T)value);
@@ -1208,8 +1222,11 @@ namespace Game.Entities
             if (smoothPhasing != null && smoothPhasing.IsBeingReplacedForSeer(GetGUID()))
                 return false;
 
-            if (!obj.IsPrivateObject() && !Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions(obj.GetTypeId(), obj.GetEntry(), this))
+            if (!obj.IsPrivateObject()
+                && !Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions(obj.GetTypeId(), obj.GetEntry(), this))
+            {
                 return false;
+            }
 
             bool corpseVisibility = false;
             if (distanceCheck)
@@ -1226,9 +1243,11 @@ namespace Game.Entities
                         {
                             corpseCheck = true;
                             if (corpse.IsWithinDist(thisPlayer, GetSightRange(obj), false))
+                            {
                                 if (corpse.IsWithinDist(obj, GetSightRange(obj), false))
                                     corpseVisibility = true;
                         }
+                    }
                     }
 
                     Unit target = obj.ToUnit();
@@ -1391,7 +1410,7 @@ namespace Game.Entities
             go = obj.ToGameObject();
             for (int i = 0; i < (int)StealthType.Max; ++i)
             {
-                if (!Convert.ToBoolean(obj.m_stealth.GetFlags() & (1 << i)))
+                if (!obj.m_stealth.GetFlags().HasAnyFlag(1u << i))
                     continue;
 
                 if (unit != null && unit.HasAuraTypeWithMiscvalue(AuraType.DetectStealth, i))
@@ -1429,8 +1448,11 @@ namespace Game.Entities
 
                 // If checking for alert, and creature's visibility range is greater than aggro distance, No alert
                 Unit tunit = obj.ToUnit();
-                if (checkAlert && unit != null && unit.ToCreature() != null && visibilityRange >= unit.ToCreature().GetAttackDistance(tunit) + unit.ToCreature().m_CombatDistance)
+                if (checkAlert && unit != null && unit.ToCreature() != null
+                    && visibilityRange >= unit.ToCreature().GetAttackDistance(tunit) + unit.ToCreature().m_CombatDistance)
+                {
                     return false;
+                }
 
                 if (distance > visibilityRange)
                     return false;
@@ -1482,6 +1504,7 @@ namespace Game.Entities
             _currMap = map;
             SetMapId(map.GetId());
             instanceId = map.GetInstanceId();
+
             if (IsStoredInWorldObjectGridContainer())
                 _currMap.AddWorldObject(this);
         }
@@ -1493,8 +1516,10 @@ namespace Game.Entities
 
             Cypher.Assert(_currMap != null);
             Cypher.Assert(!IsInWorld);
+
             if (IsStoredInWorldObjectGridContainer())
                 _currMap.RemoveWorldObject(this);
+
             _currMap = null;
         }
 
@@ -1505,7 +1530,9 @@ namespace Game.Entities
             Map map = GetMap();
             if (map == null)
             {
-                Log.outError(LogFilter.Server, "Object (TypeId: {0} Entry: {1} GUID: {2}) at attempt add to move list not have valid map (Id: {3}).", GetTypeId(), GetEntry(), GetGUID().ToString(), GetMapId());
+                Log.outError(LogFilter.Server, 
+                    $"Object (TypeId: {GetTypeId()} Entry: {GetEntry()} GUID: {GetGUID()}) " +
+                    $"at attempt add to move list not have valid map (Id: {GetMapId()}).");
                 return;
             }
 
@@ -1669,7 +1696,8 @@ namespace Game.Entities
             var data = Global.ObjectMgr.GetSummonGroup(GetEntry(), IsTypeId(TypeId.GameObject) ? SummonerType.GameObject : SummonerType.Creature, group);
             if (data.Empty())
             {
-                Log.outWarn(LogFilter.Scripts, "{0} ({1}) tried to summon non-existing summon group {2}.", GetName(), GetGUID().ToString(), group);
+                Log.outWarn(LogFilter.Scripts, 
+                    $"{GetName()} ({GetGUID()}) tried to summon non-existing summon group {group}.");
                 return;
             }
 
@@ -1833,6 +1861,7 @@ namespace Game.Entities
 
             return null;
         }
+
         public int CalculateSpellDamage(Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, int castItemId = 0, int itemLevel = -1)
         {
             return CalculateSpellDamage(out _, target, spellEffectInfo, basePoints, castItemId, itemLevel);
@@ -2144,7 +2173,8 @@ namespace Game.Entities
                 return SpellMissInfo.Resist;
 
             // cast by caster in front of victim
-            if (!victim.HasUnitState(UnitState.Controlled) && (victim.HasInArc(MathF.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection)))
+            if (!victim.HasUnitState(UnitState.Controlled) && (victim.HasInArc(MathF.PI, this) 
+                || victim.HasAuraType(AuraType.IgnoreHitDirection)))
             {
                 int deflect_chance = victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100;
                 if (deflect_chance > 0 && rand < (tmp += deflect_chance))
@@ -2229,17 +2259,27 @@ namespace Game.Entities
                 switch (GetTypeId())
                 {
                     case TypeId.Player:
-                        Log.outError(LogFilter.Unit, $"Player {ToPlayer().GetName()} has invalid faction (faction template id) #{factionId}");
+                        Log.outError(LogFilter.Unit, 
+                            $"Player {ToPlayer().GetName()} " +
+                            $"has invalid faction (faction template id) #{factionId}");
                         break;
                     case TypeId.Unit:
-                        Log.outError(LogFilter.Unit, $"Creature (template id: {ToCreature().GetCreatureTemplate().Entry}) has invalid faction (faction template Id) #{factionId}");
+                        Log.outError(LogFilter.Unit, 
+                            $"Creature (template id: {ToCreature().GetCreatureTemplate().Entry}) " +
+                            $"has invalid faction (faction template Id) #{factionId}");
                         break;
                     case TypeId.GameObject:
                         if (factionId != 0) // Gameobjects may have faction template id = 0
-                            Log.outError(LogFilter.Unit, $"GameObject (template id: {ToGameObject().GetGoInfo().entry}) has invalid faction (faction template Id) #{factionId}");
+                        {
+                            Log.outError(LogFilter.Unit, 
+                                $"GameObject (template id: {ToGameObject().GetGoInfo().entry}) " +
+                                $"has invalid faction (faction template Id) #{factionId}");
+                        }
                         break;
                     default:
-                        Log.outError(LogFilter.Unit, $"Object (name={GetName()}, Type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
+                        Log.outError(LogFilter.Unit, 
+                            $"Object (name={GetName()}, Type={GetTypeId()}) " +
+                            $"has invalid faction (faction template Id) #{factionId}");
                         break;
                 }
             }
@@ -2315,8 +2355,11 @@ namespace Game.Entities
                             return ReputationRank.Friendly;
 
                         // duel - always hostile to opponent
-                        if (selfPlayerOwner.duel != null && selfPlayerOwner.duel.Opponent == targetPlayerOwner && selfPlayerOwner.duel.State == DuelState.InProgress)
+                        if (selfPlayerOwner.duel != null && selfPlayerOwner.duel.Opponent == targetPlayerOwner
+                            && selfPlayerOwner.duel.State == DuelState.InProgress)
+                        {
                             return ReputationRank.Hostile;
+                        }
 
                         // same group - checks dependant only on our faction - skip FFA_PVP for example
                         if (selfPlayerOwner.IsInRaidWith(targetPlayerOwner))
@@ -2346,8 +2389,11 @@ namespace Game.Entities
                                     if (targetFactionEntry.CanHaveReputation)
                                     {
                                         // check contested flags
-                                        if (targetFactionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard) && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                                        if (targetFactionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard)
+                                            && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                                        {
                                             return ReputationRank.Hostile;
+                                        }
 
                                         // if faction has reputation, hostile state depends only from AtWar state
                                         if (selfPlayerOwner.GetReputationMgr().IsAtWar(targetFactionEntry))
@@ -2379,8 +2425,11 @@ namespace Game.Entities
             if (targetPlayerOwner != null)
             {
                 // check contested flags
-                if (factionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard) && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                if (factionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard)
+                    && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                {
                     return ReputationRank.Hostile;
+                }
 
                 var repRank = targetPlayerOwner.GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry);
                 if (repRank != ReputationRank.None)
@@ -2596,8 +2645,11 @@ namespace Game.Entities
                 return false;
 
             // can't attack untargetable
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable))
+                && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
+            {
                 return false;
+            }
 
             if (unitTarget != null && unitTarget.IsUninteractible())
                 return false;
@@ -2638,8 +2690,11 @@ namespace Game.Entities
             }
 
             // CvC case - can attack each other only when one of them is hostile
-            if (unit != null && !unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
+            if (unit != null && !unit.HasUnitFlag(UnitFlags.PlayerControlled) 
+                && unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
+            {
                 return IsHostileTo(unitTarget) || unitTarget.IsHostileTo(this);
+            }
 
             // Traps without owner or with NPC owner versus Creature case - can attack to creature only when one of them is hostile
             if (go?.GetGoType() == GameObjectTypes.Trap)
@@ -2663,7 +2718,8 @@ namespace Game.Entities
                 return false;
 
             // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
-            if ((playerAffectingAttacker != null && playerAffectingTarget == null) || (playerAffectingAttacker == null && playerAffectingTarget != null))
+            if ((playerAffectingAttacker != null && playerAffectingTarget == null) 
+                || (playerAffectingAttacker == null && playerAffectingTarget != null))
             {
                 Player player = playerAffectingAttacker != null ? playerAffectingAttacker : playerAffectingTarget;
                 Unit creature = playerAffectingAttacker != null ? unitTarget : unit;
@@ -2682,9 +2738,11 @@ namespace Game.Entities
                             {
                                 var repState = player.GetReputationMgr().GetState(factionEntry);
                                 if (repState != null)
+                                {
                                     if (!repState.Flags.HasFlag(ReputationFlags.AtWar))
                                         return false;
                             }
+                        }
                         }
 
                     }
@@ -2692,20 +2750,33 @@ namespace Game.Entities
             }
 
             if (playerAffectingAttacker != null && playerAffectingTarget != null)
-                if (playerAffectingAttacker.duel != null && playerAffectingAttacker.duel.Opponent == playerAffectingTarget && playerAffectingAttacker.duel.State == DuelState.InProgress)
+            {
+                if (playerAffectingAttacker.duel != null
+                    && playerAffectingAttacker.duel.Opponent == playerAffectingTarget
+                    && playerAffectingAttacker.duel.State == DuelState.InProgress)
+                {
                     return true;
+                }
+            }
 
             // PvP case - can't attack when attacker or target are in sanctuary
             // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner != null && unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled)
-                && (unitTarget.IsInSanctuary() || unitOrOwner.IsInSanctuary()) && (bySpell == null || bySpell.HasAttribute(SpellAttr8.IgnoreSanctuary)))
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled)
+                && unitOrOwner != null && unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled)
+                && (unitTarget.IsInSanctuary() || unitOrOwner.IsInSanctuary())
+                && (bySpell == null || bySpell.HasAttribute(SpellAttr8.IgnoreSanctuary)))
+            {
                 return false;
+            }
 
             // additional checks - only PvP case
             if (playerAffectingAttacker != null && playerAffectingTarget != null)
             {
-                if (playerAffectingTarget.IsPvP() || (bySpell != null && bySpell.HasAttribute(SpellAttr5.IgnoreAreaEffectPvpCheck)))
+                if (playerAffectingTarget.IsPvP()
+                    || (bySpell != null && bySpell.HasAttribute(SpellAttr5.IgnoreAreaEffectPvpCheck)))
+                {
                     return true;
+                }
 
                 if (playerAffectingAttacker.IsFFAPvP() && playerAffectingTarget.IsFFAPvP())
                     return true;
@@ -2750,23 +2821,35 @@ namespace Game.Entities
             }
 
             // can't assist invisible
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift)) && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift))
+                && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
+            {
                 return false;
+            }
 
             // can't assist dead
-            if ((bySpell == null || !bySpell.IsAllowingDeadTarget()) && unitTarget != null && !unitTarget.IsAlive())
+            if ((bySpell == null || !bySpell.IsAllowingDeadTarget())
+                && unitTarget != null && !unitTarget.IsAlive())
+            {
                 return false;
+            }
 
             // can't assist untargetable
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable))
+                && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
+            {
                 return false;
+            }
 
             if (unitTarget != null && unitTarget.IsUninteractible())
                 return false;
 
             // check flags for negative spells
-            if (isNegativeSpell && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1))
+            if (isNegativeSpell && unitTarget != null
+                && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1))
+            {
                 return false;
+            }
 
             if (isNegativeSpell || bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanAssistImmunePc))
             {
@@ -2784,8 +2867,12 @@ namespace Game.Entities
             }
 
             // can't assist non-friendly targets
-            if (GetReactionTo(target) < ReputationRank.Neutral && target.GetReactionTo(this) < ReputationRank.Neutral && (!IsCreature() || !ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+            if (GetReactionTo(target) < ReputationRank.Neutral
+                && target.GetReactionTo(this) < ReputationRank.Neutral
+                && (!IsCreature() || !ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+            {
                 return false;
+            }
 
             // PvP case
             if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
@@ -2806,9 +2893,11 @@ namespace Game.Entities
 
                     // can't assist player out of sanctuary from sanctuary if has pvp enabled
                     if (unitTarget.IsPvP() && (bySpell == null || bySpell.HasAttribute(SpellAttr8.IgnoreSanctuary)))
+                    {
                         if (unit.IsInSanctuary() && !unitTarget.IsInSanctuary())
                             return false;
                 }
+            }
             }
             // PvC case - player can assist creature only if has specific Type flags
             // !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
@@ -2820,7 +2909,10 @@ namespace Game.Entities
                     {
                         Creature creatureTarget = target.ToCreature();
                         if (creatureTarget != null)
-                            return creatureTarget.HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells) || creatureTarget.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.CanAssist);
+                        {
+                            return creatureTarget.HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)
+                                || creatureTarget.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.CanAssist);
+                        }
                     }
                 }
             }
@@ -2831,8 +2923,12 @@ namespace Game.Entities
         public Unit GetMagicHitRedirectTarget(Unit victim, SpellInfo spellInfo)
         {
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-            if (spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr1.NoRedirection) || spellInfo.HasAttribute(SpellAttr0.NoImmunities))
+            if (spellInfo.HasAttribute(SpellAttr0.IsAbility)
+                || spellInfo.HasAttribute(SpellAttr1.NoRedirection)
+                || spellInfo.HasAttribute(SpellAttr0.NoImmunities))
+            {
                 return victim;
+            }
 
             var magnetAuras = victim.GetAuraEffectsByType(AuraType.SpellMagnet);
             foreach (AuraEffect aurEff in magnetAuras)
@@ -3145,6 +3241,7 @@ namespace Game.Entities
         {
             return m_transport as T;
         }
+
         public float GetTransOffsetX() { return m_movementInfo.transport.pos.GetPositionX(); }
         public float GetTransOffsetY() { return m_movementInfo.transport.pos.GetPositionY(); }
         public float GetTransOffsetZ() { return m_movementInfo.transport.pos.GetPositionZ(); }
@@ -3152,6 +3249,7 @@ namespace Game.Entities
         Position GetTransOffset() { return m_movementInfo.transport.pos; }
         public uint GetTransTime() { return m_movementInfo.transport.time; }
         public sbyte GetTransSeat() { return m_movementInfo.transport.seat; }
+        
         public virtual ObjectGuid GetTransGUID()
         {
             if (GetTransport() != null)
@@ -3159,6 +3257,7 @@ namespace Game.Entities
 
             return ObjectGuid.Empty;
         }
+        
         public void SetTransport(ITransport t) { m_transport = t; }
 
         public virtual float GetStationaryX() { return GetPositionX(); }
@@ -3204,7 +3303,8 @@ namespace Game.Entities
             Position thisOrTransport = this;
             Position objOrObjTransport = obj;
 
-            if (GetTransport() != null && obj.GetTransport() != null && obj.GetTransport().GetTransportGUID() == GetTransport().GetTransportGUID())
+            if (GetTransport() != null && obj.GetTransport() != null 
+                && obj.GetTransport().GetTransportGUID() == GetTransport().GetTransportGUID())
             {
                 thisOrTransport = m_movementInfo.transport.pos;
                 objOrObjTransport = obj.m_movementInfo.transport.pos;
@@ -3649,7 +3749,8 @@ namespace Game.Entities
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty, pos.posZ))
             {
-                Log.outError(LogFilter.Server, "WorldObject.MovePosition invalid coordinates X: {0} and Y: {1} were passed!", destx, desty);
+                Log.outError(LogFilter.Server, 
+                    $"WorldObject.MovePosition invalid coordinates X: {destx} and Y: {desty} were passed!");
                 return;
             }
 
@@ -3694,7 +3795,9 @@ namespace Game.Entities
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty))
             {
-                Log.outError(LogFilter.Server, $"WorldObject.MovePositionToFirstCollision invalid coordinates X: {destx} and Y: {desty} were passed!");
+                Log.outError(LogFilter.Server, 
+                    $"WorldObject.MovePositionToFirstCollision invalid coordinates " +
+                    $"X: {destx} and Y: {desty} were passed!");
                 return;
             }
 
@@ -3939,12 +4042,14 @@ namespace Game.Entities
             public uint prevTime;
             public int vehicleId;
         }
+
         public struct Inertia
         {
             public int id;
             public Position force;
             public uint lifetime;
         }
+
         public struct JumpInfo
         {
             public void Reset()

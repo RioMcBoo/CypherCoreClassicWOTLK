@@ -190,7 +190,8 @@ namespace Game.Movement
             bool endFarFromPoly = distToEndPoly > 7.0f;
             if (startFarFromPoly || endFarFromPoly)
             {
-                Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . farFromPoly distToStartPoly={0:F3} distToEndPoly={1:F3}\n", distToStartPoly, distToEndPoly);
+                Log.outDebug(LogFilter.Maps, 
+                    $"++ BuildPolyPath . farFromPoly distToStartPoly={distToStartPoly:F3} distToEndPoly={distToEndPoly:F3}\n");
 
                 bool buildShotrcut = false;
                 var p = (distToStartPoly > 7.0f) ? startPos : endPos;
@@ -210,7 +211,9 @@ namespace Game.Movement
                     {
                         if (_sourceUnit.CanFly())
                             buildShotrcut = true;
-                        // Allow to build a shortcut if the unit is falling and it's trying to move downwards towards a target (i.e. charging)
+
+                        // Allow to build a shortcut if the unit is falling
+                        // and it's trying to move downwards towards a target (i.e. charging)
                         else if (_sourceUnit.IsFalling() && endPos.Z < startPos.Z)
                             buildShotrcut = true;
                     }
@@ -280,8 +283,10 @@ namespace Game.Movement
                     // here to carch few bugs
                     if (_pathPolyRefs[pathStartIndex] == 0)
                     {
-                        Log.outError(LogFilter.Maps, "Invalid poly ref in BuildPolyPath. _polyLength: {0}, pathStartIndex: {1}," +
-                            " startPos: {2}, endPos: {3}, mapid: {4}", _polyLength, pathStartIndex, startPos, endPos, _source.GetMapId());
+                        Log.outError(LogFilter.Maps, 
+                            $"Invalid poly ref in BuildPolyPath. " +
+                            $"_polyLength: {_polyLength}, pathStartIndex: {pathStartIndex}," +
+                            $" startPos: {startPos}, endPos: {endPos}, mapid: {_source.GetMapId()}");
                         break;
                     }
 
@@ -357,7 +362,10 @@ namespace Game.Movement
                 uint dtResult;
                 if (_useRaycast)
                 {
-                    Log.outError(LogFilter.Maps, $"PathGenerator::BuildPolyPath() called with _useRaycast with a previous path for unit {_source.GetGUID()}");
+                    Log.outError(LogFilter.Maps, 
+                        $"PathGenerator::BuildPolyPath() called with _useRaycast " +
+                        $"with a previous path for unit {_source.GetGUID()}");
+
                     BuildShortcut();
                     pathType = PathType.NoPath;
                     return;
@@ -383,7 +391,8 @@ namespace Game.Movement
                     Log.outError(LogFilter.Maps, $"Path Build failed\n{_source.GetDebugInfo()}");
                 }
 
-                Log.outDebug(LogFilter.Maps, "m_polyLength={0} prefixPolyLength={1} suffixPolyLength={2} \n", _polyLength, prefixPolyLength, suffixPolyLength);
+                Log.outDebug(LogFilter.Maps, 
+                    $"m_polyLength={_polyLength} prefixPolyLength={prefixPolyLength} suffixPolyLength={suffixPolyLength} \n");
 
                 for (var i = 0; i < _pathPolyRefs.Length - (prefixPolyLength - 1); ++i)
                     _pathPolyRefs[(prefixPolyLength - 1) + i] = tempPolyRefs[i];
@@ -432,7 +441,9 @@ namespace Game.Movement
                     {
                         float[] hitPos = new float[3];
 
-                        // Walk back a bit from the hit point to make sure it's in the mesh (sometimes the point is actually outside of the polygons due to float precision issues)
+                        // Walk back a bit from the hit point to make sure it's in the mesh
+                        // (sometimes the point is actually outside of the polygons due to float precision issues)
+
                         hit *= 0.99f;
                         Detour.dtVlerp(hitPos, startPoint, endPoint, hit);
 
@@ -487,7 +498,8 @@ namespace Game.Movement
                 if (_polyLength == 0 || Detour.dtStatusFailed(dtResult))
                 {
                     // only happens if we passed bad data to findPath(), or navmesh is messed up
-                    Log.outError(LogFilter.Maps, "{0}'s Path Build failed: 0 length path", _source.GetGUID().ToString());
+                    Log.outError(LogFilter.Maps, 
+                        $"{_source.GetGUID()}'s Path Build failed: 0 length path");
                     BuildShortcut();
                     pathType = PathType.NoPath;
                     return;
@@ -514,8 +526,12 @@ namespace Game.Movement
 
             if (_useRaycast)
             {
-                // _straightLine uses raycast and it currently doesn't support building a point path, only a 2-point path with start and hitpoint/end is returned
-                Log.outError(LogFilter.Maps, $"PathGenerator::BuildPointPath() called with _useRaycast for unit {_source.GetGUID()}");
+                // _straightLine uses raycast and it currently doesn't support building a point path,
+                // only a 2-point path with start and hitpoint/end is returned
+                Log.outError(LogFilter.Maps, 
+                    $"PathGenerator::BuildPointPath() called " +
+                    $"with _useRaycast for unit {_source.GetGUID()}");
+
                 BuildShortcut();
                 pathType = PathType.NoPath;
                 return;
@@ -558,14 +574,19 @@ namespace Game.Movement
                 // only happens if pass bad data to findStraightPath or navmesh is broken
                 // single point paths can be generated here
                 // @todo check the exact cases
-                Log.outDebug(LogFilter.Maps, "++ PathGenerator.BuildPointPath FAILED! path sized {0} returned\n", pointCount);
+                Log.outDebug(LogFilter.Maps, 
+                    $"++ PathGenerator.BuildPointPath FAILED! path sized {pointCount} returned\n");
+
                 BuildShortcut();
                 pathType |= PathType.NoPath;
                 return;
             }
             else if (pointCount == _pointPathLimit)
             {
-                Log.outDebug(LogFilter.Maps, "++ PathGenerator.BuildPointPath FAILED! path sized {0} returned, lower than limit set to {1}\n", pointCount, _pointPathLimit);
+                Log.outDebug(LogFilter.Maps,
+                    $"++ PathGenerator.BuildPointPath FAILED! path sized {pointCount} returned, " +
+                    $"lower than limit set to {_pointPathLimit}\n");
+
                 BuildShortcut();
                 pathType |= PathType.Short;
                 return;
@@ -581,7 +602,8 @@ namespace Game.Movement
             SetActualEndPosition(_pathPoints[pointCount - 1]);
 
             // force the given destination, if needed
-            if (_forceDestination && (!pathType.HasAnyFlag(PathType.Normal) || !InRange(GetEndPosition(), GetActualEndPosition(), 1.0f, 1.0f)))
+            if (_forceDestination 
+                && (!pathType.HasAnyFlag(PathType.Normal) || !InRange(GetEndPosition(), GetActualEndPosition(), 1.0f, 1.0f)))
             {
                 // we may want to keep partial subpath
                 if (Dist3DSqr(GetActualEndPosition(), GetEndPosition()) < 0.3f * Dist3DSqr(GetStartPosition(), GetEndPosition()))
@@ -597,7 +619,9 @@ namespace Game.Movement
 
                 pathType = (PathType.Normal | PathType.NotUsingPath);
             }
-            Log.outDebug(LogFilter.Maps, "PathGenerator.BuildPointPath path Type {0} size {1} poly-size {2}\n", pathType, pointCount, _polyLength);
+
+            Log.outDebug(LogFilter.Maps, 
+                $"PathGenerator.BuildPointPath path Type {pathType} size {pointCount} poly-size {_polyLength}\n");
         }
 
         uint FixupCorridor(ulong[] path, uint npath, uint maxPath, ulong[] visited, int nvisited)
@@ -750,7 +774,10 @@ namespace Game.Movement
                 npolys = FixupCorridor(polys, npolys, 74, visited, nvisited);
 
                 if (Detour.dtStatusFailed(_navMeshQuery.getPolyHeight(polys[0], result, ref result[1])))
-                    Log.outDebug(LogFilter.Maps, $"Cannot find height at position X: {result[2]} Y: {result[0]} Z: {result[1]} for {_source.GetDebugInfo()}");
+                {
+                    Log.outDebug(LogFilter.Maps, $"Cannot find height at position " +
+                        $"X: {result[2]} Y: {result[0]} Z: {result[1]} for {_source.GetDebugInfo()}");
+                }
 
                 result[1] += 0.5f;
                 Detour.dtVcopy(iterPos, result);
@@ -788,7 +815,8 @@ namespace Game.Movement
                     // Handle the connection.
                     float[] connectionStartPos = new float[3];
                     float[] connectionEndPos = new float[3];
-                    if (Detour.dtStatusSucceed(_navMesh.getOffMeshConnectionPolyEndPoints(prevRef, polyRef, connectionStartPos, connectionEndPos)))
+                    if (Detour.dtStatusSucceed(_navMesh.getOffMeshConnectionPolyEndPoints(
+                        prevRef, polyRef, connectionStartPos, connectionEndPos)))
                     {
                         if (nsmoothPath < maxSmoothPathSize)
                         {
@@ -932,7 +960,8 @@ namespace Game.Movement
         {
             if (GetPathType() == PathType.Blank || _pathPoints.Length < 2)
             {
-                Log.outError(LogFilter.Maps, "PathGenerator.ReducePathLengthByDist called before path was successfully built");
+                Log.outError(LogFilter.Maps, 
+                    "PathGenerator.ReducePathLengthByDist called before path was successfully built");
                 return;
             }
 
@@ -963,8 +992,12 @@ namespace Game.Movement
                     break; // bingo!
 
                 // check if the shortened path is still in LoS with the target
-                _source.GetHitSpherePointFor(new Position(_pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight), out x, out y, out z);
-                if (!_source.GetMap().IsInLineOfSight(_source.GetPhaseShift(), x, y, z, _pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight, LineOfSightChecks.All, ModelIgnoreFlags.Nothing))
+                _source.GetHitSpherePointFor(
+                    new Position(_pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight), 
+                    out x, out y, out z);
+
+                if (!_source.GetMap().IsInLineOfSight(
+                    _source.GetPhaseShift(), x, y, z, _pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight, LineOfSightChecks.All, ModelIgnoreFlags.Nothing))
                 {
                     // whenver we find a point that is not in LoS anymore, simply use last valid path
                     Array.Resize(ref _pathPoints, i + 1);
@@ -1096,7 +1129,8 @@ namespace Game.Movement
         MinValue = MagmaSlime,
         AllMask = 0x3F // max allowed value
         // areas 1-60 will be used for destructible areas (currently skipped in vmaps, WMO with flag 1)
-        // ground is the highest value to make recast choose ground over water when merging surfaces very close to each other (shallow water would be walkable) 
+        // ground is the highest value to make recast choose ground over water when merging surfaces
+        // very close to each other (shallow water would be walkable) 
     }
 
     public enum NavTerrainFlag

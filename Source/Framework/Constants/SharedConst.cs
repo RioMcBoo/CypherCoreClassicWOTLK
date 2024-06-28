@@ -846,7 +846,7 @@ namespace Framework.Constants
         Current = WrathOfTheLichKing,
     }
 
-    public enum PowerType: sbyte
+    public enum PowerType : sbyte
     {
         Health = -2,            // (-2 as signed value)
         None = -1,

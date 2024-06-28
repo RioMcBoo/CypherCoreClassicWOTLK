@@ -92,8 +92,10 @@ namespace Game.Maps
         public void LoadAllCells()
         {
             for (uint cellX = 0; cellX < MapConst.TotalCellsPerMap; cellX++)
+            {
                 for (uint cellY = 0; cellY < MapConst.TotalCellsPerMap; cellY++)
                     LoadGrid((cellX + 0.5f - MapConst.CenterGridCellId) * MapConst.SizeofCells, (cellY + 0.5f - MapConst.CenterGridCellId) * MapConst.SizeofCells);
+        }
         }
 
         public virtual void InitVisibilityDistance()
@@ -167,8 +169,10 @@ namespace Game.Maps
             CellCoord p = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
             if (!p.IsCoordValid())
             {
-                Log.outError(LogFilter.Maps, "Map.SwitchGridContainers: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]",
-                    obj.GetGUID(), obj.GetPositionX(), obj.GetPositionY(), p.X_coord, p.Y_coord);
+                Log.outError(LogFilter.Maps, 
+                    $"Map.SwitchGridContainers: Object {obj.GetGUID()} " +
+                    $"has invalid coordinates X:{obj.GetPositionX()} Y:{obj.GetPositionY()} " +
+                    $"grid cell [{p.X_coord}:{p.Y_coord}]");
                 return;
             }
 
@@ -176,7 +180,9 @@ namespace Game.Maps
             if (!IsGridLoaded(new GridCoord(cell.GetGridX(), cell.GetGridY())))
                 return;
 
-            Log.outDebug(LogFilter.Maps, "Switch object {0} from grid[{1}, {2}] {3}", obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), on);
+            Log.outDebug(LogFilter.Maps, 
+                $"Switch object {obj.GetGUID()} from grid[{cell.GetGridX()}, {cell.GetGridY()}] {on}");
+
             Grid ngrid = GetGrid(cell.GetGridX(), cell.GetGridY());
             Cypher.Assert(ngrid != null);
 
@@ -214,8 +220,8 @@ namespace Game.Maps
         {
             if (GetGrid(p.X_coord, p.Y_coord) == null)
             {
-                Log.outDebug(LogFilter.Maps, "Creating grid[{0}, {1}] for map {2} instance {3}", p.X_coord, p.Y_coord,
-                    GetId(), i_InstanceId);
+                Log.outDebug(LogFilter.Maps, 
+                    $"Creating grid[{p.X_coord}, {p.Y_coord}] for map {GetId()} instance {i_InstanceId}");
 
                 var grid = new Grid(p.X_coord * MapConst.MaxGrids + p.Y_coord, p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
                 grid.SetGridState(GridState.Idle);
@@ -240,8 +246,10 @@ namespace Game.Maps
             // refresh grid state & timer
             if (grid.GetGridState() != GridState.Active)
             {
-                Log.outDebug(LogFilter.Maps, "Active object {0} triggers loading of grid [{1}, {2}] on map {3}",
-                    obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), GetId());
+                Log.outDebug(LogFilter.Maps, 
+                    $"Active object {obj.GetGUID()} triggers loading " +
+                    $"of grid [{cell.GetGridX()}, {cell.GetGridY()}] on map {GetId()}");
+
                 ResetGridExpiry(grid, 0.1f);
                 grid.SetGridState(GridState.Active);
             }
@@ -254,8 +262,9 @@ namespace Game.Maps
 
             if (!IsGridObjectDataLoaded(cell.GetGridX(), cell.GetGridY()))
             {
-                Log.outDebug(LogFilter.Maps, "Loading grid[{0}, {1}] for map {2} instance {3}", cell.GetGridX(),
-                    cell.GetGridY(), GetId(), i_InstanceId);
+                Log.outDebug(LogFilter.Maps, 
+                    $"Loading grid[{cell.GetGridX()}, {cell.GetGridY()}] " +
+                    $"for map {GetId()} instance {i_InstanceId}");
 
                 SetGridObjectDataLoaded(true, cell.GetGridX(), cell.GetGridY());
 
@@ -312,8 +321,9 @@ namespace Game.Maps
             CellCoord cellCoord = GridDefines.ComputeCellCoord(player.GetPositionX(), player.GetPositionY());
             if (!cellCoord.IsCoordValid())
             {
-                Log.outError(LogFilter.Maps, "Map.AddPlayer (GUID: {0}) has invalid coordinates X:{1} Y:{2}",
-                    player.GetGUID().ToString(), player.GetPositionX(), player.GetPositionY());
+                Log.outError(LogFilter.Maps, 
+                    $"Map.AddPlayer (GUID: {player.GetGUID()}) " +
+                    $"has invalid coordinates X:{player.GetPositionX()} Y:{player.GetPositionY()}");
                 return false;
             }
             var cell = new Cell(cellCoord);
@@ -416,8 +426,9 @@ namespace Game.Maps
             if (!cellCoord.IsCoordValid())
             {
                 Log.outError(LogFilter.Maps,
-                    "Map.Add: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]", obj.GetGUID(),
-                    obj.GetPositionX(), obj.GetPositionY(), cellCoord.X_coord, cellCoord.Y_coord);
+                    $"Map.Add: Object {obj.GetGUID()} " +
+                    $"has invalid coordinates X:{obj.GetPositionX()} Y:{obj.GetPositionY()} " +
+                    $"grid cell [{cellCoord.X_coord}:{cellCoord.Y_coord}]");
                 return false; //Should delete object
             }
 
@@ -430,7 +441,9 @@ namespace Game.Maps
             else
                 EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
             AddToGrid(obj, cell);
-            Log.outDebug(LogFilter.Maps, "Object {0} enters grid[{1}, {2}]", obj.GetGUID().ToString(), cell.GetGridX(), cell.GetGridY());
+
+            Log.outDebug(LogFilter.Maps, 
+                $"Object {obj.GetGUID()} enters grid[{cell.GetGridX()}, {cell.GetGridY()}]");
 
             obj.AddToWorld();
 
@@ -457,8 +470,9 @@ namespace Game.Maps
             if (!cellCoord.IsCoordValid())
             {
                 Log.outError(LogFilter.Maps,
-                    "Map.Add: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]", obj.GetGUID(),
-                    obj.GetPositionX(), obj.GetPositionY(), cellCoord.X_coord, cellCoord.Y_coord);
+                    $"Map.Add: Object {obj.GetGUID()} " +
+                    $"has invalid coordinates X:{obj.GetPositionX()} Y:{obj.GetPositionY()} " +
+                    $"grid cell [{cellCoord.X_coord}:{cellCoord.Y_coord}]");
                 return false; //Should delete object
             }
 
@@ -534,7 +548,10 @@ namespace Game.Maps
 
             if (oldZone != MapConst.InvalidZone)
             {
-                Cypher.Assert(_zonePlayerCountMap[oldZone] != 0, $"A player left zone {oldZone} (went to {newZone}) - but there were no players in the zone!");
+                Cypher.Assert(_zonePlayerCountMap[oldZone] != 0, 
+                    $"A player left zone {oldZone} (went to {newZone}) - " +
+                    $"but there were no players in the zone!");
+
                 --_zonePlayerCountMap[oldZone];
             }
 
@@ -602,8 +619,10 @@ namespace Game.Maps
                     {
                         Creature unit = pair.Value.GetOther(player).ToCreature();
                         if (unit != null)
+                        {
                             if (unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                 toVisit.Add(unit);
+                    }
                     }
 
                     foreach (Unit unit in toVisit)
@@ -616,8 +635,10 @@ namespace Game.Maps
                     {
                         Unit caster = pair.Value.GetBase().GetCaster();
                         if (caster != null)
+                        {
                             if (!caster.IsPlayer() && !caster.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                 toVisit.Add(caster);
+                    }
                     }
                     foreach (Unit unit in toVisit)
                         VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
@@ -633,9 +654,11 @@ namespace Game.Maps
                         {
                             Creature unit = GetCreature(summonGuid);
                             if (unit != null)
+                            {
                                 if (unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                     toVisit.Add(unit);
                         }
+                    }
                     }
 
                     foreach (Unit unit in toVisit)
@@ -876,7 +899,9 @@ namespace Game.Maps
             if (xy_cell != cur_cell)
             {
                 //$"grid[{GetGridX()}, {GetGridY()}]cell[{GetCellX()}, {GetCellY()}]";
-                Log.outDebug(LogFilter.Maps, $"{obj.GetTypeId()} ({obj.GetGUID()}) X: {obj.GetPositionX()} Y: {obj.GetPositionY()} ({(moved ? "final" : "original")}) is in {cur_cell} instead of {xy_cell}");
+                Log.outDebug(LogFilter.Maps, 
+                    $"{obj.GetTypeId()} ({obj.GetGUID()}) X: {obj.GetPositionX()} Y: {obj.GetPositionY()} " +
+                    $"({(moved ? "final" : "original")}) is in {cur_cell} instead of {xy_cell}");
                 return true;                                        // not crash at error, just output error in debug mode
             }
 
@@ -894,9 +919,9 @@ namespace Game.Maps
 
             if (oldcell.DiffGrid(newcell) || oldcell.DiffCell(newcell))
             {
-                Log.outDebug(LogFilter.Maps, "Player {0} relocation grid[{1}, {2}]cell[{3}, {4}].grid[{5}, {6}]cell[{7}, {8}]",
-                    player.GetName(), oldcell.GetGridX(), oldcell.GetGridY(), oldcell.GetCellX(), oldcell.GetCellY(),
-                    newcell.GetGridX(), newcell.GetGridY(), newcell.GetCellX(), newcell.GetCellY());
+                Log.outDebug(LogFilter.Maps, 
+                    $"Player {player.GetName()} relocation " +
+                    $"from {oldcell} to {newcell}.");
 
                 RemoveFromGrid(player, oldcell);
                 if (oldcell.DiffGrid(newcell))
@@ -928,8 +953,10 @@ namespace Game.Maps
             else
             {
                 creature.Relocate(x, y, z, ang);
+
                 if (creature.IsVehicle())
                     creature.GetVehicleKit().RelocatePassengers();
+
                 creature.UpdateObjectVisibility(false);
                 creature.UpdatePositionData();
                 RemoveCreatureFromMoveList(creature);
@@ -951,10 +978,9 @@ namespace Game.Maps
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
                 Log.outDebug(LogFilter.Maps,
-                    "GameObject (GUID: {0} Entry: {1}) added to moving list from grid[{2}, {3}]cell[{4}, {5}] to grid[{6}, {7}]cell[{8}, {9}].",
-                    go.GetGUID().ToString(), go.GetEntry(), old_cell.GetGridX(), old_cell.GetGridY(), old_cell.GetCellX(),
-                    old_cell.GetCellY(), new_cell.GetGridX(), new_cell.GetGridY(), new_cell.GetCellX(),
-                    new_cell.GetCellY());
+                    $"GameObject (GUID: {go.GetGUID()} Entry: {go.GetEntry()}) added to moving list " +
+                    $"from {old_cell} to {new_cell}.");
+
                 AddGameObjectToMoveList(go, x, y, z, orientation);
                 // in diffcell/diffgrid case notifiers called at finishing move go in Map.MoveAllGameObjectsInMoveList
             }
@@ -981,8 +1007,9 @@ namespace Game.Maps
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
 
-                Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) added to moving list from grid[{1}, {2}]cell[{3}, {4}] to grid[{5}, {6}]cell[{7}, {8}].",
-                    dynObj.GetGUID().ToString(), old_cell.GetGridX(), old_cell.GetGridY(), old_cell.GetCellX(), old_cell.GetCellY(), new_cell.GetGridX(), new_cell.GetGridY(), new_cell.GetCellX(), new_cell.GetCellY());
+                Log.outDebug(LogFilter.Maps, 
+                    $"DynamicObject (GUID: {dynObj.GetGUID()}) added to moving list " +
+                    $"from {old_cell} to {new_cell}.");
 
                 AddDynamicObjectToMoveList(dynObj, x, y, z, orientation);
                 // in diffcell/diffgrid case notifiers called at finishing move dynObj in Map.MoveAllGameObjectsInMoveList
@@ -1010,7 +1037,9 @@ namespace Game.Maps
             // delay areatrigger move for grid/cell to grid/cell moves
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
-                Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) added to moving list from {1} to {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
+                Log.outDebug(LogFilter.Maps, 
+                    $"AreaTrigger ({at.GetGUID()}) added to moving list " +
+                    $"from {old_cell} to {new_cell}.");
 
                 AddAreaTriggerToMoveList(at, x, y, z, orientation);
                 // in diffcell/diffgrid case notifiers called at finishing move at in Map::MoveAllAreaTriggersInMoveList
@@ -1192,8 +1221,9 @@ namespace Game.Maps
                     {
                         // ... or unload (if respawn grid also not loaded)
                         Log.outDebug(LogFilter.Maps,
-                            "GameObject (GUID: {0} Entry: {1}) cannot be move to unloaded respawn grid.",
-                            go.GetGUID().ToString(), go.GetEntry());
+                            $"GameObject (GUID: {go.GetGUID()} Entry: {go.GetEntry()}) " +
+                            $"cannot be move to unloaded respawn grid.");
+
                         AddObjectToRemoveList(go);
                     }
                 }
@@ -1232,7 +1262,10 @@ namespace Game.Maps
                     dynObj.UpdateObjectVisibility(false);
                 }
                 else
-                    Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) cannot be moved to unloaded grid.", dynObj.GetGUID().ToString());
+                {
+                    Log.outDebug(LogFilter.Maps,
+                        $"DynamicObject (GUID: {dynObj.GetGUID()}) cannot be moved to unloaded grid.");
+            }
             }
 
             _dynamicObjectsToMove.Clear();
@@ -1269,7 +1302,8 @@ namespace Game.Maps
                 }
                 else
                 {
-                    Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) cannot be moved to unloaded grid.", at.GetGUID().ToString());
+                    Log.outDebug(LogFilter.Maps, 
+                        $"AreaTrigger ({at.GetGUID()}) cannot be moved to unloaded grid.");
                 }
             }
 
@@ -1298,9 +1332,10 @@ namespace Game.Maps
                 EnsureGridLoadedForActiveObject(new_cell, obj);
 
                 Log.outDebug(LogFilter.Maps,
-                    "Active creature (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to grid[{4}, {5}].",
-                    obj.GetGUID().ToString(), obj.GetEntry(), old_cell.GetGridX(),
-                    old_cell.GetGridY(), new_cell.GetGridX(), new_cell.GetGridY());
+                    $"Active creature (GUID: {obj.GetGUID()} Entry: {obj.GetEntry()}) " +
+                    $"moved from grid[{old_cell.GetGridX()}, {old_cell.GetGridY()}] " +
+                    $"to grid[{new_cell.GetGridX()}, {new_cell.GetGridY()}].");
+
                 RemoveFromGrid(obj, old_cell);
                 AddToGrid(obj, new_cell);
 
@@ -1382,9 +1417,9 @@ namespace Game.Maps
                 return true;
 
             Log.outDebug(LogFilter.Maps,
-                "GameObject (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to respawn grid[{4}, {5}].",
-                go.GetGUID().ToString(), go.GetEntry(), go.GetCurrentCell().GetGridX(), go.GetCurrentCell().GetGridY(),
-                resp_cell.GetGridX(), resp_cell.GetGridY());
+                $"GameObject (GUID: {go.GetGUID()} Entry: {go.GetEntry()}) " +
+                $"moved from grid[{go.GetCurrentCell().GetGridX()}, {go.GetCurrentCell().GetGridY()}] " +
+                $"to respawn grid[{resp_cell.GetGridX()}, {resp_cell.GetGridY()}].");
 
             // teleport it to respawn point (like normal respawn if player see)
             if (GameObjectCellRelocation(go, resp_cell))
@@ -1412,7 +1447,7 @@ namespace Game.Maps
                     return false;
             }
 
-            Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2}", x, y, GetId());
+            Log.outDebug(LogFilter.Maps, $"Unloading grid[{x}, {y}] for map {GetId()}");
 
             if (!unloadAll)
             {
@@ -1458,7 +1493,7 @@ namespace Game.Maps
 
             m_terrain.UnloadMap(gx, gy);
 
-            Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2} finished", x, y, GetId());
+            Log.outDebug(LogFilter.Maps, $"Unloading grid[{x}, {y}] for map {GetId()} finished");
             return true;
         }
 
@@ -1471,7 +1506,10 @@ namespace Game.Maps
                     if (!pl.IsBeingTeleportedFar())
                     {
                         // this is happening for bg
-                        Log.outError(LogFilter.Maps, $"Map.UnloadAll: player {pl.GetName()} is still in map {GetId()} during unload, this should not happen!");
+                        Log.outError(LogFilter.Maps, 
+                            $"Map.UnloadAll: player {pl.GetName()} is still in map {GetId()} " +
+                            $"during unload, this should not happen!");
+
                         pl.TeleportTo(pl.GetHomebind());
                     }
                 }
@@ -1619,8 +1657,12 @@ namespace Game.Maps
             if (checks.HasAnyFlag(LineOfSightChecks.Vmap) && !Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, GetId(), m_terrain, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags))
                 return false;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.CheckGobjectLos) && checks.HasAnyFlag(LineOfSightChecks.Gobject) && !_dynamicTree.IsInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift))
+            if (WorldConfig.GetBoolValue(WorldCfg.CheckGobjectLos)
+                && checks.HasAnyFlag(LineOfSightChecks.Gobject)
+                && !_dynamicTree.IsInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift))
+            {
                 return false;
+            }
 
             return true;
         }
@@ -1667,8 +1709,10 @@ namespace Game.Maps
 
             Group group = player.GetGroup();
             if (entry.IsRaid && (int)entry.Expansion >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
+            {
                 if ((group == null || !group.IsRaidGroup()) && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
                     return new TransferAbortParams(TransferAbortReason.NeedGroup);
+            }
 
             if (entry.Instanceable)
             {
@@ -1683,8 +1727,11 @@ namespace Game.Maps
                 }
 
                 // players are only allowed to enter 10 instances per hour
-                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon
+                    && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                {
                     return new TransferAbortParams(TransferAbortReason.TooManyInstances);
+            }
             }
 
             return null;
@@ -1709,7 +1756,9 @@ namespace Game.Maps
 
             player.BuildCreateUpdateBlockForPlayer(data, player);
 
-            // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
+            // build other passengers at transport also
+            // (they always visible and marked as visible
+            // and will not send at visibility update at add to map
             if (transport != null)
             {
                 foreach (WorldObject passenger in transport.GetPassengers())
@@ -1792,9 +1841,10 @@ namespace Game.Maps
         {
             if (x >= MapConst.MaxGrids || y >= MapConst.MaxGrids)
             {
-                Log.outError(LogFilter.Maps, "Map.setNGrid Invalid grid coordinates found: {0}, {1}!", x, y);
+                Log.outError(LogFilter.Maps, $"Map.setNGrid Invalid grid coordinates found: {x}, {y}!");
                 return;
             }
+
             i_grids[x][y] = grid;
         }
 
@@ -1821,7 +1871,9 @@ namespace Game.Maps
         bool CheckRespawn(RespawnInfo info)
         {
             SpawnData data = Global.ObjectMgr.GetSpawnData(info.type, info.spawnId);
-            Cypher.Assert(data != null, $"Invalid respawn info with Type {info.type}, spawnID {info.spawnId} in respawn queue.");
+            Cypher.Assert(data != null, 
+                $"Invalid respawn info with Type {info.type}, " +
+                $"spawnID {info.spawnId} in respawn queue.");
 
             // First, check if this creature's spawn group is inactive
             if (!IsSpawnGroupActive(data.spawnGroupData.groupId))
@@ -1861,7 +1913,9 @@ namespace Game.Maps
                         alreadyExists = true;
                     break;
                 default:
-                    Cypher.Assert(false, $"Invalid spawn Type {info.type} with spawnId {info.spawnId} on map {GetId()}");
+                    Cypher.Assert(false, 
+                        $"Invalid spawn Type {info.type} " +
+                        $"with spawnId {info.spawnId} on map {GetId()}");
                     return true;
             }
 
@@ -1872,7 +1926,11 @@ namespace Game.Maps
             }
 
             // next, check linked respawn time
-            ObjectGuid thisGUID = info.type == SpawnObjectType.GameObject ? ObjectGuid.Create(HighGuid.GameObject, GetId(), info.entry, info.spawnId) : ObjectGuid.Create(HighGuid.Creature, GetId(), info.entry, info.spawnId);
+            ObjectGuid thisGUID = 
+                info.type == SpawnObjectType.GameObject 
+                ? ObjectGuid.Create(HighGuid.GameObject, GetId(), info.entry, info.spawnId) 
+                : ObjectGuid.Create(HighGuid.Creature, GetId(), info.entry, info.spawnId);
+            
             long linkedTime = GetLinkedRespawnTime(thisGUID);
             if (linkedTime != 0)
             {
@@ -1884,6 +1942,7 @@ namespace Game.Maps
                     respawnTime = now + Time.Week;
                 else // set us to check again shortly after linked unit
                     respawnTime = Math.Max(now, linkedTime) + RandomHelper.IRand(5, 15);
+                
                 info.respawnTime = respawnTime;
                 return false;
             }
@@ -1945,7 +2004,8 @@ namespace Game.Maps
         {
             if (info.spawnId == 0)
             {
-                Log.outError(LogFilter.Maps, $"Attempt to insert respawn info for zero spawn id (Type {info.type})");
+                Log.outError(LogFilter.Maps, 
+                    $"Attempt to insert respawn info for zero spawn id (Type {info.type})");
                 return false;
             }
 
@@ -1964,10 +2024,16 @@ namespace Game.Maps
                     else
                         return false;
                 }
-                Cypher.Assert(!bySpawnIdMap.ContainsKey(info.spawnId), $"Insertion of respawn info with id ({info.type},{info.spawnId}) into spawn id map failed - state desync.");
+                Cypher.Assert(!bySpawnIdMap.ContainsKey(info.spawnId), 
+                    $"Insertion of respawn info with id ({info.type},{info.spawnId}) " +
+                    $"into spawn id map failed - state desync.");
             }
             else
-                Cypher.Assert(false, $"Invalid respawn info for spawn id ({info.type},{info.spawnId}) being inserted");
+            {
+                Cypher.Assert(false, 
+                    $"Invalid respawn info for spawn id " +
+                    $"({info.type},{info.spawnId}) being inserted");
+            }
 
             RespawnInfo ri = new(info);
             _respawnTimes.Add(ri);
@@ -1985,6 +2051,7 @@ namespace Game.Maps
         {
             if ((types & SpawnObjectTypeMask.Creature) != 0)
                 PushRespawnInfoFrom(respawnData, _creatureRespawnTimesBySpawnId);
+
             if ((types & SpawnObjectTypeMask.GameObject) != 0)
                 PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
         }
@@ -2036,7 +2103,11 @@ namespace Game.Maps
                 return;
 
             var respawnInfo = spawnMap.LookupByKey(info.spawnId);
-            Cypher.Assert(respawnInfo != null, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (Type {info.type})");
+
+            Cypher.Assert(respawnInfo != null, 
+                $"Respawn stores inconsistent for map {GetId()}, " +
+                $"spawnid {info.spawnId} (Type {info.type})");
+            
             spawnMap.Remove(info.spawnId);
 
             // respawn heap
@@ -2081,7 +2152,8 @@ namespace Game.Maps
                     break;
                 }
                 default:
-                    Cypher.Assert(false, $"Invalid spawn Type {type} (spawnid {spawnId}) on map {GetId()}");
+                    Cypher.Assert(false,
+                        $"Invalid spawn Type {type} (spawnid {spawnId}) on map {GetId()}");
                     break;
             }
         }
@@ -2199,8 +2271,10 @@ namespace Game.Maps
                     return false;
 
             if (spawnData.ToSpawnData().poolId != 0)
+            {
                 if (!GetPoolData().IsSpawnedObject(type, spawnId))
                     return false;
+            }
 
             return true;
         }
@@ -2219,7 +2293,9 @@ namespace Game.Maps
             var groupData = GetSpawnGroupData(groupId);
             if (groupData == null || groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
             {
-                Log.outError(LogFilter.Maps, $"Tried to spawn non-existing (or system) spawn group {groupId}. on map {GetId()} Blocked.");
+                Log.outError(LogFilter.Maps, 
+                    $"Tried to spawn non-existing (or system) " +
+                    $"spawn group {groupId} on map {GetId()}. Blocked.");
                 return false;
             }
 
@@ -2249,8 +2325,10 @@ namespace Game.Maps
                     {
                         WorldObject obj = GetWorldObjectBySpawnId(data.type, data.SpawnId);
                         if (obj != null)
+                        {
                             if ((data.type != SpawnObjectType.Creature) || obj.ToCreature().IsAlive())
                                 continue;
+                    }
                     }
 
                     toSpawn.Add(data.ToSpawnData());
@@ -2298,7 +2376,8 @@ namespace Game.Maps
                         break;
                     }
                     default:
-                        Cypher.Assert(false, $"Invalid spawn Type {data.type} with spawnId {data.SpawnId}");
+                        Cypher.Assert(false, 
+                            $"Invalid spawn Type {data.type} with spawnId {data.SpawnId}");
                         return false;
                 }
             }
@@ -2317,7 +2396,9 @@ namespace Game.Maps
             SpawnGroupTemplateData groupData = GetSpawnGroupData(groupId);
             if (groupData == null || groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
             {
-                Log.outError(LogFilter.Maps, $"Tried to despawn non-existing (or system) spawn group {groupId} on map {GetId()}. Blocked.");
+                Log.outError(LogFilter.Maps, 
+                    $"Tried to despawn non-existing (or system) " +
+                    $"spawn group {groupId} on map {GetId()}. Blocked.");
                 return false;
             }
 
@@ -2326,6 +2407,7 @@ namespace Game.Maps
                 Cypher.Assert(groupData.mapId == data.MapId);
                 if (deleteRespawnTimes)
                     RemoveRespawnTime(data.type, data.SpawnId);
+
                 count += DespawnAll(data.type, data.SpawnId);
             }
 
@@ -2338,7 +2420,10 @@ namespace Game.Maps
             SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
             if (data == null || data.flags.HasAnyFlag(SpawnGroupFlags.System))
             {
-                Log.outError(LogFilter.Maps, $"Tried to set non-existing (or system) spawn group {groupId} to {(state ? "active" : "inactive")} on map {GetId()}. Blocked.");
+                Log.outError(LogFilter.Maps, 
+                    $"Tried to set non-existing (or system) spawn group {groupId} " +
+                    $"to {(state ? "active" : "inactive")} " +
+                    $"on map {GetId()}. Blocked.");
                 return;
             }
             if (state != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn)) // toggled
@@ -2356,7 +2441,9 @@ namespace Game.Maps
             SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
             if (data == null)
             {
-                Log.outError(LogFilter.Maps, $"Tried to query state of non-existing spawn group {groupId} on map {GetId()}.");
+                Log.outError(LogFilter.Maps, 
+                    $"Tried to query state of non-existing " +
+                    $"spawn group {groupId} on map {GetId()}.");
                 return false;
             }
 
@@ -2388,7 +2475,8 @@ namespace Game.Maps
                 SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
 
                 bool isActive = IsSpawnGroupActive(spawnGroupId);
-                bool shouldBeActive = Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this);
+                bool shouldBeActive = 
+                    Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this);
 
                 if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.ManualSpawn))
                 {
@@ -2497,7 +2585,10 @@ namespace Game.Maps
                     {
                         Corpse corpse = ObjectAccessor.GetCorpse(obj, obj.GetGUID());
                         if (corpse == null)
-                            Log.outError(LogFilter.Maps, "Tried to delete corpse/bones {0} that is not in map.", obj.GetGUID().ToString());
+                        {
+                            Log.outError(LogFilter.Maps, 
+                                $"Tried to delete corpse/bones {obj.GetGUID()} that is not in map.");
+                        }
                         else
                             RemoveFromMap(corpse, true);
                         break;
@@ -2526,7 +2617,9 @@ namespace Game.Maps
                         RemoveFromMap(obj.ToCreature(), true);
                         break;
                     default:
-                        Log.outError(LogFilter.Maps, "Non-grid object (TypeId: {0}) is in grid object remove list, ignored.", obj.GetTypeId());
+                        Log.outError(LogFilter.Maps, 
+                            $"Non-grid object (TypeId: {obj.GetTypeId()}) " +
+                            $"is in grid object remove list, ignored.");
                         break;
                 }
 
@@ -2538,8 +2631,11 @@ namespace Game.Maps
         {
             uint count = 0;
             foreach (Player pl in m_activePlayers)
+            {
                 if (!pl.IsGameMaster())
                     ++count;
+            }
+
             return count;
         }
 
@@ -2619,7 +2715,9 @@ namespace Game.Maps
                 else
                 {
                     GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
-                    Log.outError(LogFilter.Maps, $"Active object {obj.GetGUID()} added to grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
+                    Log.outError(LogFilter.Maps, 
+                        $"Active object {obj.GetGUID()} added to grid[{p.X_coord}, {p.Y_coord}] " +
+                        $"but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
                 }
             }
         }
@@ -2664,7 +2762,9 @@ namespace Game.Maps
                 else
                 {
                     GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
-                    Log.outDebug(LogFilter.Maps, $"Active object {obj.GetGUID()} removed from grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
+                    Log.outDebug(LogFilter.Maps, 
+                        $"Active object {obj.GetGUID()} removed from grid[{p.X_coord}, {p.Y_coord}] " +
+                        $"but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
                 }
             }
         }
@@ -2679,7 +2779,9 @@ namespace Game.Maps
             SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
             if (data == null)
             {
-                Log.outError(LogFilter.Maps, $"Map {GetId()} attempt to save respawn time for nonexistant spawnid ({type},{spawnId}).");
+                Log.outError(LogFilter.Maps, 
+                    $"Map {GetId()} attempt to save respawn time " +
+                    $"for nonexistant spawnid ({type},{spawnId}).");
                 return;
             }
 
@@ -2701,7 +2803,11 @@ namespace Game.Maps
             if (startup)
             {
                 if (!success)
-                    Log.outError(LogFilter.Maps, $"Attempt to load saved respawn {respawnTime} for ({type},{spawnId}) failed - duplicate respawn? Skipped.");
+                {
+                    Log.outError(LogFilter.Maps,
+                        $"Attempt to load saved respawn {respawnTime} " +
+                        $"for ({type},{spawnId}) failed - duplicate respawn? Skipped.");
+            }
             }
             else if (success)
                 SaveRespawnInfoDB(ri, dbTrans);
@@ -2742,13 +2848,25 @@ namespace Game.Maps
                     {
                         SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
                         if (data != null)
-                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, GridDefines.ComputeGridCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId(), null, true);
+                        {
+                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, 
+                                GridDefines.ComputeGridCoord(
+                                    data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId(), null, true);
+                        }
                         else
-                            Log.outError(LogFilter.Maps, $"Loading saved respawn time of {respawnTime} for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
+                        {
+                            Log.outError(LogFilter.Maps,
+                                $"Loading saved respawn time of {respawnTime} " +
+                                $"for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
+                    }
                     }
                     else
-                        Log.outError(LogFilter.Maps, $"Loading saved respawn time of {respawnTime} for spawnid ({type},{spawnId}) - invalid spawn Type, ignoring");
+                    {
+                        Log.outError(LogFilter.Maps,
+                            $"Loading saved respawn time of {respawnTime} " +
+                            $"for spawnid ({type},{spawnId}) - invalid spawn Type, ignoring");
 
+                    }
                 } while (result.NextRow());
             }
         }
@@ -2855,7 +2973,8 @@ namespace Game.Maps
                 var guid = result.Read<long>(15);
                 if (type >= CorpseType.Max || type == CorpseType.Bones)
                 {
-                    Log.outError(LogFilter.Maps, $"Corpse (guid: {guid}) have wrong corpse Type ({type}), not loading.");
+                    Log.outError(LogFilter.Maps, 
+                        $"Corpse (guid: {guid}) have wrong corpse Type ({type}), not loading.");
                     continue;
                 }
 
@@ -2978,16 +3097,20 @@ namespace Game.Maps
             List<ObjectGuid> corpses = new();
 
             foreach (var p in _corpsesByPlayer)
+            {
                 if (p.Value.IsExpired(now))
                     corpses.Add(p.Key);
+            }
 
             foreach (ObjectGuid ownerGuid in corpses)
                 ConvertCorpseToBones(ownerGuid);
 
             List<Corpse> expiredBones = new();
             foreach (Corpse bones in _corpseBones)
+            {
                 if (bones.IsExpired(now))
                     expiredBones.Add(bones);
+            }
 
             foreach (Corpse bones in expiredBones)
             {
@@ -3150,9 +3273,11 @@ namespace Game.Maps
                 overrideLight.TransitionMilliseconds = (int)transitionTime.TotalMilliseconds;
 
                 foreach (var player in players)
+                {
                     if (player.GetZoneId() == zoneId)
                         player.SendPacket(overrideLight);
             }
+        }
         }
 
         public void UpdateAreaDependentAuras()
@@ -3173,7 +3298,9 @@ namespace Game.Maps
 
         public virtual string GetDebugInfo()
         {
-            return $"Id: {GetId()} InstanceId: {GetInstanceId()} Difficulty: {GetDifficultyID()} HasPlayers: {HavePlayers()}";
+            return 
+                $"Id: {GetId()} InstanceId: {GetInstanceId()} " +
+                $"Difficulty: {GetDifficultyID()} HasPlayers: {HavePlayers()}";
         }
 
         public MapRecord GetEntry()
@@ -3204,6 +3331,7 @@ namespace Game.Maps
             return GetGrid(p.X_coord, p.Y_coord) == null ||
                    GetGrid(p.X_coord, p.Y_coord).GetGridState() == GridState.Removal;
         }
+
         public bool IsRemovalGrid(Position pos) { return IsRemovalGrid(pos.GetPositionX(), pos.GetPositionY()); }
 
         private bool GetUnloadLock(GridCoord p)
@@ -3289,7 +3417,8 @@ namespace Game.Maps
 
         public bool IsNormal() => i_spawnMode switch
         {
-            Difficulty.Normal or Difficulty.Raid10N or Difficulty.Raid25N or Difficulty.NormalRaid or Difficulty.NormalIsland or Difficulty.NormalWarfront => true,
+            Difficulty.Normal or Difficulty.Raid10N or Difficulty.Raid25N 
+            or Difficulty.NormalRaid or Difficulty.NormalIsland or Difficulty.NormalWarfront => true,
             _ => false
         };
 
@@ -3302,7 +3431,8 @@ namespace Game.Maps
             // compatibility purposes of old difficulties
             return i_spawnMode switch
             {
-                Difficulty.Raid10HC or Difficulty.Raid25HC or Difficulty.Heroic or Difficulty.Scenario3ManHC => true,
+                Difficulty.Raid10HC or Difficulty.Raid25HC 
+                or Difficulty.Heroic or Difficulty.Scenario3ManHC => true,
                 _ => false
             };
         }
@@ -3334,7 +3464,8 @@ namespace Game.Maps
 
         public bool IsTimewalking()
         {
-            return (IsDungeon() && i_spawnMode == Difficulty.Timewalking) || (IsRaid() && i_spawnMode == Difficulty.TimewalkingRaid);
+            return (IsDungeon() && i_spawnMode == Difficulty.Timewalking) 
+                || (IsRaid() && i_spawnMode == Difficulty.TimewalkingRaid);
         }
 
         public bool IsBattleground()
@@ -3883,7 +4014,10 @@ namespace Game.Maps
         {
             Player player = null;
             if (source == null && target == null)
-                Log.outError(LogFilter.Scripts, "{0} source and target objects are NULL.", scriptInfo.GetDebugInfo());
+            {
+                Log.outError(LogFilter.Scripts,
+                    $"{scriptInfo.GetDebugInfo()} source and target objects are NULL.");
+            }
             else
             {
                 // Check target first, then source.
@@ -3893,9 +4027,13 @@ namespace Game.Maps
                     player = source.ToPlayer();
 
                 if (player == null)
-                    Log.outError(LogFilter.Scripts, "{0} neither source nor target object is player (source: TypeId: {1}, Entry: {2}, {3}; target: TypeId: {4}, Entry: {5}, {6}), skipping.",
-                        scriptInfo.GetDebugInfo(), source != null ? source.GetTypeId() : 0, source != null ? source.GetEntry() : 0, source != null ? source.GetGUID().ToString() : "",
-                        target != null ? target.GetTypeId() : 0, target != null ? target.GetEntry() : 0, target != null ? target.GetGUID().ToString() : "");
+                    Log.outError(LogFilter.Scripts, 
+                        $"{scriptInfo.GetDebugInfo()} neither source nor target object is player (" +
+                        $"source: TypeId: {(source != null ? source.GetTypeId() : 0)}, " +
+                        $"Entry: {(source != null ? source.GetEntry() : 0)}, {(source != null ? source.GetGUID() : "")}; " +
+                        $"target: TypeId: {(target != null ? target.GetTypeId() : 0)}, " +
+                        $"Entry: {(target != null ? target.GetEntry() : 0)}, {(target != null ? target.GetGUID() : "")}), " +
+                        $"skipping.");
             }
             return player;
         }
@@ -3904,7 +4042,10 @@ namespace Game.Maps
         {
             Creature creature = null;
             if (source == null && target == null)
-                Log.outError(LogFilter.Scripts, "{0} source and target objects are NULL.", scriptInfo.GetDebugInfo());
+            {
+                Log.outError(LogFilter.Scripts, 
+                    $"{scriptInfo.GetDebugInfo()} source and target objects are NULL.");
+            }
             else
             {
                 if (bReverse)
@@ -3912,6 +4053,7 @@ namespace Game.Maps
                     // Check target first, then source.
                     if (target != null)
                         creature = target.ToCreature();
+
                     if (creature == null && source != null)
                         creature = source.ToCreature();
                 }
@@ -3920,14 +4062,21 @@ namespace Game.Maps
                     // Check source first, then target.
                     if (source != null)
                         creature = source.ToCreature();
+
                     if (creature == null && target != null)
                         creature = target.ToCreature();
                 }
 
                 if (creature == null)
-                    Log.outError(LogFilter.Scripts, "{0} neither source nor target are creatures (source: TypeId: {1}, Entry: {2}, {3}; target: TypeId: {4}, Entry: {5}, {6}), skipping.",
-                        scriptInfo.GetDebugInfo(), source != null ? source.GetTypeId() : 0, source != null ? source.GetEntry() : 0, source != null ? source.GetGUID().ToString() : "",
-                        target != null ? target.GetTypeId() : 0, target != null ? target.GetEntry() : 0, target != null ? target.GetGUID().ToString() : "");
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"{scriptInfo.GetDebugInfo()} neither source nor target are creatures (" +
+                        $"source: TypeId: {(source != null ? source.GetTypeId() : 0)}, " +
+                        $"Entry: {(source != null ? source.GetEntry() : 0)}, {(source != null ? source.GetGUID() : "")}; " +
+                        $"target: TypeId: {(target != null ? target.GetTypeId() : 0)}, " +
+                        $"Entry: {(target != null ? target.GetEntry() : 0)}, {(target != null ? target.GetGUID() : "")}), " +
+                        $"skipping.");
+            }
             }
             return creature;
         }
@@ -3936,7 +4085,10 @@ namespace Game.Maps
         {
             GameObject gameobject = null;
             if (source == null && target == null)
-                Log.outError(LogFilter.MapsScript, $"{scriptInfo.GetDebugInfo()} source and target objects are NULL.");
+            {
+                Log.outError(LogFilter.MapsScript, 
+                    $"{scriptInfo.GetDebugInfo()} source and target objects are NULL.");
+            }
             else
             {
                 if (bReverse)
@@ -3944,6 +4096,7 @@ namespace Game.Maps
                     // Check target first, then source.
                     if (target != null)
                         gameobject = target.ToGameObject();
+
                     if (gameobject == null && source != null)
                         gameobject = source.ToGameObject();
                 }
@@ -3952,14 +4105,20 @@ namespace Game.Maps
                     // Check source first, then target.
                     if (source != null)
                         gameobject = source.ToGameObject();
+
                     if (gameobject == null && target != null)
                         gameobject = target.ToGameObject();
                 }
 
                 if (gameobject == null)
-                    Log.outError(LogFilter.MapsScript, $"{scriptInfo.GetDebugInfo()} neither source nor target are gameobjects " +
-                        $"(source: TypeId: {(source != null ? source.GetTypeId() : 0)}, Entry: {(source != null ? source.GetEntry() : 0)}, {(source != null ? source.GetGUID() : ObjectGuid.Empty)}; " +
-                        $"target: TypeId: {(target != null ? target.GetTypeId() : 0)}, Entry: {(target != null ? target.GetEntry() : 0)}, {(target != null ? target.GetGUID() : ObjectGuid.Empty)}), skipping.");
+                {
+                    Log.outError(LogFilter.MapsScript, $"{scriptInfo.GetDebugInfo()} neither source nor target are gameobjects (" +
+                        $"source: TypeId: {(source != null ? source.GetTypeId() : 0)}, " +
+                        $"Entry: {(source != null ? source.GetEntry() : 0)}, {(source != null ? source.GetGUID() : ObjectGuid.Empty)}; " +
+                        $"target: TypeId: {(target != null ? target.GetTypeId() : 0)}, " +
+                        $"Entry: {(target != null ? target.GetEntry() : 0)}, {(target != null ? target.GetGUID() : ObjectGuid.Empty)}), " +
+                        $"skipping.");
+            }
             }
             return gameobject;
         }
@@ -3968,16 +4127,25 @@ namespace Game.Maps
         {
             Unit unit = null;
             if (obj == null)
-                Log.outError(LogFilter.Scripts, "{0} {1} object is NULL.", scriptInfo.GetDebugInfo(),
-                    isSource ? "source" : "target");
-            else if (!obj.IsUnit())
+            {
                 Log.outError(LogFilter.Scripts,
-                    "{0} {1} object is not unit (TypeId: {2}, Entry: {3}, GUID: {4}), skipping.", scriptInfo.GetDebugInfo(), isSource ? "source" : "target", obj.GetTypeId(), obj.GetEntry(), obj.GetGUID().ToString());
+                    $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is NULL.");
+            }
+            else if (!obj.IsUnit())
+            {
+                Log.outError(LogFilter.Scripts,
+                    $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is not unit (" +
+                    $"TypeId: {obj.GetTypeId()}, Entry: {obj.GetEntry()}, GUID: {obj.GetGUID()}), skipping.");
+            }
             else
             {
                 unit = obj.ToUnit();
                 if (unit == null)
-                    Log.outError(LogFilter.Scripts, "{0} {1} object could not be casted to unit.", scriptInfo.GetDebugInfo(), isSource ? "source" : "target");
+                {
+                    Log.outError(LogFilter.Scripts,
+                            $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} " +
+                            $"object could not be casted to unit.");
+            }
             }
             return unit;
         }
@@ -3986,14 +4154,19 @@ namespace Game.Maps
         {
             Player player = null;
             if (obj == null)
-                Log.outError(LogFilter.Scripts, "{0} {1} object is NULL.", scriptInfo.GetDebugInfo(),
-                    isSource ? "source" : "target");
+            {
+                Log.outError(LogFilter.Scripts,
+                    $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is NULL.");
+            }
             else
             {
                 player = obj.ToPlayer();
                 if (player == null)
-                    Log.outError(LogFilter.Scripts, "{0} {1} object is not a player (TypeId: {2}, Entry: {3}, GUID: {4}).",
-                        scriptInfo.GetDebugInfo(), isSource ? "source" : "target", obj.GetTypeId(), obj.GetEntry(), obj.GetGUID().ToString());
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is not a player " +
+                        $"(TypeId: {obj.GetTypeId()}, Entry: {obj.GetEntry()}, GUID: {obj.GetGUID()}).");
+            }
             }
             return player;
         }
@@ -4002,13 +4175,19 @@ namespace Game.Maps
         {
             Creature creature = null;
             if (obj == null)
-                Log.outError(LogFilter.Scripts, "{0} {1} object is NULL.", scriptInfo.GetDebugInfo(), isSource ? "source" : "target");
+            {
+                Log.outError(LogFilter.Scripts, 
+                    $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is NULL.");
+            }
             else
             {
                 creature = obj.ToCreature();
                 if (creature == null)
+                {
                     Log.outError(LogFilter.Scripts,
-                        "{0} {1} object is not a creature (TypeId: {2}, Entry: {3}, GUID: {4}).", scriptInfo.GetDebugInfo(), isSource ? "source" : "target", obj.GetTypeId(), obj.GetEntry(), obj.GetGUID().ToString());
+                        $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is not a creature " +
+                        $"(TypeId: {obj.GetTypeId()}, Entry: {obj.GetEntry()}, GUID: {obj.GetGUID()}).");
+            }
             }
             return creature;
         }
@@ -4017,13 +4196,19 @@ namespace Game.Maps
         {
             WorldObject pWorldObject = null;
             if (obj == null)
-                Log.outError(LogFilter.Scripts, "{0} {1} object is NULL.", scriptInfo.GetDebugInfo(), isSource ? "source" : "target");
+            {
+                Log.outError(LogFilter.Scripts,
+                    $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is NULL.");
+            }
             else
             {
                 pWorldObject = obj;
                 if (pWorldObject == null)
+                {
                     Log.outError(LogFilter.Scripts,
-                        "{0} {1} object is not a world object (TypeId: {2}, Entry: {3}, GUID: {4}).", scriptInfo.GetDebugInfo(), isSource ? "source" : "target", obj.GetTypeId(), obj.GetEntry(), obj.GetGUID().ToString());
+                        $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is not a world object " +
+                        $"(TypeId: {obj.GetTypeId()}, Entry: {obj.GetEntry()}, GUID: {obj.GetGUID()}).");
+            }
             }
             return pWorldObject;
         }
@@ -4041,28 +4226,45 @@ namespace Game.Maps
                 case ScriptCommands.CloseDoor:
                     break;
                 default:
-                    Log.outError(LogFilter.Scripts, "{0} unknown command for _ScriptProcessDoor.", scriptInfo.GetDebugInfo());
+                    Log.outError(LogFilter.Scripts,
+                        $"{scriptInfo.GetDebugInfo()} unknown command for _ScriptProcessDoor.");
                     return;
             }
+
             if (guid == 0)
-                Log.outError(LogFilter.Scripts, "{0} door guid is not specified.", scriptInfo.GetDebugInfo());
+                Log.outError(LogFilter.Scripts, $"{scriptInfo.GetDebugInfo()} door guid is not specified.");
             else if (source == null)
-                Log.outError(LogFilter.Scripts, "{0} source object is NULL.", scriptInfo.GetDebugInfo());
+                Log.outError(LogFilter.Scripts, $"{scriptInfo.GetDebugInfo()} source object is NULL.");
             else if (!source.IsUnit())
+            {
                 Log.outError(LogFilter.Scripts,
-                    "{0} source object is not unit (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", scriptInfo.GetDebugInfo(), source.GetTypeId(), source.GetEntry(), source.GetGUID().ToString());
+                    $"{scriptInfo.GetDebugInfo()} source object is not unit " +
+                    $"(TypeId: {source.GetTypeId()}, Entry: {source.GetEntry()}, " +
+                    $"GUID: {source.GetGUID()}), skipping.");
+            }
             else
             {
                 if (source == null)
+                {
                     Log.outError(LogFilter.Scripts,
-                        "{0} source object could not be casted to world object (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", scriptInfo.GetDebugInfo(), source.GetTypeId(), source.GetEntry(), source.GetGUID().ToString());
+                        $"{scriptInfo.GetDebugInfo()} source object could not be casted to world object " +
+                        $"(TypeId: {source.GetTypeId()}, Entry: {source.GetEntry()}, GUID: {source.GetGUID()}), skipping.");
+                }
                 else
                 {
                     GameObject pDoor = _FindGameObject(source, guid);
                     if (pDoor == null)
-                        Log.outError(LogFilter.Scripts, "{0} gameobject was not found (guid: {1}).", scriptInfo.GetDebugInfo(), guid);
+                    {
+                        Log.outError(LogFilter.Scripts, 
+                            $"{scriptInfo.GetDebugInfo()} gameobject was not found (guid: {guid}).");
+                    }
                     else if (pDoor.GetGoType() != GameObjectTypes.Door)
-                        Log.outError(LogFilter.Scripts, "{0} gameobject is not a door (GoType: {1}, Entry: {2}, GUID: {3}).", scriptInfo.GetDebugInfo(), pDoor.GetGoType(), pDoor.GetEntry(), pDoor.GetGUID().ToString());
+                    {
+                        Log.outError(LogFilter.Scripts,
+                            $"{scriptInfo.GetDebugInfo()} gameobject is not a door " +
+                            $"(GoType: {pDoor.GetGoType()}, Entry: {pDoor.GetEntry()}, " +
+                            $"GUID: {pDoor.GetGUID()}).");
+                    }
                     else if (bOpen == (pDoor.GetGoState() == GameObjectState.Ready))
                     {
                         pDoor.UseDoorOrButton((uint)nTimeToToggle);
@@ -4126,7 +4328,8 @@ namespace Game.Maps
                             break;
                         default:
                             Log.outError(LogFilter.Scripts, 
-                                $"{step.script.GetDebugInfo()} source with unsupported high guid (GUID: {step.sourceGUID}, high guid: {step.sourceGUID.GetHighValue()}).");
+                                $"{step.script.GetDebugInfo()} source with unsupported high guid " +
+                                $"(GUID: {step.sourceGUID}, high guid: {step.sourceGUID.GetHighValue()}).");
                             break;
                     }
                 }
@@ -4155,7 +4358,8 @@ namespace Game.Maps
                             break;
                         default:
                             Log.outError(LogFilter.Scripts, 
-                                $"{step.script.GetDebugInfo()} target with unsupported high guid {step.targetGUID.GetHighValue()}.");
+                                $"{step.script.GetDebugInfo()} target with unsupported high guid " +
+                                $"{step.targetGUID.GetHighValue()}.");
                             break;
                     }
                 }
@@ -4167,7 +4371,8 @@ namespace Game.Maps
                         if (step.script.Talk.ChatType > ChatMsg.Whisper && step.script.Talk.ChatType != ChatMsg.RaidBossWhisper)
                         {
                             Log.outError(LogFilter.Scripts,
-                                $"{step.script.GetDebugInfo()} invalid chat Type ({step.script.Talk.ChatType}) specified, skipping.");
+                                $"{step.script.GetDebugInfo()} invalid chat Type " +
+                                $"({step.script.Talk.ChatType}) specified, skipping.");
                             break;
                         }
 
@@ -4182,7 +4387,8 @@ namespace Game.Maps
                             if (sourceUnit == null)
                             {
                                 Log.outError(LogFilter.Scripts,
-                                    $"{step.script.GetDebugInfo()} source object ({source.GetGUID()}) is not an unit, skipping.");
+                                    $"{step.script.GetDebugInfo()} source object " +
+                                    $"({source.GetGUID()}) is not an unit, skipping.");
                                 break;
                             }
 
@@ -4203,8 +4409,10 @@ namespace Game.Maps
                                 {
                                     Player receiver = target != null ? target.ToPlayer() : null;
                                     if (receiver == null)
+                                    {
                                         Log.outError(LogFilter.Scripts,
                                             $"{step.script.GetDebugInfo()} attempt to whisper to non-player unit, skipping.");
+                                    }
                                     else
                                         sourceUnit.Whisper(step.script.Talk.TextID, receiver, step.script.Talk.ChatType == ChatMsg.RaidBossWhisper);
                                     break;
@@ -4240,6 +4448,7 @@ namespace Game.Maps
                                 float speed =
                                     unit.GetDistance(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
                                         step.script.MoveTo.DestZ) / (step.script.MoveTo.TravelTime * 0.001f);
+                                
                                 unit.MonsterMoveWithSpeed(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
                                     step.script.MoveTo.DestZ, speed);
                             }
@@ -4256,16 +4465,20 @@ namespace Game.Maps
                             // Source or target must be Creature.
                             Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
                             if (cSource != null)
+                            {
                                 cSource.NearTeleportTo(step.script.TeleportTo.DestX, step.script.TeleportTo.DestY,
                                     step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
+                        }
                         }
                         else
                         {
                             // Source or target must be Player.
                             Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
                             if (player != null)
+                            {
                                 player.TeleportTo(step.script.TeleportTo.MapID, step.script.TeleportTo.DestX,
                                     step.script.TeleportTo.DestY, step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
+                        }
                         }
                         break;
                     }
@@ -4276,6 +4489,7 @@ namespace Game.Maps
                             Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} source object is NULL.");
                             break;
                         }
+
                         if (target == null)
                         {
                             Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} target object is NULL.");
@@ -4290,7 +4504,8 @@ namespace Game.Maps
                             if (!source.IsTypeId(TypeId.Unit) && !source.IsTypeId(TypeId.GameObject) && !source.IsTypeId(TypeId.Player))
                             {
                                 Log.outError(LogFilter.Scripts, 
-                                    $"{step.script.GetDebugInfo()} source is not unit, gameobject or player (TypeId: {source.GetTypeId()}, Entry: {source.GetEntry()}, " +
+                                    $"{step.script.GetDebugInfo()} source is not unit, gameobject or player " +
+                                    $"(TypeId: {source.GetTypeId()}, Entry: {source.GetEntry()}, " +
                                     $"GUID: {source.GetGUID()}), skipping.");
                                 break;
                             }
@@ -4304,16 +4519,19 @@ namespace Game.Maps
                                 if (!target.IsTypeId(TypeId.Unit) && !target.IsTypeId(TypeId.GameObject) && !target.IsTypeId(TypeId.Player))
                                 {
                                     Log.outError(LogFilter.Scripts,
-                                        $"{step.script.GetDebugInfo()} target is not unit, gameobject or player (TypeId: {target.GetTypeId()}, Entry: {target.GetEntry()}, " +
+                                        $"{step.script.GetDebugInfo()} target is not unit, gameobject or player " +
+                                        $"(TypeId: {target.GetTypeId()}, Entry: {target.GetEntry()}, " +
                                         $"GUID: {target.GetGUID()}), skipping.");
                                     break;
                                 }
+
                                 worldObject = target;
                             }
                             else
                             {
                                 Log.outError(LogFilter.Scripts, 
-                                    $"{step.script.GetDebugInfo()} neither source nor target is player (Entry: {source.GetEntry()}, GUID: {source.GetGUID()}; " +
+                                    $"{step.script.GetDebugInfo()} neither source nor target is player " +
+                                    $"(Entry: {source.GetEntry()}, GUID: {source.GetGUID()}; " +
                                     $"target: Entry: {target.GetEntry()}, GUID: {target.GetGUID()}), skipping.");
                                 break;
                             }
@@ -4323,7 +4541,9 @@ namespace Game.Maps
                         if ((!worldObject.IsTypeId(TypeId.Unit) || worldObject.ToUnit().IsAlive()) &&
                             (step.script.QuestExplored.Distance == 0 ||
                              worldObject.IsWithinDistInMap(player, step.script.QuestExplored.Distance)))
+                        {
                             player.AreaExploredOrEventHappens(step.script.QuestExplored.QuestID);
+                        }
                         else
                             player.FailQuest(step.script.QuestExplored.QuestID);
 
@@ -4347,7 +4567,8 @@ namespace Game.Maps
                     {
                         if (step.script.RespawnGameObject.GOGuid == 0)
                         {
-                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} gameobject guid (datalong) is not specified.");
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} gameobject guid (datalong) is not specified.");
                             break;
                         }
 
@@ -4359,7 +4580,8 @@ namespace Game.Maps
                             if (pGO == null)
                             {
                                 Log.outError(LogFilter.Scripts, 
-                                    $"{step.script.GetDebugInfo()} gameobject was not found (guid: {step.script.RespawnGameObject.GOGuid}).");
+                                    $"{step.script.GetDebugInfo()} gameobject was not found " +
+                                    $"(guid: {step.script.RespawnGameObject.GOGuid}).");
                                 break;
                             }
 
@@ -4369,7 +4591,8 @@ namespace Game.Maps
                                 pGO.GetGoType() == GameObjectTypes.Trap)
                             {
                                 Log.outError(LogFilter.Scripts,
-                                    $"{step.script.GetDebugInfo()} can not be used with gameobject of Type {pGO.GetGoType()} (guid: {step.script.RespawnGameObject.GOGuid}).");
+                                    $"{step.script.GetDebugInfo()} can not be used with gameobject of Type " +
+                                    $"{pGO.GetGoType()} (guid: {step.script.RespawnGameObject.GOGuid}).");
                                 break;
                             }
 
@@ -4377,6 +4600,7 @@ namespace Game.Maps
                             if (!pGO.IsSpawned())
                             {
                                 int nTimeToDespawn = Math.Max(5, (int)step.script.RespawnGameObject.DespawnDelay);
+
                                 pGO.SetLootState(LootState.Ready);
                                 pGO.SetRespawnTime(nTimeToDespawn);
 
@@ -4392,7 +4616,10 @@ namespace Game.Maps
                         if (pSummoner != null)
                         {
                             if (step.script.TempSummonCreature.CreatureEntry == 0)
-                                Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} creature entry (datalong) is not specified.");
+                            {
+                                Log.outError(LogFilter.Scripts, 
+                                    $"{step.script.GetDebugInfo()} creature entry (datalong) is not specified.");
+                            }
                             else
                             {
                                 float x = step.script.TempSummonCreature.PosX;
@@ -4400,8 +4627,13 @@ namespace Game.Maps
                                 float z = step.script.TempSummonCreature.PosZ;
                                 float o = step.script.TempSummonCreature.Orientation;
 
-                                if (pSummoner.SummonCreature(step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
-                                    Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} creature was not spawned (entry: {step.script.TempSummonCreature.CreatureEntry}).");
+                                if (pSummoner.SummonCreature(
+                                    step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
+                                {
+                                    Log.outError(LogFilter.Scripts, 
+                                        $"{step.script.GetDebugInfo()} creature was not spawned " +
+                                        $"(entry: {step.script.TempSummonCreature.CreatureEntry}).");
+                                }
                             }
                         }
                         break;
@@ -4427,11 +4659,14 @@ namespace Game.Maps
                             if (!target.IsTypeId(TypeId.GameObject))
                             {
                                 Log.outError(LogFilter.Scripts,
-                                    $"{step.script.GetDebugInfo()} target object is not gameobject (TypeId: {target.GetTypeId()}, Entry: {target.GetEntry()}, " +
+                                    $"{step.script.GetDebugInfo()} target object is not gameobject " +
+                                    $"(TypeId: {target.GetTypeId()}, Entry: {target.GetEntry()}, " +
                                     $"GUID: {target.GetGUID()}), skipping.");
                                 break;
                             }
+
                             GameObject pGO = target.ToGameObject();
+
                             if (pGO != null)
                                 pGO.Use(unit);
                         }
@@ -4450,7 +4685,8 @@ namespace Game.Maps
                     {
                         if (source == null && target == null)
                         {
-                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} source and target objects are NULL.");
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} source and target objects are NULL.");
                             break;
                         }
 
@@ -4477,19 +4713,24 @@ namespace Game.Maps
                                 break;
                             case eScriptFlags.CastspellSearchCreature: // source . creature with entry
                                 uSource = source;
-                                uTarget = uSource?.FindNearestCreature(Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
+                                uTarget = uSource?.FindNearestCreature(
+                                    Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
                                 break;
                         }
 
                         if (uSource == null)
                         {
-                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} no source worldobject found for spell {step.script.CastSpell.SpellID}");
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} no source worldobject found " +
+                                $"for spell {step.script.CastSpell.SpellID}");
                             break;
                         }
 
                         if (uTarget == null)
                         {
-                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} no target worldobject found for spell {step.script.CastSpell.SpellID}");
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} no target worldobject found " +
+                                $"for spell {step.script.CastSpell.SpellID}");
                             break;
                         }
 
@@ -4528,7 +4769,9 @@ namespace Game.Maps
                         Player pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script);
                         if (pReceiver != null)
                         {
-                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out var dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
+                            InventoryResult msg = pReceiver.CanStoreNewItem(
+                                ItemPos.Undefined, out var dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
+
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = pReceiver.StoreNewItem(dest, step.script.CreateItem.ItemEntry, true);
@@ -4561,7 +4804,11 @@ namespace Game.Maps
                         if (unit != null)
                         {
                             if (Global.WaypointMgr.GetPath(step.script.LoadPath.PathID) == null)
-                                Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} source object has an invalid path ({step.script.LoadPath.PathID}), skipping.");
+                            {
+                                Log.outError(LogFilter.Scripts, 
+                                    $"{step.script.GetDebugInfo()} source object has an invalid path " +
+                                    $"({step.script.LoadPath.PathID}), skipping.");
+                            }
                             else
                                 unit.GetMotionMaster().MovePath(step.script.LoadPath.PathID, step.script.LoadPath.IsRepeatable != 0);
                         }
@@ -4571,12 +4818,14 @@ namespace Game.Maps
                     {
                         if (step.script.CallScript.CreatureEntry == 0)
                         {
-                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} creature entry is not specified, skipping.");
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} creature entry is not specified, skipping.");
                             break;
                         }
                         if (step.script.CallScript.ScriptID == 0)
                         {
-                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} script id is not specified, skipping.");
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} script id is not specified, skipping.");
                             break;
                         }
 
@@ -4592,7 +4841,9 @@ namespace Game.Maps
 
                         if (cTarget == null)
                         {
-                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} target was not found (entry: {step.script.CallScript.CreatureEntry})");
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} target was not found " +
+                                $"(entry: {step.script.CallScript.CreatureEntry})");
                             break;
                         }
 
@@ -4608,8 +4859,11 @@ namespace Game.Maps
                         if (cSource != null)
                         {
                             if (cSource.IsDead())
+                            {
                                 Log.outError(LogFilter.Scripts, 
-                                    $"{step.script.GetDebugInfo()} creature is already dead (Entry: {cSource.GetEntry()}, GUID: {cSource.GetGUID()})");
+                                    $"{step.script.GetDebugInfo()} creature is already dead " +
+                                    $"(Entry: {cSource.GetEntry()}, GUID: {cSource.GetGUID()})");
+                            }
                             else
                             {
                                 cSource.SetDeathState(DeathState.JustDied);
@@ -4703,7 +4957,8 @@ namespace Game.Maps
                         break;
                     }
                     default:
-                        Log.outError(LogFilter.Scripts, $"Unknown script command {step.script.GetDebugInfo()}.");
+                        Log.outError(LogFilter.Scripts, 
+                            $"Unknown script command {step.script.GetDebugInfo()}.");
                         break;
                 }
 
@@ -4826,7 +5081,9 @@ namespace Game.Maps
         {
             if (player.GetMap() == this)
             {
-                Log.outError(LogFilter.Maps, "InstanceMap:CannotEnter - player {0} ({1}) already in map {2}, {3}, {4}!", player.GetName(), player.GetGUID().ToString(), GetId(), GetInstanceId(), GetDifficultyID());
+                Log.outError(LogFilter.Maps, 
+                    $"InstanceMap:CannotEnter - player {player.GetName()} ({player.GetGUID()}) " +
+                    $"already in map {GetId()}, {GetInstanceId()}, {GetDifficultyID()}!");
                 Cypher.Assert(false);
                 return new TransferAbortParams(TransferAbortReason.Error);
             }
@@ -4839,7 +5096,10 @@ namespace Game.Maps
             var maxPlayers = GetMaxPlayers();
             if (GetPlayersCountExceptGMs() >= maxPlayers)
             {
-                Log.outInfo(LogFilter.Maps, "MAP: Instance '{0}' of map '{1}' cannot have more than '{2}' players. Player '{3}' rejected", GetInstanceId(), GetMapName(), maxPlayers, player.GetName());
+                Log.outInfo(LogFilter.Maps, 
+                    $"MAP: Instance '{GetInstanceId()}' of map '{GetMapName()}' " +
+                    $"cannot have more than '{maxPlayers}' players. " +
+                    $"Player '{player.GetName()}' rejected");
                 return new TransferAbortParams(TransferAbortReason.MaxPlayers);
             }
 
@@ -4884,8 +5144,10 @@ namespace Game.Maps
                 }
             }
 
-            Log.outInfo(LogFilter.Maps, "MAP: Player '{0}' entered instance '{1}' of map '{2}'", player.GetName(),
-                        GetInstanceId(), GetMapName());
+            Log.outInfo(LogFilter.Maps, 
+                $"MAP: Player '{player.GetName()}' entered instance " +
+                $"'{GetInstanceId()}' of map '{GetMapName()}'");
+
             // initialize unload state
             m_unloadTimer = 0;
 
@@ -4923,7 +5185,9 @@ namespace Game.Maps
 
         public override void RemovePlayerFromMap(Player player, bool remove)
         {
-            Log.outInfo(LogFilter.Maps, "MAP: Removing player '{0}' from instance '{1}' of map '{2}' before relocating to another map", player.GetName(), GetInstanceId(), GetMapName());
+            Log.outInfo(LogFilter.Maps, 
+                $"MAP: Removing player '{player.GetName()}' from instance '{GetInstanceId()}' " +
+                $"of map '{GetMapName()}' before relocating to another map");
 
             if (i_data != null)
                 i_data.OnPlayerLeave(player);
@@ -4970,7 +5234,9 @@ namespace Game.Maps
             i_data.SetEntranceLocation(lockData.EntranceWorldSafeLocId);
             if (!lockData.Data.IsEmpty())
             {
-                Log.outDebug(LogFilter.Maps, $"Loading instance data for `{Global.ObjectMgr.GetScriptName(i_script_id)}` with id {i_InstanceId}");
+                Log.outDebug(LogFilter.Maps, 
+                    $"Loading instance data for `{Global.ObjectMgr.GetScriptName(i_script_id)}` " +
+                    $"with id {i_InstanceId}");
                 i_data.Load(lockData.Data);
             }
             else
@@ -5064,8 +5330,10 @@ namespace Game.Maps
                 SQLTransaction trans = new();
 
                 if (entries.IsInstanceIdBound())
+                {
                     Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(),
                         instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter, i_data.GetEntranceLocationForCompletedEncounters(instanceCompletedEncounters)));
+                }
 
                 foreach (var player in GetPlayers())
                 {
@@ -5180,8 +5448,10 @@ namespace Game.Maps
         {
             if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceAlliance, this) != 0)
                 return BattleGroundTeamId.Alliance;
+
             if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceHorde, this) != 0)
                 return BattleGroundTeamId.Horde;
+
             return BattleGroundTeamId.Neutral;
         }
 
@@ -5194,7 +5464,9 @@ namespace Game.Maps
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nScriptId: {GetScriptId()} ScriptName: {GetScriptName()}";
+            return 
+                $"{base.GetDebugInfo()}\nScriptId: {GetScriptId()} " +
+                $"ScriptName: {GetScriptName()}";
         }
 
         public InstanceScript GetInstanceScript()
@@ -5234,7 +5506,9 @@ namespace Game.Maps
         {
             if (player.GetMap() == this)
             {
-                Log.outError(LogFilter.Maps, "BGMap:CannotEnter - player {0} is already in map!", player.GetGUID().ToString());
+                Log.outError(LogFilter.Maps, 
+                    $"BGMap:CannotEnter - player {player.GetGUID()} is already in map!");
+
                 Cypher.Assert(false);
                 return new TransferAbortParams(TransferAbortReason.Error);
             }
@@ -5254,8 +5528,9 @@ namespace Game.Maps
         public override void RemovePlayerFromMap(Player player, bool remove)
         {
             Log.outInfo(LogFilter.Maps,
-                "MAP: Removing player '{0}' from bg '{1}' of map '{2}' before relocating to another map", player.GetName(),
-                GetInstanceId(), GetMapName());
+                $"MAP: Removing player '{player.GetName()}' from bg '{GetInstanceId()}' " +
+                $"of map '{GetMapName()}' before relocating to another map");
+
             base.RemovePlayerFromMap(player, remove);
         }
 
@@ -5267,9 +5542,13 @@ namespace Game.Maps
         public override void RemoveAllPlayers()
         {
             if (HavePlayers())
+            {
                 foreach (Player player in m_activePlayers)
+                {
                     if (!player.IsBeingTeleportedFar())
                         player.TeleportTo(player.GetBattlegroundEntryPoint());
+        }
+            }
         }
 
         public Battleground GetBG() { return m_bg; }
@@ -5370,12 +5649,16 @@ namespace Game.Maps
         {
             if (a == b)
                 return 0;
+
             if (a.respawnTime != b.respawnTime)
                 return a.respawnTime.CompareTo(b.respawnTime);
+
             if (a.spawnId != b.spawnId)
                 return a.spawnId.CompareTo(b.spawnId);
 
-            Cypher.Assert(a.type != b.type, $"Duplicate respawn entry for spawnId ({a.type},{a.spawnId}) found!");
+            Cypher.Assert(a.type != b.type, 
+                $"Duplicate respawn entry for spawnId ({a.type},{a.spawnId}) found!");
+
             return a.type.CompareTo(b.type);
         }
     }

@@ -53,7 +53,9 @@ namespace Game.Collision
 
         public LoadResult InitMap(string fname)
         {
-            Log.outDebug(LogFilter.Maps, "StaticMapTree.InitMap() : initializing StaticMapTree '{0}'", fname);
+            Log.outDebug(LogFilter.Maps, 
+                $"StaticMapTree.InitMap() : initializing StaticMapTree '{fname}'");
+
             if (!File.Exists(fname))
                 return LoadResult.FileNotFound;
 
@@ -104,7 +106,10 @@ namespace Game.Collision
         {
             if (iTreeValues == null)
             {
-                Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : tree has not been initialized [{0}, {1}]", tileX, tileY);
+                Log.outError(LogFilter.Server, 
+                    $"StaticMapTree.LoadMapTile() : " +
+                    $"tree has not been initialized [{tileX}, {tileY}]");
+
                 return LoadResult.ReadFromFileFailed;
             }
 
@@ -129,7 +134,11 @@ namespace Game.Collision
                             // acquire model instance
                             WorldModel model = vm.AcquireModelInstance(spawn.name, spawn.flags);
                             if (model == null)
-                                Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
+                            {
+                                Log.outError(LogFilter.Server, 
+                                    $"StaticMapTree.LoadMapTile() : " +
+                                    $"could not acquire WorldModel [{tileX}, {tileY}]");
+                            }
 
                             // update tree
                             if (iSpawnIndices.ContainsKey(spawn.Id))
@@ -139,7 +148,10 @@ namespace Game.Collision
                                 {
                                     if (referencedVal >= iNTreeValues)
                                     {
-                                        Log.outError(LogFilter.Maps, "StaticMapTree.LoadMapTile() : invalid tree element ({0}/{1}) referenced in tile {2}", referencedVal, iNTreeValues, fileResult.Name);
+                                        Log.outError(LogFilter.Maps, 
+                                            $"StaticMapTree.LoadMapTile() : " +
+                                            $"invalid tree element ({referencedVal}/{iNTreeValues}) " +
+                                            $"referenced in tile {fileResult.Name}");
                                         continue;
                                     }
 
@@ -154,13 +166,19 @@ namespace Game.Collision
                                 // unknown parent spawn might appear in because it overlaps multiple tiles
                                 // in case the original tile is swapped but its neighbour is now (adding this spawn)
                                 // we want to not mark it as loading error and just skip that model
-                                Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : invalid tree element (spawn {spawn.Id}) referenced in tile fileResult.Name{fileResult.Name} by map {iMapID}");
+                                Log.outError(LogFilter.Maps, 
+                                    $"StaticMapTree.LoadMapTile() : " +
+                                    $"invalid tree element (spawn {spawn.Id}) " +
+                                    $"referenced in tile fileResult.Name{fileResult.Name} " +
+                                    $"by map {iMapID}");
                                 result = LoadResult.ReadFromFileFailed;
                             }
                         }
                         else
                         {
-                            Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : cannot read model from file (spawn index {i}) referenced in tile {fileResult.Name} by map {iMapID}");
+                            Log.outError(LogFilter.Maps, 
+                                $"StaticMapTree.LoadMapTile() : cannot read model from file " +
+                                $"(spawn index {i}) referenced in tile {fileResult.Name} by map {iMapID}");
                             result = LoadResult.ReadFromFileFailed;
                         }
                     }
@@ -180,7 +198,9 @@ namespace Game.Collision
             uint tileID = PackTileID(tileX, tileY);
             if (!iLoadedTiles.ContainsKey(tileID))
             {
-                Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-loaded tile - Map:{0} X:{1} Y:{2}", iMapID, tileX, tileY);
+                Log.outError(LogFilter.Server, 
+                    $"StaticMapTree.UnloadMapTile() : " +
+                    $"trying to unload non-loaded tile - Map:{iMapID} X:{tileX} Y:{tileY}");
                 return;
             }
             if (iLoadedTiles[tileID]) // file associated with tile
@@ -209,7 +229,11 @@ namespace Game.Collision
                             {
                                 uint referencedNode = iSpawnIndices[spawn.Id];
                                 if (!iLoadedSpawns.ContainsKey(referencedNode))
-                                    Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-referenced model '{0}' (ID:{1})", spawn.name, spawn.Id);
+                                {
+                                    Log.outError(LogFilter.Server, 
+                                        $"StaticMapTree.UnloadMapTile() : " +
+                                        $"trying to unload non-referenced model '{spawn.name}' (ID:{spawn.Id})");
+                                }
                                 else if (--iLoadedSpawns[referencedNode] == 0)
                                 {
                                     iTreeValues[referencedNode].SetUnloaded();

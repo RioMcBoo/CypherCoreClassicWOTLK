@@ -46,7 +46,8 @@ namespace Game.Entities
 
         public virtual bool CanSwim()
         {
-            // Mirror client behavior, if this method returns false then client will not use swimming animation and for players will apply gravity as if there was no water
+            // Mirror client behavior, if this method returns false then client
+            // will not use swimming animation and for players will apply gravity as if there was no water
             if (HasUnitFlag(UnitFlags.CantSwim))
                 return false;
             if (HasUnitFlag(UnitFlags.PlayerControlled)) // is player
@@ -212,6 +213,7 @@ namespace Game.Entities
             init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
             if (GetTransport() != null)
                 init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
+            
             init.SetFacing(ori);
 
             //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
@@ -542,7 +544,7 @@ namespace Game.Entities
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.Unit, "Unit.UpdateSpeed: Unsupported move Type ({0})", mtype);
+                    Log.outError(LogFilter.Unit, $"Unit.UpdateSpeed: Unsupported move Type ({mtype})");
                     return;
             }
 
@@ -646,7 +648,7 @@ namespace Game.Entities
         {
             if (!GridDefines.IsValidMapCoord(x, y, z, orientation))
             {
-                Log.outError(LogFilter.Unit, "Unit.UpdatePosition({0}, {1}, {2}) .. bad coordinates!", x, y, z);
+                Log.outError(LogFilter.Unit, $"Unit.UpdatePosition({x}, {y}, {z}) .. bad coordinates!");
                 return false;
             }
 
@@ -748,7 +750,8 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().IsTemplateRooted())
+            if (IsCreature() && updateAnimTier && IsAlive() 
+                && !HasUnitState(UnitState.Root) && !ToCreature().IsTemplateRooted())
             {
                 if (IsGravityDisabled())
                     SetAnimTier(AnimTier.Fly);
@@ -882,10 +885,12 @@ namespace Game.Entities
                 {
                     var capability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
                     if (capability != null) // aura may get removed by interrupt flag, reapply
+                    {
                         if (!HasAura(capability.ModSpellAuraID))
                             CastSpell(this, capability.ModSpellAuraID, new CastSpellExtraArgs(aurEff));
                 }
             }
+        }
         }
 
         public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
@@ -1074,7 +1079,9 @@ namespace Game.Entities
             }
             else
             {
-                MoveSplineSetFlag packet = new(enable ? ServerOpcodes.MoveSplineSetFeatherFall : ServerOpcodes.MoveSplineSetNormalFall);
+                MoveSplineSetFlag packet = 
+                    new(enable ? ServerOpcodes.MoveSplineSetFeatherFall : ServerOpcodes.MoveSplineSetNormalFall);
+
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -1175,6 +1182,7 @@ namespace Game.Entities
         {
             return IsWithinDistInMap(target, distance) && !HasInArc(MathFunctions.TwoPi - arc, target);
         }
+
         public bool IsInAccessiblePlaceFor(Creature c)
         {
             if (IsInWater())
@@ -1183,14 +1191,20 @@ namespace Game.Entities
                 return c.CanWalk() || c.CanFly();
         }
 
-        public void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false) { NearTeleportTo(new Position(x, y, z, orientation), casting); }
+        public void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false) 
+        { 
+            NearTeleportTo(new Position(x, y, z, orientation), casting); 
+        }
+
         public void NearTeleportTo(Position pos, bool casting = false)
         {
             DisableSpline();
             if (IsTypeId(TypeId.Player))
             {
                 WorldLocation target = new(GetMapId(), pos);
-                ToPlayer().TeleportTo(target, (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet | (casting ? TeleportToOptions.Spell : 0)));
+                ToPlayer().TeleportTo(target, 
+                    TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat 
+                    | TeleportToOptions.NotUnSummonPet | (casting ? TeleportToOptions.Spell : 0));
             }
             else
             {
@@ -1263,7 +1277,9 @@ namespace Game.Entities
                         SetStunned(false);
                         break;
                     case UnitState.Root:
-                        if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity) || GetVehicle() != null || (IsCreature() && ToCreature().IsTemplateRooted()))
+                        if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) 
+                            || HasAuraType(AuraType.ModRootDisableGravity) || GetVehicle() != null 
+                            || (IsCreature() && ToCreature().IsTemplateRooted()))
                             return;
 
                         ClearUnitState(state);
@@ -1294,12 +1310,19 @@ namespace Game.Entities
 
         void ApplyControlStatesIfNeeded()
         {
-            // Unit States might have been already cleared but auras still present. I need to check with HasAuraType
-            if (HasUnitState(UnitState.Stunned) || HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModStunDisableGravity))
+            // Unit States might have been already cleared but auras still present.
+            // I need to check with HasAuraType
+            if (HasUnitState(UnitState.Stunned) || HasAuraType(AuraType.ModStun)
+                || HasAuraType(AuraType.ModStunDisableGravity))
+            {
                 SetStunned(true);
+            }
 
-            if (HasUnitState(UnitState.Root) || HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity))
+            if (HasUnitState(UnitState.Root) || HasAuraType(AuraType.ModRoot)
+                || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity))
+            {
                 SetRooted(true);
+            }
 
             if (HasUnitState(UnitState.Confused) || HasAuraType(AuraType.ModConfuse))
                 SetConfused(true);
@@ -1388,7 +1411,10 @@ namespace Game.Entities
                     caster = Global.ObjAccessor.GetUnit(this, fearAuras[0].GetCasterGUID());
                 if (caster == null)
                     caster = GetAttackerForHelper();
-                GetMotionMaster().MoveFleeing(caster, TimeSpan.FromMilliseconds(fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
+
+                GetMotionMaster().MoveFleeing(caster, TimeSpan.FromMilliseconds(
+                        fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
+                
                 SetUnitFlag(UnitFlags.Fleeing);
             }
             else
@@ -1727,18 +1753,22 @@ namespace Game.Entities
         {
             m_movementInfo.AddMovementFlag(f);
         }
+
         public void RemoveUnitMovementFlag(MovementFlag f)
         {
             m_movementInfo.RemoveMovementFlag(f);
         }
+
         public bool HasUnitMovementFlag(MovementFlag f)
         {
             return m_movementInfo.HasMovementFlag(f);
         }
+
         public MovementFlag GetUnitMovementFlags()
         {
             return m_movementInfo.GetMovementFlags();
         }
+
         public void SetUnitMovementFlags(MovementFlag f)
         {
             m_movementInfo.SetMovementFlags(f);
@@ -1748,18 +1778,22 @@ namespace Game.Entities
         {
             m_movementInfo.AddMovementFlag2(f);
         }
+
         void RemoveUnitMovementFlag2(MovementFlag2 f)
         {
             m_movementInfo.RemoveMovementFlag2(f);
         }
+
         public bool HasUnitMovementFlag2(MovementFlag2 f)
         {
             return m_movementInfo.HasMovementFlag2(f);
         }
+
         public MovementFlag2 GetUnitMovementFlags2()
         {
             return m_movementInfo.GetMovementFlags2();
         }
+
         public void SetUnitMovementFlags2(MovementFlag2 f)
         {
             m_movementInfo.SetMovementFlags2(f);
@@ -1857,6 +1891,7 @@ namespace Game.Entities
         {
             if (GetVehicle() != null)
                 return GetVehicleBase().GetGUID();
+
             if (GetTransport() != null)
                 return GetTransport().GetTransportGUID();
 

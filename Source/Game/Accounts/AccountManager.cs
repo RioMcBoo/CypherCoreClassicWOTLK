@@ -425,7 +425,7 @@ namespace Game
                     RBACPermissions linkedPermissionId = (RBACPermissions)result.Read<int>(1);
                     if (linkedPermissionId == permissionId)
                     {
-                        Log.outError(LogFilter.Sql, "RBAC Permission {0} has itself as linked permission. Ignored", permissionId);
+                        Log.outError(LogFilter.Sql, $"RBAC Permission {permissionId} has itself as linked permission. Ignored");
                         continue;
                     }
                     permission.AddLinkedPermission(linkedPermissionId);
@@ -497,7 +497,7 @@ namespace Game
 
         public RBACPermission GetRBACPermission(RBACPermissions permissionId)
         {
-            Log.outDebug(LogFilter.Rbac, "AccountMgr:GetRBACPermission: {0}", permissionId);
+            Log.outDebug(LogFilter.Rbac, $"AccountMgr:GetRBACPermission: {permissionId}");
             return _permissions.LookupByKey(permissionId);
         }
 
@@ -513,8 +513,8 @@ namespace Game
             rbac.LoadFromDB();
             bool hasPermission = rbac.HasPermission(permissionId);
 
-            Log.outDebug(LogFilter.Rbac, "AccountMgr:HasPermission [AccountId: {0}, PermissionId: {1}, realmId: {2}]: {3}",
-                           accountId, permissionId, realmId, hasPermission);
+            Log.outDebug(LogFilter.Rbac, 
+                $"AccountMgr:HasPermission [AccountId: {accountId}, PermissionId: {permissionId}, realmId: {realmId}]: {hasPermission}");
             return hasPermission;
         }
 

@@ -18,7 +18,9 @@ namespace Game
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags1.BlackMarket, NPCFlags2.BlackMarketView);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketHello - {0} not found or you can't interact with him.", blackMarketOpen.Guid.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketHello - " +
+                    $"{blackMarketOpen.Guid} not found or you can't interact with him.");
                 return;
             }
 
@@ -47,7 +49,9 @@ namespace Game
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags1.BlackMarket, NPCFlags2.BlackMarketView);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketRequestItems - {0} not found or you can't interact with him.", blackMarketRequestItems.Guid.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketRequestItems - " +
+                    $"{blackMarketRequestItems.Guid} not found or you can't interact with him.");
                 return;
             }
 
@@ -66,42 +70,54 @@ namespace Game
             Creature unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags1.BlackMarket, NPCFlags2.None);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} not found or you can't interact with him.", blackMarketBidOnItem.Guid.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketBidOnItem - " +
+                    $"{blackMarketBidOnItem.Guid} not found or you can't interact with him.");
                 return;
             }
 
             BlackMarketEntry entry = Global.BlackMarketMgr.GetAuctionByID(blackMarketBidOnItem.MarketID);
             if (entry == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to bid on a nonexistent auction (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketBidOnItem - {player.GetGUID()} (name: {player.GetName()}) " +
+                    $"tried to bid on a nonexistent auction (MarketId: {blackMarketBidOnItem.MarketID}).");
                 SendBlackMarketBidOnItemResult(BlackMarketError.ItemNotFound, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
                 return;
             }
 
             if (entry.GetBidder() == player.GetGUID().GetCounter())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to place a bid on an item he already bid on. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketBidOnItem - {player.GetGUID()} (name: {player.GetName()}) " +
+                    $"tried to place a bid on an item he already bid on. (MarketId: {blackMarketBidOnItem.MarketID}).");
                 SendBlackMarketBidOnItemResult(BlackMarketError.AlreadyBid, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
                 return;
             }
 
             if (!entry.ValidateBid(blackMarketBidOnItem.BidAmount))
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to place an invalid bid. Amount: {2} (MarketId: {3}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.BidAmount, blackMarketBidOnItem.MarketID);
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketBidOnItem - {player.GetGUID()} (name: {player.GetName()}) " +
+                    $"tried to place an invalid bid. Amount: {blackMarketBidOnItem.BidAmount} (MarketId: {blackMarketBidOnItem.MarketID}).");
                 SendBlackMarketBidOnItemResult(BlackMarketError.HigherBid, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
                 return;
             }
 
             if (!player.HasEnoughMoney(blackMarketBidOnItem.BidAmount))
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) does not have enough money to place bid. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketBidOnItem - {player.GetGUID()} (name: {player.GetName()}) " +
+                    $"does not have enough money to place bid. (MarketId: {blackMarketBidOnItem.MarketID}).");
                 SendBlackMarketBidOnItemResult(BlackMarketError.NotEnoughMoney, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
                 return;
             }
 
             if (entry.GetSecondsRemaining() <= 0)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to bid on a completed auction. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleBlackMarketBidOnItem - {player.GetGUID()} (name: {player.GetName()}) " +
+                    $"tried to bid on a completed auction. (MarketId: {blackMarketBidOnItem.MarketID}).");
                 SendBlackMarketBidOnItemResult(BlackMarketError.DatabaseError, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
                 return;
             }

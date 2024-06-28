@@ -126,8 +126,10 @@ namespace Game.Collision
                 int liquidType = intersectionCallBack.GetLocationInfo().hitModel.GetLiquidType();
                 float liquidLevel = 0;
                 if (!reqLiquidType.HasValue || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType.Value) != 0)
+                {
                     if (intersectionCallBack.GetHitModel().GetLiquidLevel(v, intersectionCallBack.GetLocationInfo(), ref liquidLevel))
                         data.liquidInfo = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
+                }
 
                 data.areaInfo = new((int)intersectionCallBack.GetLocationInfo().hitModel.GetWmoID(), intersectionCallBack.GetHitModel().GetNameSetId(), intersectionCallBack.GetLocationInfo().rootId, intersectionCallBack.GetLocationInfo().hitModel.GetMogpFlags(), 0);
                 return true;

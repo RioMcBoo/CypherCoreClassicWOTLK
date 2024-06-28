@@ -30,14 +30,14 @@ namespace System
         {
             long lValue = Convert.ToInt64(value);
             long lFlag = Convert.ToInt64(flag);
-            return (lValue & lFlag) != 0;
+            return lValue.HasAnyFlag(lFlag);
         }
 
         public static bool HasFlag(this Enum value, Enum flag)
         {
             long lValue = Convert.ToInt64(value);
             long lFlag = Convert.ToInt64(flag);
-            return (lValue & lFlag) == lFlag;
+            return lValue.HasFlag(lFlag);
         }
 
         public static bool DoesMatchColor(this SocketColor mask, SocketType type)

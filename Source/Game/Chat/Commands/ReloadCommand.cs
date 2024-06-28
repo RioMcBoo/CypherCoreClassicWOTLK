@@ -63,7 +63,9 @@ namespace Game.Chat
         {
             Log.outInfo(LogFilter.Server, "Reloading areatrigger_template table...");
             Global.AreaTriggerDataStorage.LoadAreaTriggerTemplates();
-            handler.SendGlobalGMSysMessage("AreaTrigger templates reloaded. Already spawned AT won't be affected. New scriptname need a reboot.");
+            handler.SendGlobalGMSysMessage(
+                "AreaTrigger templates reloaded. Already spawned AT won't be affected. " +
+                "New scriptname need a reboot.");
             return true;
         }
 
@@ -224,7 +226,8 @@ namespace Game.Chat
                     continue;
                 }
 
-                Log.outInfo(LogFilter.Server, "Reloading creature template entry {0}", entry);
+                Log.outInfo(LogFilter.Server, 
+                    $"Reloading creature template entry {entry}");
 
                 Global.ObjectMgr.LoadCreatureTemplate(result.GetFields());
                 Global.ObjectMgr.CheckCreatureTemplate(cInfo);
@@ -686,7 +689,8 @@ namespace Game.Chat
         }
 
         static bool HandleReloadSkillPerfectItemTemplateCommand(CommandHandler handler)
-        { // latched onto HandleReloadSkillExtraItemTemplateCommand as it's part of that table group (and i don't want to Chance all the command IDs)
+        { // latched onto HandleReloadSkillExtraItemTemplateCommand as it's part of that table group
+          // (and i don't want to Chance all the command IDs)
             Log.outInfo(LogFilter.Misc, "Re-Loading Skill Perfection Data Table...");
             SkillPerfectItems.LoadSkillPerfectItemTable();
             handler.SendGlobalGMSysMessage("DB table `skill_perfect_item_template` (perfect item procs when crafting) reloaded.");
@@ -851,7 +855,8 @@ namespace Game.Chat
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell target coordinates...");
             Global.SpellMgr.LoadSpellTargetPositions();
-            handler.SendGlobalGMSysMessage("DB table `spell_target_position` (destination coordinates for spell targets) reloaded.");
+            handler.SendGlobalGMSysMessage(
+                "DB table `spell_target_position` (destination coordinates for spell targets) reloaded.");
             return true;
         }
 

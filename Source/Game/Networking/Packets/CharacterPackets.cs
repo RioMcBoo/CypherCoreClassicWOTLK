@@ -226,8 +226,10 @@ namespace Game.Networking.Packets
                 data.FlushBits();
 
                 foreach (string str in MailSenders)
+                {
                     if (!str.IsEmpty())
                         data.WriteCString(str);
+                }
 
                 data.WriteString(Name);
             }

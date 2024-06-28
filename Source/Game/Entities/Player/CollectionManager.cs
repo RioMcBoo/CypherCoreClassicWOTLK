@@ -42,13 +42,17 @@ namespace Game.Entities
 
                 if (Global.DB2Mgr.GetMount(spellId) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Mount spell {0} defined in `mount_definitions` does not exist in Mount.db2, skipped", spellId);
+                    Log.outError(LogFilter.Sql, 
+                        $"Mount spell {spellId} defined in `mount_definitions` " +
+                        $"does not exist in Mount.db2, skipped");
                     continue;
                 }
 
                 if (otherFactionSpellId != 0 && Global.DB2Mgr.GetMount(otherFactionSpellId) == null)
                 {
-                    Log.outError(LogFilter.Sql, "otherFactionSpellId {0} defined in `mount_definitions` for spell {1} does not exist in Mount.db2, skipped", otherFactionSpellId, spellId);
+                    Log.outError(LogFilter.Sql, 
+                        $"otherFactionSpellId {otherFactionSpellId} defined in `mount_definitions` " +
+                        $"for spell {spellId} does not exist in Mount.db2, skipped");
                     continue;
                 }
 

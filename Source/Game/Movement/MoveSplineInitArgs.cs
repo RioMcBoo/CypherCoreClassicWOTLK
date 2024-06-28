@@ -48,9 +48,17 @@ namespace Game.Movement
                 if (!exp)
                 {
                     if (unit != null)
-                        Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for {(verbose ? unit.GetDebugInfo() : unit.GetGUID().ToString())}");
+                    {
+                        Log.outError(LogFilter.Movement, 
+                            $"MoveSplineInitArgs::Validate: expression '{exp}' " +
+                            $"failed for {(verbose ? unit.GetDebugInfo() : unit.GetGUID().ToString())}");
+                    }
                     else
-                        Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for cyclic spline continuation");
+                    {
+                        Log.outError(LogFilter.Movement, 
+                            $"MoveSplineInitArgs::Validate: expression '{exp}' " +
+                            $"failed for cyclic spline continuation");
+                    }
                     return false;
                 }
                 return true;
@@ -81,9 +89,14 @@ namespace Game.Movement
         bool _checkPathLengths()
         {
             if (path.Count > 2 || facing.type == Framework.Constants.MonsterMoveType.Normal)
+            {
                 for (int i = 0; i < path.Count - 1; ++i)
+                {
                     if ((path[i + 1] - path[i]).Length() < 0.1f)
                         return false;
+                }
+            }
+
             return true;
         }
     }

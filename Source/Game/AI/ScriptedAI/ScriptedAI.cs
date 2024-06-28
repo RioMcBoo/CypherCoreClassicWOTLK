@@ -89,7 +89,9 @@ namespace Game.AI
 
             if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
-                Log.outError(LogFilter.ScriptsAi, $"ScriptedAI::DoPlaySoundToSet: Invalid soundId {soundId} used in DoPlaySoundToSet (Source: {source.GetGUID()})");
+                Log.outError(LogFilter.ScriptsAi, 
+                    $"ScriptedAI::DoPlaySoundToSet: Invalid soundId {soundId} " +
+                    $"used in DoPlaySoundToSet (Source: {source.GetGUID()})");
                 return;
             }
 
@@ -211,7 +213,9 @@ namespace Game.AI
         /// <param name="reset"></param>
         void ForceCombatStopForCreatureEntry(int entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
         {
-            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
+            Log.outDebug(LogFilter.ScriptsAi, 
+                $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. " +
+                $"Debug info: {me.GetDebugInfo()}");
 
             List<Creature> creatures = new();
             AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
@@ -313,7 +317,8 @@ namespace Game.AI
                     continue;
 
                 //Check if our target is in range
-                if (me.IsWithinDistInMap(target, me.GetSpellMinRangeForTarget(target, tempSpell)) || !me.IsWithinDistInMap(target, me.GetSpellMaxRangeForTarget(target, tempSpell)))
+                if (me.IsWithinDistInMap(target, me.GetSpellMinRangeForTarget(target, tempSpell)) 
+                    || !me.IsWithinDistInMap(target, me.GetSpellMaxRangeForTarget(target, tempSpell)))
                     continue;
 
                 //All good so lets add it to the spell list
@@ -349,7 +354,12 @@ namespace Game.AI
             if (player != null)
                 player.TeleportTo(unit.GetMapId(), x, y, z, o, TeleportToOptions.NotLeaveCombat);
             else
-                Log.outError(LogFilter.ScriptsAi, $"ScriptedAI::DoTeleportPlayer: Creature {me.GetGUID()} Tried to teleport non-player unit ({unit.GetGUID()}) to X: {x} Y: {y} Z: {z} O: {o}. Aborted.");
+            {
+                Log.outError(LogFilter.ScriptsAi,
+                    $"ScriptedAI::DoTeleportPlayer: Creature {me.GetGUID()} " +
+                    $"Tried to teleport non-player unit ({unit.GetGUID()}) " +
+                    $"to X: {x} Y: {y} Z: {z} O: {o}. Aborted.");
+            }
         }
 
         public void DoTeleportAll(float x, float y, float z, float o)
@@ -360,9 +370,11 @@ namespace Game.AI
 
             var PlayerList = map.GetPlayers();
             foreach (var player in PlayerList)
+            {
                 if (player.IsAlive())
                     player.TeleportTo(me.GetMapId(), x, y, z, o, TeleportToOptions.NotLeaveCombat);
 
+        }
         }
 
         //Returns friendly unit with the most amount of hp missing from max hp
@@ -495,7 +507,11 @@ namespace Game.AI
         public Difficulty GetDifficulty() { return _difficulty; }
 
         // return true for 25 man or 25 man heroic mode
-        public bool Is25ManRaid() { return _difficulty == Difficulty.Raid25N || _difficulty == Difficulty.Raid25HC; }
+        public bool Is25ManRaid() 
+        { 
+            return _difficulty == Difficulty.Raid25N 
+                || _difficulty == Difficulty.Raid25HC; 
+        }
 
         public T DungeonMode<T>(T normal5, T heroic10)
         {
@@ -602,7 +618,9 @@ namespace Game.AI
 
         void ForceCombatStopForCreatureEntry(int entry, float maxSearchRange = 250.0f, bool reset = true)
         {
-            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
+            Log.outDebug(LogFilter.ScriptsAi, 
+                $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. " +
+                $"Debug info: {me.GetDebugInfo()}");
 
             List<Creature> creatures = me.GetCreatureListWithEntryInGrid(entry, maxSearchRange);
             foreach (Creature creature in creatures)
@@ -663,7 +681,10 @@ namespace Game.AI
         {
             if (delayToRespawn < TimeSpan.FromSeconds(2))
             {
-                Log.outError(LogFilter.ScriptsAi, $"BossAI::_DespawnAtEvade: called with delay of {delayToRespawn} seconds, defaulting to 2 (me: {me.GetGUID()})");
+                Log.outError(LogFilter.ScriptsAi, 
+                    $"BossAI::_DespawnAtEvade: called with delay " +
+                    $"of {delayToRespawn} seconds, defaulting to 2 (me: {me.GetGUID()})");
+
                 delayToRespawn = TimeSpan.FromSeconds(2);
             }
 
@@ -673,7 +694,10 @@ namespace Game.AI
             TempSummon whoSummon = who.ToTempSummon();
             if (whoSummon != null)
             {
-                Log.outWarn(LogFilter.ScriptsAi, $"BossAI::_DespawnAtEvade: called on a temporary summon (who: {who.GetGUID()})");
+                Log.outWarn(LogFilter.ScriptsAi, 
+                    $"BossAI::_DespawnAtEvade: called on a temporary summon " +
+                    $"(who: {who.GetGUID()})");
+
                 whoSummon.UnSummon();
                 return;
             }
@@ -792,7 +816,8 @@ namespace Game.AI
             foreach (var id in this)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, id);
-                if (summon != null && summon.IsAIEnabled() && (entry == 0 || summon.GetEntry() == entry))
+                if (summon != null && summon.IsAIEnabled() 
+                    && (entry == 0 || summon.GetEntry() == entry))
                 {
                     summon.GetAI().DoZoneInCombat();
                 }

@@ -16,7 +16,7 @@ namespace Game.Networking
         {
             _tcpNoDelay = ConfigMgr.GetDefaultValue("Network.TcpNodelay", true);
 
-            Log.outDebug(LogFilter.Misc, "Max allowed socket connections {0}", ushort.MaxValue);
+            Log.outDebug(LogFilter.Misc, $"Max allowed socket connections {ushort.MaxValue}");
 
             // -1 means use default
             _socketSendBufferSize = ConfigMgr.GetDefaultValue("Network.OutKBuff", -1);

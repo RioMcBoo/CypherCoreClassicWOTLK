@@ -38,14 +38,16 @@ namespace BNetServer
                         var key = (serviceAttr.ServiceHash, serviceAttr.MethodId);
                         if (serviceHandlers.ContainsKey(key))
                         {
-                            Log.outError(LogFilter.Network, $"Tried to override ServiceHandler: {serviceHandlers[key]} with {methodInfo.Name} (ServiceHash: {serviceAttr.ServiceHash} MethodId: {serviceAttr.MethodId})");
+                            Log.outError(LogFilter.Network, 
+                                $"Tried to override ServiceHandler: {serviceHandlers[key]} " +
+                                $"with {methodInfo.Name} (ServiceHash: {serviceAttr.ServiceHash} MethodId: {serviceAttr.MethodId})");
                             continue;
                         }
 
                         var parameters = methodInfo.GetParameters();
                         if (parameters.Length == 0)
                         {
-                            Log.outError(LogFilter.Network, $"Method: {methodInfo.Name} needs atleast one paramter");
+                            Log.outError(LogFilter.Network, $"Method: {methodInfo.Name} needs at least one parameter");
                             continue;
                         }
 
@@ -94,7 +96,10 @@ namespace BNetServer
             {
                 var response = (IMessage)Activator.CreateInstance(responseType);
                 status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response);
-                Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Returned: {2} Status: {3}.", session.GetClientInfo(), request, response, status);
+
+                Log.outDebug(LogFilter.ServiceProtobuf, 
+                    $"{session.GetClientInfo()} Client called server Method: {request}) Returned: {response} Status: {status}.");
+
                 if (status == 0)
                     session.SendResponse(token, response);
                 else
@@ -103,7 +108,10 @@ namespace BNetServer
             else
             {
                 status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request);
-                Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Status: {2}.", session.GetClientInfo(), request, status);
+                
+                Log.outDebug(LogFilter.ServiceProtobuf, 
+                    $"{session.GetClientInfo()} Client called server Method: {request}) Status: {status}.");
+
                 if (status != 0)
                     session.SendResponse(token, status);
             }

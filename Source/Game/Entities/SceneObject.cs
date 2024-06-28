@@ -70,7 +70,10 @@ namespace Game.Entities
             if (!_createdBySpellCast.IsEmpty())
             {
                 // search for a dummy aura on creator
-                Aura linkedAura = creator.GetAura(_createdBySpellCast.GetEntry(), aura => aura.GetCastId() == _createdBySpellCast);
+                Aura linkedAura = creator.GetAura(_createdBySpellCast.GetEntry(), aura => 
+                aura.GetCastId() == _createdBySpellCast
+                );
+
                 if (linkedAura == null)
                     return true;
             }
@@ -87,7 +90,9 @@ namespace Game.Entities
             long lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.SceneObject);
 
             SceneObject sceneObject = new();
-            if (!sceneObject.Create(lowGuid, SceneType.Normal, sceneId, sceneTemplate != null ? sceneTemplate.ScenePackageId : 0, creator.GetMap(), creator, pos, privateObjectOwner))
+            if (!sceneObject.Create(lowGuid, SceneType.Normal, sceneId, 
+                sceneTemplate != null ? sceneTemplate.ScenePackageId : 0,
+                creator.GetMap(), creator, pos, privateObjectOwner))
             {
                 sceneObject.Dispose();
                 return null;
@@ -212,7 +217,8 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), SceneObjectMask.GetUpdateMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), 
+                    SceneObjectMask.GetUpdateMask(), player);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

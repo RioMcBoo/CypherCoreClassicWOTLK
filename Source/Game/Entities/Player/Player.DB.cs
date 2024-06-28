@@ -87,8 +87,10 @@ namespace Game.Entities
                                 }
                             }
                             else if (item.InventoryPosition.IsBagSlotPos)
+                            {
                                 if (item.IsBag())
                                     invalidBagMap.Add(item.GetGUID(), item);
+                        }
                         }
                         else
                         {
@@ -109,7 +111,8 @@ namespace Game.Entities
                             }
                             else
                             {
-                                Log.outError(LogFilter.Player, $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: { item.GetGUID()}, " + 
+                                Log.outError(LogFilter.Player, 
+                                    $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: { item.GetGUID()}, " + 
                                     $"entry: {item.GetEntry()}) which doesnt have a valid bag (Bag GUID: {bagGuid}, slot: {slot}). Possible cheat?");                                  
                                 item.DeleteFromInventoryDB(trans);
                                 continue;
@@ -121,7 +124,8 @@ namespace Game.Entities
                             item.SetState(ItemUpdateState.Unchanged, this);
                         else
                         {
-                            Log.outError(LogFilter.Player, $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: {item.GetGUID()}, " +
+                            Log.outError(LogFilter.Player, 
+                                $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: {item.GetGUID()}, " +
                                 $"entry: {item.GetEntry()}) which can't be loaded into inventory (Bag GUID: {bagGuid}, slot: {slot}) by reason {err}. " +
                                 $"Item will be sent by mail.");
                             item.DeleteFromInventoryDB(trans);
@@ -260,8 +264,9 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: {1}) has broken item (GUID: {2}, entry: {3}) in inventory. Deleting item.",
-                        GetGUID().ToString(), GetName(), itemGuid, itemEntry);
+                    Log.outError(LogFilter.Player, 
+                        $"LoadInventory: player (GUID: {GetGUID()}, name: {GetName()}) has broken item " +
+                        $"(GUID: {itemGuid}, entry: {itemEntry}) in inventory. Deleting item." );
                     remove = true;
                 }
                 // Remove item from inventory if necessary
@@ -275,8 +280,10 @@ namespace Game.Entities
             }
             else
             {
-                Log.outError(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: {1}) has unknown item (entry: {2}) in inventory. Deleting item.",
-                    GetGUID().ToString(), GetName(), itemEntry);
+                Log.outError(LogFilter.Player, 
+                    $"LoadInventory: player (GUID: {GetGUID()}, name: {GetName()}) has unknown item " +
+                    $"(entry: {itemEntry}) in inventory. Deleting item.");
+
                 Item.DeleteFromInventoryDB(trans, itemGuid);
                 Item.DeleteFromDB(trans, itemGuid);
             }
@@ -294,7 +301,8 @@ namespace Game.Entities
                 {
                     if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills)                      // client limit
                     {
-                        Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}) has more than {SkillConst.MaxPlayerSkills} skills.");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}) has more than {SkillConst.MaxPlayerSkills} skills.");
                         break;
                     }
 
@@ -306,7 +314,10 @@ namespace Game.Entities
                     SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skill, race, GetClass());
                     if (rcEntry == null)
                     {
-                        Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}, Race: {race}, Class: {GetClass()}) has forbidden skill {skill} for his race/class combination");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}, Race: {race}, Class: {GetClass()}) " +
+                            $"has forbidden skill {skill} for his race/class combination");
+
                         mSkillStatus.Add(skill, new SkillStatusData(mSkillStatus.Count, SkillState.Deleted));
                         continue;
                     }
@@ -365,7 +376,9 @@ namespace Game.Entities
                 }
                 while (result.NextRow());
             }
-            // Learn skill rewarded spells after all skills have been loaded to prevent learning a skill from them before its loaded with proper value from DB
+
+            // Learn skill rewarded spells after all skills have been loaded to prevent learning a skill
+            // from them before its loaded with proper value from DB
             foreach (var (skillId, skillValue) in loadedSkillValues)
             {
                 LearnSkillRewardedSpells(skillId, skillValue, race);
@@ -440,7 +453,7 @@ namespace Game.Entities
 
         void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
         {
-            Log.outDebug(LogFilter.Player, "Loading auras for player {0}", GetGUID().ToString());
+            Log.outDebug(LogFilter.Player, $"Loading auras for player {GetGUID()}");
 
             ObjectGuid casterGuid = new();
             ObjectGuid itemGuid = new();
@@ -486,13 +499,15 @@ namespace Game.Entities
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Player, "Unknown aura (spellid {0}), ignore.", key.SpellId);
+                        Log.outError(LogFilter.Player, $"Unknown aura (spellid {key.SpellId}), ignore.");
                         continue;
                     }
 
                     if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey(difficulty))
                     {
-                        Log.outError(LogFilter.Player, $"Player._LoadAuras: Player '{GetName()}' ({GetGUID()}) has an invalid aura difficulty {difficulty} (SpellID: {key.SpellId}), ignoring.");
+                        Log.outError(LogFilter.Player, 
+                            $"Player._LoadAuras: Player '{GetName()}' ({GetGUID()}) " +
+                            $"has an invalid aura difficulty {difficulty} (SpellID: {key.SpellId}), ignoring.");
                         continue;
                     }
 
@@ -535,7 +550,7 @@ namespace Game.Entities
 
                         aura.SetLoadedState(maxDuration, remainTime, remainCharges, stackCount, recalculateMask, info.Amounts);
                         aura.ApplyForTargets();
-                        Log.outInfo(LogFilter.Player, "Added aura spellid {0}, effectmask {1}", spellInfo.Id, key.EffectMask);
+                        Log.outInfo(LogFilter.Player, $"Added aura spellid {spellInfo.Id}, effectmask {key.EffectMask}");
                     }
                 }
                 while (auraResult.NextRow());
@@ -547,7 +562,8 @@ namespace Game.Entities
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
             if (info == null)
             {
-                Log.outError(LogFilter.Player, "Player (Name {0}) has incorrect race/class ({1}/{2}) pair. Can't be loaded.", GetName(), GetRace(), GetClass());
+                Log.outError(LogFilter.Player, 
+                    $"Player (Name {GetName()}) has incorrect race/class ({GetRace()}/{GetClass()}) pair. Can't be loaded.");
                 return false;
             }
 
@@ -604,7 +620,8 @@ namespace Game.Entities
                 if (loc == null && GetRace() == Race.PandarenNeutral)
                     loc = Global.ObjectMgr.GetWorldSafeLoc(3295); // The Wandering Isle, Starting Area GY
 
-                Cypher.Assert(loc != null, "Missing fallback graveyard location for faction {GetTeamId()}");
+                Cypher.Assert(loc != null, 
+                    $"Missing fallback graveyard location for faction {GetBatttleGroundTeamId()}");
 
                 homebind.WorldRelocate(loc.Loc);
                 homebindAreaId = Global.TerrainMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, loc.Loc);
@@ -612,7 +629,8 @@ namespace Game.Entities
                 saveHomebindToDb();
             }
 
-            Log.outDebug(LogFilter.Player, $"Setting player home position - mapid: {homebind.GetMapId()}, areaid: {homebindAreaId}, {homebind}");
+            Log.outDebug(LogFilter.Player,
+                $"Setting player home position - mapid: {homebind.GetMapId()}, areaid: {homebindAreaId}, {homebind}");
 
             return true;
         }
@@ -666,7 +684,10 @@ namespace Game.Entities
                         ab.uState = ActionButtonUpdateState.UnChanged;
                     else
                     {
-                        Log.outError(LogFilter.Player, $"Player::_LoadActions: Player '{GetName()}' ({GetGUID()}) has an invalid action button (Button: {button}, Action: {action}, Type: {type}). It will be deleted at next save. This can be due to a player changing their talents.");
+                        Log.outError(LogFilter.Player, 
+                            $"Player::_LoadActions: Player '{GetName()}' ({GetGUID()}) has an invalid action button " +
+                            $"(Button: {button}, Action: {action}, Type: {type}). It will be deleted at next save. " +
+                            $"This can be due to a player changing their talents.");
 
                         // Will deleted in DB at next save (it can create data until save but marked as deleted)
                         m_actionButtons[button] = new ActionButton();
@@ -702,7 +723,10 @@ namespace Game.Entities
                     else
                     {
                         questStatusData.Status = QuestStatus.Incomplete;
-                        Log.outError(LogFilter.Player, $"Player._LoadQuestStatus: Player '{GetName()}' ({GetGUID()}) has invalid quest {questId} status ({qstatus}), replaced by QUEST_STATUS_INCOMPLETE(3).");
+                        Log.outError(LogFilter.Player, 
+                            $"Player._LoadQuestStatus: Player '{GetName()}' ({GetGUID()}) " +
+                            $"has invalid quest {questId} status ({qstatus}), " +
+                            $"replaced by QUEST_STATUS_INCOMPLETE(3).");
                     }
 
                     questStatusData.Explored = result.Read<byte>(2) > 0;
@@ -755,7 +779,8 @@ namespace Game.Entities
                     }
 
                     m_QuestStatus[questId] = questStatusData;
-                    Log.outDebug(LogFilter.ServerLoading, "Quest status is {0} for quest {1} for player (GUID: {2})", questStatusData.Status, questId, GetGUID().ToString());
+                    Log.outDebug(LogFilter.ServerLoading, 
+                        $"Quest status is {questStatusData.Status} for quest {questId} for player (GUID: {GetGUID()})");
 
                 }
                 while (result.NextRow());
@@ -791,10 +816,16 @@ namespace Game.Entities
                                 SetQuestSlotState(questStatusData.Slot, QuestSlotStateMask.None.SetSlot(storageIndex));
                         }
                         else
-                            Log.outError(LogFilter.Player, $"Player {GetName()} ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
+                        {
+                            Log.outError(LogFilter.Player, 
+                                $"Player {GetName()} ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
+                    }
                     }
                     else
-                        Log.outError(LogFilter.Player, $"Player {GetName()} ({GetGUID()}) does not have quest {questID} but has objective data for it.");
+                    {
+                        Log.outError(LogFilter.Player, 
+                            $"Player {GetName()} ({GetGUID()}) does not have quest {questID} but has objective data for it.");
+                }
                 }
                 while (result.NextRow());
             }
@@ -860,6 +891,7 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
+
         void _LoadDailyQuestStatus(SQLResult result)
         {
             m_DFQuests.Clear();
@@ -893,13 +925,14 @@ namespace Game.Entities
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
 
-                    Log.outDebug(LogFilter.Player, "Daily quest ({0}) cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, $"Daily quest ({quest_id}) cooldown for player (GUID: {GetGUID()})");
                 }
                 while (result.NextRow());
             }
 
             m_DailyQuestChanged = false;
         }
+
         void _LoadWeeklyQuestStatus(SQLResult result)
         {
             m_weeklyquests.Clear();
@@ -918,13 +951,14 @@ namespace Game.Entities
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
 
-                    Log.outDebug(LogFilter.Player, "Weekly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, $"Weekly quest {quest_id} cooldown for player (GUID: {GetGUID()})");
                 }
                 while (result.NextRow());
             }
 
             m_WeeklyQuestChanged = false;
         }
+
         void _LoadSeasonalQuestStatus(SQLResult result)
         {
             m_seasonalquests.Clear();
@@ -949,7 +983,7 @@ namespace Game.Entities
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
 
-                    Log.outDebug(LogFilter.Player, "Seasonal quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, $"Seasonal quest {quest_id} cooldown for player (GUID: {GetGUID()})");
                 }
                 while (result.NextRow());
             }
@@ -975,7 +1009,7 @@ namespace Game.Entities
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
 
-                    Log.outDebug(LogFilter.Player, "Monthly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, $"Monthly quest {quest_id} cooldown for player (GUID: {GetGUID()})");
                 }
                 while (result.NextRow());
             }
@@ -1247,21 +1281,24 @@ namespace Game.Entities
                 if (itemId == 0)
                 {
                     Log.outError(LogFilter.Player, 
-                        $"Player._LoadVoidStorage - Player (GUID: {GetGUID()}, name: {GetName()}) has an item with an invalid id (item id: item id: {itemId}, entry: {itemEntry}).");
+                        $"Player._LoadVoidStorage - Player (GUID: {GetGUID()}, name: {GetName()}) " +
+                        $"has an item with an invalid id (item id: item id: {itemId}, entry: {itemEntry}).");
                     continue;
                 }
 
                 if (Global.ObjectMgr.GetItemTemplate(itemEntry) == null)
                 {
                     Log.outError(LogFilter.Player, 
-                        $"Player._LoadVoidStorage - Player (GUID: {GetGUID()}, name: {GetName()}) has an item with an invalid entry (item id: item id: {itemId}, entry: {itemEntry}).");
+                        $"Player._LoadVoidStorage - Player (GUID: {GetGUID()}, name: {GetName()}) " +
+                        $"has an item with an invalid entry (item id: item id: {itemId}, entry: {itemEntry}).");
                     continue;
                 }
 
                 if (slot >= SharedConst.VoidStorageMaxSlot)
                 {
                     Log.outError(LogFilter.Player, 
-                        $"Player._LoadVoidStorage - Player (GUID: {GetGUID()}, name: {GetName()}) has an item with an invalid slot (item id: item id: {itemId}, entry: {itemEntry}, slot: {slot}).");
+                        $"Player._LoadVoidStorage - Player (GUID: {GetGUID()}, name: {GetName()}) " +
+                        $"has an item with an invalid slot (item id: item id: {itemId}, entry: {itemEntry}, slot: {slot}).");
                     continue;
                 }
 
@@ -1299,7 +1336,10 @@ namespace Game.Entities
 
                     if (m.mailTemplateId != 0 && !CliDB.MailTemplateStorage.ContainsKey(m.mailTemplateId))
                     {
-                        Log.outError(LogFilter.Player, $"Player:_LoadMail - Mail ({m.messageID}) have not existed MailTemplateId ({m.mailTemplateId}), remove at load");
+                        Log.outError(LogFilter.Player, 
+                            $"Player:_LoadMail - Mail ({m.messageID}) " +
+                            $"have not existed MailTemplateId ({m.mailTemplateId}), remove at load");
+
                         m.mailTemplateId = 0;
                     }
 
@@ -1332,7 +1372,9 @@ namespace Game.Entities
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
             if (proto == null)
             {
-                Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid}) has unknown item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
+                Log.outError(LogFilter.Player, 
+                    $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid}) " +
+                    $"has unknown item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
 
                 SQLTransaction trans = new();
 
@@ -1350,7 +1392,8 @@ namespace Game.Entities
             ObjectGuid ownerGuid = fields.Read<long>(47) != 0 ? ObjectGuid.Create(HighGuid.Player, fields.Read<long>(47)) : ObjectGuid.Empty;
             if (!item.LoadFromDB(itemGuid, ownerGuid, fields, itemEntry))
             {
-                Log.outError(LogFilter.Player, $"Player._LoadMailedItems: Item (GUID: {itemGuid}) in mail ({mailId}) doesn't exist, deleted from mail.");
+                Log.outError(LogFilter.Player, 
+                    $"Player._LoadMailedItems: Item (GUID: {itemGuid}) in mail ({mailId}) doesn't exist, deleted from mail.");
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM);
                 stmt.SetInt64(0, itemGuid);
@@ -1375,7 +1418,9 @@ namespace Game.Entities
         {
             if (result.IsEmpty())
                 return;
+            
             _declinedname = new DeclinedName();
+            
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                 _declinedname.Name[i] = result.Read<string>(i);
         }
@@ -1394,7 +1439,8 @@ namespace Game.Entities
                     ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
                     if (arenaTeam == null)
                     {
-                        Log.outError(LogFilter.Player, "Player:_LoadArenaTeamInfo: couldn't load arenateam {0}", arenaTeamId);
+                        Log.outError(LogFilter.Player, 
+                            $"Player:_LoadArenaTeamInfo: couldn't load arenateam {arenaTeamId}");
                         continue;
                     }
 
@@ -1417,6 +1463,7 @@ namespace Game.Entities
                 SetArenaTeamInfoField(slot, ArenaTeamInfoType.PersonalRating, personalRatingCache[slot]);
             }
         }
+
         void _LoadStoredAuraTeleportLocations(SQLResult result)
         {
             //                                                       0      1      2          3          4          5
@@ -1431,14 +1478,18 @@ namespace Game.Entities
 
                     if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                     {
-                        Log.outError(LogFilter.Spells, $"Player._LoadStoredAuraTeleportLocations: Player {GetName()} ({GetGUID()}) spell (ID: {spellId}) does not exist");
+                        Log.outError(LogFilter.Spells, 
+                            $"Player._LoadStoredAuraTeleportLocations: " +
+                            $"Player {GetName()} ({GetGUID()}) spell (ID: {spellId}) does not exist");
                         continue;
                     }
 
                     WorldLocation location = new(result.Read<int>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
                     if (!GridDefines.IsValidMapCoord(location))
                     {
-                        Log.outError(LogFilter.Spells, $"Player._LoadStoredAuraTeleportLocations: Player {GetName()} ({GetGUID()}) spell (ID: {spellId}) has invalid position on map {location.GetMapId()}, {location}.");
+                        Log.outError(LogFilter.Spells, 
+                            $"Player._LoadStoredAuraTeleportLocations: Player {GetName()} ({GetGUID()}) spell (ID: {spellId}) " +
+                            $"has invalid position on map {location.GetMapId()}, {location}.");
                         continue;
                     }
 
@@ -1451,6 +1502,7 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
+
         void _LoadGroup(SQLResult result)
         {
             if (!result.IsEmpty())
@@ -1476,6 +1528,7 @@ namespace Game.Entities
             if (GetGroup() == null || !GetGroup().IsLeader(GetGUID()))
                 RemovePlayerFlag(PlayerFlags.GroupLeader);
         }
+
         void _LoadInstanceTimeRestrictions(SQLResult result)
         {
             if (result.IsEmpty())
@@ -1486,6 +1539,7 @@ namespace Game.Entities
                 _instanceResetTimes.Add(result.Read<int>(0), result.Read<long>(1));
             } while (result.NextRow());
         }
+
         void _LoadEquipmentSets(SQLResult result)
         {
             if (result.IsEmpty())
@@ -1517,6 +1571,7 @@ namespace Game.Entities
             }
             while (result.NextRow());
         }
+
         void _LoadTransmogOutfits(SQLResult result)
         {
             //             0         1     2         3            4            5            6            7            8            9
@@ -1552,6 +1607,7 @@ namespace Game.Entities
                 _equipmentSets[eqSet.Data.Guid] = eqSet;
             } while (result.NextRow());
         }
+
         void _LoadCUFProfiles(SQLResult result)
         {
             if (result.IsEmpty())
@@ -1575,7 +1631,9 @@ namespace Game.Entities
 
                 if (id > PlayerConst.MaxCUFProfiles)
                 {
-                    Log.outError(LogFilter.Player, "Player._LoadCUFProfiles - Player (GUID: {0}, name: {1}) has an CUF profile with invalid id (id: {2}), max is {3}.", GetGUID().ToString(), GetName(), id, PlayerConst.MaxCUFProfiles);
+                    Log.outError(LogFilter.Player, 
+                        $"Player._LoadCUFProfiles - Player (GUID: {GetGUID()}, name: {GetName()}) " +
+                        $"has an CUF profile with invalid id (id: {id}), max is {PlayerConst.MaxCUFProfiles}.");
                     continue;
                 }
 
@@ -1583,11 +1641,13 @@ namespace Game.Entities
             }
             while (result.NextRow());
         }
+
         void _LoadRandomBGStatus(SQLResult result)
         {
             if (!result.IsEmpty())
                 m_IsBGRandomWinner = true;
         }
+
         void _LoadBGData(SQLResult result)
         {
             if (result.IsEmpty())
@@ -1604,6 +1664,7 @@ namespace Game.Entities
             m_bgData.mountSpell = result.Read<int>(9);
             m_bgData.queueId = BattlegroundQueueTypeId.FromPacked(result.Read<long>(10));
         }
+
         void _LoadPetStable(int summonedPetNumber, SQLResult result)
         {
             if (result.IsEmpty())
@@ -1672,8 +1733,10 @@ namespace Game.Entities
                 if (item.GetState() == ItemUpdateState.New)
                 {
                     if (itemTemplate != null)
+                    {
                         if (itemTemplate.HasFlag(ItemFlags.HasLoot))
                             Global.LootItemStorage.RemoveStoredLootForContainer(item.GetGUID().GetCounter());
+                    }
 
                     continue;
                 }
@@ -1683,8 +1746,10 @@ namespace Game.Entities
                 m_items[i].FSetState(ItemUpdateState.New);
 
                 if (itemTemplate != null)
+                {
                     if (itemTemplate.HasFlag(ItemFlags.HasLoot))
                         Global.LootItemStorage.RemoveStoredLootForContainer(item.GetGUID().GetCounter());
+            }
             }
 
             // Updated played time for refundable items. We don't do this in Player.Update because there's simply no need for it,
@@ -1701,7 +1766,9 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Player, $"Can't find item guid {guid} but is in refundable storage for player {GetGUID()} ! Removing.");
+                    Log.outError(LogFilter.Player, 
+                        $"Can't find item guid {guid} but is in refundable storage for player {GetGUID()} ! Removing.");
+
                     m_refundableItems.Remove(guid);
                 }
             }
@@ -1730,9 +1797,11 @@ namespace Game.Entities
                         Item test2 = GetItemByPos(item.InventoryBagSlot);
                         if (test2 != null)
                             bagTestGUID = test2.GetGUID().GetCounter();
+
                         Log.outError(LogFilter.Player, $"Player(GUID: {GetGUID()} Name: {GetName()}).SaveInventory - the bag({item.InventoryBagSlot}) and " +
                             $"slot({item.InventorySlot}) values for the item with guid {item.GetGUID()} (state {item.GetState()}) are incorrect, " +
                             "the player doesn't have an item at that position!");
+
                         // according to the test that was just performed nothing should be in this slot, delete
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_BAG_SLOT);
                         stmt.SetInt64(0, bagTestGUID);
@@ -1753,6 +1822,7 @@ namespace Game.Entities
                         Log.outError(LogFilter.Player, $"Player(GUID: {GetGUID()} Name: {GetName()}).SaveInventory - the bag({item.InventoryBagSlot}) and " +
                             $"slot({item.InventorySlot}) values for the item with guid {item.GetGUID()} are incorrect, " +
                             $"the item with guid {test.GetGUID()} is there instead!");
+                        
                         // save all changes to the item...
                         if (item.GetState() != ItemUpdateState.New) // only for existing items, no dupes
                             item.SaveToDB(trans);
@@ -2775,7 +2845,8 @@ namespace Game.Entities
             if (result.IsEmpty())
             {
                 Global.CharacterCacheStorage.GetCharacterNameByGuid(guid, out string cacheName);
-                Log.outError(LogFilter.Player, $"Player.LoadFromDB: Player {cacheName} {guid} not found in table `characters`, can't load.");
+                Log.outError(LogFilter.Player, 
+                    $"Player.LoadFromDB: Player {cacheName} {guid} not found in table `characters`, can't load.");
                 return false;
             }
 
@@ -2860,14 +2931,16 @@ namespace Game.Entities
             if (accountId != GetSession().GetAccountId())
             {
                 Log.outError(LogFilter.Player, 
-                    $"Player.LoadFromDB: Player (GUID: {guid}) loading from wrong account (is: {GetSession().GetAccountId()}, should be: {accountId}).");
+                    $"Player.LoadFromDB: Player (GUID: {guid}) loading from wrong account " +
+                    $"(is: {GetSession().GetAccountId()}, should be: {accountId}).");
                 return false;
             }
 
             SQLResult banResult = holder.GetResult(PlayerLoginQueryLoad.Banned);
             if (!banResult.IsEmpty())
             {
-                Log.outError(LogFilter.Player, $"Player.LoadFromDB: Player (GUID: {guid}) is banned, can't load.");
+                Log.outError(LogFilter.Player, 
+                    $"Player.LoadFromDB: Player (GUID: {guid}) is banned, can't load.");
                 return false;
             }
 
@@ -2891,7 +2964,8 @@ namespace Game.Entities
 
             if (gender >= Gender.None)
             {
-                Log.outError(LogFilter.Player, $"Player.LoadFromDB: layer {guid} has wrong gender ({gender}), can't be loaded.");
+                Log.outError(LogFilter.Player, 
+                    $"Player.LoadFromDB: layer {guid} has wrong gender ({gender}), can't be loaded.");
                 return false;
             }
 
@@ -2903,7 +2977,8 @@ namespace Game.Entities
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
             if (info == null)
             {
-                Log.outError(LogFilter.Player, $"Player.LoadFromDB: Player {guid} has wrong race/class ({GetRace()}/{GetClass()}), can't be loaded.");
+                Log.outError(LogFilter.Player, 
+                    $"Player.LoadFromDB: Player {guid} has wrong race/class ({GetRace()}/{GetClass()}), can't be loaded.");
                 return false;
             }
 
@@ -2955,7 +3030,8 @@ namespace Game.Entities
 
             if (!GetSession().ValidateAppearance(GetRace(), GetClass(), gender, customizations))
             {
-                Log.outError(LogFilter.Player, $"Player.LoadFromDB: Player {guid} has wrong Appearance values (Hair/Skin/Color), can't be loaded.");
+                Log.outError(LogFilter.Player, 
+                    $"Player.LoadFromDB: Player {guid} has wrong Appearance values (Hair/Skin/Color), can't be loaded.");
                 return false;
             }
 
@@ -3008,7 +3084,9 @@ namespace Game.Entities
             var mapEntry = CliDB.MapStorage.LookupByKey(mapId);
             if (mapEntry == null || !IsPositionValid())
             {
-                Log.outError(LogFilter.Player, $"Player.LoadFromDB: Player (guidlow {guid}) have invalid coordinates (MapId: {mapId} {GetPosition()}). Teleport to default race/class locations.");
+                Log.outError(LogFilter.Player, 
+                    $"Player.LoadFromDB: Player (guidlow {guid}) have invalid coordinates (MapId: {mapId} {GetPosition()}). " +
+                    $"Teleport to default race/class locations.");
                 RelocateToHomebind();
             }
             // Player was saved in Arena or Bg
@@ -3055,7 +3133,10 @@ namespace Game.Entities
                     if (mapId == -1) // BattlegroundEntry Point not found (???)
                     {
                         Log.outError(LogFilter.Player, 
-                            $"Player.LoadFromDB: Player (guidlow {guid}) was in BG in database, but BG was not found, and entry point was invalid! Teleport to default race/class locations.");
+                            $"Player.LoadFromDB: Player (guidlow {guid}) was in BG in database, " +
+                            $"but BG was not found, and entry point was invalid! " +
+                            $"Teleport to default race/class locations.");
+
                         RelocateToHomebind();
                     }
                     else
@@ -3107,7 +3188,8 @@ namespace Game.Entities
                         Math.Abs(m_movementInfo.transport.pos.posZ) > 250.0f)
                     {
                         Log.outError(LogFilter.Player,
-                            $"Player.LoadFromDB: Player (guidlow {guid}) have invalid transport coordinates (X: {x} Y: {y} Z: {z} O: {o}). Teleport to bind location.");
+                            $"Player.LoadFromDB: Player (guidlow {guid}) have invalid transport coordinates " +
+                            $"(X: {x} Y: {y} Z: {z} O: {o}). Teleport to bind location.");
 
                         m_movementInfo.transport.Reset();
                         RelocateToHomebind();
@@ -3122,7 +3204,9 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Player, $"Player.LoadFromDB: Player (guidlow {guid}) have problems with transport guid ({transguid}). Teleport to bind location.");
+                    Log.outError(LogFilter.Player, 
+                        $"Player.LoadFromDB: Player (guidlow {guid}) have problems with transport guid ({transguid}). " +
+                        $"Teleport to bind location.");
 
                     RelocateToHomebind();
                 }
@@ -3138,6 +3222,7 @@ namespace Game.Entities
                     for (int i = 0; i < 2; ++i)
                         m_taxi.AddTaxiDestination(m_bgData.taxiPath[i]);
                 }
+
                 if (!m_taxi.LoadTaxiDestinationsFromString(taxi_path, GetTeam()))
                 {
                     // problems with taxi path loading
@@ -3148,18 +3233,26 @@ namespace Game.Entities
 
                     if (nodeEntry == null)                                      // don't know taxi start node, to homebind
                     {
-                        Log.outError(LogFilter.Player, $"Player.LoadFromDB: Character {GetGUID()} have wrong data in taxi destination list, teleport to homebind.");
+                        Log.outError(LogFilter.Player, 
+                            $"Player.LoadFromDB: Character {GetGUID()} have wrong data in taxi destination list, " +
+                            $"teleport to homebind.");
+
                         RelocateToHomebind();
                     }
                     else                                                // have start node, to it
                     {
-                        Log.outError(LogFilter.Player, $"Player.LoadFromDB: Character {GetGUID()} have too short taxi destination list, teleport to original node.");
+                        Log.outError(LogFilter.Player, 
+                            $"Player.LoadFromDB: Character {GetGUID()} have too short taxi destination list, " +
+                            $"teleport to original node.");
+
                         mapId = nodeEntry.ContinentID;
                         Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
                     }
                     m_taxi.ClearTaxiDestinations();
                 }
+
                 var nodeid = m_taxi.GetTaxiSource();
+
                 if (nodeid != 0)
                 {
                     // save source node as recall coord to prevent recall and fall from sky
@@ -3187,7 +3280,10 @@ namespace Game.Entities
             {
                 if (GetSession().GetExpansion() < mapEntry.Expansion)
                 {
-                    Log.outDebug(LogFilter.Player, $"Player.LoadFromDB: Player {GetName()} using client without required expansion tried login at non accessible map {mapId}.");
+                    Log.outDebug(LogFilter.Player, 
+                        $"Player.LoadFromDB: Player {GetName()} using client without required expansion " +
+                        $"tried login at non accessible map {mapId}.");
+
                     RelocateToHomebind();
                 }
             }
@@ -3241,7 +3337,9 @@ namespace Game.Entities
                 if (map == null)
                 {
                     Log.outError(LogFilter.Player, 
-                        $"Player.LoadFromDB: Player {GetName()} {guid} Map: {mapId}, {GetPosition()}. Invalid default map coordinates or instance couldn't be created.");
+                        $"Player.LoadFromDB: Player {GetName()} {guid} Map: {mapId}, {GetPosition()}. " +
+                        $"Invalid default map coordinates or instance couldn't be created.");
+
                     return false;
                 }
             }
@@ -3442,7 +3540,8 @@ namespace Game.Entities
             }
             */
 
-            Log.outDebug(LogFilter.Player, $"Player.LoadFromDB: The value of player {GetName()} after load item and aura is: ");            
+            Log.outDebug(LogFilter.Player, 
+                $"Player.LoadFromDB: The value of player {GetName()} after load item and aura is: ");            
 
             // GM state
             if (GetSession().HasPermission(RBACPermissions.RestoreSavedGmState))
@@ -3571,7 +3670,8 @@ namespace Game.Entities
             // first save/honor gain after midnight will also update the player's honor fields
             UpdateHonorFields();
 
-            Log.outDebug(LogFilter.Player, $"Player::SaveToDB: The value of player {GetName()} at save: ");
+            Log.outDebug(LogFilter.Player, 
+                $"Player::SaveToDB: The value of player {GetName()} at save: ");
 
             if (!create)
                 Global.ScriptMgr.OnPlayerSave(this);
@@ -4007,7 +4107,8 @@ namespace Game.Entities
                 else
                     charDeleteMinLvl = WorldConfig.GetIntValue(WorldCfg.ChardeleteMinLevel);
 
-                // if we want to finalize the character removal or the character does not meet the level requirement of either heroic or non-heroic settings,
+                // if we want to finalize the character removal or the character
+                // does not meet the level requirement of either heroic or non-heroic settings,
                 // we set it to mode CHAR_DELETE_REMOVE
                 if (characterInfo.Level < charDeleteMinLvl)
                     charDelete_method = CharDeleteMethod.Remove;
@@ -4403,7 +4504,9 @@ namespace Game.Entities
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.Player, $"Player.DeleteFromDB: Tried to delete player ({playerGuid}) with unsupported delete method ({charDelete_method}).");
+                    Log.outError(LogFilter.Player, 
+                        $"Player.DeleteFromDB: Tried to delete player ({playerGuid}) " +
+                        $"with unsupported delete method ({charDelete_method}).");
 
                     if (trans.commands.Count > 0)
                         DB.Characters.CommitTransaction(trans);
@@ -4428,7 +4531,8 @@ namespace Game.Entities
 
         public static void DeleteOldCharacters(int keepDays)
         {
-            Log.outInfo(LogFilter.Player, "Player:DeleteOldChars: Deleting all characters which have been deleted {0} days before...", keepDays);
+            Log.outInfo(LogFilter.Player, 
+                $"Player:DeleteOldChars: Deleting all characters which have been deleted {keepDays} days before...");
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_OLD_CHARS);
             stmt.SetUInt32(0, (uint)(GameTime.GetGameTime() - keepDays * Time.Day));
@@ -4443,7 +4547,7 @@ namespace Game.Entities
                     count++;
                 }
                 while (result.NextRow());
-                Log.outDebug(LogFilter.Player, "Player:DeleteOldChars: Deleted {0} character(s)", count);
+                Log.outDebug(LogFilter.Player, $"Player:DeleteOldChars: Deleted {count} character(s)");
             }
         }
 
@@ -4460,6 +4564,7 @@ namespace Game.Entities
 
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
+
         public static bool LoadPositionFromDB(out WorldLocation loc, out bool inFlight, ObjectGuid guid)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_POSITION);

@@ -224,14 +224,15 @@ namespace Game
                     pGameEvent.holidayStage = result.Read<byte>(6);
                     pGameEvent.description = result.Read<string>(7);
                     pGameEvent.state = (GameEventState)result.Read<byte>(8);
-                    pGameEvent.announce = result.Read<byte>(9);
+                    pGameEvent.announce = (GameEventAnnounce)result.Read<byte>(9);
                     pGameEvent.nextstart = 0;
 
                     ++count;
 
                     if (pGameEvent.length == 0 && pGameEvent.state == GameEventState.Normal)                            // length>0 is validity check
                     {
-                        Log.outError(LogFilter.Sql, $"`game_event` game event id ({event_id}) isn't a world event and has length = 0, thus it can't be used.");
+                        Log.outError(LogFilter.Sql, 
+                            $"`game_event` game event id ({event_id}) isn't a world event and has length = 0, thus it can't be used.");
                         continue;
                     }
 
@@ -239,13 +240,18 @@ namespace Game
                     {
                         if (!CliDB.HolidaysStorage.ContainsKey((int)pGameEvent.holiday_id))
                         {
-                            Log.outError(LogFilter.Sql, $"`game_event` game event id ({event_id}) contains nonexisting holiday id {pGameEvent.holiday_id}.");
+                            Log.outError(LogFilter.Sql, 
+                                $"`game_event` game event id ({event_id}) contains nonexisting holiday id {pGameEvent.holiday_id}.");
+                            
                             pGameEvent.holiday_id = HolidayIds.None;
                             continue;
                         }
+
                         if (pGameEvent.holidayStage > SharedConst.MaxHolidayDurations)
                         {
-                            Log.outError(LogFilter.Sql, $"`game_event` game event id ({event_id}) has out of range holidayStage {pGameEvent.holidayStage}.");
+                            Log.outError(LogFilter.Sql, 
+                                $"`game_event` game event id ({event_id}) has out of range holidayStage {pGameEvent.holidayStage}.");
+                            
                             pGameEvent.holidayStage = 0;
                             continue;
                         }
@@ -269,7 +275,10 @@ namespace Game
                 SQLResult result = DB.Characters.Query("SELECT eventEntry, state, next_start FROM game_event_save");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 game event saves in game events. DB table `game_event_save` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        "Loaded 0 game event saves in game events. DB table `game_event_save` is empty.");
+                }
                 else
                 {
 
@@ -279,7 +288,8 @@ namespace Game
 
                         if (event_id >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_save` game event entry ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_save` game event entry ({event_id}) not exist in `game_event`");
                             continue;
                         }
 
@@ -290,7 +300,8 @@ namespace Game
                         }
                         else
                         {
-                            Log.outError(LogFilter.Sql, "game_event_save includes event save for non-worldevent id {0}", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"game_event_save includes event save for non-worldevent id {event_id}");
                             continue;
                         }
 
@@ -311,7 +322,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT eventEntry, prerequisite_event FROM game_event_prerequisite");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 game event prerequisites in game events. DB table `game_event_prerequisite` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 game event prerequisites in game events. DB table `game_event_prerequisite` is empty.");
+                }
                 else
                 {
                     do
@@ -320,7 +334,9 @@ namespace Game
 
                         if (event_id >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_prerequisite` game event id ({0}) is out of range compared to max event id in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_prerequisite` game event id ({event_id}) " +
+                                $"is out of range compared to max event id in `game_event`");
                             continue;
                         }
 
@@ -329,14 +345,18 @@ namespace Game
                             ushort prerequisite_event = result.Read<byte>(1);
                             if (prerequisite_event >= mGameEvent.Length)
                             {
-                                Log.outError(LogFilter.Sql, "`game_event_prerequisite` game event prerequisite id ({0}) not exist in `game_event`", prerequisite_event);
+                                Log.outError(LogFilter.Sql,
+                                    $"`game_event_prerequisite` game event prerequisite id " +
+                                    $"({prerequisite_event}) not exist in `game_event`");
                                 continue;
                             }
                             mGameEvent[event_id].prerequisite_events.Add(prerequisite_event);
                         }
                         else
                         {
-                            Log.outError(LogFilter.Sql, "game_event_prerequisiste includes event entry for non-worldevent id {0}", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"game_event_prerequisiste includes event entry " +
+                                $"for non-worldevent id {event_id}");
                             continue;
                         }
 
@@ -357,7 +377,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry FROM game_event_creature");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creatures in game events. DB table `game_event_creature` is empty");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 creatures in game events. DB table `game_event_creature` is empty");
+                }
                 else
                 {
 
@@ -370,19 +393,23 @@ namespace Game
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_creature` contains creature (GUID: {0}) not found in `creature` table.", guid);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_creature` contains creature (GUID: {guid}) not found in `creature` table.");
                             continue;
                         }
 
                         if (internal_event_id < 0 || internal_event_id >= mGameEventCreatureGuids.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_creature` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_creature` game event id ({event_id}) not exist in `game_event`");
                             continue;
                         }
 
                         // Log error for pooled object, but still spawn it
                         if (data.poolId != 0)
-                            Log.outError(LogFilter.Sql, $"`game_event_creature`: game event id ({event_id}) contains creature ({guid}) which is part of a pool ({data.poolId}). This should be spawned in game_event_pool");
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_creature`: game event id ({event_id}) contains creature ({guid}) " +
+                                $"which is part of a pool ({data.poolId}). This should be spawned in game_event_pool");
 
                         mGameEventCreatureGuids[internal_event_id].Add(guid);
 
@@ -403,7 +430,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry FROM game_event_gameobject");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobjects in game events. DB table `game_event_gameobject` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 gameobjects in game events. DB table `game_event_gameobject` is empty.");
+                }
                 else
                 {
                     do
@@ -415,19 +445,25 @@ namespace Game
                         GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_gameobject` contains gameobject (GUID: {0}) not found in `gameobject` table.", guid);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_gameobject` contains gameobject (GUID: {guid}) not found in `gameobject` table.");
                             continue;
                         }
 
                         if (internal_event_id < 0 || internal_event_id >= mGameEventGameobjectGuids.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_gameobject` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_gameobject` game event id ({event_id}) not exist in `game_event`");
                             continue;
                         }
 
                         // Log error for pooled object, but still spawn it
                         if (data.poolId != 0)
-                            Log.outError(LogFilter.Sql, $"`game_event_gameobject`: game event id ({event_id}) contains game object ({guid}) which is part of a pool ({data.poolId}). This should be spawned in game_event_pool");
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_gameobject`: game event id ({event_id}) contains game object ({guid}) " +
+                                $"which is part of a pool ({data.poolId}). This should be spawned in game_event_pool");
+                        }
 
                         mGameEventGameobjectGuids[internal_event_id].Add(guid);
 
@@ -449,7 +485,10 @@ namespace Game
                         "FROM creature JOIN game_event_model_equip ON creature.guid=game_event_model_equip.guid");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 model/equipment changes in game events. DB table `game_event_model_equip` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 model/equipment changes in game events. DB table `game_event_model_equip` is empty.");
+                }
                 else
                 {
                     do
@@ -460,7 +499,9 @@ namespace Game
 
                         if (event_id >= mGameEventModelEquip.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_model_equip` game event id ({0}) is out of range compared to max event id in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_model_equip` game event id ({event_id}) " +
+                                $"is out of range compared to max event id in `game_event`");
                             continue;
                         }
 
@@ -475,8 +516,10 @@ namespace Game
                             sbyte equipId = (sbyte)newModelEquipSet.equipment_id;
                             if (Global.ObjectMgr.GetEquipmentInfo(entry, equipId) == null)
                             {
-                                Log.outError(LogFilter.Sql, "Table `game_event_model_equip` have creature (Guid: {0}, entry: {1}) with equipment_id {2} not found in table `creature_equip_template`, set to no equipment.",
-                                    guid, entry, newModelEquipSet.equipment_id);
+                                Log.outError(LogFilter.Sql,
+                                    $"Table `game_event_model_equip` have creature (Guid: {guid}, entry: {entry}) with " +
+                                    $"equipment_id {newModelEquipSet.equipment_id} not found in table `creature_equip_template`, " +
+                                    $"set to no equipment.");
                                 continue;
                             }
                         }
@@ -500,7 +543,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT id, quest, eventEntry FROM game_event_creature_quest");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quests additions in game events. DB table `game_event_creature_quest` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 quests additions in game events. DB table `game_event_creature_quest` is empty.");
+                }
                 else
                 {
 
@@ -512,7 +558,8 @@ namespace Game
 
                         if (event_id >= mGameEventCreatureQuests.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_creature_quest` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_creature_quest` game event id ({event_id}) not exist in `game_event`");
                             continue;
                         }
 
@@ -535,7 +582,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT id, quest, eventEntry FROM game_event_gameobject_quest");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 go quests additions in game events. DB table `game_event_gameobject_quest` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 go quests additions in game events. DB table `game_event_gameobject_quest` is empty.");
+                }
                 else
                 {
 
@@ -547,7 +597,8 @@ namespace Game
 
                         if (event_id >= mGameEventGameObjectQuests.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_gameobject_quest` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_gameobject_quest` game event id ({event_id}) not exist in `game_event`");
                             continue;
                         }
 
@@ -570,7 +621,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT quest, eventEntry, condition_id, num FROM game_event_quest_condition");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest event conditions in game events. DB table `game_event_quest_condition` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 quest event conditions in game events. DB table `game_event_quest_condition` is empty.");
+                }
                 else
                 {
                     do
@@ -582,7 +636,9 @@ namespace Game
 
                         if (event_id >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_quest_condition` game event id ({0}) is out of range compared to max event id in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_quest_condition` game event id ({event_id}) is out of range " +
+                                $"compared to max event id in `game_event`");
                             continue;
                         }
 
@@ -610,7 +666,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT eventEntry, condition_id, req_num, max_world_state_field, done_world_state_field FROM game_event_condition");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 conditions in game events. DB table `game_event_condition` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 conditions in game events. DB table `game_event_condition` is empty.");
+                }
                 else
                 {
 
@@ -621,7 +680,9 @@ namespace Game
 
                         if (event_id >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_condition` game event id ({0}) is out of range compared to max event id in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql, 
+                                $"`game_event_condition` game event id ({event_id}) " +
+                                $"is out of range compared to max event id in `game_event`");
                             continue;
                         }
 
@@ -647,7 +708,10 @@ namespace Game
                 SQLResult result = DB.Characters.Query("SELECT eventEntry, condition_id, done FROM game_event_condition_save");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 condition saves in game events. DB table `game_event_condition_save` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 condition saves in game events. DB table `game_event_condition_save` is empty.");
+                }
                 else
                 {
                     do
@@ -657,7 +721,9 @@ namespace Game
 
                         if (event_id >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_condition_save` game event id ({0}) is out of range compared to max event id in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_condition_save` game event id ({event_id}) is out of range " +
+                                $"compared to max event id in `game_event`");
                             continue;
                         }
 
@@ -667,7 +733,8 @@ namespace Game
                         }
                         else
                         {
-                            Log.outError(LogFilter.Sql, "game_event_condition_save contains not present condition evt id {0} cond id {1}", event_id, condition);
+                            Log.outError(LogFilter.Sql,
+                                $"game_event_condition_save contains not present condition event id {event_id} condition id {condition}");
                             continue;
                         }
 
@@ -688,7 +755,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry, npcflag FROM game_event_npcflag");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 npcflags in game events. DB table `game_event_npcflag` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 npcflags in game events. DB table `game_event_npcflag` is empty.");
+                }
                 else
                 {
                     do
@@ -700,7 +770,9 @@ namespace Game
 
                         if (event_id >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_npcflag` game event id ({0}) is out of range compared to max event id in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_npcflag` game event id ({event_id}) is out of range " +
+                                $"compared to max event id in `game_event`");
                             continue;
                         }
 
@@ -723,7 +795,11 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT questId, eventEntry FROM game_event_seasonal_questrelation");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 seasonal quests additions in game events. DB table `game_event_seasonal_questrelation` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 seasonal quests additions in game events. " +
+                        "DB table `game_event_seasonal_questrelation` is empty.");
+                }
                 else
                 {
                     do
@@ -734,13 +810,15 @@ namespace Game
                         Quest questTemplate = Global.ObjectMgr.GetQuestTemplate(questId);
                         if (questTemplate == null)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_seasonal_questrelation` quest id ({0}) does not exist in `quest_template`", questId);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_seasonal_questrelation` quest id ({questId}) does not exist in `quest_template`");
                             continue;
                         }
 
                         if (eventEntry >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_seasonal_questrelation` event id ({0}) not exist in `game_event`", eventEntry);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_seasonal_questrelation` event id ({eventEntry}) not exist in `game_event`");
                             continue;
                         }
 
@@ -762,7 +840,10 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, Type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, slot ASC");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vendor additions in game events. DB table `game_event_npc_vendor` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 vendor additions in game events. DB table `game_event_npc_vendor` is empty.");
+                }
                 else
                 {
                     do
@@ -772,7 +853,8 @@ namespace Game
 
                         if (event_id >= mGameEventVendors.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_npc_vendor` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_npc_vendor` game event id ({event_id}) not exist in `game_event`");
                             continue;
                         }
 
@@ -831,7 +913,10 @@ namespace Game
                         " JOIN game_event_pool ON pool_template.entry = game_event_pool.pool_entry");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 pools for game events. DB table `game_event_pool` is empty.");
+                {
+                    Log.outInfo(LogFilter.ServerLoading,
+                        "Loaded 0 pools for game events. DB table `game_event_pool` is empty.");
+                }
                 else
                 {
                     do
@@ -842,16 +927,18 @@ namespace Game
 
                         if (internal_event_id < 0 || internal_event_id >= mGameEventPoolIds.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_pool` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql,
+                                $"`game_event_pool` game event id ({event_id}) not exist in `game_event`");
                             continue;
                         }
 
                         if (!Global.PoolMgr.CheckPool(entry))
                         {
-                            Log.outError(LogFilter.Sql, "Pool Id ({0}) has all creatures or gameobjects with explicit Chance sum <>100 and no equal Chance defined. The pool system cannot pick one to spawn.", entry);
+                            Log.outError(LogFilter.Sql,
+                                $"Pool Id ({entry}) has all creatures or gameobjects with explicit Chance sum <>100 " +
+                                $"and no equal Chance defined. The pool system cannot pick one to spawn.");
                             continue;
                         }
-
 
                         mGameEventPoolIds[internal_event_id].Add(entry);
 
@@ -933,10 +1020,10 @@ namespace Game
         public void StartArenaSeason()
         {
             int season = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
-            SQLResult result = DB.World.Query("SELECT eventEntry FROM game_event_arena_seasons WHERE season = '{0}'", season);
+            SQLResult result = DB.World.Query($"SELECT eventEntry FROM game_event_arena_seasons WHERE season = '{season}'");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.Gameevent, "ArenaSeason ({0}) must be an existant Arena Season", season);
+                Log.outError(LogFilter.Gameevent, $"ArenaSeason ({season}) must be an existant Arena Season");
                 return;
             }
 
@@ -944,12 +1031,13 @@ namespace Game
 
             if (eventId >= mGameEvent.Length)
             {
-                Log.outError(LogFilter.Gameevent, "EventEntry {0} for ArenaSeason ({1}) does not exists", eventId, season);
+                Log.outError(LogFilter.Gameevent, 
+                    $"EventEntry {eventId} for ArenaSeason ({season}) does not exists");
                 return;
             }
 
             StartEvent(eventId, true);
-            Log.outInfo(LogFilter.Gameevent, "Arena Season {0} started...", season);
+            Log.outInfo(LogFilter.Gameevent, $"Arena Season {season} started...");
         }
 
         public uint Update()                               // return the next event delay in ms
@@ -983,14 +1071,14 @@ namespace Game
                         // changed, save to DB the gameevent state, will be updated in next update cycle
                         SaveWorldEventStateToDB(id);
 
-                    Log.outDebug(LogFilter.Misc, "GameEvent {0} is active", id);
+                    Log.outDebug(LogFilter.Misc, $"GameEvent {id} is active");
                     // queue for activation
                     if (!IsActiveEvent(id))
                         activate.Add(id);
                 }
                 else
                 {
-                    Log.outDebug(LogFilter.Misc, "GameEvent {0} is not active", id);
+                    Log.outDebug(LogFilter.Misc, $"GameEvent {id} is not active");
                     if (IsActiveEvent(id))
                         deactivate.Add(id);
                     else
@@ -1028,7 +1116,7 @@ namespace Game
 
         void UnApplyEvent(ushort event_id)
         {
-            Log.outInfo(LogFilter.Gameevent, "GameEvent {0} \"{1}\" removed.", event_id, mGameEvent[event_id].description);
+            Log.outInfo(LogFilter.Gameevent, $"GameEvent {event_id} \"{mGameEvent[event_id].description}\" removed.");
             //! Run SAI scripts with SMART_EVENT_GAME_EVENT_END
             RunSmartAIScripts(event_id, false);
             // un-spawn positive event tagged objects
@@ -1049,11 +1137,11 @@ namespace Game
 
         void ApplyNewEvent(ushort event_id)
         {
-            byte announce = mGameEvent[event_id].announce;
-            if (announce == 1)// || (announce == 2 && WorldConfigEventAnnounce))
+            GameEventAnnounce announce = mGameEvent[event_id].announce;
+            if (announce == GameEventAnnounce.Yes)// || (announce == GameEventAnnounce.FromConfig && WorldConfigEventAnnounce))
                 Global.WorldMgr.SendWorldText(CypherStrings.Eventmessage, mGameEvent[event_id].description);
 
-            Log.outInfo(LogFilter.Gameevent, "GameEvent {0} \"{1}\" started.", event_id, mGameEvent[event_id].description);
+            Log.outInfo(LogFilter.Gameevent, $"GameEvent {event_id} \"{mGameEvent[event_id].description}\" started.");
 
             // spawn positive event tagget objects
             GameEventSpawn((short)event_id);
@@ -1134,8 +1222,9 @@ namespace Game
 
             if (internal_event_id < 0 || internal_event_id >= mGameEventCreatureGuids.Length)
             {
-                Log.outError(LogFilter.Gameevent, "GameEventMgr.GameEventSpawn attempt access to out of range mGameEventCreatureGuids element {0} (size: {1})",
-                    internal_event_id, mGameEventCreatureGuids.Length);
+                Log.outError(LogFilter.Gameevent, 
+                    $"GameEventMgr.GameEventSpawn attempt access to out of range " +
+                    $"mGameEventCreatureGuids element {internal_event_id} (size: {mGameEventCreatureGuids.Length})");
                 return;
             }
 
@@ -1160,8 +1249,9 @@ namespace Game
 
             if (internal_event_id < 0 || internal_event_id >= mGameEventGameobjectGuids.Length)
             {
-                Log.outError(LogFilter.Gameevent, "GameEventMgr.GameEventSpawn attempt access to out of range mGameEventGameobjectGuids element {0} (size: {1})",
-                    internal_event_id, mGameEventGameobjectGuids.Length);
+                Log.outError(LogFilter.Gameevent, 
+                    $"GameEventMgr.GameEventSpawn attempt access to out of range " +
+                    $"mGameEventGameobjectGuids element {internal_event_id} (size: {mGameEventGameobjectGuids.Length})");
                 return;
             }
 
@@ -1198,8 +1288,9 @@ namespace Game
 
             if (internal_event_id < 0 || internal_event_id >= mGameEventPoolIds.Length)
             {
-                Log.outError(LogFilter.Gameevent, "GameEventMgr.GameEventSpawn attempt access to out of range mGameEventPoolIds element {0} (size: {1})",
-                    internal_event_id, mGameEventPoolIds.Length);
+                Log.outError(LogFilter.Gameevent, 
+                    $"GameEventMgr.GameEventSpawn attempt access to out of range " +
+                    $"mGameEventPoolIds element {internal_event_id} (size: {mGameEventPoolIds.Length})");
                 return;
             }
 
@@ -1222,8 +1313,9 @@ namespace Game
 
             if (internal_event_id < 0 || internal_event_id >= mGameEventCreatureGuids.Length)
             {
-                Log.outError(LogFilter.Gameevent, "GameEventMgr.GameEventUnspawn attempt access to out of range mGameEventCreatureGuids element {0} (size: {1})",
-                    internal_event_id, mGameEventCreatureGuids.Length);
+                Log.outError(LogFilter.Gameevent, 
+                    $"GameEventMgr.GameEventUnspawn attempt access to out of range " +
+                    $"mGameEventCreatureGuids element {internal_event_id} (size: {mGameEventCreatureGuids.Length})");
                 return;
             }
 
@@ -1251,8 +1343,9 @@ namespace Game
 
             if (internal_event_id < 0 || internal_event_id >= mGameEventGameobjectGuids.Length)
             {
-                Log.outError(LogFilter.Gameevent, "GameEventMgr.GameEventUnspawn attempt access to out of range mGameEventGameobjectGuids element {0} (size: {1})",
-                    internal_event_id, mGameEventGameobjectGuids.Length);
+                Log.outError(LogFilter.Gameevent, 
+                    $"GameEventMgr.GameEventUnspawn attempt access to out of range " +
+                    $"mGameEventGameobjectGuids element {internal_event_id} (size: {mGameEventGameobjectGuids.Length})");
                 return;
             }
 
@@ -1261,6 +1354,7 @@ namespace Game
                 // check if it's needed by another event, if so, don't remove
                 if (event_id > 0 && HasGameObjectActiveEventExcept(guid, (ushort)event_id))
                     continue;
+
                 // Remove the gameobject from grid
                 GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                 if (data != null)
@@ -1280,7 +1374,9 @@ namespace Game
 
             if (internal_event_id < 0 || internal_event_id >= mGameEventPoolIds.Length)
             {
-                Log.outError(LogFilter.Gameevent, "GameEventMgr.GameEventUnspawn attempt access to out of range mGameEventPoolIds element {0} (size: {1})", internal_event_id, mGameEventPoolIds.Length);
+                Log.outError(LogFilter.Gameevent, 
+                    $"GameEventMgr.GameEventUnspawn attempt access to out of range " +
+                    $"mGameEventPoolIds element {internal_event_id} (size: {mGameEventPoolIds.Length})");
                 return;
             }
 
@@ -1357,9 +1453,13 @@ namespace Game
             foreach (var activeEventId in m_ActiveEvents)
             {
                 if (activeEventId != eventId)
+                {
                     foreach (var pair in mGameEventCreatureQuests[activeEventId])
+                    {
                         if (pair.Item2 == questId)
                             return true;
+            }
+                }
             }
             return false;
         }
@@ -1369,12 +1469,17 @@ namespace Game
             foreach (var activeEventId in m_ActiveEvents)
             {
                 if (activeEventId != eventId)
+                {
                     foreach (var pair in mGameEventGameObjectQuests[activeEventId])
+                    {
                         if (pair.Item2 == questId)
                             return true;
             }
+                }
+            }
             return false;
         }
+
         bool HasCreatureActiveEventExcept(long creatureId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
@@ -1383,12 +1488,15 @@ namespace Game
                 {
                     int internal_event_id = mGameEvent.Length + activeEventId - 1;
                     foreach (var id in mGameEventCreatureGuids[internal_event_id])
+                    {
                         if (id == creatureId)
                             return true;
                 }
             }
+            }
             return false;
         }
+
         bool HasGameObjectActiveEventExcept(long goId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
@@ -1397,9 +1505,11 @@ namespace Game
                 {
                     int internal_event_id = mGameEvent.Length + activeEventId - 1;
                     foreach (var id in mGameEventGameobjectGuids[internal_event_id])
+                    {
                         if (id == goId)
                             return true;
                 }
+            }
             }
             return false;
         }
@@ -1420,6 +1530,7 @@ namespace Game
                     }
                 }
             }
+
             foreach (var pair in mGameEventGameObjectQuests[eventId])
             {
                 var GameObjectQuestMap = Global.ObjectMgr.GetGOQuestRelationMapHACK();
@@ -1446,10 +1557,12 @@ namespace Game
                 {
                     var bl = CliDB.BattlemasterListStorage.LookupByKey((int)Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id));
                     if (bl != null)
+                    {
                         if (bl.HolidayWorldState != 0)
                             Global.WorldStateMgr.SetValue(bl.HolidayWorldState, Activate ? 1 : 0, false, null);
                 }
             }
+        }
         }
 
         public void HandleQuestComplete(int quest_id)
@@ -1724,12 +1837,13 @@ namespace Game
         public uint occurence;       // time between end and start
         public uint length;          // length of the event (Time.Minutes) after finishing all conditions
         public HolidayIds holiday_id;
+
         public byte holidayStage;
         public GameEventState state;   // state of the game event, these are saved into the game_event table on change!
         public Dictionary<int, GameEventFinishCondition> conditions = new();  // conditions to finish
         public List<ushort> prerequisite_events = new();  // events that must be completed before starting this event
         public string description;
-        public byte announce;         // if 0 dont announce, if 1 announce, if 2 take config value
+        public GameEventAnnounce announce;         // if 0 dont announce, if 1 announce, if 2 take config value
 
         public bool IsValid() { return length > 0 || state > GameEventState.Normal; }
     }
@@ -1759,6 +1873,7 @@ namespace Game
                     creature.GetAI().OnGameEvent(_activate, _eventId);
             }
         }
+
         public override void Visit(IList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
@@ -1781,5 +1896,12 @@ namespace Game
         WorldNextPhase = 3, // conditions are met, now 'length' timer to start next event
         WorldFinished = 4, // next events are started, unapply this one
         Internal = 5  // never handled in update
+    }
+
+    public enum GameEventAnnounce : byte
+    {
+        No = 0,
+        Yes = 1,
+        FromConfig = 2,
     }
 }

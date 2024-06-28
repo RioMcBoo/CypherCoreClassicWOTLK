@@ -287,8 +287,15 @@ namespace Game.Entities
             pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest() || IsWarModeLocalActive();
         }
 
-        public ZonePVPTypeOverride GetOverrideZonePVPType() { return (ZonePVPTypeOverride)(uint)m_activePlayerData.OverrideZonePVPType; }
-        public void SetOverrideZonePVPType(ZonePVPTypeOverride type) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideZonePVPType), (uint)type); }
+        public ZonePVPTypeOverride GetOverrideZonePVPType() 
+        { 
+            return (ZonePVPTypeOverride)(uint)m_activePlayerData.OverrideZonePVPType;
+        }
+
+        public void SetOverrideZonePVPType(ZonePVPTypeOverride type) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideZonePVPType), (uint)type); 
+        }
 
         public void ConfirmPendingBind()
         {
@@ -392,8 +399,10 @@ namespace Game.Entities
                         leader = Global.ObjAccessor.FindPlayer(leaderGuid);
 
                     if (ar.achievement != 0)
+                    {
                         if (leader == null || !leader.HasAchieved(ar.achievement))
                             missingAchievement = ar.achievement;
+                }
                 }
 
                 if (LevelMin != 0 || LevelMax != 0 || failedMapDifficultyXCondition != 0 || missingItem != 0 || missingQuest != 0 || missingAchievement != 0)
@@ -404,8 +413,12 @@ namespace Game.Entities
                     if (report)
                     {
                         if (missingQuest != 0 && !string.IsNullOrEmpty(ar.questFailedText))
+                        {
                             SendSysMessage("{0}", ar.questFailedText);
-                        else if (!mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()].IsEmpty() && mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()][0] != '\0' || failedMapDifficultyXCondition != 0) // if (missingAchievement) covered by this case
+                        }
+                        else if (!mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()].IsEmpty() 
+                            && mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()][0] != '\0' 
+                            || failedMapDifficultyXCondition != 0) // if (missingAchievement) covered by this case
                         {
                             if (abortParams != null)
                             {
@@ -448,9 +461,12 @@ namespace Game.Entities
 
             Group group = GetGroup();
             // raid instances require the player to be in a raid group to be valid
-            if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid) && (map.GetEntry().Expansion >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
+            if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid)
+                && (map.GetEntry().Expansion >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
+            {
                 if (group == null || group.IsRaidGroup())
                     return false;
+            }
 
             if (group != null)
             {
@@ -505,7 +521,8 @@ namespace Game.Entities
                     }
                 }
 
-                // Finally check with the instancesave for an entrance location if we did not get a valid one from the instancescript
+                // Finally check with the instancesave for an entrance location
+                // if we did not get a valid one from the instancescript
                 if (entranceLocation == null)
                 {
                     Group group = GetGroup();

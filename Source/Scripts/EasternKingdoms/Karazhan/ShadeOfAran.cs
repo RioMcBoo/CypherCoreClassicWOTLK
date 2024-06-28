@@ -406,7 +406,10 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
                 for (uint i = 0; i < 4; ++i)
                 {
-                    Creature unit = me.SummonCreature(CreatureIds.WaterElemental, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(90));
+                    Creature unit = me.SummonCreature(
+                        CreatureIds.WaterElemental, 0.0f, 0.0f, 0.0f, 0.0f, 
+                        TempSummonType.TimedDespawn, TimeSpan.FromSeconds(90));
+
                     if (unit != null)
                     {
                         unit.Attack(me.GetVictim(), true);
@@ -421,7 +424,10 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
             {
                 for (uint i = 0; i < 5; ++i)
                 {
-                    Creature unit = me.SummonCreature(CreatureIds.ShadowOfAran, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
+                    Creature unit = me.SummonCreature(
+                        CreatureIds.ShadowOfAran, 0.0f, 0.0f, 0.0f, 0.0f, 
+                        TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
+
                     if (unit != null)
                     {
                         unit.Attack(me.GetVictim(), true);

@@ -19,7 +19,9 @@ namespace Game.Scenarios
         {
             _map = map;
             _data = scenarioData;
-            _guid = ObjectGuid.Create(HighGuid.Scenario, map.GetId(), scenarioData.Entry.Id, map.GenerateLowGuid(HighGuid.Scenario));
+            _guid = ObjectGuid.Create(HighGuid.Scenario, map.GetId(), scenarioData.Entry.Id, 
+                map.GenerateLowGuid(HighGuid.Scenario));
+
             _currentstep = null;
 
             //ASSERT(_data);
@@ -31,7 +33,12 @@ namespace Game.Scenarios
             if (firstStep != null)
                 SetStep(firstStep);
             else
-                Log.outError(LogFilter.Scenario, "Scenario.Scenario: Could not launch Scenario (id: {0}), found no valid scenario step", _data.Entry.Id);
+            {
+                Log.outError(LogFilter.Scenario, 
+                    $"Scenario.Scenario: " +
+                    $"Could not launch Scenario (id: {_data.Entry.Id}), " +
+                    $"found no valid scenario step");
+        }
         }
 
         ~Scenario()
@@ -85,7 +92,12 @@ namespace Game.Scenarios
             if (IsComplete())
                 CompleteScenario();
             else
-                Log.outError(LogFilter.Scenario, "Scenario.CompleteStep: Scenario (id: {0}, step: {1}) was completed, but could not determine new step, or validate scenario completion.", step.ScenarioID, step.Id);
+            {
+                Log.outError(LogFilter.Scenario,
+                    $"Scenario.CompleteStep: " +
+                    $"Scenario (id: {step.ScenarioID}, step: {step.Id}) was completed, " +
+                    $"but could not determine new step, or validate scenario completion.");
+        }
         }
 
         public virtual void CompleteScenario()
@@ -208,8 +220,10 @@ namespace Game.Scenarios
                 return false;
 
             if (step.IsBonusObjective)
+            {
                 if (step != currentStep)
                     return false;
+            }
 
             return base.CanCompleteCriteriaTree(tree);
         }
@@ -257,7 +271,8 @@ namespace Game.Scenarios
                 scenarioState.CurrentStep = step.Id;
             scenarioState.CriteriaProgress = GetCriteriasProgressFor(player);
             scenarioState.BonusObjectives = GetBonusObjectivesData();
-            // Don't know exactly what this is for, but seems to contain list of scenario steps that we're either on or that are completed
+            // Don't know exactly what this is for, but seems to contain list
+            // of scenario steps that we're either on or that are completed
             foreach (var state in _stepStates)
             {
                 if (state.Key.IsBonusObjective)
@@ -371,6 +386,7 @@ namespace Game.Scenarios
         public virtual void Update(uint diff) { }
 
         public void SetStepState(ScenarioStepRecord step, ScenarioStepState state) { _stepStates[step] = state; }
+        
         public ScenarioStepRecord GetStep()
         {
             return _currentstep;

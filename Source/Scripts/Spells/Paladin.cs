@@ -197,7 +197,8 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ConsecrationDamage, SpellIds.ConsecrationProtectionAura, SpellIds.ConsecratedGroundPassive, SpellIds.ConsecratedGroundSlow);
+            return ValidateSpellInfo(SpellIds.ConsecrationDamage, SpellIds.ConsecrationProtectionAura, 
+                SpellIds.ConsecratedGroundPassive, SpellIds.ConsecratedGroundSlow);
         }
 
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -225,8 +226,11 @@ namespace Scripts.Spells.Paladin
             if (caster != null)
             {
                 // 243597 is also being cast as protection, but CreateObject is not sent, either serverside areatrigger for this aura or unused - also no visual is seen
-                if (unit == caster && caster.IsPlayer() && caster.ToPlayer().GetPrimarySpecialization() == ChrSpecialization.PaladinProtection)
+                if (unit == caster && caster.IsPlayer()
+                    && caster.ToPlayer().GetPrimarySpecialization() == ChrSpecialization.PaladinProtection)
+                {
                     caster.CastSpell(caster, SpellIds.ConsecrationProtectionAura);
+                }
 
                 if (caster.IsValidAttackTarget(unit))
                     if (caster.HasAura(SpellIds.ConsecratedGroundPassive))
@@ -248,7 +252,9 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.FinalStand, SpellIds.FinalStandEffect, SpellIds.Forbearance, SpellIds.ImmuneShieldMarker) && spellInfo.ExcludeCasterAuraSpell == SpellIds.ImmuneShieldMarker;
+            return ValidateSpellInfo(SpellIds.FinalStand, SpellIds.FinalStandEffect, 
+                SpellIds.Forbearance, SpellIds.ImmuneShieldMarker) 
+                && spellInfo.ExcludeCasterAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
         SpellCastResult CheckForbearance()
@@ -351,7 +357,8 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ConsecrationProtectionAura, SpellIds.HammerOfTheRighteousAoe);
+            return ValidateSpellInfo(SpellIds.ConsecrationProtectionAura, 
+                SpellIds.HammerOfTheRighteousAoe);
         }
 
         void HandleAoEHit(int effIndex)
@@ -410,18 +417,21 @@ namespace Scripts.Spells.Paladin
 
         bool CheckFlashOfLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            return eventInfo.GetProcSpell() != null && eventInfo.GetProcSpell().m_appliedMods.Contains(GetAura());
+            return eventInfo.GetProcSpell() != null 
+                && eventInfo.GetProcSpell().m_appliedMods.Contains(GetAura());
         }
 
         bool CheckHolyLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            return eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Paladin, HolyLightSpellClassMask);
+            return eventInfo.GetSpellInfo() != null 
+                && eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Paladin, HolyLightSpellClassMask);
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.InfusionOfLightEnergize,
-                new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(eventInfo.GetProcSpell()));
+                new CastSpellExtraArgs(
+                    TriggerCastFlags.FullMask).SetTriggeringSpell(eventInfo.GetProcSpell()));
         }
 
         public override void Register()
@@ -440,7 +450,8 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.JudgmentProtRetR3, SpellIds.JudgmentGainHolyPower, SpellIds.JudgmentHolyR3, SpellIds.JudgmentHolyR3Debuff);
+            return ValidateSpellInfo(SpellIds.JudgmentProtRetR3, SpellIds.JudgmentGainHolyPower, 
+                SpellIds.JudgmentHolyR3, SpellIds.JudgmentHolyR3Debuff);
         }
 
         void HandleOnHit()
@@ -465,7 +476,8 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.HolyShock, SpellIds.HolyShockHealing, SpellIds.HolyShockDamage);
+            return ValidateSpellInfo(SpellIds.HolyShock, SpellIds.HolyShockHealing, 
+                SpellIds.HolyShockDamage);
         }
 
         SpellCastResult CheckCast()
@@ -525,7 +537,11 @@ namespace Scripts.Spells.Paladin
 
         void PlayVisual()
         {
-            GetCaster().SendPlaySpellVisual(GetHitUnit(), IsHitCrit() ? PaladinVisualSpellHolyShockDamageCrit : PaladinVisualSpellHolyShockDamage, 0, 0, 0.0f, false);
+            GetCaster().SendPlaySpellVisual(GetHitUnit(), 
+                IsHitCrit() 
+                ? PaladinVisualSpellHolyShockDamageCrit 
+                : PaladinVisualSpellHolyShockDamage, 
+                0, 0, 0.0f, false);
         }
 
         public override void Register()
@@ -548,7 +564,11 @@ namespace Scripts.Spells.Paladin
 
         void PlayVisual()
         {
-            GetCaster().SendPlaySpellVisual(GetHitUnit(), IsHitCrit() ? PaladinVisualSpellHolyShockHealCrit : PaladinVisualSpellHolyShockHeal, 0, 0, 0.0f, false);
+            GetCaster().SendPlaySpellVisual(GetHitUnit(), 
+                IsHitCrit() 
+                ? PaladinVisualSpellHolyShockHealCrit 
+                : PaladinVisualSpellHolyShockHeal, 
+                0, 0, 0.0f, false);
         }
 
         public override void Register()
@@ -625,7 +645,8 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Forbearance, SpellIds.ImmuneShieldMarker) && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
+            return ValidateSpellInfo(SpellIds.Forbearance, SpellIds.ImmuneShieldMarker) 
+                && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
         SpellCastResult CheckForbearance()
@@ -666,8 +687,13 @@ namespace Scripts.Spells.Paladin
         {
             if (eventInfo.GetActionTarget() == null)
                 return false;
-            if (eventInfo.GetActionTarget().HasAura(SpellIds.BeaconOfLight, eventInfo.GetActor().GetGUID()))
+
+            if (eventInfo.GetActionTarget().HasAura(SpellIds.BeaconOfLight,
+                eventInfo.GetActor().GetGUID()))
+            {
                 return false;
+            }
+
             return true;
         }
 
@@ -691,7 +717,8 @@ namespace Scripts.Spells.Paladin
                     {
                         CastSpellExtraArgs args = new(aurEff);
                         args.AddSpellMod(SpellValueMod.BasePoint0, heal);
-                        eventInfo.GetActor().CastSpell(applications.FirstOrDefault().GetTarget(), SpellIds.BeaconOfLightHeal, args);
+                        eventInfo.GetActor().CastSpell(
+                            applications.FirstOrDefault().GetTarget(), SpellIds.BeaconOfLightHeal, args);
                     }
                     return;
                 }
@@ -710,7 +737,9 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.HolyPowerArmor, SpellIds.HolyPowerAttackPower, SpellIds.HolyPowerSpellPower, SpellIds.HolyPowerMp5);
+            return ValidateSpellInfo(SpellIds.HolyPowerArmor, 
+                SpellIds.HolyPowerAttackPower, SpellIds.HolyPowerSpellPower, 
+                SpellIds.HolyPowerMp5);
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

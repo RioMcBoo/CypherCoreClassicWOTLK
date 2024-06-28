@@ -795,7 +795,10 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             {
                 player.CloseGossipMenu();
 
-                Creature pBigBadWolf = me.SummonCreature(CreatureIds.BigBadWolf, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetOrientation(), TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
+                Creature pBigBadWolf = me.SummonCreature(
+                    CreatureIds.BigBadWolf, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetOrientation(), 
+                    TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
+
                 if (pBigBadWolf != null)
                     pBigBadWolf.GetAI().AttackStart(player);
 
@@ -1043,7 +1046,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             if (Phase == RAJPhase.Romulo)
             {
-                Log.outError(LogFilter.Scripts, "boss_julianneAI: cannot take damage in PhaseRomulo, why was i here?");
+                Log.outError(LogFilter.Scripts, 
+                    "boss_julianneAI: cannot take damage in PhaseRomulo, why was i here?");
+
                 damage = 0;
                 return;
             }
@@ -1078,7 +1083,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     return;
                 }
             }
-            Log.outError(LogFilter.Scripts, "boss_julianneAI: DamageTaken reach end of code, that should not happen.");
+
+            Log.outError(LogFilter.Scripts, 
+                "boss_julianneAI: DamageTaken reach end of code, that should not happen.");
         }
 
         public override void JustDied(Unit killer)
@@ -1133,7 +1140,10 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             {
                 if (SummonRomuloTimer <= diff)
                 {
-                    Creature pRomulo = me.SummonCreature(CreatureIds.Romulo, MiscConst.RomuloX, MiscConst.RomuloY, me.GetPositionZ(), 0, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
+                    Creature pRomulo = me.SummonCreature(
+                        CreatureIds.Romulo, MiscConst.RomuloX, MiscConst.RomuloY, me.GetPositionZ(), 0, 
+                        TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
+
                     if (pRomulo != null)
                     {
                         RomuloGUID = pRomulo.GetGUID();
@@ -1325,7 +1335,8 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 }
             }
 
-            Log.outError(LogFilter.Scenario, "boss_romulo: DamageTaken reach end of code, that should not happen.");
+            Log.outError(LogFilter.Scenario, 
+                "boss_romulo: DamageTaken reach end of code, that should not happen.");
         }
 
         public override void JustEngagedWith(Unit who)

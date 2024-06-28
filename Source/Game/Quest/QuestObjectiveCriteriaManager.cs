@@ -84,7 +84,9 @@ namespace Game
                     if (criteria == null)
                     {
                         // Removing non-existing criteria data for all characters
-                        Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
+                        Log.outError(LogFilter.Player, 
+                            $"Non-existing quest objective criteria {criteriaId} data " +
+                            $"has been removed from the table `character_queststatus_objectives_criteria_progress`.");
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
                         stmt.SetInt32(0, criteriaId);
@@ -102,8 +104,9 @@ namespace Game
                     progress.Changed = false;
 
                     _criteriaProgress[criteriaId] = progress;
-                } while (criteriaResult.NextRow());
             }
+                while (criteriaResult.NextRow());
+        }
         }
 
         public void SaveToDB(SQLTransaction trans)
@@ -232,27 +235,39 @@ namespace Game
 
             if (HasCompletedObjective(objective))
             {
-                Log.outTrace(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Objective already completed");
+                Log.outTrace(LogFilter.Player, 
+                    $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: " +
+                    $"(Id: {criteria.Id} Type {criteria.Entry.Type} " +
+                    $"Quest Objective {objective.Id}) Objective already completed");
                 return false;
             }
 
             if (_owner.GetQuestStatus(objective.QuestID) != QuestStatus.Incomplete)
             {
-                Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Not on quest");
+                Log.outTrace(LogFilter.Achievement, 
+                    $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: " +
+                    $"(Id: {criteria.Id} Type {criteria.Entry.Type} " +
+                    $"Quest Objective {objective.Id}) Not on quest");
                 return false;
             }
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
             if (_owner.GetGroup() != null && _owner.GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(referencePlayer.GetMap().GetDifficultyID()))
             {
-                Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Quest cannot be completed in raid group");
+                Log.outTrace(LogFilter.Achievement, 
+                    $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: " +
+                    $"(Id: {criteria.Id} Type {criteria.Entry.Type} " +
+                    $"Quest Objective {objective.Id}) Quest cannot be completed in raid group");
                 return false;
             }
 
             ushort slot = _owner.FindQuestSlot(objective.QuestID);
             if (slot >= SharedConst.MaxQuestLogSize || !_owner.IsQuestObjectiveCompletable(slot, quest, objective))
             {
-                Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Objective not completable");
+                Log.outTrace(LogFilter.Achievement, 
+                    $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: " +
+                    $"(Id: {criteria.Id} Type {criteria.Entry.Type} " +
+                    $"Quest Objective {objective.Id}) Objective not completable");
                 return false;
             }
 

@@ -307,7 +307,10 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
 
         public override WorldSafeLocsEntry GetExploitTeleportLocation(Team team)
         {
-            return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? MiscConst.ExploitTeleportLocationAlliance : MiscConst.ExploitTeleportLocationHorde);
+            return Global.ObjectMgr.GetWorldSafeLoc(
+                team == Team.Alliance 
+                ? MiscConst.ExploitTeleportLocationAlliance 
+                : MiscConst.ExploitTeleportLocationHorde);
         }
 
         public override Team GetPrematureWinner()

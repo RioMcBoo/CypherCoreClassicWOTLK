@@ -91,7 +91,8 @@ namespace Game.Maps
                     minions.Add(minion.entry, new MinionInfo(bosses[minion.bossId]));
             }
 
-            Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadMinionData: {0} minions loaded.", minions.Count);
+            Log.outDebug(LogFilter.Scripts, 
+                $"InstanceScript.LoadMinionData: {minions.Count} minions loaded.");
         }
 
         public void LoadDoorData(params DoorData[] data)
@@ -105,7 +106,8 @@ namespace Game.Maps
                     doors.Add(door.entry, new DoorInfo(bosses[door.bossId], door.Behavior));
             }
 
-            Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadDoorData: {0} doors loaded.", doors.Count);
+            Log.outDebug(LogFilter.Scripts,
+                $"InstanceScript.LoadDoorData: {doors.Count} doors loaded.");
         }
 
         public void LoadObjectData(ObjectData[] creatureData, ObjectData[] gameObjectData)
@@ -116,7 +118,9 @@ namespace Game.Maps
             if (gameObjectData != null)
                 LoadObjectData(gameObjectData, _gameObjectInfo);
 
-            Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadObjectData: {0} objects loaded.", _creatureInfo.Count + _gameObjectInfo.Count);
+            Log.outDebug(LogFilter.Scripts, 
+                $"InstanceScript.LoadObjectData: " +
+                $"{_creatureInfo.Count + _gameObjectInfo.Count} objects loaded.");
         }
 
         void LoadObjectData(ObjectData[] objectData, Dictionary<int, int> objectInfo)
@@ -137,8 +141,10 @@ namespace Game.Maps
         void LoadDungeonEncounterData(int bossId, int[] dungeonEncounterIds)
         {
             if (bossId < bosses.Count)
+            {
                 for (int i = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
                     bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
+        }
         }
 
         public virtual void UpdateDoorState(GameObject door)
@@ -334,7 +340,9 @@ namespace Game.Maps
                 if (bossInfo.state == EncounterState.ToBeDecided) // loading
                 {
                     bossInfo.state = state;
-                    Log.outDebug(LogFilter.Scripts, $"InstanceScript: Initialize boss {id} state as {state} (map {instance.GetId()}, {instance.GetInstanceId()}).");
+                    Log.outDebug(LogFilter.Scripts, 
+                        $"InstanceScript: Initialize boss {id} state as {state} " +
+                        $"(map {instance.GetId()}, {instance.GetInstanceId()}).");
                     return false;
                 }
                 else
@@ -344,7 +352,11 @@ namespace Game.Maps
 
                     if (bossInfo.state == EncounterState.Done)
                     {
-                        Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance boss {id} state from {bossInfo.state} back to {state} for map {instance.GetId()}, instance id {instance.GetInstanceId()}. Blocked!");
+                        Log.outError(LogFilter.Maps, 
+                            $"InstanceScript: Tried to set instance boss {id} " +
+                            $"state from {bossInfo.state} back to {state} " +
+                            $"for map {instance.GetId()}, instance id {instance.GetInstanceId()}. " +
+                            $"Blocked!");
                         return false;
                     }
 
@@ -354,9 +366,11 @@ namespace Game.Maps
                         {
                             Creature minion = instance.GetCreature(guid);
                             if (minion != null)
+                            {
                                 if (minion.IsWorldBoss() && minion.IsAlive())
                                     return false;
                         }
+                    }
                     }
 
                     DungeonEncounterRecord dungeonEncounter = null;
@@ -546,7 +560,11 @@ namespace Game.Maps
                         go.ResetDoorOrButton();
                 }
                 else
-                    Log.outError(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"InstanceScript: DoUseDoorOrButton can't use gameobject entry {go.GetEntry()}, " +
+                        $"because Type is {go.GetGoType()}.");
+            }
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton failed");
@@ -566,7 +584,11 @@ namespace Game.Maps
                         go.ResetDoorOrButton();
                 }
                 else
-                    Log.outError(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
+                {
+                    Log.outError(LogFilter.Scripts,
+                        $"InstanceScript: DoCloseDoorOrButton can't use gameobject entry {go.GetEntry()}, " +
+                        $"because Type is {go.GetGoType()}.");
+            }
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton failed");
@@ -584,7 +606,10 @@ namespace Game.Maps
                     case GameObjectTypes.Trap:
                     case GameObjectTypes.FishingNode:
                         // not expect any of these should ever be handled
-                        Log.outError(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject can't respawn gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
+                        Log.outError(LogFilter.Scripts, 
+                            $"InstanceScript: DoRespawnGameObject " +
+                            $"can't respawn gameobject entry {go.GetEntry()}, " +
+                            $"because Type is {go.GetGoType()}.");
                         return;
                     default:
                         break;
@@ -650,9 +675,11 @@ namespace Game.Maps
             {
                 Unit controlled = player.m_Controlled[i];
                 if (controlled != null)
+                {
                     if (controlled.IsInWorld && controlled.IsCreature())
                         controlled.RemoveAurasDueToSpell(spell);
             }
+        }
         }
 
         // Cast spell on all players in instance
@@ -689,9 +716,11 @@ namespace Game.Maps
             {
                 Unit controlled = player.m_Controlled[i];
                 if (controlled != null)
+                {
                     if (controlled.IsInWorld && controlled.IsCreature())
                         controlled.CastSpell(player, spell, true);
             }
+        }
         }
 
         public DungeonEncounterRecord GetBossDungeonEncounter(int id)
@@ -710,17 +739,23 @@ namespace Game.Maps
         
         public virtual bool CheckAchievementCriteriaMeet(int criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)
         {
-            Log.outError(LogFilter.Server, "Achievement system call CheckAchievementCriteriaMeet but instance script for map {0} not have implementation for achievement criteria {1}",
-                instance.GetId(), criteria_id);
+            Log.outError(LogFilter.Server, 
+                $"Achievement system call CheckAchievementCriteriaMeet " +
+                $"but instance script for map {instance.GetId()} " +
+                $"not have implementation for achievement criteria {criteria_id}");
             return false;
         }
 
         public bool IsEncounterCompleted(int dungeonEncounterId)
         {
             for (int i = 0; i < bosses.Count; ++i)
+            {
                 for (var j = 0; j < bosses[i].DungeonEncounters.Length; ++j)
+                {
                     if (bosses[i].DungeonEncounters[j] != null && bosses[i].DungeonEncounters[j].Id == dungeonEncounterId)
                         return bosses[i].state == EncounterState.Done;
+                }
+            }
 
             return false;
         }
@@ -729,8 +764,10 @@ namespace Game.Maps
         {
             DungeonEncounterRecord dungeonEncounter = GetBossDungeonEncounter(bossId);
             if (dungeonEncounter != null)
+            {
                 if ((completedEncountersMask & (1 << dungeonEncounter.Bit)) != 0)
                     return bosses[bossId].state == EncounterState.Done;
+            }
 
             return false;
         }
@@ -965,11 +1002,41 @@ namespace Game.Maps
                 bosses.Add(i, new BossInfo());
         }
 
-        public void OutSaveInstData() { Log.outDebug(LogFilter.Scripts, "Saving Instance Data for Instance {0} (Map {1}, Instance Id {2})", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
-        public void OutSaveInstDataComplete() { Log.outDebug(LogFilter.Scripts, "Saving Instance Data for Instance {0} (Map {1}, Instance Id {2}) completed.", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
-        public void OutLoadInstData(string input) { Log.outDebug(LogFilter.Scripts, "Loading Instance Data for Instance {0} (Map {1}, Instance Id {2}). Input is '{3}'", instance.GetMapName(), instance.GetId(), instance.GetInstanceId(), input); }
-        public void OutLoadInstDataComplete() { Log.outDebug(LogFilter.Scripts, "Instance Data Load for Instance {0} (Map {1}, Instance Id: {2}) is complete.", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
-        public void OutLoadInstDataFail() { Log.outDebug(LogFilter.Scripts, "Unable to load Instance Data for Instance {0} (Map {1}, Instance Id: {2}).", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
+        public void OutSaveInstData() 
+        { 
+            Log.outDebug(LogFilter.Scripts, 
+                $"Saving Instance Data for Instance {instance.GetMapName()} " +
+                $"(Map {instance.GetId()}, Instance Id {instance.GetInstanceId()})"); 
+        }
+
+        public void OutSaveInstDataComplete() 
+        { 
+            Log.outDebug(LogFilter.Scripts, 
+                $"Saving Instance Data for Instance {instance.GetMapName()} " +
+                $"(Map {instance.GetId()}, Instance Id {instance.GetInstanceId()}) completed."); 
+        }
+
+        public void OutLoadInstData(string input) 
+        { 
+            Log.outDebug(LogFilter.Scripts, 
+                $"Loading Instance Data for Instance {instance.GetMapName()} " +
+                $"(Map {instance.GetId()}, Instance Id {instance.GetInstanceId()}). " +
+                $"Input is '{input}'"); 
+        }
+
+        public void OutLoadInstDataComplete() 
+        { 
+            Log.outDebug(LogFilter.Scripts, 
+                $"Instance Data Load for Instance {instance.GetMapName()} " +
+                $"(Map {instance.GetId()}, Instance Id: {instance.GetInstanceId()}) is complete.");
+        }
+
+        public void OutLoadInstDataFail() 
+        { 
+            Log.outDebug(LogFilter.Scripts, 
+                $"Unable to load Instance Data for Instance {instance.GetMapName()} " +
+                $"(Map {instance.GetId()}, Instance Id: {instance.GetInstanceId()})."); 
+        }
 
         public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroups() { return _instanceSpawnGroups; }
 
@@ -1073,9 +1140,12 @@ namespace Game.Maps
 
         public DungeonEncounterRecord GetDungeonEncounterForDifficulty(Difficulty difficulty)
         {
-            return DungeonEncounters.FirstOrDefault(dungeonEncounter => dungeonEncounter?.DifficultyID == 0 || (Difficulty)dungeonEncounter?.DifficultyID == difficulty);
+            return DungeonEncounters.FirstOrDefault(dungeonEncounter => 
+            dungeonEncounter?.DifficultyID == 0 || (Difficulty)dungeonEncounter?.DifficultyID == difficulty
+            );
         }
     }
+
     class DoorInfo
     {
         public DoorInfo(BossInfo _bossInfo, EncounterDoorBehavior behavior)
@@ -1087,6 +1157,7 @@ namespace Game.Maps
         public BossInfo bossInfo;
         public EncounterDoorBehavior Behavior;
     }
+
     class MinionInfo
     {
         public MinionInfo(BossInfo _bossInfo)

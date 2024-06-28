@@ -77,8 +77,11 @@ namespace Scripts.Spells.Shaman
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 5);
             if (energizeAmount != null)
-                GetCaster().CastSpell(GetCaster(), SpellIds.ChainLightningOverloadEnergize, new CastSpellExtraArgs(energizeAmount)
-                    .AddSpellMod(SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))));
+            {
+                GetCaster().CastSpell(GetCaster(), SpellIds.ChainLightningOverloadEnergize, 
+                    new CastSpellExtraArgs(energizeAmount).AddSpellMod(
+                        SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))));
+        }
         }
 
         public override void Register()
@@ -178,9 +181,13 @@ namespace Scripts.Spells.Shaman
             {
                 Unit caster = at.GetCaster();
                 if (caster != null)
-                    caster.CastSpell(at.GetPosition(), SpellIds.EarthquakeTick, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                {
+                    caster.CastSpell(at.GetPosition(), SpellIds.EarthquakeTick,
+                        new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                         .SetOriginalCaster(at.GetGUID())
-                        .AddSpellMod(SpellValueMod.BasePoint0, (int)(caster.SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.213f * _damageMultiplier)));
+                        .AddSpellMod(SpellValueMod.BasePoint0, 
+                        (int)(caster.SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.213f * _damageMultiplier)));
+                }
 
                 _refreshTimer += _period;
             }
@@ -311,7 +318,10 @@ namespace Scripts.Spells.Shaman
                 if (dest != null)
                 {
                     var duration = TimeSpan.FromMilliseconds(GetSpellInfo().CalcDuration(GetOriginalCaster()));
-                    TempSummon summon = GetCaster().GetMap().SummonCreature(NpcHealingRainInvisibleStalker, dest, null, duration, GetOriginalCaster());
+                    TempSummon summon = 
+                        GetCaster().GetMap().SummonCreature(
+                            NpcHealingRainInvisibleStalker, dest, null, duration, GetOriginalCaster());
+
                     if (summon == null)
                         return;
 
@@ -498,7 +508,10 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
             Player target = GetTarget().ToPlayer();
             if (target != null)
-                target.GetSpellHistory().ModifyCooldown(SpellIds.ElementalMastery, TimeSpan.FromMilliseconds(-aurEff.GetAmount()));
+            {
+                target.GetSpellHistory().ModifyCooldown(
+                    SpellIds.ElementalMastery, TimeSpan.FromMilliseconds(-aurEff.GetAmount()));
+            }
         }
 
         public override void Register()
@@ -594,7 +607,8 @@ namespace Scripts.Spells.Shaman
 
         void ResetCooldown()
         {
-            GetCaster().GetSpellHistory().RestoreCharge(SpellMgr.GetSpellInfo(SpellIds.LavaBurst, GetCastDifficulty()).ChargeCategoryId);
+            GetCaster().GetSpellHistory().RestoreCharge(
+                SpellMgr.GetSpellInfo(SpellIds.LavaBurst, GetCastDifficulty()).ChargeCategoryId);
         }
 
         public override void Register()
@@ -616,8 +630,11 @@ namespace Scripts.Spells.Shaman
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 1);
             if (energizeAmount != null)
-                GetCaster().CastSpell(GetCaster(), SpellIds.LightningBoltOverloadEnergize, new CastSpellExtraArgs(energizeAmount)
+            {
+                GetCaster().CastSpell(GetCaster(), SpellIds.LightningBoltOverloadEnergize, 
+                    new CastSpellExtraArgs(energizeAmount)
                     .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
+        }
         }
 
         public override void Register()
@@ -669,7 +686,8 @@ namespace Scripts.Spells.Shaman
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GhostWolf, SpellIds.SpiritWolfTalent, SpellIds.SpiritWolfPeriodic, SpellIds.SpiritWolfAura);
+            return ValidateSpellInfo(SpellIds.GhostWolf, SpellIds.SpiritWolfTalent, 
+                SpellIds.SpiritWolfPeriodic, SpellIds.SpiritWolfAura);
         }
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -721,7 +739,8 @@ namespace Scripts.Spells.Shaman
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.TotemicPowerArmor, SpellIds.TotemicPowerAttackPower, SpellIds.TotemicPowerSpellPower, SpellIds.TotemicPowerMp5);
+            return ValidateSpellInfo(SpellIds.TotemicPowerArmor, SpellIds.TotemicPowerAttackPower, 
+                SpellIds.TotemicPowerSpellPower, SpellIds.TotemicPowerMp5);
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -772,8 +791,11 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
 
             // Need Remove self if Lightning Shield not active
-            if (GetTarget().GetAuraEffect(AuraType.ProcTriggerSpell, SpellFamilyNames.Shaman, new FlagArray128(0x400), GetCaster().GetGUID()) == null)
+            if (GetTarget().GetAuraEffect(AuraType.ProcTriggerSpell, SpellFamilyNames.Shaman,
+                new FlagArray128(0x400), GetCaster().GetGUID()) == null)
+            {
                 Remove();
+        }
         }
 
         public override void Register()
@@ -865,7 +887,9 @@ namespace Scripts.Spells.Shaman
             Unit target = eventInfo.GetProcTarget();
 
             // try to find spell Flame Shock on the target
-            AuraEffect flameShock = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
+            AuraEffect flameShock = target.GetAuraEffect(
+                AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
+            
             if (flameShock == null)
                 return;
 

@@ -33,6 +33,7 @@ namespace Game.AI
                     me.ClearUnitState(UnitState.Distracted);
                     me.GetMotionMaster().Clear();
                 }
+
                 me.GetMotionMaster().MoveChase(victim);
             }
         }
@@ -249,6 +250,7 @@ namespace Game.AI
 
                             return targetSelectorInner.Invoke(candidate);
                         };
+
                         target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
                     }
                     break;
@@ -280,6 +282,7 @@ namespace Game.AI
 
                             return targetSelectorInner.Invoke(candidate);
                         };
+
                         if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim) && targetSelector(me.GetVictim()))
                             target = me.GetVictim();
                         else

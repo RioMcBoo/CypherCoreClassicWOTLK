@@ -1352,9 +1352,11 @@ namespace Scripts.Spells.Druid
             {
                 AuraEffect shootingStars = caster.GetAuraEffect(SpellIds.ShootingStars, 0);
                 if (shootingStars != null)
+                {
                     if (RandomHelper.randChance(shootingStars.GetAmount()))
                         caster.CastSpell(GetTarget(), SpellIds.ShootingStarsDamage, true);
             }
+        }
         }
 
         public override void Register()

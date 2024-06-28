@@ -242,7 +242,8 @@ namespace Game
             {
                 AddQueuedPlayer(s);
                 UpdateMaxSessionCounters();
-                Log.outInfo(LogFilter.Server, "PlayerQueue: Account id {0} is in Queue Position ({1}).", s.GetAccountId(), ++QueueSize);
+                Log.outInfo(LogFilter.Server, 
+                    $"PlayerQueue: Account id {s.GetAccountId()} is in Queue Position ({++QueueSize}).");
                 return;
             }
 
@@ -256,7 +257,7 @@ namespace Game
                 float popu = GetActiveSessionCount();              // updated number of users on the server
                 popu /= pLimit;
                 popu *= 2;
-                Log.outInfo(LogFilter.Server, "Server Population ({0}).", popu);
+                Log.outInfo(LogFilter.Server, $"Server Population ({popu}).");
             }
         }
 
@@ -413,21 +414,27 @@ namespace Game
             RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
             uint realm_zone = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
 
-            DB.Login.Execute("UPDATE realmlist SET icon = {0}, timezone = {1} WHERE id = '{2}'", (byte)server_type, realm_zone, _realm.Id.Index);      // One-time query
+            DB.Login.Execute($"UPDATE realmlist SET icon = {server_type}, timezone = {realm_zone} WHERE id = '{_realm.Id.Index}'");      // One-time query
 
             Log.outInfo(LogFilter.ServerLoading, "Initialize DataStorage...");
             // Load DB2s
             m_availableDbcLocaleMask = CliDB.LoadStores(_dataPath, m_defaultDbcLocale);
+
             if (m_availableDbcLocaleMask == null || !m_availableDbcLocaleMask[(int)m_defaultDbcLocale])
             {
-                Log.outFatal(LogFilter.ServerLoading, $"Unable to load db2 files for {m_defaultDbcLocale} locale specified in DBC.Locale config!");
+                Log.outFatal(LogFilter.ServerLoading, 
+                    $"Unable to load db2 files for {m_defaultDbcLocale} locale specified in DBC.Locale config!");
+
                 Environment.Exit(1);
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
             if (!GameObjectModel.LoadGameObjectModelList())
             {
-                Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models (part of vmaps), objects using WMO models will crash the client - server shutting down!");
+                Log.outFatal(LogFilter.ServerLoading, 
+                    "Unable to load gameobject models (part of vmaps), " +
+                    "objects using WMO models will crash the client - server shutting down!");
+
                 Environment.Exit(1);
             }
 
@@ -459,7 +466,10 @@ namespace Game
             {
                 if (mapEntry.ParentMapID != -1)
                 {
-                    Cypher.Assert(mapEntry.CosmeticParentMapID == -1 || mapEntry.ParentMapID == mapEntry.CosmeticParentMapID, $"Inconsistent parent map data for map {mapEntry.Id} (ParentMapID = {mapEntry.ParentMapID}, CosmeticParentMapID = {mapEntry.CosmeticParentMapID})");
+                    Cypher.Assert(mapEntry.CosmeticParentMapID == -1 || mapEntry.ParentMapID == mapEntry.CosmeticParentMapID, 
+                        $"Inconsistent parent map data for map {mapEntry.Id} (ParentMapID = {mapEntry.ParentMapID}, " +
+                        $"CosmeticParentMapID = {mapEntry.CosmeticParentMapID})");
+
                     mapData.Add(mapEntry.ParentMapID, mapEntry.Id);
                 }
                 else if (mapEntry.CosmeticParentMapID != -1)
@@ -1129,11 +1139,13 @@ namespace Game
 
             if (m_defaultDbcLocale >= Locale.Total || m_defaultDbcLocale == Locale.None)
             {
-                Log.outError(LogFilter.ServerLoading, "Incorrect DBC.Locale! Must be >= 0 and < {0} and not {1} (set to 0)", Locale.Total, Locale.None);
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Incorrect DBC.Locale! Must be >= 0 and < {(int)Locale.Total} and not {(int)Locale.None} (set to 0)");
+
                 m_defaultDbcLocale = Locale.enUS;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Using {0} DBC Locale", m_defaultDbcLocale);
+            Log.outInfo(LogFilter.ServerLoading, $"Using {m_defaultDbcLocale} DBC Locale");
 
             // load update time related configs
             _worldUpdateTime.LoadFromConfig();
@@ -1167,16 +1179,21 @@ namespace Game
                 SharedConst.playerBaseMoveSpeed[i] = SharedConst.baseMoveSpeed[i] * WorldConfig.GetFloatValue(WorldCfg.RateMovespeed);
 
             var rateCreatureAggro = WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro);
+
             //visibility on continents
             m_MaxVisibleDistanceOnContinents = ConfigMgr.GetDefaultValue("Visibility.Distance.Continents", SharedConst.DefaultVisibilityDistance);
             if (m_MaxVisibleDistanceOnContinents < 45 * rateCreatureAggro)
             {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Continents can't be less max aggro radius {0}", 45 * rateCreatureAggro);
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.Continents can't be less max aggro radius {45 * rateCreatureAggro}");
+
                 m_MaxVisibleDistanceOnContinents = 45 * rateCreatureAggro;
             }
             else if (m_MaxVisibleDistanceOnContinents > SharedConst.MaxVisibilityDistance)
             {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Continents can't be greater {0}", SharedConst.MaxVisibilityDistance);
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.Continents can't be greater {SharedConst.MaxVisibilityDistance}");
+
                 m_MaxVisibleDistanceOnContinents = SharedConst.MaxVisibilityDistance;
             }
 
@@ -1184,12 +1201,16 @@ namespace Game
             m_MaxVisibleDistanceInInstances = ConfigMgr.GetDefaultValue("Visibility.Distance.Instances", SharedConst.DefaultVisibilityInstance);
             if (m_MaxVisibleDistanceInInstances < 45 * rateCreatureAggro)
             {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Instances can't be less max aggro radius {0}", 45 * rateCreatureAggro);
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.Instances can't be less max aggro radius {45 * rateCreatureAggro}");
+
                 m_MaxVisibleDistanceInInstances = 45 * rateCreatureAggro;
             }
             else if (m_MaxVisibleDistanceInInstances > SharedConst.MaxVisibilityDistance)
             {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Instances can't be greater {0}", SharedConst.MaxVisibilityDistance);
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.Instances can't be greater {SharedConst.MaxVisibilityDistance}");
+
                 m_MaxVisibleDistanceInInstances = SharedConst.MaxVisibilityDistance;
             }
 
@@ -1197,12 +1218,16 @@ namespace Game
             m_MaxVisibleDistanceInBG = ConfigMgr.GetDefaultValue("Visibility.Distance.BG", SharedConst.DefaultVisibilityBGAreans);
             if (m_MaxVisibleDistanceInBG < 45 * rateCreatureAggro)
             {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.BG can't be less max aggro radius {45 * rateCreatureAggro}");
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.BG can't be less max aggro radius {45 * rateCreatureAggro}");
+
                 m_MaxVisibleDistanceInBG = 45 * rateCreatureAggro;
             }
             else if (m_MaxVisibleDistanceInBG > SharedConst.MaxVisibilityDistance)
             {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.BG can't be greater {SharedConst.MaxVisibilityDistance}");
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.BG can't be greater {SharedConst.MaxVisibilityDistance}");
+
                 m_MaxVisibleDistanceInBG = SharedConst.MaxVisibilityDistance;
             }
 
@@ -1210,12 +1235,16 @@ namespace Game
             m_MaxVisibleDistanceInArenas = ConfigMgr.GetDefaultValue("Visibility.Distance.Arenas", SharedConst.DefaultVisibilityBGAreans);
             if (m_MaxVisibleDistanceInArenas < 45 * rateCreatureAggro)
             {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.Arenas can't be less max aggro radius {45 * rateCreatureAggro}");
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.Arenas can't be less max aggro radius {45 * rateCreatureAggro}");
+
                 m_MaxVisibleDistanceInArenas = 45 * rateCreatureAggro;
             }
             else if (m_MaxVisibleDistanceInArenas > SharedConst.MaxVisibilityDistance)
             {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.Arenas can't be greater {SharedConst.MaxVisibilityDistance}");
+                Log.outError(LogFilter.ServerLoading, 
+                    $"Visibility.Distance.Arenas can't be greater {SharedConst.MaxVisibilityDistance}");
+
                 m_MaxVisibleDistanceInArenas = SharedConst.MaxVisibilityDistance;
             }
 
@@ -1224,35 +1253,48 @@ namespace Game
             m_visibility_notify_periodInBG = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InBG", SharedConst.DefaultVisibilityNotifyPeriod);
             m_visibility_notify_periodInArenas = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InArenas", SharedConst.DefaultVisibilityNotifyPeriod);
 
-            _guidWarningMsg = WorldConfig.GetDefaultValue("Respawn.WarningMessage", "There will be an unscheduled server restart at 03:00. The server will be available again shortly after.");
+            _guidWarningMsg = WorldConfig.GetDefaultValue(
+                "Respawn.WarningMessage", "There will be an unscheduled server restart at 03:00. " +
+                "The server will be available again shortly after.");
+
             _alertRestartReason = WorldConfig.GetDefaultValue("Respawn.AlertRestartReason", "Urgent Maintenance");
 
             string dataPath = ConfigMgr.GetDefaultValue("DataDir", "./");
             if (reload)
             {
                 if (dataPath != _dataPath)
-                    Log.outError(LogFilter.ServerLoading, "DataDir option can't be changed at worldserver.conf reload, using current value ({0}).", _dataPath);
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"DataDir option can't be changed at worldserver.conf reload, " +
+                        $"using current value ({_dataPath}).");
+            }
             }
             else
             {
                 _dataPath = dataPath;
-                Log.outInfo(LogFilter.ServerLoading, "Using DataDir {0}", _dataPath);
+                Log.outInfo(LogFilter.ServerLoading, $"Using DataDir {_dataPath}");
             }
 
-            Log.outInfo(LogFilter.ServerLoading, @"WORLD: MMap data directory is: {0}\mmaps", _dataPath);
+            Log.outInfo(LogFilter.ServerLoading, $@"WORLD: MMap data directory is: {_dataPath}\mmaps");
 
             bool EnableIndoor = ConfigMgr.GetDefaultValue("vmap.EnableIndoorCheck", true);
             bool EnableLOS = ConfigMgr.GetDefaultValue("vmap.EnableLOS", true);
             bool EnableHeight = ConfigMgr.GetDefaultValue("vmap.EnableHeight", true);
 
             if (!EnableHeight)
-                Log.outError(LogFilter.ServerLoading, "VMap height checking Disabled! Creatures movements and other various things WILL be broken! Expect no support.");
+            {
+                Log.outError(LogFilter.ServerLoading,
+                    "VMap height checking Disabled! Creatures movements " +
+                    "and other various things WILL be broken! Expect no support.");
+            }
 
             Global.VMapMgr.SetEnableLineOfSightCalc(EnableLOS);
             Global.VMapMgr.SetEnableHeightCalc(EnableHeight);
 
-            Log.outInfo(LogFilter.ServerLoading, "VMap support included. LineOfSight: {0}, getHeight: {1}, indoorCheck: {2}", EnableLOS, EnableHeight, EnableIndoor);
-            Log.outInfo(LogFilter.ServerLoading, @"VMap data directory is: {0}\vmaps", GetDataPath());
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"VMap support included. LineOfSight: {EnableLOS}, getHeight: {EnableHeight}, indoorCheck: {EnableIndoor}");
+
+            Log.outInfo(LogFilter.ServerLoading, $@"VMap data directory is: {GetDataPath()}\vmaps");
         }
 
         public void SetForcedWarModeFactionBalanceState(int team, int reward = 0)
@@ -1278,7 +1320,9 @@ namespace Game
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty for this realm!");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 autobroadcasts definitions. " +
+                    "DB table `autobroadcast` is empty for this realm!");
                 return;
             }
 
@@ -1879,7 +1923,9 @@ namespace Game
                 ServerMessageType msgid = m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? ServerMessageType.RestartTime : ServerMessageType.ShutdownTime;
 
                 SendServerMessage(msgid, str, player);
-                Log.outDebug(LogFilter.Server, "Server is {0} in {1}", (m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? "restart" : "shuttingdown"), str);
+
+                Log.outDebug(LogFilter.Server, 
+                    $"Server is {(m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? "restart" : "shuttingdown")} in {str}");
             }
         }
 
@@ -1897,7 +1943,8 @@ namespace Game
             m_ExitCode = (byte)ShutdownExitCode.Shutdown;                       // to default value
             SendServerMessage(msgid);
 
-            Log.outDebug(LogFilter.Server, "Server {0} cancelled.", (m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? "restart" : "shutdown"));
+            Log.outDebug(LogFilter.Server, 
+                $"Server {(m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? "restart" : "shutdown")} cancelled.");
 
             Global.ScriptMgr.OnShutdownCancel();
             return oldTimer;
@@ -1968,7 +2015,7 @@ namespace Game
                 SendGlobalMessage(new PrintNotification(pair.Value.Message));
             }
 
-            Log.outDebug(LogFilter.Misc, "AutoBroadcast: '{0}'", pair.Value.Message);
+            Log.outDebug(LogFilter.Misc, $"AutoBroadcast: '{pair.Value.Message}'");
         }
 
         public void UpdateRealmCharCount(int accountId)
@@ -2299,8 +2346,10 @@ namespace Game
         public bool IsBattlePetJournalLockAcquired(ObjectGuid battlenetAccountGuid)
         {
             foreach (var sessionForBnet in m_sessionsByBnetGuid.LookupByKey(battlenetAccountGuid))
+            {
                 if (sessionForBnet.GetBattlePetMgr().HasJournalLock())
                     return true;
+            }
 
             return false;
         }

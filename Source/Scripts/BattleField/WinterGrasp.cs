@@ -47,7 +47,8 @@ namespace Game.BattleFields
             }
 
             // Load from db
-            if (Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgShowTimeNextBattle, m_Map) == 0 && Global.WorldStateMgr.GetValue(WGConst.ClockWorldState[0], m_Map) == 0)
+            if (Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgShowTimeNextBattle, m_Map) == 0 
+                && Global.WorldStateMgr.GetValue(WGConst.ClockWorldState[0], m_Map) == 0)
             {
                 Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 0, false, m_Map);
                 Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, RandomHelper.IRand(0, 1), false, m_Map);
@@ -128,13 +129,21 @@ namespace Game.BattleFields
                 if (go != null)
                 {
                     DefenderPortalList[BattleGroundTeamId.Alliance].Add(go.GetGUID());
-                    go.SetRespawnTime((int)(GetDefenderTeam() == BattleGroundTeamId.Alliance ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
+
+                    go.SetRespawnTime((int)
+                        (GetDefenderTeam() == BattleGroundTeamId.Alliance 
+                        ? BattlegroundConst.RespawnImmediately 
+                        : BattlegroundConst.RespawnOneDay));
                 }
                 go = SpawnGameObject(teleporter.HordeEntry, teleporter.Pos, teleporter.Rot);
                 if (go != null)
                 {
                     DefenderPortalList[BattleGroundTeamId.Horde].Add(go.GetGUID());
-                    go.SetRespawnTime((int)(GetDefenderTeam() == BattleGroundTeamId.Horde ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
+
+                    go.SetRespawnTime((int)
+                        (GetDefenderTeam() == BattleGroundTeamId.Horde 
+                        ? BattlegroundConst.RespawnImmediately 
+                        : BattlegroundConst.RespawnOneDay));
                 }
             }
 
@@ -362,8 +371,17 @@ namespace Game.BattleFields
                         Player player = Global.ObjAccessor.FindPlayer(guid);
                         if (player != null)
                         {
-                            player.RemoveAurasDueToSpell(m_DefenderTeam == BattleGroundTeamId.Alliance ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player.GetGUID());
-                            player.AddAura(m_DefenderTeam == BattleGroundTeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
+                            player.RemoveAurasDueToSpell(
+                                m_DefenderTeam == BattleGroundTeamId.Alliance 
+                                ? WGSpells.HordeControlPhaseShift 
+                                : WGSpells.AllianceControlPhaseShift, 
+                            player.GetGUID());
+
+                            player.AddAura(
+                                m_DefenderTeam == BattleGroundTeamId.Horde 
+                                ? WGSpells.HordeControlPhaseShift 
+                                : WGSpells.AllianceControlPhaseShift, 
+                            player);
                         }
                     }
                 }
@@ -421,7 +439,8 @@ namespace Game.BattleFields
                 case AreaId.TheChilledQuagmire:
                     return WGGraveyardId.Horde;
                 default:
-                    Log.outError(LogFilter.Battlefield, "BattlefieldWG.GetSpiritGraveyardId: Unexpected Area Id {0}", areaId);
+                    Log.outError(LogFilter.Battlefield, 
+                        $"BattlefieldWG.GetSpiritGraveyardId: Unexpected Area Id {areaId}");
                     break;
             }
 
@@ -613,7 +632,11 @@ namespace Game.BattleFields
                     killer.CastSpell(killer, WGSpells.Corporal, true);
                     Creature stalker = GetCreature(StalkerGuid);
                     if (stalker != null)
-                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankCorporal, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
+                    {
+                        Global.CreatureTextMgr.SendChat(
+                            stalker, WintergraspText.RankCorporal, killer, ChatMsg.Addon, Language.Addon,
+                            CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
+                    }
                 }
                 else
                     killer.CastSpell(killer, WGSpells.Recruit, true);
@@ -626,7 +649,11 @@ namespace Game.BattleFields
                     killer.CastSpell(killer, WGSpells.Lieutenant, true);
                     Creature stalker = GetCreature(StalkerGuid);
                     if (stalker != null)
-                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankFirstLieutenant, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
+                    {
+                        Global.CreatureTextMgr.SendChat(
+                            stalker, WintergraspText.RankFirstLieutenant, killer, ChatMsg.Addon, Language.Addon,
+                            CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
+                    }
                 }
                 else
                     killer.CastSpell(killer, WGSpells.Corporal, true);

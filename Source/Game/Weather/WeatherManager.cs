@@ -24,7 +24,8 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 weather definitions. DB table `game_weather` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, 
+                    "Loaded 0 weather definitions. DB table `game_weather` is empty.");
                 return;
             }
 
@@ -43,19 +44,22 @@ namespace Game
                     if (wzc.data[season].rainChance > 100)
                     {
                         wzc.data[season].rainChance = 25;
-                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong rain Chance > 100%", zone_id, season);
+                        Log.outError(LogFilter.Sql, 
+                            $"Weather for zone {zone_id} season {season} has wrong rain Chance > 100%");
                     }
 
                     if (wzc.data[season].snowChance > 100)
                     {
                         wzc.data[season].snowChance = 25;
-                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong snow Chance > 100%", zone_id, season);
+                        Log.outError(LogFilter.Sql, 
+                            $"Weather for zone {zone_id} season {season} has wrong snow Chance > 100%");
                     }
 
                     if (wzc.data[season].stormChance > 100)
                     {
                         wzc.data[season].stormChance = 25;
-                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong storm Chance > 100%", zone_id, season);
+                        Log.outError(LogFilter.Sql, 
+                            $"Weather for zone {zone_id} season {season} has wrong storm Chance > 100%");
                     }
                 }
 
@@ -86,7 +90,8 @@ namespace Game
             m_type = WeatherType.Fine;
             m_intensity = 0;
 
-            //Log.outInfo(LogFilter.General, "WORLD: Starting weather system for zone {0} (change every {1} minutes).", m_zone, (m_timer.GetInterval() / (Time.Minute * Time.InMilliseconds)));
+            //Log.outInfo(LogFilter.General,
+            //$"WORLD: Starting weather system for zone {m_zone} (change every {(m_timer.GetInterval() / (Time.Minute * Time.InMilliseconds))} minutes).");
         }
 
         public bool Update(uint diff)
@@ -142,7 +147,8 @@ namespace Game
 
             string[] seasonName = ["spring", "summer", "fall", "winter"];
 
-            Log.outInfo(LogFilter.Server, "Generating a change in {0} weather for zone {1}.", seasonName[season], m_zone);
+            Log.outInfo(LogFilter.Server, 
+                $"Generating a change in {seasonName[season]} weather for zone {m_zone}.");
 
             if ((u < 60) && (m_intensity < 0.33333334f))                // Get fair
             {
@@ -309,7 +315,9 @@ namespace Game
                     wthstr = "fine";
                     break;
             }
-            Log.outInfo(LogFilter.Server, "Change the weather of zone {0} to {1}.", m_zone, wthstr);
+
+            Log.outInfo(LogFilter.Server, 
+                $"Change the weather of zone {m_zone} to {wthstr}.");
 
             Global.ScriptMgr.OnWeatherChange(this, state, m_intensity);
             return true;

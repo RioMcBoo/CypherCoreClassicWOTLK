@@ -112,8 +112,10 @@ namespace Game.Movement
                 args.velocity = unit.GetSpeed(SelectSpeedType(moveFlagsForSpeed));
                 Creature creature = unit.ToCreature();
                 if (creature != null)
+                {
                     if (creature.HasSearchedAssistance())
                         args.velocity *= 0.66f;
+            }
             }
 
             // limit the speed in the same way the client does
@@ -140,11 +142,13 @@ namespace Game.Movement
             packet.MoverGUID = unit.GetGUID();
             packet.Pos = new Vector3(real_position.X, real_position.Y, real_position.Z);
             packet.InitializeSplineData(move_spline);
+
             if (transport)
             {
                 packet.SplineData.Move.TransportGUID = unit.GetTransGUID();
                 packet.SplineData.Move.VehicleSeat = unit.GetTransSeat();
             }
+
             unit.SendMessageToSet(packet, true);
 
             return move_spline.Duration();
@@ -160,6 +164,7 @@ namespace Game.Movement
 
             bool transport = !unit.GetTransGUID().IsEmpty();
             Vector4 loc = new();
+
             if (move_spline.onTransport == transport)
                 loc = move_spline.ComputePosition();
             else

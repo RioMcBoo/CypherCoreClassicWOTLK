@@ -20,7 +20,9 @@ namespace Game
             var questGiver = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
             if (questGiver == null)
             {
-                Log.outInfo(LogFilter.Network, "Error in CMSG_QUESTGIVER_STATUS_QUERY, called for non-existing questgiver {0}", packet.QuestGiverGUID.ToString());
+                Log.outInfo(LogFilter.Network, 
+                    $"Error in CMSG_QUESTGIVER_STATUS_QUERY, " +
+                    $"called for non-existing questgiver {packet.QuestGiverGUID}");
                 return;
             }
 
@@ -33,10 +35,14 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverHello, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverHello(QuestGiverHello packet)
         {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags1.QuestGiver, NPCFlags2.None);
+            Creature creature = 
+                GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags1.QuestGiver, NPCFlags2.None);
+            
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleQuestgiverHello - {0} not found or you can't interact with him.", packet.QuestGiverGUID.ToString());
+                Log.outDebug(LogFilter.Network, 
+                    $"WORLD: HandleQuestgiverHello - {packet.QuestGiverGUID} " +
+                    $"not found or you can't interact with him.");
                 return;
             }
 
@@ -48,6 +54,7 @@ namespace Game
             uint pause = creature.GetMovementTemplate().GetInteractionPauseTimer();
             if (pause != 0)
                 creature.PauseMovement(pause);
+
             creature.SetHomePosition(creature.GetPosition());
 
             _player.PlayerTalkClass.ClearMenus();
@@ -63,7 +70,10 @@ namespace Game
         {
             WorldObject obj;
             if (!packet.QuestGiverGUID.IsPlayer())
-                obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject | TypeMask.Item);
+            {
+                obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID,
+                    TypeMask.Unit | TypeMask.GameObject | TypeMask.Item);
+            }
             else
                 obj = Global.ObjAccessor.FindPlayer(packet.QuestGiverGUID);
 
@@ -83,11 +93,13 @@ namespace Game
             Player playerQuestObject = obj.ToPlayer();
             if (playerQuestObject != null)
             {
-                if ((_player.GetPlayerSharingQuest().IsEmpty() && _player.GetPlayerSharingQuest() != packet.QuestGiverGUID) || !playerQuestObject.CanShareQuest(packet.QuestID))
+                if ((_player.GetPlayerSharingQuest().IsEmpty() && _player.GetPlayerSharingQuest() != packet.QuestGiverGUID) 
+                    || !playerQuestObject.CanShareQuest(packet.QuestID))
                 {
                     CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
                 }
+
                 if (!_player.IsInSameRaidWith(playerQuestObject))
                 {
                     CLOSE_GOSSIP_CLEAR_SHARING_INFO();
@@ -192,7 +204,10 @@ namespace Game
         void HandleQuestgiverQueryQuest(QuestGiverQueryQuest packet)
         {
             // Verify that the guid is valid and is a questgiver or involved in the requested quest
-            var obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, (TypeMask.Unit | TypeMask.GameObject | TypeMask.Item));
+            var obj = 
+                Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, 
+                TypeMask.Unit | TypeMask.GameObject | TypeMask.Item);
+
             if (obj == null || (!obj.HasQuest(packet.QuestID) && !obj.HasInvolvedQuest(packet.QuestID)))
             {
                 GetPlayer().PlayerTalkClass.SendCloseGossip();
@@ -244,7 +259,10 @@ namespace Game
                         ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(packet.Choice.Item.ItemID);
                         if (rewardProto == null)
                         {
-                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
+                            Log.outError(LogFilter.Network, 
+                                $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                                $"tried to get invalid reward item (Item Entry: {packet.Choice.Item.ItemID}) for quest {packet.QuestID} " +
+                                $"(possible packet-hacking detected)");
                             return;
                         }
 
@@ -295,14 +313,21 @@ namespace Game
 
                         if (!itemValid)
                         {
-                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get reward item (Item Entry: {2}) wich is not a reward for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
+                            Log.outError(LogFilter.Network, 
+                                $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                                $"tried to get reward item (Item Entry: {packet.Choice.Item.ItemID}) " +
+                                $"wich is not a reward for quest {packet.QuestID} " +
+                                $"(possible packet-hacking detected)");
                             return;
                         }
                         break;
                     case LootItemType.Currency:
                         if (!CliDB.CurrencyTypesStorage.HasRecord(packet.Choice.Item.ItemID))
                         {
-                            Log.outError(LogFilter.Player, $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {_player.GetName()} ({_player.GetGUID()}) tried to get invalid reward currency (Currency ID: {packet.Choice.Item.ItemID}) for quest {packet.QuestID} (possible packet-hacking detected)");
+                            Log.outError(LogFilter.Player, 
+                                $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {_player.GetName()} ({_player.GetGUID()}) " +
+                                $"tried to get invalid reward currency (Currency ID: {packet.Choice.Item.ItemID}) for quest {packet.QuestID} " +
+                                $"(possible packet-hacking detected)");
                             return;
                         }
 
@@ -315,9 +340,14 @@ namespace Game
                                 break;
                             }
                         }
+
                         if (!currencyValid)
                         {
-                            Log.outError(LogFilter.Player, $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {_player.GetName()} ({_player.GetGUID()}) tried to get reward currency (Currency ID: {packet.Choice.Item.ItemID}) wich is not a reward for quest {packet.QuestID} (possible packet-hacking detected)");
+                            Log.outError(LogFilter.Player, 
+                                $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {_player.GetName()} ({_player.GetGUID()}) " +
+                                $"tried to get reward currency (Currency ID: {packet.Choice.Item.ItemID}) " +
+                                $"wich is not a reward for quest {packet.QuestID} " +
+                                $"(possible packet-hacking detected)");
                             return;
                         }
                         break;
@@ -339,8 +369,10 @@ namespace Game
             if ((!GetPlayer().CanSeeStartQuest(quest) && GetPlayer().GetQuestStatus(packet.QuestID) == QuestStatus.None) ||
                 (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete && !quest.IsTurnIn()))
             {
-                Log.outError(LogFilter.Network, "Error in QuestStatus.Complete: player {0} ({1}) tried to complete quest {2}, but is not allowed to do so (possible packet-hacking or high latency)",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.QuestID);
+                Log.outError(LogFilter.Network, 
+                    $"Error in QuestStatus.Complete: player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                    $"tried to complete quest {packet.QuestID}, " +
+                    $"but is not allowed to do so (possible packet-hacking or high latency)");
                 return;
             }
 
@@ -368,7 +400,10 @@ namespace Game
 
             if (!quest.HasAnyFlag(QuestFlags.AutoComplete))
             {
-                WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+                WorldObject obj =
+                    Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, 
+                    TypeMask.Unit | TypeMask.GameObject);
+
                 if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
                     return;
 
@@ -405,8 +440,10 @@ namespace Game
                         if (quest.HasAnyFlag(QuestFlagsEx.NoAbandonOnceBegun))
                         {
                             foreach (QuestObjective objective in quest.Objectives)
+                            {
                                 if (_player.IsQuestObjectiveComplete(packet.Entry, quest, objective))
                                     return;
+                        }
                         }
 
                         if (quest.LimitTime != 0)
@@ -414,7 +451,9 @@ namespace Game
 
                         if (quest.HasAnyFlag(QuestFlags.Pvp))
                         {
-                            GetPlayer().pvpInfo.IsHostile = GetPlayer().pvpInfo.IsInHostileArea || GetPlayer().HasPvPForcingQuest();
+                            GetPlayer().pvpInfo.IsHostile 
+                                = GetPlayer().pvpInfo.IsInHostileArea || GetPlayer().HasPvPForcingQuest();
+                            
                             GetPlayer().UpdatePvPState();
                         }
                     }
@@ -506,8 +545,10 @@ namespace Game
 
             if (!GetPlayer().CanSeeStartQuest(quest) && GetPlayer().GetQuestStatus(packet.QuestID) == QuestStatus.None)
             {
-                Log.outError(LogFilter.Network, "Possible hacking attempt: Player {0} ({1}) tried to complete quest [entry: {2}] without being in possession of the quest!",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.QuestID);
+                Log.outError(LogFilter.Network, 
+                    $"Possible hacking attempt: Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
+                    $"tried to complete quest [entry: {packet.QuestID}] " +
+                    $"without being in possession of the quest!");
                 return;
             }
 
@@ -740,7 +781,11 @@ namespace Game
         {
             if (_player.PlayerTalkClass.GetInteractionData().PlayerChoiceId != choiceResponse.ChoiceID)
             {
-                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to respond to invalid player choice {choiceResponse.ChoiceID} (allowed {_player.PlayerTalkClass.GetInteractionData().PlayerChoiceId}) (possible packet-hacking detected)");
+                Log.outError(LogFilter.Player, 
+                    $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} " +
+                    $"tried to respond to invalid player choice {choiceResponse.ChoiceID} " +
+                    $"(allowed {_player.PlayerTalkClass.GetInteractionData().PlayerChoiceId}) " +
+                    $"(possible packet-hacking detected)");
                 return;
             }
 
@@ -751,11 +796,15 @@ namespace Game
             PlayerChoiceResponse playerChoiceResponse = playerChoice.GetResponseByIdentifier(choiceResponse.ResponseIdentifier);
             if (playerChoiceResponse == null)
             {
-                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response {choiceResponse.ResponseIdentifier} (possible packet-hacking detected)");
+                Log.outError(LogFilter.Player, 
+                    $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} " +
+                    $"tried to select invalid player choice response {choiceResponse.ResponseIdentifier} " +
+                    $"(possible packet-hacking detected)");
                 return;
             }
 
-            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), choiceResponse.ChoiceID, choiceResponse.ResponseIdentifier);
+            Global.ScriptMgr.OnPlayerChoiceResponse(
+                GetPlayer(), choiceResponse.ChoiceID, choiceResponse.ResponseIdentifier);
 
             if (playerChoiceResponse.Reward != null)
             {

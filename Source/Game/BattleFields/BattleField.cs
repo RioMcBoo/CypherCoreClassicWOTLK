@@ -35,12 +35,12 @@ namespace Game.BattleFields
 
             for (byte i = 0; i < 2; ++i)
             {
-                m_players[i] = new List<ObjectGuid>();
-                m_PlayersInQueue[i] = new List<ObjectGuid>();
-                m_PlayersInWar[i] = new List<ObjectGuid>();
-                m_InvitedPlayers[i] = new Dictionary<ObjectGuid, long>();
-                m_PlayersWillBeKick[i] = new Dictionary<ObjectGuid, long>();
-                m_Groups[i] = new List<ObjectGuid>();
+                m_players[i] = new();
+                m_PlayersInQueue[i] = new();
+                m_PlayersInWar[i] = new();
+                m_InvitedPlayers[i] = new();
+                m_PlayersWillBeKick[i] = new();
+                m_Groups[i] = new();
             }
         }
 
@@ -256,7 +256,11 @@ namespace Game.BattleFields
             if (creature != null)
                 StalkerGuid = creature.GetGUID();
             else
-                Log.outError(LogFilter.Battlefield, "Battlefield.InitStalker: could not spawn Stalker (Creature entry {0}), zone messeges will be un-available", entry);
+            {
+                Log.outError(LogFilter.Battlefield,
+                    $"Battlefield.InitStalker: could not spawn Stalker (Creature entry {entry}), " +
+                    $"zone messeges will be un-available");
+        }
         }
 
         public override void ProcessEvent(WorldObject target, int eventId, WorldObject invoker)
@@ -565,10 +569,10 @@ namespace Game.BattleFields
                 if (graveyard != null)
                     return graveyard;
                 else
-                    Log.outError(LogFilter.Battlefield, "Battlefield:GetGraveyardById Id: {0} not existed", id);
+                    Log.outError(LogFilter.Battlefield, $"Battlefield:GetGraveyardById Id: {id} not existed");
             }
             else
-                Log.outError(LogFilter.Battlefield, "Battlefield:GetGraveyardById Id: {0} cant be found", id);
+                Log.outError(LogFilter.Battlefield, $"Battlefield:GetGraveyardById Id: {id} cant be found");
 
             return null;
         }
@@ -603,14 +607,16 @@ namespace Game.BattleFields
         {
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
             {
-                Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: entry {0} does not exist.", entry);
+                Log.outError(LogFilter.Battlefield, 
+                    $"Battlefield:SpawnCreature: entry {entry} does not exist.");
                 return null;
             }
 
             Creature creature = Creature.CreateCreature(entry, m_Map, pos);
             if (creature == null)
             {
-                Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: Can't create creature entry: {0}", entry);
+                Log.outError(LogFilter.Battlefield, 
+                    $"Battlefield:SpawnCreature: Can't create creature entry: {entry}");
                 return null;
             }
 
@@ -629,7 +635,9 @@ namespace Game.BattleFields
         {
             if (Global.ObjectMgr.GetGameObjectTemplate(entry) == null)
             {
-                Log.outError(LogFilter.Battlefield, "Battlefield.SpawnGameObject: GameObject template {0} not found in database! Battlefield not created!", entry);
+                Log.outError(LogFilter.Battlefield, 
+                    $"Battlefield.SpawnGameObject: GameObject template {entry} " +
+                    $"not found in database! Battlefield not created!");
                 return null;
             }
 
@@ -637,7 +645,9 @@ namespace Game.BattleFields
             GameObject go = GameObject.CreateGameObject(entry, m_Map, pos, rotation, 255, GameObjectState.Ready);
             if (go == null)
             {
-                Log.outError(LogFilter.Battlefield, "Battlefield:SpawnGameObject: Cannot create gameobject template {1}! Battlefield not created!", entry);
+                Log.outError(LogFilter.Battlefield, 
+                    $"Battlefield:SpawnGameObject: Cannot create gameobject template {entry}! " +
+                    $"Battlefield not created!");
                 return null;
             }
 

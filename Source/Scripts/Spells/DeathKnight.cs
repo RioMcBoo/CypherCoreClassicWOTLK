@@ -723,8 +723,10 @@ namespace Scripts.Spells.DeathKnight
         {
             Unit owner = GetCaster().GetOwner();
             if (owner != null)
+            {
                 if (owner.HasAura(SpellIds.GlyphOfTheSkeleton))
                     return SpellCastResult.SpellCastOk;
+            }
 
             return SpellCastResult.SpellUnavailable;
         }
