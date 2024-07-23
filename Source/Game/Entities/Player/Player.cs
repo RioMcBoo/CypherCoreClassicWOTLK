@@ -3284,12 +3284,7 @@ namespace Game.Entities
 
         public CinematicManager GetCinematicMgr() { return _cinematicMgr; }
 
-        public void SendUpdateWorldState(WorldStates variable, int value, bool hidden = false)
-        {
-            SendUpdateWorldState((int)variable, value, hidden);
-        }
-
-        public void SendUpdateWorldState(int variable, int value, bool hidden = false)
+        public void SendUpdateWorldState(int variable, WorldStateValue value, bool hidden = false)
         {
             UpdateWorldState worldstate = new();
             worldstate.VariableID = variable;

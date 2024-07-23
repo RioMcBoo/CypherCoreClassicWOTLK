@@ -17,51 +17,25 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(SubareaID);
 
             _worldPacket.WriteInt32(Worldstates.Count);
-            foreach (WorldStateInfo wsi in Worldstates)
+            foreach (var wsi in Worldstates)
             {
-                _worldPacket.WriteInt32(wsi.VariableID);
-                _worldPacket.WriteInt32(wsi.Value);
+                _worldPacket.WriteInt32(wsi.state);
+                _worldPacket.WriteInt32(wsi.value);
             }
         }
 
-        public void AddState(WorldStates variableID, int value)
+        public void AddState(int worldStateId, WorldStateValue value)
         {
-            AddState(variableID, value);
-        }
-
-        public void AddState(int variableID, int value)
-        {
-            Worldstates.Add(new WorldStateInfo(variableID, value));
-        }
-
-        public void AddState(WorldStates variableID, bool value)
-        {
-            AddState(variableID, value);
-        }
-
-        public void AddState(int variableID, bool value)
-        {
-            Worldstates.Add(new WorldStateInfo(variableID, value ? 1 : 0));
+            Worldstates.Add((worldStateId, value));
         }
 
         public int AreaID;
         public int SubareaID;
         public int MapID;
 
-        List<WorldStateInfo> Worldstates = new();
+        List<(int state, WorldStateValue value)> Worldstates = new();
 
-        struct WorldStateInfo
-        {
-            public WorldStateInfo(int variableID, int value)
-            {
-                VariableID = variableID;
-                Value = value;
             }
-
-            public int VariableID;
-            public int Value;
-        }
-    }
 
     public class UpdateWorldState : ServerPacket
     {
@@ -75,7 +49,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public int Value;
+        public WorldStateValue Value;
         public bool Hidden; // @todo: research
         public int VariableID;
     }

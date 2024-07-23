@@ -573,7 +573,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public void UpdateWorldState(int worldStateId, int value, bool hidden = false)
+        public void UpdateWorldState(int worldStateId, WorldStateValue value, bool hidden = false)
         {
             Global.WorldStateMgr.SetValue(worldStateId, value, hidden, GetBgMap());
         }

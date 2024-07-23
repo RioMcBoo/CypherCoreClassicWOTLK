@@ -363,17 +363,17 @@ namespace Game.Maps
             GetMultiPersonalPhaseTracker().OnOwnerPhaseChanged(player, GetGrid(cell.GetGridX(), cell.GetGridY()), this, cell);
         }
 
-        public int GetWorldStateValue(int worldStateId)
+        public WorldStateValue GetWorldStateValue(int worldStateId)
         {
             return _worldStateValues.LookupByKey(worldStateId);
         }
 
-        public Dictionary<int, int> GetWorldStateValues() { return _worldStateValues; }
+        public Dictionary<int, WorldStateValue> GetWorldStateValues() { return _worldStateValues; }
 
-        public void SetWorldStateValue(int worldStateId, int value, bool hidden)
+        public void SetWorldStateValue(int worldStateId, WorldStateValue value, bool hidden)
         {
-            int oldValue = 0;
-            if (!_worldStateValues.TryAdd(worldStateId, 0))
+            WorldStateValue oldValue = default;
+            if (!_worldStateValues.TryAdd(worldStateId, value))
             {
                 oldValue = _worldStateValues[worldStateId];
                 if (oldValue == value)
@@ -5037,7 +5037,7 @@ namespace Game.Maps
 
         MultiPersonalPhaseTracker _multiPersonalPhaseTracker = new();
 
-        Dictionary<int, int> _worldStateValues = new();
+        Dictionary<int, WorldStateValue> _worldStateValues = new();
         #endregion
     }
 

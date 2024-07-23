@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Collections;
-using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Maps;
@@ -10,6 +9,8 @@ using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Game
 {
@@ -17,9 +18,9 @@ namespace Game
     {
         static int AnyMap = -1;
 
-        Dictionary<int, WorldStateTemplate> _worldStateTemplates = new();
-        Dictionary<int, int> _realmWorldStateValues = new();
-        Dictionary<int, Dictionary<int, int>> _worldStatesByMap = new();
+        private Dictionary<int/*worldStateId*/, WorldStateTemplate> _worldStateTemplates = new();
+        private Dictionary<int/*worldStateId*/, WorldStateValue> _realmWorldStateValues = new();
+        private Dictionary<int/*map*/, Dictionary<int/*worldStateId*/, WorldStateValue>> _worldStatesByMap = new();
 
         WorldStateManager() { }
 
@@ -36,11 +37,10 @@ namespace Game
                 do
                 {
                     int id = result.Read<int>(0);
-                    WorldStateTemplate worldState = new();
-                    worldState.Id = id;
-                    worldState.DefaultValue = result.Read<int>(1);
+                    int defaultValue = result.Read<int>(1);
 
                     string mapIds = result.Read<string>(2);
+                    List<int> mapIdsList = new List<int>();
                     if (!mapIds.IsEmpty())
                     {
                         foreach (string mapIdToken in new StringArray(mapIds, ','))
@@ -61,11 +61,11 @@ namespace Game
                                 continue;
                             }
 
-                            worldState.MapIds.Add(mapId);
+                            mapIdsList.Add(mapId);
                         }
                     }
 
-                    if (!mapIds.IsEmpty() && worldState.MapIds.Empty())
+                    if (!mapIds.IsEmpty() && mapIdsList.Empty())
                     {
                         Log.outError(LogFilter.Sql, 
                             $"Table `world_state` contains a world state {id} " +
@@ -74,7 +74,8 @@ namespace Game
                     }
 
                     string areaIds = result.Read<string>(3);
-                    if (!areaIds.IsEmpty() && !worldState.MapIds.Empty())
+                    List<int> areaIdsList = new List<int>();
+                    if (!areaIds.IsEmpty() && !mapIdsList.Empty())
                     {
                         foreach (string areaIdToken in new StringArray(areaIds, ','))
                         {
@@ -95,7 +96,7 @@ namespace Game
                                 continue;
                             }
 
-                            if (!worldState.MapIds.Contains(areaTableEntry.ContinentID))
+                            if (!mapIdsList.Contains(areaTableEntry.ContinentID))
                             {
                                 Log.outError(LogFilter.Sql, 
                                     $"Table `world_state` contains a world state {id} " +
@@ -103,10 +104,10 @@ namespace Game
                                 continue;
                             }
 
-                            worldState.AreaIds.Add(areaId);
+                            areaIdsList.Add(areaId);
                         }
 
-                        if (!areaIds.IsEmpty() && worldState.AreaIds.Empty())
+                        if (!areaIds.IsEmpty() && areaIdsList.Empty())
                         {
                             Log.outError(LogFilter.Sql, 
                                 $"Table `world_state` contains a world state {id} " +
@@ -121,22 +122,22 @@ namespace Game
                             $"but is a realm wide world state, area requirement ignored");
                     }
 
-                    worldState.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(4));
+                    int scriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(4));
 
-                    if (!worldState.MapIds.Empty())
+                    if (!mapIdsList.Empty())
                     {
-                        foreach (int mapId in worldState.MapIds)
+                        foreach (int mapId in mapIdsList)
                         {
                             if (!_worldStatesByMap.ContainsKey(mapId))
                                 _worldStatesByMap[mapId] = new();
 
-                            _worldStatesByMap[mapId][id] = worldState.DefaultValue;
+                            _worldStatesByMap[mapId][id] = defaultValue;
                         }
                     }
                     else
-                        _realmWorldStateValues[id] = worldState.DefaultValue;
+                        _realmWorldStateValues[id] = defaultValue;
 
-                    _worldStateTemplates[id] = worldState;
+                    _worldStateTemplates[id] = new WorldStateTemplate(id, defaultValue, scriptId, mapIdsList, areaIdsList);
 
                 } while (result.NextRow());
 
@@ -191,12 +192,7 @@ namespace Game
             return _worldStateTemplates.LookupByKey(worldStateId);
         }
 
-        public int GetValue(WorldStates worldStateId, Map map)
-        {
-            return GetValue((int)worldStateId, map);
-        }
-
-        public int GetValue(int worldStateId, Map map)
+        public WorldStateValue GetValue(int worldStateId, Map map)
         {
             WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);
             if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
@@ -208,30 +204,19 @@ namespace Game
             return map.GetWorldStateValue(worldStateId);
         }
 
-        public void SetValue(WorldStates worldStateId, int value, bool hidden, Map map)
-        {
-            SetValue((int)worldStateId, value, hidden, map);
-        }
-
-        public void SetValue(uint worldStateId, int value, bool hidden, Map map)
-        {
-            SetValue((int)worldStateId, value, hidden, map);
-        }
-
-        public void SetValue(int worldStateId, int value, bool hidden, Map map)
+        /// <summary cref="Framework.Constants.WorldStates">WorldStates worldStateId</summary>
+        public void SetValue(int worldStateId, WorldStateValue value, bool hidden, Map map)
         {
             WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);
             if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
             {
-                int oldValue = 0;
-                if (!_realmWorldStateValues.TryAdd(worldStateId, 0))
+                WorldStateValue oldValue = default;
+                if (!_realmWorldStateValues.TryAdd(worldStateId, value))
                 {
                     oldValue = _realmWorldStateValues[worldStateId];
                     if (oldValue == value)
                         return;
                 }
-
-                _realmWorldStateValues[worldStateId] = value;
 
                 if (worldStateTemplate != null)
                     Global.ScriptMgr.OnWorldStateValueChange(worldStateTemplate, oldValue, value, null);
@@ -251,7 +236,7 @@ namespace Game
             map.SetWorldStateValue(worldStateId, value, hidden);
         }
 
-        public void SaveValueInDb(int worldStateId, int value)
+        public void SaveValueInDb(int worldStateId, WorldStateValue value)
         {
             if (GetWorldStateTemplate(worldStateId) == null)
                 return;
@@ -262,22 +247,17 @@ namespace Game
             DB.Characters.Execute(stmt);
         }
 
-        public void SetValueAndSaveInDb(WorldStates worldStateId, int value, bool hidden, Map map)
-        {
-            SetValueAndSaveInDb((int)worldStateId, value, hidden, map);
-        }
-
-        public void SetValueAndSaveInDb(int worldStateId, int value, bool hidden, Map map)
+        public void SetValueAndSaveInDb(int worldStateId, WorldStateValue value, bool hidden, Map map)
         {
             SetValue(worldStateId, value, hidden, map);
             SaveValueInDb(worldStateId, value);
         }
 
-        public Dictionary<int, int> GetInitialWorldStatesForMap(Map map)
+        public Dictionary<int, WorldStateValue> GetInitialWorldStatesForMap(Map map)
         {
-            Dictionary<int, int> initialValues = new();
+            Dictionary<int, WorldStateValue> initialValues = new();
 
-            if (_worldStatesByMap.TryGetValue(map.GetId(), out Dictionary<int, int> valuesTemplate))
+            if (_worldStatesByMap.TryGetValue(map.GetId(), out var valuesTemplate))
             {
                 foreach (var (key, value) in valuesTemplate)
                     initialValues.Add(key, value);
@@ -314,11 +294,63 @@ namespace Game
 
     public class WorldStateTemplate
     {
-        public int Id;
-        public int DefaultValue;
-        public int ScriptId;
+        public readonly int Id;
+        public readonly int DefaultValue;
+        public readonly int ScriptId;
 
-        public List<int> MapIds = new();
-        public List<int> AreaIds = new();
+        public List<int> MapIds;
+        public List<int> AreaIds;
+
+        public WorldStateTemplate(int stateId, int defaultValue, int scriptId, List<int> mapIds, List<int> areaIds)
+        {
+            Id = stateId;
+            DefaultValue = defaultValue;
+            ScriptId = scriptId;
+            MapIds = mapIds;
+            AreaIds = areaIds;
+        }
+    }
+
+    [StructLayout(LayoutKind.Explicit, Size = 4)]
+    public readonly struct WorldStateValue
+    {
+        [FieldOffset(0)]
+        private readonly int _Raw;
+        [FieldOffset(0)]
+        public readonly int Int32;
+        [FieldOffset(0)]
+        public readonly bool Bool;
+
+        public WorldStateValue(int value) { Int32 = value; }
+        public WorldStateValue(bool value) { Bool = value; }
+
+        public static implicit operator WorldStateValue(int value) => new(value);
+        public static implicit operator WorldStateValue(bool value) => new(value);
+
+        public static implicit operator int(WorldStateValue value) => value.Int32;
+        public static implicit operator bool(WorldStateValue value) => value.Bool;
+
+        public override string ToString() => Int32.ToString();
+        public override int GetHashCode() => Int32;
+
+        public static bool operator ==(WorldStateValue left, WorldStateValue right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(WorldStateValue left, WorldStateValue right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj);
+        }
+
+        public bool Equals(WorldStateValue another)
+        {
+            return _Raw == another._Raw;
+        }
     }
 }

@@ -624,7 +624,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject failed");
         }
 
-        public void DoUpdateWorldState(uint worldStateId, int value)
+        public void DoUpdateWorldState(int worldStateId, WorldStateValue value)
         {
             Global.WorldStateMgr.SetValue(worldStateId, value, false, instance);
         }

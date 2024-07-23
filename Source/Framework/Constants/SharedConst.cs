@@ -3261,101 +3261,101 @@ namespace Framework.Constants
         EastparkWorkshop = 4612,
     }
 
-    public enum WorldStates
+    public static class WorldStates
     {
-        CurrentPvpSeasonId = 3191,
-        PreviousPvpSeasonId = 3901,
+        public static int CurrentPvpSeasonId = 3191;
+        public static int PreviousPvpSeasonId = 3901;
 
-        TeamInInstanceAlliance = 4485,
-        TeamInInstanceHorde = 4486,
+        public static int TeamInInstanceAlliance = 4485;
+        public static int TeamInInstanceHorde = 4486;
 
-        BattlefieldWgVehicleH = 3490,
-        BattlefieldWgMaxVehicleH = 3491,
-        BattlefieldWgVehicleA = 3680,
-        BattlefieldWgMaxVehicleA = 3681,
-        BattlefieldWgWorkshopKW = 3698,
-        BattlefieldWgWorkshopKE = 3699,
-        BattlefieldWgWorkshopNw = 3700,
-        BattlefieldWgWorkshopNe = 3701,
-        BattlefieldWgWorkshopSw = 3702,
-        BattlefieldWgWorkshopSe = 3703,
-        BattlefieldWgShowTimeBattleEnd = 3710,
-        BattlefieldWgTimeBattleEnd = 3781,
-        BattlefieldWgShowTimeNextBattle = 3801,
-        BattlefieldWgDefender = 3802,
-        BattlefieldWgAttacker = 3803,
-        BattlefieldWgAttackedH = 4022,
-        BattlefieldWgAttackedA = 4023,
-        BattlefieldWgDefendedH = 4024,
-        BattlefieldWgDefendedA = 4025,
-        BattlefieldWgTimeNextBattle = 4354,
+        public static int BattlefieldWgVehicleH = 3490;
+        public static int BattlefieldWgMaxVehicleH = 3491;
+        public static int BattlefieldWgVehicleA = 3680;
+        public static int BattlefieldWgMaxVehicleA = 3681;
+        public static int BattlefieldWgWorkshopKW = 3698;
+        public static int BattlefieldWgWorkshopKE = 3699;
+        public static int BattlefieldWgWorkshopNw = 3700;
+        public static int BattlefieldWgWorkshopNe = 3701;
+        public static int BattlefieldWgWorkshopSw = 3702;
+        public static int BattlefieldWgWorkshopSe = 3703;
+        public static int BattlefieldWgShowTimeBattleEnd = 3710;
+        public static int BattlefieldWgTimeBattleEnd = 3781;
+        public static int BattlefieldWgShowTimeNextBattle = 3801;
+        public static int BattlefieldWgDefender = 3802;
+        public static int BattlefieldWgAttacker = 3803;
+        public static int BattlefieldWgAttackedH = 4022;
+        public static int BattlefieldWgAttackedA = 4023;
+        public static int BattlefieldWgDefendedH = 4024;
+        public static int BattlefieldWgDefendedA = 4025;
+        public static int BattlefieldWgTimeNextBattle = 4354;
 
-        BattlefieldTbAllianceControlsShow = 5385,
-        BattlefieldTbHordeControlsShow = 5384,
-        BattlefieldTbAllianceAttackingShow = 5546,
-        BattlefieldTbHordeAttackingShow = 5547,
+        public static int BattlefieldTbAllianceControlsShow = 5385;
+        public static int BattlefieldTbHordeControlsShow = 5384;
+        public static int BattlefieldTbAllianceAttackingShow = 5546;
+        public static int BattlefieldTbHordeAttackingShow = 5547;
 
-        BattlefieldTbBuildingsCaptured = 5348,
-        BattlefieldTbBuildingsCapturedShow = 5349,
-        BattlefieldTbTowersDestroyed = 5347,
-        BattlefieldTbTowersDestroyedShow = 5350,
+        public static int BattlefieldTbBuildingsCaptured = 5348;
+        public static int BattlefieldTbBuildingsCapturedShow = 5349;
+        public static int BattlefieldTbTowersDestroyed = 5347;
+        public static int BattlefieldTbTowersDestroyedShow = 5350;
 
-        BattlefieldTbFactionControlling = 5334, // 1 -> Alliance, 2 -> Horde
+        public static int BattlefieldTbFactionControlling = 5334; // 1 -> Alliance; 2 -> Horde
 
-        BattlefieldTbTimeNextBattle = 5332,
-        BattlefieldTbTimeNextBattleShow = 5387,
-        BattlefieldTbTimeBattleEnd = 5333,
-        BattlefieldTbTimeBattleEndShow = 5346,
+        public static int BattlefieldTbTimeNextBattle = 5332;
+        public static int BattlefieldTbTimeNextBattleShow = 5387;
+        public static int BattlefieldTbTimeBattleEnd = 5333;
+        public static int BattlefieldTbTimeBattleEndShow = 5346;
 
-        BattlefieldTbStatePreparations = 5684,
-        BattlefieldTbStateBattle = 5344,
+        public static int BattlefieldTbStatePreparations = 5684;
+        public static int BattlefieldTbStateBattle = 5344;
 
-        BattlefieldTbKeepHorde = 5469,
-        BattlefieldTbKeepAlliance = 5470,
+        public static int BattlefieldTbKeepHorde = 5469;
+        public static int BattlefieldTbKeepAlliance = 5470;
 
-        BattlefieldTbGarrisonHordeControlled = 5418,
-        BattlefieldTbGarrisonHordeCapturing = 5419,
-        BattlefieldTbGarrisonNeutral = 5420, // Unused
-        BattlefieldTbGarrisonAllianceCapturing = 5421,
-        BattlefieldTbGarrisonAllianceControlled = 5422,
+        public static int BattlefieldTbGarrisonHordeControlled = 5418;
+        public static int BattlefieldTbGarrisonHordeCapturing = 5419;
+        public static int BattlefieldTbGarrisonNeutral = 5420; // Unused
+        public static int BattlefieldTbGarrisonAllianceCapturing = 5421;
+        public static int BattlefieldTbGarrisonAllianceControlled = 5422;
 
-        BattlefieldTbVigilHordeControlled = 5423,
-        BattlefieldTbVigilHordeCapturing = 5424,
-        BattlefieldTbVigilNeutral = 5425, // Unused
-        BattlefieldTbVigilAllianceCapturing = 5426,
-        BattlefieldTbVigilAllianceControlled = 5427,
+        public static int BattlefieldTbVigilHordeControlled = 5423;
+        public static int BattlefieldTbVigilHordeCapturing = 5424;
+        public static int BattlefieldTbVigilNeutral = 5425; // Unused
+        public static int BattlefieldTbVigilAllianceCapturing = 5426;
+        public static int BattlefieldTbVigilAllianceControlled = 5427;
 
-        BattlefieldTbSlagworksHordeControlled = 5428,
-        BattlefieldTbSlagworksHordeCapturing = 5429,
-        BattlefieldTbSlagworksNeutral = 5430, // Unused
-        BattlefieldTbSlagworksAllianceCapturing = 5431,
-        BattlefieldTbSlagworksAllianceControlled = 5432,
+        public static int BattlefieldTbSlagworksHordeControlled = 5428;
+        public static int BattlefieldTbSlagworksHordeCapturing = 5429;
+        public static int BattlefieldTbSlagworksNeutral = 5430; // Unused
+        public static int BattlefieldTbSlagworksAllianceCapturing = 5431;
+        public static int BattlefieldTbSlagworksAllianceControlled = 5432;
 
-        BattlefieldTbWestIntactHorde = 5433,
-        BattlefieldTbWestDamagedHorde = 5434,
-        BattlefieldTbWestDestroyedNeutral = 5435,
-        BattlefieldTbWestIntactAlliance = 5436,
-        BattlefieldTbWestDamagedAlliance = 5437,
-        BattlefieldTbWestIntactNeutral = 5453, // Unused
-        BattlefieldTbWestDamagedNeutral = 5454, // Unused
+        public static int BattlefieldTbWestIntactHorde = 5433;
+        public static int BattlefieldTbWestDamagedHorde = 5434;
+        public static int BattlefieldTbWestDestroyedNeutral = 5435;
+        public static int BattlefieldTbWestIntactAlliance = 5436;
+        public static int BattlefieldTbWestDamagedAlliance = 5437;
+        public static int BattlefieldTbWestIntactNeutral = 5453; // Unused
+        public static int BattlefieldTbWestDamagedNeutral = 5454; // Unused
 
-        BattlefieldTbSouthIntactHorde = 5438,
-        BattlefieldTbSouthDamagedHorde = 5439,
-        BattlefieldTbSouthDestroyedNeutral = 5440,
-        BattlefieldTbSouthIntactAlliance = 5441,
-        BattlefieldTbSouthDamagedAlliance = 5442,
-        BattlefieldTbSouthIntactNeutral = 5455, // Unused
-        BattlefieldTbSouthDamagedNeutral = 5456, // Unused
+        public static int BattlefieldTbSouthIntactHorde = 5438;
+        public static int BattlefieldTbSouthDamagedHorde = 5439;
+        public static int BattlefieldTbSouthDestroyedNeutral = 5440;
+        public static int BattlefieldTbSouthIntactAlliance = 5441;
+        public static int BattlefieldTbSouthDamagedAlliance = 5442;
+        public static int BattlefieldTbSouthIntactNeutral = 5455; // Unused
+        public static int BattlefieldTbSouthDamagedNeutral = 5456; // Unused
 
-        BattlefieldTbEastIntactHorde = 5443,
-        BattlefieldTbEastDamagedHorde = 5444,
-        BattlefieldTbEastDestroyedNeutral = 5445,
-        BattlefieldTbEastIntactAlliance = 5446,
-        BattlefieldTbEastDamagedAlliance = 5447,
-        BattlefieldTbEastIntactNeutral = 5451,
-        BattlefieldTbEastDamagedNeutral = 5452,
+        public static int BattlefieldTbEastIntactHorde = 5443;
+        public static int BattlefieldTbEastDamagedHorde = 5444;
+        public static int BattlefieldTbEastDestroyedNeutral = 5445;
+        public static int BattlefieldTbEastIntactAlliance = 5446;
+        public static int BattlefieldTbEastDamagedAlliance = 5447;
+        public static int BattlefieldTbEastIntactNeutral = 5451;
+        public static int BattlefieldTbEastDamagedNeutral = 5452;
 
-        WarModeHordeBuffValue = 17042,
-        WarModeAllianceBuffValue = 17043,
+        public static int WarModeHordeBuffValue = 17042;
+        public static int WarModeAllianceBuffValue = 17043;
     }
 }

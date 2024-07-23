@@ -1255,7 +1255,7 @@ namespace Game.Scripting
         }
 
         // WorldState
-        public void OnWorldStateValueChange(WorldStateTemplate worldStateTemplate, int oldValue, int newValue, Map map)
+        public void OnWorldStateValueChange(WorldStateTemplate worldStateTemplate, WorldStateValue oldValue, WorldStateValue newValue, Map map)
         {
             Cypher.Assert(worldStateTemplate != null);
 

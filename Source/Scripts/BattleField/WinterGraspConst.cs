@@ -27,7 +27,7 @@ namespace Game.BattleFields
             new BfWGCoordGY(5140.790f, 2179.120f, 390.950f, 1.972220f, 1332, WGGossipText.GYAlliance, BattleGroundTeamId.Alliance),
         ];
 
-        public static WorldStates[] ClockWorldState = [WorldStates.BattlefieldWgTimeBattleEnd, WorldStates.BattlefieldWgTimeNextBattle];
+        public static WorldStateValue[] ClockWorldState = [WorldStates.BattlefieldWgTimeBattleEnd, WorldStates.BattlefieldWgTimeNextBattle];
         public static int[] WintergraspFaction = [1732, 1735, 35];
 
         public static Position WintergraspStalkerPos = new(4948.985f, 2937.789f, 550.5172f, 1.815142f);
@@ -674,7 +674,7 @@ namespace Game.BattleFields
     class StaticWintergraspWorkshopInfo
     {
         public byte WorkshopId;
-        public WorldStates WorldStateId;
+        public WorldStateValue WorldStateId;
         public byte AllianceCaptureTextId;
         public byte AllianceAttackTextId;
         public byte HordeCaptureTextId;

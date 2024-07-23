@@ -264,7 +264,7 @@ namespace Game.BattleFields
 
             // update win statistics
             {
-                WorldStates worldStateId;
+                int worldStateId;
                 // successful defense
                 if (endByTimer)
                     worldStateId = GetDefenderTeam() == BattleGroundTeamId.Horde ? WorldStates.BattlefieldWgDefendedH : WorldStates.BattlefieldWgDefendedA;
@@ -272,7 +272,7 @@ namespace Game.BattleFields
                 else
                     worldStateId = GetDefenderTeam() == BattleGroundTeamId.Horde ? WorldStates.BattlefieldWgAttackedH : WorldStates.BattlefieldWgAttackedA;
 
-                Global.WorldStateMgr.SetValueAndSaveInDb(worldStateId, Global.WorldStateMgr.GetValue((int)worldStateId, m_Map) + 1, false, m_Map);
+                Global.WorldStateMgr.SetValueAndSaveInDb(worldStateId, Global.WorldStateMgr.GetValue(worldStateId, m_Map) + 1, false, m_Map);
             }
 
             Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, GetDefenderTeam(), false, m_Map);
@@ -1169,7 +1169,7 @@ namespace Game.BattleFields
                     break;
             }
 
-            _state = (WGGameObjectState)Global.WorldStateMgr.GetValue(_worldState, _wg.GetMap());
+            _state = (WGGameObjectState)Global.WorldStateMgr.GetValue(_worldState, _wg.GetMap()).Int32;
             if (_state == WGGameObjectState.None)
             {
                 // set to default state based on Type
