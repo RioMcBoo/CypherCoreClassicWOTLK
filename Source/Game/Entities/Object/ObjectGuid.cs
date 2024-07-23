@@ -468,12 +468,12 @@ namespace Game.Entities
         void CheckGuidTrigger(long guidlow)
         {
             if (!Global.WorldMgr.IsGuidAlert()
-                && guidlow > WorldConfig.GetInt64Value(WorldCfg.RespawnGuidAlertLevel))
+                && guidlow > WorldConfig.Values[WorldCfg.RespawnGuidAlertLevel].Int64)
             {
                 Global.WorldMgr.TriggerGuidAlert();
             }
             else if (!Global.WorldMgr.IsGuidWarning()
-                && guidlow > WorldConfig.GetInt64Value(WorldCfg.RespawnGuidWarnLevel))
+                && guidlow > WorldConfig.Values[WorldCfg.RespawnGuidWarnLevel].Int64)
             {
                 Global.WorldMgr.TriggerGuidWarning();
         }

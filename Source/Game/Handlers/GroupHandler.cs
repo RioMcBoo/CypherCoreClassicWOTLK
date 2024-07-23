@@ -46,14 +46,15 @@ namespace Game
             }
 
             // restrict invite to GMs
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowGmGroup) && !invitingPlayer.IsGameMaster() && invitedPlayer.IsGameMaster())
+            if (!WorldConfig.Values[WorldCfg.AllowGmGroup].Bool && !invitingPlayer.IsGameMaster() && invitedPlayer.IsGameMaster())
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.BadPlayerNameS);
                 return;
             }
 
             // can't group with
-            if (!invitingPlayer.IsGameMaster() && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && invitingPlayer.GetTeam() != invitedPlayer.GetTeam())
+            if (!invitingPlayer.IsGameMaster() && !WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGroup].Bool 
+                && invitingPlayer.GetTeam() != invitedPlayer.GetTeam())
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.PlayerWrongFaction);
                 return;
@@ -80,7 +81,7 @@ namespace Game
                 return;
             }
 
-            if (!invitedPlayer.GetSocial().HasFriend(invitingPlayer.GetGUID()) && invitingPlayer.GetLevel() < WorldConfig.GetIntValue(WorldCfg.PartyLevelReq))
+            if (!invitedPlayer.GetSocial().HasFriend(invitingPlayer.GetGUID()) && invitingPlayer.GetLevel() < WorldConfig.Values[WorldCfg.PartyLevelReq].Int32)
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.InviteRestricted);
                 return;

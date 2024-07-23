@@ -570,7 +570,7 @@ namespace Game.Networking
 
             PreparedStatement stmt = null;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.AllowLogginIpAddressesInDatabase))
+            if (WorldConfig.Values[WorldCfg.AllowLogginIpAddressesInDatabase].Bool)
             {
                 // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
@@ -609,7 +609,7 @@ namespace Game.Networking
             }
 
             // Must be done before WorldSession is created
-            bool wardenActive = WorldConfig.GetBoolValue(WorldCfg.WardenEnabled);
+            bool wardenActive = WorldConfig.Values[WorldCfg.WardenEnabled].Bool;
             if (wardenActive && account.game.OS != "Win" && account.game.OS != "Wn64" && account.game.OS != "Mc64")
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
@@ -694,7 +694,7 @@ namespace Game.Networking
                 $"WorldSocket:HandleAuthSession: " +
                 $"Client '{authSession.RealmJoinTicket}' authenticated successfully from {address}.");
 
-            if (WorldConfig.GetBoolValue(WorldCfg.AllowLogginIpAddressesInDatabase))
+            if (WorldConfig.Values[WorldCfg.AllowLogginIpAddressesInDatabase].Bool)
             {
                 // Update the last_ip in the database
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
@@ -862,8 +862,8 @@ namespace Game.Networking
                 {
                     ++_OverSpeedPings;
 
-                    uint maxAllowed = WorldConfig.GetUIntValue(WorldCfg.MaxOverspeedPings);
-                    if (maxAllowed != 0 && _OverSpeedPings > maxAllowed)
+                    int maxAllowed = WorldConfig.Values[WorldCfg.MaxOverspeedPings].Int32;
+                    if (maxAllowed > 0 && _OverSpeedPings > maxAllowed)
                     {
                         lock (_worldSessionLock)
                         {

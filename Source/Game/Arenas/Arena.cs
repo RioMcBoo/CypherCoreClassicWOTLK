@@ -191,7 +191,7 @@ namespace Game.Arenas
                             $"Team1Id: {GetArenaTeamIdByIndex(BattleGroundTeamId.Alliance)} - Team2Id: {GetArenaTeamIdByIndex(BattleGroundTeamId.Horde)} ended. " +
                             $"WinnerTeamId: {winnerArenaTeam.GetId()}. Winner rating: +{winnerChange}, Loser rating: {loserChange}");
 
-                        if (WorldConfig.GetBoolValue(WorldCfg.ArenaLogExtendedInfo))
+                        if (WorldConfig.Values[WorldCfg.ArenaLogExtendedInfo].Bool)
                         {
                             foreach (var score in PlayerScores)
                             {

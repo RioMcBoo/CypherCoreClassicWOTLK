@@ -24,13 +24,13 @@ namespace Game.BattleFields
 
             InitStalker(WGNpcs.Stalker, WGConst.WintergraspStalkerPos);
 
-            m_MaxPlayer = WorldConfig.GetIntValue(WorldCfg.WintergraspPlrMax);
-            m_IsEnabled = WorldConfig.GetBoolValue(WorldCfg.WintergraspEnable);
-            m_MinPlayer = WorldConfig.GetIntValue(WorldCfg.WintergraspPlrMin);
-            m_MinLevel = WorldConfig.GetIntValue(WorldCfg.WintergraspPlrMinLvl);
-            m_BattleTime = WorldConfig.GetUIntValue(WorldCfg.WintergraspBattletime) * Time.Minute * Time.InMilliseconds;
-            m_NoWarBattleTime = WorldConfig.GetUIntValue(WorldCfg.WintergraspNobattletime) * Time.Minute * Time.InMilliseconds;
-            m_RestartAfterCrash = WorldConfig.GetUIntValue(WorldCfg.WintergraspRestartAfterCrash) * Time.Minute * Time.InMilliseconds;
+            m_MaxPlayer = WorldConfig.Values[WorldCfg.WintergraspPlrMax].Int32;
+            m_IsEnabled = WorldConfig.Values[WorldCfg.WintergraspEnable].Bool;
+            m_MinPlayer = WorldConfig.Values[WorldCfg.WintergraspPlrMin].Int32;
+            m_MinLevel = WorldConfig.Values[WorldCfg.WintergraspPlrMinLvl].Int32;
+            m_BattleTime = (uint)WorldConfig.Values[WorldCfg.WintergraspBattletime].Int32 * Time.Minute * Time.InMilliseconds;
+            m_NoWarBattleTime = (uint)WorldConfig.Values[WorldCfg.WintergraspNobattletime].Int32 * Time.Minute * Time.InMilliseconds;
+            m_RestartAfterCrash = (uint)WorldConfig.Values[WorldCfg.WintergraspRestartAfterCrash].Int32 * Time.Minute * Time.InMilliseconds;
 
             m_TimeForAcceptInvite = 20;
             m_StartGroupingTimer = 15 * Time.Minute * Time.InMilliseconds;

@@ -701,8 +701,8 @@ namespace Game.Chat
                     return false;
 
                 bool found = false;
-                uint count = 0;
-                uint maxResults = WorldConfig.GetUIntValue(WorldCfg.MaxResultsLookupCommands);
+                int count = 0;
+                int maxResults = WorldConfig.Values[WorldCfg.MaxResultsLookupCommands].Int32;
 
                 // Search in ItemSet.dbc
                 foreach (var (id, set) in CliDB.ItemSetStorage)
@@ -731,7 +731,7 @@ namespace Game.Chat
 
                     if (locale < Locale.Total)
                     {
-                        if (maxResults != 0 && count++ == maxResults)
+                        if (maxResults > 0 && count++ == maxResults)
                         {
                             handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                             return true;

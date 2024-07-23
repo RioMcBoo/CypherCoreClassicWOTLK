@@ -24,7 +24,7 @@ namespace Game.Entities
             {
                 case RestTypes.XP:
                     // Reset restBonus (XP only) for max level players
-                    if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                    if (_player.GetLevel() >= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                         restBonus = 0;
 
                     next_level_xp = _player.m_activePlayerData.NextLevelXP;
@@ -75,7 +75,7 @@ namespace Game.Entities
         {
             // Don't add extra rest bonus to max level players. Note: Might need different condition
             // in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
-            if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (_player.GetLevel() >= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                 restBonus = 0;
 
             float totalRestBonus = GetRestBonus(restType) + restBonus;
@@ -139,7 +139,7 @@ namespace Game.Entities
                 {
                     _restTime = now;
 
-                    float bubble = 0.125f * WorldConfig.GetFloatValue(WorldCfg.RateRestIngame);
+                    float bubble = 0.125f * WorldConfig.Values[WorldCfg.RateRestIngame].Float;
                     AddRestBonus(RestTypes.XP, timeDiff * CalcExtraPerSec(RestTypes.XP, bubble));
                 }
             }

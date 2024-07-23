@@ -19,17 +19,17 @@ namespace Game.Entities
     {
         MapManager()
         {
-            i_gridCleanUpDelay = WorldConfig.GetUIntValue(WorldCfg.IntervalGridclean);
-            i_timer.SetInterval(WorldConfig.GetIntValue(WorldCfg.IntervalMapupdate));
+            i_gridCleanUpDelay = (uint)WorldConfig.Values[WorldCfg.IntervalGridClean].Int32;
+            i_timer.SetInterval(WorldConfig.Values[WorldCfg.IntervalMapUpdate].Int32);
         }
 
         public void Initialize()
         {
             //todo needs alot of support for threadsafe.
-            int num_threads = WorldConfig.GetIntValue(WorldCfg.Numthreads);
+            int num_threads = WorldConfig.Values[WorldCfg.Numthreads].Int32;
             // Start mtmaps if needed.
             if (num_threads > 0)
-                m_updater = new MapUpdater(WorldConfig.GetIntValue(WorldCfg.Numthreads));
+                m_updater = new MapUpdater(WorldConfig.Values[WorldCfg.Numthreads].Int32);
         }
 
         public void InitializeVisibilityDistanceInfo()
@@ -50,7 +50,7 @@ namespace Game.Entities
             map.LoadCorpseData();
             map.InitSpawnGroupState();
 
-            if (WorldConfig.GetBoolValue(WorldCfg.BasemapLoadGrids))
+            if (WorldConfig.Values[WorldCfg.BasemapLoadGrids].Bool)
                 map.LoadAllCells();
 
             return map;
@@ -86,7 +86,7 @@ namespace Game.Entities
             map.SetInstanceScenario(Global.ScenarioMgr.CreateInstanceScenario(map, team));
             map.InitSpawnGroupState();
 
-            if (WorldConfig.GetBoolValue(WorldCfg.InstancemapLoadGrids))
+            if (WorldConfig.Values[WorldCfg.InstancemapLoadGrids].Bool)
                 map.LoadAllCells();
 
             return map;
@@ -103,7 +103,7 @@ namespace Game.Entities
             bg.SetBgMap(map);
             map.InitSpawnGroupState();
 
-            if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundMapLoadGrids))
+            if (WorldConfig.Values[WorldCfg.BattlegroundMapLoadGrids].Bool)
                 map.LoadAllCells();
 
             return map;

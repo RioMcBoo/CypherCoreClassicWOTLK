@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Framework.Configuration
 {
-    public class ConfigMgr
+    public abstract class ConfigMgr
     {
         public static bool Load(string fileName)
         {
@@ -45,17 +45,43 @@ namespace Framework.Configuration
             return true;
         }
 
-        public static T GetDefaultValue<T>(string name, T defaultValue)
+        public static T GetDefaultValue<T>(string name, T defaultValue) where T : IParsable<T>
         {
             string temp = _configList.LookupByKey(name);
 
-            var type = typeof(T).IsEnum ? typeof(T).GetEnumUnderlyingType() : typeof(T);
+            if (temp.IsEmpty())
+                return defaultValue;
+
+            T parsedValue;
+
+            if (defaultValue is bool)
+            {
+                if (temp == "1")
+                {
+                    parsedValue = T.Parse(bool.TrueString, null);
+                    return parsedValue;
+                }
+
+                if (temp == "0")
+                {
+                    parsedValue = T.Parse(bool.FalseString, null);
+                    return parsedValue;
+                }
+            }
+
+            parsedValue = T.Parse(temp, null);
+
+            return parsedValue;
+        }
+
+        public static T GetDefaultEnumValue<T>(string name, T defaultValue) where T : Enum
+        {
+            string temp = _configList.LookupByKey(name);
+
+            var type = typeof(T).GetEnumUnderlyingType();
 
             if (temp.IsEmpty())
                 return (T)Convert.ChangeType(defaultValue, type);
-
-            if (Type.GetTypeCode(typeof(T)) == TypeCode.Boolean && temp.IsNumber())
-                return (T)Convert.ChangeType(temp == "1", typeof(T));
 
             return (T)Convert.ChangeType(temp, type);
         }
@@ -65,6 +91,6 @@ namespace Framework.Configuration
             return _configList.Where(p => p.Key.Contains(name)).Select(p => p.Key);
         }
 
-        static Dictionary<string, string> _configList = new();
+        private static Dictionary<string, string> _configList = new();        
     }
 }

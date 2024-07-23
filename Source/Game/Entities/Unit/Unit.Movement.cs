@@ -1413,7 +1413,7 @@ namespace Game.Entities
                     caster = GetAttackerForHelper();
 
                 GetMotionMaster().MoveFleeing(caster, TimeSpan.FromMilliseconds(
-                        fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
+                       fearAuras.Empty() ? WorldConfig.Values[WorldCfg.CreatureFamilyFleeDelay].Int32 : 0)); // caster == NULL processed in MoveFleeing
                 
                 SetUnitFlag(UnitFlags.Fleeing);
             }

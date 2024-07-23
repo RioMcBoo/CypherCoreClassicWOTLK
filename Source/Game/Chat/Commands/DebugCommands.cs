@@ -526,8 +526,8 @@ namespace Game.Chat
             else
                 Global.MapMgr.DoForAllMaps(map => HandleDebugGuidLimitsMap(handler, map));
 
-            handler.SendSysMessage($"Guid Warn Level: {WorldConfig.GetIntValue(WorldCfg.RespawnGuidWarnLevel)}");
-            handler.SendSysMessage($"Guid Alert Level: {WorldConfig.GetIntValue(WorldCfg.RespawnGuidAlertLevel)}");
+            handler.SendSysMessage($"Guid Warn Level: {WorldConfig.Values[WorldCfg.RespawnGuidWarnLevel].Int64}");
+            handler.SendSysMessage($"Guid Alert Level: {WorldConfig.Values[WorldCfg.RespawnGuidAlertLevel].Int64}");
             return true;
         }
 

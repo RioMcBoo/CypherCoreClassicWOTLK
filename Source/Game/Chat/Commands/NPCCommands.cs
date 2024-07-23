@@ -1025,7 +1025,7 @@ namespace Game.Chat
             [Command("level", RBACPermissions.CommandNpcSetLevel)]
             static bool HandleNpcSetLevelCommand(CommandHandler handler, byte lvl)
             {
-                if (lvl < 1 || lvl > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) + 3)
+                if (lvl < 1 || lvl > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32 + 3)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
                     return false;

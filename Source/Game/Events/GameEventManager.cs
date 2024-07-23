@@ -1019,7 +1019,7 @@ namespace Game
 
         public void StartArenaSeason()
         {
-            int season = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
+            int season = WorldConfig.Values[WorldCfg.ArenaSeasonId].Int32;
             SQLResult result = DB.World.Query($"SELECT eventEntry FROM game_event_arena_seasons WHERE season = '{season}'");
             if (result.IsEmpty())
             {

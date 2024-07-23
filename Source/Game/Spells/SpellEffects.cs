@@ -1936,7 +1936,7 @@ namespace Game.Spells
                 // Generate extra money for pick pocket loot
                 int a = RandomHelper.IRand(0, creature.GetLevel() / 2);
                 int b = RandomHelper.IRand(0, player.GetLevel() / 2);
-                creature._loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                creature._loot.gold = (uint)(10 * (a + b) * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
             }
             else if (creature._loot != null)
             {
@@ -3092,7 +3092,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
-            if (!WorldConfig.GetBoolValue(WorldCfg.CastUnstuck))
+            if (!WorldConfig.Values[WorldCfg.CastUnstuck].Bool)
                 return;
 
             Player player = m_caster.ToPlayer();
@@ -4422,7 +4422,7 @@ namespace Game.Spells
             if (itemTarget.GetCount() < 5)
                 return;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.SkillProspecting))
+            if (WorldConfig.Values[WorldCfg.SkillProspecting].Bool)
             {
                 int SkillValue = player.GetPureSkillValue(SkillType.Jewelcrafting);
                 int reqSkillValue = itemTarget.GetTemplate().GetRequiredSkillRank();
@@ -4450,7 +4450,7 @@ namespace Game.Spells
             if (itemTarget.GetCount() < 5)
                 return;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.SkillMilling))
+            if (WorldConfig.Values[WorldCfg.SkillMilling].Bool)
             {
                 int SkillValue = player.GetPureSkillValue(SkillType.Inscription);
                 int reqSkillValue = itemTarget.GetTemplate().GetRequiredSkillRank();

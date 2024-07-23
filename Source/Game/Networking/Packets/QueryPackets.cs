@@ -404,7 +404,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(QuestPOIDataStats.Count);
             _worldPacket.WriteInt32(QuestPOIDataStats.Count);
 
-            bool useCache = WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries);
+            bool useCache = WorldConfig.Values[WorldCfg.CacheDataQueries].Bool;
 
             foreach (QuestPOIData questPOIData in QuestPOIDataStats)
             {

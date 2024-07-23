@@ -45,7 +45,7 @@ namespace Game
 
         public AuctionHouseObject GetAuctionsMap(int factionTemplateId)
         {
-            if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionAuction))
+            if (WorldConfig.Values[WorldCfg.AllowTwoSideInteractionAuction].Bool)
                 return mNeutralAuctions;
 
             // teams have linked auction houses
@@ -449,7 +449,7 @@ namespace Game
             if ((--throttleObject.QueriesRemaining) == 0)
                 return new AuctionThrottleResult(throttleObject.PeriodEnd - now, false);
             else
-                return new AuctionThrottleResult(TimeSpan.FromMilliseconds(WorldConfig.GetIntValue(addonTainted ? WorldCfg.AuctionTaintedSearchDelay : WorldCfg.AuctionSearchDelay)), false);
+                return new AuctionThrottleResult(TimeSpan.FromMilliseconds(WorldConfig.Values[addonTainted ? WorldCfg.AuctionTaintedSearchDelay : WorldCfg.AuctionSearchDelay].Int32), false);
         }
 
         public AuctionHouseRecord GetAuctionHouseEntry(int factionTemplateId)
@@ -462,7 +462,7 @@ namespace Game
         {
             int houseid = 1; // Auction House
 
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionAuction))
+            if (!WorldConfig.Values[WorldCfg.AllowTwoSideInteractionAuction].Bool)
             {
                 // FIXME: found way for proper auctionhouse selection by another way
                 // AuctionHouse.dbc have faction field with _player_ factions associated with auction house races.
@@ -1103,7 +1103,7 @@ namespace Game
             if (throttleData == null)
             {
                 throttleData = new PlayerReplicateThrottleData();
-                throttleData.NextAllowedReplication = curTime + TimeSpan.FromSeconds(WorldConfig.GetIntValue(WorldCfg.AuctionReplicateDelay));
+                throttleData.NextAllowedReplication = curTime + TimeSpan.FromSeconds(WorldConfig.Values[WorldCfg.AuctionReplicateDelay].Int32);                
                 throttleData.Global = Global.AuctionHouseMgr.GenerateReplicationId();
             }
             else
@@ -1136,7 +1136,7 @@ namespace Game
 
         public long CalculateAuctionHouseCut(long bidAmount)
         {
-            return Math.Max((long)(MathFunctions.CalculatePct(bidAmount, _auctionHouse.ConsignmentRate) * WorldConfig.GetFloatValue(WorldCfg.RateAuctionCut)), 0);
+            return Math.Max((long)(MathFunctions.CalculatePct(bidAmount, _auctionHouse.ConsignmentRate) * WorldConfig.Values[WorldCfg.RateAuctionCut].Float), 0);
         }
 
         public CommodityQuote CreateCommodityQuote(Player player, int itemId, int quantity)
@@ -1326,13 +1326,16 @@ namespace Game
                 {
                     owner.UpdateCriteria(CriteriaType.MoneyEarnedFromAuctions, profit);
                     owner.UpdateCriteria(CriteriaType.HighestAuctionSale, profit);
-                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay), true);
+                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32, true);
                 }
 
-                new MailDraft(Global.AuctionHouseMgr.BuildCommodityAuctionMailSubject(AuctionMailType.Sold, itemId, boughtFromAuction),
+                new MailDraft(
+                    Global.AuctionHouseMgr.BuildCommodityAuctionMailSubject(AuctionMailType.Sold, itemId, boughtFromAuction),
                     Global.AuctionHouseMgr.BuildAuctionSoldMailBody(player.GetGUID(), auction.BuyoutOrUnitPrice * boughtFromAuction, boughtFromAuction, depositPart, auctionHouseCut))
                     .AddMoney(profit)
-                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), new MailSender(this), MailCheckFlags.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
+                    .SendMailTo(trans, 
+                        new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), 
+                        new MailSender(this), MailCheckFlags.Copied, (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32);
             }
 
             player.ModifyMoney(-totalPrice);
@@ -1498,13 +1501,16 @@ namespace Game
                     owner.UpdateCriteria(CriteriaType.MoneyEarnedFromAuctions, profit);
                     owner.UpdateCriteria(CriteriaType.HighestAuctionSale, auction.BidAmount);
                     //send auction owner notification, bidder must be current!
-                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay), true);
+                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32, true);
                 }
 
-                new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Sold, auction),
+                new MailDraft(
+                    Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Sold, auction),
                     Global.AuctionHouseMgr.BuildAuctionSoldMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit, auctionHouseCut))
                     .AddMoney(profit)
-                    .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
+                    .SendMailTo(trans, 
+                        new MailReceiver(owner, auction.Owner), 
+                        new MailSender(this), MailCheckFlags.Copied, (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32);
             }
         }
 
@@ -1571,13 +1577,13 @@ namespace Game
             if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
                 WowTime eta = GameTime.GetUtcWowTime();
-                eta += TimeSpan.FromSeconds(WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));
+                eta += TimeSpan.FromSeconds(WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32);
                 if (owner != null)
                     eta += owner.GetSession().GetTimezoneOffset();
 
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Invoice, auction),
                     Global.AuctionHouseMgr.BuildAuctionInvoiceMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit,
-                        CalculateAuctionHouseCut(auction.BidAmount), WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay), eta.GetPackedTime()))
+                        CalculateAuctionHouseCut(auction.BidAmount), (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32, eta.GetPackedTime()))
                     .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied);
             }
         }

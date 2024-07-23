@@ -16,7 +16,7 @@ namespace Game
         public static void CleanDatabase()
         {
             // config to disable
-            if (!WorldConfig.GetBoolValue(WorldCfg.CleanCharacterDb))
+            if (!WorldConfig.Values[WorldCfg.CleanCharacterDb].Bool)
                 return;
 
             Log.outInfo(LogFilter.Server, "Cleaning character database...");
@@ -43,7 +43,7 @@ namespace Game
 
             // NOTE: In order to have persistentFlags be set in worldstates for the next cleanup,
             // you need to define them at least once in worldstates.
-            flags &= (CleaningFlags)WorldConfig.GetIntValue(WorldCfg.PersistentCharacterCleanFlags);
+            flags &= (CleaningFlags)WorldConfig.Values[WorldCfg.PersistentCharacterCleanFlags].Int32;
             Global.WorldMgr.SetPersistentWorldVariable(WorldManager.CharacterDatabaseCleaningFlagsVarId, (int)flags);
 
             Global.WorldMgr.SetCleaningFlags(flags);

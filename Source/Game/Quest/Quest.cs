@@ -477,9 +477,9 @@ namespace Game
 
             int xp = RoundXPValue(diffFactor * questXp.Difficulty[xpDifficulty] / 10);
 
-            if (WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) != 0)
+            if (WorldConfig.Values[WorldCfg.MinQuestScaledXpRatio].Int32 > 0)
             {
-                int minScaledXP = RoundXPValue((int)(questXp.Difficulty[xpDifficulty] * xpMultiplier)) * WorldConfig.GetIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
+                int minScaledXP = RoundXPValue((int)(questXp.Difficulty[xpDifficulty] * xpMultiplier)) * WorldConfig.Values[WorldCfg.MinQuestScaledXpRatio].Int32 / 100;
                 xp = Math.Max(minScaledXP, xp);
             }
 
@@ -574,18 +574,18 @@ namespace Game
                 return 0;
 
             // Else, return the rewarded copper sum modified by the rate
-            return (int)(RewardBonusMoney * WorldConfig.GetFloatValue(WorldCfg.RateMoneyMaxLevelQuest));
+            return (int)(RewardBonusMoney * WorldConfig.Values[WorldCfg.RateMoneyMaxLevelQuest].Float);
         }
 
         public bool IsAutoAccept()
         {
-            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) 
+            return !WorldConfig.Values[WorldCfg.QuestIgnoreAutoAccept].Bool 
                 && HasAnyFlag(QuestFlags.AutoAccept);
         }
 
         public bool IsTurnIn()
         {
-            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoComplete) 
+            return !WorldConfig.Values[WorldCfg.QuestIgnoreAutoComplete].Bool 
                 && Type == QuestType.TurnIn;
         }
 
@@ -614,7 +614,7 @@ namespace Game
             if (IsRaidQuest(difficulty))
                 return true;
 
-            return WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreRaid);
+            return WorldConfig.Values[WorldCfg.QuestIgnoreRaid].Bool;
         }
 
         public int CalculateHonorGain(int level)

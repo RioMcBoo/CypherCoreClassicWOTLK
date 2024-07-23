@@ -182,7 +182,7 @@ namespace Game.Entities
             if (zone == null)
                 return;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.Weather))
+            if (WorldConfig.Values[WorldCfg.Weather].Bool)
                 GetMap().GetOrGenerateZoneDefaultWeather(newZone);
 
             GetMap().SendZoneDynamicInfo(newZone, this);
@@ -356,7 +356,7 @@ namespace Game.Entities
 
                 Difficulty target_difficulty = GetDifficultyID(mapEntry);
                 MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
-                if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
+                if (!WorldConfig.Values[WorldCfg.InstanceIgnoreLevel].Bool)
                 {
                     var mapDifficultyConditions = Global.DB2Mgr.GetMapDifficultyConditions((Difficulty)mapDiff.Id);
                     foreach (var pair in mapDifficultyConditions)
@@ -371,7 +371,7 @@ namespace Game.Entities
 
                 if (ar != null)
                 {
-                    if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
+                    if (!WorldConfig.Values[WorldCfg.InstanceIgnoreLevel].Bool)
                     {
                         if (ar.levelMin != 0 && GetLevel() < ar.levelMin)
                             LevelMin = ar.levelMin;
@@ -461,8 +461,8 @@ namespace Game.Entities
 
             Group group = GetGroup();
             // raid instances require the player to be in a raid group to be valid
-            if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid)
-                && (map.GetEntry().Expansion >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
+            if (map.IsRaid() && !WorldConfig.Values[WorldCfg.InstanceIgnoreRaid].Bool
+                && (map.GetEntry().Expansion >= (Expansion)WorldConfig.Values[WorldCfg.Expansion].Int32))
             {
                 if (group == null || group.IsRaidGroup())
                     return false;
@@ -486,8 +486,9 @@ namespace Game.Entities
 
         public bool CheckInstanceCount(int instanceId)
         {
-            if (_instanceResetTimes.Count < WorldConfig.GetIntValue(WorldCfg.MaxInstancesPerHour))
+            if (_instanceResetTimes.Count < WorldConfig.Values[WorldCfg.MaxInstancesPerHour].Int32)
                 return true;
+
             return _instanceResetTimes.ContainsKey(instanceId);
         }
 

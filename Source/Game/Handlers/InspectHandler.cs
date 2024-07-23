@@ -30,7 +30,8 @@ namespace Game
             InspectResult inspectResult = new();
             inspectResult.DisplayInfo.Initialize(player);
 
-            if (GetPlayer().CanBeGameMaster() || WorldConfig.GetIntValue(WorldCfg.TalentsInspecting) + (GetPlayer().GetEffectiveTeam() == player.GetEffectiveTeam() ? 1 : 0) > 1)
+            if (GetPlayer().CanBeGameMaster() 
+                || WorldConfig.Values[WorldCfg.TalentsInspecting].Int32 + (GetPlayer().GetEffectiveTeam() == player.GetEffectiveTeam() ? 1 : 0) > 1)
             {
                 var talents = player.GetPlayerTalents(player.GetActiveTalentGroup());
                 foreach (var v in talents)

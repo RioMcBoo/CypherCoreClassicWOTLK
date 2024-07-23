@@ -1342,7 +1342,7 @@ namespace Game.Entities
                             LearnSpell(discoveredSpell, false);
                     }
 
-                    int craft_skill_gain = _spell_idx.NumSkillUps * WorldConfig.GetIntValue(WorldCfg.SkillGainCrafting);
+                    int craft_skill_gain = _spell_idx.NumSkillUps * WorldConfig.Values[WorldCfg.SkillGainCrafting].Int32;
 
                     return UpdateSkillPro(_spell_idx.SkillupSkillLineID, SkillGainChance(SkillValue, _spell_idx.TrivialSkillLineRankHigh,
                         (_spell_idx.TrivialSkillLineRankHigh + _spell_idx.TrivialSkillLineRankLow) / 2, _spell_idx.TrivialSkillLineRankLow), craft_skill_gain);
@@ -1364,7 +1364,7 @@ namespace Game.Entities
             if (skillEntry == null)
                 return false;
 
-            int gatheringSkillGain = WorldConfig.GetIntValue(WorldCfg.SkillGainGathering);
+            int gatheringSkillGain = WorldConfig.Values[WorldCfg.SkillGainGathering].Int32;
 
             int baseSkillLevelStep = 30;
             int yellowLevel = redLevel + baseSkillLevelStep;
@@ -1389,15 +1389,15 @@ namespace Game.Entities
                 case SkillType.Herbalism:
                     return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator, gatheringSkillGain);
                 case SkillType.Skinning:
-                    if (WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps) == 0)
+                    if (WorldConfig.Values[WorldCfg.SkillChanceSkinningSteps].Int32 == 0)
                         return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator, gatheringSkillGain);
                     else
-                        return UpdateSkillPro(skillId, (SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator) >> (skillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps)), gatheringSkillGain);
+                        return UpdateSkillPro(skillId, (SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator) >> (skillValue / WorldConfig.Values[WorldCfg.SkillChanceSkinningSteps].Int32), gatheringSkillGain);
                 case SkillType.Mining:
-                    if (WorldConfig.GetIntValue(WorldCfg.SkillChanceMiningSteps) == 0)
+                    if (WorldConfig.Values[WorldCfg.SkillChanceMiningSteps].Int32 == 0)
                         return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator, gatheringSkillGain);
                     else
-                        return UpdateSkillPro(skillId, (SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator) >> (skillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceMiningSteps)), gatheringSkillGain);
+                        return UpdateSkillPro(skillId, (SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator) >> (skillValue / WorldConfig.Values[WorldCfg.SkillChanceMiningSteps].Int32), gatheringSkillGain);
             }
             return false;
         }
@@ -1435,7 +1435,7 @@ namespace Game.Entities
             {
                 m_fishingSteps = 0;
 
-                int gatheringSkillGain = WorldConfig.GetIntValue(WorldCfg.SkillGainGathering);
+                int gatheringSkillGain = WorldConfig.Values[WorldCfg.SkillGainGathering].Int32;
                 return UpdateSkillPro(fishingSkill, 100 * 10, gatheringSkillGain);
             }
 
@@ -1482,12 +1482,12 @@ namespace Game.Entities
         int SkillGainChance(int SkillValue, int GrayLevel, int GreenLevel, int YellowLevel)
         {
             if (SkillValue >= GrayLevel)
-                return WorldConfig.GetIntValue(WorldCfg.SkillChanceGrey) * 10;
+                return WorldConfig.Values[WorldCfg.SkillChanceGrey].Int32 * 10;
             if (SkillValue >= GreenLevel)
-                return WorldConfig.GetIntValue(WorldCfg.SkillChanceGreen) * 10;
+                return WorldConfig.Values[WorldCfg.SkillChanceGreen].Int32 * 10;
             if (SkillValue >= YellowLevel)
-                return WorldConfig.GetIntValue(WorldCfg.SkillChanceYellow) * 10;
-            return WorldConfig.GetIntValue(WorldCfg.SkillChanceOrange) * 10;
+                return WorldConfig.Values[WorldCfg.SkillChanceYellow].Int32 * 10;
+            return WorldConfig.Values[WorldCfg.SkillChanceOrange].Int32 * 10;
         }
 
         bool EnchantmentFitsRequirements(int enchantmentcondition, int slot)
@@ -2112,7 +2112,7 @@ namespace Game.Entities
 
         public void LearnCustomSpells()
         {
-            if (!WorldConfig.GetBoolValue(WorldCfg.StartAllSpells))
+            if (!WorldConfig.Values[WorldCfg.StartAllSpells].Bool)
                 return;
 
             // learn default race/class spells
@@ -2320,7 +2320,7 @@ namespace Game.Entities
             if (spellInfo != null && spellInfo.IsPrimaryProfessionFirstRank())
             {
                 int freeProfs = GetFreePrimaryProfessionPoints() + 1;
-                if (freeProfs <= WorldConfig.GetIntValue(WorldCfg.MaxPrimaryTradeSkill))
+                if (freeProfs <= WorldConfig.Values[WorldCfg.MaxPrimaryTradeSkill].Int32)
                     SetFreePrimaryProfessions(freeProfs);
             }
 
@@ -2465,7 +2465,7 @@ namespace Game.Entities
                     SetCanDualWield(false);
             }
 
-            if (WorldConfig.GetBoolValue(WorldCfg.OffhandCheckAtSpellUnlearn))
+            if (WorldConfig.Values[WorldCfg.OffhandCheckAtSpellUnlearn].Bool)
                 AutoUnequipOffhandIfNeed();
 
             // remove from spell book if not replaced by lesser rank

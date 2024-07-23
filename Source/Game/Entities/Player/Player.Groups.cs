@@ -217,7 +217,7 @@ namespace Game.Entities
             if (player.GetMap().IsDungeon())
                 return true;
 
-            return pRewardSource.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.GroupXpDistance);
+            return pRewardSource.GetDistance(player) <= WorldConfig.Values[WorldCfg.GroupXpDistance].Float;
         }
 
         public Group GetGroupInvite() { return m_groupInvite; }
@@ -245,7 +245,7 @@ namespace Game.Entities
 
         public bool IsGroupVisibleFor(Player p)
         {
-            switch (WorldConfig.GetIntValue(WorldCfg.GroupVisibility))
+            switch (WorldConfig.Values[WorldCfg.GroupVisibility].Int32)
             {
                 default: 
                     return IsInSameGroupWith(p);

@@ -686,7 +686,7 @@ namespace Game.Entities
             if (!IsAlive())
                 return;
 
-            var maxlevel = Math.Min(WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel), GetOwner().GetLevel());
+            var maxlevel = Math.Min(WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32, GetOwner().GetLevel());
             var petlevel = GetLevel();
 
             // If pet is detected to be at, or above(?) the players level, don't hand out XP

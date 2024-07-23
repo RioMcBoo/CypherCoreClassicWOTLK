@@ -124,13 +124,13 @@ namespace Game.DungeonFinding
                     continue;
                 }
 
-                if (maxLevel == 0 || maxLevel > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                if (maxLevel == 0 || maxLevel > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                 {
                     Log.outError(LogFilter.Sql, 
                         $"Level {maxLevel} specified for dungeon {dungeonId} " +
                         $"in table `lfg_dungeon_rewards` can never be reached!");
 
-                    maxLevel = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+                    maxLevel = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
                 }
 
                 if (firstQuestId == 0 || Global.ObjectMgr.GetQuestTemplate(firstQuestId) == null)
@@ -1886,7 +1886,7 @@ namespace Game.DungeonFinding
 
         public void SetTeam(ObjectGuid guid, Team team)
         {
-            if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup))
+            if (WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGroup].Bool)
                 team = 0;
 
             PlayersStore[guid].SetTeam(team);

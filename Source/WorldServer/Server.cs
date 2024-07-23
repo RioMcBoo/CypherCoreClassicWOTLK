@@ -56,7 +56,7 @@ namespace WorldServer
             }
 
             // Launch the worldserver listener socket
-            int worldPort = WorldConfig.GetIntValue(WorldCfg.PortWorld);
+            int worldPort = WorldConfig.Values[WorldCfg.PortWorld].Int32;
             string worldListener = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
 
             int networkThreads = ConfigMgr.GetDefaultValue("Network.Threads", 1);

@@ -131,7 +131,7 @@ namespace Game.BlackMarket
                 templates.Add(pair.Value);
             }
 
-            templates.RandomResize(WorldConfig.GetIntValue(WorldCfg.BlackmarketMaxAuctions));
+            templates.RandomResize(WorldConfig.Values[WorldCfg.BlackmarketMaxAuctions].Int32);
 
             foreach (BlackMarketTemplate templat in templates)
             {
@@ -148,7 +148,7 @@ namespace Game.BlackMarket
 
         public bool IsEnabled()
         {
-            return WorldConfig.GetBoolValue(WorldCfg.BlackmarketEnabled);
+            return WorldConfig.Values[WorldCfg.BlackmarketEnabled].Bool;
         }
 
         public void BuildItemsResponse(BlackMarketRequestItemsResult packet, Player player)

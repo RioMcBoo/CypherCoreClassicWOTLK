@@ -278,7 +278,7 @@ namespace Game.Chat
             int charCount = Global.AccountMgr.GetCharactersCount(newAccount.GetID());
             if (charCount != 0)
             {
-                if (charCount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
+                if (charCount >= WorldConfig.Values[WorldCfg.CharactersPerRealm].Int32)
                 {
                     handler.SendSysMessage(CypherStrings.AccountCharacterListFull, newAccount.GetName(), newAccount.GetID());
                     return false;
@@ -536,7 +536,7 @@ namespace Game.Chat
             [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
             static bool HandleCharacterDeletedOldCommand(CommandHandler handler, ushort? days)
             {
-                int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
+                int keepDays = WorldConfig.Values[WorldCfg.ChardeleteKeepDays].Int32;
 
                 if (days.HasValue)
                     keepDays = days.Value;
@@ -641,7 +641,7 @@ namespace Game.Chat
 
                 // check character count
                 int charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
-                if (charcount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
+                if (charcount >= WorldConfig.Values[WorldCfg.CharactersPerRealm].Int32)
                 {
                     handler.SendSysMessage(CypherStrings.CharacterDeletedSkipFull, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
                     return;

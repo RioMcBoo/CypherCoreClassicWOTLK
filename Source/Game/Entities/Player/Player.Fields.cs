@@ -294,7 +294,7 @@ namespace Game.Entities
         public int? introSceneId;
         public int? introSceneIdNPE;
 
-        public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
+        public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32];
 
         public PlayerInfo()
         {

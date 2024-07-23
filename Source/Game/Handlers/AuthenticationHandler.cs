@@ -87,21 +87,21 @@ namespace Game
             FeatureSystemStatusGlueScreen features = new();
             features.BpayStoreAvailable = false;
             features.BpayStoreDisabledByParentalControls = false;
-            features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
-            features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
-            features.MaxCharactersPerRealm = WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm);
-            features.MinimumExpansionLevel = (int)Expansion.Classic;
-            features.MaximumExpansionLevel = WorldConfig.GetIntValue(WorldCfg.Expansion);
+            features.CharUndeleteEnabled = WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteEnabled].Bool;
+            features.BpayStoreEnabled = WorldConfig.Values[WorldCfg.FeatureSystemBpayStoreEnabled].Bool;
+            features.MaxCharactersPerRealm = WorldConfig.Values[WorldCfg.CharactersPerRealm].Int32 ;
+            features.MinimumExpansionLevel = Expansion.Classic;
+            features.MaximumExpansionLevel = (Expansion)WorldConfig.Values[WorldCfg.Expansion].Int32;
 
             var europaTicketConfig = new EuropaTicketConfig();
             europaTicketConfig.ThrottleState.MaxTries = 10;
             europaTicketConfig.ThrottleState.PerMilliseconds = 60000;
             europaTicketConfig.ThrottleState.TryCount = 1;
             europaTicketConfig.ThrottleState.LastResetTimeBeforeNow = 111111;
-            europaTicketConfig.TicketsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled);
-            europaTicketConfig.BugsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled);
-            europaTicketConfig.ComplaintsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled);
-            europaTicketConfig.SuggestionsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled);
+            europaTicketConfig.TicketsEnabled = WorldConfig.Values[WorldCfg.SupportTicketsEnabled].Bool;
+            europaTicketConfig.BugsEnabled = WorldConfig.Values[WorldCfg.SupportBugsEnabled].Bool;
+            europaTicketConfig.ComplaintsEnabled = WorldConfig.Values[WorldCfg.SupportComplaintsEnabled].Bool;
+            europaTicketConfig.SuggestionsEnabled = WorldConfig.Values[WorldCfg.SupportSuggestionsEnabled].Bool;
 
             features.EuropaTicketSystemStatus = europaTicketConfig;
 

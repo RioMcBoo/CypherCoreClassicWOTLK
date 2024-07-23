@@ -302,8 +302,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
             _worldPacket.WriteInt32(ActiveCharacterUpgradeBoostType);
             _worldPacket.WriteInt32(ActiveClassTrialBoostType);
-            _worldPacket.WriteInt32(MinimumExpansionLevel);
-            _worldPacket.WriteInt32(MaximumExpansionLevel);
+            _worldPacket.WriteInt32((int)MinimumExpansionLevel);
+            _worldPacket.WriteInt32((int)MaximumExpansionLevel);
             _worldPacket.WriteInt32(ActiveSeason);
             _worldPacket.WriteInt32(GameRuleValues.Count);
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
@@ -357,8 +357,8 @@ namespace Game.Networking.Packets
         public uint BpayStoreProductDeliveryDelay;      // NYI
         public int ActiveCharacterUpgradeBoostType;     // NYI
         public int ActiveClassTrialBoostType;           // NYI
-        public int MinimumExpansionLevel;
-        public int MaximumExpansionLevel;
+        public Expansion MinimumExpansionLevel;
+        public Expansion MaximumExpansionLevel;
         public uint KioskSessionMinutes;
         public int ActiveSeason;                        // Currently active Classic season
         public List<GameRuleValuePair> GameRuleValues = new();

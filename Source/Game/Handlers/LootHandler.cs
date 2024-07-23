@@ -216,7 +216,7 @@ namespace Game
 
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Looting);
 
-            bool aeLootEnabled = WorldConfig.GetBoolValue(WorldCfg.EnableAELoot);
+            bool aeLootEnabled = WorldConfig.Values[WorldCfg.EnableAELoot].Bool;
             List<Creature> corpses = new();
 
             if (aeLootEnabled)

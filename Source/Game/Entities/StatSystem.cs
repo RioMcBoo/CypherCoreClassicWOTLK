@@ -1174,7 +1174,7 @@ namespace Game.Entities
         }
 
         //skill+step, checking for max value
-        bool UpdateSkill(SkillType skill_id, ushort step)
+        bool UpdateSkill(SkillType skill_id, int step)
         {
             if (skill_id == SkillType.None)
                 return false;
@@ -1183,15 +1183,15 @@ namespace Game.Entities
             if (itr == null || itr.State == SkillState.Deleted)
                 return false;
 
-            ushort value = m_activePlayerData.Skill.GetValue().SkillRank[itr.Pos];
-            ushort max = m_activePlayerData.Skill.GetValue().SkillMaxRank[itr.Pos];
+            int value = m_activePlayerData.Skill.GetValue().SkillRank[itr.Pos];
+            int max = m_activePlayerData.Skill.GetValue().SkillMaxRank[itr.Pos];
 
             if ((max == 0) || (value == 0) || (value >= max))
                 return false;
 
             if (value < max)
             {
-                ushort new_value = (ushort)(value + step);
+                int new_value = value + step;
                 if (new_value > max)
                     new_value = max;
 
@@ -1223,7 +1223,7 @@ namespace Game.Entities
 
         public void UpdateDefense()
         {
-            if (UpdateSkill(SkillType.Defense, (ushort)WorldConfig.GetIntValue(WorldCfg.SkillGainDefense)))
+            if (UpdateSkill(SkillType.Defense, WorldConfig.Values[WorldCfg.SkillGainDefense].Int32))
                 UpdateDefenseBonusesMod(); // update dependent from defense skill part
         }
 
@@ -1238,7 +1238,7 @@ namespace Game.Entities
             if (victim.GetTypeId() == TypeId.Unit && (victim.ToCreature().GetCreatureTemplate().FlagsExtra & CreatureFlagsExtra.NoSkillGains) != 0)
                 return;
 
-            ushort weapon_skill_gain = (ushort)WorldConfig.GetUIntValue(WorldCfg.SkillGainWeapon);
+            int weapon_skill_gain = WorldConfig.Values[WorldCfg.SkillGainWeapon].Int32;
 
             Item tmpitem = GetWeaponForAttack(attType, true);
             if (tmpitem == null && attType == WeaponAttackType.BaseAttack)
@@ -1929,8 +1929,8 @@ namespace Game.Entities
                 // apply diminishing formula to diminishing parry Chance
                 value = CalculateDiminishingReturns(parry_cap, GetClass(), nondiminishing, diminishing);
 
-                if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
-                    value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsParry) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsParry) : value;
+                if (WorldConfig.Values[WorldCfg.StatsLimitsEnable].Bool)
+                    value = value > WorldConfig.Values[WorldCfg.StatsLimitsParry].Float ? WorldConfig.Values[WorldCfg.StatsLimitsParry].Float : value;
             }
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ParryPercentage), value);
         }
@@ -1967,8 +1967,8 @@ namespace Game.Entities
             // apply diminishing formula to diminishing dodge Chance
             float value = CalculateDiminishingReturns(dodge_cap, GetClass(), nondiminishing, diminishing);
 
-            if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
-                value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsDodge) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsDodge) : value;
+            if (WorldConfig.Values[WorldCfg.StatsLimitsEnable].Bool)
+                value = value > WorldConfig.Values[WorldCfg.StatsLimitsDodge].Float ? WorldConfig.Values[WorldCfg.StatsLimitsDodge].Float : value;
 
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DodgePercentage), value);
         }
@@ -1988,8 +1988,8 @@ namespace Game.Entities
                 // Increase from rating
                 value += GetRatingBonusValue(CombatRating.Block);
 
-                if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
-                    value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsBlock) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsBlock) : value;
+                if (WorldConfig.Values[WorldCfg.StatsLimitsEnable].Bool)
+                    value = value > WorldConfig.Values[WorldCfg.StatsLimitsBlock].Float ? WorldConfig.Values[WorldCfg.StatsLimitsBlock].Float : value;
             }
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BlockPercentage), value);
         }
@@ -1998,8 +1998,8 @@ namespace Game.Entities
         {
             static float applyCritLimit(float value)
             {
-                if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
-                    value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) : value;
+                if (WorldConfig.Values[WorldCfg.StatsLimitsEnable].Bool)
+                    value = value > WorldConfig.Values[WorldCfg.StatsLimitsCrit].Float ? WorldConfig.Values[WorldCfg.StatsLimitsCrit].Float : value;
                 return value;
             }
 

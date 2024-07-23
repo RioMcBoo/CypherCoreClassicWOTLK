@@ -25,7 +25,7 @@ namespace Game.Chat
             SpecialLinkedArea = CliDB.AreaTableStorage.LookupByKey(3459);
             Cypher.Assert(SpecialLinkedArea.HasFlag(AreaFlags.LinkedChatSpecialArea));
 
-            if (!WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
+            if (!WorldConfig.Values[WorldCfg.PreserveCustomChannels].Bool)
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. Custom channel saving is disabled.");
                 return;
@@ -33,7 +33,7 @@ namespace Game.Chat
 
             uint count = 0;
             uint oldMSTime = Time.GetMSTime();
-            uint days = WorldConfig.GetUIntValue(WorldCfg.PreserveCustomChannelDuration);
+            uint days = (uint)WorldConfig.Values[WorldCfg.PreserveCustomChannelDuration].Int32;
             if (days != 0)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_OLD_CHANNELS);
@@ -93,7 +93,7 @@ namespace Game.Chat
 
         public static ChannelManager ForTeam(Team team)
         {
-            if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionChannel))
+            if (WorldConfig.Values[WorldCfg.AllowTwoSideInteractionChannel].Bool)
                 return allianceChannelMgr;        // cross-faction
 
             if (team == Team.Alliance)

@@ -546,7 +546,7 @@ namespace Game.Guilds
             if (pInvitee.GetSocial().HasIgnore(player.GetGUID(), player.GetSession().GetAccountGUID()))
                 return;
 
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && pInvitee.GetTeam() != player.GetTeam())
+            if (!WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGuild].Bool && pInvitee.GetTeam() != player.GetTeam())
             {
                 SendCommandResult(session, GuildCommandType.InvitePlayer, GuildCommandError.NotAllied, name);
                 return;
@@ -610,7 +610,7 @@ namespace Game.Guilds
         public void HandleAcceptMember(WorldSession session)
         {
             Player player = session.GetPlayer();
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) &&
+            if (!WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGuild].Bool &&
                 player.GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(GetLeaderGUID()))
                 return;
 
@@ -3181,7 +3181,7 @@ namespace Game.Guilds
 
             public LogHolder()
             {
-                m_maxRecords = WorldConfig.GetIntValue(typeof(T) == typeof(BankEventLogEntry) ? WorldCfg.GuildBankEventLogCount : WorldCfg.GuildEventLogCount);
+                m_maxRecords = WorldConfig.Values[typeof(T) == typeof(BankEventLogEntry) ? WorldCfg.GuildBankEventLogCount : WorldCfg.GuildEventLogCount].Int32;
                 m_nextGUID = GuildConst.EventLogGuidUndefined;
             }
 

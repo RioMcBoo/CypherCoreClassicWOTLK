@@ -968,7 +968,7 @@ namespace Game.Maps
         public virtual void OnPlayerLeave(Player player) { }
 
         // Return wether server allow two side groups or not
-        public bool ServerAllowsTwoSideGroups() { return WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup); }
+        public bool ServerAllowsTwoSideGroups() { return WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGroup].Bool; }
 
         public EncounterState GetBossState(int id) { return id < bosses.Count ? bosses[id].state : EncounterState.ToBeDecided; }
         public List<AreaBoundary> GetBossBoundary(int id) { return id < bosses.Count ? bosses[id].boundary : null; }

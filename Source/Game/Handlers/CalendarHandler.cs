@@ -307,7 +307,7 @@ namespace Game
                 if (_player == null || _player.GetGUID() != playerGuid)
                     return;
 
-                if (_player.GetTeam() != inviteeTeam && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionCalendar))
+                if (_player.GetTeam() != inviteeTeam && !WorldConfig.Values[WorldCfg.AllowTwoSideInteractionCalendar].Bool)
                 {
                     Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.NotAllied);
                     return;

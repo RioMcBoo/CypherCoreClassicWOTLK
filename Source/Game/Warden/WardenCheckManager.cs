@@ -27,7 +27,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             // Check if Warden is enabled by config before loading anything
-            if (!WorldConfig.GetBoolValue(WorldCfg.WardenEnabled))
+            if (!WorldConfig.Values[WorldCfg.WardenEnabled].Bool)
             {
                 Log.outInfo(LogFilter.Warden, "Warden disabled, loading checks skipped.");
                 return;
@@ -127,7 +127,7 @@ namespace Game
                 }
 
                 // initialize action with default action from config, this may be overridden later
-                wardenCheck.Action = (WardenActions)WorldConfig.GetIntValue(WorldCfg.WardenClientFailAction);
+                wardenCheck.Action = (WardenActions)WorldConfig.Values[WorldCfg.WardenClientFailAction].Int32;
 
                 _pools[(int)category].Add(id);
                 ++count;
@@ -142,7 +142,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             // Check if Warden is enabled by config before loading anything
-            if (!WorldConfig.GetBoolValue(WorldCfg.WardenEnabled))
+            if (!WorldConfig.Values[WorldCfg.WardenEnabled].Bool)
             {
                 Log.outInfo(LogFilter.Warden, "Warden disabled, loading check overrides skipped.");
                 return;

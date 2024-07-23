@@ -20,7 +20,7 @@ namespace Scripts.World.DuelReset
         public override void OnDuelStart(Player player1, Player player2)
         {
             // Cooldowns reset
-            if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelCooldowns))
+            if (WorldConfig.Values[WorldCfg.ResetDuelCooldowns].Bool)
             {
                 player1.GetSpellHistory().SaveCooldownStateBeforeDuel();
                 player2.GetSpellHistory().SaveCooldownStateBeforeDuel();
@@ -30,7 +30,7 @@ namespace Scripts.World.DuelReset
             }
 
             // Health and mana reset
-            if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelHealthMana))
+            if (WorldConfig.Values[WorldCfg.ResetDuelHealthMana].Bool)
             {
                 player1.SaveHealthBeforeDuel();
                 player1.SaveManaBeforeDuel();
@@ -49,7 +49,7 @@ namespace Scripts.World.DuelReset
             if (type == DuelCompleteType.Won)
             {
                 // Cooldown restore
-                if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelCooldowns))
+                if (WorldConfig.Values[WorldCfg.ResetDuelCooldowns].Bool)
                 {
                     ResetSpellCooldowns(winner, false);
                     ResetSpellCooldowns(loser, false);
@@ -59,7 +59,7 @@ namespace Scripts.World.DuelReset
                 }
 
                 // Health and mana restore
-                if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelHealthMana))
+                if (WorldConfig.Values[WorldCfg.ResetDuelHealthMana].Bool)
                 {
                     winner.RestoreHealthAfterDuel();
                     loser.RestoreHealthAfterDuel();

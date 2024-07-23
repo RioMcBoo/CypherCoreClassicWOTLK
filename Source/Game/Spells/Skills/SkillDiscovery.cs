@@ -227,7 +227,7 @@ namespace Game.Spells
             {
                 foreach (var item_iter in tab)
                 {
-                    if (RandomHelper.randChance(item_iter.chance * WorldConfig.GetFloatValue(WorldCfg.RateSkillDiscovery)) &&
+                    if (RandomHelper.randChance(item_iter.chance * WorldConfig.Values[WorldCfg.RateSkillDiscovery].Float) &&
                         item_iter.reqSkillValue <= skillvalue &&
                         !player.HasSpell(item_iter.spellId))
                         return item_iter.spellId;
@@ -245,7 +245,7 @@ namespace Game.Spells
             {
                 foreach (var item_iter in tab)
                 {
-                    if (RandomHelper.randChance(item_iter.chance * WorldConfig.GetFloatValue(WorldCfg.RateSkillDiscovery)) &&
+                    if (RandomHelper.randChance(item_iter.chance * WorldConfig.Values[WorldCfg.RateSkillDiscovery].Float) &&
                         item_iter.reqSkillValue <= skillvalue &&
                         !player.HasSpell(item_iter.spellId))
                         return item_iter.spellId;

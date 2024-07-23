@@ -600,7 +600,7 @@ namespace Game.Entities
                             {
                                 // regenerate health if cannot reach the target and the setting is set to do so.
                                 // this allows to disable the health regen of raid bosses if pathfinding has issues for whatever reason
-                                if (WorldConfig.GetBoolValue(WorldCfg.RegenHpCannotReachTargetInRaid) || !GetMap().IsRaid())
+                                if (WorldConfig.Values[WorldCfg.RegenHpCannotReachTargetInRaid].Bool || !GetMap().IsRaid())
                                 {
                                     RegenerateHealth();
                                     Log.outDebug(LogFilter.Unit,
@@ -656,7 +656,7 @@ namespace Game.Entities
                 case PowerType.Focus:
                     {
                         // For hunter pets.
-                        addvalue = 24 * WorldConfig.GetFloatValue(WorldCfg.RatePowerFocus);
+                        addvalue = 24 * WorldConfig.Values[WorldCfg.RatePowerFocus].Float;
                         break;
                     }
                 case PowerType.Energy:
@@ -672,7 +672,7 @@ namespace Game.Entities
                         {
                             if (!IsPowerRegenInterruptedByMP5Rule())
                             {
-                                float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
+                                float ManaIncreaseRate = WorldConfig.Values[WorldCfg.RatePowerMana].Float;
                                 float Spirit = GetStat(Stats.Spirit);
 
                                 addvalue = (int)((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
@@ -710,7 +710,7 @@ namespace Game.Entities
             // Not only pet, but any controlled creature (and not polymorphed)
             if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
             {
-                float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
+                float HealthIncreaseRate = WorldConfig.Values[WorldCfg.RateHealth].Float;
                 float Spirit = GetStat(Stats.Spirit);
 
                 if (GetPower(PowerType.Mana) > 0)
@@ -736,7 +736,7 @@ namespace Game.Entities
             if (HasAuraType(AuraType.PreventsFleeing))
                 return;
 
-            float radius = WorldConfig.GetFloatValue(WorldCfg.CreatureFamilyFleeAssistanceRadius);
+            float radius = WorldConfig.Values[WorldCfg.CreatureFamilyFleeAssistanceRadius].Float;
             if (radius > 0)
             {
                 var u_check = new NearestAssistCreatureInCreatureRangeCheck(this, GetVictim(), radius);
@@ -880,22 +880,25 @@ namespace Game.Entities
             switch (GetCreatureClassification())
             {
                 case CreatureClassifications.Elite:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayElite);
+                    m_corpseDelay = (uint)WorldConfig.Values[WorldCfg.CorpseDecayElite].Int32;
                     break;
                 case CreatureClassifications.RareElite:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayRareelite);
+                    m_corpseDelay = (uint)WorldConfig.Values[WorldCfg.CorpseDecayRareelite].Int32;
                     break;
                 case CreatureClassifications.Obsolete:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayObsolete);
+                    m_corpseDelay = (uint)WorldConfig.Values[WorldCfg.CorpseDecayObsolete].Int32;
                     break;
                 case CreatureClassifications.Rare:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayRare);
+                    m_corpseDelay = (uint)WorldConfig.Values[WorldCfg.CorpseDecayRare].Int32;
                     break;
                 case CreatureClassifications.Trivial:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayTrivial);
+                    m_corpseDelay = (uint)WorldConfig.Values[WorldCfg.CorpseDecayTrivial].Int32;
                     break;
                 case CreatureClassifications.MinusMob:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayMinusMob);
+                    m_corpseDelay = (uint)WorldConfig.Values[WorldCfg.CorpseDecayMinusMob].Int32;
+                    break;
+                default:
+                    m_corpseDelay = (uint)WorldConfig.Values[WorldCfg.CorpseDecayNormal].Int32;
                     break;
             }
 
@@ -1249,7 +1252,7 @@ namespace Game.Entities
 
         public void StartPickPocketRefillTimer()
         {
-            _pickpocketLootRestore = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.CreaturePickpocketRefill);
+            _pickpocketLootRestore = GameTime.GetGameTime() + WorldConfig.Values[WorldCfg.CreaturePickpocketRefill].Int32;
         }
 
         public void ResetPickPocketRefillTimer() { _pickpocketLootRestore = 0; }
@@ -1611,21 +1614,21 @@ namespace Game.Entities
             switch (classification)                                           // define rates for each elite rank
             {
                 case CreatureClassifications.Normal:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpNormal);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpNormal].Float;
                 case CreatureClassifications.Elite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpElite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpElite].Float;
                 case CreatureClassifications.RareElite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpRareelite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpRareelite].Float;
                 case CreatureClassifications.Obsolete:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpObsolete);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpObsolete].Float;
                 case CreatureClassifications.Rare:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpRare);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpRare].Float;
                 case CreatureClassifications.Trivial:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpTrivial);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpTrivial].Float;
                 case CreatureClassifications.MinusMob:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpMinusmob);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpMinusmob].Float;
                 default:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpElite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureHpElite].Float;
             }
         }
 
@@ -1645,21 +1648,21 @@ namespace Game.Entities
             switch (classification)
             {
                 case CreatureClassifications.Normal:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageNormal);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageNormal].Float;
                 case CreatureClassifications.Elite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageElite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageElite].Float;
                 case CreatureClassifications.RareElite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageRareelite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageRareelite].Float;
                 case CreatureClassifications.Obsolete:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageObsolete);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageObsolete].Float;
                 case CreatureClassifications.Rare:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageRare);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageRare].Float;
                 case CreatureClassifications.Trivial:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageTrivial);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageTrivial].Float;
                 case CreatureClassifications.MinusMob:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageMinusmob);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageMinusmob].Float;
                 default:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageElite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureDamageElite].Float;
             }
         }
 
@@ -1668,21 +1671,21 @@ namespace Game.Entities
             switch (classification)                                           // define rates for each elite rank
             {
                 case CreatureClassifications.Normal:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageNormal);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageNormal].Float;
                 case CreatureClassifications.Elite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageElite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageElite].Float;
                 case CreatureClassifications.RareElite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageRareelite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageRareelite].Float;
                 case CreatureClassifications.Obsolete:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageObsolete);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageObsolete].Float;
                 case CreatureClassifications.Rare:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageRare);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageRare].Float;
                 case CreatureClassifications.Trivial:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageTrivial);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageTrivial].Float;
                 case CreatureClassifications.MinusMob:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageMinusmob);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageMinusmob].Float;
                 default:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageElite);
+                    return WorldConfig.Values[WorldCfg.RateCreatureSpelldamageElite].Float;
             }
         }
 
@@ -1992,7 +1995,7 @@ namespace Game.Entities
 
         public float GetAttackDistance(Unit player)
         {
-            float aggroRate = WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro);
+            float aggroRate = WorldConfig.Values[WorldCfg.RateCreatureAggro].Float;
             if (aggroRate == 0)
                 return 0.0f;
 
@@ -2013,7 +2016,7 @@ namespace Game.Entities
             float aggroRadius = baseAggroDistance + levelDifference;
 
             // detect range auras
-            if ((creatureLevel + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if ((creatureLevel + 5) <= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
             {
                 aggroRadius += GetTotalAuraModifier(AuraType.ModDetectRange);
                 aggroRadius += player.GetTotalAuraModifier(AuraType.ModDetectedRange);
@@ -2042,8 +2045,8 @@ namespace Game.Entities
             {
                 m_corpseRemoveTime = GameTime.GetGameTime() + m_corpseDelay;
                 uint respawnDelay = m_respawnDelay;
-                uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
-                if (scalingMode != 0)
+                int scalingMode = WorldConfig.Values[WorldCfg.RespawnDynamicMode].Int32;
+                if (scalingMode > 0)
                     GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
 
                 // @todo remove the boss respawn time hack in a dynspawn follow-up once we have creature groups in instances
@@ -2239,8 +2242,8 @@ namespace Game.Entities
                 else
                 {
                     uint respawnDelay = m_respawnDelay;
-                    uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
-                    if (scalingMode != 0)
+                    int scalingMode = WorldConfig.Values[WorldCfg.RespawnDynamicMode].Int32;
+                    if (scalingMode > 0)
                         GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
                     m_respawnTime = GameTime.GetGameTime() + respawnDelay;
                     SaveRespawnTime();
@@ -2370,7 +2373,7 @@ namespace Game.Entities
             {
                 SetNoCallAssistance(true);
 
-                float radius = WorldConfig.GetFloatValue(WorldCfg.CreatureFamilyAssistanceRadius);
+                float radius = WorldConfig.Values[WorldCfg.CreatureFamilyAssistanceRadius].Float;
 
                 if (radius > 0)
                 {
@@ -2389,7 +2392,7 @@ namespace Game.Entities
                             e.AddAssistant(assistList.First().GetGUID());
                             assistList.Remove(assistList.First());
                         }
-                        m_Events.AddEvent(e, m_Events.CalculateTime(TimeSpan.FromMilliseconds(WorldConfig.GetUIntValue(WorldCfg.CreatureFamilyAssistanceDelay))));
+                        m_Events.AddEvent(e, m_Events.CalculateTime(TimeSpan.FromMilliseconds(WorldConfig.Values[WorldCfg.CreatureFamilyAssistanceDelay].Int32)));
                     }
                 }
             }
@@ -2850,7 +2853,7 @@ namespace Game.Entities
                 return;
 
             // Scripts can choose to ignore RATE_CORPSE_DECAY_LOOTED by calling SetCorpseDelay(timer, true)
-            float decayRate = m_ignoreCorpseDecayRatio ? 1.0f : WorldConfig.GetFloatValue(WorldCfg.RateCorpseDecayLooted);
+            float decayRate = m_ignoreCorpseDecayRatio ? 1.0f : WorldConfig.Values[WorldCfg.RateCorpseDecayLooted].Float;
 
             // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
             bool isFullySkinned()
@@ -2975,8 +2978,8 @@ namespace Game.Entities
             {
                 if (IsWorldBoss())
                 {
-                    int level = unitTarget.GetLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff);
-                    return MathFunctions.RoundToInterval(ref level, 1u, 255u);
+                    int level = unitTarget.GetLevel() + WorldConfig.Values[WorldCfg.WorldBossLevelDiff].Int32;
+                    return MathFunctions.RoundToInterval(ref level, 1, 255);
                 }
             }
 

@@ -321,7 +321,7 @@ namespace Scripts.Events.Brewfest
                 BroadcastTextId = RandomHelper.RAND(TextIds.SayThunderbrews1, TextIds.SayThunderbrews2, TextIds.SayThunderbrews3, TextIds.SayThunderbrews4);
 
             if (BroadcastTextId != 0)
-                target.Talk(BroadcastTextId, ChatMsg.Say, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
+                target.Talk(BroadcastTextId, ChatMsg.Say, WorldConfig.Values[WorldCfg.ListenRangeSay].Float, target);
         }
 
         public override void Register()

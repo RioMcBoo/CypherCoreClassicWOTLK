@@ -299,7 +299,7 @@ namespace BNetServer.REST
 
                             if (failedLogins >= maxWrongPassword)
                             {
-                                BanMode banType = ConfigMgr.GetDefaultValue("WrongPass.BanType", BanMode.IP);
+                                BanMode banType = ConfigMgr.GetDefaultEnumValue("WrongPass.BanType", BanMode.IP);
                                 int banTime = ConfigMgr.GetDefaultValue("WrongPass.BanTime", 600);
 
                                 if (banType == BanMode.Account)

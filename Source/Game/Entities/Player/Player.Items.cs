@@ -5456,7 +5456,7 @@ namespace Game.Entities
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
             bones.loot.gold = (uint)(RandomHelper.IRand(50, 150) * 0.016f * Math.Pow(GetLevel() / 5.76f, 2.5f) 
-                * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
 
             bones.lootRecipient = looterPlr;
             looterPlr.SendLoot(bones.loot);

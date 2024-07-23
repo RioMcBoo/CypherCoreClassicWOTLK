@@ -17,7 +17,7 @@ namespace Scripts.World.Achievements
         public override int OnGiveXP(Player player, int amount, Unit unit)
         {
             if (IsXPBoostActive())
-                amount = (int)(amount * WorldConfig.GetFloatValue(WorldCfg.RateXpBoost));
+                amount = (int)(amount * WorldConfig.Values[WorldCfg.RateXpBoost].Float);
 
             return amount;
         }
@@ -26,7 +26,7 @@ namespace Scripts.World.Achievements
         {
             long time = GameTime.GetGameTime();
             DateTime localTm = Time.UnixTimeToDateTime(time);
-            uint weekdayMaskBoosted = WorldConfig.GetUIntValue(WorldCfg.XpBoostDaymask);
+            uint weekdayMaskBoosted = WorldConfig.Values[WorldCfg.XpBoostDaymask].UInt32;
             uint weekdayMask = (1u << (int)localTm.DayOfWeek);
             bool currentDayBoosted = (weekdayMask & weekdayMaskBoosted) != 0;
             return currentDayBoosted;

@@ -14,7 +14,7 @@ namespace Game.Chat.Commands
         [Command("togglesystem", RBACPermissions.CommandTicketTogglesystem, true)]
         static bool HandleToggleGMTicketSystem(CommandHandler handler)
         {
-            if (!WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled))
+            if (!WorldConfig.Values[WorldCfg.SupportTicketsEnabled].Bool)
             {
                 handler.SendSysMessage(CypherStrings.DisallowTicketsConfig);
                 return true;

@@ -63,7 +63,7 @@ namespace Game
             GameObjectTemplate info = Global.ObjectMgr.GetGameObjectTemplate(packet.GameObjectID);
             if (info != null)
             {
-                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+                if (!WorldConfig.Values[WorldCfg.CacheDataQueries].Bool)
                     info.InitializeQueryData();
 
                 QueryGameObjectResponse queryGameObjectResponse = info.QueryData;
@@ -104,7 +104,7 @@ namespace Game
                 Difficulty difficulty = _player.GetMap().GetDifficultyID();
 
                 // Cache only exists for difficulty base
-                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries) && difficulty == Difficulty.None)
+                if (!WorldConfig.Values[WorldCfg.CacheDataQueries].Bool && difficulty == Difficulty.None)
                     SendPacket(ci.QueryData[(int)GetSessionDbLocaleIndex()]);
                 else
                 {

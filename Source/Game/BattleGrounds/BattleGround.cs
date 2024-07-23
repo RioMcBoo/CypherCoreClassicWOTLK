@@ -391,7 +391,7 @@ namespace Game.BattleGrounds
                         }
                     }
                     // Announce BG starting
-                    if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundQueueAnnouncerEnable))
+                    if (WorldConfig.Values[WorldCfg.BattlegroundQueueAnnouncerEnable].Bool)
                         Global.WorldMgr.SendWorldText(CypherStrings.BgStartedAnnounceWorld, GetName(), GetMinLevel(), GetMaxLevel());
                 }
             }
@@ -607,7 +607,7 @@ namespace Game.BattleGrounds
 
             PreparedStatement stmt;
             ulong battlegroundId = 1;
-            if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
+            if (IsBattleground() && WorldConfig.Values[WorldCfg.BattlegroundStoreStatisticsEnable].Bool)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PVPSTATS_MAXID);
                 SQLResult result = DB.Characters.Query(stmt);
@@ -660,10 +660,15 @@ namespace Game.BattleGrounds
                 player.RemoveAura(BattlegroundConst.SpellHonorableDefender25y);
                 player.RemoveAura(BattlegroundConst.SpellHonorableDefender60y);
 
-                int winnerKills = player.GetRandomWinner() ? WorldConfig.GetIntValue(WorldCfg.BgRewardWinnerHonorLast) : WorldConfig.GetIntValue(WorldCfg.BgRewardWinnerHonorFirst);
-                int loserKills = player.GetRandomWinner() ? WorldConfig.GetIntValue(WorldCfg.BgRewardLoserHonorLast) : WorldConfig.GetIntValue(WorldCfg.BgRewardLoserHonorFirst);
+                int winnerKills = player.GetRandomWinner() 
+                    ? WorldConfig.Values[WorldCfg.BgRewardWinnerHonorLast].Int32 
+                    : WorldConfig.Values[WorldCfg.BgRewardWinnerHonorFirst].Int32;
 
-                if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
+                int loserKills = player.GetRandomWinner() 
+                    ? WorldConfig.Values[WorldCfg.BgRewardLoserHonorLast].Int32 
+                    : WorldConfig.Values[WorldCfg.BgRewardLoserHonorFirst].Int32;
+
+                if (IsBattleground() && WorldConfig.Values[WorldCfg.BattlegroundStoreStatisticsEnable].Bool)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PVPSTATS_PLAYER);
                     var score = PlayerScores.LookupByKey(player.GetGUID());
@@ -1140,8 +1145,11 @@ namespace Game.BattleGrounds
         public int GetFreeSlotsForTeam(Team team)
         {
             // if BG is starting and WorldCfg.BattlegroundInvitationType == BattlegroundQueueInvitationTypeB.NoBalance, invite anyone
-            if (GetStatus() == BattlegroundStatus.WaitJoin && WorldConfig.GetIntValue(WorldCfg.BattlegroundInvitationType) == (int)BattlegroundQueueInvitationType.NoBalance)
+            if (GetStatus() == BattlegroundStatus.WaitJoin 
+                && WorldConfig.Values[WorldCfg.BattlegroundInvitationType].Int32 == (int)BattlegroundQueueInvitationType.NoBalance)
+            {
                 return (GetInvitedCount(team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(team) : 0;
+            }
 
             // if BG is already started
             // or WorldCfg.BattlegroundInvitationType != BattlegroundQueueInvitationType.NoBalance,
@@ -1727,7 +1735,7 @@ namespace Game.BattleGrounds
 
         void RewardXPAtKill(Player killer, Player victim)
         {
-            if (WorldConfig.GetBoolValue(WorldCfg.BgXpForKill) && killer != null && victim != null)
+            if (WorldConfig.Values[WorldCfg.BgXpForKill].Bool && killer != null && victim != null)
                 new KillRewarder([killer], victim, true).Reward();
         }
 

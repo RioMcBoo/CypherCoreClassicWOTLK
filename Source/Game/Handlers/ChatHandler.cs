@@ -130,13 +130,13 @@ namespace Game
                         case ChatMsg.Raid:
                         case ChatMsg.RaidWarning:
                             // allow two side chat at group channel if two side group allowed
-                            if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup))
+                            if (WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGroup].Bool)
                                 lang = Language.Universal;
                             break;
                         case ChatMsg.Guild:
                         case ChatMsg.Officer:
                             // allow two side chat at guild channel if two side guild allowed
-                            if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild))
+                            if (WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGuild].Bool)
                                 lang = Language.Universal;
                             break;
                     }
@@ -173,9 +173,9 @@ namespace Game
                     if (!sender.IsAlive())
                         return;
 
-                    if (sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatSayLevelReq))
+                    if (sender.GetLevel() < WorldConfig.Values[WorldCfg.ChatSayLevelReq].Int32)
                     {
-                        SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.GetIntValue(WorldCfg.ChatSayLevelReq));
+                        SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.Values[WorldCfg.ChatSayLevelReq].Int32);
                         return;
                     }
 
@@ -186,9 +186,9 @@ namespace Game
                     if (!sender.IsAlive())
                         return;
 
-                    if (sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatEmoteLevelReq))
+                    if (sender.GetLevel() < WorldConfig.Values[WorldCfg.ChatEmoteLevelReq].Int32)
                     {
-                        SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.GetIntValue(WorldCfg.ChatEmoteLevelReq));
+                        SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.Values[WorldCfg.ChatEmoteLevelReq].Int32);
                         return;
                     }
 
@@ -199,9 +199,9 @@ namespace Game
                     if (!sender.IsAlive())
                         return;
 
-                    if (sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatYellLevelReq))
+                    if (sender.GetLevel() < WorldConfig.Values[WorldCfg.ChatYellLevelReq].Int32)
                     {
-                        SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.GetIntValue(WorldCfg.ChatYellLevelReq));
+                        SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.Values[WorldCfg.ChatYellLevelReq].Int32);
                         return;
                     }
 
@@ -227,9 +227,9 @@ namespace Game
                     // Apply checks only if receiver is not already in whitelist and if receiver is not a GM with ".whisper on"
                     if (!receiver.IsInWhisperWhiteList(sender.GetGUID()) && !receiver.IsGameMasterAcceptingWhispers())
                     {
-                        if (!sender.IsGameMaster() && sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq))
+                        if (!sender.IsGameMaster() && sender.GetLevel() < WorldConfig.Values[WorldCfg.ChatWhisperLevelReq].Int32)
                         {
-                            SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.WhisperReq), WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq));
+                            SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.WhisperReq), WorldConfig.Values[WorldCfg.ChatWhisperLevelReq].Int32);
                             return;
                         }
 
@@ -246,7 +246,7 @@ namespace Game
                         return;
                     }
 
-                    if (receiver.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq) ||
+                    if (receiver.GetLevel() < WorldConfig.Values[WorldCfg.ChatWhisperLevelReq].Int32 ||
                         (HasPermission(RBACPermissions.CanFilterWhispers) && !sender.IsAcceptWhispers() && !sender.IsInWhisperWhiteList(receiver.GetGUID())))
                         sender.AddWhisperWhiteList(receiver.GetGUID());
 
@@ -316,8 +316,11 @@ namespace Game
                 case ChatMsg.RaidWarning:
                 {
                     Group group = GetPlayer().GetGroup();
-                    if (group == null || !(group.IsRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
+                    if (group == null || !(group.IsRaidGroup() || WorldConfig.Values[WorldCfg.ChatPartyRaidWarnings].Bool)
+                        || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
+                    {
                         return;
+                    }
 
                     Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
@@ -330,9 +333,9 @@ namespace Game
                 case ChatMsg.Channel:
                     if (!HasPermission(RBACPermissions.SkipCheckChatChannelReq))
                     {
-                        if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatChannelLevelReq))
+                        if (GetPlayer().GetLevel() < WorldConfig.Values[WorldCfg.ChatChannelLevelReq].Int32)
                         {
-                            SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.ChannelReq), WorldConfig.GetIntValue(WorldCfg.ChatChannelLevelReq));
+                            SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.ChannelReq), WorldConfig.Values[WorldCfg.ChatChannelLevelReq].Int32);
                             return;
                         }
                     }
@@ -394,7 +397,7 @@ namespace Game
                 return;
 
             // Disabled addon channel?
-            if (!WorldConfig.GetBoolValue(WorldCfg.AddonChannel))
+            if (!WorldConfig.Values[WorldCfg.AddonChannel].Bool)
                 return;
 
             if (prefix == AddonChannelCommandHandler.PREFIX && new AddonChannelCommandHandler(this).ParseCommands(text))
@@ -593,7 +596,7 @@ namespace Game
             textEmote.TargetGUID = packet.Target;
             textEmote.EmoteID = packet.EmoteID;
             textEmote.SoundIndex = packet.SoundIndex;
-            GetPlayer().SendMessageToSetInRange(textEmote, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true);
+            GetPlayer().SendMessageToSetInRange(textEmote, WorldConfig.Values[WorldCfg.ListenRangeTextemote].Float, true);
 
             Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Target);
 

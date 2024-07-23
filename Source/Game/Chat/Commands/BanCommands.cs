@@ -44,14 +44,14 @@ namespace Game.Chat.Commands
                 {
                     if (duration > 0)
                     {
-                        if (WorldConfig.GetBoolValue(WorldCfg.ShowBanInWorld))
+                        if (WorldConfig.Values[WorldCfg.ShowBanInWorld].Bool)
                             Global.WorldMgr.SendWorldText(CypherStrings.BanCharacterYoubannedmessageWorld, author, playerName, Time.secsToTimeString(duration, TimeFormat.ShortText), reason);
                         else
                             handler.SendSysMessage(CypherStrings.BanYoubanned, playerName, Time.secsToTimeString(duration, TimeFormat.ShortText), reason);
                     }
                     else
                     {
-                        if (WorldConfig.GetBoolValue(WorldCfg.ShowBanInWorld))
+                        if (WorldConfig.Values[WorldCfg.ShowBanInWorld].Bool)
                             Global.WorldMgr.SendWorldText(CypherStrings.BanCharacterYoupermbannedmessageWorld, author, playerName, reason);
                         else
                             handler.SendSysMessage(CypherStrings.BanYoupermbanned, playerName, reason);
@@ -111,14 +111,14 @@ namespace Game.Chat.Commands
                 case BanReturn.Success:
                     if (duration > 0)
                     {
-                        if (WorldConfig.GetBoolValue(WorldCfg.ShowBanInWorld))
+                        if (WorldConfig.Values[WorldCfg.ShowBanInWorld].Bool)
                             Global.WorldMgr.SendWorldText(CypherStrings.BanAccountYoubannedmessageWorld, author, nameOrIP, Time.secsToTimeString(duration), reason);
                         else
                             handler.SendSysMessage(CypherStrings.BanYoubanned, nameOrIP, Time.secsToTimeString(duration, TimeFormat.ShortText), reason);
                     }
                     else
                     {
-                        if (WorldConfig.GetBoolValue(WorldCfg.ShowBanInWorld))
+                        if (WorldConfig.Values[WorldCfg.ShowBanInWorld].Bool)
                             Global.WorldMgr.SendWorldText(CypherStrings.BanAccountYoupermbannedmessageWorld, author, nameOrIP, reason);
                         else
                             handler.SendSysMessage(CypherStrings.BanYoupermbanned, nameOrIP, reason);

@@ -35,7 +35,7 @@ namespace Game
             _accountName = name;
             _battlenetAccountId = battlenetAccountId;
             m_accountExpansion = expansion;
-            m_expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.GetIntValue(WorldCfg.Expansion));
+            m_expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.Values[WorldCfg.Expansion].Int32);
             _os = os;
             m_sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
             m_sessionDbLocaleIndex = locale;
@@ -510,7 +510,7 @@ namespace Game
             ConnectTo connectTo = new();
             connectTo.Key = _instanceConnectKey.Raw;
             connectTo.Serial = serial;
-            connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
+            connectTo.Payload.Port = (ushort)WorldConfig.Values[WorldCfg.PortInstance].Int32;
             connectTo.Con = (byte)ConnectionType.Instance;
 
             if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
@@ -615,7 +615,7 @@ namespace Game
                 $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} " +
                 $"sent a message with an invalid link:\n{str}");
 
-            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
+            if (WorldConfig.Values[WorldCfg.ChatStrictLinkCheckingKick].Int32 > 0)
                 KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
 
             return false;
@@ -630,7 +630,7 @@ namespace Game
                 $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) " +
                 $"sent a message which illegally contained a hyperlink:\n{str}");
 
-            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
+            if (WorldConfig.Values[WorldCfg.ChatStrictLinkCheckingKick].Int32 > 0)
                 KickPlayer("WorldSession::DisallowHyperlinksAndMaybeKick Illegal chat link");
 
             return false;
@@ -839,7 +839,7 @@ namespace Game
 
             SendSetTimeZoneInformation();
             SendFeatureSystemStatusGlueScreen();
-            SendClientCacheVersion(WorldConfig.GetUIntValue(WorldCfg.ClientCacheVersion));
+            SendClientCacheVersion(WorldConfig.Values[WorldCfg.ClientCacheVersion].UInt32);
             SendAvailableHotfixes();
             SendAccountDataTimes(ObjectGuid.Empty, AccountDataTypeMask.GlobalCacheMask);
             SendTutorialsData();
@@ -944,9 +944,9 @@ namespace Game
         public void ResetTimeOutTime(bool onlyActive)
         {
             if (GetPlayer() != null)
-                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
+                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.Values[WorldCfg.SocketTimeoutTimeActive].Int32;
             else if (!onlyActive)
-                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
+                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.Values[WorldCfg.SocketTimeoutTime].Int32;
         }
 
         bool IsConnectionIdle()
@@ -1070,7 +1070,7 @@ namespace Game
         public DosProtection(WorldSession s)
         {
             Session = s;
-            _policy = (Policy)WorldConfig.GetIntValue(WorldCfg.PacketSpoofPolicy);
+            _policy = (Policy)WorldConfig.Values[WorldCfg.PacketSpoofPolicy].Int32;
         }
 
         //todo fix me
@@ -1109,8 +1109,8 @@ namespace Game
                     Log.outInfo(LogFilter.Network, "AntiDOS: Player kicked!");
                     return false;
                 case Policy.Ban:
-                    BanMode bm = (BanMode)WorldConfig.GetIntValue(WorldCfg.PacketSpoofBanmode);
-                    uint duration = WorldConfig.GetUIntValue(WorldCfg.PacketSpoofBanduration); // in seconds
+                    BanMode bm = (BanMode)WorldConfig.Values[WorldCfg.PacketSpoofBanmode].Int32;
+                    uint duration = (uint)WorldConfig.Values[WorldCfg.PacketSpoofBanduration].Int32; // in seconds
                     string nameOrIp = "";
                     switch (bm)
                     {

@@ -223,7 +223,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Maps, 
                     $"Creating grid[{p.X_coord}, {p.Y_coord}] for map {GetId()} instance {i_InstanceId}");
 
-                var grid = new Grid(p.X_coord * MapConst.MaxGrids + p.Y_coord, p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
+                var grid = new Grid(p.X_coord * MapConst.MaxGrids + p.Y_coord, p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.Values[WorldCfg.GridUnload].Bool);
                 grid.SetGridState(GridState.Idle);
                 SetGrid(grid, p.X_coord, p.Y_coord);
 
@@ -582,7 +582,7 @@ namespace Game.Maps
             {
                 ProcessRespawns();
                 UpdateSpawnGroupConditions();
-                _respawnCheckTimer = WorldConfig.GetUIntValue(WorldCfg.RespawnMinCheckIntervalMs);
+                _respawnCheckTimer = (uint)WorldConfig.Values[WorldCfg.RespawnMinCheckIntervalMs].Int32;
             }
             else
                 _respawnCheckTimer -= diff;
@@ -1657,7 +1657,7 @@ namespace Game.Maps
             if (checks.HasAnyFlag(LineOfSightChecks.Vmap) && !Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, GetId(), m_terrain, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags))
                 return false;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.CheckGobjectLos)
+            if (WorldConfig.Values[WorldCfg.CheckGobjectLos].Bool
                 && checks.HasAnyFlag(LineOfSightChecks.Gobject)
                 && !_dynamicTree.IsInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift))
             {
@@ -1708,9 +1708,9 @@ namespace Game.Maps
             }
 
             Group group = player.GetGroup();
-            if (entry.IsRaid && (int)entry.Expansion >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
+            if (entry.IsRaid && entry.Expansion >= (Expansion)WorldConfig.Values[WorldCfg.Expansion].Int32) // can only enter in a raid group but raids from old expansion don't need a group
             {
-                if ((group == null || !group.IsRaidGroup()) && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
+                if ((group == null || !group.IsRaidGroup()) && !WorldConfig.Values[WorldCfg.InstanceIgnoreRaid].Bool)
                     return new TransferAbortParams(TransferAbortReason.NeedGroup);
             }
 
@@ -1890,7 +1890,7 @@ namespace Game.Maps
                 case SpawnObjectType.Creature:
                 {
                     // escort check for creatures only (if the world config boolean is set)
-                    bool isEscort = WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
+                    bool isEscort = WorldConfig.Values[WorldCfg.RespawnDynamicEscortNpc].Bool && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
 
                     var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
                     foreach (var creature in range)
@@ -2208,7 +2208,7 @@ namespace Game.Maps
             }
         }
 
-        public void ApplyDynamicModeRespawnScaling(WorldObject obj, long spawnId, ref uint respawnDelay, uint mode)
+        public void ApplyDynamicModeRespawnScaling(WorldObject obj, long spawnId, ref uint respawnDelay, int mode)
         {
             Cypher.Assert(mode == 1);
             Cypher.Assert(obj.GetMap() == this);
@@ -2243,11 +2243,12 @@ namespace Game.Maps
             if (playerCount == 0)
                 return;
 
-            double adjustFactor = WorldConfig.GetFloatValue(type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicRateGameobject : WorldCfg.RespawnDynamicRateCreature) / playerCount;
+            float adjustFactor = WorldConfig.Values[type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicRateGameobject : WorldCfg.RespawnDynamicRateCreature].Float / playerCount;
             if (adjustFactor >= 1.0) // nothing to do here
                 return;
 
-            uint timeMinimum = WorldConfig.GetUIntValue(type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicMinimumGameObject : WorldCfg.RespawnDynamicMinimumCreature);
+            uint timeMinimum = (uint)WorldConfig.Values[type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicMinimumGameObject : WorldCfg.RespawnDynamicMinimumCreature].Int32;
+            
             if (respawnDelay <= timeMinimum)
                 return;
 
@@ -3048,9 +3049,9 @@ namespace Game.Maps
 
             // create the bones only if the map and the grid is loaded at the corpse's location
             // ignore bones creating option in case insignia
-            if ((insignia ||
-                (IsBattlegroundOrArena() ? WorldConfig.GetBoolValue(WorldCfg.DeathBonesBgOrArena) : WorldConfig.GetBoolValue(WorldCfg.DeathBonesWorld))) &&
-                !IsRemovalGrid(corpse.GetPositionX(), corpse.GetPositionY()))
+            if ((insignia
+                || (IsBattlegroundOrArena() ? WorldConfig.Values[WorldCfg.DeathBonesBgOrArena].Bool : WorldConfig.Values[WorldCfg.DeathBonesWorld].Bool))
+                && !IsRemovalGrid(corpse.GetPositionX(), corpse.GetPositionY()))
             {
                 // Create bones, don't change Corpse
                 bones = new Corpse();
@@ -5052,7 +5053,7 @@ namespace Game.Maps
 
             // the timer is started by default, and stopped when the first player joins
             // this make sure it gets unloaded if for some reason no player joins
-            m_unloadTimer = (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
+            m_unloadTimer = (uint)Math.Max(WorldConfig.Values[WorldCfg.InstanceUnloadDelay].Int32, 1);
 
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == BattleGroundTeamId.Alliance ? 1 : 0, false, this);
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == BattleGroundTeamId.Horde ? 1 : 0, false, this);
@@ -5194,7 +5195,7 @@ namespace Game.Maps
 
             // if last player set unload timer
             if (m_unloadTimer == 0 && GetPlayers().Count == 1)
-                m_unloadTimer = (i_instanceLock != null && i_instanceLock.IsExpired()) ? 1 : (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
+                m_unloadTimer = (i_instanceLock != null && i_instanceLock.IsExpired()) ? 1 : (uint)Math.Max(WorldConfig.Values[WorldCfg.InstanceUnloadDelay].Int32, 1);
 
             if (i_scenario != null)
                 i_scenario.OnPlayerExit(player);

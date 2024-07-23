@@ -3679,7 +3679,7 @@ namespace Game.Entities
             (searcher ?? this).UpdateAllowedPositionZ(x, y, ref z);
 
             // if detection disabled, return first point
-            if (!WorldConfig.GetBoolValue(WorldCfg.DetectPosCollision))
+            if (!WorldConfig.Values[WorldCfg.DetectPosCollision].Bool)
                 return;
 
             // return if the point is already in LoS

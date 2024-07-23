@@ -113,7 +113,7 @@ namespace Game.Mails
             }
 
             // If theres is an item, there is a one hour delivery delay.
-            uint deliver_delay = needItemDelay ? WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay) : 0;
+            uint deliver_delay = needItemDelay ? (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32 : 0;
 
             // will delete item or place to receiver mail list
             SendMailTo(trans, new MailReceiver(receiver, receiver_guid), new MailSender(MailMessageType.Normal, senderGuid), MailCheckFlags.Returned, deliver_delay);
@@ -140,7 +140,7 @@ namespace Game.Mails
 
             // auction mail without any items and money
             if (sender.GetMailMessageType() == MailMessageType.Auction && m_items.Empty() && m_money == 0)
-                expire_delay = WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay);
+                expire_delay = (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32;
             // default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
             else
                 if (m_COD != 0)

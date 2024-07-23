@@ -2583,7 +2583,7 @@ namespace Game.Entities
         void _SaveStats(SQLTransaction trans)
         {
             // check if stat saving is enabled and if char level is high enough
-            if (WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave) == 0 || GetLevel() < WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave))
+            if (WorldConfig.Values[WorldCfg.MinLevelStatSave].Int32 == 0 || GetLevel() < WorldConfig.Values[WorldCfg.MinLevelStatSave].Int32)
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_STATS);
@@ -3546,7 +3546,7 @@ namespace Game.Entities
             // GM state
             if (GetSession().HasPermission(RBACPermissions.RestoreSavedGmState))
             {
-                switch (WorldConfig.GetIntValue(WorldCfg.GmLoginState))
+                switch (WorldConfig.Values[WorldCfg.GmLoginState].Int32)
                 {
                     default:
                     case 0:
@@ -3560,7 +3560,7 @@ namespace Game.Entities
                         break;
                 }
 
-                switch (WorldConfig.GetIntValue(WorldCfg.GmVisibleState))
+                switch (WorldConfig.Values[WorldCfg.GmVisibleState].Int32)
                 {
                     default:
                     case 0:
@@ -3574,7 +3574,7 @@ namespace Game.Entities
                         break;
                 }
 
-                switch (WorldConfig.GetIntValue(WorldCfg.GmChat))
+                switch (WorldConfig.Values[WorldCfg.GmChat].Int32)
                 {
                     default:
                     case 0:
@@ -3588,7 +3588,7 @@ namespace Game.Entities
                         break;
                 }
 
-                switch (WorldConfig.GetIntValue(WorldCfg.GmWhisperingTo))
+                switch (WorldConfig.Values[WorldCfg.GmWhisperingTo].Int32)
                 {
                     default:
                     case 0:
@@ -3626,8 +3626,8 @@ namespace Game.Entities
                 //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
                 float bubble1 = 0.125f;
                 float bubble = is_logout_resting > 0
-                    ? bubble1 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInTavernOrCity)
-                    : bubble0 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInWilderness);
+                    ? bubble1 * WorldConfig.Values[WorldCfg.RateRestOfflineInTavernOrCity].Float
+                    : bubble0 * WorldConfig.Values[WorldCfg.RateRestOfflineInWilderness].Float;
 
                 _restMgr.AddRestBonus(RestTypes.XP, time_diff * _restMgr.CalcExtraPerSec(RestTypes.XP, bubble));
             }
@@ -3658,7 +3658,7 @@ namespace Game.Entities
         public void SaveToDB(SQLTransaction loginTransaction, SQLTransaction characterTransaction, bool create = false)
         {
             // delay auto save at any saves (manual, in code, or autosave)
-            m_nextSave = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
+            m_nextSave = (uint)WorldConfig.Values[WorldCfg.IntervalSave].Int32;
 
             //lets allow only players in world to be saved
             if (IsBeingTeleportedFar())
@@ -3989,7 +3989,7 @@ namespace Game.Entities
 
             // check if stats should only be saved on logout
             // save stats can be out of transaction
-            if (GetSession().IsLogingOut() || !WorldConfig.GetBoolValue(WorldCfg.StatsSaveOnlyOnLogout))
+            if (GetSession().IsLogingOut() || !WorldConfig.Values[WorldCfg.StatsSaveOnlyOnLogout].Bool)
                 _SaveStats(characterTransaction);
 
             // TODO: Move this out
@@ -4087,7 +4087,7 @@ namespace Game.Entities
 
             // Convert guid to low GUID for CharacterNameData, but also other methods on success
             var guid = playerGuid.GetCounter();
-            CharDeleteMethod charDelete_method = (CharDeleteMethod)WorldConfig.GetIntValue(WorldCfg.ChardeleteMethod);
+            CharDeleteMethod charDelete_method = (CharDeleteMethod)WorldConfig.Values[WorldCfg.ChardeleteMethod].Int32;
             CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(playerGuid);
             string name = "<Unknown>";
             if (characterInfo != null)
@@ -4101,11 +4101,11 @@ namespace Game.Entities
                 int charDeleteMinLvl;
 
                 if (characterInfo.ClassId == Class.Deathknight)
-                    charDeleteMinLvl = WorldConfig.GetIntValue(WorldCfg.ChardeleteDeathKnightMinLevel);
+                    charDeleteMinLvl = WorldConfig.Values[WorldCfg.ChardeleteDeathKnightMinLevel].Int32;
                 else if (characterInfo.ClassId == Class.DemonHunter)
-                    charDeleteMinLvl = WorldConfig.GetIntValue(WorldCfg.ChardeleteDemonHunterMinLevel);
+                    charDeleteMinLvl = WorldConfig.Values[WorldCfg.ChardeleteDemonHunterMinLevel].Int32;
                 else
-                    charDeleteMinLvl = WorldConfig.GetIntValue(WorldCfg.ChardeleteMinLevel);
+                    charDeleteMinLvl = WorldConfig.Values[WorldCfg.ChardeleteMinLevel].Int32;
 
                 // if we want to finalize the character removal or the character
                 // does not meet the level requirement of either heroic or non-heroic settings,
@@ -4522,7 +4522,7 @@ namespace Game.Entities
 
         public static void DeleteOldCharacters()
         {
-            int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
+            int keepDays = WorldConfig.Values[WorldCfg.ChardeleteKeepDays].Int32;
             if (keepDays == 0)
                 return;
 

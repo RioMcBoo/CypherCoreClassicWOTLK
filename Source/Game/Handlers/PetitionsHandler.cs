@@ -30,7 +30,7 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             var charterItemID = GuildConst.CharterItemId;
-            var cost = WorldConfig.GetIntValue(WorldCfg.CharterCostGuild);
+            var cost = WorldConfig.Values[WorldCfg.CharterCostGuild].UInt32;
 
             // do not let if already in guild.
             if (GetPlayer().GetGuildId() != 0)
@@ -153,7 +153,7 @@ namespace Game
                 return;
             }
 
-            uint reqSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
+            int reqSignatures = WorldConfig.Values[WorldCfg.MinPetitionSigns].Int32;
 
             PetitionInfo petitionInfo = new();
             petitionInfo.PetitionID = (int)petitionGuid.GetCounter();
@@ -216,13 +216,14 @@ namespace Game
             }
 
             ObjectGuid ownerGuid = petition.ownerGuid;
-            uint signs = (uint)petition.Signatures.Count;
+            int signs = petition.Signatures.Count;
 
             if (ownerGuid == GetPlayer().GetGUID())
                 return;
 
             // not let enemies sign guild charter
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && GetPlayer().GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(ownerGuid))
+            if (!WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGuild].Bool 
+                && GetPlayer().GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(ownerGuid))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NotAllied);
                 return;
@@ -320,7 +321,8 @@ namespace Game
             if (petition == null)
                 return;
 
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && GetPlayer().GetTeam() != player.GetTeam())
+            if (!WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGuild].Bool 
+                && GetPlayer().GetTeam() != player.GetTeam())
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NotAllied);
                 return;
@@ -382,7 +384,7 @@ namespace Game
             }
 
             var signatures = petition.Signatures; // we need a copy, Guild::AddMember invalidates petition
-            uint requiredSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
+            int requiredSignatures = WorldConfig.Values[WorldCfg.MinPetitionSigns].Int32;
 
             // Notify player if signatures are missing
             if (signatures.Count < requiredSignatures)
@@ -447,7 +449,7 @@ namespace Game
 
             ServerPetitionShowList packet = new();
             packet.Unit = guid;
-            packet.Price = WorldConfig.GetUIntValue(WorldCfg.CharterCostGuild);
+            packet.Price = WorldConfig.Values[WorldCfg.CharterCostGuild].UInt32;
             SendPacket(packet);
         }
     }

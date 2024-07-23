@@ -1753,7 +1753,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.ServerExpansionEqualOrGreaterThan: // 92
-                    if (WorldConfig.GetIntValue(WorldCfg.Expansion) < reqValue)
+                    if (WorldConfig.Values[WorldCfg.Expansion].Int32 < reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerHasBattlePetJournalLock: // 93
@@ -1945,11 +1945,11 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.PvpSeasonIsActive: // 124
-                    if (!WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress))
+                    if (!WorldConfig.Values[WorldCfg.ArenaSeasonInProgress].Bool)
                         return false;
                     break;
                 case ModifierTreeType.PvpSeason: // 125
-                    if (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) != reqValue)
+                    if (WorldConfig.Values[WorldCfg.ArenaSeasonId].Int32 != reqValue)
                         return false;
                     break;
                 case ModifierTreeType.GarrisonTierEqualOrGreaterThan: // 126

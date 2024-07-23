@@ -571,10 +571,10 @@ namespace Game
                 return;
             }
 
-            if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
+            if (GetPlayer().GetLevel() < WorldConfig.Values[WorldCfg.TradeLevelReq].Int32)
             {
                 SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeReq), 
-                    WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+                    WorldConfig.Values[WorldCfg.TradeLevelReq].Int32);
 
                 info.Status = TradeStatus.Failed;
                 SendTradeStatus(info);
@@ -627,7 +627,7 @@ namespace Game
             if ((pOther.GetTeam() != GetPlayer().GetTeam() || 
                 pOther.HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ||
                 GetPlayer().HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode)) &&
-                (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideTrade) &&
+                (!WorldConfig.Values[WorldCfg.AllowTwoSideTrade].Bool &&
                 !HasPermission(RBACPermissions.AllowTwoSideTrade)))
             {
                 info.Status = TradeStatus.WrongFaction;
@@ -642,10 +642,10 @@ namespace Game
                 return;
             }
 
-            if (pOther.GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
+            if (pOther.GetLevel() < WorldConfig.Values[WorldCfg.TradeLevelReq].Int32)
             {
                 SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeOtherReq), 
-                    WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+                    WorldConfig.Values[WorldCfg.TradeLevelReq].Int32);
 
                 info.Status = TradeStatus.Failed;
                 SendTradeStatus(info);

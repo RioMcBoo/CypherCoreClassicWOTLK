@@ -36,20 +36,20 @@ namespace Game.Chat
             else
                 dbPortOutput = $"Realm Id: {Global.WorldMgr.GetRealmId().Index} not found in `realmlist` table. Please check your setup";
 
-            DatabaseTypeFlags updateFlags = ConfigMgr.GetDefaultValue("Updates.EnableDatabases", DatabaseTypeFlags.None);
+            DatabaseTypeFlags updateFlags = ConfigMgr.GetDefaultEnumValue("Updates.EnableDatabases", DatabaseTypeFlags.None);
             if (updateFlags == 0)
                 handler.SendSysMessage("Automatic database updates are disabled for all databases!");
             else
                 handler.SendSysMessage($"Automatic database updates are enabled for the following databases: {updateFlags}");
 
-            handler.SendSysMessage($"Worldserver listening connections on port {WorldConfig.GetIntValue(WorldCfg.PortWorld)}");
+            handler.SendSysMessage($"Worldserver listening connections on port {WorldConfig.Values[WorldCfg.PortWorld].Int32}");
             handler.SendSysMessage(dbPortOutput);
 
-            bool vmapIndoorCheck = WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck);
+            bool vmapIndoorCheck = WorldConfig.Values[WorldCfg.VmapIndoorCheck].Bool;
             bool vmapLOSCheck = Global.VMapMgr.IsLineOfSightCalcEnabled();
             bool vmapHeightCheck = Global.VMapMgr.IsHeightCalcEnabled();
 
-            bool mmapEnabled = WorldConfig.GetBoolValue(WorldCfg.EnableMmaps);
+            bool mmapEnabled = WorldConfig.Values[WorldCfg.EnableMmaps].Bool;
 
             string dataDir = Global.WorldMgr.GetDataPath();
             List<string> subDirs = new();
@@ -289,9 +289,11 @@ namespace Game.Chat
                     return false;
 
             // Override parameter "delay" with the configuration value if there are still players connected and "force" parameter was not specified
-            if (delay < WorldConfig.GetIntValue(WorldCfg.ForceShutdownThreshold) && !shutdownMask.HasAnyFlag(ShutdownMask.Force) && !IsOnlyUser(handler.GetSession()))
+            if (delay < WorldConfig.Values[WorldCfg.ForceShutdownThreshold].Int32 
+                && !shutdownMask.HasAnyFlag(ShutdownMask.Force) 
+                && !IsOnlyUser(handler.GetSession()))
             {
-                delay = WorldConfig.GetIntValue(WorldCfg.ForceShutdownThreshold);
+                delay = WorldConfig.Values[WorldCfg.ForceShutdownThreshold].Int32;
                 handler.SendSysMessage(CypherStrings.ShutdownDelayed, delay);
             }
 

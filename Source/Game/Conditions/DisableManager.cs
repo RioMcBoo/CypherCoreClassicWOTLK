@@ -410,7 +410,7 @@ namespace Game
 
         public bool IsPathfindingEnabled(int mapId)
         {
-            return WorldConfig.GetBoolValue(WorldCfg.EnableMmaps) && !Global.DisableMgr.IsDisabledFor(DisableType.MMAP, mapId, null);
+            return WorldConfig.Values[WorldCfg.EnableMmaps].Bool && !Global.DisableMgr.IsDisabledFor(DisableType.MMAP, mapId, null);
         }
     }
 

@@ -227,7 +227,7 @@ namespace Game.Movement
                 ownerCreature.SetNoCallAssistance(false);
                 ownerCreature.CallAssistance();
                 if (ownerCreature.IsAlive())
-                    ownerCreature.GetMotionMaster().MoveSeekAssistanceDistract(WorldConfig.GetUIntValue(WorldCfg.CreatureFamilyAssistanceDelay));
+                    ownerCreature.GetMotionMaster().MoveSeekAssistanceDistract((uint)WorldConfig.Values[WorldCfg.CreatureFamilyAssistanceDelay].Int32);
             }
         }
 

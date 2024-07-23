@@ -263,15 +263,15 @@ namespace Game
 
         public float GetRangeForChatType(ChatMsg msgType)
         {
-            float dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay);
+            float dist = WorldConfig.Values[WorldCfg.ListenRangeSay].Float;
             switch (msgType)
             {
                 case ChatMsg.MonsterYell:
-                    dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell);
+                    dist = WorldConfig.Values[WorldCfg.ListenRangeYell].Float;
                     break;
                 case ChatMsg.MonsterEmote:
                 case ChatMsg.RaidBossEmote:
-                    dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote);
+                    dist = WorldConfig.Values[WorldCfg.ListenRangeTextemote].Float;
                     break;
                 default:
                     break;

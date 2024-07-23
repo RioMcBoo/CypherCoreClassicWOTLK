@@ -521,7 +521,7 @@ namespace Game
 
             auctionHouse.BuildReplicate(response, GetPlayer(), replicateItems.ChangeNumberGlobal, replicateItems.ChangeNumberCursor, replicateItems.ChangeNumberTombstone, replicateItems.Count);
 
-            response.DesiredDelay = WorldConfig.GetIntValue(WorldCfg.AuctionSearchDelay) * 5;
+            response.DesiredDelay = WorldConfig.Values[WorldCfg.AuctionSearchDelay].Int32 * 5;
             response.Result = 0;
 
             SendPacket(response);
@@ -659,7 +659,7 @@ namespace Game
                 return;
             }
 
-            TimeSpan auctionTime = TimeSpan.FromSeconds((long)TimeSpan.FromMinutes(sellCommodity.RunTime).TotalSeconds * WorldConfig.GetFloatValue(WorldCfg.RateAuctionTime));
+            TimeSpan auctionTime = TimeSpan.FromSeconds((long)TimeSpan.FromMinutes(sellCommodity.RunTime).TotalSeconds * WorldConfig.Values[WorldCfg.RateAuctionTime].Float);
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
             long deposit = Global.AuctionHouseMgr.GetCommodityAuctionDeposit(items2.FirstOrDefault().Value.Item.GetTemplate(), TimeSpan.FromMinutes(sellCommodity.RunTime), totalCount);
@@ -863,7 +863,7 @@ namespace Game
                 return;
             }
 
-            TimeSpan auctionTime = TimeSpan.FromSeconds((long)(TimeSpan.FromMinutes(sellItem.RunTime).TotalSeconds * WorldConfig.GetFloatValue(WorldCfg.RateAuctionTime)));
+            TimeSpan auctionTime = TimeSpan.FromSeconds((long)(TimeSpan.FromMinutes(sellItem.RunTime).TotalSeconds * WorldConfig.Values[WorldCfg.RateAuctionTime].Float));
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
             long deposit = Global.AuctionHouseMgr.GetItemAuctionDeposit(_player, item, TimeSpan.FromMinutes(sellItem.RunTime));
@@ -1003,9 +1003,9 @@ namespace Game
 
         public void SendAuctionHello(ObjectGuid guid, Creature unit)
         {
-            if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.AuctionLevelReq))
+            if (GetPlayer().GetLevel() < WorldConfig.Values[WorldCfg.AuctionLevelReq].Int32)
             {
-                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.AuctionReq), WorldConfig.GetIntValue(WorldCfg.AuctionLevelReq));
+                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.AuctionReq), WorldConfig.Values[WorldCfg.AuctionLevelReq].Int32);
                 return;
             }
 

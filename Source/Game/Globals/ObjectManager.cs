@@ -108,11 +108,11 @@ namespace Game
             if (name.Length > SharedConst.MaxPlayerNameLenght)
                 return ResponseCodes.CharNameTooLong;
 
-            uint minName = WorldConfig.GetUIntValue(WorldCfg.MinPlayerName);
+            int minName = WorldConfig.Values[WorldCfg.MinPlayerName].Int32;
             if (name.Length < minName)
                 return ResponseCodes.CharNameTooShort;
 
-            uint strictMask = WorldConfig.GetUIntValue(WorldCfg.StrictPlayerNames);
+            int strictMask = WorldConfig.Values[WorldCfg.StrictPlayerNames].Int32;
             if (!IsValidString(name, strictMask, false, create))
                 return ResponseCodes.CharNameMixedLanguages;
 
@@ -131,11 +131,11 @@ namespace Game
             if (name.Length > SharedConst.MaxCharterNameLenght)
                 return false;
 
-            uint minName = WorldConfig.GetUIntValue(WorldCfg.MinCharterName);
+            int minName = WorldConfig.Values[WorldCfg.MinCharterName].Int32;
             if (name.Length < minName)
                 return false;
 
-            uint strictMask = WorldConfig.GetUIntValue(WorldCfg.StrictCharterNames);
+            int strictMask = WorldConfig.Values[WorldCfg.StrictCharterNames].Int32;
 
             return IsValidString(name, strictMask, true);
         }
@@ -145,11 +145,11 @@ namespace Game
             if (name.Length > SharedConst.MaxPetNameLenght)
                 return PetNameInvalidReason.TooLong;
 
-            uint minName = WorldConfig.GetUIntValue(WorldCfg.MinPetName);
+            int minName = WorldConfig.Values[WorldCfg.MinPetName].Int32;
             if (name.Length < minName)
                 return PetNameInvalidReason.TooShort;
 
-            uint strictMask = WorldConfig.GetUIntValue(WorldCfg.StrictPetNames);
+            int strictMask = WorldConfig.Values[WorldCfg.StrictPetNames].Int32;
             if (!IsValidString(name, strictMask, false))
                 return PetNameInvalidReason.MixedLanguages;
 
@@ -170,7 +170,7 @@ namespace Game
                 value = data[(int)locale];
         }
 
-        static bool IsValidString(string str, uint strictMask, bool numericOrSpace, bool create = false)
+        static bool IsValidString(string str, int strictMask, bool numericOrSpace, bool create = false)
         {
             if (strictMask == 0)                                       // any language, ignore realm
             {
@@ -4453,7 +4453,7 @@ namespace Game
                     }
                 }
 
-                if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
+                if (WorldConfig.Values[WorldCfg.CalculateCreatureZoneAreaData].Bool)
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
                     Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out int zoneId, out int areaId, data.MapId, data.SpawnPoint);
@@ -5421,7 +5421,7 @@ namespace Game
                     data.rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(data.SpawnPoint.GetOrientation(), 0f, 0f));
                 }
 
-                if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
+                if (WorldConfig.Values[WorldCfg.CalculateGameobjectZoneAreaData].Bool)
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
                     Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out int zoneId, out int areaId, data.MapId, data.SpawnPoint);
@@ -7531,8 +7531,9 @@ namespace Game
                             continue;
                         }
 
-                        uint currentlevel = result.Read<byte>(1);
-                        if (currentlevel > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                        int currentlevel = result.Read<byte>(1);
+
+                        if (currentlevel > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                         {
                             if (currentlevel > SharedConst.StrongMaxLevel)        // hardcoded level maximum
                             {
@@ -7582,25 +7583,27 @@ namespace Game
                             if (playerInfo == null)
                                 continue;
 
+                            Expansion configExpansion = (Expansion)WorldConfig.Values[WorldCfg.Expansion].Int32;
+
                             // skip expansion races if not playing with expansion
-                            if ((Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion) < Expansion.BurningCrusade 
+                            if (configExpansion < Expansion.BurningCrusade 
                                 && (race == Race.BloodElf || race == Race.Draenei))
                                 continue;
 
                             // skip expansion classes if not playing with expansion
-                            if ((Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion) < Expansion.WrathOfTheLichKing 
+                            if (configExpansion < Expansion.WrathOfTheLichKing 
                                 && class_ == Class.Deathknight)
                                 continue;
 
-                            if ((Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion) < Expansion.MistsOfPandaria 
+                            if (configExpansion < Expansion.MistsOfPandaria 
                                 && (race == Race.PandarenNeutral || race == Race.PandarenHorde || race == Race.PandarenAlliance))
                                 continue;
 
-                            if ((Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion) < Expansion.Legion 
+                            if (configExpansion < Expansion.Legion 
                                 && class_ == Class.DemonHunter)
                                 continue;
 
-                            if ((Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion) < Expansion.Dragonflight 
+                            if (configExpansion < Expansion.Dragonflight 
                                 && class_ == Class.Evoker)
                                 continue;
 
@@ -7615,7 +7618,7 @@ namespace Game
                             }
 
                             // fill level gaps
-                            for (var level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
+                            for (var level = 1; level < WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32; ++level)
                             {
                                 if (playerInfo.levelInfo[level].stats[0] == 0)
                                 {
@@ -7636,7 +7639,7 @@ namespace Game
             // Loading xp per level data
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create XP Data...");
             {
-                _playerXPperLevel = new int[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
+                _playerXPperLevel = new int[WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32];
 
                 //                                          0      1
                 SQLResult result = DB.World.Query("SELECT Level, Experience FROM player_xp_for_level");
@@ -7659,7 +7662,7 @@ namespace Game
                     int currentlevel = result.Read<byte>(0);
                     int currentxp = result.Read<int>(1);
 
-                    if (currentlevel >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                    if (currentlevel >= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                     {
                         if (currentlevel > SharedConst.StrongMaxLevel)        // hardcoded level maximum
                         {
@@ -7683,7 +7686,7 @@ namespace Game
                 } while (result.NextRow());
 
                 // fill level gaps
-                for (var level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
+                for (var level = 1; level < WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32; ++level)
                 {
                     if (_playerXPperLevel[level] == 0)
                     {
@@ -7704,8 +7707,8 @@ namespace Game
             if (level < 1 || class_ >= Class.Max)
                 return 0.0f;
 
-            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
+                level = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
 
             GtOCTRegenHPRecord octRegenHP = CliDB.OCTRegenHPGameTable.GetRow(level);
             if (octRegenHP is null)
@@ -7725,8 +7728,8 @@ namespace Game
             if (level < 1 || class_ >= Class.Max)
                 return 0.0f;
 
-            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
+                level = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
 
             GtRegenHPPerSptRecord regenHPPerSpt = CliDB.RegenHPPerSptGameTable.GetRow(level);
             if (regenHPPerSpt is null)
@@ -7745,8 +7748,8 @@ namespace Game
             if (level < 1 || class_ >= Class.Max)
                 return 0.0f;
 
-            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
+                level = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
 
             GtRegenMPPerSptRecord regenMPPerSpt = CliDB.RegenMPPerSptGameTable.GetRow(level);
             if (regenMPPerSpt is null)
@@ -7803,8 +7806,8 @@ namespace Game
             if (level < 1 || _class >= Class.Max)
                 return;
 
-            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = (byte)WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
+                level = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
 
             GtBaseMPRecord mp = CliDB.BaseMPGameTable.GetRow(level);
             if (mp == null)
@@ -7827,7 +7830,7 @@ namespace Game
             if (pInfo == null)
                 return null;
 
-            if (level <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (level <= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                 return pInfo.levelInfo[level - 1];
             else
                 return BuildPlayerLevelInfo(race, _class, level);
@@ -7836,9 +7839,9 @@ namespace Game
         PlayerLevelInfo BuildPlayerLevelInfo(Race race, Class _class, int level)
         {
             // base data (last known level)
-            var info = _playerInfo.LookupByKey((race, _class)).levelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1];
+            var info = _playerInfo.LookupByKey((race, _class)).levelInfo[WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32 - 1];
 
-            for (int lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1; lvl < level; ++lvl)
+            for (int lvl = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32 - 1; lvl < level; ++lvl)
             {
                 switch (_class)
                 {
@@ -7930,7 +7933,7 @@ namespace Game
                 }
 
                 int currentlevel = result.Read<int>(1);
-                if (currentlevel > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                if (currentlevel > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                 {
                     if (currentlevel > SharedConst.StrongMaxLevel)        // hardcoded level maximum
                     {
@@ -7959,7 +7962,7 @@ namespace Game
                 var pInfoMapEntry = petInfoStore.LookupByKey(creatureid);
 
                 if (pInfoMapEntry == null)
-                    pInfoMapEntry = new PetLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
+                    pInfoMapEntry = new PetLevelInfo[WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32];
 
                 PetLevelInfo pLevelInfo = new();
                 pLevelInfo.health = result.Read<int>(2);
@@ -7992,7 +7995,7 @@ namespace Game
                 }
 
                 // fill level gaps
-                for (byte level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
+                for (byte level = 1; level < WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32; ++level)
                 {
                     if (pInfo[level].health == 0)
                     {
@@ -8051,8 +8054,8 @@ namespace Game
 
         public PetLevelInfo GetPetLevelInfo(int creatureid, int level)
         {
-            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
+                level = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
 
             var petinfo = petInfoStore.LookupByKey(creatureid);
 
@@ -11214,12 +11217,12 @@ namespace Game
                 int mailTemplateId = result.Read<int>(2);
                 int senderEntry = result.Read<int>(3);
 
-                if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                 {
                     Log.outError(LogFilter.Sql,
                         $"Table `mail_level_reward` " +
                         $"have data for level {level} that more supported by client " +
-                        $"({WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)}), ignoring.");
+                        $"({WorldConfig.Values[WorldCfg.MaxPlayerLevel]}), ignoring.");
                     continue;
                 }
 
@@ -12184,7 +12187,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             // cache disabled
-            if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+            if (!WorldConfig.Values[WorldCfg.CacheDataQueries].Bool)
             {
                 Log.outInfo(LogFilter.ServerLoading, 
                     "Query data caching is disabled. Skipped initialization.");

@@ -93,7 +93,7 @@ namespace Game
 
             if (_dataSent)
             {
-                uint maxClientResponseDelay = WorldConfig.GetUIntValue(WorldCfg.WardenClientResponseDelay);
+                uint maxClientResponseDelay = (uint)WorldConfig.Values[WorldCfg.WardenClientResponseDelay].Int32;
                 if (maxClientResponseDelay > 0)
                 {
                     // Kick player if client response delays more than set in config
@@ -164,7 +164,7 @@ namespace Game
             if (check != null)
                 action = check.Action;
             else
-                action = (WardenActions)WorldConfig.GetIntValue(WorldCfg.WardenClientFailAction);
+                action = (WardenActions)WorldConfig.Values[WorldCfg.WardenClientFailAction].Int32;
 
             switch (action)
             {
@@ -179,7 +179,7 @@ namespace Game
                     if (check != null)
                         banReason += $": {check.Comment} (CheckId: {check.CheckId})";
 
-                    Global.WorldMgr.BanAccount(BanMode.Account, accountName, WorldConfig.GetUIntValue(WorldCfg.WardenClientBanDuration), banReason, "Server");
+                    Global.WorldMgr.BanAccount(BanMode.Account, accountName, (uint)WorldConfig.Values[WorldCfg.WardenClientBanDuration].Int32, banReason, "Server");
                     break;
                 }
                 case WardenActions.Log:

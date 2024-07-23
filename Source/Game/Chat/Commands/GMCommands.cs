@@ -76,7 +76,7 @@ namespace Game.Chat
                 AccountTypes playerSec = player.GetSession().GetSecurity();
                 if ((player.IsGameMaster() ||
                     (player.GetSession().HasPermission(RBACPermissions.CommandsAppearInGmList) &&
-                     playerSec <= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInGmList))) &&
+                     playerSec <= (AccountTypes)WorldConfig.Values[WorldCfg.GmLevelInGmList].Int32)) &&
                     (handler.GetSession() == null || player.IsVisibleGloballyFor(handler.GetSession().GetPlayer())))
                 {
                     if (first)

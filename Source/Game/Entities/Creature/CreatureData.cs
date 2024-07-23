@@ -335,7 +335,7 @@ namespace Game.Entities
             Rooted = false;
             Chase = CreatureChaseMovementType.Run;
             Random = CreatureRandomMovementType.Walk;
-            InteractionPauseTimer = WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer);
+            InteractionPauseTimer = (uint)WorldConfig.Values[WorldCfg.CreatureStopForPlayer].Int32;
         }
 
         public bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }

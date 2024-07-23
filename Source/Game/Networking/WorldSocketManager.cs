@@ -25,7 +25,7 @@ namespace Game.Networking
                 return false;
 
             _instanceAcceptor = new AsyncAcceptor();
-            if (!_instanceAcceptor.Start(bindIp, WorldConfig.GetIntValue(WorldCfg.PortInstance)))
+            if (!_instanceAcceptor.Start(bindIp, WorldConfig.Values[WorldCfg.PortInstance].Int32))
             {
                 Log.outError(LogFilter.Network, "StartNetwork failed to start instance AsyncAcceptor");
                 return false;

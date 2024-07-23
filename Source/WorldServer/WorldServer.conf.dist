@@ -1778,14 +1778,14 @@ Creature.PickPocketRefillDelay = 600
 #    ListenRange.Say
 #        Description: Distance in which players can read say messages from creatures or
 #                     gameobjects.
-#        Default:     40
+#        Default:     25
 
 ListenRange.Say = 40
 
 #
 #    ListenRange.TextEmote
 #        Description: Distance in which players can read emotes from creatures or gameobjects.
-#        Default:     40
+#        Default:     25
 
 ListenRange.TextEmote = 40
 
@@ -2481,13 +2481,20 @@ Rate.InstanceResetTime = 1
 
 #
 #    SkillGain.Crafting
+#	 SkillGain.Defence
 #    SkillGain.Gathering
+#    SkillGain.Weapon
+#    
 #        Description: Crafting/defense/gathering/weapon skills gain rate.
 #        Default:     1 - (SkillGain.Crafting)
+#                     1 - (SkillGain.Defence)
 #                     1 - (SkillGain.Gathering)
+#                     1 - (SkillGain.Weapon)
 
 SkillGain.Crafting  = 1
+SkillGain.Defence	= 1
 SkillGain.Gathering = 1
+SkillGain.Weapon	= 1
 
 #
 #    SkillChance.Orange
@@ -2825,64 +2832,6 @@ Wintergrasp.NoBattleTimer = 150
 Wintergrasp.CrashRestartTimer = 10
 
 #
-#     TolBarad.Enable
-#         Description: Enable the Tol Barad battlefield.
-#         Default:     0 - (Disabled)
-#                      1 - (Enabled, Experimental as in incomplete, bugged and with crashes)
-
-TolBarad.Enable = 0
-
-#
-#     TolBarad.PlayerMax
-#         Description: Maximum number of players allowed in Tol Barad.
-#         Default:     100
-
-TolBarad.PlayerMax = 100
-
-#
-#     TolBarad.PlayerMin
-#         Description: Minimum number of players required for Tol Barad.
-#         Default:     0
-
-TolBarad.PlayerMin = 0
-
-#
-#     TolBarad.PlayerMinLvl
-#         Description: Required character level for the Tol Barad battle.
-#         Default:     85
-
-TolBarad.PlayerMinLvl = 85
-
-#
-#     TolBarad.BattleTimer
-#         Description: Time (in minutes) for the Tol Barad battle to last.
-#         Default:     15
-
-TolBarad.BattleTimer = 15
-
-#
-#     TolBarad.BonusTime
-#         Description: Bonus time (in minutes) for each tower destroyed in Tol Barad battle.
-#         Default:     5
-
-TolBarad.BonusTime = 5
-
-#
-#     TolBarad.NoBattleTimer
-#         Description: Time (in minutes) between TolBarad battles.
-#         Default:     150
-
-TolBarad.NoBattleTimer = 150
-
-#
-#     TolBarad.CrashRestartTimer
-#         Description: Time (in minutes) to delay the restart of TolBarad if the world server
-#                      crashed during a running battle.
-#         Default:     10
-
-TolBarad.CrashRestartTimer = 10
-
-#
 ###################################################################################################
 
 ###################################################################################################
@@ -2938,9 +2887,9 @@ Arena.QueueAnnouncer.Enable = 0
 #
 #    Arena.ArenaSeason.ID
 #        Description: Current arena season id shown in clients.
-#        Default:     32
+#        Default:     8
 
-Arena.ArenaSeason.ID = 32
+Arena.ArenaSeason.ID = 8
 
 #
 #    Arena.ArenaSeason.InProgress
@@ -3960,6 +3909,7 @@ PacketSpoof.Policy = 1
 #        Description: If PacketSpoof.Policy equals 2, this will determine the ban mode.
 #        Note:        Banning by character not supported for logical reasons.
 #        Default:     0 - Ban Account
+					  1 - Ban Character (not supported)
 #                     2 - Ban IP
 #
 

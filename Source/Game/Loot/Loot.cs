@@ -944,11 +944,11 @@ namespace Game.Loots
             if (maxAmount > 0)
             {
                 if (maxAmount <= minAmount)
-                    gold = (uint)(maxAmount * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                    gold = (uint)(maxAmount * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
                 else if ((maxAmount - minAmount) < 32700)
-                    gold = (uint)(RandomHelper.URand(minAmount, maxAmount) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                    gold = (uint)(RandomHelper.URand(minAmount, maxAmount) * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
                 else
-                    gold = (uint)(RandomHelper.URand(minAmount >> 8, maxAmount >> 8) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney)) << 8;
+                    gold = (uint)(RandomHelper.URand(minAmount >> 8, maxAmount >> 8) * WorldConfig.Values[WorldCfg.RateDropMoney].Float) << 8;
             }
         }
 

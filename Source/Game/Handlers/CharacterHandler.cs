@@ -31,7 +31,7 @@ namespace Game
 
             // get all the data necessary for loading all characters (along with their pets) on the account
             EnumCharactersQueryHolder holder = new();
-            if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), false))
+            if (!holder.Initialize(GetAccountId(), WorldConfig.Values[WorldCfg.DeclinedNamesUsed].Bool, false))
             {
                 HandleCharEnum(holder);
                 return;
@@ -45,7 +45,7 @@ namespace Game
             EnumCharactersResult charResult = new();
             charResult.Success = true;
             charResult.IsDeletedCharacters = holder.IsDeletedCharacters();
-            charResult.DisabledClassesMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
+            charResult.DisabledClassesMask = WorldConfig.Values[WorldCfg.CharacterCreatingDisabledClassmask].Int32;
 
             if (!charResult.IsDeletedCharacters)
                 _legitCharacters.Clear();
@@ -117,7 +117,10 @@ namespace Game
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
                 raceUnlock.HasExpansion = GetAccountExpansion() >= requirement.Value.Expansion;
-                raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
+
+                raceUnlock.HasAchievement = 
+                    requirement.Value.AchievementId != 0 
+                    && (WorldConfig.Values[WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement].Bool
                     /* || HasAccountAchievement(requirement.second.AchievementId)*/);
                 charResult.RaceUnlockData.Add(raceUnlock);
             }
@@ -130,7 +133,7 @@ namespace Game
         {
             // get all the data necessary for loading all undeleted characters (along with their pets) on the account
             EnumCharactersQueryHolder holder = new();
-            if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), true))
+            if (!holder.Initialize(GetAccountId(), WorldConfig.Values[WorldCfg.DeclinedNamesUsed].Bool, true))
             {
                 HandleCharEnum(holder);
                 return;
@@ -144,7 +147,7 @@ namespace Game
             EnumCharactersResult charEnum = new();
             charEnum.Success = true;
             charEnum.IsDeletedCharacters = true;
-            charEnum.DisabledClassesMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
+            charEnum.DisabledClassesMask = WorldConfig.Values[WorldCfg.CharacterCreatingDisabledClassmask].Int32;
 
             if (!result.IsEmpty())
             {
@@ -272,7 +275,7 @@ namespace Game
         {
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationTeammask))
             {
-                int mask = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingDisabled);
+                int mask = WorldConfig.Values[WorldCfg.CharacterCreatingDisabled].Int32;
                 if (mask != 0)
                 {
                     bool disabled = false;
@@ -401,7 +404,7 @@ namespace Game
                     return;
                 }
 
-                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.GetInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
+                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.Values[WorldCfg.CharacterCreatingDisabledRacemask].Int32;
                 if (raceMaskDisabled.HasRace(charCreate.CreateInfo.RaceId))
                 {
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
@@ -411,8 +414,8 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationClassmask))
             {
-                int classMaskDisabled = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
-                if (Convert.ToBoolean((1 << ((int)charCreate.CreateInfo.ClassId - 1)) & classMaskDisabled))
+                ClassMask classMaskDisabled = (ClassMask)WorldConfig.Values[WorldCfg.CharacterCreatingDisabledClassmask].Int32;
+                if (classMaskDisabled.HasClass(charCreate.CreateInfo.ClassId))
                 {
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
                     return;
@@ -460,11 +463,11 @@ namespace Game
 
             }).WithChainingCallback((queryCallback, result) =>
             {
-                ulong acctCharCount = 0;
+                uint acctCharCount = 0;
                 if (!result.IsEmpty())
-                    acctCharCount = result.Read<ulong>(0);
+                    acctCharCount = (uint)result.Read<ulong>(0);
 
-                if (acctCharCount >= WorldConfig.GetUIntValue(WorldCfg.CharactersPerAccount))
+                if (acctCharCount >= WorldConfig.Values[WorldCfg.CharactersPerAccount].Int32)
                 {
                     SendCharCreate(ResponseCodes.CharCreateAccountLimit);
                     return;
@@ -480,22 +483,22 @@ namespace Game
                 {
                     createInfo.CharCount = (byte)result.Read<ulong>(0); // SQL's COUNT() returns uint64 but it will always be less than uint8.Max
 
-                    if (createInfo.CharCount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
+                    if (createInfo.CharCount >= WorldConfig.Values[WorldCfg.CharactersPerRealm].Int32)
                     {
                         SendCharCreate(ResponseCodes.CharCreateServerLimit);
                         return;
                     }
                 }
 
-                int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
+                int demonHunterReqLevel = WorldConfig.Values[WorldCfg.CharacterCreatingMinLevelForDemonHunter].Int32;
                 bool hasDemonHunterReqLevel = demonHunterReqLevel == 0;
-                uint evokerReqLevel = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingMinLevelForEvoker);
+                int evokerReqLevel = WorldConfig.Values[WorldCfg.CharacterCreatingMinLevelForEvoker].Int32;
                 bool hasEvokerReqLevel = (evokerReqLevel == 0);
                 bool allowTwoSideAccounts = !Global.WorldMgr.IsPvPRealm() || HasPermission(RBACPermissions.TwoSideCharacterCreation);
-                int skipCinematics = WorldConfig.GetIntValue(WorldCfg.SkipCinematics);
+                int skipCinematics = WorldConfig.Values[WorldCfg.SkipCinematics].Int32;
                 bool checkClassLevelReqs = (createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker)
                                             && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
-                int evokerLimit = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingEvokersPerRealm);
+                int evokerLimit = WorldConfig.Values[WorldCfg.CharacterCreatingEvokersPerRealm].Int32;
                 bool hasEvokerLimit = evokerLimit != 0;
 
                 void finalizeCharacterCreation(SQLResult result1)
@@ -853,11 +856,11 @@ namespace Game
             // Send PVPSeason
             {
                 SeasonInfo seasonInfo = new();
-                seasonInfo.PreviousArenaSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) 
-                    - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0);
+                seasonInfo.PreviousArenaSeason = WorldConfig.Values[WorldCfg.ArenaSeasonId].Int32 
+                    - (WorldConfig.Values[WorldCfg.ArenaSeasonInProgress].Bool ? 1 : 0);
 
-                if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress))
-                    seasonInfo.CurrentArenaSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
+                if (WorldConfig.Values[WorldCfg.ArenaSeasonInProgress].Bool)
+                    seasonInfo.CurrentArenaSeason = WorldConfig.Values[WorldCfg.ArenaSeasonId].Int32;
 
                 SendPacket(seasonInfo);
             }
@@ -1028,14 +1031,14 @@ namespace Game
                     pCurrChar.CastSpell(pCurrChar, spellId, new CastSpellExtraArgs(true));
 
                 // start with every map explored
-                if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))
+                if (WorldConfig.Values[WorldCfg.StartAllExplored].Bool)
                 {
                     for (int i = 0; i < PlayerConst.ExploredZonesSize; i++)
                         pCurrChar.AddExploredZones(i, 0xFFFFFFFFFFFFFFFF);
                 }
 
                 //Reputations if "StartAllReputation" is enabled
-                if (WorldConfig.GetBoolValue(WorldCfg.StartAllRep))
+                if (WorldConfig.Values[WorldCfg.StartAllRep].Bool)
                 {
                     ReputationMgr repMgr = pCurrChar.GetReputationMgr();
                     repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(942), 42999, false); // Cenarion Expedition
@@ -1103,7 +1106,7 @@ namespace Game
             if (Global.WorldMgr.IsShuttingDown())
                 Global.WorldMgr.ShutdownMsg(true, pCurrChar);
 
-            if (WorldConfig.GetBoolValue(WorldCfg.AllTaxiPaths))
+            if (WorldConfig.Values[WorldCfg.AllTaxiPaths].Bool)
                 pCurrChar.SetTaxiCheater(true);
 
             if (pCurrChar.IsGameMaster())
@@ -1172,16 +1175,16 @@ namespace Game
             features.NPETutorialsEnabled = true;
             // END OF DUMMY VALUES
 
-            europaTicketSystemStatus.TicketsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled);
-            europaTicketSystemStatus.BugsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled);
-            europaTicketSystemStatus.ComplaintsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled);
-            europaTicketSystemStatus.SuggestionsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled);
+            europaTicketSystemStatus.TicketsEnabled = WorldConfig.Values[WorldCfg.SupportTicketsEnabled].Bool;
+            europaTicketSystemStatus.BugsEnabled = WorldConfig.Values[WorldCfg.SupportBugsEnabled].Bool;
+            europaTicketSystemStatus.ComplaintsEnabled = WorldConfig.Values[WorldCfg.SupportComplaintsEnabled].Bool;
+            europaTicketSystemStatus.SuggestionsEnabled = WorldConfig.Values[WorldCfg.SupportSuggestionsEnabled].Bool;
 
             features.EuropaTicketSystemStatus = europaTicketSystemStatus;
 
-            features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
-            features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
-            features.WarModeFeatureEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemWarModeEnabled);
+            features.CharUndeleteEnabled = WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteEnabled].Bool;
+            features.BpayStoreEnabled = WorldConfig.Values[WorldCfg.FeatureSystemBpayStoreEnabled].Bool;
+            features.WarModeFeatureEnabled = WorldConfig.Values[WorldCfg.FeatureSystemWarModeEnabled].Bool;
             features.IsMuted = !CanSpeak();
 
 
@@ -1540,7 +1543,7 @@ namespace Game
             }
 
             // prevent character rename
-            if (WorldConfig.GetBoolValue(WorldCfg.PreventRenameCustomization) && (customizeInfo.CharName != oldName))
+            if (WorldConfig.Values[WorldCfg.PreventRenameCustomization].Bool && (customizeInfo.CharName != oldName))
             {
                 SendCharCustomize(ResponseCodes.CharNameFailure, customizeInfo);
                 return;
@@ -1838,7 +1841,7 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.GetInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
+                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.Values[WorldCfg.CharacterCreatingDisabledRacemask].Int32;
                 if (raceMaskDisabled.HasRace(factionChangeInfo.RaceID))
                 {
                     SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
@@ -1847,7 +1850,7 @@ namespace Game
             }
 
             // prevent character rename
-            if (WorldConfig.GetBoolValue(WorldCfg.PreventRenameCustomization) && (factionChangeInfo.Name != oldName))
+            if (WorldConfig.Values[WorldCfg.PreventRenameCustomization].Bool && (factionChangeInfo.Name != oldName))
             {
                 SendCharFactionChange(ResponseCodes.CharNameFailure, factionChangeInfo);
                 return;
@@ -2033,7 +2036,7 @@ namespace Game
                         trans.Append(stmt);
                     }
 
-                    if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild))
+                    if (!WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGuild].Bool)
                     {
                         // Reset guild
                         Guild guild = Global.GuildMgr.GetGuildById(characterInfo.GuildId);
@@ -2043,7 +2046,7 @@ namespace Game
                         Player.LeaveAllArenaTeams(factionChangeInfo.Guid);
                     }
 
-                    if (groupId != 0 && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup))
+                    if (groupId != 0 && !WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGroup].Bool)
                     {
                         Group group = Global.GroupMgr.GetGroupByDbStoreId(groupId);
                         if (group != null)
@@ -2339,7 +2342,7 @@ namespace Game
         void HandleUndeleteCooldownStatusCallback(SQLResult result)
         {
             uint cooldown = 0;
-            uint maxCooldown = WorldConfig.GetUIntValue(WorldCfg.FeatureSystemCharacterUndeleteCooldown);
+            uint maxCooldown = (uint)WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown].Int32;
             if (!result.IsEmpty())
             {
                 uint lastUndelete = result.Read<uint>(0);
@@ -2354,7 +2357,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UndeleteCharacter, Status = SessionStatus.Authed)]
         void HandleCharUndelete(UndeleteCharacter undeleteCharacter)
         {
-            if (!WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled))
+            if (!WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteEnabled].Bool)
             {
                 SendUndeleteCharacterResponse(CharacterUndeleteResult.Disabled, undeleteCharacter.UndeleteInfo);
                 return;
@@ -2369,7 +2372,7 @@ namespace Game
                 if (!result.IsEmpty())
                 {
                     uint lastUndelete = result.Read<uint>(0);
-                    uint maxCooldown = WorldConfig.GetUIntValue(WorldCfg.FeatureSystemCharacterUndeleteCooldown);
+                    uint maxCooldown = (uint)WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown].Int32;
                     if (lastUndelete != 0 && (lastUndelete + maxCooldown > GameTime.GetGameTime()))
                     {
                         SendUndeleteCharacterResponse(CharacterUndeleteResult.Cooldown, undeleteInfo);
@@ -2420,7 +2423,7 @@ namespace Game
             {
                 if (!result.IsEmpty())
                 {
-                    if (result.Read<ulong>(0) >= WorldConfig.GetUIntValue(WorldCfg.CharactersPerRealm)) // SQL's COUNT() returns uint64 but it will always be less than uint8.Max
+                    if (result.Read<uint>(0) >= WorldConfig.Values[WorldCfg.CharactersPerRealm].Int32) // SQL's COUNT() returns uint64 but it will always be less than uint8.Max
                     {
                         SendUndeleteCharacterResponse(CharacterUndeleteResult.CharCreate, undeleteInfo);
                         return;
@@ -2823,7 +2826,7 @@ namespace Game
             stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.SpellCharges, stmt);
 
-            if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed))
+            if (WorldConfig.Values[WorldCfg.DeclinedNamesUsed].Bool)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_DECLINEDNAMES);
                 stmt.SetInt64(0, lowGuid);

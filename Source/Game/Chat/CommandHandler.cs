@@ -464,7 +464,7 @@ namespace Game.Chat
                 return false;
 
             // ignore only for non-players for non strong checks (when allow apply command at least to same sec level)
-            if (!Global.AccountMgr.IsPlayerAccount(_session.GetSecurity()) && !strong && !WorldConfig.GetBoolValue(WorldCfg.GmLowerSecurity))
+            if (!Global.AccountMgr.IsPlayerAccount(_session.GetSecurity()) && !strong && !WorldConfig.Values[WorldCfg.GmLowerSecurity].Bool)
                 return false;
 
             if (target != null)

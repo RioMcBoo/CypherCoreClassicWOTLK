@@ -2000,7 +2000,9 @@ namespace Game.Entities
         int GetViewerDependentFactionTemplate(UnitData unitData, Unit unit, Player receiver)
         {
             int factionTemplate = unitData.FactionTemplate;
-            if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
+            if (unit.IsControlledByPlayer() && receiver != unit 
+                && WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGroup].Bool 
+                && unit.IsInRaidWith(receiver))
             {
                 FactionTemplateRecord ft1 = unit.GetFactionTemplateEntry();
                 FactionTemplateRecord ft2 = receiver.GetFactionTemplateEntry();
@@ -2039,7 +2041,9 @@ namespace Game.Entities
         byte GetViewerDependentPvpFlags(UnitData unitData, Unit unit, Player receiver)
         {
             byte pvpFlags = unitData.PvpFlags;
-            if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
+            if (unit.IsControlledByPlayer() && receiver != unit 
+                && WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGroup].Bool 
+                && unit.IsInRaidWith(receiver))
             {
                 FactionTemplateRecord ft1 = unit.GetFactionTemplateEntry();
                 FactionTemplateRecord ft2 = receiver.GetFactionTemplateEntry();

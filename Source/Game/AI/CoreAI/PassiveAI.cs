@@ -104,7 +104,7 @@ namespace Game.AI
         public override void JustEngagedWith(Unit who)
         {
             me.StartDefaultCombatMovement(who);            
-            _evadeTimer.Reset(TimeSpan.FromMilliseconds(WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay)));
+            _evadeTimer.Reset(TimeSpan.FromMilliseconds(WorldConfig.Values[WorldCfg.CreatureFamilyFleeDelay].Int32));
         }
 
         public override void UpdateAI(uint diff)

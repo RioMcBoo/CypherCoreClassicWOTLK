@@ -2485,8 +2485,8 @@ namespace Game
                 return false;
 
             if (condition.MinExpansionLevel != -1 && condition.MinExpansionTier != -1 && !player.IsGameMaster()
-                && ((condition.MinExpansionLevel == WorldConfig.GetIntValue(WorldCfg.Expansion) && condition.MinExpansionTier > 0) /*TODO: implement tier*/
-                || condition.MinExpansionLevel > WorldConfig.GetIntValue(WorldCfg.Expansion)))
+                && ((condition.MinExpansionLevel == WorldConfig.Values[WorldCfg.Expansion].Int32 && condition.MinExpansionTier > 0) /*TODO: implement tier*/
+                || condition.MinExpansionLevel > WorldConfig.Values[WorldCfg.Expansion].Int32))
                 return false;
 
             if (condition.PhaseID != 0 || condition.PhaseGroupID != 0 || condition.PhaseUseFlags != 0)

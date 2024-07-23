@@ -16,11 +16,11 @@ namespace Game.SupportSystem
 
         public void Initialize()
         {
-            SetSupportSystemStatus(WorldConfig.GetBoolValue(WorldCfg.SupportEnabled));
-            SetTicketSystemStatus(WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled));
-            SetBugSystemStatus(WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled));
-            SetComplaintSystemStatus(WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled));
-            SetSuggestionSystemStatus(WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled));
+            SetSupportSystemStatus(WorldConfig.Values[WorldCfg.SupportEnabled].Bool);
+            SetTicketSystemStatus(WorldConfig.Values[WorldCfg.SupportTicketsEnabled].Bool);
+            SetBugSystemStatus(WorldConfig.Values[WorldCfg.SupportBugsEnabled].Bool);
+            SetComplaintSystemStatus(WorldConfig.Values[WorldCfg.SupportComplaintsEnabled].Bool);
+            SetSuggestionSystemStatus(WorldConfig.Values[WorldCfg.SupportSuggestionsEnabled].Bool);
         }
 
         public T GetTicket<T>(int Id) where T : Ticket

@@ -494,7 +494,7 @@ namespace Game.Entities
 
             var cost = 0u;
 
-            if (!noCost && !WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost))
+            if (!noCost && !WorldConfig.Values[WorldCfg.NoResetTalentCost].Bool)
             {
                 cost = GetNextResetTalentsCost();
 

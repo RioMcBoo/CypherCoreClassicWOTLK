@@ -49,7 +49,7 @@ namespace Game
 
             var team = GetPlayer().GetTeam();
 
-            uint gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
+            int gmLevelInWhoList = WorldConfig.Values[WorldCfg.GmLevelInWhoList].Int32;
 
             WhoResponsePkt response = new();
             response.RequestID = whoRequest.RequestID;
@@ -140,7 +140,7 @@ namespace Game
                 response.Response.Add(whoEntry);
 
                 // 50 is maximum player count sent to client
-                if (response.Response.Count >= 50)
+                if (response.Response.Count >= WorldConfig.Values[WorldCfg.MaxWho].Int32)
                     break;
             }
 

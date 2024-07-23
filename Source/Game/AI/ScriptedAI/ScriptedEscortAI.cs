@@ -251,7 +251,10 @@ namespace Game.AI
                         bool isEscort = false;
                         CreatureData creatureData = me.GetCreatureData();
                         if (creatureData != null)
-                            isEscort = (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && creatureData.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc));
+                        {
+                            isEscort = WorldConfig.Values[WorldCfg.RespawnDynamicEscortNpc].Bool
+                                && creatureData.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc);
+                        }
 
                         if (_instantRespawn)
                         {
@@ -381,8 +384,11 @@ namespace Game.AI
             CreatureData cdata = me.GetCreatureData();
             if (cdata != null)
             {
-                if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
+                if (WorldConfig.Values[WorldCfg.RespawnDynamicEscortNpc].Bool
+                    && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
+                {
                     me.SaveRespawnTime(me.GetRespawnDelay());
+            }
             }
 
             if (me.IsEngaged())

@@ -75,7 +75,7 @@ namespace Game.BattleGrounds
             uint lastOnlineTime = GameTime.GetGameTimeMS();
 
             //announce world (this don't need mutex)
-            if (m_queueId.Rated && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
+            if (m_queueId.Rated && WorldConfig.Values[WorldCfg.ArenaQueueAnnouncerEnable].Bool)
             {
                 ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenateamid);
                 if (arenaTeam != null)
@@ -119,7 +119,7 @@ namespace Game.BattleGrounds
                 m_QueuedGroups[(int)bracketId][index].Add(ginfo);
 
                 //announce to world, this code needs mutex
-                if (!m_queueId.Rated && !isPremade && WorldConfig.GetBoolValue(WorldCfg.BattlegroundQueueAnnouncerEnable))
+                if (!m_queueId.Rated && !isPremade && WorldConfig.Values[WorldCfg.BattlegroundQueueAnnouncerEnable].Bool)
                 {
                     BattlegroundTemplate bg = Global.BattlegroundMgr.GetBattlegroundTemplateByTypeId(m_queueId.BattlemasterListId);
                     if (bg != null)
@@ -138,7 +138,7 @@ namespace Game.BattleGrounds
                                 qHorde += (uint)groupQueueInfo.Players.Count;
 
                         // Show queue status to player only (when joining queue)
-                        if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundQueueAnnouncerPlayeronly))
+                        if (WorldConfig.Values[WorldCfg.BattlegroundQueueAnnouncerPlayerOnly].Bool)
                         {
                             leader.SendSysMessage(CypherStrings.BgQueueAnnounceSelf, bg.BattlemasterEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()], q_min_level, q_max_level,
                                 qAlliance, (MinPlayers > qAlliance) ? MinPlayers - qAlliance : 0, qHorde, (MinPlayers > qHorde) ? MinPlayers - qHorde : 0);
@@ -284,7 +284,8 @@ namespace Game.BattleGrounds
             m_QueuedPlayers.Remove(guid);
 
             // announce to world if arena team left queue for rated match, show only once
-            if (m_queueId.TeamSize != 0 && m_queueId.Rated && group.Players.Empty() && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
+            if (m_queueId.TeamSize != 0 && m_queueId.Rated && group.Players.Empty() 
+                && WorldConfig.Values[WorldCfg.ArenaQueueAnnouncerEnable].Bool)
             {
                 ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(group.ArenaTeamId);
                 if (team != null)
@@ -443,7 +444,7 @@ namespace Game.BattleGrounds
             var hordeCount = m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueueNormalHorde].Count;
 
             // try to get even teams
-            if (WorldConfig.GetIntValue(WorldCfg.BattlegroundInvitationType) == (int)BattlegroundQueueInvitationType.Even)
+            if (WorldConfig.Values[WorldCfg.BattlegroundInvitationType].Int32 == (int)BattlegroundQueueInvitationType.Even)
             {
                 // check if the teams are even
                 if (hordeFree == 1 && aliFree == 1)
@@ -486,7 +487,7 @@ namespace Game.BattleGrounds
             }
 
             //if ofc like BG queue invitation is set in config, then we are happy
-            if (WorldConfig.GetIntValue(WorldCfg.BattlegroundInvitationType) == (int)BattlegroundQueueInvitationType.NoBalance)
+            if (WorldConfig.Values[WorldCfg.BattlegroundInvitationType].Int32 == (int)BattlegroundQueueInvitationType.NoBalance)
                 return;
             /*
             if we reached this code, then we have to solve NP - complete problem called Subset sum problem
@@ -594,7 +595,7 @@ namespace Game.BattleGrounds
             // this could be 2 cycles but i'm checking only first team in queue - it can cause problem -
             // if first is invited to BG and seconds timer expired, but we can ignore it, because players have only 80 seconds to click to enter bg
             // and when they click or after 80 seconds the queue info is removed from queue
-            uint time_before = GameTime.GetGameTimeMS() - WorldConfig.GetUIntValue(WorldCfg.BattlegroundPremadeGroupWaitForMatch);
+            uint time_before = GameTime.GetGameTimeMS() - (uint)WorldConfig.Values[WorldCfg.BattlegroundPremadeGroupWaitForMatch].Int32;
             for (int i = 0; i < SharedConst.PvpTeamsCount; i++)
             {
                 if (!m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueuePremadeAlliance + i].Empty())
@@ -635,8 +636,9 @@ namespace Game.BattleGrounds
             if (m_SelectionPools[BattleGroundTeamId.Horde].GetPlayerCount() < m_SelectionPools[BattleGroundTeamId.Alliance].GetPlayerCount())
                 j = BattleGroundTeamId.Horde;
 
-            if (WorldConfig.GetIntValue(WorldCfg.BattlegroundInvitationType) != (int)BattlegroundQueueInvitationType.NoBalance
-                && m_SelectionPools[BattleGroundTeamId.Horde].GetPlayerCount() >= minPlayers && m_SelectionPools[BattleGroundTeamId.Alliance].GetPlayerCount() >= minPlayers)
+            if (WorldConfig.Values[WorldCfg.BattlegroundInvitationType].Int32 != (int)BattlegroundQueueInvitationType.NoBalance
+                && m_SelectionPools[BattleGroundTeamId.Horde].GetPlayerCount() >= minPlayers 
+                && m_SelectionPools[BattleGroundTeamId.Alliance].GetPlayerCount() >= minPlayers)
             {
                 //we will try to invite more groups to team with less players indexed by j
                 ++(teamIndex[j]);                                         //this will not cause a crash, because for cycle above reached break;

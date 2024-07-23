@@ -118,7 +118,7 @@ namespace Game.Chat
                 return;
 
             _isDirty = false;
-            _nextActivityUpdateTime = now + RandomHelper.URand(1 * Time.Minute, 6 * Time.Minute) * Math.Max(1u, WorldConfig.GetUIntValue(WorldCfg.PreserveCustomChannelInterval));
+            _nextActivityUpdateTime = now + RandomHelper.URand(1 * Time.Minute, 6 * Time.Minute) * Math.Max(1u, (uint)WorldConfig.Values[WorldCfg.PreserveCustomChannelInterval].Int32);
         }
 
         public void JoinChannel(Player player, string pass = "")
@@ -149,7 +149,7 @@ namespace Game.Chat
                 return;
             }
 
-            if (HasFlag(ChannelFlags.Lfg) && WorldConfig.GetBoolValue(WorldCfg.RestrictedLfgChannel) &&
+            if (HasFlag(ChannelFlags.Lfg) && WorldConfig.Values[WorldCfg.RestrictedLfgChannel].Bool &&
                 Global.AccountMgr.IsPlayerAccount(player.GetSession().GetSecurity()) && //FIXME: Move to RBAC
                 player.GetGroup() != null)
             {
@@ -526,7 +526,7 @@ namespace Game.Chat
             list.Channel = channelName;
             list.ChannelFlags = GetFlags();
 
-            uint gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
+            AccountTypes gmLevelInWhoList = (AccountTypes)WorldConfig.Values[WorldCfg.GmLevelInWhoList].Int32;
 
             foreach (var pair in _playersStore)
             {
@@ -535,7 +535,7 @@ namespace Game.Chat
                 // PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
                 // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
                 if (member != null && (player.GetSession().HasPermission(RBACPermissions.WhoSeeAllSecLevels) ||
-                    member.GetSession().GetSecurity() <= (AccountTypes)gmLevelInWhoList) &&
+                    member.GetSession().GetSecurity() <= gmLevelInWhoList) &&
                     member.IsVisibleGloballyFor(player))
                 {
                     list.Members.Add(new ChannelListResponse.ChannelPlayer(pair.Key, Global.WorldMgr.GetVirtualRealmAddress(), pair.Value.GetFlags()));
@@ -586,7 +586,7 @@ namespace Game.Chat
                 return;
 
             // TODO: Add proper RBAC check
-            if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionChannel))
+            if (WorldConfig.Values[WorldCfg.AllowTwoSideInteractionChannel].Bool)
                 lang = Language.Universal;
 
             if (!IsOn(guid))

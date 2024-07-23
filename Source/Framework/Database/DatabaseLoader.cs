@@ -14,7 +14,7 @@ namespace Framework.Database
         public DatabaseLoader(DatabaseTypeFlags defaultUpdateMask)
         {
             _autoSetup = ConfigMgr.GetDefaultValue("Updates.AutoSetup", true);
-            _updateFlags = ConfigMgr.GetDefaultValue("Updates.EnableDatabases", defaultUpdateMask);
+            _updateFlags = ConfigMgr.GetDefaultEnumValue("Updates.EnableDatabases", defaultUpdateMask);
         }
 
         public void AddDatabase<T>(MySqlBase<T> database, string baseDBName)

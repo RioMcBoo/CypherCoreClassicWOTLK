@@ -371,17 +371,17 @@ namespace Game.Entities
 
         public virtual void Say(string text, Language language, WorldObject target = null)
         {
-            Talk(text, ChatMsg.MonsterSay, language, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
+            Talk(text, ChatMsg.MonsterSay, language, WorldConfig.Values[WorldCfg.ListenRangeSay].Float, target);
         }
 
         public virtual void Yell(string text, Language language, WorldObject target = null)
         {
-            Talk(text, ChatMsg.MonsterYell, language, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), target);
+            Talk(text, ChatMsg.MonsterYell, language, WorldConfig.Values[WorldCfg.ListenRangeYell].Float, target);
         }
 
         public virtual void TextEmote(string text, WorldObject target = null, bool isBossEmote = false)
         {
-            Talk(text, isBossEmote ? ChatMsg.RaidBossEmote : ChatMsg.MonsterEmote, Language.Universal, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), target);
+            Talk(text, isBossEmote ? ChatMsg.RaidBossEmote : ChatMsg.MonsterEmote, Language.Universal, WorldConfig.Values[WorldCfg.ListenRangeTextemote].Float, target);
         }
 
         public virtual void Whisper(string text, Language language, Player target, bool isBossWhisper = false)
@@ -412,17 +412,17 @@ namespace Game.Entities
 
         public virtual void Say(int textId, WorldObject target = null)
         {
-            Talk(textId, ChatMsg.MonsterSay, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
+            Talk(textId, ChatMsg.MonsterSay, WorldConfig.Values[WorldCfg.ListenRangeSay].Float, target);
         }
 
         public virtual void Yell(int textId, WorldObject target = null)
         {
-            Talk(textId, ChatMsg.MonsterYell, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), target);
+            Talk(textId, ChatMsg.MonsterYell, WorldConfig.Values[WorldCfg.ListenRangeYell].Float, target);
         }
 
         public virtual void TextEmote(int textId, WorldObject target = null, bool isBossEmote = false)
         {
-            Talk(textId, isBossEmote ? ChatMsg.RaidBossEmote : ChatMsg.MonsterEmote, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), target);
+            Talk(textId, isBossEmote ? ChatMsg.RaidBossEmote : ChatMsg.MonsterEmote, WorldConfig.Values[WorldCfg.ListenRangeTextemote].Float, target);
         }
 
         public virtual void Whisper(int textId, Player target, bool isBossWhisper = false)
@@ -2998,7 +2998,7 @@ namespace Game.Entities
                 else                                                // victim is a player
                 {
                     // random durability for items (HIT TAKEN)
-                    if (durabilityLoss && WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossDamage) > RandomHelper.randPercent())
+                    if (durabilityLoss && WorldConfig.Values[WorldCfg.RateDurabilityLossDamage].Float > RandomHelper.randPercent())
                     {
                         byte slot = (byte)RandomHelper.IRand(0, EquipmentSlot.End - 1);
                         victim.ToPlayer().DurabilityPointLossForEquipSlot(slot);
@@ -3008,7 +3008,7 @@ namespace Game.Entities
                 if (attacker != null && attacker.IsPlayer())
                 {
                     // random durability for items (HIT DONE)
-                    if (durabilityLoss && RandomHelper.randChance(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossDamage)))
+                    if (durabilityLoss && RandomHelper.randChance(WorldConfig.Values[WorldCfg.RateDurabilityLossDamage].Float))
                     {
                         byte slot = (byte)RandomHelper.IRand(0, EquipmentSlot.End - 1);
                         attacker.ToPlayer().DurabilityPointLossForEquipSlot(slot);
@@ -3470,7 +3470,7 @@ namespace Game.Entities
             // talent who gave more rage on attack
             MathFunctions.AddPct(ref addRage, GetTotalAuraModifier(AuraType.ModRageFromDamageDealt));
 
-            addRage *= WorldConfig.GetFloatValue(WorldCfg.RatePowerRageIncome);
+            addRage *= WorldConfig.Values[WorldCfg.RatePowerRageIncome].Float;
 
             ModifyPower(PowerType.Rage, (int)(addRage * 10));
         }

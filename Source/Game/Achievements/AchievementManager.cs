@@ -638,8 +638,8 @@ namespace Game.Achievements
                 {
                     BroadcastTextBuilder _builder = new(_owner, ChatMsg.Achievement, (int)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
                     var _localizer = new LocalizedDo(_builder);
-                    var _worker = new PlayerDistWorker(_owner, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), _localizer);
-                    Cell.VisitWorldObjects(_owner, _worker, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));
+                    var _worker = new PlayerDistWorker(_owner, WorldConfig.Values[WorldCfg.ListenRangeSay].Float, _localizer);
+                    Cell.VisitWorldObjects(_owner, _worker, WorldConfig.Values[WorldCfg.ListenRangeSay].Float);
                 }
             }
 
@@ -657,7 +657,7 @@ namespace Game.Achievements
 
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
             {
-                float dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay);
+                float dist = WorldConfig.Values[WorldCfg.ListenRangeSay].Float;
                 MessageDistDeliverer notifier = new(_owner, achievementEarnedBuilder, dist);
                 Cell.VisitWorldObjects(_owner, notifier, dist);
             }

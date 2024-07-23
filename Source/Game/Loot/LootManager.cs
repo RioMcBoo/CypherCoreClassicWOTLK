@@ -542,11 +542,11 @@ namespace Game.Loots
                 return true;
 
             if (reference > 0)                                   // reference case
-                return RandomHelper.randChance(chance * (rate ? WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferenced) : 1.0f));
+                return RandomHelper.randChance(chance * (rate ? WorldConfig.Values[WorldCfg.RateDropItemReferenced].Float : 1.0f));
 
             ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
 
-            float qualityModifier = pProto != null && rate ? WorldConfig.GetFloatValue(qualityToRate[(int)pProto.GetQuality()]) : 1.0f;
+            float qualityModifier = pProto != null && rate ? WorldConfig.Values[qualityToRate[(int)pProto.GetQuality()]].Float : 1.0f;
 
             return RandomHelper.randChance(chance * qualityModifier);
         }
@@ -832,7 +832,7 @@ namespace Game.Loots
                     if (Referenced == null)
                         continue;                                       // Error message already printed at loading stage
 
-                    uint maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
+                    uint maxcount = (uint)(item.maxcount * WorldConfig.Values[WorldCfg.RateDropItemReferencedAmount].Float);
                     for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
                         Referenced.Process(loot, rate, lootMode, item.groupid, personalLooter);
                 }
@@ -886,7 +886,7 @@ namespace Game.Loots
                     if (referenced == null)
                         continue;                                       // Error message already printed at loading stage
 
-                    uint maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
+                    uint maxcount = (uint)(item.maxcount * WorldConfig.Values[WorldCfg.RateDropItemReferencedAmount].Float);
                     List<Player> gotLoot = new();
                     for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
                     {

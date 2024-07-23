@@ -38,7 +38,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(RaceLimitDisables.Count);
 
             if (DisabledClassesMask.HasValue)
-                _worldPacket.WriteUInt32(DisabledClassesMask.Value);
+                _worldPacket.WriteInt32(DisabledClassesMask.Value);
 
             foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
                 unlockedConditionalAppearance.Write(_worldPacket);
@@ -61,7 +61,7 @@ namespace Game.Networking.Packets
         public bool IsTrialAccountRestricted;
 
         public int MaxCharacterLevel = 1;
-        public uint? DisabledClassesMask = new();
+        public int? DisabledClassesMask = new();
 
         public List<CharacterInfo> Characters = new(); // all characters on the list
         public List<RaceUnlock> RaceUnlockData = new(); //
@@ -104,7 +104,7 @@ namespace Game.Networking.Packets
                 if (fields.Read<ulong>(18) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(28)))
+                if (WorldConfig.Values[WorldCfg.DeclinedNamesUsed].Bool && !string.IsNullOrEmpty(fields.Read<string>(28)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))

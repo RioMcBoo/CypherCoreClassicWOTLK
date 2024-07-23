@@ -402,7 +402,7 @@ namespace Game.Entities
                 SatisfyQuestDependentQuests(quest, false) && SatisfyQuestDay(quest, false) && SatisfyQuestWeek(quest, false) &&
                 SatisfyQuestMonth(quest, false) && SatisfyQuestSeasonal(quest, false))
             {
-                return GetLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= quest.MinLevel;
+                return GetLevel() + WorldConfig.Values[WorldCfg.QuestHighLevelHideDiff].Int32 >= quest.MinLevel;
             }
 
             return false;
@@ -834,7 +834,7 @@ namespace Game.Entities
 
         public int GetQuestMoneyReward(Quest quest)
         {
-            return (int)(quest.MoneyValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
+            return (int)(quest.MoneyValue(this) * WorldConfig.Values[WorldCfg.RateMoneyQuest].Float);
         }
 
         public int GetQuestXPReward(Quest quest)
@@ -845,7 +845,7 @@ namespace Game.Entities
             if (rewarded)
                 return 0;
 
-            var XP = (int)(quest.XPValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateXpQuest));
+            var XP = (int)(quest.XPValue(this) * WorldConfig.Values[WorldCfg.RateXpQuest].Float);
 
             // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
             var ModXPPctAuras = GetAuraEffectsByType(AuraType.ModXpQuestPct);
@@ -1056,7 +1056,7 @@ namespace Game.Entities
             if (!IsMaxLevel())
                 GiveXP(XP, null);
             else
-                moneyRew = (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                moneyRew = (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
 
             moneyRew += GetQuestMoneyReward(quest);
 
@@ -2111,7 +2111,7 @@ namespace Game.Entities
 
                 if (quest.IsTurnIn() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
                 {
-                    if (GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
+                    if (GetLevel() > (GetQuestLevel(quest) + WorldConfig.Values[WorldCfg.QuestLowLevelHideDiff].Int32))
                         result |= QuestGiverStatus.RepeatableTurnin;
                     else
                         result |= QuestGiverStatus.TrivialRepeatableTurnin;
@@ -2133,7 +2133,7 @@ namespace Game.Entities
                     {
                         if (SatisfyQuestLevel(quest, false))
                         {
-                            bool isTrivial = GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff));
+                            bool isTrivial = GetLevel() > (GetQuestLevel(quest) + WorldConfig.Values[WorldCfg.QuestLowLevelHideDiff].Int32);
                             if (quest.IsImportant())
                                 result |= isTrivial ? QuestGiverStatus.TrivialImportantQuest : QuestGiverStatus.ImportantQuest;
                             else if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
@@ -3086,7 +3086,7 @@ namespace Game.Entities
             else // At max level, increase gold reward
             {
                 xp = 0;
-                moneyReward = GetQuestMoneyReward(quest) + (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                moneyReward = GetQuestMoneyReward(quest) + (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
             }
 
             QuestGiverQuestComplete packet = new();

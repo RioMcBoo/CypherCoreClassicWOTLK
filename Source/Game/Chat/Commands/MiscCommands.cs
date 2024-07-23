@@ -493,7 +493,7 @@ namespace Game.Chat
             // Check if duration needs to be retrieved from config
             if (getDurationFromConfig)
             {
-                freezeDuration = WorldConfig.GetIntValue(WorldCfg.GmFreezeDuration);
+                freezeDuration = WorldConfig.Values[WorldCfg.GmFreezeDuration].Int32;
                 canApplyFreeze = true;
             }
 
@@ -771,7 +771,7 @@ namespace Game.Chat
             if (kickReason != null)
                 kickReasonStr = kickReason;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.ShowKickInWorld))
+            if (WorldConfig.Values[WorldCfg.ShowKickInWorld].Bool)
             {
                 Global.WorldMgr.SendWorldText(
                     CypherStrings.CommandKickmessageWorld, 
@@ -1035,7 +1035,7 @@ namespace Game.Chat
 
             string nameLink = handler.PlayerLink(player.GetName());
 
-            if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
+            if (WorldConfig.Values[WorldCfg.ShowMuteInWorld].Bool)
             {
                 Global.WorldMgr.SendWorldText(
                     CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReasonStr);
@@ -1444,7 +1444,7 @@ namespace Game.Chat
                 handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No));
 
             // Output X. LANG_PINFO_CHR_LEVEL
-            if (level != WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (level != WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                 handler.SendSysMessage(CypherStrings.PinfoChrLevelLow, level, xp, xptotal, (xptotal - xp));
             else
                 handler.SendSysMessage(CypherStrings.PinfoChrLevelHigh, level);
@@ -1559,7 +1559,7 @@ namespace Game.Chat
         [CommandNonGroup("pvpstats", RBACPermissions.CommandPvpstats, true)]
         static bool HandlePvPstatsCommand(CommandHandler handler)
         {
-            if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
+            if (WorldConfig.Values[WorldCfg.BattlegroundStoreStatisticsEnable].Bool)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
                 SQLResult result = DB.Characters.Query(stmt);
@@ -1716,7 +1716,7 @@ namespace Game.Chat
             }
 
             // save if the player has last been saved over 20 seconds ago
-            uint saveInterval = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
+            uint saveInterval = (uint)WorldConfig.Values[WorldCfg.IntervalSave].Int32;
             if (saveInterval == 0 || (saveInterval > 20 * Time.InMilliseconds && player.GetSaveTimer() <= saveInterval - 20 * Time.InMilliseconds))
                 player.SaveToDB();
 
@@ -2099,7 +2099,7 @@ namespace Game.Chat
         static bool HandleChangeWeather(CommandHandler handler, uint type, float intensity)
         {
             // Weather is OFF
-            if (!WorldConfig.GetBoolValue(WorldCfg.Weather))
+            if (!WorldConfig.Values[WorldCfg.Weather].Bool)
             {
                 handler.SendSysMessage(CypherStrings.WeatherDisabled);
                 return false;

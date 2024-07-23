@@ -706,7 +706,7 @@ namespace Game.Entities
                 dmultiplier = durabilityCost.ArmorSubClassCost[itemTemplate.GetSubClass()];
 
             var cost = (long)Math.Round(lostDurability * dmultiplier * durabilityQualityEntry.Data * GetRepairCostMultiplier());
-            cost = (long)(cost * discount * WorldConfig.GetFloatValue(WorldCfg.RateRepaircost));
+            cost = (long)(cost * discount * WorldConfig.Values[WorldCfg.RateRepaircost].Float);
 
             if (cost == 0) // Fix for ITEM_QUALITY_ARTIFACT
                 cost = 1;
@@ -1841,10 +1841,10 @@ namespace Game.Entities
             ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, 0);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), petitionId);
         }
-        public void SetPetitionNumSignatures(uint signatures)
+        public void SetPetitionNumSignatures(int signatures)
         {
             ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, 0);
-            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), signatures);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), (uint)signatures);
         }
 
         public void SetFixedLevel(int level)

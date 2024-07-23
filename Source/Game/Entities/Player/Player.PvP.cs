@@ -151,7 +151,7 @@ namespace Game.Entities
                 honor_f += _restMgr.GetRestBonusFor(RestTypes.Honor, (int)honor_f);
             }
 
-            honor_f *= WorldConfig.GetFloatValue(WorldCfg.RateHonor);
+            honor_f *= WorldConfig.Values[WorldCfg.RateHonor].Float;
             // Back to int now
             honor = (int)honor_f;
             // honor - for show honor points in log
@@ -178,7 +178,7 @@ namespace Game.Entities
                 }
             }
 
-            if (WorldConfig.GetBoolValue(WorldCfg.PvpTokenEnable) && pvptoken)
+            if (WorldConfig.Values[WorldCfg.PvpTokenEnable].Bool && pvptoken)
             {
                 if (victim == null || victim == this || victim.HasAuraType(AuraType.NoPvpCredit))
                     return true;
@@ -186,14 +186,14 @@ namespace Game.Entities
                 if (victim.IsTypeId(TypeId.Player))
                 {
                     // Check if allowed to receive it in current map
-                    int MapType = WorldConfig.GetIntValue(WorldCfg.PvpTokenMapType);
+                    int MapType = WorldConfig.Values[WorldCfg.PvpTokenMapType].Int32;
                     if ((MapType == 1 && !InBattleground() && !IsFFAPvP())
                         || (MapType == 2 && !IsFFAPvP())
                         || (MapType == 3 && !InBattleground()))
                         return true;
 
-                    var itemId = WorldConfig.GetIntValue(WorldCfg.PvpTokenId);
-                    var count = WorldConfig.GetIntValue(WorldCfg.PvpTokenCount);
+                    int itemId = WorldConfig.Values[WorldCfg.PvpTokenId].Int32;
+                    int count = WorldConfig.Values[WorldCfg.PvpTokenCount].Int32;
 
                     if (AddItem(itemId, count))
                         SendSysMessage("You have been awarded a token for slaying another player.");
@@ -638,7 +638,7 @@ namespace Game.Entities
                 bg.RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
                 // call after remove to be sure that player resurrected for correct cast
-                if (bg.IsBattleground() && !IsGameMaster() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundCastDeserter))
+                if (bg.IsBattleground() && !IsGameMaster() && WorldConfig.Values[WorldCfg.BattlegroundCastDeserter].Bool)
                 {
                     if (bg.GetStatus() == BattlegroundStatus.InProgress || bg.GetStatus() == BattlegroundStatus.WaitJoin)
                     {
@@ -702,7 +702,7 @@ namespace Game.Entities
             {
                 m_bgData.bgAfkReporter.Add(reporter.GetGUID());
                 // by default 3 players have to complain to apply debuff
-                if (m_bgData.bgAfkReporter.Count >= WorldConfig.GetIntValue(WorldCfg.BattlegroundReportAfk))
+                if (m_bgData.bgAfkReporter.Count >= WorldConfig.Values[WorldCfg.BattlegroundReportAfk].Int32)
                 {
                     // cast 'Idle' spell
                     CastSpell(this, 43680, true);
@@ -738,8 +738,8 @@ namespace Game.Entities
 
             // limit check leel to dbc compatible level range
             var level = GetLevel();
-            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
+                level = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
 
             if (level < bg.GetMinLevel() || level > bg.GetMaxLevel())
                 return false;

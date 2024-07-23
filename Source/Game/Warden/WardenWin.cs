@@ -200,7 +200,7 @@ namespace Game
                     continue;
 
                 var checks = _checks[(int)category];
-                for (uint i = 0, n = WorldConfig.GetUIntValue(WardenCheckManager.GetWardenCategoryCountConfig(category)); i < n; ++i)
+                for (int i = 0, n = WorldConfig.Values[WardenCheckManager.GetWardenCategoryCountConfig(category)].Int32; i < n; ++i)
                 {
                     if (checks.IsAtEnd()) // all checks were already sent, list will be re-filled on next Update() run
                         break;
@@ -470,7 +470,7 @@ namespace Game
             }
 
             // Set hold off timer, minimum timer should at least be 1 second
-            uint holdOff = WorldConfig.GetUIntValue(WorldCfg.WardenClientCheckHoldoff);
+            uint holdOff = (uint)WorldConfig.Values[WorldCfg.WardenClientCheckHoldoff].Int32;
             _checkTimer = (holdOff < 1 ? 1 : holdOff) * Time.InMilliseconds;
         }
     }

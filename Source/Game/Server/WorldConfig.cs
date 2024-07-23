@@ -4,12 +4,17 @@
 using Framework.Configuration;
 using Framework.Constants;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Game
 {
     public class WorldConfig : ConfigMgr
     {
+        private WorldConfig() { }
+        public static WorldConfig Values = new();
+
         public static void Load(bool reload = false)
         {
             if (reload)
@@ -26,19 +31,21 @@ namespace Game
             Values[WorldCfg.SupportSuggestionsEnabled] = GetDefaultValue("Support.SuggestionsEnabled", false);
 
             // Send server info on login?
-            Values[WorldCfg.EnableSinfoLogin] = GetDefaultValue("Server.LoginInfo", 0);
+            Values[WorldCfg.EnableSinfoLogin] = GetDefaultValue("Server.LoginInfo", false);
 
             // Read all rates from the config file
             static void SetRegenRate(WorldCfg rate, string configKey)
             {
-                Values[rate] = GetDefaultValue(configKey, 1.0f);
-                if ((float) Values[rate] < 0.0f)
+                float default_rate = GetDefaultValue(configKey, 1.0f);
+                if (default_rate < 0.0f)
                 {
-                    Log.outError(LogFilter.ServerLoading, 
-                        $"{configKey} ({Values[rate]}) must be > 0. Using 1 instead.");
+                    Log.outError(LogFilter.ServerLoading,
+                        $"{configKey} ({default_rate}) must be > 0. Using 1 instead.");
 
-                    Values[rate] = 1;
+                    default_rate = 1.0f;
                 }
+
+                Values[rate] = default_rate;
             }
 
             SetRegenRate(WorldCfg.RateHealth, "Rate.Health");
@@ -76,14 +83,13 @@ namespace Game
             Values[WorldCfg.RateXpBgKill] = GetDefaultValue("Rate.XP.BattlegroundKill", 1.0f);
             Values[WorldCfg.RateXpQuest] = GetDefaultValue("Rate.XP.Quest", 1.0f);
             Values[WorldCfg.RateXpExplore] = GetDefaultValue("Rate.XP.Explore", 1.0f);
-
-            Values[WorldCfg.XpBoostDaymask] = GetDefaultValue("XP.Boost.Daymask", 0);
+            Values[WorldCfg.XpBoostDaymask] = GetDefaultValue("XP.Boost.Daymask", 0u);
             Values[WorldCfg.RateXpBoost] = GetDefaultValue("XP.Boost.Rate", 2.0f);
 
             Values[WorldCfg.RateRepaircost] = GetDefaultValue("Rate.RepairCost", 1.0f);
-            if ((float)Values[WorldCfg.RateRepaircost] < 0.0f)
+            if (Values[WorldCfg.RateRepaircost].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Rate.RepairCost ({Values[WorldCfg.RateRepaircost]}) must be >=0. Using 0.0 instead.");
 
                 Values[WorldCfg.RateRepaircost] = 0.0f;
@@ -126,18 +132,18 @@ namespace Game
             Values[WorldCfg.RateInstanceResetTime] = GetDefaultValue("Rate.InstanceResetTime", 1.0f);
 
             Values[WorldCfg.RateTalent] = GetDefaultValue("Rate.Talent", 1.0f);
-            if ((float)Values[WorldCfg.RateTalent] < 0.0f)
+            if (Values[WorldCfg.RateTalent].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Rate.Talent ({Values[WorldCfg.RateTalent]}) must be > 0. Using 1 instead.");
 
                 Values[WorldCfg.RateTalent] = 1.0f;
             }
 
             Values[WorldCfg.RateMovespeed] = GetDefaultValue("Rate.MoveSpeed", 1.0f);
-            if ((float)Values[WorldCfg.RateMovespeed] < 0.0f)
+            if (Values[WorldCfg.RateMovespeed].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Rate.MoveSpeed ({Values[WorldCfg.RateMovespeed]}) must be > 0. Using 1 instead.");
 
                 Values[WorldCfg.RateMovespeed] = 1.0f;
@@ -146,71 +152,71 @@ namespace Game
             Values[WorldCfg.RateCorpseDecayLooted] = GetDefaultValue("Rate.Corpse.Decay.Looted", 0.5f);
 
             Values[WorldCfg.RateDurabilityLossOnDeath] = GetDefaultValue("DurabilityLoss.OnDeath", 10.0f);
-            if ((float)Values[WorldCfg.RateDurabilityLossOnDeath] < 0.0f)
+            if (Values[WorldCfg.RateDurabilityLossOnDeath].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"DurabilityLoss.OnDeath ({Values[WorldCfg.RateDurabilityLossOnDeath]}) must be >=0. Using 0.0 instead.");
 
                 Values[WorldCfg.RateDurabilityLossOnDeath] = 0.0f;
             }
-            if ((float)Values[WorldCfg.RateDurabilityLossOnDeath] > 100.0f)
+            if (Values[WorldCfg.RateDurabilityLossOnDeath].Float > 100.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"DurabilityLoss.OnDeath ({Values[WorldCfg.RateDurabilityLossOnDeath]}) must be <= 100. Using 100.0 instead.");
 
                 Values[WorldCfg.RateDurabilityLossOnDeath] = 0.0f;
             }
-            Values[WorldCfg.RateDurabilityLossOnDeath] = (float)Values[WorldCfg.RateDurabilityLossOnDeath] / 100.0f;
+            Values[WorldCfg.RateDurabilityLossOnDeath] = Values[WorldCfg.RateDurabilityLossOnDeath].Float / 100.0f;
 
             Values[WorldCfg.RateDurabilityLossDamage] = GetDefaultValue("DurabilityLossChance.Damage", 0.5f);
-            if ((float)Values[WorldCfg.RateDurabilityLossDamage] < 0.0f)
+            if (Values[WorldCfg.RateDurabilityLossDamage].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"DurabilityLossChance.Damage ({Values[WorldCfg.RateDurabilityLossDamage]}) must be >=0. Using 0.0 instead.");
 
                 Values[WorldCfg.RateDurabilityLossDamage] = 0.0f;
             }
 
             Values[WorldCfg.RateDurabilityLossAbsorb] = GetDefaultValue("DurabilityLossChance.Absorb", 0.5f);
-            if ((float)Values[WorldCfg.RateDurabilityLossAbsorb] < 0.0f)
+            if (Values[WorldCfg.RateDurabilityLossAbsorb].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"DurabilityLossChance.Absorb ({Values[WorldCfg.RateDurabilityLossAbsorb]}) must be >=0. Using 0.0 instead.");
 
                 Values[WorldCfg.RateDurabilityLossAbsorb] = 0.0f;
             }
 
             Values[WorldCfg.RateDurabilityLossParry] = GetDefaultValue("DurabilityLossChance.Parry", 0.05f);
-            if ((float)Values[WorldCfg.RateDurabilityLossParry] < 0.0f)
+            if (Values[WorldCfg.RateDurabilityLossParry].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"DurabilityLossChance.Parry ({Values[WorldCfg.RateDurabilityLossParry]}) must be >=0. Using 0.0 instead.");
 
                 Values[WorldCfg.RateDurabilityLossParry] = 0.0f;
             }
 
             Values[WorldCfg.RateDurabilityLossBlock] = GetDefaultValue("DurabilityLossChance.Block", 0.05f);
-            if ((float)Values[WorldCfg.RateDurabilityLossBlock] < 0.0f)
+            if (Values[WorldCfg.RateDurabilityLossBlock].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"DurabilityLossChance.Block ({Values[WorldCfg.RateDurabilityLossBlock]}) must be >=0. Using 0.0 instead.");
 
                 Values[WorldCfg.RateDurabilityLossBlock] = 0.0f;
             }
 
             Values[WorldCfg.RateMoneyQuest] = GetDefaultValue("Rate.Quest.Money.Reward", 1.0f);
-            if ((float)Values[WorldCfg.RateMoneyQuest] < 0.0f)
+            if (Values[WorldCfg.RateMoneyQuest].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Rate.Quest.Money.Reward ({Values[WorldCfg.RateMoneyQuest]}) must be >=0. Using 0 instead.");
 
                 Values[WorldCfg.RateMoneyQuest] = 0.0f;
             }
 
             Values[WorldCfg.RateMoneyMaxLevelQuest] = GetDefaultValue("Rate.Quest.Money.Max.Level.Reward", 1.0f);
-            if ((float)Values[WorldCfg.RateMoneyMaxLevelQuest] < 0.0f)
+            if (Values[WorldCfg.RateMoneyMaxLevelQuest].Float < 0.0f)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Rate.Quest.Money.Max.Level.Reward ({Values[WorldCfg.RateMoneyMaxLevelQuest]}) must be >=0. Using 0 instead.");
 
                 Values[WorldCfg.RateMoneyMaxLevelQuest] = 0.0f;
@@ -220,9 +226,9 @@ namespace Game
             Values[WorldCfg.DurabilityLossInPvp] = GetDefaultValue("DurabilityLoss.InPvP", false);
 
             Values[WorldCfg.Compression] = GetDefaultValue("Compression", 1);
-            if ((int)Values[WorldCfg.Compression] < 1 || (int)Values[WorldCfg.Compression] > 9)
+            if (Values[WorldCfg.Compression].Int32 < 1 || Values[WorldCfg.Compression].Int32 > 9)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Compression Level ({Values[WorldCfg.Compression]}) must be in range 1..9. Using default compression Level (1).");
 
                 Values[WorldCfg.Compression] = 1;
@@ -234,9 +240,9 @@ namespace Game
             Values[WorldCfg.AuctionReplicateDelay] = GetDefaultValue("Auction.ReplicateItemsCooldown", 900);
 
             Values[WorldCfg.AuctionSearchDelay] = GetDefaultValue("Auction.SearchDelay", 300);
-            if ((int)Values[WorldCfg.AuctionSearchDelay] < 100 || (int)Values[WorldCfg.AuctionSearchDelay] > 10000)
+            if (Values[WorldCfg.AuctionSearchDelay].Int32 < 100 || Values[WorldCfg.AuctionSearchDelay].Int32 > 10000)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Auction.SearchDelay ({Values[WorldCfg.AuctionSearchDelay]}) " +
                     $"must be between 100 and 10000. Using default of 300ms");
 
@@ -244,9 +250,9 @@ namespace Game
             }
 
             Values[WorldCfg.AuctionTaintedSearchDelay] = GetDefaultValue("Auction.TaintedSearchDelay", 3000);
-            if ((int)Values[WorldCfg.AuctionTaintedSearchDelay] < 100 || (int)Values[WorldCfg.AuctionTaintedSearchDelay] > 10000)
+            if (Values[WorldCfg.AuctionTaintedSearchDelay].Int32 < 100 || Values[WorldCfg.AuctionTaintedSearchDelay].Int32 > 10000)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Auction.TaintedSearchDelay ({Values[WorldCfg.AuctionTaintedSearchDelay]}) " +
                     $"must be between 100 and 10000. Using default of 3s");
 
@@ -265,68 +271,73 @@ namespace Game
             Values[WorldCfg.PreserveCustomChannels] = GetDefaultValue("PreserveCustomChannels", false);
             Values[WorldCfg.PreserveCustomChannelDuration] = GetDefaultValue("PreserveCustomChannelDuration", 14);
             Values[WorldCfg.PreserveCustomChannelInterval] = GetDefaultValue("PreserveCustomChannelInterval", 5);
-            Values[WorldCfg.GridUnload] = GetDefaultValue("GridUnload", true);
-            Values[WorldCfg.BasemapLoadGrids] = GetDefaultValue("BaseMapLoadAllGrids", false);
-            if ((bool)Values[WorldCfg.BasemapLoadGrids] && (bool)Values[WorldCfg.GridUnload])
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"BaseMapLoadAllGrids enabled, but GridUnload also enabled. " +
-                    $"GridUnload must be disabled to enable base map pre-loading. " +
-                    $"Base map pre-loading disabled");
 
-                Values[WorldCfg.BasemapLoadGrids] = false;
+            {
+                Values[WorldCfg.GridUnload] = GetDefaultValue("GridUnload", true);
+
+                Values[WorldCfg.BasemapLoadGrids] = GetDefaultValue("BaseMapLoadAllGrids", false);
+                if (Values[WorldCfg.BasemapLoadGrids].Bool && Values[WorldCfg.GridUnload].Bool)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"BaseMapLoadAllGrids enabled, but GridUnload also enabled. " +
+                        $"GridUnload must be disabled to enable base map pre-loading. " +
+                        $"Base map pre-loading disabled");
+
+                    Values[WorldCfg.BasemapLoadGrids] = false;
+                }
+                Values[WorldCfg.InstancemapLoadGrids] = GetDefaultValue("InstanceMapLoadAllGrids", false);
+                if (Values[WorldCfg.InstancemapLoadGrids].Bool && Values[WorldCfg.GridUnload].Bool)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"InstanceMapLoadAllGrids enabled, but GridUnload also enabled. " +
+                        $"GridUnload must be disabled to enable instance map pre-loading. " +
+                        $"Instance map pre-loading disabled");
+
+                    Values[WorldCfg.InstancemapLoadGrids] = false;
+                }
+
+                Values[WorldCfg.BattlegroundMapLoadGrids] = GetDefaultValue("BattlegroundMapLoadAllGrids", true);
+                Values[WorldCfg.IntervalSave] = GetDefaultValue("PlayerSaveInterval", 15 * Time.Minute * Time.InMilliseconds);
+                Values[WorldCfg.IntervalDisconnectTolerance] = GetDefaultValue("DisconnectToleranceInterval", 0);
+                Values[WorldCfg.StatsSaveOnlyOnLogout] = GetDefaultValue("PlayerSave.Stats.SaveOnlyOnLogout", true);
+
+                Values[WorldCfg.MinLevelStatSave] = GetDefaultValue("PlayerSave.Stats.MinLevel", 0);
+                if (Values[WorldCfg.MinLevelStatSave].Int32 > SharedConst.MaxLevel)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"PlayerSave.Stats.MinLevel ({Values[WorldCfg.MinLevelStatSave]}) must be in range 0..80. " +
+                        $"Using default, do not save character stats (0).");
+
+                    Values[WorldCfg.MinLevelStatSave] = 0;
+                }
+
+                Values[WorldCfg.IntervalGridClean] = GetDefaultValue("GridCleanUpDelay", 5 * Time.Minute * Time.InMilliseconds);
+                if (Values[WorldCfg.IntervalGridClean].Int32 < MapConst.MinGridDelay)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"GridCleanUpDelay ({Values[WorldCfg.IntervalGridClean]}) " +
+                        $"must be greater {MapConst.MinGridDelay} Use this minimal value.");
+
+                    Values[WorldCfg.IntervalGridClean] = MapConst.MinGridDelay;
+                }
             }
-            Values[WorldCfg.InstancemapLoadGrids] = GetDefaultValue("InstanceMapLoadAllGrids", false);
-            if ((bool)Values[WorldCfg.InstancemapLoadGrids] && (bool)Values[WorldCfg.GridUnload])
+
+            Values[WorldCfg.IntervalMapUpdate] = GetDefaultValue("MapUpdateInterval", 10);
+            if (Values[WorldCfg.IntervalMapUpdate].Int32 < MapConst.MinMapUpdateDelay)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"InstanceMapLoadAllGrids enabled, but GridUnload also enabled. " +
-                    $"GridUnload must be disabled to enable instance map pre-loading. " +
-                    $"Instance map pre-loading disabled");
-
-                Values[WorldCfg.InstancemapLoadGrids] = false;
-            }
-
-            Values[WorldCfg.BattlegroundMapLoadGrids] = GetDefaultValue("BattlegroundMapLoadAllGrids", true);
-            Values[WorldCfg.IntervalSave] = GetDefaultValue("PlayerSaveInterval", 15 * Time.Minute * Time.InMilliseconds);
-            Values[WorldCfg.IntervalDisconnectTolerance] = GetDefaultValue("DisconnectToleranceInterval", 0);
-            Values[WorldCfg.StatsSaveOnlyOnLogout] = GetDefaultValue("PlayerSave.Stats.SaveOnlyOnLogout", true);
-
-            Values[WorldCfg.MinLevelStatSave] = GetDefaultValue("PlayerSave.Stats.MinLevel", 0);
-            if ((int)Values[WorldCfg.MinLevelStatSave] > SharedConst.MaxLevel)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"PlayerSave.Stats.MinLevel ({Values[WorldCfg.MinLevelStatSave]}) must be in range 0..80. " +
-                    $"Using default, do not save character stats (0).");
-
-                Values[WorldCfg.MinLevelStatSave] = 0;
-            }
-
-            Values[WorldCfg.IntervalGridclean] = GetDefaultValue("GridCleanUpDelay", 5 * Time.Minute * Time.InMilliseconds);
-            if ((int)Values[WorldCfg.IntervalGridclean] < MapConst.MinGridDelay)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"GridCleanUpDelay ({Values[WorldCfg.IntervalGridclean]}) " +
-                    $"must be greater {MapConst.MinGridDelay} Use this minimal value.");
-
-                Values[WorldCfg.IntervalGridclean] = MapConst.MinGridDelay;
-            }
-
-            Values[WorldCfg.IntervalMapupdate] = GetDefaultValue("MapUpdateInterval", 10);
-            if ((int)Values[WorldCfg.IntervalMapupdate] < MapConst.MinMapUpdateDelay)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"MapUpdateInterval ({Values[WorldCfg.IntervalMapupdate]}) " +
+                Log.outError(LogFilter.ServerLoading,
+                    $"MapUpdateInterval ({Values[WorldCfg.IntervalMapUpdate]}) " +
                     $"must be greater {MapConst.MinMapUpdateDelay}. Use this minimal value.");
 
-                Values[WorldCfg.IntervalMapupdate] = MapConst.MinMapUpdateDelay;
+                Values[WorldCfg.IntervalMapUpdate] = MapConst.MinMapUpdateDelay;
             }
 
             Values[WorldCfg.IntervalChangeweather] = GetDefaultValue("ChangeWeatherInterval", 10 * Time.Minute * Time.InMilliseconds);
+
             if (reload)
             {
                 int val = GetDefaultValue("WorldServerPort", 8085);
-                if (val != (int)Values[WorldCfg.PortWorld])
+                if (val != Values[WorldCfg.PortWorld].Int32)
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"WorldServerPort option can't be changed at worldserver.conf reload, " +
@@ -334,12 +345,12 @@ namespace Game
                 }
 
                 val = GetDefaultValue("InstanceServerPort", 8086);
-                if (val != (int)Values[WorldCfg.PortInstance])
+                if (val != Values[WorldCfg.PortInstance].Int32)
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"InstanceServerPort option can't be changed at worldserver.conf reload, " +
                         $"using current value ({Values[WorldCfg.PortInstance]}).");
-            }
+                }
             }
             else
             {
@@ -356,27 +367,27 @@ namespace Game
             Values[WorldCfg.MaxRecruitAFriendDistance] = GetDefaultValue("MaxRecruitAFriendBonusDistance", 100.0f);
 
             Values[WorldCfg.MinQuestScaledXpRatio] = GetDefaultValue("MinQuestScaledXPRatio", 0);
-            if ((int)Values[WorldCfg.MinQuestScaledXpRatio] > 100)
+            if ((uint)Values[WorldCfg.MinQuestScaledXpRatio].Int32 > 100)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"MinQuestScaledXPRatio ({Values[WorldCfg.MinQuestScaledXpRatio]}) must be in range 0..100. Set to 0.");
 
                 Values[WorldCfg.MinQuestScaledXpRatio] = 0;
             }
 
             Values[WorldCfg.MinCreatureScaledXpRatio] = GetDefaultValue("MinCreatureScaledXPRatio", 0);
-            if ((int)Values[WorldCfg.MinCreatureScaledXpRatio] > 100)
+            if ((uint)Values[WorldCfg.MinCreatureScaledXpRatio].Int32 > 100)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"MinCreatureScaledXPRatio ({Values[WorldCfg.MinCreatureScaledXpRatio]}) must be in range 0..100. Set to 0.");
 
                 Values[WorldCfg.MinCreatureScaledXpRatio] = 0;
             }
 
             Values[WorldCfg.MinDiscoveredScaledXpRatio] = GetDefaultValue("MinDiscoveredScaledXPRatio", 0);
-            if ((int)Values[WorldCfg.MinDiscoveredScaledXpRatio] > 100)
+            if ((uint)Values[WorldCfg.MinDiscoveredScaledXpRatio].Int32 > 100)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"MinDiscoveredScaledXPRatio ({Values[WorldCfg.MinDiscoveredScaledXpRatio]}) must be in range 0..100. Set to 0.");
 
                 Values[WorldCfg.MinDiscoveredScaledXpRatio] = 0;
@@ -390,25 +401,25 @@ namespace Game
             if (reload)
             {
                 int val = GetDefaultValue("GameType", 0);
-                if (val != (int)Values[WorldCfg.GameType])
+                if (val != Values[WorldCfg.GameType].Int32)
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"GameType option can't be changed at worldserver.conf reload, " +
                         $"using current value ({Values[WorldCfg.GameType]}).");
-            }
+                }
             }
             else
                 Values[WorldCfg.GameType] = GetDefaultValue("GameType", 0);
 
             if (reload)
             {
-                int val = (int)GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
-                if (val != (int)Values[WorldCfg.RealmZone])
+                int val = GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
+                if (val != Values[WorldCfg.RealmZone].Int32)
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"RealmZone option can't be changed at worldserver.conf reload, " +
                         $"using current value ({Values[WorldCfg.RealmZone]}).");
-            }
+                }
             }
             else
                 Values[WorldCfg.RealmZone] = GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
@@ -424,55 +435,55 @@ namespace Game
             Values[WorldCfg.StrictPetNames] = GetDefaultValue("StrictPetNames", 0);
 
             Values[WorldCfg.MinPlayerName] = GetDefaultValue("MinPlayerName", 2);
-            if ((int)Values[WorldCfg.MinPlayerName] < 1 || (int)Values[WorldCfg.MinPlayerName] > 12)
+            if (Values[WorldCfg.MinPlayerName].Int32 < 1 || Values[WorldCfg.MinPlayerName].Int32 > 12)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"MinPlayerName ({Values[WorldCfg.MinPlayerName]}) must be in range 1..{12}. Set to 2.");
+                Log.outError(LogFilter.ServerLoading,
+                    $"MinPlayerName ({Values[WorldCfg.MinPlayerName]}) must be in range {1}..{12}. Set to {2}.");
 
                 Values[WorldCfg.MinPlayerName] = 2;
             }
 
             Values[WorldCfg.MinCharterName] = GetDefaultValue("MinCharterName", 2);
-            if ((int)Values[WorldCfg.MinCharterName] < 1 || (int)Values[WorldCfg.MinCharterName] > 24)
+            if (Values[WorldCfg.MinCharterName].Int32 < 1 || Values[WorldCfg.MinCharterName].Int32 > 24)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"MinCharterName ({Values[WorldCfg.MinCharterName]}) must be in range 1..{24}. Set to 2.");
+                Log.outError(LogFilter.ServerLoading,
+                    $"MinCharterName ({Values[WorldCfg.MinCharterName]}) must be in range {1}..{24}. Set to {2}.");
 
                 Values[WorldCfg.MinCharterName] = 2;
             }
 
             Values[WorldCfg.MinPetName] = GetDefaultValue("MinPetName", 2);
-            if ((int)Values[WorldCfg.MinPetName] < 1 || (int)Values[WorldCfg.MinPetName] > 12)
+            if (Values[WorldCfg.MinPetName].Int32 < 1 || Values[WorldCfg.MinPetName].Int32 > 12)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"MinPetName ({Values[WorldCfg.MinPetName]}) must be in range 1..{12}. Set to 2.");
+                Log.outError(LogFilter.ServerLoading,
+                    $"MinPetName ({Values[WorldCfg.MinPetName]}) must be in range {1}..{12}. Set to {2}.");
 
                 Values[WorldCfg.MinPetName] = 2;
             }
 
-            Values[WorldCfg.CharterCostGuild] = GetDefaultValue("Guild.CharterCost", 1000);
-            Values[WorldCfg.CharterCostArena2v2] = GetDefaultValue("ArenaTeam.CharterCost.2v2", 800000);
-            Values[WorldCfg.CharterCostArena3v3] = GetDefaultValue("ArenaTeam.CharterCost.3v3", 1200000);
-            Values[WorldCfg.CharterCostArena5v5] = GetDefaultValue("ArenaTeam.CharterCost.5v5", 2000000);
+            Values[WorldCfg.CharterCostGuild] = GetDefaultValue("Guild.CharterCost", 1000u);
+            Values[WorldCfg.CharterCostArena2v2] = GetDefaultValue("ArenaTeam.CharterCost.2v2", 800000u);
+            Values[WorldCfg.CharterCostArena3v3] = GetDefaultValue("ArenaTeam.CharterCost.3v3", 1200000u);
+            Values[WorldCfg.CharterCostArena5v5] = GetDefaultValue("ArenaTeam.CharterCost.5v5", 2000000u);
 
             Values[WorldCfg.CharacterCreatingDisabled] = GetDefaultValue("CharacterCreating.Disabled", 0);
             Values[WorldCfg.CharacterCreatingDisabledRacemask] = GetDefaultValue("CharacterCreating.Disabled.RaceMask", 0);
             Values[WorldCfg.CharacterCreatingDisabledClassmask] = GetDefaultValue("CharacterCreating.Disabled.ClassMask", 0);
 
             Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 60);
-            if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 200)
+            if (Values[WorldCfg.CharactersPerRealm].Int32 < 1 || Values[WorldCfg.CharactersPerRealm].Int32 > 200)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"CharactersPerRealm ({Values[WorldCfg.CharactersPerRealm]}) must be in range 1..200. Set to 200.");
+                Log.outError(LogFilter.ServerLoading,
+                    $"CharactersPerRealm ({Values[WorldCfg.CharactersPerRealm]}) must be in range {1}..{200}. Set to {200}.");
 
                 Values[WorldCfg.CharactersPerRealm] = 200;
             }
 
             // must be after CharactersPerRealm
             Values[WorldCfg.CharactersPerAccount] = GetDefaultValue("CharactersPerAccount", 60);
-            if ((int)Values[WorldCfg.CharactersPerAccount] < (int)Values[WorldCfg.CharactersPerRealm])
+            if (Values[WorldCfg.CharactersPerAccount].Int32 < Values[WorldCfg.CharactersPerRealm].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"CharactersPerAccount ({Values[WorldCfg.CharactersPerAccount]}) " +
                     $"can't be less than CharactersPerRealm ({Values[WorldCfg.CharactersPerRealm]}).");
 
@@ -480,11 +491,11 @@ namespace Game
             }
 
             Values[WorldCfg.CharacterCreatingEvokersPerRealm] = GetDefaultValue("CharacterCreating.EvokersPerRealm", 1);
-            if ((int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] < 0 || (int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] > 10)
+            if ((uint)Values[WorldCfg.CharacterCreatingEvokersPerRealm].Int32 > 10)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"CharacterCreating.EvokersPerRealm ({Values[WorldCfg.CharacterCreatingEvokersPerRealm]}) " +
-                    $"must be in range 0..10. Set to 1.");
+                    $"must be in range 0..{10}. Set to {1}.");
 
                 Values[WorldCfg.CharacterCreatingEvokersPerRealm] = 1;
             }
@@ -492,14 +503,14 @@ namespace Game
             Values[WorldCfg.CharacterCreatingMinLevelForDemonHunter] = GetDefaultValue("CharacterCreating.MinLevelForDemonHunter", 0);
             Values[WorldCfg.CharacterCreatingMinLevelForEvoker] = GetDefaultValue("CharacterCreating.MinLevelForEvoker", 50);
 
-            Values[WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement] = 
+            Values[WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement] =
                 GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false);
 
             Values[WorldCfg.SkipCinematics] = GetDefaultValue("SkipCinematics", 0);
-            if ((int)Values[WorldCfg.SkipCinematics] < 0 || (int)Values[WorldCfg.SkipCinematics] > 2)
+            if (Values[WorldCfg.SkipCinematics].Int32 < 0 || Values[WorldCfg.SkipCinematics].Int32 > 2)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"SkipCinematics ({Values[WorldCfg.SkipCinematics]}) must be in range 0..2. Set to 0.");
+                Log.outError(LogFilter.ServerLoading,
+                    $"SkipCinematics ({Values[WorldCfg.SkipCinematics]}) must be in range {0}..{2}. Set to {0}.");
 
                 Values[WorldCfg.SkipCinematics] = 0;
             }
@@ -507,20 +518,20 @@ namespace Game
             if (reload)
             {
                 int val = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxPlayerLevel);
-                if (val != (int)Values[WorldCfg.MaxPlayerLevel])
+                if (val != Values[WorldCfg.MaxPlayerLevel].Int32)
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"MaxPlayerLevel option can't be changed at config reload, " +
                         $"using current value ({Values[WorldCfg.MaxPlayerLevel]}).");
-            }
+                }
             }
             else
                 Values[WorldCfg.MaxPlayerLevel] = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxPlayerLevel);
 
-            if ((int)Values[WorldCfg.MaxPlayerLevel] > SharedConst.MaxLevel)
+            if (Values[WorldCfg.MaxPlayerLevel].Int32 > SharedConst.MaxLevel && Values[WorldCfg.MaxPlayerLevel].Int32 >= 1)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"MaxPlayerLevel ({Values[WorldCfg.MaxPlayerLevel]}) must be in range 1..{SharedConst.MaxLevel}. " +
+                Log.outError(LogFilter.ServerLoading,
+                    $"MaxPlayerLevel ({Values[WorldCfg.MaxPlayerLevel]}) must be in range {1}..{SharedConst.MaxLevel}. " +
                     $"Set to {SharedConst.MaxLevel}.");
 
                 Values[WorldCfg.MaxPlayerLevel] = SharedConst.MaxLevel;
@@ -529,38 +540,38 @@ namespace Game
             Values[WorldCfg.MinDualspecLevel] = GetDefaultValue("MinDualSpecLevel", 40);
 
             Values[WorldCfg.StartPlayerLevel] = GetDefaultValue("StartPlayerLevel", 1);
-            if ((int)Values[WorldCfg.StartPlayerLevel] < 1)
+            if (Values[WorldCfg.StartPlayerLevel].Int32 < 1)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartPlayerLevel ({Values[WorldCfg.StartPlayerLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
-                    $"Set to 1.");
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"Set to {1}.");
 
                 Values[WorldCfg.StartPlayerLevel] = 1;
             }
-            else if ((int)Values[WorldCfg.StartPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            else if (Values[WorldCfg.StartPlayerLevel].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartPlayerLevel ({Values[WorldCfg.StartPlayerLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
                     $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
                 Values[WorldCfg.StartPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
             Values[WorldCfg.StartDeathKnightPlayerLevel] = GetDefaultValue("StartDeathKnightPlayerLevel", 55);
-            if ((int)Values[WorldCfg.StartDeathKnightPlayerLevel] < 1)
+            if (Values[WorldCfg.StartDeathKnightPlayerLevel].Int32 < 1)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartDeathKnightPlayerLevel ({Values[WorldCfg.StartDeathKnightPlayerLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
-                    $"Set to 1.");
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"Set to {1}.");
 
                 Values[WorldCfg.StartDeathKnightPlayerLevel] = 1;
             }
-            else if ((int)Values[WorldCfg.StartDeathKnightPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            else if (Values[WorldCfg.StartDeathKnightPlayerLevel].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartDeathKnightPlayerLevel ({Values[WorldCfg.StartDeathKnightPlayerLevel]}) " +
                     $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
                     $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
@@ -569,111 +580,111 @@ namespace Game
             }
 
             Values[WorldCfg.StartDemonHunterPlayerLevel] = GetDefaultValue("StartDemonHunterPlayerLevel", 8);
-            if ((int)Values[WorldCfg.StartDemonHunterPlayerLevel] < 1)
+            if (Values[WorldCfg.StartDemonHunterPlayerLevel].Int32 < 1)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartDemonHunterPlayerLevel ({Values[WorldCfg.StartDemonHunterPlayerLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
-                    $"Set to 1.");
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"Set to {1}.");
 
                 Values[WorldCfg.StartDemonHunterPlayerLevel] = 1;
             }
-            else if ((int)Values[WorldCfg.StartDemonHunterPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            else if (Values[WorldCfg.StartDemonHunterPlayerLevel].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartDemonHunterPlayerLevel ({Values[WorldCfg.StartDemonHunterPlayerLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
                     $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
                 Values[WorldCfg.StartDemonHunterPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
             Values[WorldCfg.StartEvokerPlayerLevel] = GetDefaultValue("StartEvokerPlayerLevel", 58);
-            if ((int)Values[WorldCfg.StartEvokerPlayerLevel] < 1)
+            if (Values[WorldCfg.StartEvokerPlayerLevel].Int32 < 1)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
-                    $"Set to 1.");
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"Set to {1}.");
 
                 Values[WorldCfg.StartEvokerPlayerLevel] = 1;
             }
-            else if ((int)Values[WorldCfg.StartEvokerPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            else if (Values[WorldCfg.StartEvokerPlayerLevel].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
                     $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
                 Values[WorldCfg.StartEvokerPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
             Values[WorldCfg.StartAlliedRaceLevel] = GetDefaultValue("StartAlliedRacePlayerLevel", 10);
-            if ((int)Values[WorldCfg.StartAlliedRaceLevel] < 1)
+            if (Values[WorldCfg.StartAlliedRaceLevel].Int32 < 1)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartAlliedRaceLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
-                    $"Set to 1.");
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"Set to {1}.");
 
                 Values[WorldCfg.StartAlliedRaceLevel] = 1;
             }
-            else if ((int)Values[WorldCfg.StartAlliedRaceLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            else if (Values[WorldCfg.StartAlliedRaceLevel].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartAlliedRaceLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) " +
-                    $"must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"must be in range {1}..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
                     $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
                 Values[WorldCfg.StartAlliedRaceLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
             Values[WorldCfg.StartPlayerMoney] = GetDefaultValue("StartPlayerMoney", 0);
-            if ((int)Values[WorldCfg.StartPlayerMoney] < 0)
+            if (Values[WorldCfg.StartPlayerMoney].Int32 < 0)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartPlayerMoney ({Values[WorldCfg.StartPlayerMoney]}) " +
-                    $"must be in range 0..{PlayerConst.MaxMoneyAmount}. " +
+                    $"must be in range {0}..{PlayerConst.MaxMoneyAmount}. " +
                     $"Set to {0}.");
 
                 Values[WorldCfg.StartPlayerMoney] = 0;
             }
-            else if ((int)Values[WorldCfg.StartPlayerMoney] > 0x7FFFFFFF - 1) // TODO: (See MaxMoneyAMOUNT)
+            else if (Values[WorldCfg.StartPlayerMoney].Int32 > PlayerConst.MaxMoneyAmount)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartPlayerMoney ({Values[WorldCfg.StartPlayerMoney]}) " +
-                    $"must be in range 0..{0x7FFFFFFF - 1}. " +
-                    $"Set to {0x7FFFFFFF - 1}.");
+                    $"must be in range {0}..{PlayerConst.MaxMoneyAmount}. " +
+                    $"Set to {PlayerConst.MaxMoneyAmount}.");
 
-                Values[WorldCfg.StartPlayerMoney] = 0x7FFFFFFF - 1;
+                Values[WorldCfg.StartPlayerMoney] = PlayerConst.MaxMoneyAmount;
             }
 
             Values[WorldCfg.CurrencyResetHour] = GetDefaultValue("Currency.ResetHour", 3);
-            if ((int)Values[WorldCfg.CurrencyResetHour] > 23)
+            if ((uint)Values[WorldCfg.CurrencyResetHour].Int32 > 23)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"StartPlayerMoney ({Values[WorldCfg.CurrencyResetHour]}) " +
-                    $"must be in range 0..{23}. " +
+                    $"must be in range {0}..{23}. " +
                     $"Set to {3}.");
 
                 Values[WorldCfg.CurrencyResetHour] = 3;
             }
 
             Values[WorldCfg.CurrencyResetDay] = GetDefaultValue("Currency.ResetDay", 3);
-            if ((int)Values[WorldCfg.CurrencyResetDay] > 6)
+            if ((uint)Values[WorldCfg.CurrencyResetDay].Int32 > 6)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Currency.ResetDay ({Values[WorldCfg.CurrencyResetDay]}) " +
-                    $"must be in range 0..{6}. " +
+                    $"must be in range {0}..{6}. " +
                     $"Set to {3}.");
 
                 Values[WorldCfg.CurrencyResetDay] = 3;
             }
 
             Values[WorldCfg.CurrencyResetInterval] = GetDefaultValue("Currency.ResetInterval", 7);
-            if ((int)Values[WorldCfg.CurrencyResetInterval] <= 0)
+            if (Values[WorldCfg.CurrencyResetInterval].Int32 <= 0)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Currency.ResetInterval ({Values[WorldCfg.CurrencyResetInterval]}) " +
                     $"must be > 0, " +
                     $"set to default {7}.");
@@ -682,11 +693,11 @@ namespace Game
             }
 
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 60);
-            if ((int)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            if ((uint)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"RecruitAFriend.MaxLevel ({Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel]}) " +
-                    $"must be in the range 0..MaxLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
+                    $"must be in the range {0}..MaxLevel({Values[WorldCfg.MaxPlayerLevel]}). " +
                     $"Set to {60}.");
 
                 Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = 60;
@@ -705,22 +716,22 @@ namespace Game
             Values[WorldCfg.InstanceUnloadDelay] = GetDefaultValue("Instance.UnloadDelay", 30 * Time.Minute * Time.InMilliseconds);
 
             Values[WorldCfg.DailyQuestResetTimeHour] = GetDefaultValue("Quests.DailyResetTime", 3);
-            if ((int)Values[WorldCfg.DailyQuestResetTimeHour] > 23)
+            if ((uint)Values[WorldCfg.DailyQuestResetTimeHour].Int32 > 23)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Quests.DailyResetTime ({Values[WorldCfg.DailyQuestResetTimeHour]}) " +
-                    $"must be in range 0..{23}. " +
+                    $"must be in range {0}..{23}. " +
                     $"Set to {3}.");
 
                 Values[WorldCfg.DailyQuestResetTimeHour] = 3;
             }
 
             Values[WorldCfg.WeeklyQuestResetTimeWDay] = GetDefaultValue("Quests.WeeklyResetWDay", 3);
-            if ((int)Values[WorldCfg.WeeklyQuestResetTimeWDay] > 6)
+            if ((uint)Values[WorldCfg.WeeklyQuestResetTimeWDay].Int32 > 6)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Quests.WeeklyResetDay ({Values[WorldCfg.WeeklyQuestResetTimeWDay]}) " +
-                    $"must be in range 0..{6}. " +
+                    $"must be in range {0}..{6}. " +
                     $"Set to {3} ({(DayOfWeek)3}).");
 
                 Values[WorldCfg.WeeklyQuestResetTimeWDay] = 3;
@@ -729,11 +740,11 @@ namespace Game
             Values[WorldCfg.MaxPrimaryTradeSkill] = GetDefaultValue("MaxPrimaryTradeSkill", 2);
 
             Values[WorldCfg.MinPetitionSigns] = GetDefaultValue("MinPetitionSigns", 4);
-            if ((int)Values[WorldCfg.MinPetitionSigns] > 4)
+            if ((uint)Values[WorldCfg.MinPetitionSigns].Int32 > 4)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"MinPetitionSigns ({Values[WorldCfg.MinPetitionSigns]}) " +
-                    $"must be in range 0..{4}. " +
+                    $"must be in range {0}..{4}. " +
                     $"Set to {4}.");
 
                 Values[WorldCfg.MinPetitionSigns] = 4;
@@ -749,20 +760,20 @@ namespace Game
             Values[WorldCfg.GmLevelInWhoList] = GetDefaultValue("GM.InWhoList.Level", (int)AccountTypes.Administrator);
 
             Values[WorldCfg.StartGmLevel] = GetDefaultValue("GM.StartLevel", 1);
-            if ((int)Values[WorldCfg.StartGmLevel] < (int)Values[WorldCfg.StartPlayerLevel])
+            if (Values[WorldCfg.StartGmLevel].Int32 < Values[WorldCfg.StartPlayerLevel].Int32)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"GM.StartLevel ({Values[WorldCfg.StartGmLevel]}) " +
                     $"must be in range StartPlayerLevel({Values[WorldCfg.StartPlayerLevel]})..{SharedConst.MaxLevel}. " +
                     $"Set to {Values[WorldCfg.StartPlayerLevel]}.");
 
                 Values[WorldCfg.StartGmLevel] = Values[WorldCfg.StartPlayerLevel];
             }
-            else if ((int)Values[WorldCfg.StartGmLevel] > SharedConst.MaxLevel)
+            else if (Values[WorldCfg.StartGmLevel].Int32 > SharedConst.MaxLevel)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"GM.StartLevel ({Values[WorldCfg.StartGmLevel]}) " +
-                    $"must be in range 1..{SharedConst.MaxLevel}. " +
+                    $"must be in range {1}..{SharedConst.MaxLevel}. " +
                     $"Set to {SharedConst.MaxLevel}.");
 
                 Values[WorldCfg.StartGmLevel] = SharedConst.MaxLevel;
@@ -775,44 +786,57 @@ namespace Game
 
             Values[WorldCfg.MailDeliveryDelay] = GetDefaultValue("MailDeliveryDelay", Time.Hour);
 
-            Values[WorldCfg.CleanOldMailTime] = GetDefaultValue("CleanOldMailTime", 4);
-            if ((int)Values[WorldCfg.CleanOldMailTime] > 23)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"CleanOldMailTime ({Values[WorldCfg.CleanOldMailTime]}) " +
-                    $"must be an hour, between 0 and {23}. " +
-                    $"Set to {4}.");
+                int defaultValue = GetDefaultValue("CleanOldMailTime", 4);
+                if ((uint)defaultValue > 23)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                            $"CleanOldMailTime ({defaultValue}) " +
+                            $"must be an hour, between {0} and {23}. " +
+                        $"Set to {4}.");
 
-                Values[WorldCfg.CleanOldMailTime] = 4;
+                    defaultValue = 4;
+                }
+
+                Values[WorldCfg.CleanOldMailTime] = defaultValue;
             }
 
-            Values[WorldCfg.UptimeUpdate] = GetDefaultValue("UpdateUptimeInterval", 10);
-            if ((int)Values[WorldCfg.UptimeUpdate] <= 0)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"UpdateUptimeInterval ({Values[WorldCfg.UptimeUpdate]}) " +
-                    $"must be > {0}, " +
-                    $"set to default {10}.");
+                int defaultValue = GetDefaultValue("UpdateUptimeInterval", 10);
+                if (defaultValue <= 0)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                            $"UpdateUptimeInterval ({defaultValue}) " +
+                        $"must be > {0}, " +
+                        $"set to default {10}.");
 
-                Values[WorldCfg.UptimeUpdate] = 10;
+                    defaultValue = 10;
+                }
+
+                Values[WorldCfg.UptimeUpdate] = defaultValue;
             }
 
             // log db cleanup interval
-            Values[WorldCfg.LogdbClearinterval] = GetDefaultValue("LogDB.Opt.ClearInterval", 10);
-            if ((int)Values[WorldCfg.LogdbClearinterval] <= 0)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"LogDB.Opt.ClearInterval ({Values[WorldCfg.LogdbClearinterval]}) " +
-                    $"must be > {0}, " +
-                    $"set to default {10}.");
+                int defaultValue = GetDefaultValue("LogDB.Opt.ClearInterval", 10);
+                if (defaultValue <= 0)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                            $"LogDB.Opt.ClearInterval ({defaultValue}) " +
+                        $"must be > {0}, " +
+                        $"set to default {10}.");
 
-                Values[WorldCfg.LogdbClearinterval] = 10;
+                    defaultValue = 10;
+                }
+
+                Values[WorldCfg.LogdbClearinterval] = defaultValue;
+
+                Values[WorldCfg.LogdbCleartime] = GetDefaultValue("LogDB.Opt.ClearTime", 1209600);
+
+                Log.outInfo(LogFilter.ServerLoading,
+                    $"Will clear `logs` table of entries older than {Values[WorldCfg.LogdbCleartime]} seconds " +
+                    $"every {Values[WorldCfg.LogdbClearinterval]} minutes.");
             }
-            Values[WorldCfg.LogdbCleartime] = GetDefaultValue("LogDB.Opt.ClearTime", 1209600); // 14 days default
-
-            Log.outInfo(LogFilter.ServerLoading, 
-                $"Will clear `logs` table of entries older than {Values[WorldCfg.LogdbCleartime]} seconds " +
-                $"every {Values[WorldCfg.LogdbClearinterval]} minutes.");
 
             Values[WorldCfg.SkillChanceOrange] = GetDefaultValue("SkillChance.Orange", 100);
             Values[WorldCfg.SkillChanceYellow] = GetDefaultValue("SkillChance.Yellow", 75);
@@ -826,13 +850,14 @@ namespace Game
             Values[WorldCfg.SkillMilling] = GetDefaultValue("SkillChance.Milling", false);
 
             Values[WorldCfg.SkillGainCrafting] = GetDefaultValue("SkillGain.Crafting", 1);
-
+            Values[WorldCfg.SkillGainDefense] = GetDefaultValue("SkillGain.Defense", 1);
             Values[WorldCfg.SkillGainGathering] = GetDefaultValue("SkillGain.Gathering", 1);
+            Values[WorldCfg.SkillGainWeapon] = GetDefaultValue("SkillGain.Weapon", 1);
 
             Values[WorldCfg.MaxOverspeedPings] = GetDefaultValue("MaxOverspeedPings", 2);
-            if ((int)Values[WorldCfg.MaxOverspeedPings] != 0 && (int)Values[WorldCfg.MaxOverspeedPings] < 2)
+            if (Values[WorldCfg.MaxOverspeedPings].Int32 != 0 && Values[WorldCfg.MaxOverspeedPings].Int32 < 2)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"MaxOverspeedPings ({Values[WorldCfg.MaxOverspeedPings]}) " +
                     $"must be in range {2}..infinity (or {0} to disable check). " +
                     $"Set to {2}.");
@@ -846,16 +871,16 @@ namespace Game
 
             if (reload)
             {
-                int val = GetDefaultValue("Expansion", (int)Expansion.WarlordsOfDraenor);
-                if (val != (int)Values[WorldCfg.Expansion])
+                int val = GetDefaultValue("Expansion", (int)Expansion.WrathOfTheLichKing);
+                if (val != Values[WorldCfg.Expansion].Int32)
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"Expansion option can't be changed at worldserver.conf reload, " +
-                        $"using current value ({Values[WorldCfg.Expansion]}).");
-            }
+                        $"using current value ({Values[WorldCfg.Expansion]}[{(Expansion)Values[WorldCfg.Expansion].Int32}]).");
+                }
             }
             else
-                Values[WorldCfg.Expansion] = GetDefaultValue("Expansion", Expansion.WarlordsOfDraenor);
+                Values[WorldCfg.Expansion] = GetDefaultValue("Expansion", (int)Expansion.WrathOfTheLichKing);
 
             Values[WorldCfg.ChatFloodMessageCount] = GetDefaultValue("ChatFlood.MessageCount", 10);
             Values[WorldCfg.ChatFloodMessageDelay] = GetDefaultValue("ChatFlood.MessageDelay", 1);
@@ -872,45 +897,56 @@ namespace Game
 
             Values[WorldCfg.QuestEnableQuestTracker] = GetDefaultValue("Quests.EnableQuestTracker", false);
 
-            // note: disable value (-1) will assigned as 0xFFFFFFF, to prevent overflow at calculations limit it to max possible player Level MaxLevel(100)
-            Values[WorldCfg.QuestLowLevelHideDiff] = GetDefaultValue("Quests.LowLevelHideDiff", 4);
-            if ((int)Values[WorldCfg.QuestLowLevelHideDiff] > SharedConst.MaxLevel)
-                Values[WorldCfg.QuestLowLevelHideDiff] = SharedConst.MaxLevel;
-            Values[WorldCfg.QuestHighLevelHideDiff] = GetDefaultValue("Quests.HighLevelHideDiff", 7);
-            if ((int)Values[WorldCfg.QuestHighLevelHideDiff] > SharedConst.MaxLevel)
-                Values[WorldCfg.QuestHighLevelHideDiff] = SharedConst.MaxLevel;
+            {
+                // note: disable value (-1) will assigned as SharedConst.MaxLevel,
+                // to prevent wrong calculations in this case
+                int defaultValue;
+
+                defaultValue = GetDefaultValue("Quests.LowLevelHideDiff", 5);
+                if (defaultValue > SharedConst.MaxLevel || defaultValue < 0)
+                    Values[WorldCfg.QuestLowLevelHideDiff] = SharedConst.MaxLevel;
+                else
+                    Values[WorldCfg.QuestLowLevelHideDiff] = defaultValue;
+
+                defaultValue = GetDefaultValue("Quests.HighLevelHideDiff", 2);
+                if (defaultValue > SharedConst.MaxLevel || defaultValue < 0)
+                    Values[WorldCfg.QuestHighLevelHideDiff] = SharedConst.MaxLevel;
+                else
+                    Values[WorldCfg.QuestHighLevelHideDiff] = defaultValue;
+            }
+
             Values[WorldCfg.QuestIgnoreRaid] = GetDefaultValue("Quests.IgnoreRaid", false);
             Values[WorldCfg.QuestIgnoreAutoAccept] = GetDefaultValue("Quests.IgnoreAutoAccept", false);
             Values[WorldCfg.QuestIgnoreAutoComplete] = GetDefaultValue("Quests.IgnoreAutoComplete", false);
 
             Values[WorldCfg.RandomBgResetHour] = GetDefaultValue("Battleground.Random.ResetHour", 6);
-            if ((int)Values[WorldCfg.RandomBgResetHour] > 23)
+            if ((uint)Values[WorldCfg.RandomBgResetHour].Int32 > 23)
             {
-                Log.outError(LogFilter.ServerLoading, 
+                Log.outError(LogFilter.ServerLoading,
                     $"Battleground.Random.ResetHour ({Values[WorldCfg.RandomBgResetHour]}) " +
-                    $"must be an hour, between 0 and {23}. " +
+                    $"must be an hour, between {0} and {23}. " +
                     $"Set to {6}.");
 
                 Values[WorldCfg.RandomBgResetHour] = 6;
             }
 
             Values[WorldCfg.CalendarDeleteOldEventsHour] = GetDefaultValue("Calendar.DeleteOldEventsHour", 6);
-            if ((int)Values[WorldCfg.CalendarDeleteOldEventsHour] > 23)
+            if ((uint)Values[WorldCfg.CalendarDeleteOldEventsHour].Int32 > 23)
             {
-                Log.outError(LogFilter.Misc, 
+                Log.outError(LogFilter.Misc,
                     $"Calendar.DeleteOldEventsHour ({Values[WorldCfg.CalendarDeleteOldEventsHour]}) " +
-                    $"must be an hour, between 0 and {23}. " +
+                    $"must be an hour, between {0} and {23}. " +
                     $"Set to {6}.");
 
                 Values[WorldCfg.CalendarDeleteOldEventsHour] = 6;
             }
 
             Values[WorldCfg.GuildResetHour] = GetDefaultValue("Guild.ResetHour", 6);
-            if ((int)Values[WorldCfg.GuildResetHour] > 23)
+            if ((uint)Values[WorldCfg.GuildResetHour].Int32 > 23)
             {
-                Log.outError(LogFilter.Server, 
+                Log.outError(LogFilter.Server,
                     $"Guild.ResetHour ({Values[WorldCfg.GuildResetHour]}) " +
-                    $"must be an hour, between 0 and {23}. " +
+                    $"must be an hour, between {0} and {23}. " +
                     $"Set to {6}.");
 
                 Values[WorldCfg.GuildResetHour] = 6;
@@ -920,7 +956,7 @@ namespace Game
 
             Values[WorldCfg.RestrictedLfgChannel] = GetDefaultValue("Channel.RestrictedLfg", true);
             Values[WorldCfg.TalentsInspecting] = GetDefaultValue("TalentsInspecting", 1);
-            Values[WorldCfg.ChatFakeMessagePreventing] = GetDefaultValue("ChatFakeMessagePreventing", false);
+            Values[WorldCfg.ChatFakeMessagePreventing] = GetDefaultValue("ChatFakeMessagePreventing", false); //TODO: NIY?
             Values[WorldCfg.ChatStrictLinkCheckingSeverity] = GetDefaultValue("ChatStrictLinkChecking.Severity", 0);
             Values[WorldCfg.ChatStrictLinkCheckingKick] = GetDefaultValue("ChatStrictLinkChecking.Kick", 0);
 
@@ -950,29 +986,29 @@ namespace Game
 
             Values[WorldCfg.BattlegroundCastDeserter] = GetDefaultValue("Battleground.CastDeserter", true);
             Values[WorldCfg.BattlegroundQueueAnnouncerEnable] = GetDefaultValue("Battleground.QueueAnnouncer.Enable", false);
-            Values[WorldCfg.BattlegroundQueueAnnouncerPlayeronly] = GetDefaultValue("Battleground.QueueAnnouncer.PlayerOnly", false);
+            Values[WorldCfg.BattlegroundQueueAnnouncerPlayerOnly] = GetDefaultValue("Battleground.QueueAnnouncer.PlayerOnly", false);
             Values[WorldCfg.BattlegroundStoreStatisticsEnable] = GetDefaultValue("Battleground.StoreStatistics.Enable", false);
 
             {
-            Values[WorldCfg.BattlegroundReportAfk] = GetDefaultValue("Battleground.ReportAFK", 3);
-            if ((int)Values[WorldCfg.BattlegroundReportAfk] < 1)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Battleground.ReportAFK ({Values[WorldCfg.BattlegroundReportAfk]}) " +
-                    $"must be > {0}. " +
-                    $"Using {3} instead.");
+                Values[WorldCfg.BattlegroundReportAfk] = GetDefaultValue("Battleground.ReportAFK", 3);
+                if (Values[WorldCfg.BattlegroundReportAfk].Int32 < 1)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Battleground.ReportAFK ({Values[WorldCfg.BattlegroundReportAfk]}) " +
+                        $"must be > {0}. " +
+                        $"Using {3} instead.");
 
-                Values[WorldCfg.BattlegroundReportAfk] = 3;
-            }
-            if ((int)Values[WorldCfg.BattlegroundReportAfk] > 9)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Battleground.ReportAFK ({Values[WorldCfg.BattlegroundReportAfk]}) " +
-                    $"must be < {10}. " +
-                    $"Using {3} instead.");
+                    Values[WorldCfg.BattlegroundReportAfk] = 3;
+                }
+                if (Values[WorldCfg.BattlegroundReportAfk].Int32 > 9)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Battleground.ReportAFK ({Values[WorldCfg.BattlegroundReportAfk]}) " +
+                        $"must be < {10}. " +
+                        $"Using {3} instead.");
 
-                Values[WorldCfg.BattlegroundReportAfk] = 3;
-            }
+                    Values[WorldCfg.BattlegroundReportAfk] = 3;
+                }
             }
 
             Values[WorldCfg.BattlegroundInvitationType] = GetDefaultValue("Battleground.InvitationType", 0);
@@ -987,7 +1023,7 @@ namespace Game
             Values[WorldCfg.ArenaStartRating] = GetDefaultValue("Arena.ArenaStartRating", 0);
             Values[WorldCfg.ArenaStartPersonalRating] = GetDefaultValue("Arena.ArenaStartPersonalRating", 1000);
             Values[WorldCfg.ArenaStartMatchmakerRating] = GetDefaultValue("Arena.ArenaStartMatchmakerRating", 1500);
-            Values[WorldCfg.ArenaSeasonInProgress] = GetDefaultValue("Arena.ArenaSeason.InProgress", false);
+            Values[WorldCfg.ArenaSeasonInProgress] = GetDefaultValue("Arena.ArenaSeason.InProgress", true);
             Values[WorldCfg.ArenaLogExtendedInfo] = GetDefaultValue("ArenaLog.ExtendedInfo", false);
             Values[WorldCfg.ArenaWinRatingModifier1] = GetDefaultValue("Arena.ArenaWinRatingModifier1", 48.0f);
             Values[WorldCfg.ArenaWinRatingModifier2] = GetDefaultValue("Arena.ArenaWinRatingModifier2", 24.0f);
@@ -996,8 +1032,11 @@ namespace Game
 
             if (reload)
             {
-                Global.WorldStateMgr.SetValue(WorldStates.CurrentPvpSeasonId, GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? GetIntValue(WorldCfg.ArenaSeasonId) : 0, false, null);
-                Global.WorldStateMgr.SetValue(WorldStates.PreviousPvpSeasonId, GetIntValue(WorldCfg.ArenaSeasonId) - (GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0), false, null);
+                Global.WorldStateMgr.SetValue(
+                    WorldStates.CurrentPvpSeasonId, Values[WorldCfg.ArenaSeasonInProgress].Bool ? Values[WorldCfg.ArenaSeasonId].Int32 : 0, false, null);
+
+                Global.WorldStateMgr.SetValue(
+                    WorldStates.PreviousPvpSeasonId, Values[WorldCfg.ArenaSeasonId].Int32 - (Values[WorldCfg.ArenaSeasonInProgress].Bool ? 1 : 0), false, null);
             }
 
             Values[WorldCfg.OffhandCheckAtSpellUnlearn] = GetDefaultValue("OffhandCheckAtSpellUnlearn", true);
@@ -1005,30 +1044,29 @@ namespace Game
             Values[WorldCfg.CreaturePickpocketRefill] = GetDefaultValue("Creature.PickPocketRefillDelay", 10 * Time.Minute);
             Values[WorldCfg.CreatureStopForPlayer] = GetDefaultValue("Creature.MovingStopTimeForPlayer", 3 * Time.Minute * Time.InMilliseconds);
 
-            int clientCacheId = GetDefaultValue("ClientCacheVersion", 0);
-            if (clientCacheId != 0)
             {
+                uint defaultChacheId = 0u;
+                uint oldCacheId = Values[WorldCfg.ClientCacheVersion].UInt32; // Already Pre-Loaded in WorldServer.Server.StartDB();
+                uint clientCacheId = GetDefaultValue("ClientCacheVersion", defaultChacheId);
+
                 // overwrite DB/old value
-                if (clientCacheId > 0)
-                    Values[WorldCfg.ClientCacheVersion] = clientCacheId;
-                else
+                if (clientCacheId != oldCacheId && clientCacheId != defaultChacheId)
                 {
-                    Log.outError(LogFilter.ServerLoading,
-                        $"ClientCacheVersion can't be negative {clientCacheId}, ignored.");
+                    Values[WorldCfg.ClientCacheVersion] = clientCacheId;
+                    Log.outInfo(LogFilter.ServerLoading, $"Client cache version set to: {clientCacheId}");
+                }              
             }
-            }
-            Log.outInfo(LogFilter.ServerLoading, $"Client cache version set to: {clientCacheId}");
 
             Values[WorldCfg.GuildNewsLogCount] = GetDefaultValue("Guild.NewsLogRecordsCount", GuildConst.NewsLogMaxRecords);
-            if ((int)Values[WorldCfg.GuildNewsLogCount] > GuildConst.NewsLogMaxRecords)
+            if (Values[WorldCfg.GuildNewsLogCount].Int32 > GuildConst.NewsLogMaxRecords)
                 Values[WorldCfg.GuildNewsLogCount] = GuildConst.NewsLogMaxRecords;
 
             Values[WorldCfg.GuildEventLogCount] = GetDefaultValue("Guild.EventLogRecordsCount", GuildConst.EventLogMaxRecords);
-            if ((int)Values[WorldCfg.GuildEventLogCount] > GuildConst.EventLogMaxRecords)
+            if (Values[WorldCfg.GuildEventLogCount].Int32 > GuildConst.EventLogMaxRecords)
                 Values[WorldCfg.GuildEventLogCount] = GuildConst.EventLogMaxRecords;
 
             Values[WorldCfg.GuildBankEventLogCount] = GetDefaultValue("Guild.BankEventLogRecordsCount", GuildConst.BankLogMaxRecords);
-            if ((int)Values[WorldCfg.GuildBankEventLogCount] > GuildConst.BankLogMaxRecords)
+            if (Values[WorldCfg.GuildBankEventLogCount].Int32 > GuildConst.BankLogMaxRecords)
                 Values[WorldCfg.GuildBankEventLogCount] = GuildConst.BankLogMaxRecords;
 
             // Load the CharDelete related config options
@@ -1040,121 +1078,125 @@ namespace Game
 
             // No aggro from gray mobs
             {
-            Values[WorldCfg.NoGrayAggroAbove] = GetDefaultValue("NoGrayAggro.Above", 0);
-            Values[WorldCfg.NoGrayAggroBelow] = GetDefaultValue("NoGrayAggro.Below", 0);
-            if ((int)Values[WorldCfg.NoGrayAggroAbove] > (int)Values[WorldCfg.MaxPlayerLevel])
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"NoGrayAggro.Above ({Values[WorldCfg.NoGrayAggroAbove]}) " +
-                    $"must be in range 0..{(int)Values[WorldCfg.MaxPlayerLevel]}. " +
-                    $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
+                Values[WorldCfg.NoGrayAggroAbove] = GetDefaultValue("NoGrayAggro.Above", 0);
+                Values[WorldCfg.NoGrayAggroBelow] = GetDefaultValue("NoGrayAggro.Below", 0);
+                if (Values[WorldCfg.NoGrayAggroAbove].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"NoGrayAggro.Above ({Values[WorldCfg.NoGrayAggroAbove]}) " +
+                            $"must be in range {0}..{Values[WorldCfg.MaxPlayerLevel]}. " +
+                        $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
-                Values[WorldCfg.NoGrayAggroAbove] = Values[WorldCfg.MaxPlayerLevel];
-            }
+                    Values[WorldCfg.NoGrayAggroAbove] = Values[WorldCfg.MaxPlayerLevel];
+                }
 
-            if ((int)Values[WorldCfg.NoGrayAggroBelow] > (int)Values[WorldCfg.MaxPlayerLevel])
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"NoGrayAggro.Below ({Values[WorldCfg.NoGrayAggroBelow]}) " +
-                    $"must be in range 0..{Values[WorldCfg.MaxPlayerLevel]}. " +
-                    $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
+                if (Values[WorldCfg.NoGrayAggroBelow].Int32 > Values[WorldCfg.MaxPlayerLevel].Int32)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"NoGrayAggro.Below ({Values[WorldCfg.NoGrayAggroBelow]}) " +
+                            $"must be in range {0}..{Values[WorldCfg.MaxPlayerLevel]}. " +
+                        $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
-                Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.MaxPlayerLevel];
-            }
+                    Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.MaxPlayerLevel];
+                }
 
-            if ((int)Values[WorldCfg.NoGrayAggroAbove] > 0 && (int)Values[WorldCfg.NoGrayAggroAbove] < (int)Values[WorldCfg.NoGrayAggroBelow])
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"NoGrayAggro.Below ({Values[WorldCfg.NoGrayAggroBelow]}) " +
-                    $"cannot be greater than NoGrayAggro. " +
-                    $"Above ({Values[WorldCfg.NoGrayAggroAbove]}). " +
-                    $"Set to {Values[WorldCfg.NoGrayAggroAbove]}.");
+                if (Values[WorldCfg.NoGrayAggroAbove].Int32 > 0 && Values[WorldCfg.NoGrayAggroAbove].Int32 < Values[WorldCfg.NoGrayAggroBelow].Int32)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"NoGrayAggro.Below ({Values[WorldCfg.NoGrayAggroBelow]}) " +
+                        $"cannot be greater than NoGrayAggro. " +
+                        $"Above ({Values[WorldCfg.NoGrayAggroAbove]}). " +
+                        $"Set to {Values[WorldCfg.NoGrayAggroAbove]}.");
 
-                Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.NoGrayAggroAbove];
-            }
+                    Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.NoGrayAggroAbove];
+                }
             }
 
             // Respawn Settings
-            Values[WorldCfg.RespawnMinCheckIntervalMs] = GetDefaultValue("Respawn.MinCheckIntervalMS", 5000);
-            Values[WorldCfg.RespawnDynamicMode] = GetDefaultValue("Respawn.DynamicMode", 0);
-            if ((int)Values[WorldCfg.RespawnDynamicMode] > 1)
             {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Invalid value for Respawn. " +
-                    $"DynamicMode ({Values[WorldCfg.RespawnDynamicMode]}). " +
-                    $"Set to {0}.");
+                Values[WorldCfg.RespawnMinCheckIntervalMs] = GetDefaultValue("Respawn.MinCheckIntervalMS", 5000);
 
-                Values[WorldCfg.RespawnDynamicMode] = 0;
+                Values[WorldCfg.RespawnDynamicMode] = GetDefaultValue("Respawn.DynamicMode", 0);
+                if ((uint)Values[WorldCfg.RespawnDynamicMode].Int32 > 1)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Invalid value for Respawn. " +
+                        $"DynamicMode ({Values[WorldCfg.RespawnDynamicMode]}). " +
+                        $"Set to {0}.");
+
+                    Values[WorldCfg.RespawnDynamicMode] = 0;
+                }
+
+                Values[WorldCfg.RespawnDynamicEscortNpc] = GetDefaultValue("Respawn.DynamicEscortNPC", false);
+
+                Values[WorldCfg.RespawnGuidWarnLevel] = GetDefaultValue("Respawn.GuidWarnLevel", 12000000L);
+                if ((uint)Values[WorldCfg.RespawnGuidWarnLevel].Int64 > 16777215)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Respawn.GuidWarnLevel ({Values[WorldCfg.RespawnGuidWarnLevel]}) " +
+                        $"cannot be greater than maximum GUID ({16777215}). " +
+                        $"Set to {12000000}.");
+
+                    Values[WorldCfg.RespawnGuidWarnLevel] = 12000000L;
+                }
+
+                Values[WorldCfg.RespawnGuidAlertLevel] = GetDefaultValue("Respawn.GuidAlertLevel", 16000000L);
+                if ((ulong)Values[WorldCfg.RespawnGuidAlertLevel].Int64 > 16777215)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Respawn.GuidWarnLevel ({Values[WorldCfg.RespawnGuidAlertLevel]}) " +
+                        $"cannot be greater than maximum GUID ({16777215}). " +
+                        $"Set to {16000000}.");
+
+                    Values[WorldCfg.RespawnGuidAlertLevel] = 16000000L;
+                }
+
+                Values[WorldCfg.RespawnRestartQuietTime] = GetDefaultValue("Respawn.RestartQuietTime", 3);
+                if ((uint)Values[WorldCfg.RespawnRestartQuietTime].Int32 > 23)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Respawn.RestartQuietTime ({Values[WorldCfg.RespawnRestartQuietTime]}) " +
+                            $"must be an hour, between {0} and {23}. " +
+                        $"Set to {3}.");
+
+                    Values[WorldCfg.RespawnRestartQuietTime] = 3;
+                }
+
+                Values[WorldCfg.RespawnDynamicRateCreature] = GetDefaultValue("Respawn.DynamicRateCreature", 10.0f);
+                if (Values[WorldCfg.RespawnDynamicRateCreature].Float < 0.0f)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Respawn.DynamicRateCreature ({Values[WorldCfg.RespawnDynamicRateCreature]}) " +
+                        $"must be positive. " +
+                        $"Set to {10}.");
+
+                    Values[WorldCfg.RespawnDynamicRateCreature] = 10.0f;
+                }
+
+                Values[WorldCfg.RespawnDynamicMinimumCreature] = GetDefaultValue("Respawn.DynamicMinimumCreature", 10);
+
+                Values[WorldCfg.RespawnDynamicRateGameobject] = GetDefaultValue("Respawn.DynamicRateGameObject", 10.0f);
+                if (Values[WorldCfg.RespawnDynamicRateGameobject].Float < 0.0f)
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"Respawn.DynamicRateGameObject ({Values[WorldCfg.RespawnDynamicRateGameobject]}) " +
+                        $"must be positive. " +
+                        $"Set to {10}.");
+
+                    Values[WorldCfg.RespawnDynamicRateGameobject] = 10.0f;
+                }
+
+                Values[WorldCfg.RespawnDynamicMinimumGameObject] = GetDefaultValue("Respawn.DynamicMinimumGameObject", 10);
+                Values[WorldCfg.RespawnGuidWarningFrequency] = GetDefaultValue("Respawn.WarningFrequency", 1800);
             }
-
-            Values[WorldCfg.RespawnDynamicEscortNpc] = GetDefaultValue("Respawn.DynamicEscortNPC", false);
-                
-            Values[WorldCfg.RespawnGuidWarnLevel] = GetDefaultValue("Respawn.GuidWarnLevel", 12000000);
-            if ((int)Values[WorldCfg.RespawnGuidWarnLevel] > 16777215)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Respawn.GuidWarnLevel ({Values[WorldCfg.RespawnGuidWarnLevel]}) " +
-                    $"cannot be greater than maximum GUID ({16777215}). " +
-                    $"Set to {12000000}.");
-
-                Values[WorldCfg.RespawnGuidWarnLevel] = 12000000;
-            }
-
-            Values[WorldCfg.RespawnGuidAlertLevel] = GetDefaultValue("Respawn.GuidAlertLevel", 16000000);
-            if ((int)Values[WorldCfg.RespawnGuidAlertLevel] > 16777215)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Respawn.GuidWarnLevel ({Values[WorldCfg.RespawnGuidAlertLevel]}) " +
-                    $"cannot be greater than maximum GUID ({16777215}). " +
-                    $"Set to {16000000}.");
-
-                Values[WorldCfg.RespawnGuidAlertLevel] = 16000000;
-            }
-
-            Values[WorldCfg.RespawnRestartQuietTime] = GetDefaultValue("Respawn.RestartQuietTime", 3);
-            if ((int)Values[WorldCfg.RespawnRestartQuietTime] > 23)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Respawn.RestartQuietTime ({Values[WorldCfg.RespawnRestartQuietTime]}) " +
-                    $"must be an hour, between 0 and 23. " +
-                    $"Set to {3}.");
-
-                Values[WorldCfg.RespawnRestartQuietTime] = 3;
-            }
-
-            Values[WorldCfg.RespawnDynamicRateCreature] = GetDefaultValue("Respawn.DynamicRateCreature", 10.0f);
-            if ((float)Values[WorldCfg.RespawnDynamicRateCreature] < 0.0f)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Respawn.DynamicRateCreature ({Values[WorldCfg.RespawnDynamicRateCreature]}) " +
-                    $"must be positive. " +
-                    $"Set to {10}.");
-
-                Values[WorldCfg.RespawnDynamicRateCreature] = 10.0f;
-            }
-
-            Values[WorldCfg.RespawnDynamicMinimumCreature] = GetDefaultValue("Respawn.DynamicMinimumCreature", 10);
-
-            Values[WorldCfg.RespawnDynamicRateGameobject] = GetDefaultValue("Respawn.DynamicRateGameObject", 10.0f);
-            if ((float)Values[WorldCfg.RespawnDynamicRateGameobject] < 0.0f)
-            {
-                Log.outError(LogFilter.ServerLoading, 
-                    $"Respawn.DynamicRateGameObject ({Values[WorldCfg.RespawnDynamicRateGameobject]}) " +
-                    $"must be positive. " +
-                    $"Set to {10}.");
-
-                Values[WorldCfg.RespawnDynamicRateGameobject] = 10.0f;
-            }
-
-            Values[WorldCfg.RespawnDynamicMinimumGameObject] = GetDefaultValue("Respawn.DynamicMinimumGameObject", 10);
-            Values[WorldCfg.RespawnGuidWarningFrequency] = GetDefaultValue("Respawn.WarningFrequency", 1800);
 
             Values[WorldCfg.EnableMmaps] = GetDefaultValue("mmap.EnablePathFinding", true);
-            Values[WorldCfg.VmapIndoorCheck] = GetDefaultValue("vmap.EnableIndoorCheck", false);
+            Values[WorldCfg.VmapIndoorCheck] = GetDefaultValue("vmap.EnableIndoorCheck", true);
 
-            Values[WorldCfg.MaxWho] = GetDefaultValue("MaxWhoListReturns", 49);
+            Values[WorldCfg.MaxWho] = GetDefaultValue("MaxWhoListReturns", 50);
+
             Values[WorldCfg.StartAllSpells] = GetDefaultValue("PlayerStart.AllSpells", false);
-            if ((bool)Values[WorldCfg.StartAllSpells])
+            if (Values[WorldCfg.StartAllSpells].Bool)
                 Log.outWarn(LogFilter.ServerLoading, "PlayerStart.AllSpells Enabled - may not function as intended!");
 
             Values[WorldCfg.HonorAfterDuel] = GetDefaultValue("HonorPointsAfterDuel", 0);
@@ -1164,12 +1206,12 @@ namespace Game
             Values[WorldCfg.StartAllRep] = GetDefaultValue("PlayerStart.AllReputation", false);
 
             {
-            Values[WorldCfg.PvpTokenEnable] = GetDefaultValue("PvPToken.Enable", false);
-            Values[WorldCfg.PvpTokenMapType] = GetDefaultValue("PvPToken.MapAllowType", 4);
-            Values[WorldCfg.PvpTokenId] = GetDefaultValue("PvPToken.ItemID", 29434);
-            Values[WorldCfg.PvpTokenCount] = GetDefaultValue("PvPToken.ItemCount", 1);
-            if ((int)Values[WorldCfg.PvpTokenCount] < 1)
-                Values[WorldCfg.PvpTokenCount] = 1;
+                Values[WorldCfg.PvpTokenEnable] = GetDefaultValue("PvPToken.Enable", false);
+                Values[WorldCfg.PvpTokenMapType] = GetDefaultValue("PvPToken.MapAllowType", 4);
+                Values[WorldCfg.PvpTokenId] = GetDefaultValue("PvPToken.ItemID", 29434);
+                Values[WorldCfg.PvpTokenCount] = GetDefaultValue("PvPToken.ItemCount", 1);
+                if (Values[WorldCfg.PvpTokenCount].Int32 < 1)
+                    Values[WorldCfg.PvpTokenCount] = 1;
             }
 
             Values[WorldCfg.NoResetTalentCost] = GetDefaultValue("NoResetTalentsCost", false);
@@ -1213,7 +1255,7 @@ namespace Game
             Values[WorldCfg.BgRewardLoserHonorLast] = GetDefaultValue("Battleground.RewardLoserHonorLast", 3500);
 
             // Max instances per hour
-            Values[WorldCfg.MaxInstancesPerHour] = GetDefaultValue("AccountInstancesPerHour", 5);
+            Values[WorldCfg.MaxInstancesPerHour] = GetDefaultValue("AccountInstancesPerHour", 10);
 
             // Anounce reset of instance to whole party
             Values[WorldCfg.InstancesResetAnnounce] = GetDefaultValue("InstancesResetAnnounce", false);
@@ -1228,8 +1270,8 @@ namespace Game
             Values[WorldCfg.GuildSaveInterval] = GetDefaultValue("Guild.SaveInterval", 15);
 
             // misc
-            Values[WorldCfg.PdumpNoPaths] = GetDefaultValue("PlayerDump.DisallowPaths", true);
-            Values[WorldCfg.PdumpNoOverwrite] = GetDefaultValue("PlayerDump.DisallowOverwrite", true);
+            Values[WorldCfg.PdumpNoPaths] = GetDefaultValue("PlayerDump.DisallowPaths", true);          //Todo: NIY
+            Values[WorldCfg.PdumpNoOverwrite] = GetDefaultValue("PlayerDump.DisallowOverwrite", true);  //Todo: NIY
 
             // Wintergrasp battlefield
             Values[WorldCfg.WintergraspEnable] = GetDefaultValue("Wintergrasp.Enable", false);
@@ -1240,15 +1282,6 @@ namespace Game
             Values[WorldCfg.WintergraspNobattletime] = GetDefaultValue("Wintergrasp.NoBattleTimer", 150);
             Values[WorldCfg.WintergraspRestartAfterCrash] = GetDefaultValue("Wintergrasp.CrashRestartTimer", 10);
 
-            // Tol Barad battlefield
-            Values[WorldCfg.TolbaradEnable] = GetDefaultValue("TolBarad.Enable", true);
-            Values[WorldCfg.TolbaradPlrMax] = GetDefaultValue("TolBarad.PlayerMax", 100);
-            Values[WorldCfg.TolbaradPlrMin] = GetDefaultValue("TolBarad.PlayerMin", 0);
-            Values[WorldCfg.TolbaradPlrMinLvl] = GetDefaultValue("TolBarad.PlayerMinLvl", 85);
-            Values[WorldCfg.TolbaradBattleTime] = GetDefaultValue("TolBarad.BattleTimer", 15);
-            Values[WorldCfg.TolbaradBonusTime] = GetDefaultValue("TolBarad.BonusTime", 5);
-            Values[WorldCfg.TolbaradNoBattleTime] = GetDefaultValue("TolBarad.NoBattleTimer", 150);
-            Values[WorldCfg.TolbaradRestartAfterCrash] = GetDefaultValue("TolBarad.CrashRestartTimer", 10);
 
             // Stats limits
             Values[WorldCfg.StatsLimitsEnable] = GetDefaultValue("Stats.Limits.Enable", false);
@@ -1258,14 +1291,14 @@ namespace Game
             Values[WorldCfg.StatsLimitsCrit] = GetDefaultValue("Stats.Limits.Crit", 95.0f);
 
             //packet spoof punishment
-            Values[WorldCfg.PacketSpoofPolicy] = GetDefaultValue("PacketSpoof.Policy", 1);//Kick
+            Values[WorldCfg.PacketSpoofPolicy] = GetDefaultValue("PacketSpoof.Policy", 1);  // log + Kick
             Values[WorldCfg.PacketSpoofBanmode] = GetDefaultValue("PacketSpoof.BanMode", (int)BanMode.Account);
-            if ((int)Values[WorldCfg.PacketSpoofBanmode] == 1 || (int)Values[WorldCfg.PacketSpoofBanmode] > 2)
+            if (Values[WorldCfg.PacketSpoofBanmode].Int32 == (int)BanMode.Character || Values[WorldCfg.PacketSpoofBanmode].Int32 > (int)BanMode.IP)
                 Values[WorldCfg.PacketSpoofBanmode] = (int)BanMode.Account;
 
             Values[WorldCfg.PacketSpoofBanduration] = GetDefaultValue("PacketSpoof.BanDuration", 86400);
 
-            Values[WorldCfg.IpBasedActionLogging] = GetDefaultValue("Allow.IP.Based.Action.Logging", false);
+            Values[WorldCfg.IpBasedActionLogging] = GetDefaultValue("Allow.IP.Based.Action.Logging", false); //Todo: NIY
 
             // AHBot
             Values[WorldCfg.AhbotUpdateInterval] = GetDefaultValue("AuctionHouseBot.Update.Interval", 20);
@@ -1288,21 +1321,21 @@ namespace Game
             Values[WorldCfg.CacheDataQueries] = GetDefaultValue("CacheDataQueries", true);
 
             // Check Invalid Position
-            Values[WorldCfg.CreatureCheckInvalidPostion] = GetDefaultValue("Creature.CheckInvalidPosition", false);
-            Values[WorldCfg.GameobjectCheckInvalidPostion] = GetDefaultValue("GameObject.CheckInvalidPosition", false);
+            Values[WorldCfg.CreatureCheckInvalidPostion] = GetDefaultValue("Creature.CheckInvalidPosition", false); //TODO: NIY
+            Values[WorldCfg.GameobjectCheckInvalidPostion] = GetDefaultValue("GameObject.CheckInvalidPosition", false); //TODO: NIY
 
             // Whether to use LoS from game objects
             Values[WorldCfg.CheckGobjectLos] = GetDefaultValue("CheckGameObjectLoS", true);
 
             // FactionBalance
-            Values[WorldCfg.FactionBalanceLevelCheckDiff] = GetDefaultValue("Pvp.FactionBalance.LevelCheckDiff", 0);
+            Values[WorldCfg.FactionBalanceLevelCheckDiff] = GetDefaultValue("Pvp.FactionBalance.LevelCheckDiff", 0); //TODO: NIY
             Values[WorldCfg.CallToArms5Pct] = GetDefaultValue("Pvp.FactionBalance.Pct5", 0.6f);
             Values[WorldCfg.CallToArms10Pct] = GetDefaultValue("Pvp.FactionBalance.Pct10", 0.7f);
             Values[WorldCfg.CallToArms20Pct] = GetDefaultValue("Pvp.FactionBalance.Pct20", 0.8f);
 
             // Specifies if IP addresses can be logged to the database
             Values[WorldCfg.AllowLogginIpAddressesInDatabase] = GetDefaultValue("AllowLoggingIPAddressesInDatabase", true);
-            
+
             //Loot Settings
             Values[WorldCfg.EnableAELoot] = GetDefaultValue("EnableAELoot", false);
 
@@ -1311,36 +1344,213 @@ namespace Game
                 Global.ScriptMgr.OnConfigLoad(reload);
         }
 
-        public static uint GetUIntValue(WorldCfg confi)
+        public WorldConfigValue this[WorldCfg index]
         {
-            return Convert.ToUInt32(Values.LookupByKey(confi));
+            get
+            {
+                // All Configs must be initialized before use,
+                // so skip the check to get an exception
+                return _values[index];
+            }
+
+            protected set
+            {
+                if (_values.TryGetValue(index, out var worldConfigValue))
+                {
+                    if (worldConfigValue.Type != value.Type)
+                    {
+                        throw new InvalidOperationException(
+                            "You cannot change a type of value that has already been initialized.");
+                    }
+                }
+
+                _values[index] = value;
+            }
         }
 
-        public static int GetIntValue(WorldCfg confi)
+        public static void SetValue(WorldCfg config, WorldConfigValue value)
         {
-            return Convert.ToInt32(Values.LookupByKey(confi));
+            Values[config] = value;
         }
 
-        public static long GetInt64Value(WorldCfg confi)
+        public IEnumerator GetEnumerator()
         {
-            return Convert.ToInt64(Values.LookupByKey(confi));
+            return _values.GetEnumerator();
         }
 
-        public static bool GetBoolValue(WorldCfg confi)
+        private Dictionary<WorldCfg, WorldConfigValue> _values = new();
+
+        private class WorldConfigSet
         {
-            return Convert.ToBoolean(Values.LookupByKey(confi));
+            public delegate void OverridedCheckLogic(WorldConfigSet self);
+
+            public WorldCfgType ConfigValueType;
+            public dynamic MinValue = null;
+            public bool ExcludingMinValue;
+            public dynamic MaxValue = null;
+            public bool ExcludingMaxValue;
+            public dynamic[] Variety = null;
+            public bool ExcludingVariety;
+            public dynamic DefaultValue = null;
+            public dynamic Value = null;
+            public string ConfigName;
+            public OverridedCheckLogic OverridedLogic;
+        }
+    }
+
+    public enum WorldCfgType : byte
+    {
+        None = 0,
+        Int32,
+        Int64,
+        UInt32,
+        UInt64,
+        Float,
+        Double,
+        Bool,
+    }
+
+    [StructLayout(LayoutKind.Explicit, Size = 9)]
+    public readonly struct WorldConfigValue
+    {
+        [FieldOffset(0)]
+        public readonly WorldCfgType Type;
+        [FieldOffset(1)]
+        private readonly long _Raw;
+        [FieldOffset(1)]
+        private readonly int _Int32;
+        [FieldOffset(1)]
+        private readonly uint _UInt32;
+        [FieldOffset(1)]
+        private readonly long _Int64;
+        [FieldOffset(1)]
+        private readonly ulong _UInt64;
+        [FieldOffset(1)]
+        private readonly float _Float;
+        [FieldOffset(1)]
+        private readonly double _Double;
+        [FieldOffset(1)]
+        private readonly bool _Bool;
+
+        public WorldConfigValue(int value) { _Int32 = value; Type = WorldCfgType.Int32; }
+        public WorldConfigValue(uint value) { _UInt32 = value; Type = WorldCfgType.UInt32; }
+        public WorldConfigValue(long value) { _Int64 = value; Type = WorldCfgType.Int64; }
+        //public WorldConfigValue(ulong value) { _UInt64 = value; Type = WorldCfgType.UInt64; }
+        public WorldConfigValue(float value) { _Float = value; Type = WorldCfgType.Float; }
+        //public WorldConfigValue(double value) { _Double = value; Type = WorldCfgType.Double; }
+        public WorldConfigValue(bool value) { _Bool = value; Type = WorldCfgType.Bool; }
+
+        public static implicit operator WorldConfigValue(int value) => new(value);
+        public static implicit operator WorldConfigValue(uint value) => new(value);
+        public static implicit operator WorldConfigValue(long value) => new(value);
+        //public static implicit operator WorldConfigValue(ulong value) => new(value);
+        public static implicit operator WorldConfigValue(float value) => new(value);
+        //public static implicit operator WorldConfigValue(double value) => new(value);
+        public static implicit operator WorldConfigValue(bool value) => new(value);
+        /*
+                public static implicit operator int(WorldConfigValue value) => value.Int32;
+                public static implicit operator uint(WorldConfigValue value) => value.UInt32;
+                public static implicit operator long(WorldConfigValue value) => value.Int64;
+                //public static implicit operator ulong(WorldConfigValue value) => value.UInt64;
+                public static implicit operator float(WorldConfigValue value) => value.Float;
+                //public static implicit operator double(WorldConfigValue value) => value.Double;
+                public static implicit operator bool(WorldConfigValue value) => value.Bool;
+        */
+
+        public override string ToString()
+        {
+            switch (Type)
+            {
+                case WorldCfgType.Int32: return _Int32.ToString();
+                case WorldCfgType.UInt32: return _UInt32.ToString();
+                case WorldCfgType.Int64: return _Int64.ToString();
+                //case WorldCfgType.UInt64: return _UInt64.ToString();
+                case WorldCfgType.Float: return _Float.ToString();
+                //case WorldCfgType.Double: return _Double.ToString();
+                case WorldCfgType.Bool: return _Bool.ToString();
+            }
+
+            return base.ToString();
         }
 
-        public static float GetFloatValue(WorldCfg confi)
+        public override int GetHashCode()
         {
-            return Convert.ToSingle(Values.LookupByKey(confi));
+            return (_UInt64 & (uint)Type << 56).GetHashCode();
         }
 
-        public static void SetValue(WorldCfg confi, object value)
+        public static bool operator ==(WorldConfigValue left, WorldConfigValue right)
         {
-            Values[confi] = value;
+            return left.Equals(right);
         }
 
-        static Dictionary<WorldCfg, object> Values = new();
+        public static bool operator !=(WorldConfigValue left, WorldConfigValue right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj);
+        }
+
+        public bool Equals(WorldConfigValue another)
+        {
+            return _Raw == another._Raw && Type == another.Type;
+        }
+
+        public int Int32
+        {
+            get
+            {
+                if (Type == WorldCfgType.Int32)
+                    return _Int32;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public uint UInt32
+        {
+            get
+            {
+                if (Type == WorldCfgType.UInt32)
+                    return _UInt32;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public float Float
+        {
+            get
+            {
+                if (Type == WorldCfgType.Float)
+                    return _Float;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public long Int64
+        {
+            get
+            {
+                if (Type == WorldCfgType.Int64)
+                    return _Int64;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public bool Bool
+        {
+            get
+            {
+                if (Type == WorldCfgType.Bool)
+                    return _Bool;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
     }
 }

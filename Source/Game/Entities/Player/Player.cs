@@ -51,7 +51,7 @@ namespace Game.Entities
             m_regenInterruptTimestamp = GameTime.Now();
 
             m_zoneUpdateId = -1;
-            m_nextSave = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
+            m_nextSave = (uint)WorldConfig.Values[WorldCfg.IntervalSave].Int32;
             m_customizationsChanged = false;
 
             SetGroupInvite(null);
@@ -233,7 +233,8 @@ namespace Game.Entities
             SetGender(createInfo.Sex);
             SetPowerType(powertype, false);
             InitDisplayIds();
-            if ((RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.PVP || (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.RPPVP)
+            if ((RealmType)WorldConfig.Values[WorldCfg.GameType].Int32 == RealmType.PVP 
+                || (RealmType)WorldConfig.Values[WorldCfg.GameType].Int32 == RealmType.RPPVP)
             {
                 SetPvpFlag(UnitPVPStateFlags.PvP);
                 SetUnitFlag(UnitFlags.PlayerControlled);
@@ -254,7 +255,7 @@ namespace Game.Entities
 
             InitRunes();
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), WorldConfig.GetIntValue(WorldCfg.StartPlayerMoney));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), WorldConfig.Values[WorldCfg.StartPlayerMoney].Int32);
 
             // Played time
             m_Last_tick = GameTime.GetGameTime();
@@ -1734,14 +1735,14 @@ namespace Game.Entities
             switch (source)
             {
                 case ReputationSource.Kill:
-                    rate = WorldConfig.GetFloatValue(WorldCfg.RateReputationLowLevelKill);
+                    rate = WorldConfig.Values[WorldCfg.RateReputationLowLevelKill].Float;
                     break;
                 case ReputationSource.Quest:
                 case ReputationSource.DailyQuest:
                 case ReputationSource.WeeklyQuest:
                 case ReputationSource.MonthlyQuest:
                 case ReputationSource.RepeatableQuest:
-                    rate = WorldConfig.GetFloatValue(WorldCfg.RateReputationLowLevelQuest);
+                    rate = WorldConfig.Values[WorldCfg.RateReputationLowLevelQuest].Float;
                     break;
                 case ReputationSource.Spell:
                 default:
@@ -1793,7 +1794,7 @@ namespace Game.Entities
             }
 
             if (source != ReputationSource.Spell && GetsRecruitAFriendBonus(false))
-                percent *= 1.0f + WorldConfig.GetFloatValue(WorldCfg.RateReputationRecruitAFriendBonus);
+                percent *= 1.0f + WorldConfig.Values[WorldCfg.RateReputationRecruitAFriendBonus].Float;
 
             return MathFunctions.CalculatePct(rep, percent);
         }
@@ -2183,21 +2184,21 @@ namespace Game.Entities
 
         public int GetStartLevel(Race race, Class playerClass, int? characterTemplateId = null)
         {
-            int startLevel = WorldConfig.GetIntValue(WorldCfg.StartPlayerLevel);
+            int startLevel = WorldConfig.Values[WorldCfg.StartPlayerLevel].Int32;
             if (CliDB.ChrRacesStorage.LookupByKey((int)race).HasFlag(ChrRacesFlag.IsAlliedRace))
-                startLevel = WorldConfig.GetIntValue(WorldCfg.StartAlliedRaceLevel);
+                startLevel = WorldConfig.Values[WorldCfg.StartAlliedRaceLevel].Int32;
 
             if (playerClass == Class.Deathknight)
             {
                 if (race == Race.PandarenAlliance || race == Race.PandarenHorde)
-                    startLevel = Math.Max(WorldConfig.GetIntValue(WorldCfg.StartAlliedRaceLevel), startLevel);
+                    startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartAlliedRaceLevel].Int32, startLevel);
                 else
-                    startLevel = Math.Max(WorldConfig.GetIntValue(WorldCfg.StartDeathKnightPlayerLevel), startLevel);
+                    startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartDeathKnightPlayerLevel].Int32, startLevel);
             }
             else if (playerClass == Class.DemonHunter)
-                startLevel = Math.Max(WorldConfig.GetIntValue(WorldCfg.StartDemonHunterPlayerLevel), startLevel);
+                startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartDemonHunterPlayerLevel].Int32, startLevel);
             else if (playerClass == Class.Evoker)
-                startLevel = Math.Max(WorldConfig.GetIntValue(WorldCfg.StartEvokerPlayerLevel), startLevel);
+                startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartEvokerPlayerLevel].Int32, startLevel);
 
             if (characterTemplateId.HasValue)
             {
@@ -2216,7 +2217,7 @@ namespace Game.Entities
             }
 
             if (GetSession().HasPermission(RBACPermissions.UseStartGmLevel))
-                startLevel = Math.Max(WorldConfig.GetIntValue(WorldCfg.StartGmLevel), startLevel);
+                startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartGmLevel].Int32, startLevel);
 
             return startLevel;
         }
@@ -2319,7 +2320,7 @@ namespace Game.Entities
 
                 if (damageperc > 0)
                 {
-                    int damage = (int)(damageperc * GetMaxHealth() * WorldConfig.GetFloatValue(WorldCfg.RateDamageFall));
+                    int damage = (int)(damageperc * GetMaxHealth() * WorldConfig.Values[WorldCfg.RateDamageFall].Float);
 
                     float height = movementInfo.Pos.posZ;
                     UpdateGroundPositionZ(movementInfo.Pos.posX, movementInfo.Pos.posY, ref height);
@@ -2818,7 +2819,7 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.TalentMaster:
                     PlayerTalkClass.SendCloseGossip();
-                    SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.Talents);
+                    SendRespecWipeConfirm(guid, WorldConfig.Values[WorldCfg.NoResetTalentCost].Bool ? 0 : GetNextResetTalentsCost(), SpecResetType.Talents);
                     break;
                 case GossipOptionNpc.Stablemaster:
                     SetStableMaster(guid);
@@ -2826,7 +2827,7 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.PetSpecializationMaster:
                     PlayerTalkClass.SendCloseGossip();
-                    SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.PetTalents);
+                    SendRespecWipeConfirm(guid, WorldConfig.Values[WorldCfg.NoResetTalentCost].Bool ? 0 : GetNextResetTalentsCost(), SpecResetType.PetTalents);
                     break;
                 case GossipOptionNpc.GuildBanker:
                     Guild guild = GetGuild();
@@ -3652,7 +3653,7 @@ namespace Game.Entities
             ];
 
             if (RatesForPower[(int)power] != 0)
-                addvalue *= WorldConfig.GetFloatValue(RatesForPower[(int)power]);
+                addvalue *= WorldConfig.Values[RatesForPower[(int)power]].Float;
 
             // Mana regen calculated in Player.UpdateManaRegen()
             if (power != PowerType.Mana)
@@ -3761,7 +3762,7 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
+            float HealthIncreaseRate = WorldConfig.Values[WorldCfg.RateHealth].Float;
 
             if (GetLevel() < 15)
                 HealthIncreaseRate *= (2.066f - (GetLevel() * 0.066f));
@@ -3900,11 +3901,11 @@ namespace Game.Entities
                 {
                     Log.outDebug(LogFilter.Player, 
                         $"Player::EnvironmentalDamage: Player '{GetName()}' ({GetGUID()}) fall to death, " +
-                        $"losing {WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath)} durability");
+                        $"losing {WorldConfig.Values[WorldCfg.RateDurabilityLossOnDeath].Float} durability");
 
-                    DurabilityLossAll(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath), false);
+                    DurabilityLossAll(WorldConfig.Values[WorldCfg.RateDurabilityLossOnDeath].Float, false);
                     // durability lost message
-                    SendDurabilityLoss(this, (int)(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath) * 100.0f));
+                    SendDurabilityLoss(this, (int)(WorldConfig.Values[WorldCfg.RateDurabilityLossOnDeath].Float * 100.0f));
                 }
 
                 UpdateCriteria(CriteriaType.DieFromEnviromentalDamage, 1, (long)type);
@@ -4221,8 +4222,12 @@ namespace Game.Entities
                     return Time.Minute * Time.InMilliseconds;
                 case MirrorTimerType.Breath:
                 {
-                    if (!IsAlive() || HasAuraType(AuraType.WaterBreathing) || GetSession().GetSecurity() >= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.DisableBreathing))
+                    if (!IsAlive() || HasAuraType(AuraType.WaterBreathing)
+                        || GetSession().GetSecurity() >= (AccountTypes)WorldConfig.Values[WorldCfg.DisableBreathing].Int32)
+                    {
                         return -1;
+                    }
+
                     int UnderWaterTime = 3 * Time.Minute * Time.InMilliseconds;
                     UnderWaterTime *= (int)GetTotalAuraMultiplier(AuraType.ModWaterBreathing);
                     return UnderWaterTime;
@@ -4311,7 +4316,7 @@ namespace Game.Entities
             //Characters from level 11-19 will suffer from one minute of sickness
             //for each level they are above 10.
             //Characters level 20 and up suffer from ten minutes of sickness.
-            int startLevel = WorldConfig.GetIntValue(WorldCfg.DeathSicknessLevel);
+            int startLevel = WorldConfig.Values[WorldCfg.DeathSicknessLevel].Int32;
             var raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)GetRace());
 
             if (GetLevel() >= startLevel)
@@ -4544,10 +4549,10 @@ namespace Game.Entities
         {
             if (pvp)
             {
-                if (!WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPvp))
+                if (!WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPvp].Bool)
                     return PlayerConst.copseReclaimDelay[0];
             }
-            else if (!WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPve))
+            else if (!WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPve].Bool)
                 return 0;
 
             long now = GameTime.GetGameTime();
@@ -4561,8 +4566,8 @@ namespace Game.Entities
         {
             bool pvp = m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.PVPDeath);
 
-            if ((pvp && !WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPvp)) ||
-                (!pvp && !WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPve)))
+            if ((pvp && !WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPvp].Bool) ||
+                (!pvp && !WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPve].Bool))
                 return;
             long now = GameTime.GetGameTime();
             if (now < m_deathExpireTime)
@@ -4593,8 +4598,8 @@ namespace Game.Entities
                     return -1;
 
                 ulong count = 0;
-                if ((pvp && WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPvp)) ||
-                   (!pvp && WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPve)))
+                if ((pvp && WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPvp].Bool) ||
+                   (!pvp && WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPve].Bool))
                 {
                     count = (ulong)(m_deathExpireTime - corpse.GetGhostTime()) / PlayerConst.DeathExpireStep;
 
@@ -5164,7 +5169,7 @@ namespace Game.Entities
             var k_grey = Formulas.GetGrayLevel(GetLevel());
 
             // Victim level less gray level
-            if (v_level < k_grey && WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) == 0)
+            if (v_level < k_grey && WorldConfig.Values[WorldCfg.MinCreatureScaledXpRatio].Int32 == 0)
                 return false;
 
             Creature creature = victim.ToCreature();
@@ -5690,7 +5695,7 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().SendFavoriteAppearances();
 
             InitialSetup initialSetup = new();
-            initialSetup.ServerExpansionLevel = (byte)WorldConfig.GetIntValue(WorldCfg.Expansion);
+            initialSetup.ServerExpansionLevel = (byte)WorldConfig.Values[WorldCfg.Expansion].Int32;
             SendPacket(initialSetup);
 
             SetMovedUnit(this);
@@ -5880,7 +5885,7 @@ namespace Game.Entities
             PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
             int exp_max_lvl = (int)ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
-            int conf_max_lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            int conf_max_lvl = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
             if (exp_max_lvl == SharedConst.DefaultMaxPlayerLevel || exp_max_lvl >= conf_max_lvl)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
             else
@@ -6389,7 +6394,7 @@ namespace Game.Entities
             if (IsInFlight())
                 return;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck))
+            if (WorldConfig.Values[WorldCfg.VmapIndoorCheck].Bool)
                 RemoveAurasWithAttribute(IsOutdoors() ? SpellAttr0.OnlyIndoors : SpellAttr0.OnlyOutdoors);
 
             var areaId = GetAreaId();
@@ -6435,7 +6440,7 @@ namespace Game.Entities
                         int XP;
                         if (diff < -5)
                         {
-                            XP = (int)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (int)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.Values[WorldCfg.RateXpExplore].Float);
                         }
                         else if (diff > 5)
                         {
@@ -6443,16 +6448,16 @@ namespace Game.Entities
                             if (exploration_percent < 0)
                                 exploration_percent = 0;
 
-                            XP = (int)(ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (int)(ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * exploration_percent / 100 * WorldConfig.Values[WorldCfg.RateXpExplore].Float);
                         }
                         else
                         {
-                            XP = (int)(ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (int)(ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * WorldConfig.Values[WorldCfg.RateXpExplore].Float);
                         }
 
-                        if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
+                        if (WorldConfig.Values[WorldCfg.MinDiscoveredScaledXpRatio].Int32 > 0)
                         {
-                            var minScaledXP = (int)(ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
+                            var minScaledXP = (int)(ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * WorldConfig.Values[WorldCfg.RateXpExplore].Float) * WorldConfig.Values[WorldCfg.MinDiscoveredScaledXpRatio].Int32 / 100;
                             XP = Math.Max(minScaledXP, XP);
                         }
 
@@ -6522,7 +6527,7 @@ namespace Game.Entities
         {
             ScriptMgr.OnPlayerChat(this, ChatMsg.Say, language, text);
 
-            SendChatMessageToSetInRange(ChatMsg.Say, language, text, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));
+            SendChatMessageToSetInRange(ChatMsg.Say, language, text, WorldConfig.Values[WorldCfg.ListenRangeSay].Float);
         }
 
         void SendChatMessageToSetInRange(ChatMsg chatMsg, Language language, string text, float range)
@@ -6540,7 +6545,7 @@ namespace Game.Entities
 
         public override void Say(int textId, WorldObject target = null)
         {
-            Talk(textId, ChatMsg.Say, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
+            Talk(textId, ChatMsg.Say, WorldConfig.Values[WorldCfg.ListenRangeSay].Float, target);
         }
 
         public override void Yell(string text, Language language, WorldObject obj = null)
@@ -6549,12 +6554,12 @@ namespace Game.Entities
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Yell, language, this, this, text);
-            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), true);
+            SendMessageToSetInRange(data, WorldConfig.Values[WorldCfg.ListenRangeYell].Float, true);
         }
 
         public override void Yell(int textId, WorldObject target = null)
         {
-            Talk(textId, ChatMsg.Yell, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), target);
+            Talk(textId, ChatMsg.Yell, WorldConfig.Values[WorldCfg.ListenRangeYell].Float, target);
         }
 
         public override void TextEmote(string text, WorldObject obj = null, bool something = false)
@@ -6563,13 +6568,13 @@ namespace Game.Entities
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
-            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, 
+            SendMessageToSetInRange(data, WorldConfig.Values[WorldCfg.ListenRangeTextemote].Float, true, 
                 !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat), true);
         }
 
         public override void TextEmote(int textId, WorldObject target = null, bool isBossEmote = false)
         {
-            Talk(textId, ChatMsg.Emote, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), target);
+            Talk(textId, ChatMsg.Emote, WorldConfig.Values[WorldCfg.ListenRangeTextemote].Float, target);
         }
 
         public void WhisperAddon(string text, string prefix, bool isLogged, Player receiver)
@@ -7146,7 +7151,7 @@ namespace Game.Entities
             //Checks and preparations done, DO FLIGHT
             UpdateCriteria(CriteriaType.BuyTaxi, 1);
 
-            if (WorldConfig.GetBoolValue(WorldCfg.InstantTaxi))
+            if (WorldConfig.Values[WorldCfg.InstantTaxi].Bool)
             {
                 var lastPathNode = CliDB.TaxiNodesStorage.LookupByKey(nodes[^1]);
                 m_taxi.ClearTaxiDestinations();
@@ -7248,7 +7253,7 @@ namespace Game.Entities
         public bool GetsRecruitAFriendBonus(bool forXP)
         {
             bool recruitAFriend = false;
-            if (GetLevel() <= WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel) || !forXP)
+            if (GetLevel() <= WorldConfig.Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel].Int32 || !forXP)
             {
                 Group group = GetGroup();
                 if (group != null)
@@ -7265,13 +7270,13 @@ namespace Game.Entities
                         if (forXP)
                         {
                             // level must be allowed to get RaF bonus
-                            if (player.GetLevel() > WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel))
+                            if (player.GetLevel() > WorldConfig.Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel].Int32)
                                 continue;
 
                             // level difference must be small enough to get RaF bonus, UNLESS we are lower level
                             if (player.GetLevel() < GetLevel())
                             {
-                                if (GetLevel() - player.GetLevel() > WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevelDifference))
+                                if (GetLevel() - player.GetLevel() > WorldConfig.Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevelDifference].Int32)
                                     continue;
                             }
                         }
@@ -7298,7 +7303,7 @@ namespace Game.Entities
             if (player == null || IsAlive())
                 player = this;
 
-            return pOther.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.MaxRecruitAFriendDistance);
+            return pOther.GetDistance(player) <= WorldConfig.Values[WorldCfg.MaxRecruitAFriendDistance].Float;
         }
 
         public TeleportToOptions GetTeleportOptions() { return m_teleport_options; }
@@ -7406,7 +7411,7 @@ namespace Game.Entities
 
         void InitPrimaryProfessions()
         {
-            SetFreePrimaryProfessions(WorldConfig.GetIntValue(WorldCfg.MaxPrimaryTradeSkill));
+            SetFreePrimaryProfessions(WorldConfig.Values[WorldCfg.MaxPrimaryTradeSkill].Int32);
         }
 
         public int GetFreePrimaryProfessionPoints() { return m_activePlayerData.CharacterPoints; }

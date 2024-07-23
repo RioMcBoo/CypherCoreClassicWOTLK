@@ -873,8 +873,8 @@ namespace Game.Entities
                     }
 
                     uint respawnDelay = m_respawnDelayTime;
-                    uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
-                    if (scalingMode != 0)
+                    int scalingMode = WorldConfig.Values[WorldCfg.RespawnDynamicMode].Int32;
+                    if (scalingMode > 0)
                         GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
                     m_respawnTime = GameTime.GetGameTime() + respawnDelay;
 

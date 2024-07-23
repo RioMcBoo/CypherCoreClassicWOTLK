@@ -429,8 +429,8 @@ namespace Game.Entities
                         opponent.CastSpell(duel.Opponent, 52994, true);
 
                     // Honor points after duel (the winner) - ImpConfig
-                    int amount = WorldConfig.GetIntValue(WorldCfg.HonorAfterDuel);
-                    if (amount != 0)
+                    int amount = WorldConfig.Values[WorldCfg.HonorAfterDuel].Int32;
+                    if (amount > 0)
                         opponent.RewardHonor(null, 1, amount);
 
                     break;

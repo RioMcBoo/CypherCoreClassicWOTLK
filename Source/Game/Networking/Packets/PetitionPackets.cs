@@ -283,8 +283,8 @@ namespace Game.Networking.Packets
             data.WriteInt32(PetitionID);
             data.WritePackedGuid(Petitioner);
 
-            data.WriteUInt32(MinSignatures);
-            data.WriteUInt32(MaxSignatures);
+            data.WriteInt32(MinSignatures);
+            data.WriteInt32(MaxSignatures);
             data.WriteInt32(DeadLine);
             data.WriteInt32(IssueDate);
             data.WriteInt32(AllowedGuildID);
@@ -316,8 +316,8 @@ namespace Game.Networking.Packets
         public ObjectGuid Petitioner;
         public string Title;
         public string BodyText;
-        public uint MinSignatures;
-        public uint MaxSignatures;
+        public int MinSignatures;
+        public int MaxSignatures;
         public int DeadLine;
         public int IssueDate;
         public int AllowedGuildID;

@@ -42,7 +42,7 @@ namespace Game.Entities
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
 
             if (!player.GetSession().HasPermission(RBACPermissions.WhoSeeAllSecLevels) &&
-                target.GetSession().GetSecurity() > (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList))
+                target.GetSession().GetSecurity() > (AccountTypes)WorldConfig.Values[WorldCfg.GmLevelInWhoList].Int32)
                 return;
 
             // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
@@ -87,7 +87,7 @@ namespace Game.Entities
             if (player == null)
                 return;
 
-            AccountTypes gmSecLevel = (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList);
+            AccountTypes gmSecLevel = (AccountTypes)WorldConfig.Values[WorldCfg.GmLevelInWhoList].Int32;
             foreach (var pair in _socialMap)
             {
                 var info = pair.Value.PlayerSocialMap.LookupByKey(player.GetGUID());

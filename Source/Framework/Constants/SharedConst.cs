@@ -1623,411 +1623,794 @@ namespace Framework.Constants
 
     public enum WorldCfg
     {
+        /// <summary cref="int">int</summary>
         AccPasschangesec,
+        /// <summary cref="bool">bool</summary>
         AddonChannel,
+        /// <summary cref="int">Seconds</summary>
         AhbotUpdateInterval,
+        /// <summary cref="bool">bool</summary>
         AllTaxiPaths,
+        /// <summary cref="bool">bool</summary>
         AllowGmGroup,
+        /// <summary cref="bool">bool</summary>
         AllowLogginIpAddressesInDatabase,
+        /// <summary cref="bool">bool</summary>
         AllowTwoSideInteractionAuction,
+        /// <summary cref="bool">bool</summary>
         AllowTwoSideInteractionCalendar,
+        /// <summary cref="bool">bool</summary>
         AllowTwoSideInteractionChannel,
+        /// <summary cref="bool">bool</summary>
         AllowTwoSideInteractionGroup,
+        /// <summary cref="bool">bool</summary>
         AllowTwoSideInteractionGuild,
+        /// <summary cref="bool">bool</summary>
         AllowTwoSideTrade,
+        /// <summary cref="bool">bool</summary>
         ArenaLogExtendedInfo,
+        /// <summary cref="int">int</summary>
         ArenaMaxRatingDifference,
+        /// <summary cref="bool">bool</summary>
         ArenaQueueAnnouncerEnable,
+        /// <summary cref="int">Milliseconds</summary>
         ArenaRatedUpdateTimer,
+        /// <summary cref="int">Milliseconds</summary>
         ArenaRatingDiscardTimer,
+        /// <summary cref="int">int</summary>
         ArenaSeasonId,
+        /// <summary cref="bool">bool</summary>
         ArenaSeasonInProgress,
+        /// <summary cref="int">int</summary>
         ArenaStartMatchmakerRating,
+        /// <summary cref="int">int</summary>
         ArenaStartPersonalRating,
+        /// <summary cref="int">int</summary>
         ArenaStartRating,
+        /// <summary cref="float">float</summary>
         ArenaWinRatingModifier1,
+        /// <summary cref="float">float</summary>
         ArenaWinRatingModifier2,
+        /// <summary cref="float">float</summary>
         ArenaLoseRatingModifier,
+        /// <summary cref="float">float</summary>
         ArenaMatchmakerRatingModifier,
+        /// <summary cref="bool">bool</summary>
         EnableAELoot,
+        /// <summary cref="int">int</summary>
         AuctionLevelReq,
+        /// <summary cref="int">Seconds</summary>
         AuctionReplicateDelay,
+        /// <summary cref="int">Milliseconds</summary>
         AuctionSearchDelay,
+        /// <summary cref="int">Milliseconds</summary>
         AuctionTaintedSearchDelay,
+        /// <summary cref="bool">bool</summary>
         AutoBroadcast,
+        /// <summary cref="int">int</summary>
         AutoBroadcastCenter,
+        /// <summary cref="int">Milliseconds</summary>
         AutoBroadcastInterval,
+        /// <summary cref="bool">bool</summary>
         BasemapLoadGrids,
+        /// <summary cref="bool">bool</summary>
         BattlegroundCastDeserter,
+        /// <summary cref="int">int</summary>
         BattlegroundInvitationType,
+        /// <summary cref="bool">bool</summary>
         BattlegroundMapLoadGrids,
+        /// <summary cref="int">Milliseconds</summary>
         BattlegroundPremadeGroupWaitForMatch,
+        /// <summary cref="int">Milliseconds</summary>
         BattlegroundPrematureFinishTimer,
+        /// <summary cref="bool">bool</summary>
         BattlegroundQueueAnnouncerEnable,
-        BattlegroundQueueAnnouncerPlayeronly,
+        /// <summary cref="bool">bool</summary>
+        BattlegroundQueueAnnouncerPlayerOnly,
+        /// <summary cref="int">int</summary>
         BattlegroundReportAfk,
+        /// <summary cref="bool">bool</summary>
         BattlegroundStoreStatisticsEnable,
+        /// <summary cref="int">int</summary>
         BgRewardLoserHonorFirst,
+        /// <summary cref="int">int</summary>
         BgRewardLoserHonorLast,
+        /// <summary cref="int">int</summary>
         BgRewardWinnerConquestFirst,
+        /// <summary cref="int">int</summary>
         BgRewardWinnerConquestLast,
+        /// <summary cref="int">int</summary>
         BgRewardWinnerHonorFirst,
+            /// <summary cref="int">int</summary>
         BgRewardWinnerHonorLast,
+        /// <summary cref="bool">bool</summary>
         BgXpForKill,
+        /// <summary cref="bool">bool</summary>
         BlackmarketEnabled,
+        /// <summary cref="int">int</summary>
         BlackmarketMaxAuctions,
+        /// <summary cref="int">Hours</summary>
         BlackmarketUpdatePeriod,
+        /// <summary cref="bool">bool</summary>
         CacheDataQueries,
+        /// <summary cref="bool">bool</summary>
         CalculateCreatureZoneAreaData,
+        /// <summary cref="bool">bool</summary>
         CalculateGameobjectZoneAreaData,
+        /// <summary cref="int">int</summary>
         CalendarDeleteOldEventsHour,
+        /// <summary cref="float">float</summary>
         CallToArms5Pct,
+        /// <summary cref="float">float</summary>
         CallToArms10Pct,
+        /// <summary cref="float">float</summary>
         CallToArms20Pct,
+        /// <summary cref="bool">bool</summary>
         CastUnstuck,
+        /// <summary cref="bool">bool</summary>
         CharacterCreatingDisableAlliedRaceAchievementRequirement,
+        /// <summary cref="int">int</summary>
         CharacterCreatingDisabled,
+        /// <summary cref="int">int</summary>
         CharacterCreatingDisabledClassmask,
+        /// <summary cref="int">int</summary>
         CharacterCreatingDisabledRacemask,
+        /// <summary cref="int">int</summary>
         CharacterCreatingEvokersPerRealm,
+        /// <summary cref="int">int</summary>
         CharacterCreatingMinLevelForDemonHunter,
+        /// <summary cref="int">int</summary>
         CharacterCreatingMinLevelForEvoker,
+        /// <summary cref="int">int</summary>
         CharactersPerAccount,
+        /// <summary cref="int">int</summary>
         CharactersPerRealm,
+        /// <summary cref="int">int</summary>
         ChardeleteDeathKnightMinLevel,
+        /// <summary cref="int">int</summary>
         ChardeleteDemonHunterMinLevel,
+        /// <summary cref="int">Days</summary>
         ChardeleteKeepDays,
+        /// <summary cref="int">int</summary>
         ChardeleteMethod,
+        /// <summary cref="int">int</summary>
         ChardeleteMinLevel,
+        /// <summary cref="uint">uint</summary>
         CharterCostArena2v2,
+        /// <summary cref="uint">uint</summary>
         CharterCostArena3v3,
+        /// <summary cref="uint">uint</summary>
         CharterCostArena5v5,
+        /// <summary cref="uint">uint</summary>
         CharterCostGuild,
+        /// <summary cref="int">int</summary>
         ChatChannelLevelReq,
+        /// <summary cref="int">int</summary>
         ChatEmoteLevelReq,
+        /// <summary cref="bool">bool</summary>
         ChatFakeMessagePreventing,
+        /// <summary cref="int">int</summary>
         ChatFloodMessageCount,
+        /// <summary cref="int">Seconds</summary>
         ChatFloodMessageDelay,
+        /// <summary cref="int">Seconds</summary>
         ChatFloodMuteTime,
+        /// <summary cref="bool">bool</summary>
         ChatPartyRaidWarnings,
+        /// <summary cref="int">int</summary>
         ChatSayLevelReq,
+        /// <summary cref="int">int</summary>
         ChatStrictLinkCheckingKick,
+        /// <summary cref="int">int</summary>
         ChatStrictLinkCheckingSeverity,
+        /// <summary cref="int">int</summary>
         ChatWhisperLevelReq,
+        /// <summary cref="int">int</summary>
         ChatYellLevelReq,
+        /// <summary cref="bool">bool</summary>
         CheckGobjectLos,
+        /// <summary cref="bool">bool</summary>
         CleanCharacterDb,
+        /// <summary cref="int">Hours</summary>
         CleanOldMailTime,
+        /// <summary cref="uint">uint</summary>
         ClientCacheVersion,
         CommunityAllowBnetClubTypeEnabled,
         CommunityAllowCharacterClubTypeEnabled,
         CommunityChatKeepDays,
         CommunityClubFinderEnabled,
         CommunityClubsEnabled,
+        /// <summary cref="int">int</summary>
         Compression,
+        /// <summary cref="int">Seconds</summary>
         CorpseDecayElite,
+        /// <summary cref="int">Seconds</summary>
         CorpseDecayMinusMob,
+        /// <summary cref="int">Seconds</summary>
         CorpseDecayNormal,
+        /// <summary cref="int">Seconds</summary>
         CorpseDecayObsolete,
+        /// <summary cref="int">Seconds</summary>
         CorpseDecayRare,
+        /// <summary cref="int">Seconds</summary>
         CorpseDecayRareelite,
+        /// <summary cref="int">Seconds</summary>
         CorpseDecayTrivial,
+        /// <summary cref="bool">bool</summary>
         CreatureCheckInvalidPostion,
+        /// <summary cref="int">Milliseconds</summary>
         CreatureFamilyAssistanceDelay,
+        /// <summary cref="float">float (yards)</summary>
         CreatureFamilyAssistanceRadius,
+        /// <summary cref="float">float (yards)</summary>
         CreatureFamilyFleeAssistanceRadius,
+        /// <summary cref="int">Milliseconds</summary>
         CreatureFamilyFleeDelay,
+        /// <summary cref="int">Seconds</summary>
         CreaturePickpocketRefill,
+        /// <summary cref="int">Milliseconds</summary>
         CreatureStopForPlayer,
+        /// <summary cref="int">int (DayOfWeek)</summary>
         CurrencyResetDay,
+        /// <summary cref="int">int</summary>
         CurrencyResetHour,
+        /// <summary cref="int">Days</summary>
         CurrencyResetInterval,
+        /// <summary cref="int">int</summary>
         DailyQuestResetTimeHour,
+        /// <summary cref="bool">bool</summary>
         DbcEnforceItemAttributes,
+        /// <summary cref="bool">bool</summary>
         DeathBonesBgOrArena,
+        /// <summary cref="bool">bool</summary>
         DeathBonesWorld,
+        /// <summary cref="bool">bool</summary>
         DeathCorpseReclaimDelayPve,
+        /// <summary cref="bool">bool</summary>
         DeathCorpseReclaimDelayPvp,
+        /// <summary cref="int">int</summary>
         DeathSicknessLevel,
+        /// <summary cref="bool">bool</summary>
         DeclinedNamesUsed,
+        /// <summary cref="bool">bool</summary>
         DetectPosCollision,
+        /// <summary cref="bool">bool</summary>
         DieCommandMode,
+        /// <summary cref="int">int</summary>
         DisableBreathing,
         DurabilityLossInPvp,
+        /// <summary cref="bool">bool</summary>
         EnableMmaps,
+        /// <summary cref="bool">bool</summary>
         EnableSinfoLogin,
+        /// <summary cref="bool">bool</summary>
         EventAnnounce,
+        /// <summary cref="int">int</summary>
         Expansion,
+        /// <summary cref="int">int</summary>
         FactionBalanceLevelCheckDiff,
+        /// <summary cref="bool">bool</summary>
         FeatureSystemBpayStoreEnabled,
+        /// <summary cref="int">Seconds</summary>
         FeatureSystemCharacterUndeleteCooldown,
+        /// <summary cref="bool">bool</summary>
         FeatureSystemCharacterUndeleteEnabled,
+        /// <summary cref="bool">bool</summary>
         FeatureSystemWarModeEnabled,
+        /// <summary cref="int">Seconds</summary>
         ForceShutdownThreshold,
+        /// <summary cref="bool">bool</summary>
         GameobjectCheckInvalidPostion,
+        /// <summary cref="int">int</summary>
         GameType,
+        /// <summary cref="int">int</summary>
         GmChat,
+        /// <summary cref="int">Seconds</summary>
         GmFreezeDuration,
+        /// <summary cref="int">int</summary>
         GmLevelInGmList,
+        /// <summary cref="int">int</summary>
         GmLevelInWhoList,
+        /// <summary cref="int">int</summary>
         GmLoginState,
+        /// <summary cref="bool">bool</summary>
         GmLowerSecurity,
+        /// <summary cref="int">int</summary>
         GmVisibleState,
+        /// <summary cref="int">int</summary>
         GmWhisperingTo,
+        /// <summary cref="bool">bool</summary>
         GridUnload,
+        /// <summary cref="int">int</summary>
         GroupVisibility,
+        /// <summary cref="float">float</summary>
         GroupXpDistance,
+        /// <summary cref="int">int</summary>
         GuildBankEventLogCount,
+        /// <summary cref="int">int</summary>
         GuildEventLogCount,
+        /// <summary cref="int">int</summary>
         GuildNewsLogCount,
+        /// <summary cref="int">int</summary>
         GuildResetHour,
+        /// <summary cref="int">Minutes</summary>
         GuildSaveInterval,
+        /// <summary cref="int">int</summary>
         HonorAfterDuel,
+        /// <summary cref="bool">bool</summary>
         InstanceIgnoreLevel,
+        /// <summary cref="bool">bool</summary>
         InstanceIgnoreRaid,
+        /// <summary cref="bool">bool</summary>
         InstancemapLoadGrids,
+        /// <summary >NIY</summary>
         InstanceResetTimeHour,
+        /// <summary cref="int">Milliseconds</summary>
         InstanceUnloadDelay,
+        /// <summary cref="bool">bool</summary>
         InstancesResetAnnounce,
         InstantLogout,
+        /// <summary cref="bool">bool</summary>
         InstantTaxi,
+        /// <summary cref="int">Milliseconds</summary>
         IntervalChangeweather,
+        /// <summary cref="Seconds">Milliseconds</summary>
         IntervalDisconnectTolerance,
-        IntervalGridclean,
-        IntervalMapupdate,
+        /// <summary cref="int">Milliseconds</summary>
+        IntervalGridClean,
+        /// <summary cref="int">Milliseconds</summary>
+        IntervalMapUpdate,
+        /// <summary cref="int">Milliseconds</summary>
         IntervalSave,
+        /// <summary cref="bool">bool</summary>
         IpBasedActionLogging,
+        /// <summary cref="int">int</summary>
         LfgOptionsmask,
+        /// <summary cref="float">float (yards)</summary>
         ListenRangeSay,
+        /// <summary cref="float">float (yards)</summary>
         ListenRangeTextemote,
+        /// <summary cref="float">float (yards)</summary>
         ListenRangeYell,
+        /// <summary cref="int">Minutes</summary>
         LogdbClearinterval,
+        /// <summary cref="int">Seconds</summary>
         LogdbCleartime,
+        /// <summary cref="int">Seconds</summary>
         MailDeliveryDelay,
+        /// <summary cref="int">int</summary>
         MailLevelReq,
         MaxInstancesPerHour,
+        /// <summary cref="int">int</summary>
         MaxOverspeedPings,
+        /// <summary cref="int">int</summary>
         MaxPlayerLevel,
+        /// <summary cref="int">int</summary>
         MaxPrimaryTradeSkill,
+        /// <summary cref="int">int</summary>
         MaxRecruitAFriendBonusPlayerLevel,
+        /// <summary cref="int">int</summary>
         MaxRecruitAFriendBonusPlayerLevelDifference,
+        /// <summary cref="float">float</summary>
         MaxRecruitAFriendDistance,
+        /// <summary cref="int">int</summary>
         MaxResultsLookupCommands,
+        /// <summary cref="int">int</summary>
         MaxWho,
+        /// <summary cref="int">int</summary>
         MinCharterName,
+        /// <summary cref="int">int</summary>
         MinCreatureScaledXpRatio,
+        /// <summary cref="int">int</summary>
         MinDiscoveredScaledXpRatio,
+        /// <summary cref="int">int</summary>
         MinDualspecLevel,
+        /// <summary cref="int">int</summary>
         MinLevelStatSave,
+        /// <summary cref="int">int</summary>
         MinPetName,
+        /// <summary cref="int">int</summary>
         MinPetitionSigns,
+        /// <summary cref="int">int</summary>
         MinPlayerName,
+        /// <summary cref="int">int</summary>
         MinQuestScaledXpRatio,
+        /// <summary cref="int">int</summary>
         NoGrayAggroAbove,
+        /// <summary cref="int">int</summary>
         NoGrayAggroBelow,
+        /// <summary cref="bool">bool</summary>
         NoResetTalentCost,
+        /// <summary cref="int">int</summary>
         Numthreads,
+        /// <summary cref="bool">bool</summary>
         OffhandCheckAtSpellUnlearn,
+        /// <summary cref="int">Seconds</summary>
         PacketSpoofBanduration,
+        /// <summary cref="int">int</summary>
         PacketSpoofBanmode,
+        /// <summary cref="int">int</summary>
         PacketSpoofPolicy,
+        /// <summary cref="int">int</summary>
         PartyLevelReq,
+        /// <summary cref="bool">bool</summary>
         PdumpNoOverwrite,
+        /// <summary cref="bool">bool</summary>
         PdumpNoPaths,
+        /// <summary cref="int">int</summary>
         PersistentCharacterCleanFlags,
         PlayerAllowCommands,
+        /// <summary cref="int">int</summary>
         PortInstance,
+        /// <summary cref="int">int</summary>
         PortWorld,
+        /// <summary cref="int">Days</summary>
         PreserveCustomChannelDuration,
+        /// <summary cref="int">Minutes</summary>
         PreserveCustomChannelInterval,
+        /// <summary cref="bool">bool</summary>
         PreserveCustomChannels,
+        /// <summary cref="bool">bool</summary>
         PreventRenameCustomization,
+        /// <summary cref="int">int</summary>
         PvpTokenCount,
+        /// <summary cref="bool">bool</summary>
         PvpTokenEnable,
+        /// <summary cref="int">int</summary>
         PvpTokenId,
+        /// <summary cref="int">int</summary>
         PvpTokenMapType,
+        /// <summary cref="bool">bool</summary>
         QuestEnableQuestTracker,
+        /// <summary cref="int">int</summary>
         QuestHighLevelHideDiff,
+        /// <summary cref="bool">bool</summary>
         QuestIgnoreAutoAccept,
+        /// <summary cref="bool">bool</summary>
         QuestIgnoreAutoComplete,
+        /// <summary cref="bool">bool</summary>
         QuestIgnoreRaid,
+        /// <summary cref="int">int</summary>
         QuestLowLevelHideDiff,
+        /// <summary cref="int">int</summary>
         RandomBgResetHour,
+        /// <summary cref="float">float</summary>
         RateAuctionCut,
+        /// <summary cref="float">float</summary>
         RateAuctionDeposit,
+        /// <summary cref="float">float</summary>
         RateAuctionTime,
+        /// <summary cref="float">float</summary>
         RateCorpseDecayLooted,
+        /// <summary cref="float">float</summary>
         RateCreatureAggro,
+        /// <summary cref="float">float</summary>
         RateCreatureDamageElite,
+        /// <summary cref="float">float</summary>
         RateCreatureDamageMinusmob,
+        /// <summary cref="float">float</summary>
         RateCreatureDamageNormal,
+        /// <summary cref="float">float</summary>
         RateCreatureDamageObsolete,
+        /// <summary cref="float">float</summary>
         RateCreatureDamageRare,
+        /// <summary cref="float">float</summary>
         RateCreatureDamageRareelite,
+        /// <summary cref="float">float</summary>
         RateCreatureDamageTrivial,
+        /// <summary cref="float">float</summary>
         RateCreatureHpElite,
+        /// <summary cref="float">float</summary>
         RateCreatureHpMinusmob,
+        /// <summary cref="float">float</summary>
         RateCreatureHpNormal,
+        /// <summary cref="float">float</summary>
         RateCreatureHpObsolete,
+        /// <summary cref="float">float</summary>
         RateCreatureHpRare,
+        /// <summary cref="float">float</summary>
         RateCreatureHpRareelite,
+        /// <summary cref="float">float</summary>
         RateCreatureHpTrivial,
+        /// <summary cref="float">float</summary>
         RateCreatureSpelldamageElite,
+        /// <summary cref="float">float</summary>
         RateCreatureSpelldamageMinusmob,
+        /// <summary cref="float">float</summary>
         RateCreatureSpelldamageNormal,
+        /// <summary cref="float">float</summary>
         RateCreatureSpelldamageObsolete,
+        /// <summary cref="float">float</summary>
         RateCreatureSpelldamageRare,
+        /// <summary cref="float">float</summary>
         RateCreatureSpelldamageRareelite,
+        /// <summary cref="float">float</summary>
         RateCreatureSpelldamageTrivial,
+        /// <summary cref="float">float</summary>
         RateDamageFall,
+        /// <summary cref="float">float</summary>
         RateDropItemArtifact,
+        /// <summary cref="float">float</summary>
         RateDropItemEpic,
+        /// <summary cref="float">float</summary>
         RateDropItemLegendary,
+        /// <summary cref="float">float</summary>
         RateDropItemNormal,
+        /// <summary cref="float">float</summary>
         RateDropItemPoor,
+        /// <summary cref="float">float</summary>
         RateDropItemRare,
+        /// <summary cref="float">float</summary>
         RateDropItemReferenced,
+        /// <summary cref="float">float</summary>
         RateDropItemReferencedAmount,
+        /// <summary cref="float">float</summary>
         RateDropItemUncommon,
+        /// <summary cref="float">float</summary>
         RateDropMoney,
+        /// <summary cref="float">float</summary>
         RateDurabilityLossAbsorb,
+        /// <summary cref="float">float</summary>
         RateDurabilityLossBlock,
+        /// <summary cref="float">float</summary>
         RateDurabilityLossDamage,
+        /// <summary cref="float">float</summary>
         RateDurabilityLossOnDeath,
+        /// <summary cref="float">float</summary>
         RateDurabilityLossParry,
+        /// <summary cref="float">float</summary>
         RateHealth,
+        /// <summary cref="float">float</summary>
         RateHonor,
+        /// <summary cref="float">float</summary>
         RateInstanceResetTime,
+        /// <summary cref="float">float</summary>
         RateMoneyMaxLevelQuest,
+        /// <summary cref="float">float</summary>
         RateMoneyQuest,
+        /// <summary cref="float">float</summary>
         RateMovespeed,
+        /// <summary cref="float">float</summary>
         RatePowerArcaneCharges,
+        /// <summary cref="float">float</summary>
         RatePowerChi,
+        /// <summary cref="float">float</summary>
         RatePowerComboPointsLoss,
+        /// <summary cref="float">float</summary>
         RatePowerEnergy,
+        /// <summary cref="float">float</summary>
         RatePowerFocus,
+        /// <summary cref="float">float</summary>
         RatePowerFury,
+        /// <summary cref="float">float</summary>
         RatePowerHolyPower,
+        /// <summary cref="float">float</summary>
         RatePowerInsanity,
+        /// <summary cref="float">float</summary>
         RatePowerLunarPower,
+        /// <summary cref="float">float</summary>
         RatePowerMaelstrom,
+        /// <summary cref="float">float</summary>
         RatePowerMana,
+        /// <summary cref="float">float</summary>
         RatePowerPain,
+        /// <summary cref="float">float</summary>
         RatePowerEssence,
+        /// <summary cref="float">float</summary>
         RatePowerRageIncome,
+        /// <summary cref="float">float</summary>
         RatePowerRageLoss,
+        /// <summary cref="float">float</summary>
         RatePowerRunicPowerIncome,
+        /// <summary cref="float">float</summary>
         RatePowerRunicPowerLoss,
+        /// <summary cref="float">float</summary>
         RatePowerSoulShards,
+        /// <summary cref="float">float</summary>
         RateRepaircost,
+        /// <summary cref="float">float</summary>
         RateReputationGain,
+        /// <summary cref="float">float</summary>
         RateReputationLowLevelKill,
+        /// <summary cref="float">float</summary>
         RateReputationLowLevelQuest,
+        /// <summary cref="float">float</summary>
         RateReputationRecruitAFriendBonus,
+        /// <summary cref="float">float</summary>
         RateRestIngame,
+        /// <summary cref="float">float</summary>
         RateRestOfflineInTavernOrCity,
+        /// <summary cref="float">float</summary>
         RateRestOfflineInWilderness,
+        /// <summary cref="float">float</summary>
         RateSkillDiscovery,
+        /// <summary cref="float">float</summary>
         RateTalent,
+        /// <summary cref="float">float</summary>
         RateXpExplore,
+        /// <summary cref="float">float</summary>
         RateXpGuildModifier,
+        /// <summary cref="float">float</summary>
         RateXpKill,
+        /// <summary cref="float">float</summary>
         RateXpBgKill,
+        /// <summary cref="float">float</summary>
         RateXpBoost,
+        /// <summary cref="float">float</summary>
         RateXpQuest,
+        /// <summary cref="int">int</summary>
         RealmZone,
+        /// <summary cref="bool">bool</summary>
         RegenHpCannotReachTargetInRaid,
+        /// <summary cref="bool">bool</summary>
         ResetDuelCooldowns,
+        /// <summary cref="bool">bool</summary>
         ResetDuelHealthMana,
+        /// <summary cref="int">int (DayOfWeek)</summary>
         ResetScheduleWeekDay,
+        /// <summary cref="int">int</summary>
         ResetScheduleHour,
+        /// <summary cref="bool">bool</summary>
         RespawnDynamicEscortNpc,
+        /// <summary cref="int">Seconds</summary>
         RespawnDynamicMinimumCreature,
+        /// <summary cref="int">Seconds</summary>
         RespawnDynamicMinimumGameObject,
+        /// <summary cref="int">int</summary>
         RespawnDynamicMode,
+        /// <summary cref="float">float</summary>
         RespawnDynamicRateCreature,
+        /// <summary cref="float">float</summary>
         RespawnDynamicRateGameobject,
+        /// <summary cref="long">long</summary>
         RespawnGuidAlertLevel,
+        /// <summary cref="long">long</summary>
         RespawnGuidWarnLevel,
+        /// <summary cref="int">Seconds</summary>
         RespawnGuidWarningFrequency,
+        /// <summary cref="int">Milliseconds</summary>
         RespawnMinCheckIntervalMs,
+        /// <summary cref="int">int</summary>
         RespawnRestartQuietTime,
+        /// <summary cref="bool">bool</summary>
         RestrictedLfgChannel,
+        /// <summary cref="int">Microseconds</summary>
         SessionAddDelay,
+        /// <summary cref="bool">bool</summary>
         ShowBanInWorld,
+        /// <summary cref="bool">bool</summary>
         ShowKickInWorld,
+        /// <summary cref="bool">bool</summary>
         ShowMuteInWorld,
+        /// <summary cref="float">float</summary>
         SightMonster,
+        /// <summary cref="int">int (%)</summary>
         SkillChanceGreen,
+        /// <summary cref="int">int (%)</summary>
         SkillChanceGrey,
+        /// <summary cref="int">int</summary>
         SkillChanceMiningSteps,
+        /// <summary cref="int">int (%)</summary>
         SkillChanceOrange,
+        /// <summary cref="int">int</summary>
         SkillChanceSkinningSteps,
+        /// <summary cref="int">int (%)</summary>
         SkillChanceYellow,
+        /// <summary cref="int">int</summary>
         SkillGainCrafting,
+        /// <summary cref="int">int</summary>
         SkillGainDefense,
+        /// <summary cref="int">int</summary>
         SkillGainGathering,
+        /// <summary cref="int">int</summary>
         SkillGainWeapon,
+        /// <summary cref="bool">bool</summary>
         SkillMilling,
+        /// <summary cref="bool">bool</summary>
         SkillProspecting,
+        /// <summary cref="int">int</summary>
         SkipCinematics,
+        /// <summary cref="int">Milliseconds</summary>
         SocketTimeoutTime,
+        /// <summary cref="int">Milliseconds</summary>
         SocketTimeoutTimeActive,
+        /// <summary cref="int">int</summary>
         StartAlliedRaceLevel,
+        /// <summary cref="bool">bool</summary>
         StartAllExplored,
+        /// <summary cref="bool">bool</summary>
         StartAllRep,
+        /// <summary cref="bool">bool</summary>
         StartAllSpells,
+        /// <summary cref="int">int</summary>
         StartDeathKnightPlayerLevel,
+        /// <summary cref="int">int</summary>
         StartDemonHunterPlayerLevel,
+        /// <summary cref="int">int</summary>
         StartEvokerPlayerLevel,
+        /// <summary cref="int">int</summary>
         StartGmLevel,
+        /// <summary cref="int">int</summary>
         StartPlayerLevel,
+        /// <summary cref="int">int</summary>
         StartPlayerMoney,
+        /// <summary cref="float">float</summary>
         StatsLimitsBlock,
+        /// <summary cref="float">float</summary>
         StatsLimitsCrit,
+        /// <summary cref="float">float</summary>
         StatsLimitsDodge,
+        /// <summary cref="bool">bool</summary>
         StatsLimitsEnable,
+        /// <summary cref="float">float</summary>
         StatsLimitsParry,
+        /// <summary cref="bool">bool</summary>
         StatsSaveOnlyOnLogout,
+        /// <summary cref="int">int</summary>
         StrictCharterNames,
+        /// <summary cref="int">int</summary>
         StrictPetNames,
+        /// <summary cref="int">int</summary>
         StrictPlayerNames,
+        /// <summary cref="bool">bool</summary>
         SupportBugsEnabled,
+        /// <summary cref="bool">bool</summary>
         SupportComplaintsEnabled,
+        /// <summary cref="bool">bool</summary>
         SupportEnabled,
+        /// <summary cref="bool">bool</summary>
         SupportSuggestionsEnabled,
+        /// <summary cref="bool">bool</summary>
         SupportTicketsEnabled,
+        /// <summary cref="int">int</summary>
         TalentsInspecting,
+        /// <summary cref="float">float (yards)</summary>
         ThreatRadius,
-        TolbaradBattleTime,
-        TolbaradBonusTime,
-        TolbaradEnable,
-        TolbaradNoBattleTime,
-        TolbaradPlrMax,
-        TolbaradPlrMin,
-        TolbaradPlrMinLvl,
-        TolbaradRestartAfterCrash,
+        /// <summary cref="int">Minutes</summary>
+        TimeZoneOffset,
+        /// <summary cref="int">int</summary>
         TradeLevelReq,
+        /// <summary cref="int">Minutes</summary>
         UptimeUpdate,
+        /// <summary cref="bool">bool</summary>
         VmapIndoorCheck,
+        /// <summary cref="int">Seconds</summary>
         WardenClientResponseDelay,
+        /// <summary cref="int">Seconds</summary>
         WardenClientCheckHoldoff,
+        /// <summary cref="int">int</summary>
         WardenClientFailAction,
+        /// <summary cref="int">Seconds</summary>
         WardenClientBanDuration,
+        /// <summary cref="bool">bool</summary>
         WardenEnabled,
+        /// <summary cref="int">int</summary>
         WardenNumInjectChecks,
+        /// <summary cref="int">int</summary>
         WardenNumLuaChecks,
+        /// <summary cref="int">int</summary>
         WardenNumClientModChecks,
+        /// <summary cref="bool">bool</summary>
         Weather,
+        /// <summary cref="int">int (DayOfWeek)</summary>
         WeeklyQuestResetTimeWDay,
+        /// <summary cref="int">Minutes</summary>
         WintergraspBattletime,
+        /// <summary cref="bool">bool</summary>
         WintergraspEnable,
+        /// <summary cref="int">Minutes</summary>
         WintergraspNobattletime,
+        /// <summary cref="int">int</summary>
         WintergraspPlrMax,
+        /// <summary cref="int">int</summary>
         WintergraspPlrMin,
+        /// <summary cref="int">int</summary>
         WintergraspPlrMinLvl,
+        /// <summary cref="int">Minutes</summary>
         WintergraspRestartAfterCrash,
+        /// <summary cref="int">int</summary>
         WorldBossLevelDiff,
+        /// <summary cref="uint">uint</summary>
         XpBoostDaymask,
         Max
     }
