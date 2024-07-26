@@ -355,7 +355,13 @@ namespace Game
 
         public override bool Equals(object obj)
         {
-            return Equals(obj);
+            if (obj == null)
+                return false;
+
+            if (obj is WorldStateValue other)
+                return Equals(other);
+
+            throw new ArgumentException();
         }
 
         public bool Equals(WorldStateValue another)
