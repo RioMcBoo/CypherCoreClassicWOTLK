@@ -428,9 +428,8 @@ namespace Game.Entities
             m_achievementSys.UpdateTimedCriteria(diff);
 
             DoMeleeAttackIfReady();
-            
-            if (HasPlayerFlag(PlayerFlags.Resting))
-                _restMgr.Update(diff);
+
+            _restMgr.Update();
 
             if (m_weaponChangeTimer > 0)
             {

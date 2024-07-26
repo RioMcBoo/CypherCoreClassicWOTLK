@@ -8,12 +8,17 @@ namespace Game.Entities
         ServerTime _restTime;
         int _innAreaTriggerId;
         float[] _restBonus = new float[(int)RestTypes.Max];
+        float _XpBonusDeposit;
         RestFlag _restFlagMask;
 
         public RestMgr(Player player)
         {
             _player = player;
         }
+
+        int GetNextLevelXpBonus() => _player.m_activePlayerData.NextLevelXP;
+        int GetNextLevelHonorBonus() => _player.m_activePlayerData.HonorNextLevel;
+        float GetRestBonusMax(int nextLevelBonus) => nextLevelBonus * 1.5f / 2;
 
         public void SetRestBonus(RestTypes restType, float restBonus)
         {
@@ -27,7 +32,7 @@ namespace Game.Entities
                     if (_player.GetLevel() >= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                         restBonus = 0;
 
-                    next_level_xp = _player.m_activePlayerData.NextLevelXP;
+                    next_level_xp = GetNextLevelXpBonus();
                     affectedByRaF = true;
                     break;
                 case RestTypes.Honor:
@@ -35,13 +40,13 @@ namespace Game.Entities
                     if (_player.IsMaxHonorLevel())
                         restBonus = 0;
 
-                    next_level_xp = _player.m_activePlayerData.HonorNextLevel;
+                    next_level_xp = GetNextLevelHonorBonus();
                     break;
                 default:
                     return;
             }
 
-            float rest_bonus_max = next_level_xp * 1.5f / 2;
+            float rest_bonus_max = GetRestBonusMax(next_level_xp);
 
             if (restBonus < 0)
                 restBonus = 0;
@@ -69,15 +74,14 @@ namespace Game.Entities
             // update data for client
             _player.SetRestThreshold(restType, (int)_restBonus[(int)restType]);
             _player.SetRestState(restType, newRestState);
+
+            // XpBonusDeposit needs to be reset after it taken into account 
+            if (restType == RestTypes.XP)
+                _XpBonusDeposit = 0;
         }
 
         public void AddRestBonus(RestTypes restType, float restBonus)
         {
-            // Don't add extra rest bonus to max level players. Note: Might need different condition
-            // in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
-            if (_player.GetLevel() >= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
-                restBonus = 0;
-
             float totalRestBonus = GetRestBonus(restType) + restBonus;
             SetRestBonus(restType, totalRestBonus);
         }
@@ -104,6 +108,7 @@ namespace Game.Entities
 
             if (oldRestMask != 0 && _restFlagMask == 0) // only remove flag/time on the last rest state remove
             {
+                Update(true); // update freezed timer
                 _restTime = ServerTime.Zero;
                 _player.RemovePlayerFlag(PlayerFlags.Resting);
             }
@@ -130,17 +135,34 @@ namespace Game.Entities
             return rested_bonus;
         }
 
-        public void Update(uint now)
+        public void Update(bool skipTimer = false, bool skipClientUpdate = false)
         {
-            if (RandomHelper.randChance(3) && _restTime > 0) // freeze update
-            {
-                long timeDiff = now - _restTime;
-                if (timeDiff >= 10)
-                {
-                    _restTime = now;
+            if (_restTime == ServerTime.Zero)
+                return;
 
-                    float bubble = 0.125f * WorldConfig.Values[WorldCfg.RateRestIngame].Float;
-                    AddRestBonus(RestTypes.XP, timeDiff * CalcExtraPerSec(RestTypes.XP, bubble));
+            if (GetNextLevelXpBonus() == 0)
+                return;
+
+            if (LoopTime.ServerTime == _restTime)
+                return;
+
+            Seconds timeDiff = (Seconds)(LoopTime.ServerTime - _restTime);
+
+            if (timeDiff > (Minutes)1 || skipTimer) // freeze update
+            {
+                float bubble = 0.125f * WorldConfig.Values[WorldCfg.RateRestIngame].Float;
+                float bonus = timeDiff * CalcExtraPerSec(RestTypes.XP, bubble);
+
+                _XpBonusDeposit += bonus;
+
+                _restTime = LoopTime.ServerTime;
+
+                if (skipClientUpdate)
+                    return;
+
+                if (_XpBonusDeposit >= GetNextLevelXpBonus() / 1000) // 0.1% from total bar
+                {
+                    SetRestBonus(RestTypes.XP, _restBonus[(int)RestTypes.XP] + _XpBonusDeposit);
                 }
             }
         }
@@ -165,7 +187,18 @@ namespace Game.Entities
             }
         }
 
-        public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
+        public float GetRestBonus(RestTypes restType)
+        {
+            float totalBonus = _restBonus[(int)restType];
+            if (restType == RestTypes.XP)
+            {
+                Update(true, true);
+                totalBonus += _XpBonusDeposit;
+            }
+
+            return totalBonus; 
+        }
+
         public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
         public int GetInnTriggerId() { return _innAreaTriggerId; }
     }
