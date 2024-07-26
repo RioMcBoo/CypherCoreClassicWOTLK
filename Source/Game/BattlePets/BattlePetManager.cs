@@ -245,7 +245,7 @@ namespace Game.BattlePets
                         pet.PacketInfo.Quality = petsResult.Read<byte>(7);
                         pet.PacketInfo.Flags = petsResult.Read<ushort>(8);
                         pet.PacketInfo.Name = petsResult.Read<string>(9);
-                        pet.NameTimestamp = petsResult.Read<long>(10);
+                        pet.NameTimestamp = (ServerTime)(UnixTime64)petsResult.Read<long>(10);
                         pet.PacketInfo.CreatureID = speciesEntry.CreatureID;
 
                         if (!petsResult.IsNull(12))
@@ -308,7 +308,7 @@ namespace Game.BattlePets
                         stmt.SetUInt8(8, pair.Value.PacketInfo.Quality);
                         stmt.SetUInt16(9, pair.Value.PacketInfo.Flags);
                         stmt.SetString(10, pair.Value.PacketInfo.Name);
-                        stmt.SetInt64(11, pair.Value.NameTimestamp);
+                        stmt.SetInt64(11, (UnixTime64)pair.Value.NameTimestamp);
                         if (pair.Value.PacketInfo.OwnerInfo.HasValue)
                         {
                             stmt.SetInt64(12, pair.Value.PacketInfo.OwnerInfo.Value.Guid.GetCounter());
@@ -344,7 +344,7 @@ namespace Game.BattlePets
                         stmt.SetUInt8(3, pair.Value.PacketInfo.Quality);
                         stmt.SetUInt16(4, pair.Value.PacketInfo.Flags);
                         stmt.SetString(5, pair.Value.PacketInfo.Name);
-                        stmt.SetInt64(6, pair.Value.NameTimestamp);
+                        stmt.SetInt64(6, (UnixTime64)pair.Value.NameTimestamp);
                         stmt.SetInt32(7, _owner.GetBattlenetAccountId());
                         stmt.SetInt64(8, pair.Key);
                         trans.Append(stmt);
@@ -479,7 +479,7 @@ namespace Game.BattlePets
                 return;
 
             pet.PacketInfo.Name = name;
-            pet.NameTimestamp = GameTime.GetGameTime();
+            pet.NameTimestamp = LoopTime.ServerTime;
 
             pet.DeclinedName = new DeclinedName();
             if (declinedName != null)
@@ -919,7 +919,7 @@ namespace Game.BattlePets
         }
 
         public BattlePetStruct PacketInfo;
-        public long NameTimestamp;
+        public ServerTime NameTimestamp;
         public DeclinedName DeclinedName;
         public BattlePetSaveInfo SaveInfo;
     }

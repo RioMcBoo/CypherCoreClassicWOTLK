@@ -210,14 +210,16 @@ namespace Game.DataStorage
         public byte LegacySlotIndex;
         private sbyte _triggerType;
         public short Charges;
-        public int CoolDownMSec;
-        public int CategoryCoolDownMSec;
+        private int _coolDownMSec;
+        private int _categoryCoolDownMSec;
         private ushort _spellCategoryID;
         public int SpellID;
         public ushort ChrSpecializationID;
         public int ParentItemID;
 
         #region Properties
+        public Milliseconds CoolDown => (Milliseconds)_coolDownMSec;
+        public Milliseconds CategoryCoolDown => (Milliseconds)_categoryCoolDownMSec;
         public ItemSpelltriggerType TriggerType => (ItemSpelltriggerType)_triggerType;
         public SpellCategories SpellCategoryID => (SpellCategories)_spellCategoryID;
         #endregion
@@ -428,7 +430,7 @@ namespace Game.DataStorage
         public LocalizedString Display1;
         public LocalizedString Display;
         public float DmgVariance;
-        public uint DurationInInventory;
+        private int _durationInInventory;
         public float QualityModifier;
         public uint BagFamily;
         public int StartQuestID;
@@ -462,7 +464,7 @@ namespace Game.DataStorage
         public ushort ItemSet;
         public ushort LockID;
         public ushort PageID;
-        public ushort ItemDelay;
+        private ushort _itemDelay;
         public ushort MinFactionID;
         public ushort RequiredSkillRank;
         public ushort RequiredSkill;
@@ -504,6 +506,8 @@ namespace Game.DataStorage
         public ItemQuality OverallQualityID => (ItemQuality)_overallQualityID;
         public Expansion ExpansionID => (Expansion)_expansionID;
         public ReputationRank MinReputation => (ReputationRank)_minReputation;
+        public Milliseconds ItemDelay => (Milliseconds)_itemDelay;
+        public Seconds DurationInInventory => (Seconds)_durationInInventory;
         #endregion
     }
 

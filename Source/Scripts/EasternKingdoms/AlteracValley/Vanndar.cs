@@ -37,27 +37,27 @@ namespace Scripts.EasternKingdoms.AlteracValley.Vanndar
 
         public override void JustEngagedWith(Unit who)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule((Seconds)3, task =>
             {
                 DoCastVictim(SpellIds.Avatar);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)15, (Seconds)20);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule((Seconds)4, task =>
             {
                 DoCastVictim(SpellIds.Thunderclap);
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)5, (Seconds)15);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule((Seconds)6, task =>
             {
                 DoCastVictim(SpellIds.Stormbolt);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
+                task.Repeat((Seconds)10, (Seconds)25);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule((Seconds)20, (Seconds)30, task =>
             {
                 Talk(TextIds.YellRandom);
-                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)20, (Seconds)30);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule((Seconds)5, task =>
             {
                 if (me.GetDistance2d(me.GetHomePosition().GetPositionX(), me.GetHomePosition().GetPositionY()) > 50)
                 {
@@ -70,7 +70,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Vanndar
             Talk(TextIds.YellAggro);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

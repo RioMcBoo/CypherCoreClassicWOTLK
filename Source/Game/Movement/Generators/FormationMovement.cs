@@ -11,7 +11,7 @@ namespace Game.Movement
     {
         AbstractFollower _abstractFollower;
 
-        static uint FORMATION_MOVEMENT_INTERVAL = 1200; // sniffed (3 batch update cycles)
+        static readonly Milliseconds FORMATION_MOVEMENT_INTERVAL = (Milliseconds)1200; // sniffed (3 batch update cycles)
         float _range;
         float _angle;
         int _point1;
@@ -48,7 +48,7 @@ namespace Game.Movement
                 return;
             }
 
-            _nextMoveTimer.Reset(0);
+            _nextMoveTimer.Reset(TimeSpan.Zero);
         }
 
         public override void DoReset(Creature owner)
@@ -58,7 +58,7 @@ namespace Game.Movement
             DoInitialize(owner);
         }
 
-        public override bool DoUpdate(Creature owner, uint diff)
+        public override bool DoUpdate(Creature owner, TimeSpan diff)
         {
             Unit target = _abstractFollower.GetTarget();
 
@@ -70,7 +70,7 @@ namespace Game.Movement
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
-                _nextMoveTimer.Reset(0);
+                _nextMoveTimer.Reset(TimeSpan.Zero);
                 _hasPredictedDestination = false;
                 return true;
             }
@@ -81,7 +81,7 @@ namespace Game.Movement
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
-                _nextMoveTimer.Reset(0);
+                _nextMoveTimer.Reset(TimeSpan.Zero);
                 _hasPredictedDestination = false;
                 return true;
             }
@@ -154,7 +154,7 @@ namespace Game.Movement
                 and apply our formation shape based on that destination.
             */
             Position dest = new Position(target.GetPosition());
-            float velocity = 0.0f;
+            Speed velocity = (Speed)0.0f;
 
             // Formation leader is moving. Predict our destination
             if (!target.MoveSpline.Finalized())
@@ -176,7 +176,7 @@ namespace Game.Movement
                 float velocityMod = Math.Min(distance / travelDist, 1.5f);
 
                 // Now we will always stay synch with our leader
-                velocity *= velocityMod;
+                velocity.PerSec *= velocityMod;
                 _hasPredictedDestination = true;
             }
             else

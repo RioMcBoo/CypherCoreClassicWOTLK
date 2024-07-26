@@ -186,15 +186,15 @@ namespace Game.DataStorage
         public bool IsRestoringDungeonState => HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout);
         public bool IsExtendable => !HasFlag(MapDifficultyFlags.DisableLockExtension);
 
-        public uint RaidDuration
+        public Seconds RaidDuration
         {
             get
             {
                 if (ResetInterval == MapDifficultyResetInterval.Daily)
-                    return 86400;
+                    return (Days)1;
                 if (ResetInterval == MapDifficultyResetInterval.Weekly)
-                    return 604800;
-                return 0;
+                    return (Days)7;
+                return Seconds.Zero;
             }
         }
         #endregion

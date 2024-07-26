@@ -50,10 +50,22 @@ public class RandomHelper
     {
         return rand.Next(minValue, maxValue);
     }
-    public static uint URand(dynamic minValue, dynamic maxValue)
+
+    public static long IRand64(long minValue, long maxValue)
     {
-        return (uint)rand.Next(Convert.ToInt32(minValue), Convert.ToInt32(maxValue));
+        return rand.NextInt64(minValue, maxValue);
     }
+
+    public static uint URand(uint minValue, uint maxValue)
+    {
+        return (uint)rand.Next((int)minValue, (int)maxValue);
+    }
+
+    public static TimeSpan TRand(TimeSpan minValue, TimeSpan maxValue)
+    {
+        return new TimeSpan(rand.NextInt64(minValue.Ticks, maxValue.Ticks));
+    }
+
     public static float FRand(float min, float max)
     {
         Cypher.Assert(max >= min);
@@ -100,10 +112,10 @@ public class RandomHelper
 
     public static TimeSpan RandTime(TimeSpan min, TimeSpan max)
     {
-        double diff = max.TotalMilliseconds - min.TotalMilliseconds;
-        Cypher.Assert(diff >= 0);
-        Cypher.Assert(diff <= 0xFFFFFFFF);
-        return min + TimeSpan.FromMilliseconds(URand(0, (uint)diff));
+        TimeSpan diff = max - min;
+        Cypher.Assert(diff >= TimeSpan.Zero);
+        Cypher.Assert(diff <= Milliseconds.MaxValue);
+        return min + TimeSpan.FromTicks(IRand64(0, diff.Ticks));
     }
 }
 

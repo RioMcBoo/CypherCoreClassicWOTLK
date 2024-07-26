@@ -165,7 +165,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(BattlePetID);
             _worldPacket.WriteInt32(CreatureID);
-            _worldPacket.WriteInt64(Timestamp);
+            _worldPacket.WriteInt64((UnixTime64)Timestamp);
 
             _worldPacket.WriteBit(Allow);
 
@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid BattlePetID;
         public int CreatureID;
-        public long Timestamp;
+        public ServerTime Timestamp;
         public bool Allow;
 
         public bool HasDeclined;

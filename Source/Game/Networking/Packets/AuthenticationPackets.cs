@@ -206,7 +206,7 @@ namespace Game.Networking.Packets
             public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region. @todo implement
             public uint TimeSecondsUntilPCKick; // @todo research
             public uint CurrencyID; // this is probably used for the ingame shop. @todo implement
-            public long Time;
+            public UnixTime64 Time;
 
             public GameTime GameTimeInfo;
 

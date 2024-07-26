@@ -33,7 +33,7 @@ namespace Game.Scripting
         //Initialization
         public void Initialize()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             LoadDatabase();
 
@@ -47,7 +47,8 @@ namespace Game.Scripting
             // MapScripts
             Global.MapMgr.AddSC_BuiltInScripts();
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {GetScriptCount()} C# scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {GetScriptCount()} C# scripts in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadScripts()
@@ -191,7 +192,7 @@ namespace Game.Scripting
 
         void LoadScriptSplineChains()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             m_mSplineChainsMap.Clear();
 
@@ -226,9 +227,9 @@ namespace Game.Scripting
                         continue;
                     }
 
-                    uint expectedDuration = resultMeta.Read<uint>(3);
-                    uint msUntilNext = resultMeta.Read<uint>(4);
-                    float velocity = resultMeta.Read<float>(5);
+                    Milliseconds expectedDuration = (Milliseconds)resultMeta.Read<int>(3);
+                    Milliseconds msUntilNext = (Milliseconds)resultMeta.Read<int>(4);
+                    Speed velocity = (Speed)resultMeta.Read<float>(5);
                     chain.Add(new SplineChainLink(expectedDuration, msUntilNext, velocity));
 
                     if (splineId == 0)
@@ -273,7 +274,9 @@ namespace Game.Scripting
                     ++wpCount;
                 } while (resultWP.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain data for {0} chains, consisting of {1} splines with {2} waypoints in {3} ms", chainCount, splineCount, wpCount, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, 
+                    $"Loaded spline chain data for {chainCount} chains, " +
+                    $"consisting of {splineCount} splines with {wpCount} waypoints in {Time.Diff(oldMSTime)} ms.");
             }
         }
 
@@ -436,7 +439,7 @@ namespace Game.Scripting
             ForEach<WorldScript>(p => p.OnShutdownCancel());
         }
 
-        public void OnWorldUpdate(uint diff)
+        public void OnWorldUpdate(TimeSpan diff)
         {
             ForEach<WorldScript>(p => p.OnUpdate(diff));
         }
@@ -545,7 +548,7 @@ namespace Game.Scripting
                 ForEach<BattlegroundMapScript>(p => p.OnPlayerLeave(map.ToBattlegroundMap(), player));
         }
 
-        public void OnMapUpdate(Map map, uint diff)
+        public void OnMapUpdate(Map map, TimeSpan diff)
         {
             Cypher.Assert(map != null);
             var record = map.GetEntry();
@@ -667,7 +670,7 @@ namespace Game.Scripting
             RunScript<WeatherScript>(p => p.OnChange(weather, state, grade), weather.GetScriptId());
         }
 
-        public void OnWeatherUpdate(Weather weather, uint diff)
+        public void OnWeatherUpdate(Weather weather, TimeSpan diff)
         {
             Cypher.Assert(weather != null);
             RunScript<WeatherScript>(p => p.OnUpdate(weather, diff), weather.GetScriptId());
@@ -764,7 +767,7 @@ namespace Game.Scripting
         }
 
         // DynamicObjectScript
-        public void OnDynamicObjectUpdate(DynamicObject dynobj, uint diff)
+        public void OnDynamicObjectUpdate(DynamicObject dynobj, TimeSpan diff)
         {
             Cypher.Assert(dynobj != null);
 
@@ -796,7 +799,7 @@ namespace Game.Scripting
             RunScript<TransportScript>(p => p.OnRemovePassenger(transport, player), transport.GetScriptId());
         }
         
-        public void OnTransportUpdate(Transport transport, uint diff)
+        public void OnTransportUpdate(Transport transport, TimeSpan diff)
         {
             Cypher.Assert(transport != null);
 
@@ -1179,7 +1182,7 @@ namespace Game.Scripting
             RunScript<ConversationScript>(script => script.OnConversationLineStarted(conversation, lineId, sender), conversation.GetScriptId());
         }
 
-        public void OnConversationUpdate(Conversation conversation, uint diff)
+        public void OnConversationUpdate(Conversation conversation, TimeSpan diff)
         {
             Cypher.Assert(conversation != null);
 

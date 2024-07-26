@@ -48,10 +48,10 @@ namespace Game.Entities
             if (!GetSession().HasPermission(RBACPermissions.CanFilterWhispers))
                 SetAcceptWhispers(true);
 
-            m_regenInterruptTimestamp = GameTime.Now();
+            m_regenInterruptTimestamp = LoopTime.ServerTime;
 
             m_zoneUpdateId = -1;
-            m_nextSave = (uint)WorldConfig.Values[WorldCfg.IntervalSave].Int32;
+            m_nextSave = WorldConfig.Values[WorldCfg.IntervalSave].Milliseconds;
             m_customizationsChanged = false;
 
             SetGroupInvite(null);
@@ -61,9 +61,9 @@ namespace Game.Entities
             m_currentBuybackSlot = InventorySlots.BuyBackStart;
 
             for (byte i = 0; i < (int)MirrorTimerType.Max; i++)
-                m_MirrorTimer[i] = -1;
+                m_MirrorTimer[i] = new(-1);
 
-            m_logintime = GameTime.GetGameTime();
+            m_logintime = LoopTime.ServerTime;
             m_Last_tick = m_logintime;
 
             m_dungeonDifficulty = Difficulty.Normal;
@@ -88,7 +88,7 @@ namespace Game.Entities
             }
 
             // Honor System
-            m_lastHonorUpdateTime = GameTime.GetGameTime();
+            m_lastHonorUpdateTime = LoopTime.RealmTime;
 
             m_unitMovedByMe = this;
             m_playerMovingMe = this;
@@ -113,7 +113,7 @@ namespace Game.Entities
 
             _restMgr = new RestMgr(this);
 
-            m_groupUpdateTimer = new(5000);
+            m_groupUpdateTimer = new((Seconds)5);
         }
 
         public override void Dispose()
@@ -190,7 +190,7 @@ namespace Game.Entities
 
             var position = createInfo.UseNPE && info.createPositionNPE.HasValue ? info.createPositionNPE.Value : info.createPosition;
 
-            m_createTime = GameTime.GetGameTime();
+            m_createTime = LoopTime.ServerTime;
             m_createMode = createInfo.UseNPE && info.createPositionNPE.HasValue ? PlayerCreateMode.NPE : PlayerCreateMode.Normal;
 
             Relocate(position.Loc);
@@ -258,9 +258,9 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), WorldConfig.Values[WorldCfg.StartPlayerMoney].Int32);
 
             // Played time
-            m_Last_tick = GameTime.GetGameTime();
-            m_PlayedTimeTotal = 0;
-            m_PlayedTimeLevel = 0;
+            m_Last_tick = LoopTime.ServerTime;
+            m_PlayedTimeTotal = Seconds.Zero;
+            m_PlayedTimeLevel = Seconds.Zero;
 
             // base stats and related field values
             InitStatsForLevel();
@@ -333,26 +333,26 @@ namespace Game.Entities
             return true;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             if (!IsInWorld)
                 return;
 
             // undelivered mail
-            if (m_nextMailDelivereTime != 0 && m_nextMailDelivereTime <= GameTime.GetGameTime())
+            if (m_nextMailDelivereTime != ServerTime.Zero && m_nextMailDelivereTime <= LoopTime.ServerTime)
             {
                 SendNewMail();
                 ++unReadMails;
 
                 // It will be recalculate at mailbox open (for unReadMails important non-0 until mailbox open, it also will be recalculated)
-                m_nextMailDelivereTime = 0;
+                m_nextMailDelivereTime = ServerTime.Zero;
             }
 
             // Update cinematic location, if 500ms have passed and we're doing a cinematic now.
             _cinematicMgr.m_cinematicDiff += diff;
-            if (_cinematicMgr.m_cinematicCamera != null && _cinematicMgr.m_activeCinematic != null && Time.GetMSTimeDiffToNow(_cinematicMgr.m_lastCinematicCheck) > 500)
+            if (_cinematicMgr.m_cinematicCamera != null && _cinematicMgr.m_activeCinematic != null && Time.Diff(_cinematicMgr.m_lastCinematicCheck) > (Milliseconds)500)
             {
-                _cinematicMgr.m_lastCinematicCheck = GameTime.GetGameTimeMS();
+                _cinematicMgr.m_lastCinematicCheck = LoopTime.ServerTime;
                 _cinematicMgr.UpdateCinematicLocation(diff);
             }
 
@@ -365,7 +365,7 @@ namespace Game.Entities
             if (CanExecutePendingSpellCastRequest())
                 ExecutePendingSpellCastRequest();
 
-            long now = GameTime.GetGameTime();
+            ServerTime now = LoopTime.ServerTime;
 
             UpdatePvPFlag(now);
 
@@ -384,23 +384,24 @@ namespace Game.Entities
                 {
                     if (!aura.IsPermanent())
                         aura.SetDuration(aura.GetSpellInfo().GetMaxDuration());
-            }
+                }
             }
 
             AIUpdateTick(diff);
 
             // Update items that have just a limited lifetime
+            TimeSpan elapsed = now - m_Last_tick;
             if (now > m_Last_tick)
-                UpdateItemDuration((uint)(now - m_Last_tick));
+                UpdateItemDuration((Seconds)elapsed);
 
             // check every second
-            if (now > m_Last_tick + 1)
+            if (now > m_Last_tick + (Seconds)1)
                 UpdateSoulboundTradeItems();
 
             // If mute expired, remove it from the DB
-            if (GetSession().m_muteTime != 0 && GetSession().m_muteTime < now)
+            if (GetSession().m_mutedUntilTime != ServerTime.Zero && GetSession().m_mutedUntilTime < now)
             {
-                GetSession().m_muteTime = 0;
+                GetSession().m_mutedUntilTime = ServerTime.Zero;
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
                 stmt.SetInt32(0, 0); // Set the mute time to 0
                 stmt.SetString(1, "");
@@ -424,17 +425,17 @@ namespace Game.Entities
                 }
             }
 
-            m_achievementSys.UpdateTimedCriteria(TimeSpan.FromMilliseconds(diff));
+            m_achievementSys.UpdateTimedCriteria(diff);
 
             DoMeleeAttackIfReady();
-
+            
             if (HasPlayerFlag(PlayerFlags.Resting))
                 _restMgr.Update(diff);
 
             if (m_weaponChangeTimer > 0)
             {
                 if (diff >= m_weaponChangeTimer)
-                    m_weaponChangeTimer = 0;
+                    m_weaponChangeTimer = Milliseconds.Zero;
                 else
                     m_weaponChangeTimer -= diff;
             }
@@ -463,7 +464,7 @@ namespace Game.Entities
                         if (m_areaUpdateId != newarea)
                             UpdateArea(newarea);
 
-                        m_zoneUpdateTimer = 1 * Time.InMilliseconds;
+                        m_zoneUpdateTimer = (Seconds)1;
                     }
                 }
                 else
@@ -493,12 +494,11 @@ namespace Game.Entities
             }
 
             //Handle Water/drowning
-            HandleDrowning(diff);
+            HandleDrowning((Milliseconds)diff);
 
             // Played time
             if (now > m_Last_tick)
-            {
-                uint elapsed = (uint)(now - m_Last_tick);
+            {                
                 m_PlayedTimeTotal += elapsed;
                 m_PlayedTimeLevel += elapsed;
                 m_Last_tick = now;
@@ -507,7 +507,7 @@ namespace Game.Entities
             if (GetDrunkValue() != 0)
             {
                 m_drunkTimer += diff;
-                if (m_drunkTimer > 9 * Time.InMilliseconds)
+                if (m_drunkTimer > (Seconds)9)
                     HandleSobering();
             }
             if (HasPendingBind())
@@ -517,7 +517,7 @@ namespace Game.Entities
                     // Player left the instance
                     if (_pendingBindId == GetInstanceId())
                         ConfirmPendingBind();
-                    SetPendingBind(0, 0);
+                    SetPendingBind(0, Milliseconds.Zero);
                 }
                 else
                     _pendingBindTimer -= diff;
@@ -527,7 +527,7 @@ namespace Game.Entities
             {
                 if (diff >= m_deathTimer)
                 {
-                    m_deathTimer = 0;
+                    m_deathTimer = Milliseconds.Zero;
                     BuildPlayerRepop();
                     RepopAtGraveyard();
                 }
@@ -535,8 +535,8 @@ namespace Game.Entities
                     m_deathTimer -= diff;
             }
 
-            UpdateEnchantTime(diff);
-            UpdateHomebindTime(diff);
+            UpdateEnchantTime((Milliseconds)diff);
+            UpdateHomebindTime((Milliseconds)diff);
 
             if (!_instanceResetTimes.Empty())
             {
@@ -552,7 +552,7 @@ namespace Game.Entities
             if (m_groupUpdateTimer.Passed())
             {
                 SendUpdateToOutOfRangeGroupMembers();
-                m_groupUpdateTimer.Reset(5000);
+                m_groupUpdateTimer.Reset((Seconds)5);
             }
 
             Pet pet = GetPet();
@@ -563,7 +563,7 @@ namespace Game.Entities
             {
                 if (m_hostileReferenceCheckTimer <= diff)
                 {
-                    m_hostileReferenceCheckTimer = 15 * Time.InMilliseconds;
+                    m_hostileReferenceCheckTimer = (Seconds)15;
                     if (!GetMap().IsDungeon())
                         GetCombatManager().EndCombatBeyondRange(GetVisibilityRange(), true);
                 }
@@ -704,9 +704,9 @@ namespace Game.Entities
             }
         }
 
-        public void SetTransportServerTime(uint transportServerTime) 
+        public void SetTransportServerTime(RelativeTime transportServerTime) 
         { 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), (int)transportServerTime); 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), transportServerTime); 
         }
 
         void ScheduleDelayedOperation(PlayerDelayedOperations operation)
@@ -1236,7 +1236,7 @@ namespace Game.Entities
             petSpells.PetGUID = vehicle.GetGUID();
             petSpells.CreatureFamily = 0;                          // Pet Family (0 for all vehicles)
             petSpells.Specialization = 0;
-            petSpells.TimeLimit = (uint)(vehicle.IsSummon() ? vehicle.ToTempSummon().GetTimer().TotalMilliseconds : 0);
+            petSpells.TimeLimit = (Milliseconds)(vehicle.IsSummon() ? vehicle.ToTempSummon().GetTimer().ToMilliseconds() : 0);
             petSpells.ReactState = vehicle.GetReactState();
             petSpells.CommandState = CommandStates.Follow;
             petSpells.Flag = 0x8;
@@ -2140,7 +2140,7 @@ namespace Game.Entities
                     SendPacket(transferPending);
 
                     RemovePlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
-                    SetTransportServerTime(0);
+                    SetTransportServerTime(default);
                 }
 
                 // remove from old map now
@@ -2210,10 +2210,10 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outWarn(LogFilter.Cheat, 
+                    Log.outWarn(LogFilter.Cheat,
                         $"Account: {GetSession().GetAccountId()} (IP: {GetSession().GetRemoteAddress()}) " +
                         $"tried to use a character template without given permission. Possible cheating attempt.");
-            }
+                }
             }
 
             if (GetSession().HasPermission(RBACPermissions.UseStartGmLevel))
@@ -2362,7 +2362,7 @@ namespace Game.Entities
 
         public bool HasSummonPending()
         {
-            return m_summon_expire >= GameTime.GetGameTime();
+            return m_summon_expire >= LoopTime.ServerTime;
         }
 
         public void SendSummonRequestFrom(Unit summoner)
@@ -2378,7 +2378,7 @@ namespace Game.Entities
             if (HasAura(23445))
                 return;
 
-            m_summon_expire = GameTime.GetGameTime() + PlayerConst.MaxPlayerSummonDelay;
+            m_summon_expire = LoopTime.ServerTime + PlayerConst.MaxPlayerSummonDelay;
             m_summon_location = new WorldLocation(summoner);
             m_summon_instanceId = summoner.GetInstanceId();
 
@@ -2444,13 +2444,13 @@ namespace Game.Entities
 
             if (!agree)
             {
-                m_summon_expire = 0;
+                m_summon_expire = ServerTime.Zero;
                 broadcastSummonResponse(false);
                 return;
             }
 
             // expire and auto declined
-            if (m_summon_expire < GameTime.GetGameTime())
+            if (m_summon_expire < LoopTime.ServerTime)
             {
                 broadcastSummonResponse(false);
                 return;
@@ -2465,7 +2465,7 @@ namespace Game.Entities
             if (bg != null)
                 bg.EventPlayerDroppedFlag(this);
 
-            m_summon_expire = 0;
+            m_summon_expire = ServerTime.Zero;
 
             UpdateCriteria(CriteriaType.AcceptSummon, 1);
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Summon);
@@ -3161,14 +3161,14 @@ namespace Game.Entities
         {
             // calculate next delivery time (min. from non-delivered mails
             // and recalculate unReadMail
-            long cTime = GameTime.GetGameTime();
-            m_nextMailDelivereTime = 0;
+            ServerTime cTime = LoopTime.ServerTime;
+            m_nextMailDelivereTime = ServerTime.Zero;
             unReadMails = 0;
             foreach (var mail in m_mail)
             {
                 if (mail.deliver_time > cTime)
                 {
-                    if (m_nextMailDelivereTime == 0 || m_nextMailDelivereTime > mail.deliver_time)
+                    if (m_nextMailDelivereTime == ServerTime.Zero || m_nextMailDelivereTime > mail.deliver_time)
                         m_nextMailDelivereTime = mail.deliver_time;
                 }
                 else if ((mail.checkMask & MailCheckFlags.Read) == 0)
@@ -3176,16 +3176,16 @@ namespace Game.Entities
             }
         }
 
-        public void AddNewMailDeliverTime(long deliver_time)
+        public void AddNewMailDeliverTime(ServerTime deliver_time)
         {
-            if (deliver_time <= GameTime.GetGameTime())                          // ready now
+            if (deliver_time <= LoopTime.ServerTime)                          // ready now
             {
                 ++unReadMails;
                 SendNewMail();
             }
             else                                                    // not ready and no have ready mails
             {
-                if (m_nextMailDelivereTime == 0 || m_nextMailDelivereTime > deliver_time)
+                if (m_nextMailDelivereTime == ServerTime.Zero || m_nextMailDelivereTime > deliver_time)
                     m_nextMailDelivereTime = deliver_time;
             }
         }
@@ -3207,34 +3207,39 @@ namespace Game.Entities
 
         //Binds
         public bool HasPendingBind() { return _pendingBindId > 0; }
-        void UpdateHomebindTime(uint time)
+
+        public static readonly Seconds HomeBindTime = (Minutes)1;
+
+        void UpdateHomebindTime(Milliseconds diff)
         {
             // GMs never get homebind timer online
             if (m_InstanceValid || IsGameMaster())
             {
                 if (m_HomebindTimer != 0) // instance valid, but timer not reset
-                    SendRaidGroupOnlyMessage(RaidGroupReason.None, 0);
+                    SendRaidGroupOnlyMessage(RaidGroupReason.None, Milliseconds.Zero);
 
                 // instance is valid, reset homebind timer
-                m_HomebindTimer = 0;
+                m_HomebindTimer = Milliseconds.Zero;
             }
             else if (m_HomebindTimer > 0)
             {
-                if (time >= m_HomebindTimer)
+                if (diff >= m_HomebindTimer)
                 {
                     // teleport to nearest graveyard
                     RepopAtGraveyard();
                 }
                 else
-                    m_HomebindTimer -= time;
+                    m_HomebindTimer -= diff;
             }
             else
             {
                 // instance is invalid, start homebind timer
-                m_HomebindTimer = 60000;
+                m_HomebindTimer = HomeBindTime;
                 // send message to player
-                SendRaidGroupOnlyMessage(RaidGroupReason.RequirementsUnmatch, (int)m_HomebindTimer);
-                Log.outDebug(LogFilter.Maps, "PLAYER: Player '{0}' (GUID: {1}) will be teleported to homebind in 60 seconds", GetName(), GetGUID().ToString());
+                SendRaidGroupOnlyMessage(RaidGroupReason.RequirementsUnmatch, m_HomebindTimer);
+
+                Log.outDebug(LogFilter.Maps, 
+                    $"PLAYER: Player '{GetName()}' (GUID: {GetGUID()}) will be teleported to homebind in {HomeBindTime} seconds.");
             }
         }
 
@@ -3280,8 +3285,8 @@ namespace Game.Entities
         }
 
         //Misc
-        public uint GetTotalPlayedTime() { return m_PlayedTimeTotal; }
-        public uint GetLevelPlayedTime() { return m_PlayedTimeLevel; }
+        public Seconds GetTotalPlayedTime() { return m_PlayedTimeTotal; }
+        public Seconds GetLevelPlayedTime() { return m_PlayedTimeLevel; }
 
         public CinematicManager GetCinematicMgr() { return _cinematicMgr; }
 
@@ -3556,22 +3561,22 @@ namespace Game.Entities
             }
             */
 
-            if (m_regenTimerCount >= 2000)
+            if (m_regenTimerCount >= (Milliseconds)2000)
             {
                 // Not in combat or they have regeneration
                 if (!IsInCombat() || IsPolymorphed() || m_baseHealthRegen != 0 || HasAuraType(AuraType.ModRegenDuringCombat) || HasAuraType(AuraType.ModHealthRegenInCombat))
                     RegenerateHealth();
 
-                m_regenTimerCount -= 2000;
+                m_regenTimerCount -= (Milliseconds)2000;
             }
 
-            RegenTimer = 0;
+            RegenTimer = Milliseconds.Zero;
 
             // Handles the emotes for drinking and eating.
             // According to sniffs there is a background timer going on that repeats independed from the time window where the aura applies.
             // That's why we dont need to reset the timer on apply. In sniffs I have seen that the first call for the spell visual is totally random, then after
             // 5 seconds over and over again which confirms my theory that we have a independed timer.
-            if (m_foodEmoteTimerCount >= 5000)
+            if (m_foodEmoteTimerCount >= (Milliseconds)5000)
             {
                 List<AuraEffect> auraList = GetAuraEffectsByType(AuraType.ModRegen);
                 auraList.AddRange(GetAuraEffectsByType(AuraType.ModPowerRegen));
@@ -3590,7 +3595,7 @@ namespace Game.Entities
                         break;
                     }
                 }
-                m_foodEmoteTimerCount -= 5000;
+                m_foodEmoteTimerCount -= (Milliseconds)5000;
             }
         }
 
@@ -3619,7 +3624,7 @@ namespace Game.Entities
             else
                 addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[powerIndex]) * 0.001f * RegenTimer;
 
-            if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now())
+            if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + powerType.RegenInterruptTime >= LoopTime.ServerTime)
                 return;
 
             WorldCfg[] RatesForPower =
@@ -3659,7 +3664,7 @@ namespace Game.Entities
             if (power != PowerType.Mana)
             {
                 addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
-                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : RegenTimer) / (5 * Time.InMilliseconds);
+                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : RegenTimer) / (5 * Time.MillisecondsInSecond);
             }
 
             int minPower = powerType.MinPower;
@@ -3749,7 +3754,7 @@ namespace Game.Entities
             if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
                 return;
 
-            m_regenInterruptTimestamp = GameTime.Now();
+            m_regenInterruptTimestamp = LoopTime.ServerTime;
             m_powerFraction[powerIndex] = 0.0f;
             SendPacket(new InterruptPowerRegen(power));
         }
@@ -3780,7 +3785,7 @@ namespace Game.Entities
                 if (!IsInCombat())
                 {
                     addValue *= GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
-                    addValue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.InMilliseconds / (5 * Time.InMilliseconds);
+                    addValue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.MillisecondsInSecond / (5 * Time.MillisecondsInSecond);
                 }
                 else if (HasAuraType(AuraType.ModRegenDuringCombat))
                     MathFunctions.ApplyPct(ref addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
@@ -4053,7 +4058,7 @@ namespace Game.Entities
             return m_MirrorTimer[(int)type] == GetMaxTimer(type);
         }
 
-        void HandleDrowning(uint time_diff)
+        void HandleDrowning(Milliseconds diff)
         {
             if (m_MirrorTimerFlags == 0)
                 return;
@@ -4087,11 +4092,11 @@ namespace Game.Entities
                 }
                 else                                                              // If activated - do tick
                 {
-                    m_MirrorTimer[breathTimer] -= (int)time_diff;
+                    m_MirrorTimer[breathTimer] -= diff;
                     // Timer limit - need deal damage
                     if (m_MirrorTimer[breathTimer] < 0)
                     {
-                        m_MirrorTimer[breathTimer] += 1 * Time.InMilliseconds;
+                        m_MirrorTimer[breathTimer] += (Seconds)1;
                         // Calculate and deal damage
                         int damage = getEnvironmentalDamage(EnviromentalDamage.Drowning);
                         EnvironmentalDamage(EnviromentalDamage.Drowning, damage);
@@ -4102,13 +4107,14 @@ namespace Game.Entities
             }
             else if (m_MirrorTimer[breathTimer] != -1)        // Regen timer
             {
-                int UnderWaterTime = GetMaxTimer(MirrorTimerType.Breath);
+                int regen = 10;
+                Milliseconds UnderWaterTime = GetMaxTimer(MirrorTimerType.Breath);
                 // Need breath regen
-                m_MirrorTimer[breathTimer] += (int)(10 * time_diff);
+                m_MirrorTimer[breathTimer] += (Milliseconds)(regen * diff);
                 if (m_MirrorTimer[breathTimer] >= UnderWaterTime || !IsAlive())
                     StopMirrorTimer(MirrorTimerType.Breath);
                 else if (m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InWater))
-                    SendMirrorTimer(MirrorTimerType.Breath, UnderWaterTime, m_MirrorTimer[breathTimer], 10);
+                    SendMirrorTimer(MirrorTimerType.Breath, UnderWaterTime, m_MirrorTimer[breathTimer], regen);
             }
 
             // In dark water
@@ -4122,11 +4128,11 @@ namespace Game.Entities
                 }
                 else
                 {
-                    m_MirrorTimer[fatigueTimer] -= (int)time_diff;
+                    m_MirrorTimer[fatigueTimer] -= diff;
                     // Timer limit - need deal damage or teleport ghost to graveyard
                     if (m_MirrorTimer[fatigueTimer] < 0)
                     {
-                        m_MirrorTimer[fatigueTimer] += 1 * Time.InMilliseconds;
+                        m_MirrorTimer[fatigueTimer] += (Seconds)1;
                         if (IsAlive())                                            // Calculate and deal damage
                         {
                             int damage = getEnvironmentalDamage(EnviromentalDamage.Exhausted);
@@ -4141,12 +4147,13 @@ namespace Game.Entities
             }
             else if (m_MirrorTimer[fatigueTimer] != -1)       // Regen timer
             {
-                int DarkWaterTime = GetMaxTimer(MirrorTimerType.Fatigue);
-                m_MirrorTimer[fatigueTimer] += (int)(10 * time_diff);
+                int regen = 10;
+                Milliseconds DarkWaterTime = GetMaxTimer(MirrorTimerType.Fatigue);
+                m_MirrorTimer[fatigueTimer] += (Milliseconds)(regen * diff);
                 if (m_MirrorTimer[fatigueTimer] >= DarkWaterTime || !IsAlive())
                     StopMirrorTimer(MirrorTimerType.Fatigue);
                 else if (m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InDarkWater))
-                    SendMirrorTimer(MirrorTimerType.Fatigue, DarkWaterTime, m_MirrorTimer[fatigueTimer], 10);
+                    SendMirrorTimer(MirrorTimerType.Fatigue, DarkWaterTime, m_MirrorTimer[fatigueTimer], regen);
             }
 
             if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InLava) && !(_lastLiquid != null && _lastLiquid.SpellID != 0))
@@ -4156,10 +4163,10 @@ namespace Game.Entities
                     m_MirrorTimer[fireTimer] = GetMaxTimer(MirrorTimerType.Fire);
                 else
                 {
-                    m_MirrorTimer[fireTimer] -= (int)time_diff;
+                    m_MirrorTimer[fireTimer] -= diff;
                     if (m_MirrorTimer[fireTimer] < 0)
                     {
-                        m_MirrorTimer[fireTimer] += 1 * Time.InMilliseconds;
+                        m_MirrorTimer[fireTimer] += (Seconds)1;
                         // Calculate and deal damage
                         int damage = getEnvironmentalDamage(EnviromentalDamage.Lava);
                         if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InLava))
@@ -4172,7 +4179,7 @@ namespace Game.Entities
                 }
             }
             else
-                m_MirrorTimer[fireTimer] = -1;
+                m_MirrorTimer[fireTimer] = new(-1);
 
             // Recheck timers flag
             m_MirrorTimerFlags &= ~PlayerUnderwaterState.ExistTimers;
@@ -4189,14 +4196,14 @@ namespace Game.Entities
 
         void HandleSobering()
         {
-            m_drunkTimer = 0;
+            m_drunkTimer = Milliseconds.Zero;
 
             byte currentDrunkValue = GetDrunkValue();
             byte drunk = (byte)(currentDrunkValue != 0 ? --currentDrunkValue : 0);
             SetDrunkValue(drunk);
         }
 
-        void SendMirrorTimer(MirrorTimerType Type, int MaxValue, int CurrentValue, int Regen)
+        void SendMirrorTimer(MirrorTimerType Type, Milliseconds MaxValue, Milliseconds CurrentValue, int Regen)
         {
             if (MaxValue == -1)
             {
@@ -4210,36 +4217,37 @@ namespace Game.Entities
 
         void StopMirrorTimer(MirrorTimerType Type)
         {
-            m_MirrorTimer[(int)Type] = -1;
+            m_MirrorTimer[(int)Type] = new(-1);
             SendPacket(new StopMirrorTimer(Type));
         }
 
-        int GetMaxTimer(MirrorTimerType timer)
+        Milliseconds GetMaxTimer(MirrorTimerType timer)
         {
             switch (timer)
             {
                 case MirrorTimerType.Fatigue:
-                    return Time.Minute * Time.InMilliseconds;
+                    return (Minutes)1;
                 case MirrorTimerType.Breath:
                 {
                     if (!IsAlive() || HasAuraType(AuraType.WaterBreathing)
                         || GetSession().GetSecurity() >= (AccountTypes)WorldConfig.Values[WorldCfg.DisableBreathing].Int32)
                     {
-                        return -1;
+                        return new(-1);
                     }
 
-                    int UnderWaterTime = 3 * Time.Minute * Time.InMilliseconds;
-                    UnderWaterTime *= (int)GetTotalAuraMultiplier(AuraType.ModWaterBreathing);
+                    Milliseconds UnderWaterTime = (Minutes)3;
+                    UnderWaterTime = (Milliseconds)(UnderWaterTime * GetTotalAuraMultiplier(AuraType.ModWaterBreathing));
                     return UnderWaterTime;
                 }
                 case MirrorTimerType.Fire:
                 {
                     if (!IsAlive())
-                        return -1;
-                    return 1 * Time.InMilliseconds;
+                        return new(-1);
+
+                    return (Seconds)1;
                 }
                 default:
-                    return 0;
+                    return Milliseconds.Zero;
             }
         }
 
@@ -4278,7 +4286,7 @@ namespace Game.Entities
             if (!HasUnitState(UnitState.Stunned))
                 SetRooted(false);
 
-            m_deathTimer = 0;
+            m_deathTimer = Milliseconds.Zero;
 
             // set health/powers (0- will be set in caller)
             if (restore_percent > 0.0f)
@@ -4327,10 +4335,10 @@ namespace Game.Entities
                 // not full duration
                 if (GetLevel() < startLevel + 9)
                 {
-                    int delta = (GetLevel() - startLevel + 1) * Time.Minute;
+                    Seconds delta = (Seconds)(GetLevel() - startLevel + 1) * Time.Minute;
                     Aura aur = GetAura(raceEntry.ResSicknessSpellID, GetGUID());
                     if (aur != null)
-                        aur.SetDuration(delta * Time.InMilliseconds);
+                        aur.SetDuration(delta);
 
                 }
             }
@@ -4392,7 +4400,7 @@ namespace Game.Entities
                 RemovePlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
 
             // 6 minutes until repop at graveyard
-            m_deathTimer = 6 * Time.Minute * Time.InMilliseconds;
+            m_deathTimer = (Minutes)6;
 
             UpdateCorpseReclaimDelay();                             // dependent at use SetDeathPvP() call before kill
 
@@ -4481,7 +4489,7 @@ namespace Game.Entities
             {
                 if (triggerSave && !GetSession().PlayerLogoutWithSave())   // at logout we will already store the player
                     SaveToDB();                                             // prevent loading as ghost without corpse
-        }
+            }
         }
 
         public Corpse GetCorpse() { return GetMap().GetCorpseByPlayer(GetGUID()); }
@@ -4517,7 +4525,7 @@ namespace Game.Entities
             }
 
             // stop countdown until repop
-            m_deathTimer = 0;
+            m_deathTimer = Milliseconds.Zero;
 
             // if no grave found, stay at the current location
             // and don't show spirit healer location
@@ -4545,7 +4553,7 @@ namespace Game.Entities
 
         public WorldLocation GetCorpseLocation() { return _corpseLocation; }
 
-        public uint GetCorpseReclaimDelay(bool pvp)
+        public Seconds GetCorpseReclaimDelay(bool pvp)
         {
             if (pvp)
             {
@@ -4553,12 +4561,12 @@ namespace Game.Entities
                     return PlayerConst.copseReclaimDelay[0];
             }
             else if (!WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPve].Bool)
-                return 0;
+                return Seconds.Zero;
 
-            long now = GameTime.GetGameTime();
+            ServerTime now = LoopTime.ServerTime;
             // 0..2 full period
             // should be ceil(x)-1 but not floor(x)
-            ulong count = (ulong)((now < m_deathExpireTime - 1) ? (m_deathExpireTime - 1 - now) / PlayerConst.DeathExpireStep : 0);
+            long count = (long)((now < m_deathExpireTime - (Seconds)1) ? (m_deathExpireTime - (Seconds)1 - now) / PlayerConst.DeathExpireStep : 0);
             return PlayerConst.copseReclaimDelay[count];
         }
 
@@ -4569,13 +4577,14 @@ namespace Game.Entities
             if ((pvp && !WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPvp].Bool) ||
                 (!pvp && !WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPve].Bool))
                 return;
-            long now = GameTime.GetGameTime();
+
+            ServerTime now = LoopTime.ServerTime;
             if (now < m_deathExpireTime)
             {
                 // full and partly periods 1..3
-                ulong count = (ulong)(m_deathExpireTime - now) / PlayerConst.DeathExpireStep + 1;
+                long count = (long)((m_deathExpireTime - now) / PlayerConst.DeathExpireStep) + 1;
                 if (count < PlayerConst.MaxDeathCount)
-                    m_deathExpireTime = now + (long)(count + 1) * PlayerConst.DeathExpireStep;
+                    m_deathExpireTime = now + (count + 1) * PlayerConst.DeathExpireStep;
                 else
                     m_deathExpireTime = now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep;
             }
@@ -4583,42 +4592,42 @@ namespace Game.Entities
                 m_deathExpireTime = now + PlayerConst.DeathExpireStep;
         }
 
-        int CalculateCorpseReclaimDelay(bool load = false)
+        Milliseconds CalculateCorpseReclaimDelay(bool load = false)
         {
             Corpse corpse = GetCorpse();
             if (load && corpse == null)
-                return -1;
+                return new(-1);
 
             bool pvp = corpse != null ? corpse.GetCorpseType() == CorpseType.ResurrectablePVP : (m_ExtraFlags & PlayerExtraFlags.PVPDeath) != 0;
 
-            uint delay;
+            Seconds delay;
             if (load)
             {
                 if (corpse.GetGhostTime() > m_deathExpireTime)
-                    return -1;
+                    return new(-1);
 
-                ulong count = 0;
+                long count = 0;
                 if ((pvp && WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPvp].Bool) ||
                    (!pvp && WorldConfig.Values[WorldCfg.DeathCorpseReclaimDelayPve].Bool))
                 {
-                    count = (ulong)(m_deathExpireTime - corpse.GetGhostTime()) / PlayerConst.DeathExpireStep;
+                    count = (long)((m_deathExpireTime - corpse.GetGhostTime()) / PlayerConst.DeathExpireStep);
 
                     if (count >= PlayerConst.MaxDeathCount)
                         count = PlayerConst.MaxDeathCount - 1;
                 }
 
-                long expected_time = corpse.GetGhostTime() + PlayerConst.copseReclaimDelay[count];
-                long now = GameTime.GetGameTime();
+                ServerTime expected_time = corpse.GetGhostTime() + PlayerConst.copseReclaimDelay[count];
+                ServerTime now = LoopTime.ServerTime;
 
                 if (now >= expected_time)
-                    return -1;
+                    return new(-1);
 
-                delay = (uint)(expected_time - now);
+                delay = (Seconds)(expected_time - now);
             }
             else
                 delay = GetCorpseReclaimDelay(pvp);
 
-            return (int)(delay * Time.InMilliseconds);
+            return delay;
         }
 
         void SendCorpseReclaimDelay(int delay)
@@ -4650,12 +4659,12 @@ namespace Game.Entities
             return null;
         }
 
-        public Pet SummonPet(int entry, PetSaveMode? slot, float x, float y, float z, float ang, uint duration)
+        public Pet SummonPet(int entry, PetSaveMode? slot, float x, float y, float z, float ang, TimeSpan duration)
         {
             return SummonPet(entry, slot, x, y, z, ang, duration, out _);
         }
 
-        public Pet SummonPet(int entry, PetSaveMode? slot, float x, float y, float z, float ang, uint duration, out bool isNew)
+        public Pet SummonPet(int entry, PetSaveMode? slot, float x, float y, float z, float ang, TimeSpan duration, out bool isNew)
         {
             isNew = false;
 
@@ -4664,7 +4673,7 @@ namespace Game.Entities
             Pet pet = new(this, PetType.Summon);
             if (pet.LoadPetFromDB(this, entry, 0, false, slot))
             {
-                if (duration > 0)
+                if (duration > TimeSpan.Zero)
                     pet.SetDuration(duration);
 
                 return pet;
@@ -4719,7 +4728,7 @@ namespace Game.Entities
             pet.SetPetNextLevelExperience(1000);
             pet.SetFullHealth();
             pet.SetFullPower(PowerType.Mana);
-            pet.SetPetNameTimestamp((uint)GameTime.GetGameTime());
+            pet.SetPetNameTimestamp(LoopTime.ServerTime);
 
             map.AddToMap(pet.ToCreature());
 
@@ -4733,7 +4742,7 @@ namespace Game.Entities
             pet.SavePetToDB(PetSaveMode.AsCurrent);
             PetSpellInitialize();
 
-            if (duration > 0)
+            if (duration > TimeSpan.Zero)
                 pet.SetDuration(duration);
 
             //ObjectAccessor.UpdateObjectVisibility(pet);
@@ -5181,8 +5190,8 @@ namespace Game.Entities
             return true;
         }
 
-        public void SetRegenTimerCount(uint time) { m_regenTimerCount = time; }
-        void SetWeaponChangeTimer(uint time) { m_weaponChangeTimer = time; }
+        public void SetRegenTimerCount(Milliseconds time) { m_regenTimerCount = time; }
+        void SetWeaponChangeTimer(Milliseconds time) { m_weaponChangeTimer = time; }
 
         //Team
         public static Team TeamForRace(Race race)
@@ -5232,7 +5241,7 @@ namespace Game.Entities
             ScriptMgr.OnPlayerMoneyChanged(this, amount);
 
             if (amount < 0)
-                SetMoney((GetMoney() > -amount ? GetMoney() + amount : 0));
+                SetMoney(GetMoney() > -amount ? GetMoney() + amount : 0);
             else
             {
                 if (GetMoney() <= (PlayerConst.MaxMoneyAmount - amount))
@@ -5359,7 +5368,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), ObjectMgr.GetXPForLevel(level));
 
             //update level, max level of skills
-            m_PlayedTimeLevel = 0;                   // Level Played Time reset
+            m_PlayedTimeLevel = Seconds.Zero;        // Level Played Time reset
 
             _ApplyAllLevelScaleItemMods(false);
 
@@ -5627,7 +5636,7 @@ namespace Game.Entities
                 {
                     if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
                         activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
-            }
+                }
             }
 
             activeGlyphs.IsFullUpdate = true;
@@ -5652,10 +5661,10 @@ namespace Game.Entities
             float TimeSpeed = 0.01666667f;
             LoginSetTimeSpeed loginSetTimeSpeed = new();
             loginSetTimeSpeed.NewSpeed = TimeSpeed;
-            loginSetTimeSpeed.GameTime = GameTime.GetWowTime();
-            loginSetTimeSpeed.ServerTime = GameTime.GetWowTime();
-            loginSetTimeSpeed.GameTimeHolidayOffset = 0; // @todo
-            loginSetTimeSpeed.ServerTimeHolidayOffset = 0; // @todo
+            loginSetTimeSpeed.GameTime = LoopTime.RealmTime;
+            loginSetTimeSpeed.ServerTime = LoopTime.ServerTime;
+            loginSetTimeSpeed.GameTimeHolidayOffset = Time.Zero; // @todo : 268529800 - got from some packet at 03/13/2024 18:42:00 game and the same server time
+            loginSetTimeSpeed.ServerTimeHolidayOffset = Time.Zero; // - always zero even when GameTimeHolidayOffset is set
             SendPacket(loginSetTimeSpeed);
 
             // SMSG_WORLD_SERVER_INFO
@@ -5695,7 +5704,7 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().SendFavoriteAppearances();
 
             InitialSetup initialSetup = new();
-            initialSetup.ServerExpansionLevel = (byte)WorldConfig.Values[WorldCfg.Expansion].Int32;
+            initialSetup.ServerExpansionLevel = (Expansion)WorldConfig.Values[WorldCfg.Expansion].Int32;
             SendPacket(initialSetup);
 
             SetMovedUnit(this);
@@ -5849,9 +5858,9 @@ namespace Game.Entities
 
         public void Recall() { TeleportTo(m_recall_location, 0, m_recall_instanceId); }
 
-        public uint GetSaveTimer() { return m_nextSave; }
+        public Milliseconds GetSaveTimer() { return m_nextSave; }
 
-        void SetSaveTimer(uint timer) { m_nextSave = timer; }
+        void SetSaveTimer(Milliseconds timer) { m_nextSave = timer; }
 
         void SendAurasForTarget(Unit target)
         {
@@ -6957,7 +6966,7 @@ namespace Game.Entities
             UpdateObjectVisibility();
 
             if (!isSobering)
-                m_drunkTimer = 0;   // reset sobering timer
+                m_drunkTimer = Milliseconds.Zero;   // reset sobering timer
 
             if (newDrunkenState == oldDrunkenState)
                 return;
@@ -6981,7 +6990,7 @@ namespace Game.Entities
             return DrunkenState.Sober;
         }
 
-        public uint GetDeathTimer() { return m_deathTimer; }
+        public Milliseconds GetDeathTimer() { return m_deathTimer; }
 
         public bool ActivateTaxiPathTo(List<int> nodes, Creature npc = null, int spellid = 0, int preferredMountDisplay = 0)
         {
@@ -7045,7 +7054,7 @@ namespace Game.Entities
                 {
                     if (spell.m_spellInfo.Id != spellid)
                         InterruptSpell(CurrentSpellTypes.Channeled, true);
-            }
+                }
             }
 
             var sourcenode = nodes[0];

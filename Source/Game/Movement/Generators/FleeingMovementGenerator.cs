@@ -42,7 +42,7 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             if (owner == null || !owner.IsAlive())
                 return false;
@@ -113,7 +113,7 @@ namespace Game.Movement
             // Add LOS check for target point
             if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
             {
-                _timer.Reset(200);
+                _timer.Reset((Milliseconds)200);
                 return;
             }
 
@@ -129,7 +129,7 @@ namespace Game.Movement
                 || _path.GetPathType().HasFlag(PathType.Shortcut) 
                 || _path.GetPathType().HasFlag(PathType.FarFromPoly))
             {
-                _timer.Reset(100);
+                _timer.Reset((Milliseconds)100);
                 return;
             }
 
@@ -138,8 +138,8 @@ namespace Game.Movement
             MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(false);
-            uint traveltime = (uint)init.Launch();
-            _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
+            TimeSpan traveltime = init.Launch();
+            _timer.Reset(traveltime + (Milliseconds)RandomHelper.IRand(800, 1500));
         }
 
         void GetPoint(Unit owner, Position position)
@@ -202,7 +202,7 @@ namespace Game.Movement
             _totalFleeTime = new TimeTracker(time);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             if (owner == null || !owner.IsAlive())
                 return false;

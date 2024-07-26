@@ -81,7 +81,7 @@ namespace Scripts.Spells.Shaman
                 GetCaster().CastSpell(GetCaster(), SpellIds.ChainLightningOverloadEnergize, 
                     new CastSpellExtraArgs(energizeAmount).AddSpellMod(
                         SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))));
-        }
+            }
         }
 
         public override void Register()
@@ -151,8 +151,8 @@ namespace Scripts.Spells.Shaman
 
         public areatrigger_sha_earthquake(AreaTrigger areatrigger) : base(areatrigger)
         {
-            _refreshTimer = TimeSpan.FromSeconds(0);
-            _period = TimeSpan.FromSeconds(1);
+            _refreshTimer = Time.SpanFromSeconds(0);
+            _period = Time.SpanFromSeconds(1);
             _damageMultiplier = 1.0f;
         }
 
@@ -163,7 +163,7 @@ namespace Scripts.Spells.Shaman
             {
                 AuraEffect earthquake = caster.GetAuraEffect(SpellIds.Earthquake, 1);
                 if (earthquake != null)
-                    _period = TimeSpan.FromMilliseconds(earthquake.GetPeriod());
+                    _period = Time.SpanFromMilliseconds(earthquake.GetPeriod());
             }
 
             if (creatingSpell != null)
@@ -174,10 +174,10 @@ namespace Scripts.Spells.Shaman
             }
         }
 
-        public override void OnUpdate(uint diff)
+        public override void OnUpdate(TimeSpan diff)
         {
-            _refreshTimer -= TimeSpan.FromMilliseconds(diff);
-            while (_refreshTimer <= TimeSpan.FromSeconds(0))
+            _refreshTimer -= diff;
+            while (_refreshTimer <= TimeSpan.Zero)
             {
                 Unit caster = at.GetCaster();
                 if (caster != null)
@@ -317,7 +317,7 @@ namespace Scripts.Spells.Shaman
                 WorldLocation dest = GetExplTargetDest();
                 if (dest != null)
                 {
-                    var duration = TimeSpan.FromMilliseconds(GetSpellInfo().CalcDuration(GetOriginalCaster()));
+                    var duration = Time.SpanFromMilliseconds(GetSpellInfo().CalcDuration(GetOriginalCaster()));
                     TempSummon summon = 
                         GetCaster().GetMap().SummonCreature(
                             NpcHealingRainInvisibleStalker, dest, null, duration, GetOriginalCaster());
@@ -510,7 +510,7 @@ namespace Scripts.Spells.Shaman
             if (target != null)
             {
                 target.GetSpellHistory().ModifyCooldown(
-                    SpellIds.ElementalMastery, TimeSpan.FromMilliseconds(-aurEff.GetAmount()));
+                    SpellIds.ElementalMastery, Time.SpanFromMilliseconds(-aurEff.GetAmount()));
             }
         }
 
@@ -634,7 +634,7 @@ namespace Scripts.Spells.Shaman
                 GetCaster().CastSpell(GetCaster(), SpellIds.LightningBoltOverloadEnergize, 
                     new CastSpellExtraArgs(energizeAmount)
                     .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
-        }
+            }
         }
 
         public override void Register()
@@ -795,7 +795,7 @@ namespace Scripts.Spells.Shaman
                 new FlagArray128(0x400), GetCaster().GetGUID()) == null)
             {
                 Remove();
-        }
+            }
         }
 
         public override void Register()
@@ -895,8 +895,8 @@ namespace Scripts.Spells.Shaman
 
             Aura flameShockAura = flameShock.GetBase();
 
-            int maxDuration = flameShockAura.GetMaxDuration();
-            int newDuration = flameShockAura.GetDuration() + aurEff.GetAmount() * Time.InMilliseconds;
+            Milliseconds maxDuration = flameShockAura.GetMaxDuration();
+            Milliseconds newDuration = flameShockAura.GetDuration() + (Seconds)aurEff.GetAmount();
 
             flameShockAura.SetDuration(newDuration);
             // is it blizzlike to change max duration for Fs?
@@ -978,19 +978,19 @@ namespace Scripts.Spells.Shaman
     [Script]
     class areatrigger_sha_wind_rush_totem : AreaTriggerAI
     {
-        uint RefreshTime = 4500;
+        TimeSpan RefreshTime = (Milliseconds)4500;
 
-        uint _refreshTimer;
+        TimeSpan _refreshTimer;
 
         public areatrigger_sha_wind_rush_totem(AreaTrigger areatrigger) : base(areatrigger)
         {
             _refreshTimer = RefreshTime;
         }
 
-        public override void OnUpdate(uint diff)
+        public override void OnUpdate(TimeSpan diff)
         {
             _refreshTimer -= diff;
-            if (_refreshTimer <= 0)
+            if (_refreshTimer <= TimeSpan.Zero)
             {
                 Unit caster = at.GetCaster();
                 if (caster != null)

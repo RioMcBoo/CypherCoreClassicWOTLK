@@ -43,17 +43,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
         {
             Talk(TextIds.SayAggro);
             me.CallForHelp(166.0f);
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule((Seconds)4, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
                 if (target != null)
                     DoCast(target, SpellIds.Handofthaurissan);
-                task.Repeat(TimeSpan.FromSeconds(5));
+                task.Repeat((Seconds)5);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(25), task =>
+            _scheduler.Schedule((Seconds)25, task =>
             {
                 DoCastVictim(SpellIds.Avatarofflame);
-                task.Repeat(TimeSpan.FromSeconds(18));
+                task.Repeat((Seconds)18);
             });
         }
 
@@ -74,7 +74,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

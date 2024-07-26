@@ -39,14 +39,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
         public override void JustEngagedWith(Unit target)
         {
             base.JustEngagedWith(target);
-            _events.ScheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(6));
-            _events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(10));
-            _events.ScheduleEvent(EventIds.MagicGrounding, TimeSpan.FromSeconds(24));
-            _events.ScheduleEvent(EventIds.Counterspell, TimeSpan.FromSeconds(15));
-            _events.ScheduleEvent(EventIds.ShazzrahGate, TimeSpan.FromSeconds(45));
+            _events.ScheduleEvent(EventIds.ArcaneExplosion, Time.SpanFromSeconds(6));
+            _events.ScheduleEvent(EventIds.ShazzrahCurse, Time.SpanFromSeconds(10));
+            _events.ScheduleEvent(EventIds.MagicGrounding, Time.SpanFromSeconds(24));
+            _events.ScheduleEvent(EventIds.Counterspell, Time.SpanFromSeconds(15));
+            _events.ScheduleEvent(EventIds.ShazzrahGate, Time.SpanFromSeconds(45));
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -62,7 +62,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
                 {
                     case EventIds.ArcaneExplosion:
                         DoCastVictim(SpellIds.ArcaneExplosion);
-                        _events.ScheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(7));
+                        _events.ScheduleEvent(EventIds.ArcaneExplosion, Time.SpanFromSeconds(4), Time.SpanFromSeconds(7));
                         break;
                     // Triggered subsequent to using "Gate of Shazzrah".
                     case EventIds.ArcaneExplosionTriggered:
@@ -72,22 +72,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.ShazzrahCurse);
                         if (target != null)
                             DoCast(target, SpellIds.ShazzrahCurse);
-                        _events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30));
+                        _events.ScheduleEvent(EventIds.ShazzrahCurse, Time.SpanFromSeconds(25), Time.SpanFromSeconds(30));
                         break;
                     case EventIds.MagicGrounding:
                         DoCast(me, SpellIds.MagicGrounding);
-                        _events.ScheduleEvent(EventIds.MagicGrounding, TimeSpan.FromSeconds(35));
+                        _events.ScheduleEvent(EventIds.MagicGrounding, Time.SpanFromSeconds(35));
                         break;
                     case EventIds.Counterspell:
                         DoCastVictim(SpellIds.Counterspell);
-                        _events.ScheduleEvent(EventIds.Counterspell, TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(20));
+                        _events.ScheduleEvent(EventIds.Counterspell, Time.SpanFromSeconds(16), Time.SpanFromSeconds(20));
                         break;
                     case EventIds.ShazzrahGate:
                         ResetThreatList();
                         DoCastAOE(SpellIds.ShazzrahGateDummy);
-                        _events.ScheduleEvent(EventIds.ArcaneExplosionTriggered, TimeSpan.FromSeconds(2));
-                        _events.RescheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(6));
-                        _events.ScheduleEvent(EventIds.ShazzrahGate, TimeSpan.FromSeconds(45));
+                        _events.ScheduleEvent(EventIds.ArcaneExplosionTriggered, Time.SpanFromSeconds(2));
+                        _events.RescheduleEvent(EventIds.ArcaneExplosion, Time.SpanFromSeconds(3), Time.SpanFromSeconds(6));
+                        _events.ScheduleEvent(EventIds.ShazzrahGate, Time.SpanFromSeconds(45));
                         break;
                     default:
                         break;

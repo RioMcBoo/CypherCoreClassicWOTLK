@@ -172,9 +172,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
-            _events.ScheduleEvent(EventIds.Whirlwind, TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(15));
-            _events.ScheduleEvent(EventIds.Cleave, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(17));
-            _events.ScheduleEvent(EventIds.MortalStrike, TimeSpan.FromSeconds(17), TimeSpan.FromSeconds(19));
+            _events.ScheduleEvent(EventIds.Whirlwind, Time.SpanFromSeconds(13), Time.SpanFromSeconds(15));
+            _events.ScheduleEvent(EventIds.Cleave, Time.SpanFromSeconds(15), Time.SpanFromSeconds(17));
+            _events.ScheduleEvent(EventIds.MortalStrike, Time.SpanFromSeconds(17), Time.SpanFromSeconds(19));
         }
 
         public override void IsSummonedBy(WorldObject summoner)
@@ -207,8 +207,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                     if (portcullis != null)
                         portcullisGUID = portcullis.GetGUID();
 
-                    _events.ScheduleEvent(EventIds.TurnToPlayer, TimeSpan.FromSeconds(0));
-                    _events.ScheduleEvent(EventIds.Start1, TimeSpan.FromSeconds(1));
+                    _events.ScheduleEvent(EventIds.TurnToPlayer, (Seconds)0);
+                    _events.ScheduleEvent(EventIds.Start1, (Seconds)1);
                 }
             }
         }
@@ -220,19 +220,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                 switch (id)
                 {
                     case 5:
-                        _events.ScheduleEvent(EventIds.Teleport1, TimeSpan.FromSeconds(2));
+                        _events.ScheduleEvent(EventIds.Teleport1, (Seconds)2);
                         break;
                     case 11:
                         Creature gyth = me.FindNearestCreature(CreaturesIds.Gyth, 10.0f, true);
                         if (gyth != null)
                             gyth.GetAI().SetData(1, 1);
-                        me.DespawnOrUnsummon(TimeSpan.FromSeconds(1), TimeSpan.FromDays(7));
+                        me.DespawnOrUnsummon((Seconds)1, (Days)7);
                         break;
                 }
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (gythEvent)
             {
@@ -247,16 +247,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius0);
-                            _events.ScheduleEvent(EventIds.Start2, TimeSpan.FromSeconds(4));
+                            _events.ScheduleEvent(EventIds.Start2, (Seconds)4);
                             break;
                         }
                         case EventIds.Start2:
                         {
-                            _events.ScheduleEvent(EventIds.TurnToPlayer, TimeSpan.FromSeconds(0));
+                            _events.ScheduleEvent(EventIds.TurnToPlayer, (Seconds)0);
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.HandleEmoteCommand(Emote.OneshotPoint);
-                            _events.ScheduleEvent(EventIds.Start3, TimeSpan.FromSeconds(4));
+                            _events.ScheduleEvent(EventIds.Start3, (Seconds)4);
                             break;
                         }
                         case EventIds.Start3:
@@ -264,9 +264,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius1);
-                            _events.ScheduleEvent(EventIds.Wave1, TimeSpan.FromSeconds(2));
-                            _events.ScheduleEvent(EventIds.TurnToRend, TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.WavesText1, TimeSpan.FromSeconds(20));
+                            _events.ScheduleEvent(EventIds.Wave1, (Seconds)2);
+                            _events.ScheduleEvent(EventIds.TurnToRend, (Seconds)4);
+                            _events.ScheduleEvent(EventIds.WavesText1, (Seconds)20);
                             break;
                         }
                         case EventIds.TurnToRend:
@@ -315,65 +315,65 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                             break;
                         case EventIds.WavesText1:
                         {
-                            _events.ScheduleEvent(EventIds.TurnToPlayer, TimeSpan.FromSeconds(0));
+                            _events.ScheduleEvent(EventIds.TurnToPlayer, (Seconds)0);
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius2);
                             me.HandleEmoteCommand(Emote.OneshotTalk);
-                            _events.ScheduleEvent(EventIds.TurnToFacing1, TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.WavesEmote1, TimeSpan.FromSeconds(5));
-                            _events.ScheduleEvent(EventIds.Wave2, TimeSpan.FromSeconds(2));
-                            _events.ScheduleEvent(EventIds.WavesText2, TimeSpan.FromSeconds(20));
+                            _events.ScheduleEvent(EventIds.TurnToFacing1, (Seconds)4);
+                            _events.ScheduleEvent(EventIds.WavesEmote1, (Seconds)5);
+                            _events.ScheduleEvent(EventIds.Wave2, (Seconds)2);
+                            _events.ScheduleEvent(EventIds.WavesText2, (Seconds)20);
                             break;
                         }
                         case EventIds.WavesText2:
                         {
-                            _events.ScheduleEvent(EventIds.TurnToPlayer, TimeSpan.FromSeconds(0));
+                            _events.ScheduleEvent(EventIds.TurnToPlayer, (Seconds)0);
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius3);
-                            _events.ScheduleEvent(EventIds.TurnToFacing1, TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.Wave3, TimeSpan.FromSeconds(2));
-                            _events.ScheduleEvent(EventIds.WavesText3, TimeSpan.FromSeconds(20));
+                            _events.ScheduleEvent(EventIds.TurnToFacing1, (Seconds)4);
+                            _events.ScheduleEvent(EventIds.Wave3, (Seconds)2);
+                            _events.ScheduleEvent(EventIds.WavesText3, (Seconds)20);
                             break;
                         }
                         case EventIds.WavesText3:
                         {
-                            _events.ScheduleEvent(EventIds.TurnToPlayer, TimeSpan.FromSeconds(0));
+                            _events.ScheduleEvent(EventIds.TurnToPlayer, (Seconds)0);
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius4);
-                            _events.ScheduleEvent(EventIds.TurnToFacing1, TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.Wave4, TimeSpan.FromSeconds(2));
-                            _events.ScheduleEvent(EventIds.WavesText4, TimeSpan.FromSeconds(20));
+                            _events.ScheduleEvent(EventIds.TurnToFacing1, (Seconds)4);
+                            _events.ScheduleEvent(EventIds.Wave4, (Seconds)2);
+                            _events.ScheduleEvent(EventIds.WavesText4, (Seconds)20);
                             break;
                         }
                         case EventIds.WavesText4:
                             Talk(TextIds.SayBlackhand1);
-                            _events.ScheduleEvent(EventIds.WavesEmote2, TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.TurnToFacing3, TimeSpan.FromSeconds(8));
-                            _events.ScheduleEvent(EventIds.Wave5, TimeSpan.FromSeconds(2));
-                            _events.ScheduleEvent(EventIds.WavesText5, TimeSpan.FromSeconds(20));
+                            _events.ScheduleEvent(EventIds.WavesEmote2, (Seconds)4);
+                            _events.ScheduleEvent(EventIds.TurnToFacing3, (Seconds)8);
+                            _events.ScheduleEvent(EventIds.Wave5, (Seconds)2);
+                            _events.ScheduleEvent(EventIds.WavesText5, (Seconds)20);
                             break;
                         case EventIds.WavesText5:
                         {
-                            _events.ScheduleEvent(EventIds.TurnToPlayer, TimeSpan.FromSeconds(0));
+                            _events.ScheduleEvent(EventIds.TurnToPlayer, (Seconds)0);
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius5);
-                            _events.ScheduleEvent(EventIds.TurnToFacing1, TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.Wave6, TimeSpan.FromSeconds(2));
-                            _events.ScheduleEvent(EventIds.WavesCompleteText1, TimeSpan.FromSeconds(20));
+                            _events.ScheduleEvent(EventIds.TurnToFacing1, (Seconds)4);
+                            _events.ScheduleEvent(EventIds.Wave6, (Seconds)2);
+                            _events.ScheduleEvent(EventIds.WavesCompleteText1, (Seconds)20);
                             break;
                         }
                         case EventIds.WavesCompleteText1:
                         {
-                            _events.ScheduleEvent(EventIds.TurnToPlayer, TimeSpan.FromSeconds(0));
+                            _events.ScheduleEvent(EventIds.TurnToPlayer, (Seconds)0);
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius6);
-                            _events.ScheduleEvent(EventIds.TurnToFacing1, TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.WavesCompleteText2, TimeSpan.FromSeconds(13));
+                            _events.ScheduleEvent(EventIds.TurnToFacing1, (Seconds)4);
+                            _events.ScheduleEvent(EventIds.WavesCompleteText2, (Seconds)13);
                             break;
                         }
                         case EventIds.WavesCompleteText2:
@@ -382,8 +382,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius7);
                             Talk(TextIds.SayBlackhand2);
-                            _events.ScheduleEvent(EventIds.PathRend, TimeSpan.FromSeconds(1));
-                            _events.ScheduleEvent(EventIds.WavesCompleteText3, TimeSpan.FromSeconds(4));
+                            _events.ScheduleEvent(EventIds.PathRend, (Seconds)1);
+                            _events.ScheduleEvent(EventIds.WavesCompleteText3, (Seconds)4);
                             break;
                         }
                         case EventIds.WavesCompleteText3:
@@ -391,8 +391,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                             Creature victor = ObjectAccessor.GetCreature(me, victorGUID);
                             if (victor != null)
                                 victor.GetAI().Talk(TextIds.SayNefarius8);
-                            _events.ScheduleEvent(EventIds.PathNefarius, TimeSpan.FromSeconds(1));
-                            _events.ScheduleEvent(EventIds.PathRend, TimeSpan.FromSeconds(1));
+                            _events.ScheduleEvent(EventIds.PathNefarius, (Seconds)1);
+                            _events.ScheduleEvent(EventIds.PathRend, (Seconds)1);
                             break;
                         }
                         case EventIds.PathNefarius:
@@ -407,7 +407,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                             break;
                         case EventIds.Teleport1:
                             me.NearTeleportTo(194.2993f, -474.0814f, 121.4505f, -0.01225555f);
-                            _events.ScheduleEvent(EventIds.Teleport2, TimeSpan.FromSeconds(50));
+                            _events.ScheduleEvent(EventIds.Teleport2, (Seconds)50);
                             break;
                         case EventIds.Teleport2:
                             me.NearTeleportTo(216.485f, -434.93f, 110.888f, -0.01225555f);
@@ -487,15 +487,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                 {
                     case EventIds.Whirlwind:
                         DoCast(SpellIds.Whirlwind);
-                        _events.ScheduleEvent(EventIds.Whirlwind, TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(18));
+                        _events.ScheduleEvent(EventIds.Whirlwind, Time.SpanFromSeconds(13), Time.SpanFromSeconds(18));
                         break;
                     case EventIds.Cleave:
                         DoCastVictim(SpellIds.Cleave);
-                        _events.ScheduleEvent(EventIds.Cleave, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(14));
+                        _events.ScheduleEvent(EventIds.Cleave, Time.SpanFromSeconds(10), Time.SpanFromSeconds(14));
                         break;
                     case EventIds.MortalStrike:
                         DoCastVictim(SpellIds.MortalStrike);
-                        _events.ScheduleEvent(EventIds.MortalStrike, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(16));
+                        _events.ScheduleEvent(EventIds.MortalStrike, Time.SpanFromSeconds(14), Time.SpanFromSeconds(16));
                         break;
                 }
 

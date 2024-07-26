@@ -28,15 +28,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.HighlordOmokk
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Frenzy);
-                task.Repeat(TimeSpan.FromMinutes(1));
+                task.Repeat((Minutes)1);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(18), task =>
+            _scheduler.Schedule((Seconds)18, task =>
             {
                 DoCastVictim(SpellIds.KnockAway);
-                task.Repeat(TimeSpan.FromSeconds(12));
+                task.Repeat((Seconds)12);
             });
         }
 
@@ -45,7 +45,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.HighlordOmokk
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

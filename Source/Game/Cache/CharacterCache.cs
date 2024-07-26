@@ -17,7 +17,7 @@ namespace Game.Cache
         public void LoadCharacterCacheStorage()
         {
             _characterCacheStore.Clear();
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.Characters.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
             if (result.IsEmpty())
@@ -31,7 +31,8 @@ namespace Game.Cache
                 AddCharacterCacheEntry(ObjectGuid.Create(HighGuid.Player, result.Read<long>(0)), result.Read<int>(2), result.Read<string>(1), result.Read<byte>(4), result.Read<byte>(3), result.Read<byte>(5), result.Read<byte>(6), result.Read<uint>(7) != 0);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded character infos for {_characterCacheStore.Count} characters in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded character infos for {_characterCacheStore.Count} characters in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void AddCharacterCacheEntry(ObjectGuid guid, int accountId, string name, byte gender, byte race, byte playerClass, byte level, bool isDeleted)

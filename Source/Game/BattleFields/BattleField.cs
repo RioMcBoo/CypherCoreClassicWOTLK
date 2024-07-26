@@ -7,6 +7,7 @@ using Game.Groups;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -26,9 +27,9 @@ namespace Game.BattleFields
             m_IsEnabled = true;
             m_DefenderTeam = BattleGroundTeamId.Neutral;
 
-            m_TimeForAcceptInvite = 20;
-            m_uiKickDontAcceptTimer = 1000;
-            m_uiKickAfkPlayersTimer = 1000;
+            m_TimeForAcceptInvite = (Seconds)20;
+            m_uiKickDontAcceptTimer = (Seconds)1;
+            m_uiKickAfkPlayersTimer = (Seconds)1;
 
             m_Map = map;
             m_MapId = map.GetId();
@@ -56,7 +57,7 @@ namespace Game.BattleFields
                 else // No more vacant places
                 {
                     // todo Send a packet to announce it to player
-                    m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+                    m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = LoopTime.ServerTime + (Seconds)10;
                     InvitePlayerToQueue(player);
                 }
             }
@@ -96,7 +97,7 @@ namespace Game.BattleFields
             OnPlayerLeaveZone(player);
         }
 
-        public virtual bool Update(uint diff)
+        public virtual bool Update(TimeSpan diff)
         {
             if (m_Timer <= diff)
             {
@@ -121,7 +122,7 @@ namespace Game.BattleFields
             {
                 if (m_uiKickAfkPlayersTimer <= diff)
                 {
-                    m_uiKickAfkPlayersTimer = 1000;
+                    m_uiKickAfkPlayersTimer = (Seconds)1;
                     KickAfkPlayers();
                 }
                 else
@@ -130,7 +131,7 @@ namespace Game.BattleFields
                 // Kick players who chose not to accept invitation to the battle
                 if (m_uiKickDontAcceptTimer <= diff)
                 {
-                    long now = GameTime.GetGameTime();
+                    ServerTime now = LoopTime.ServerTime;
                     for (int team = 0; team < SharedConst.PvpTeamsCount; team++)
                     {
                         foreach (var pair in m_InvitedPlayers[team])
@@ -146,7 +147,7 @@ namespace Game.BattleFields
                                 KickPlayerFromBattlefield(pair.Key);
                     }
 
-                    m_uiKickDontAcceptTimer = 1000;
+                    m_uiKickDontAcceptTimer = (Seconds)1;
                 }
                 else
                     m_uiKickDontAcceptTimer -= diff;
@@ -212,7 +213,7 @@ namespace Game.BattleFields
                         if (m_PlayersInWar[player.GetBatttleGroundTeamId()].Count + m_InvitedPlayers[player.GetBatttleGroundTeamId()].Count < m_MaxPlayer)
                             InvitePlayerToWar(player);
                         else // Battlefield is full of players
-                            m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+                            m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = LoopTime.ServerTime + (Seconds)10;
                     }
                 }
             }
@@ -237,7 +238,7 @@ namespace Game.BattleFields
             if (player.GetLevel() < m_MinLevel)
             {
                 if (!m_PlayersWillBeKick[player.GetBatttleGroundTeamId()].ContainsKey(player.GetGUID()))
-                    m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+                    m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = LoopTime.ServerTime + (Seconds)10;
                 return;
             }
 
@@ -246,7 +247,7 @@ namespace Game.BattleFields
                 return;
 
             m_PlayersWillBeKick[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
-            m_InvitedPlayers[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + m_TimeForAcceptInvite;
+            m_InvitedPlayers[player.GetBatttleGroundTeamId()][player.GetGUID()] = LoopTime.ServerTime + m_TimeForAcceptInvite;
             PlayerAcceptInviteToWar(player);
         }
 
@@ -260,7 +261,7 @@ namespace Game.BattleFields
                 Log.outError(LogFilter.Battlefield,
                     $"Battlefield.InitStalker: could not spawn Stalker (Creature entry {entry}), " +
                     $"zone messeges will be un-available");
-        }
+            }
         }
 
         public override void ProcessEvent(WorldObject target, int eventId, WorldObject invoker)
@@ -741,14 +742,14 @@ namespace Game.BattleFields
 
         List<BfGraveyard> GetGraveyardVector() { return m_GraveyardList; }
 
-        public uint GetTimer() { return m_Timer; }
-        public void SetTimer(uint timer) { m_Timer = timer; }
+        public TimeSpan GetTimer() { return m_Timer; }
+        public void SetTimer(TimeSpan timer) { m_Timer = timer; }
 
         // use for switch off all worldstate for client
         public virtual void SendRemoveWorldStates(Player player) { }
 
         public ObjectGuid StalkerGuid;
-        protected uint m_Timer;                                         // Global timer for event
+        protected TimeSpan m_Timer;                                         // Global timer for event
         protected bool m_IsEnabled;
         protected bool m_isActive;
         protected int m_DefenderTeam;
@@ -760,8 +761,8 @@ namespace Game.BattleFields
         protected List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];                      // Players in zone
         protected List<ObjectGuid>[] m_PlayersInQueue = new List<ObjectGuid>[2];               // Players in the queue
         protected List<ObjectGuid>[] m_PlayersInWar = new List<ObjectGuid>[2];                 // Players in WG combat
-        protected Dictionary<ObjectGuid, long>[] m_InvitedPlayers = new Dictionary<ObjectGuid, long>[2];
-        protected Dictionary<ObjectGuid, long>[] m_PlayersWillBeKick = new Dictionary<ObjectGuid, long>[2];
+        protected Dictionary<ObjectGuid, ServerTime>[] m_InvitedPlayers = new Dictionary<ObjectGuid, ServerTime>[2];
+        protected Dictionary<ObjectGuid, ServerTime>[] m_PlayersWillBeKick = new Dictionary<ObjectGuid, ServerTime>[2];
 
         // Variables that must exist for each battlefield
         protected int m_TypeId;                                        // See enum BattlefieldTypes
@@ -772,22 +773,22 @@ namespace Game.BattleFields
         protected int m_MaxPlayer;                                     // Maximum number of player that participated to Battlefield
         protected int m_MinPlayer;                                     // Minimum number of player for Battlefield start
         protected int m_MinLevel;                                      // Required level to participate at Battlefield
-        protected uint m_BattleTime;                                    // Length of a battle
-        protected uint m_NoWarBattleTime;                               // Time between two battles
-        protected uint m_RestartAfterCrash;                             // Delay to restart Wintergrasp if the server crashed during a running battle.
-        protected uint m_TimeForAcceptInvite;
-        protected uint m_uiKickDontAcceptTimer;
-        protected WorldLocation KickPosition;                             // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
+        protected TimeSpan m_BattleTime;                               // Length of a battle
+        protected TimeSpan m_NoWarBattleTime;                          // Time between two battles
+        protected TimeSpan m_RestartAfterCrash;                        // Delay to restart Wintergrasp if the server crashed during a running battle.
+        protected TimeSpan m_TimeForAcceptInvite;
+        protected TimeSpan m_uiKickDontAcceptTimer;
+        protected WorldLocation KickPosition;                          // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
 
-        uint m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war
+        TimeSpan m_uiKickAfkPlayersTimer;                              // Timer for check Afk in war
 
         // Graveyard variables
-        protected List<BfGraveyard> m_GraveyardList = new();                          // Vector witch contain the different GY of the battle
+        protected List<BfGraveyard> m_GraveyardList = new();           // Vector witch contain the different GY of the battle
 
-        protected uint m_StartGroupingTimer;                            // Timer for invite players in area 15 minute before start battle
-        protected bool m_StartGrouping;                                   // bool for know if all players in area has been invited
+        protected TimeSpan m_StartGroupingTimer;                       // Timer for invite players in area 15 minute before start battle
+        protected bool m_StartGrouping;                                // bool for know if all players in area has been invited
 
-        List<ObjectGuid>[] m_Groups = new List<ObjectGuid>[2];                       // Contain different raid group
+        List<ObjectGuid>[] m_Groups = new List<ObjectGuid>[2];         // Contain different raid group
 
         Dictionary<int, long> m_Data64 = new();
         protected Dictionary<int, int> m_Data32 = new();

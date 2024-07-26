@@ -56,25 +56,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
             base.JustEngagedWith(who);
 
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16), task =>
+            _scheduler.Schedule((Seconds)8, (Seconds)16, task =>
             {
                 DoCast(me, SpellIds.CorrosiveAcid);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(16));
+                task.Repeat((Seconds)10, (Seconds)16);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16), task =>
+            _scheduler.Schedule((Seconds)8, (Seconds)16, task =>
             {
                 DoCast(me, SpellIds.Freeze);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(16));
+                task.Repeat((Seconds)10, (Seconds)16);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16), task =>
+            _scheduler.Schedule((Seconds)8, (Seconds)16, task =>
             {
                 DoCast(me, SpellIds.Flamebreath);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(16));
+                task.Repeat((Seconds)10, (Seconds)16);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(18), task =>
+            _scheduler.Schedule((Seconds)12, (Seconds)18, task =>
             {
                 DoCastVictim(SpellIds.KnockAway);
-                task.Repeat(TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)14, (Seconds)20);
             });
         }
 
@@ -88,7 +88,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
             switch (data)
             {
                 case 1:
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                    _scheduler.Schedule((Seconds)1, task =>
                     {
                         me.AddAura(SpellIds.RendMounts, me);
                         GameObject portcullis = me.FindNearestGameObject(GameObjectsIds.DrPortcullis, 40.0f);
@@ -98,7 +98,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
                         if (victor != null)
                             victor.GetAI().SetData(1, 1);
 
-                        task.Schedule(TimeSpan.FromSeconds(2), summonTask2 =>
+                        task.Schedule((Seconds)2, summonTask2 =>
                         {
                             me.GetMotionMaster().MovePath(MiscConst.GythPath1, false);
                         });
@@ -109,7 +109,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!SummonedRend && HealthBelowPct(5))
             {

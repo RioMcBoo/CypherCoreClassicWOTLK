@@ -245,7 +245,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                         break;
                     case DataTypes.Chess:
                         if (state == EncounterState.Done)
-                            DoRespawnGameObject(DustCoveredChest, TimeSpan.FromHours(24));
+                            DoRespawnGameObject(DustCoveredChest, (Hours)24);
                         break;
                     default:
                         break;

@@ -77,13 +77,13 @@ namespace Game.Chat
         }
 
         [Command("timer", RBACPermissions.CommandBfTimer)]
-        static bool HandleBattlefieldTimer(CommandHandler handler, uint battleId, uint time)
+        static bool HandleBattlefieldTimer(CommandHandler handler, uint battleId, int time)
         {
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
             if (bf == null)
                 return false;
 
-            bf.SetTimer(time * Time.InMilliseconds);
+            bf.SetTimer((Seconds)time);
             if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command timer used)");
 

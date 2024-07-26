@@ -4,6 +4,7 @@
 using Framework.Database;
 using Game.Entities;
 using Game.Maps;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +20,7 @@ namespace Game.BattleFields
 
         public void InitBattlefield()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             uint count = 0;
             SQLResult result = DB.World.Query("SELECT TypeId, ScriptName FROM battlefield_template");
@@ -40,7 +41,7 @@ namespace Game.BattleFields
                 } while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} battlefields in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} battlefields in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void CreateBattlefieldsForMap(Map map)
@@ -141,16 +142,16 @@ namespace Game.BattleFields
             return null;
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             _updateTimer += diff;
-            if (_updateTimer > 1000)
+            if (_updateTimer > (Seconds)1)
             {
                 foreach (var (map, battlefield) in _battlefieldsByMap)
                     if (battlefield.IsEnabled())
                         battlefield.Update(_updateTimer);
 
-                _updateTimer = 0;
+                _updateTimer = TimeSpan.Zero;
             }
         }
 
@@ -161,6 +162,6 @@ namespace Game.BattleFields
         // used in player event handling
         Dictionary<(Map map, int zoneId), BattleField>  _battlefieldsByZone = new();
         // update interval
-        uint _updateTimer;
+        TimeSpan _updateTimer;
     }
 }

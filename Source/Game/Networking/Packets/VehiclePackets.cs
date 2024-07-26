@@ -66,7 +66,7 @@ namespace Game.Networking.Packets
             Status.Read(_worldPacket);
         }
 
-        public MovementInfo Status;
+        public MovementInfo Status = new();
     }
 
     public class RequestVehiclePrevSeat : ClientPacket
@@ -95,7 +95,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid DstVehicle;
-        public MovementInfo Status;
+        public MovementInfo Status = new();
         public byte DstSeatIndex = 255;
     }
 

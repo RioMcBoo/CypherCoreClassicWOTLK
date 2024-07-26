@@ -9,6 +9,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.DataStorage;
 using System.Collections.Generic;
+using System;
 
 namespace Game
 {
@@ -51,7 +52,7 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             // Stop the npc if moving
-            uint pause = creature.GetMovementTemplate().GetInteractionPauseTimer();
+            Milliseconds pause = creature.GetMovementTemplate().GetInteractionPauseTimer();
             if (pause != 0)
                 creature.PauseMovement(pause);
 
@@ -443,10 +444,10 @@ namespace Game
                             {
                                 if (_player.IsQuestObjectiveComplete(packet.Entry, quest, objective))
                                     return;
-                        }
+                            }
                         }
 
-                        if (quest.LimitTime != 0)
+                        if (quest.LimitTime != TimeSpan.Zero)
                             GetPlayer().RemoveTimedQuest(questId);
 
                         if (quest.HasAnyFlag(QuestFlags.Pvp))

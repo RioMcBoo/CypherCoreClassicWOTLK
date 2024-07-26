@@ -11,7 +11,7 @@ namespace Game.Arenas
     {
         public RuinsofLordaeronArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -30,8 +30,8 @@ namespace Game.Arenas
                 return false;
             }
 
-            result &= AddObject(RuinsofLordaeronObjectTypes.Buff1, RuinsofLordaeronObjectTypes.Buff1, 1328.719971f, 1632.719971f, 36.730400f, -1.448624f, 0, 0, 0.6626201f, -0.7489557f, 120);
-            result &= AddObject(RuinsofLordaeronObjectTypes.Buff2, RuinsofLordaeronObjectTypes.Buff2, 1243.300049f, 1699.170044f, 34.872601f, -0.06981307f, 0, 0, 0.03489945f, -0.9993908f, 120);
+            result &= AddObject(RuinsofLordaeronObjectTypes.Buff1, RuinsofLordaeronObjectTypes.Buff1, 1328.719971f, 1632.719971f, 36.730400f, -1.448624f, 0, 0, 0.6626201f, -0.7489557f, (Seconds)120);
+            result &= AddObject(RuinsofLordaeronObjectTypes.Buff2, RuinsofLordaeronObjectTypes.Buff2, 1243.300049f, 1699.170044f, 34.872601f, -0.06981307f, 0, 0, 0.03489945f, -0.9993908f, (Seconds)120);
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "RuinsofLordaeronArena: Failed to spawn buff object!");
@@ -52,14 +52,14 @@ namespace Game.Arenas
             for (int i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
                 DoorOpen(i);
 
-            taskScheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            taskScheduler.Schedule((Seconds)5, task =>
             {
                 for (int i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
                     DelObject(i);
             });
 
             for (int i = RuinsofLordaeronObjectTypes.Buff1; i <= RuinsofLordaeronObjectTypes.Buff2; ++i)
-                SpawnBGObject(i, 60);
+                SpawnBGObject(i, (Seconds)60);
         }
     }
 

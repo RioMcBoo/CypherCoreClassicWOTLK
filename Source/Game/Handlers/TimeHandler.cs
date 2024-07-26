@@ -13,7 +13,7 @@ namespace Game
         void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
         {
             ServerTimeOffset response = new();
-            response.Time = GameTime.GetGameTime();
+            response.Time = LoopTime.RealmTime;
             SendPacket(response);
         }
     }

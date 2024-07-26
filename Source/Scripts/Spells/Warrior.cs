@@ -146,7 +146,7 @@ namespace Scripts.Spells.Warrior
             {
                 for (int i = 0; i < 5; ++i)
                 {
-                    int timeOffset = 6 * i * aurEff.GetPeriod() / 25;
+                    Milliseconds timeOffset = (Milliseconds)(6 * i * aurEff.GetPeriod() / 25);
                     Vector4 loc = GetTarget().MoveSpline.ComputePosition(timeOffset);
                     GetTarget().SendPlaySpellVisual(new Position(loc.X, loc.Y, loc.Z), SpellIds.VisualBlazingCharge, 0, 0, 1.0f, true);
                 }
@@ -567,7 +567,7 @@ namespace Scripts.Spells.Warrior
         void HandleAfterCast()
         {
             if (_targetCount >= GetEffectInfo(0).CalcValue())
-                GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-GetEffectInfo(3).CalcValue()));
+                GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, Time.SpanFromSeconds(-GetEffectInfo(3).CalcValue()));
         }
 
         public override void Register()

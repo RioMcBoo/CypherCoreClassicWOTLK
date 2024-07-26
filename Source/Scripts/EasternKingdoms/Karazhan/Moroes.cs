@@ -115,7 +115,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), MiscConst.GroupNonEnrage, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), MiscConst.GroupNonEnrage, task =>
             {
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -129,18 +129,18 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 }
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(23), MiscConst.GroupNonEnrage, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(23), MiscConst.GroupNonEnrage, task =>
             {
                 DoCastVictim(SpellIds.Gouge);
-                task.Repeat(TimeSpan.FromSeconds(40));
+                task.Repeat(Time.SpanFromSeconds(40));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), MiscConst.GroupNonEnrage, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(30), MiscConst.GroupNonEnrage, task =>
             {
                 DoCast(me, SpellIds.Vanish);
                 me.SetCanMelee(false);
                 InVanish = true;
 
-                task.Schedule(TimeSpan.FromSeconds(5), garroteTask =>
+                task.Schedule(Time.SpanFromSeconds(5), garroteTask =>
                 {
                     Talk(TextIds.SaySpecial);
 
@@ -154,12 +154,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(35), MiscConst.GroupNonEnrage, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(35), MiscConst.GroupNonEnrage, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.MinDistance, 0, 0.0f, true, false);
                 if (target != null)
                     DoCast(target, SpellIds.Blind);
-                task.Repeat(TimeSpan.FromSeconds(40));
+                task.Repeat(Time.SpanFromSeconds(40));
             });
 
             Talk(TextIds.SayAggro);
@@ -196,7 +196,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 {
                     Creature creature = 
                         me.SummonCreature(AddList[i], MiscConst.Locations[i], 
-                        TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
+                        TempSummonType.CorpseTimedDespawn, Time.SpanFromSeconds(10));
 
                     if (creature != null)
                     {
@@ -211,7 +211,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 {
                     Creature creature = 
                         me.SummonCreature(AddId[i], MiscConst.Locations[i], 
-                        TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
+                        TempSummonType.CorpseTimedDespawn, Time.SpanFromSeconds(10));
 
                     if (creature != null)
                         AddGUID[i] = creature.GetGUID();
@@ -259,7 +259,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -318,7 +318,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             return me;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (instance.GetBossState(DataTypes.Moroes) != EncounterState.InProgress)
                 EnterEvadeMode();
@@ -336,14 +336,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         void Initialize()
         {
-            ManaBurn_Timer = 7000;
-            MindFlay_Timer = 1000;
-            ShadowWordPain_Timer = 6000;
+            ManaBurn_Timer = (Seconds)7;
+            MindFlay_Timer = (Seconds)1;
+            ShadowWordPain_Timer = (Seconds)6;
         }
 
-        uint ManaBurn_Timer;
-        uint MindFlay_Timer;
-        uint ShadowWordPain_Timer;
+        TimeSpan ManaBurn_Timer;
+        TimeSpan MindFlay_Timer;
+        TimeSpan ShadowWordPain_Timer;
 
         public override void Reset()
         {
@@ -354,7 +354,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -364,7 +364,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (MindFlay_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Mindfly);
-                MindFlay_Timer = 12000;                         // 3 sec channeled
+                MindFlay_Timer = (Seconds)12;                         // 3 sec channeled
             }
             else MindFlay_Timer -= diff;
 
@@ -377,7 +377,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                         DoCast(target, SpellIds.Manaburn);
                 }
 
-                ManaBurn_Timer = 5000;                          // 3 sec cast
+                ManaBurn_Timer = (Seconds)5;                          // 3 sec cast
             }
             else ManaBurn_Timer -= diff;
 
@@ -387,7 +387,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 if (target != null)
                 {
                     DoCast(target, SpellIds.Swpain);
-                    ShadowWordPain_Timer = 7000;
+                    ShadowWordPain_Timer = (Seconds)7;
                 }
             }
             else ShadowWordPain_Timer -= diff;
@@ -405,14 +405,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         void Initialize()
         {
-            HammerOfJustice_Timer = 1000;
-            SealOfCommand_Timer = 7000;
-            JudgementOfCommand_Timer = SealOfCommand_Timer + 29000;
+            HammerOfJustice_Timer = (Seconds)1;
+            SealOfCommand_Timer = (Seconds)7;
+            JudgementOfCommand_Timer = SealOfCommand_Timer + (Seconds)29;
         }
 
-        uint HammerOfJustice_Timer;
-        uint SealOfCommand_Timer;
-        uint JudgementOfCommand_Timer;
+        TimeSpan HammerOfJustice_Timer;
+        TimeSpan SealOfCommand_Timer;
+        TimeSpan JudgementOfCommand_Timer;
 
         public override void Reset()
         {
@@ -421,7 +421,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -431,22 +431,22 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (SealOfCommand_Timer <= diff)
             {
                 DoCast(me, SpellIds.Sealofcommand);
-                SealOfCommand_Timer = 32000;
-                JudgementOfCommand_Timer = 29000;
+                SealOfCommand_Timer = (Seconds)32;
+                JudgementOfCommand_Timer = (Seconds)29;
             }
             else SealOfCommand_Timer -= diff;
 
             if (JudgementOfCommand_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Judgementofcommand);
-                JudgementOfCommand_Timer = SealOfCommand_Timer + 29000;
+                JudgementOfCommand_Timer = SealOfCommand_Timer + (Seconds)29;
             }
             else JudgementOfCommand_Timer -= diff;
 
             if (HammerOfJustice_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Hammerofjustice);
-                HammerOfJustice_Timer = 12000;
+                HammerOfJustice_Timer = (Seconds)12;
             }
             else HammerOfJustice_Timer -= diff;
         }
@@ -463,16 +463,16 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         void Initialize()
         {
-            DispelMagic_Timer = 11000;
-            GreaterHeal_Timer = 1500;
-            HolyFire_Timer = 5000;
-            PowerWordShield_Timer = 1000;
+            DispelMagic_Timer = (Seconds)11;
+            GreaterHeal_Timer = (Milliseconds)1500;
+            HolyFire_Timer = (Seconds)5;
+            PowerWordShield_Timer = (Seconds)1;
         }
 
-        uint DispelMagic_Timer;
-        uint GreaterHeal_Timer;
-        uint HolyFire_Timer;
-        uint PowerWordShield_Timer;
+        TimeSpan DispelMagic_Timer;
+        TimeSpan GreaterHeal_Timer;
+        TimeSpan HolyFire_Timer;
+        TimeSpan PowerWordShield_Timer;
 
         public override void Reset()
         {
@@ -483,7 +483,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -493,7 +493,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (PowerWordShield_Timer <= diff)
             {
                 DoCast(me, SpellIds.Pwshield);
-                PowerWordShield_Timer = 15000;
+                PowerWordShield_Timer = (Seconds)15;
             }
             else PowerWordShield_Timer -= diff;
 
@@ -502,14 +502,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 Unit target = SelectGuestTarget();
 
                 DoCast(target, SpellIds.Greaterheal);
-                GreaterHeal_Timer = 17000;
+                GreaterHeal_Timer = (Seconds)17;
             }
             else GreaterHeal_Timer -= diff;
 
             if (HolyFire_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Holyfire);
-                HolyFire_Timer = 22000;
+                HolyFire_Timer = (Seconds)22;
             }
             else HolyFire_Timer -= diff;
 
@@ -521,7 +521,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 if (target != null)
                     DoCast(target, SpellIds.Dispelmagic);
 
-                DispelMagic_Timer = 25000;
+                DispelMagic_Timer = (Seconds)25;
             }
             else DispelMagic_Timer -= diff;
         }
@@ -538,16 +538,16 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         void Initialize()
         {
-            Cleanse_Timer = 13000;
-            GreaterBless_Timer = 1000;
-            HolyLight_Timer = 7000;
-            DivineShield_Timer = 31000;
+            Cleanse_Timer = (Seconds)13;
+            GreaterBless_Timer = (Seconds)1;
+            HolyLight_Timer = (Seconds)7;
+            DivineShield_Timer = (Seconds)31;
         }
 
-        uint Cleanse_Timer;
-        uint GreaterBless_Timer;
-        uint HolyLight_Timer;
-        uint DivineShield_Timer;
+        TimeSpan Cleanse_Timer;
+        TimeSpan GreaterBless_Timer;
+        TimeSpan HolyLight_Timer;
+        TimeSpan DivineShield_Timer;
 
         public override void Reset()
         {
@@ -558,7 +558,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -568,7 +568,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (DivineShield_Timer <= diff)
             {
                 DoCast(me, SpellIds.Divineshield);
-                DivineShield_Timer = 31000;
+                DivineShield_Timer = Time.SpanFromMilliseconds(31000);
             }
             else DivineShield_Timer -= diff;
 
@@ -577,7 +577,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 Unit target = SelectGuestTarget();
 
                 DoCast(target, SpellIds.Holylight);
-                HolyLight_Timer = 10000;
+                HolyLight_Timer = Time.SpanFromMilliseconds(10000);
             }
             else HolyLight_Timer -= diff;
 
@@ -587,7 +587,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
                 DoCast(target, SpellIds.Greaterblessofmight);
 
-                GreaterBless_Timer = 50000;
+                GreaterBless_Timer = Time.SpanFromMilliseconds(50000);
             }
             else GreaterBless_Timer -= diff;
 
@@ -597,7 +597,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
                 DoCast(target, SpellIds.Cleanse);
 
-                Cleanse_Timer = 10000;
+                Cleanse_Timer = Time.SpanFromMilliseconds(10000);
             }
             else Cleanse_Timer -= diff;
         }
@@ -614,14 +614,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         void Initialize()
         {
-            Hamstring_Timer = 7000;
-            MortalStrike_Timer = 10000;
-            WhirlWind_Timer = 21000;
+            Hamstring_Timer = Time.SpanFromMilliseconds(7000);
+            MortalStrike_Timer = Time.SpanFromMilliseconds(10000);
+            WhirlWind_Timer = Time.SpanFromMilliseconds(21000);
         }
 
-        uint Hamstring_Timer;
-        uint MortalStrike_Timer;
-        uint WhirlWind_Timer;
+        TimeSpan Hamstring_Timer;
+        TimeSpan MortalStrike_Timer;
+        TimeSpan WhirlWind_Timer;
 
         public override void Reset()
         {
@@ -630,7 +630,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -640,21 +640,21 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (Hamstring_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Hamstring);
-                Hamstring_Timer = 12000;
+                Hamstring_Timer = Time.SpanFromMilliseconds(12000);
             }
             else Hamstring_Timer -= diff;
 
             if (MortalStrike_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Mortalstrike);
-                MortalStrike_Timer = 18000;
+                MortalStrike_Timer = Time.SpanFromMilliseconds(18000);
             }
             else MortalStrike_Timer -= diff;
 
             if (WhirlWind_Timer <= diff)
             {
                 DoCast(me, SpellIds.Whirlwind);
-                WhirlWind_Timer = 21000;
+                WhirlWind_Timer = Time.SpanFromMilliseconds(21000);
             }
             else WhirlWind_Timer -= diff;
         }
@@ -671,16 +671,16 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         void Initialize()
         {
-            Disarm_Timer = 6000;
-            HeroicStrike_Timer = 10000;
-            ShieldBash_Timer = 8000;
-            ShieldWall_Timer = 4000;
+            Disarm_Timer = Time.SpanFromMilliseconds(6000);
+            HeroicStrike_Timer = Time.SpanFromMilliseconds(10000);
+            ShieldBash_Timer = Time.SpanFromMilliseconds(8000);
+            ShieldWall_Timer = Time.SpanFromMilliseconds(4000);
         }
 
-        uint Disarm_Timer;
-        uint HeroicStrike_Timer;
-        uint ShieldBash_Timer;
-        uint ShieldWall_Timer;
+        TimeSpan Disarm_Timer;
+        TimeSpan HeroicStrike_Timer;
+        TimeSpan ShieldBash_Timer;
+        TimeSpan ShieldWall_Timer;
 
         public override void Reset()
         {
@@ -689,7 +689,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -699,28 +699,28 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (Disarm_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Disarm);
-                Disarm_Timer = 12000;
+                Disarm_Timer = Time.SpanFromMilliseconds(12000);
             }
             else Disarm_Timer -= diff;
 
             if (HeroicStrike_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Heroicstrike);
-                HeroicStrike_Timer = 10000;
+                HeroicStrike_Timer = Time.SpanFromMilliseconds(10000);
             }
             else HeroicStrike_Timer -= diff;
 
             if (ShieldBash_Timer <= diff)
             {
                 DoCastVictim(SpellIds.Shieldbash);
-                ShieldBash_Timer = 13000;
+                ShieldBash_Timer = Time.SpanFromMilliseconds(13000);
             }
             else ShieldBash_Timer -= diff;
 
             if (ShieldWall_Timer <= diff)
             {
                 DoCast(me, SpellIds.Shieldwall);
-                ShieldWall_Timer = 21000;
+                ShieldWall_Timer = Time.SpanFromMilliseconds(21000);
             }
             else ShieldWall_Timer -= diff;
         }

@@ -628,14 +628,14 @@ namespace Game.AI
     {
         const float CASTER_CHASE_DISTANCE = 28.0f;
 
-        uint _castCheckTimer;
+        TimeSpan _castCheckTimer;
         bool _chaseCloser;
         bool _forceFacing;
         bool _isFollowing;
 
         public SimpleCharmedPlayerAI(Player player) : base(player)
         {
-            _castCheckTimer = 2500;
+            _castCheckTimer = (Milliseconds)2500;
             _chaseCloser = false;
             _forceFacing = true;
         }
@@ -1196,7 +1196,7 @@ namespace Game.AI
             return SelectSpellCast(spells);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             Creature charmer = GetCharmer();
             if (charmer == null)
@@ -1265,7 +1265,7 @@ namespace Game.AI
                 if (_castCheckTimer <= diff)
                 {
                     if (me.HasUnitState(UnitState.Casting))
-                        _castCheckTimer = 0;
+                        _castCheckTimer = TimeSpan.Zero;
                     else
                     {
                         if (IsRangedAttacker()) // chase to zero if the target isn't in line of sight
@@ -1283,7 +1283,7 @@ namespace Game.AI
                         var shouldCast = SelectAppropriateCastForSpec();
                         if (shouldCast != default)
                             DoCastAtTarget(shouldCast);
-                        _castCheckTimer = 500;
+                        _castCheckTimer = (Milliseconds)500;
                     }
                 }
                 else

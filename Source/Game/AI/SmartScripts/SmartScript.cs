@@ -47,7 +47,7 @@ namespace Game.AI
         List<SmartScriptHolder> _storedEvents = new();
         List<int> _remIDs = new();
 
-        uint _textTimer;
+        TimeSpan _textTimer;
         int _lastTextID;
         ObjectGuid _textGUID;
         int _talkerEntry;
@@ -66,7 +66,7 @@ namespace Game.AI
             _trigger = null;
             _eventPhase = 0;
             _pathId = 0;
-            _textTimer = 0;
+            _textTimer = TimeSpan.Zero;
             _lastTextID = 0;
             _textGUID = ObjectGuid.Empty;
             _useTextTimer = false;
@@ -125,8 +125,8 @@ namespace Game.AI
                             Event.EntryOrGuid, Event.EventId, Event.SourceType, unit, GetBaseObject()))
                         {
                             ProcessEvent(Event, unit, var0, var1, bvar, spell, gob, varString);
-                }
-            }
+                        }
+                    }
                 }
             }
 
@@ -590,7 +590,7 @@ namespace Game.AI
                         if (!IsUnit(target))
                             continue;
 
-                        if (!e.Action.cast.castFlags.HasAnyFlag((int)SmartCastFlags.AuraNotPresent) 
+                        if (!e.Action.cast.castFlags.HasAnyFlag((int)SmartCastFlags.AuraNotPresent)
                             || !target.ToUnit().HasAura(e.Action.cast.spell))
                         {
 
@@ -608,7 +608,7 @@ namespace Game.AI
 
                             tempLastInvoker.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
 
-                            Log.outDebug(LogFilter.ScriptsAi, 
+                            Log.outDebug(LogFilter.ScriptsAi,
                                 $"SmartScript.ProcessAction. SMART_ACTION_INVOKER_CAST: " +
                                 $"Invoker {tempLastInvoker.GetGUID()} casts spell {e.Action.cast.spell} " +
                                 $"on target {target.GetGUID()} with castflags {e.Action.cast.castFlags}");
@@ -619,7 +619,7 @@ namespace Game.AI
                                 $"Spell {e.Action.cast.spell} not cast because it has flag " +
                                 $"SMARTCAST_AURA_NOT_PRESENT and the target ({target.GetGUID()}) " +
                                 $"already has the aura");
-                    }
+                        }
                     }
                     break;
                 }
@@ -631,7 +631,7 @@ namespace Game.AI
                         {
                             // Activate
                             target.ToGameObject().SetLootState(LootState.Ready);
-                            target.ToGameObject().UseDoorOrButton(0, false, unit);
+                            target.ToGameObject().UseDoorOrButton(default, false, unit);
 
                             Log.outDebug(LogFilter.ScriptsAi, 
                                 $"SmartScript.ProcessAction. SMART_ACTION_ACTIVATE_GOBJECT. " +
@@ -1045,11 +1045,11 @@ namespace Game.AI
                 case SmartActions.ForceDespawn:
                 {
                     // there should be at least a world update tick before despawn, to avoid breaking linked actions
-                    TimeSpan despawnDelay = TimeSpan.FromMilliseconds(e.Action.forceDespawn.delay);
+                    TimeSpan despawnDelay = e.Action.forceDespawn.delay;
                     if (despawnDelay <= TimeSpan.Zero)
-                        despawnDelay = TimeSpan.FromMilliseconds(1);
+                        despawnDelay = (Milliseconds)1;
 
-                    TimeSpan forceRespawnTimer = TimeSpan.FromSeconds(e.Action.forceDespawn.forceRespawnTimer);
+                    TimeSpan forceRespawnTimer = e.Action.forceDespawn.forceRespawnTimer;
 
                     foreach (var target in targets)
                     {
@@ -1239,7 +1239,11 @@ namespace Game.AI
                         o += e.Target.o;
                         for (uint counter = 0; counter < spawnsCount; counter++)
                         {
-                            Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
+                            Creature summon = summoner.SummonCreature(
+                                e.Action.summonCreature.creature, x, y, z, o, 
+                                (TempSummonType)e.Action.summonCreature.type, 
+                                e.Action.summonCreature.duration, privateObjectOwner);
+
                             if (summon != null)
                                 if (e.Action.summonCreature.attackInvoker != 0)
                                     summon.GetAI().AttackStart(target.ToUnit());
@@ -1251,7 +1255,11 @@ namespace Game.AI
 
                     for (uint counter = 0; counter < spawnsCount; counter++)
                     {
-                        Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
+                        Creature summon = summoner.SummonCreature(
+                            e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, 
+                            (TempSummonType)e.Action.summonCreature.type, 
+                            e.Action.summonCreature.duration, privateObjectOwner);
+
                         if (summon != null)
                             if (unit != null && e.Action.summonCreature.attackInvoker != 0)
                                 summon.GetAI().AttackStart(unit);
@@ -1268,14 +1276,18 @@ namespace Game.AI
                     {
                         Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
                         Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f));
-                        summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
+                        summoner.SummonGameObject(
+                            e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime, 
+                            (GameObjectSummonType)e.Action.summonGO.summonType);
                     }
 
                     if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
                     Quaternion _rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
-                    summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
+                    summoner.SummonGameObject(e.Action.summonGO.entry, 
+                        new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), 
+                        _rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
                     break;
                 }
                 case SmartActions.KillUnit:
@@ -1359,7 +1371,7 @@ namespace Game.AI
                                     Log.outError(LogFilter.Sql,
                                         "SmartScript: Action target for SMART_ACTION_SET_COUNTER " +
                                         "is not using SmartAI, skipping");
-                            }
+                                }
                             }
                             else if (IsGameObject(target))
                             {
@@ -1371,9 +1383,9 @@ namespace Game.AI
                                     Log.outError(LogFilter.Sql,
                                         "SmartScript: Action target for SMART_ACTION_SET_COUNTER " +
                                         "is not using SmartGameObjectAI, skipping");
+                                }
                             }
                         }
-                    }
                     }
                     else
                         StoreCounter(e.Action.setCounter.counterId, e.Action.setCounter.value, e.Action.setCounter.reset);
@@ -1400,7 +1412,7 @@ namespace Game.AI
                     _me.GetAI<SmartAI>().StartPath(entry, repeat, unit);
 
                     int quest = e.Action.wpStart.quest;
-                    uint DespawnTime = e.Action.wpStart.despawnTime;
+                    Milliseconds DespawnTime = e.Action.wpStart.despawnTime;
                     _me.GetAI<SmartAI>().EscortQuestID = quest;
                     _me.GetAI<SmartAI>().SetDespawnTime(DespawnTime);
                     break;
@@ -1410,7 +1422,7 @@ namespace Game.AI
                     if (!IsSmart())
                         break;
 
-                    uint delay = e.Action.wpPause.delay;
+                    Milliseconds delay = e.Action.wpPause.delay;
                     ((SmartAI)_me.GetAI()).PausePath(delay, true);
                     break;
                 }
@@ -1419,7 +1431,7 @@ namespace Game.AI
                     if (!IsSmart())
                         break;
 
-                    uint DespawnTime = e.Action.wpStop.despawnTime;
+                    Milliseconds DespawnTime = e.Action.wpStop.despawnTime;
                     int quest = e.Action.wpStop.quest;
                     bool fail = e.Action.wpStop.fail != 0;
                     ((SmartAI)_me.GetAI()).StopPath(DespawnTime, quest, fail);
@@ -1432,7 +1444,7 @@ namespace Game.AI
 
                     // Set the timer to 1 ms so the path will be resumed on next update loop
                     if (_me.GetAI<SmartAI>().CanResumePath())
-                        _me.GetAI<SmartAI>().SetWPPauseTimer(1);
+                        _me.GetAI<SmartAI>().SetWPPauseTimer((Milliseconds)1);
                     break;
                 }
                 case SmartActions.SetOrientation:
@@ -1545,7 +1557,7 @@ namespace Game.AI
                                 EquipmentInfo eInfo = Global.ObjectMgr.GetEquipmentInfo(npc.GetEntry(), equipId);
                                 if (eInfo == null)
                                 {
-                                    Log.outError(LogFilter.Sql, 
+                                    Log.outError(LogFilter.Sql,
                                         $"SmartScript: SMART_ACTION_EQUIP uses non-existent equipment info id {equipId} " +
                                         $"for creature {npc.GetEntry()}");
                                     break;
@@ -1565,8 +1577,8 @@ namespace Game.AI
                             {
                                 if (e.Action.equip.mask == 0 || (e.Action.equip.mask & (1 << i)) != 0)
                                     npc.SetVirtualItem(i, slot[i].ItemId, slot[i].AppearanceModId, slot[i].ItemVisual);
+                            }
                         }
-                    }
                     }
                     break;
                 }
@@ -1631,7 +1643,7 @@ namespace Game.AI
                             {
                                 if (((SmartAI)creature.GetAI()).CanCombatMove())
                                     creature.StartDefaultCombatMovement(creature.GetVictim(), attackDistance, attackAngle);
-                    }
+                            }
                         }
                     }
                     break;
@@ -1729,7 +1741,7 @@ namespace Game.AI
                             if (!IsUnit(target))
                                 continue;
 
-                            if (!e.Action.crossCast.castFlags.HasAnyFlag((int)SmartCastFlags.AuraNotPresent) 
+                            if (!e.Action.crossCast.castFlags.HasAnyFlag((int)SmartCastFlags.AuraNotPresent)
                                 || !target.ToUnit().HasAura(e.Action.crossCast.spell))
                             {
                                 if (!interruptedSpell && e.Action.crossCast.castFlags.HasAnyFlag((int)SmartCastFlags.InterruptPrevious))
@@ -1745,8 +1757,8 @@ namespace Game.AI
                                 Log.outDebug(LogFilter.ScriptsAi,
                                     $"Spell {e.Action.crossCast.spell} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT " +
                                     $"and the target ({target.GetGUID()}) already has the aura");
+                            }
                         }
-                    }
                     }
                     break;
                 }
@@ -1929,7 +1941,7 @@ namespace Game.AI
                         if (IsUnit(target))
                         {
                             target.ToUnit().InterruptNonMeleeSpells(
-                                e.Action.interruptSpellCasting.withDelayed != 0, e.Action.interruptSpellCasting.spell_id, 
+                                e.Action.interruptSpellCasting.withDelayed != 0, e.Action.interruptSpellCasting.spell_id,
                                 e.Action.interruptSpellCasting.withInstant != 0);
                         }
                     }
@@ -2024,7 +2036,7 @@ namespace Game.AI
                                 Log.outError(LogFilter.Sql, 
                                     "SmartScript: Action target for SMART_ACTION_SEND_TARGET_TO_TARGET " +
                                     "is not using SmartAI, skipping");
-                        }
+                            }
                         }
                         else if (IsGameObject(target))
                         {
@@ -2036,8 +2048,8 @@ namespace Game.AI
                                 Log.outError(LogFilter.Sql, 
                                     "SmartScript: Action target for SMART_ACTION_SEND_TARGET_TO_TARGET " +
                                     "is not using SmartGameObjectAI, skipping");
+                            }
                         }
-                    }
                     }
                     break;
                 }
@@ -2288,8 +2300,8 @@ namespace Game.AI
 
                         ne.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
                         ne.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
-                        ne.minMaxRepeat.repeatMin = 0;
-                        ne.minMaxRepeat.repeatMax = 0;
+                        ne.minMaxRepeat.repeatMin = Milliseconds.Zero;
+                        ne.minMaxRepeat.repeatMax = Milliseconds.Zero;
 
                         ne.event_flags = 0;
                         ne.event_flags |= SmartEventFlags.NotRepeatable;
@@ -2297,8 +2309,8 @@ namespace Game.AI
                         SmartAction ac = new();
                         ac.type = SmartActions.SpawnSpawngroup;
                         ac.groupSpawn.groupId = e.Action.groupSpawn.groupId;
-                        ac.groupSpawn.minDelay = 0;
-                        ac.groupSpawn.maxDelay = 0;
+                        ac.groupSpawn.minDelay = Milliseconds.Zero;
+                        ac.groupSpawn.maxDelay = Milliseconds.Zero;
                         ac.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
                         ac.timeEvent.id = e.Action.timeEvent.id;
 
@@ -2330,8 +2342,8 @@ namespace Game.AI
 
                         ne.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
                         ne.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
-                        ne.minMaxRepeat.repeatMin = 0;
-                        ne.minMaxRepeat.repeatMax = 0;
+                        ne.minMaxRepeat.repeatMin = Milliseconds.Zero;
+                        ne.minMaxRepeat.repeatMax = Milliseconds.Zero;
 
                         ne.event_flags = 0;
                         ne.event_flags |= SmartEventFlags.NotRepeatable;
@@ -2339,8 +2351,8 @@ namespace Game.AI
                         SmartAction ac = new();
                         ac.type = SmartActions.DespawnSpawngroup;
                         ac.groupSpawn.groupId = e.Action.groupSpawn.groupId;
-                        ac.groupSpawn.minDelay = 0;
-                        ac.groupSpawn.maxDelay = 0;
+                        ac.groupSpawn.minDelay = Milliseconds.Zero;
+                        ac.groupSpawn.maxDelay = Milliseconds.Zero;
                         ac.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
                         ac.timeEvent.id = e.Action.timeEvent.id;
 
@@ -2499,7 +2511,7 @@ namespace Game.AI
                 {
                     int speedInteger = e.Action.movementSpeed.speedInteger;
                     int speedFraction = e.Action.movementSpeed.speedFraction;
-                    float speed = (float)(speedInteger + speedFraction / Math.Pow(10, Math.Floor(Math.Log10(speedFraction != 0 ? speedFraction : 1) + 1)));
+                    Speed speed = (Speed)(speedInteger + speedFraction / Math.Pow(10, Math.Floor(Math.Log10(speedFraction != 0 ? speedFraction : 1) + 1)));
 
                     foreach (var target in targets)
                     {
@@ -2532,12 +2544,12 @@ namespace Game.AI
                     WorldObject obj = GetBaseObject();
                     if (obj != null)
                     {
-                        obj.GetMap().SetZoneOverrideLight(e.Action.overrideLight.zoneId, e.Action.overrideLight.areaLightId, e.Action.overrideLight.overrideLightId, TimeSpan.FromMilliseconds(e.Action.overrideLight.transitionMilliseconds));
+                        obj.GetMap().SetZoneOverrideLight(e.Action.overrideLight.zoneId, e.Action.overrideLight.areaLightId, e.Action.overrideLight.overrideLightId, e.Action.overrideLight.transition);
                         Log.outDebug(LogFilter.ScriptsAi, 
                             $"SmartScript::ProcessAction: SMART_ACTION_OVERRIDE_LIGHT: " +
                             $"{obj.GetGUID()} sets zone override light (zoneId: {e.Action.overrideLight.zoneId}, " +
                             $"areaLightId: {e.Action.overrideLight.areaLightId}, overrideLightId: {e.Action.overrideLight.overrideLightId}, " +
-                            $"transitionMilliseconds: {e.Action.overrideLight.transitionMilliseconds})");
+                            $"transitionMilliseconds: {e.Action.overrideLight.transition})");
                     }
                     break;
                 }
@@ -2592,8 +2604,8 @@ namespace Game.AI
                                     $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: " +
                                     $"id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, " +
                                     $"target {playerTarget.GetName()} - failed to create");
+                            }
                         }
-                    }
                     }
 
                     break;
@@ -2665,12 +2677,12 @@ namespace Game.AI
 
                     void doCreatePersonalClone(Position position, Player privateObjectOwner)
                     {
-                        Creature summon = GetBaseObject().SummonPersonalClone(position, (TempSummonType)e.Action.becomePersonalClone.type, TimeSpan.FromMilliseconds(e.Action.becomePersonalClone.duration), 0, 0, privateObjectOwner);
+                        Creature summon = GetBaseObject().SummonPersonalClone(position, (TempSummonType)e.Action.becomePersonalClone.type, e.Action.becomePersonalClone.duration, 0, 0, privateObjectOwner);
                         if (summon != null)
                         {
                             if (IsSmart(summon))
                                 ((SmartAI)summon.GetAI()).SetTimedActionList(e, e.EntryOrGuid, privateObjectOwner, e.EventId + 1);
-                    }
+                        }
                     }
 
                     // if target is position then targets container was empty
@@ -2741,11 +2753,11 @@ namespace Game.AI
                     Log.outError(LogFilter.Sql,
                         $"SmartScript.ProcessAction: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()}, " +
                         $"Event {e.EventId}, Link Event {e.Link} not found or invalid, skipped.");
+                }
             }
         }
-        }
 
-        void ProcessTimedAction(SmartScriptHolder e, uint min, uint max, Unit unit = null, int var0 = 0, int var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
+        void ProcessTimedAction(SmartScriptHolder e, TimeSpan min, TimeSpan max, Unit unit = null, int var0 = 0, int var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
             // We may want to execute action rarely and because of this if condition is not fulfilled the action will be rechecked in a long time
             if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(e.EntryOrGuid, e.EventId, e.SourceType, unit, GetBaseObject()))
@@ -2754,7 +2766,10 @@ namespace Game.AI
                 ProcessAction(e, unit, var0, var1, bvar, spell, gob, varString);
             }
             else
-                RecalcTimer(e, Math.Min(min, 5000), Math.Min(min, 5000));
+            {
+                min = Time.Min(min, (Seconds)5);
+                RecalcTimer(e, min, min);
+            }
         }
 
         SmartScriptHolder CreateSmartEvent(SmartEvents e, SmartEventFlags event_flags, int event_param1, int event_param2, int event_param3, int event_param4, int event_param5,
@@ -2951,7 +2966,7 @@ namespace Game.AI
                             && refObj.IsInRange(obj, e.Target.unitRange.minDist, e.Target.unitRange.maxDist))
                         {
                             targets.Add(obj);
-                    }
+                        }
                     }
 
                     if (e.Target.unitRange.maxSize != 0)
@@ -3021,7 +3036,7 @@ namespace Game.AI
                             && refObj.IsInRange(obj, e.Target.goRange.minDist, e.Target.goRange.maxDist))
                         {
                             targets.Add(obj);
-                    }
+                        }
                     }
 
                     if (e.Target.goRange.maxSize != 0)
@@ -3198,7 +3213,7 @@ namespace Game.AI
                         {
                             if (e.Target.threatList.maxDist == 0 || _me.IsWithinCombatRange(refe.GetVictim(), e.Target.threatList.maxDist))
                                 targets.Add(refe.GetVictim());
-                    }
+                        }
                     }
                     break;
                 }
@@ -3341,7 +3356,9 @@ namespace Game.AI
                         ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax, _me.GetVictim());
                     }
                     else // make it predictable
-                        RecalcTimer(e, 500, 500);
+                    {
+                        RecalcTimer(e, (Milliseconds)500, (Milliseconds)500);
+                    }
                     break;
                 }
                 case SmartEvents.VictimCasting:
@@ -3361,7 +3378,7 @@ namespace Game.AI
                         {
                             if (currSpell.m_spellInfo.Id != e.Event.targetCasting.spellId)
                                 return;
-                    }
+                        }
                     }
 
                     ProcessTimedAction(e, e.Event.targetCasting.repeatMin, e.Event.targetCasting.repeatMax, _me.GetVictim());
@@ -3377,7 +3394,7 @@ namespace Game.AI
                     if (creatures.Empty())
                     {
                         // if there are at least two same npcs, they will perform the same action immediately even if this is useless...
-                        RecalcTimer(e, 1000, 3000);
+                        RecalcTimer(e, (Seconds)1, (Seconds)3);
                         return;
                     }
 
@@ -3886,7 +3903,7 @@ namespace Game.AI
                 case SmartEvents.Update:
                 case SmartEvents.UpdateIc:
                 case SmartEvents.UpdateOoc:
-                    RecalcTimer(e, e.Event.minMaxRepeat.min, e.Event.minMaxRepeat.max);
+                    RecalcTimer(e, (Milliseconds)e.Event.minMaxRepeat.min, (Milliseconds)e.Event.minMaxRepeat.max);
                     break;
                 case SmartEvents.DistanceCreature:
                 case SmartEvents.DistanceGameobject:
@@ -3898,18 +3915,18 @@ namespace Game.AI
             }
         }
 
-        void RecalcTimer(SmartScriptHolder e, uint min, uint max)
+        void RecalcTimer(SmartScriptHolder e, TimeSpan min, TimeSpan max)
         {
-            if (e.EntryOrGuid == 15294 && e.Timer != 0)
+            if (e.EntryOrGuid == 15294 && e.Timer != TimeSpan.Zero)
             {
                 Log.outError(LogFilter.Server, "Called RecalcTimer");
             }
             // min/max was checked at loading!
-            e.Timer = RandomHelper.URand(min, max);
-            e.Active = e.Timer == 0;
+            e.Timer = RandomHelper.TRand(min, max);
+            e.Active = e.Timer == TimeSpan.Zero;
         }
 
-        void UpdateTimer(SmartScriptHolder e, uint diff)
+        void UpdateTimer(SmartScriptHolder e, TimeSpan diff)
         {
             if (e.GetEventType() == SmartEvents.Link)
                 return;
@@ -3943,7 +3960,7 @@ namespace Game.AI
                 {
                     if (_me != null && _me.HasUnitState(UnitState.Root | UnitState.LostControl))
                     {
-                        e.Timer = 1;
+                        e.Timer = (Milliseconds)1;
                         return;
                     }
                 }
@@ -3992,7 +4009,7 @@ namespace Game.AI
                 if (e.Priority != SmartScriptHolder.DefaultPriority)
                 {
                     // Reset priority to default one only if the event hasn't been rescheduled again to next loop
-                    if (e.Timer > 1)
+                    if (e.Timer > (Milliseconds)1)
                     {
                         // Re-sort events if this was moved to the top of the queue
                         _eventSortingRequired = true;
@@ -4004,9 +4021,11 @@ namespace Game.AI
             else
             {
                 e.Timer -= diff;
-                if (e.EntryOrGuid == 15294 && _me.GetGUID().GetCounter() == 55039 && e.Timer != 0)
+                if (e.EntryOrGuid == 15294 && _me.GetGUID().GetCounter() == 55039 && e.Timer != TimeSpan.Zero)
                 {
-                    Log.outError(LogFilter.Server, "Called UpdateTimer: reduce timer: e.timer: {0}, diff: {1}  current time: {2}", e.Timer, diff, Time.GetMSTime());
+                    Log.outError(LogFilter.Server, 
+                        $"Called UpdateTimer: reduce timer: e.timer: {(Milliseconds)e.Timer}, " +
+                        $"diff: {(Milliseconds)diff} current time: {Time.NowRelative}");
                 }
             }
 
@@ -4028,7 +4047,7 @@ namespace Game.AI
             }
         }
 
-        public void OnUpdate(uint diff)
+        public void OnUpdate(TimeSpan diff)
         {
             if ((_scriptType == SmartScriptType.Creature || _scriptType == SmartScriptType.GameObject || _scriptType == SmartScriptType.AreaTriggerEntity || _scriptType == SmartScriptType.AreaTriggerEntityCustom) && GetBaseObject() == null)
                 return;
@@ -4100,7 +4119,7 @@ namespace Game.AI
                     _lastTextID = 0;
                     int entry = _talkerEntry;
                     _talkerEntry = 0;
-                    _textTimer = 0;
+                    _textTimer = TimeSpan.Zero;
                     _useTextTimer = false;
                     ProcessEventsFor(SmartEvents.TextOver, null, textID, entry);
                 }
@@ -4115,7 +4134,7 @@ namespace Game.AI
 
         void RaisePriority(SmartScriptHolder e)
         {
-            e.Timer = 1;
+            e.Timer = (Milliseconds)1;
             // Change priority only if it's set to default, otherwise keep the current order of events
             if (e.Priority == SmartScriptHolder.DefaultPriority)
             {

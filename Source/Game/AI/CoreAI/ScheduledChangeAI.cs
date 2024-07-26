@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 
 namespace Game.AI
 {
@@ -18,7 +19,7 @@ namespace Game.AI
 
         public override void JustEnteredCombat(Unit unit) { }
 
-        public override void UpdateAI(uint diff) { }
+        public override void UpdateAI(TimeSpan diff) { }
 
         public override void JustAppeared() { }
 

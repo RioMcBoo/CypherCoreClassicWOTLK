@@ -42,30 +42,30 @@ namespace Scripts.EasternKingdoms.AlteracValley.Galvangar
         public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayAggro);
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(9), task =>
+            _scheduler.Schedule((Seconds)1, (Seconds)9, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(16));
+                task.Repeat((Seconds)10, (Seconds)16);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(19), task =>
+            _scheduler.Schedule((Seconds)2, (Seconds)19, task =>
             {
                 DoCastVictim(SpellIds.FrighteningShout);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)10, (Seconds)15);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(13), task =>
+            _scheduler.Schedule((Seconds)1, (Seconds)13, task =>
             {
                 DoCastVictim(SpellIds.Whirlwind1);
-                task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)6, (Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)5, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Whirlwind2);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
+                task.Repeat((Seconds)10, (Seconds)25);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)5, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.MortalStrike);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)10, (Seconds)30);
             });
         }
 
@@ -87,7 +87,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Galvangar
             return true;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() || !CheckInRoom())
                 return;

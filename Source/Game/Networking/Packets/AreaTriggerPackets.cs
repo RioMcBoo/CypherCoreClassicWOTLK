@@ -79,7 +79,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(TimeToTarget);
+            data.WriteInt32(TimeToTarget);
             data.WriteUInt32(ElapsedTimeForMovement);
 
             data.WriteBits(Points.Length, 16);
@@ -89,8 +89,8 @@ namespace Game.Networking.Packets
                 data.WriteVector3(point);
         }
 
-        public uint TimeToTarget;
-        public uint ElapsedTimeForMovement;
+        public Milliseconds TimeToTarget;
+        public RelativeTime ElapsedTimeForMovement;
         public Vector3[] Points = [];
     }
 }

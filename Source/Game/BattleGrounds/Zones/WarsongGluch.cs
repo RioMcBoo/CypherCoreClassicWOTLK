@@ -36,11 +36,11 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
             _flagAssaultTimer = new(MiscConst.FlagAssaultTimer);
         }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() == BattlegroundStatus.InProgress)
             {
-                if (GetElapsedTime() >= 17 * Time.Minute * Time.InMilliseconds)
+                if (GetElapsedTime() >= (Minutes)17)
                 {
                     if (GetTeamScore(BattleGroundTeamId.Alliance) == 0)
                     {
@@ -134,12 +134,12 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
                 if (gameObject != null)
                 {
                     gameObject.UseDoorOrButton();
-                    gameObject.DespawnOrUnsummon(TimeSpan.FromSeconds(3));
+                    gameObject.DespawnOrUnsummon((Seconds)3);
                 }
             }
 
             UpdateWorldState(WorldStateIds.StateTimerActive, 1);
-            UpdateWorldState(WorldStateIds.StateTimer, (int)(GameTime.GetGameTime() + 15 * Time.Minute));
+            UpdateWorldState(WorldStateIds.StateTimer, LoopTime.RealmTime + (Minutes)15);
 
             // players joining later are not eligibles
             TriggerGameEvent(8563);
@@ -442,7 +442,7 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
                     ApplyAssaultDebuffToPlayer(player);
 
                     flagInBase.CastSpell(player, SpellIds.QuickCapTimer, true);
-                    player.StartCriteria(CriteriaStartEvent.BeSpellTarget, SpellIds.QuickCapTimer, TimeSpan.FromSeconds(GameTime.GetGameTime() - flagInBase.GetFlagTakenFromBaseTime()));
+                    player.StartCriteria(CriteriaStartEvent.BeSpellTarget, SpellIds.QuickCapTimer, LoopTime.ServerTime - flagInBase.GetFlagTakenFromBaseTime());
                     break;
                 }
                 case FlagState.Respawning:
@@ -612,7 +612,7 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
 
         public const int WsEventStartBattle = 35912;
 
-        public static TimeSpan FlagAssaultTimer = TimeSpan.FromSeconds(30);
+        public static TimeSpan FlagAssaultTimer = (Seconds)30;
         public const ushort FlagBrutalAssaultStackCount = 5;
 
         public static int[][] Honor =

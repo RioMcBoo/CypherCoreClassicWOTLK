@@ -230,7 +230,7 @@ namespace Game.Collision
                                 uint referencedNode = iSpawnIndices[spawn.Id];
                                 if (!iLoadedSpawns.ContainsKey(referencedNode))
                                 {
-                                    Log.outError(LogFilter.Server, 
+                                    Log.outError(LogFilter.Server,
                                         $"StaticMapTree.UnloadMapTile() : " +
                                         $"trying to unload non-referenced model '{spawn.name}' (ID:{spawn.Id})");
                                 }

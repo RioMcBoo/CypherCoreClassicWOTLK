@@ -46,13 +46,13 @@ namespace Game.Entities
             }
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             Global.ScriptMgr.OnConversationUpdate(this, diff);
 
-            if (GetDuration() > TimeSpan.FromMilliseconds(diff))
+            if (GetDuration() > diff)
             {
-                _duration -= TimeSpan.FromMilliseconds(diff);                
+                _duration -= diff;                
             }
             else
             {
@@ -138,7 +138,7 @@ namespace Game.Entities
                     if (locale == Locale.enUS)
                         lineField.StartTime = (uint)_lastLineEndTimes[(int)locale].TotalMilliseconds;
 
-                    _lastLineEndTimes[(int)locale] += TimeSpan.FromMilliseconds(convoLine.AdditionalDuration);
+                    _lastLineEndTimes[(int)locale] += convoLine.AdditionalDuration;
                 }
 
                 lines.Add(lineField);
@@ -149,7 +149,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Lines), lines);
 
             // conversations are despawned 5-20s after LastLineEndTime
-            _duration += TimeSpan.FromSeconds(10);
+            _duration += (Seconds)10;
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
         }
@@ -216,7 +216,7 @@ namespace Game.Entities
             return _lastLineEndTimes[(int)locale];
         }
 
-        public int GetLineDuration(Locale locale, int lineId)
+        public Milliseconds GetLineDuration(Locale locale, int lineId)
         {
             var convoLine = CliDB.ConversationLineStorage.LookupByKey(lineId);
             if (convoLine == null)
@@ -224,10 +224,10 @@ namespace Game.Entities
                 Log.outError(LogFilter.Conversation, 
                     $"Conversation::GetLineDuration: Tried to get duration " +
                     $"for invalid ConversationLine id {lineId}.");
-                return 0;
+                return Milliseconds.Zero;
             }
 
-            return 0;
+            return Milliseconds.Zero;
         }
 
         public TimeSpan GetLineEndTime(Locale locale, int lineId)
@@ -240,7 +240,7 @@ namespace Game.Entities
                     $"for locale {locale}, lineid {lineId} (Conversation ID: {GetEntry()}).");
                 return TimeSpan.Zero;
             }
-            return lineStartTime + TimeSpan.FromMilliseconds(GetLineDuration(locale, lineId));
+            return lineStartTime + GetLineDuration(locale, lineId);
         }
 
         public Locale GetPrivateObjectOwnerLocale()

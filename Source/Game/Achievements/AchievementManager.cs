@@ -238,7 +238,7 @@ namespace Game.Achievements
                         continue;
 
                     CompletedAchievementData ca = new();
-                    ca.Date = achievementResult.Read<long>(1);
+                    ca.Date = (ServerTime)(UnixTime64)achievementResult.Read<long>(1);
                     ca.Changed = false;
 
                     _achievementPoints += achievement.Points;
@@ -262,12 +262,13 @@ namespace Game.Achievements
 
             if (!criteriaResult.IsEmpty())
             {
-                var now = GameTime.GetGameTime();
+                ServerTime now = LoopTime.ServerTime;
+
                 do
                 {
                     int id = criteriaResult.Read<int>(0);
                     long counter = criteriaResult.Read<long>(1);
-                    long date = criteriaResult.Read<long>(2);
+                    ServerTime date = (ServerTime)(UnixTime64)criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
                     if (criteria == null)
@@ -282,7 +283,7 @@ namespace Game.Achievements
                         continue;
                     }
 
-                    if (criteria.Entry.StartTimer != 0 && (date + criteria.Entry.StartTimer) < now)
+                    if (criteria.Entry.StartTimer != TimeSpan.Zero && (date + criteria.Entry.StartTimer) < now)
                         continue;
 
                     CriteriaProgress progress = new();
@@ -314,7 +315,7 @@ namespace Game.Achievements
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_ACHIEVEMENT);
                     stmt.SetInt64(0, _owner.GetGUID().GetCounter());
                     stmt.SetInt32(1, pair.Key);
-                    stmt.SetInt64(2, pair.Value.Date);
+                    stmt.SetInt64(2, (UnixTime64)pair.Value.Date);
                     trans.Append(stmt);
 
                     pair.Value.Changed = false;
@@ -339,7 +340,7 @@ namespace Game.Achievements
                         stmt.SetInt64(0, _owner.GetGUID().GetCounter());
                         stmt.SetInt32(1, pair.Key);
                         stmt.SetInt64(2, pair.Value.Counter);
-                        stmt.SetInt64(3, pair.Value.Date);
+                        stmt.SetInt64(3, (UnixTime64)pair.Value.Date);
                         trans.Append(stmt);
                     }
 
@@ -361,7 +362,7 @@ namespace Game.Achievements
 
                 EarnedAchievement earned = new();
                 earned.Id = id;
-                earned.Date.SetUtcTimeFromUnixTime(completedAchievement.Date);
+                earned.Date = (RealmTime)completedAchievement.Date;
                 if (!achievement.Flags.HasAnyFlag(AchievementFlags.Account))
                 {
                     earned.Owner = _owner.GetGUID();
@@ -380,8 +381,8 @@ namespace Game.Achievements
                 progress.Quantity = criteriaProgres.Counter;
                 progress.Player = criteriaProgres.PlayerGUID;
                 progress.Flags = 0;
-                progress.Date.SetUtcTimeFromUnixTime(criteriaProgres.Date);
-                progress.Date += _owner.GetSession().GetTimezoneOffset();
+                progress.Date = (RealmTime)criteriaProgres.Date;
+                //progress.Date += _owner.GetSession().GetTimezoneOffset(); 
                 progress.TimeFromStart = 0;
                 progress.TimeFromCreate = 0;
                 achievementData.Data.Progress.Add(progress);
@@ -393,8 +394,8 @@ namespace Game.Achievements
                     accountProgress.Quantity = criteriaProgres.Counter;
                     accountProgress.Player = _owner.GetSession().GetBattlenetAccountGUID();
                     accountProgress.Flags = 0;
-                    accountProgress.Date.SetUtcTimeFromUnixTime(criteriaProgres.Date);
-                    accountProgress.Date += _owner.GetSession().GetTimezoneOffset();
+                    accountProgress.Date = (RealmTime)criteriaProgres.Date;
+                    //accountProgress.Date += _owner.GetSession().GetTimezoneOffset(); 
                     accountProgress.TimeFromStart = 0;
                     accountProgress.TimeFromCreate = 0;
                     allAccountCriteria.Progress.Add(accountProgress);
@@ -420,8 +421,8 @@ namespace Game.Achievements
 
                 EarnedAchievement earned = new();
                 earned.Id = id;
-                earned.Date.SetUtcTimeFromUnixTime(completedAchievement.Date);
-                earned.Date += receiver.GetSession().GetTimezoneOffset();
+                earned.Date = (RealmTime)completedAchievement.Date;
+                //earned.Date += receiver.GetSession().GetTimezoneOffset(); 
                 if (!achievement.Flags.HasAnyFlag(AchievementFlags.Account))
                 {
                     earned.Owner = _owner.GetGUID();
@@ -438,8 +439,8 @@ namespace Game.Achievements
                 progress.Quantity = criteriaProgres.Counter;
                 progress.Player = criteriaProgres.PlayerGUID;
                 progress.Flags = 0;
-                progress.Date.SetUtcTimeFromUnixTime(criteriaProgres.Date);
-                progress.Date += receiver.GetSession().GetTimezoneOffset();
+                progress.Date = (RealmTime)criteriaProgres.Date;
+                //progress.Date += receiver.GetSession().GetTimezoneOffset(); 
                 progress.TimeFromStart = 0;
                 progress.TimeFromCreate = 0;
                 inspectedAchievements.Data.Progress.Add(progress);
@@ -474,7 +475,7 @@ namespace Game.Achievements
             Log.outDebug(LogFilter.Achievement, $"PlayerAchievementMgr.CompletedAchievement({achievement.Id}). {GetOwnerInfo()}");
 
             CompletedAchievementData ca = new();
-            ca.Date = GameTime.GetGameTime();
+            ca.Date = LoopTime.ServerTime;
             ca.Changed = true;
             _completedAchievements[achievement.Id] = ca;
 
@@ -569,11 +570,11 @@ namespace Game.Achievements
                 criteriaUpdate.Progress.Quantity = progress.Counter;
                 criteriaUpdate.Progress.Player = _owner.GetSession().GetBattlenetAccountGUID();
                 criteriaUpdate.Progress.Flags = 0;
-                if (criteria.Entry.StartTimer != 0)
+                if (criteria.Entry.StartTimer != TimeSpan.Zero)
                     criteriaUpdate.Progress.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
-                criteriaUpdate.Progress.Date.SetUtcTimeFromUnixTime(progress.Date);
-                criteriaUpdate.Progress.Date += _owner.GetSession().GetTimezoneOffset();
+                criteriaUpdate.Progress.Date = (RealmTime)progress.Date;
+                //criteriaUpdate.Progress.Date += _owner.GetSession().GetTimezoneOffset();
                 criteriaUpdate.Progress.TimeFromStart = (uint)timeElapsed.TotalSeconds;
                 criteriaUpdate.Progress.TimeFromCreate = 0;
                 SendPacket(criteriaUpdate);
@@ -587,11 +588,11 @@ namespace Game.Achievements
                 criteriaUpdate.Quantity = progress.Counter;
                 criteriaUpdate.PlayerGUID = _owner.GetGUID();
                 criteriaUpdate.Flags = 0;
-                if (criteria.Entry.StartTimer != 0)
+                if (criteria.Entry.StartTimer != TimeSpan.Zero)
                     criteriaUpdate.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
-                criteriaUpdate.CurrentTime.SetUtcTimeFromUnixTime(progress.Date);
-                criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
+                criteriaUpdate.CurrentTime = (RealmTime)progress.Date;
+                //criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
                 criteriaUpdate.ElapsedTime = (uint)timeElapsed.TotalSeconds;
                 criteriaUpdate.CreationTime = 0;
 
@@ -650,8 +651,8 @@ namespace Game.Achievements
                 achievementEarned.Earner = _owner.GetGUID();
                 achievementEarned.EarnerNativeRealm = achievementEarned.EarnerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
                 achievementEarned.AchievementID = achievement.Id;
-                achievementEarned.Time = GameTime.GetUtcWowTime();
-                achievementEarned.Time += receiver.GetSession().GetTimezoneOffset();
+                achievementEarned.Time = LoopTime.RealmTime;
+                //achievementEarned.Time += receiver.GetSession().GetTimezoneOffset();
                 receiver.SendPacket(achievementEarned);
             };
 
@@ -702,8 +703,8 @@ namespace Game.Achievements
                     GuildAchievementDeleted guildAchievementDeleted = new();
                     guildAchievementDeleted.AchievementID = id;
                     guildAchievementDeleted.GuildGUID = guid;
-                    guildAchievementDeleted.TimeDeleted = GameTime.GetUtcWowTime();
-                    guildAchievementDeleted.TimeDeleted += receiver.GetSession().GetTimezoneOffset();
+                    guildAchievementDeleted.TimeDeleted = LoopTime.RealmTime;
+                    //guildAchievementDeleted.TimeDeleted += receiver.GetSession().GetTimezoneOffset();
                     receiver.SendPacket(guildAchievementDeleted);
                 });
             }
@@ -744,7 +745,7 @@ namespace Game.Achievements
                         continue;
 
                     CompletedAchievementData ca = _completedAchievements[achievementid];
-                    ca.Date = achievementResult.Read<long>(1);
+                    ca.Date = (ServerTime)(UnixTime64)achievementResult.Read<long>(1);
                     var guids = new StringArray(achievementResult.Read<string>(2), ',');
                     if (!guids.IsEmpty())
                     {
@@ -765,12 +766,12 @@ namespace Game.Achievements
 
             if (!criteriaResult.IsEmpty())
             {
-                long now = GameTime.GetGameTime();
+                ServerTime now = LoopTime.ServerTime;
                 do
                 {
                     int id = criteriaResult.Read<int>(0);
                     long counter = criteriaResult.Read<long>(1);
-                    long date = criteriaResult.Read<long>(2);
+                    ServerTime date = (ServerTime)(UnixTime64)criteriaResult.Read<long>(2);
                     long guidLow = criteriaResult.Read<long>(3);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
@@ -786,7 +787,7 @@ namespace Game.Achievements
                         continue;
                     }
 
-                    if (criteria.Entry.StartTimer != 0 && date + criteria.Entry.StartTimer < now)
+                    if (criteria.Entry.StartTimer != TimeSpan.Zero && date + criteria.Entry.StartTimer < now)
                         continue;
 
                     CriteriaProgress progress = new();
@@ -821,7 +822,7 @@ namespace Game.Achievements
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_ACHIEVEMENT);
                 stmt.SetInt64(0, _owner.GetId());
                 stmt.SetInt32(1, pair.Key);
-                stmt.SetInt64(2, pair.Value.Date);
+                stmt.SetInt64(2, (UnixTime64)pair.Value.Date);
                 foreach (var guid in pair.Value.CompletingPlayers)
                     guidstr.AppendFormat($"{guid.GetCounter()},");
 
@@ -845,7 +846,7 @@ namespace Game.Achievements
                 stmt.SetInt64(0, _owner.GetId());
                 stmt.SetInt32(1, pair.Key);
                 stmt.SetInt64(2, pair.Value.Counter);
-                stmt.SetInt64(3, pair.Value.Date);
+                stmt.SetInt64(3, (UnixTime64)pair.Value.Date);
                 stmt.SetInt64(4, pair.Value.PlayerGUID.GetCounter());
                 trans.Append(stmt);
             }
@@ -863,8 +864,8 @@ namespace Game.Achievements
 
                 EarnedAchievement earned = new();
                 earned.Id = id;
-                earned.Date.SetUtcTimeFromUnixTime(completedAchievement.Date);
-                earned.Date += receiver.GetSession().GetTimezoneOffset();
+                earned.Date = (RealmTime)completedAchievement.Date;
+                //earned.Date += receiver.GetSession().GetTimezoneOffset();
                 allGuildAchievements.Earned.Add(earned);
             }
 
@@ -891,8 +892,8 @@ namespace Game.Achievements
                                 guildCriteriaProgress.CriteriaID = node.Criteria.Id;
                                 guildCriteriaProgress.DateCreated = 0;
                                 guildCriteriaProgress.DateStarted = 0;
-                                guildCriteriaProgress.DateUpdated.SetUtcTimeFromUnixTime(progress.Date);
-                                guildCriteriaProgress.DateUpdated += receiver.GetSession().GetTimezoneOffset();
+                                guildCriteriaProgress.DateUpdated = (RealmTime)progress.Date;
+                                //guildCriteriaProgress.DateUpdated += receiver.GetSession().GetTimezoneOffset();
                                 guildCriteriaProgress.Quantity = progress.Counter;
                                 guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
                                 guildCriteriaProgress.Flags = 0;
@@ -921,8 +922,8 @@ namespace Game.Achievements
                 guildCriteriaProgress.CriteriaID = criteriaId;
                 guildCriteriaProgress.DateCreated = 0;
                 guildCriteriaProgress.DateStarted = 0;
-                guildCriteriaProgress.DateUpdated.SetUtcTimeFromUnixTime(progress.Date);
-                guildCriteriaProgress.DateUpdated += receiver.GetSession().GetTimezoneOffset();
+                guildCriteriaProgress.DateUpdated = (RealmTime)progress.Date;
+                //guildCriteriaProgress.DateUpdated += receiver.GetSession().GetTimezoneOffset();
                 guildCriteriaProgress.Quantity = progress.Counter;
                 guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
                 guildCriteriaProgress.Flags = 0;
@@ -965,7 +966,7 @@ namespace Game.Achievements
 
             SendAchievementEarned(achievement);
             CompletedAchievementData ca = new();
-            ca.Date = GameTime.GetGameTime();
+            ca.Date = LoopTime.ServerTime;
             ca.Changed = true;
 
             if (achievement.Flags.HasAnyFlag(AchievementFlags.ShowGuildMembers))
@@ -1009,8 +1010,8 @@ namespace Game.Achievements
                 guildCriteriaProgress.CriteriaID = entry.Id;
                 guildCriteriaProgress.DateCreated = 0;
                 guildCriteriaProgress.DateStarted = 0;
-                guildCriteriaProgress.DateUpdated.SetUtcTimeFromUnixTime(progress.Date);
-                guildCriteriaProgress.DateUpdated += member.GetSession().GetTimezoneOffset();
+                guildCriteriaProgress.DateUpdated = (RealmTime)progress.Date;
+                //guildCriteriaProgress.DateUpdated += member.GetSession().GetTimezoneOffset();
                 guildCriteriaProgress.Quantity = progress.Counter;
                 guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
                 guildCriteriaProgress.Flags = 0;
@@ -1046,8 +1047,8 @@ namespace Game.Achievements
                 GuildAchievementEarned guildAchievementEarned = new();
                 guildAchievementEarned.AchievementID = achievement.Id;
                 guildAchievementEarned.GuildGUID = _owner.GetGUID();
-                guildAchievementEarned.TimeEarned = GameTime.GetUtcWowTime();
-                guildAchievementEarned.TimeEarned += receiver.GetSession().GetTimezoneOffset();
+                guildAchievementEarned.TimeEarned = LoopTime.RealmTime;
+                //guildAchievementEarned.TimeEarned += receiver.GetSession().GetTimezoneOffset();
                 receiver.SendPacket(guildAchievementEarned);
             };
 
@@ -1076,7 +1077,7 @@ namespace Game.Achievements
         MultiMap<int, AchievementRecord> _achievementListByReferencedId = new();
 
         // store realm first achievements
-        Dictionary<int /*achievementId*/, DateTime /*completionTime*/> _allCompletedAchievements = new();
+        Dictionary<int /*achievementId*/, ServerTime /*completionTime*/> _allCompletedAchievements = new();
 
         Dictionary<int, AchievementReward> _achievementRewards = new();
         Dictionary<int, AchievementRewardLocale> _achievementRewardLocales = new();
@@ -1101,21 +1102,21 @@ namespace Game.Achievements
 
         public bool IsRealmCompleted(AchievementRecord achievement)
         {
-            var time = _allCompletedAchievements.LookupByKey(achievement.Id);
+            ServerTime time = _allCompletedAchievements.LookupByKey(achievement.Id);
             if (time == default)
                 return false;
 
-            if (time == DateTime.MinValue)
+            if (time == ServerTime.Zero)
                 return false;
 
-            if (time == DateTime.MaxValue)
+            if (time == ServerTime.Infinity)
                 return true;
 
             // Allow completing the realm first kill for entire minute after first person did it
             // it may allow more than one group to achieve it (highly unlikely)
             // but apparently this is how blizz handles it as well
             if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstKill))
-                return (DateTime.Now - time) > TimeSpan.FromMinutes(1);
+                return (LoopTime.ServerTime - time) > (Minutes)1;
 
             return true;
         }
@@ -1125,13 +1126,13 @@ namespace Game.Achievements
             if (IsRealmCompleted(achievement))
                 return;
 
-            _allCompletedAchievements[achievement.Id] = DateTime.Now;
+            _allCompletedAchievements[achievement.Id] = LoopTime.ServerTime;
         }
 
         //==========================================================
         public void LoadAchievementReferenceList()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             if (CliDB.AchievementStorage.Empty())
             {
@@ -1154,12 +1155,12 @@ namespace Game.Achievements
             if (achievement1 != null)
                 achievement1.InstanceID = 631;    // Correct map requirement (currently has Ulduar); 6.0.3 note - it STILL has ulduar requirement
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement references in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} achievement references in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadAchievementScripts()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             _achievementScripts.Clear();                            // need for reload case
 
@@ -1185,19 +1186,19 @@ namespace Game.Achievements
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_achievementScripts.Count} achievement scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_achievementScripts.Count} achievement scripts in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadCompletedAchievements()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Populate _allCompletedAchievements with all realm first achievement ids to make multithreaded access safer
             // while it will not prevent races, it will prevent crashes that happen because std::unordered_map key was added
             // instead the only potential race will happen on value associated with the key
             foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
                 if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
-                    _allCompletedAchievements[achievement.Id] = DateTime.MinValue;
+                    _allCompletedAchievements[achievement.Id] = ServerTime.Zero;
 
             SQLResult result = DB.Characters.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
             if (result.IsEmpty())
@@ -1224,16 +1225,16 @@ namespace Game.Achievements
                     continue;
                 }
                 else if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
-                    _allCompletedAchievements[achievementId] = DateTime.MaxValue;
+                    _allCompletedAchievements[achievementId] = ServerTime.Infinity; // to skip searching for the maximum value
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} realm first completed achievements in {1} ms.", _allCompletedAchievements.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_allCompletedAchievements.Count} realm first completed achievements in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadRewards()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             _achievementRewards.Clear();                           // need for reload case
 
@@ -1342,12 +1343,12 @@ namespace Game.Achievements
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement rewards in {1} ms.", _achievementRewards.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_achievementRewards.Count} achievement rewards in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadRewardLocales()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             _achievementRewardLocales.Clear();                       // need for reload case
 
@@ -1382,7 +1383,7 @@ namespace Game.Achievements
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement reward locale strings in {1} ms.", _achievementRewardLocales.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_achievementRewardLocales.Count} achievement reward locale strings in {Time.Diff(oldMSTime)} ms.");
         }
 
         public int GetAchievementScriptId(int achievementId)
@@ -1409,7 +1410,7 @@ namespace Game.Achievements
 
     public class CompletedAchievementData
     {
-        public long Date;
+        public ServerTime Date;
         public List<ObjectGuid> CompletingPlayers = new();
         public bool Changed;
     }

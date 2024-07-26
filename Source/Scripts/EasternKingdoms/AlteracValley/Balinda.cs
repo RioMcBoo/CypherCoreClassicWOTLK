@@ -62,33 +62,33 @@ namespace Scripts.EasternKingdoms.AlteracValley.Balinda
         public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayAggro);
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule((Seconds)5, (Seconds)15, task =>
             {
                 DoCastVictim(SpellIds.ArcaneExplosion);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 DoCastVictim(SpellIds.ConeOfCold);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)10, (Seconds)20);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule((Seconds)1, task =>
             {
                 DoCastVictim(SpellIds.Fireball);
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(9));
+                task.Repeat((Seconds)5, (Seconds)9);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule((Seconds)4, task =>
             {
                 DoCastVictim(SpellIds.Frostbolt);
-                task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(12));
+                task.Repeat((Seconds)4, (Seconds)12);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule((Seconds)3, task =>
             {
                 if (summons.Empty())
                     DoCast(SpellIds.SummonWaterElemental);
-                task.Repeat(TimeSpan.FromSeconds(50));
+                task.Repeat((Seconds)50);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule((Seconds)5, task =>
             {
                 if (me.GetDistance2d(me.GetHomePosition().GetPositionX(), me.GetHomePosition().GetPositionY()) > 50)
                 {
@@ -136,7 +136,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Balinda
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

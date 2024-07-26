@@ -14,13 +14,13 @@ namespace Game.Combat
 {
     public class ThreatManager
     {
-        public static uint THREAT_UPDATE_INTERVAL = 1000u;
+        public static readonly TimeSpan THREAT_UPDATE_INTERVAL = (Seconds)1;
 
         public Unit _owner;
         bool _ownerCanHaveThreatList;
 
         public bool NeedClientUpdate;
-        uint _updateTimer;
+        TimeSpan _updateTimer;
         List<ThreatReference> _sortedThreatList = new();
         Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
         List<ObjectGuid> _needsAIUpdate = new();
@@ -71,7 +71,7 @@ namespace Game.Combat
             _ownerCanHaveThreatList = CanHaveThreatList(_owner);
         }
 
-        public void Update(uint tdiff)
+        public void Update(TimeSpan tdiff)
         {
             if (!CanHaveThreatList() || IsThreatListEmpty(true))
                 return;

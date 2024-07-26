@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 
 namespace Game
 {
@@ -54,14 +55,12 @@ namespace Game
             Log.outDebug(LogFilter.Network, $"Player 1 is: {player.GetGUID()} ({player.GetName()})");
             Log.outDebug(LogFilter.Network, $"Player 2 is: {target.GetGUID()} ({target.GetName()})");
 
-            long now = GameTime.GetGameTime();
-            player.duel.StartTime = now + 3;
-            target.duel.StartTime = now + 3;
+            Seconds duelStartTime = (Seconds)3;
+                        
+            player.duel.StartTime = target.duel.StartTime = LoopTime.ServerTime + duelStartTime;
+            player.duel.State = target.duel.State = DuelState.Countdown;
 
-            player.duel.State = DuelState.Countdown;
-            target.duel.State = DuelState.Countdown;
-
-            DuelCountdown packet = new(3000);
+            DuelCountdown packet = new(duelStartTime);
 
             player.SendPacket(packet);
             target.SendPacket(packet);

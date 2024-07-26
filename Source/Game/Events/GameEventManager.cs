@@ -24,11 +24,11 @@ namespace Game
                 default:
                 case GameEventState.Normal:
                 {
-                    long currenttime = GameTime.GetGameTime();
+                    RealmTime currenttime = LoopTime.RealmTime;
                     // Get the event information
-                    return mGameEvent[entry].start < currenttime
-                        && currenttime < mGameEvent[entry].end
-                        && (currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * Time.Minute) < mGameEvent[entry].length * Time.Minute;
+                    return mGameEvent[entry].StartTime < currenttime
+                        && currenttime < mGameEvent[entry].EndTime
+                        && (currenttime - mGameEvent[entry].StartTime).Ticks % mGameEvent[entry].Occurence.Ticks < mGameEvent[entry].Length.Ticks;
                 }
                 // if the state is conditions or nextphase, then the event should be active
                 case GameEventState.WorldConditions:
@@ -41,11 +41,10 @@ namespace Game
                 // if inactive world event, check the prerequisite events
                 case GameEventState.WorldInactive:
                 {
-                    long currenttime = GameTime.GetGameTime();
                     foreach (var gameEventId in mGameEvent[entry].prerequisite_events)
                     {
                         if ((mGameEvent[gameEventId].state != GameEventState.WorldNextPhase && mGameEvent[gameEventId].state != GameEventState.WorldFinished) ||   // if prereq not in nextphase or finished state, then can't start this one
-                            mGameEvent[gameEventId].nextstart > currenttime)               // if not in nextphase state for long enough, can't start this one
+                            mGameEvent[gameEventId].NextStartTime > LoopTime.RealmTime)               // if not in nextphase state for long enough, can't start this one
                             return false;
                     }
                     // all prerequisite events are met
@@ -55,41 +54,44 @@ namespace Game
             }
         }
 
-        public uint NextCheck(ushort entry)
+        public TimeSpan NextCheck(ushort entry)
         {
-            long currenttime = GameTime.GetGameTime();
+            RealmTime currenttime = LoopTime.RealmTime;
 
             // for NEXTPHASE state world events, return the delay to start the next event, so the followup event will be checked correctly
-            if ((mGameEvent[entry].state == GameEventState.WorldNextPhase || mGameEvent[entry].state == GameEventState.WorldFinished) && mGameEvent[entry].nextstart >= currenttime)
-                return (uint)(mGameEvent[entry].nextstart - currenttime);
+            if ((mGameEvent[entry].state == GameEventState.WorldNextPhase || mGameEvent[entry].state == GameEventState.WorldFinished)
+                && mGameEvent[entry].NextStartTime >= currenttime)
+            {
+                return mGameEvent[entry].NextStartTime - currenttime;
+            }
 
             // for CONDITIONS state world events, return the length of the wait period, so if the conditions are met, this check will be called again to set the timer as NEXTPHASE event
             if (mGameEvent[entry].state == GameEventState.WorldConditions)
             {
-                if (mGameEvent[entry].length != 0)
-                    return mGameEvent[entry].length * 60;
+                if (mGameEvent[entry].Length != TimeSpan.Zero)
+                    return mGameEvent[entry].Length;
                 else
-                    return Time.Day;
+                    return (Days)1;
             }
 
             // outdated event: we return max
-            if (currenttime > mGameEvent[entry].end)
-                return Time.Day;
+            if (currenttime > mGameEvent[entry].EndTime)
+                return (Days)1;
 
             // never started event, we return delay before start
-            if (mGameEvent[entry].start > currenttime)
-                return (uint)(mGameEvent[entry].start - currenttime);
+            if (mGameEvent[entry].StartTime > currenttime)
+                return mGameEvent[entry].StartTime - currenttime;
 
-            uint delay;
+            TimeSpan delay;
             // in event, we return the end of it
-            if ((((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60)) < (mGameEvent[entry].length * 60)))
+            if ((currenttime - mGameEvent[entry].StartTime).Ticks % mGameEvent[entry].Occurence.Ticks < mGameEvent[entry].Length.Ticks)
                 // we return the delay before it ends
-                delay = (uint)((mGameEvent[entry].length * Time.Minute) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * Time.Minute)));
+                delay = new(mGameEvent[entry].Length.Ticks - ((currenttime - mGameEvent[entry].StartTime).Ticks % mGameEvent[entry].Occurence.Ticks));
             else                                                    // not in window, we return the delay before next start
-                delay = (uint)((mGameEvent[entry].occurence * Time.Minute) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * Time.Minute)));
+                delay = new(mGameEvent[entry].Occurence.Ticks - ((currenttime - mGameEvent[entry].StartTime).Ticks % mGameEvent[entry].Occurence.Ticks));
             // In case the end is before next check
-            if (mGameEvent[entry].end < currenttime + delay)
-                return (uint)(mGameEvent[entry].end - currenttime);
+            if (mGameEvent[entry].EndTime < currenttime + delay)
+                return mGameEvent[entry].EndTime - currenttime;
             else
                 return delay;
         }
@@ -117,9 +119,9 @@ namespace Game
                 ApplyNewEvent(event_id);
                 if (overwrite)
                 {
-                    mGameEvent[event_id].start = GameTime.GetGameTime();
-                    if (data.end <= data.start)
-                        data.end = data.start + data.length;
+                    mGameEvent[event_id].StartTime = LoopTime.RealmTime;
+                    if (data.EndTime <= data.StartTime)
+                        data.EndTime = data.StartTime + data.Length;
                 }
 
                 return false;
@@ -159,9 +161,9 @@ namespace Game
 
             if (overwrite && !serverwide_evt)
             {
-                data.start = GameTime.GetGameTime() - data.length * Time.Minute;
-                if (data.end <= data.start)
-                    data.end = data.start + data.length;
+                data.StartTime = LoopTime.RealmTime - data.Length;
+                if (data.EndTime <= data.StartTime)
+                    data.EndTime = data.StartTime + data.Length;
             }
             else if (serverwide_evt)
             {
@@ -169,7 +171,7 @@ namespace Game
                 if (overwrite || data.state != GameEventState.WorldFinished)
                 {
                     // reset conditions
-                    data.nextstart = 0;
+                    data.NextStartTime = RealmTime.Zero;
                     data.state = GameEventState.WorldInactive;
                     foreach (var pair in data.conditions)
                         pair.Value.done = 0;
@@ -191,7 +193,7 @@ namespace Game
         public void LoadFromDB()
         {
             uint count = 0;
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             {
                 //                                               0           1                           2                         3          4       5        6            7            8             9
                 SQLResult result = DB.World.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, holidayStage, description, world_event, announce FROM game_event");
@@ -213,23 +215,21 @@ namespace Game
                     }
 
                     GameEventData pGameEvent = new();
-                    ulong starttime = result.Read<ulong>(1);
-                    pGameEvent.start = (long)starttime;
-                    ulong endtime = result.Read<ulong>(2);
-                    pGameEvent.end = (long)endtime;
-                    pGameEvent.occurence = result.Read<uint>(3);
-                    pGameEvent.length = result.Read<uint>(4);
+                    pGameEvent.StartTime = (RealmTime)(UnixTime64)result.Read<long>(1);
+                    pGameEvent.EndTime = (RealmTime)(UnixTime64)result.Read<long>(2);
+                    pGameEvent.Occurence = (Minutes)result.Read<int>(3);
+                    pGameEvent.Length = (Minutes)result.Read<int>(4);
                     pGameEvent.holiday_id = (HolidayIds)result.Read<uint>(5);
 
                     pGameEvent.holidayStage = result.Read<byte>(6);
                     pGameEvent.description = result.Read<string>(7);
                     pGameEvent.state = (GameEventState)result.Read<byte>(8);
                     pGameEvent.announce = (GameEventAnnounce)result.Read<byte>(9);
-                    pGameEvent.nextstart = 0;
+                    pGameEvent.NextStartTime = RealmTime.Zero;
 
                     ++count;
 
-                    if (pGameEvent.length == 0 && pGameEvent.state == GameEventState.Normal)                            // length>0 is validity check
+                    if (pGameEvent.Length == TimeSpan.Zero && pGameEvent.state == GameEventState.Normal)                            // length>0 is validity check
                     {
                         Log.outError(LogFilter.Sql, 
                             $"`game_event` game event id ({event_id}) isn't a world event and has length = 0, thus it can't be used.");
@@ -263,13 +263,13 @@ namespace Game
                 }
                 while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} game events in {Time.Diff(oldMSTime)} ms.");
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Saves Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                                   0       1        2
                 SQLResult result = DB.Characters.Query("SELECT eventEntry, state, next_start FROM game_event_save");
@@ -296,7 +296,7 @@ namespace Game
                         if (mGameEvent[event_id].state != GameEventState.Normal && mGameEvent[event_id].state != GameEventState.Internal)
                         {
                             mGameEvent[event_id].state = (GameEventState)result.Read<byte>(1);
-                            mGameEvent[event_id].nextstart = result.Read<uint>(2);
+                            mGameEvent[event_id].NextStartTime = (RealmTime)(UnixTime)result.Read<int>(2);
                         }
                         else
                         {
@@ -309,14 +309,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game event saves in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} game event saves in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Prerequisite Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                              0             1
                 SQLResult result = DB.World.Query("SELECT eventEntry, prerequisite_event FROM game_event_prerequisite");
@@ -364,14 +365,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game event prerequisites in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} game event prerequisites in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Creature Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                          0        1
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry FROM game_event_creature");
@@ -417,14 +419,14 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creatures in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event GO Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                         0         1
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry FROM game_event_gameobject");
@@ -471,14 +473,14 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobjects in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobjects in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Model/Equipment Change Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                               0           1                       2                                 3                                     4
                 SQLResult result = DB.World.Query("SELECT creature.guid, creature.id, game_event_model_equip.eventEntry, game_event_model_equip.modelid, game_event_model_equip.equipment_id " +
@@ -530,14 +532,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} model/equipment changes in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} model/equipment changes in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Quest Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                         0     1      2
                 SQLResult result = DB.World.Query("SELECT id, quest, eventEntry FROM game_event_creature_quest");
@@ -569,14 +572,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quests additions in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} quests additions in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event GO Quest Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                         0     1      2
                 SQLResult result = DB.World.Query("SELECT id, quest, eventEntry FROM game_event_gameobject_quest");
@@ -608,14 +612,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quests additions in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} quests additions in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Quest Condition Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                          0       1         2             3
                 SQLResult result = DB.World.Query("SELECT quest, eventEntry, condition_id, num FROM game_event_quest_condition");
@@ -653,14 +658,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest event conditions in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} quest event conditions in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Condition Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                             0          1            2             3                      4
                 SQLResult result = DB.World.Query("SELECT eventEntry, condition_id, req_num, max_world_state_field, done_world_state_field FROM game_event_condition");
@@ -695,14 +701,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} conditions in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} conditions in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Condition Save Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                                   0           1         2
                 SQLResult result = DB.Characters.Query("SELECT eventEntry, condition_id, done FROM game_event_condition_save");
@@ -742,14 +749,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} condition saves in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} condition saves in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event NPCflag Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                          0       1        2
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry, npcflag FROM game_event_npcflag");
@@ -782,14 +790,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} npcflags in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} npcflags in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Seasonal Quest Relations...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                           0          1
                 SQLResult result = DB.World.Query("SELECT questId, eventEntry FROM game_event_seasonal_questrelation");
@@ -827,14 +836,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quests additions in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} quests additions in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Vendor Additions Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                        0           1     2     3         4         5             6     7             8                  9
                 SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, Type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, slot ASC");
@@ -878,7 +888,7 @@ namespace Game
                         VendorItem vItem = new();
                         vItem.item = result.Read<int>(2);
                         vItem.maxcount = result.Read<int>(3);
-                        vItem.incrtime = result.Read<uint>(4);
+                        vItem.incrtime = (Seconds)result.Read<int>(4);
                         vItem.ExtendedCost = result.Read<int>(5);
                         vItem.Type = (ItemVendorType)result.Read<byte>(6);
                         vItem.PlayerConditionId = result.Read<int>(8);
@@ -899,14 +909,15 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} vendor additions in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} vendor additions in game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Pool Data...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                             0                         1
                 SQLResult result = DB.World.Query("SELECT pool_template.entry, game_event_pool.eventEntry FROM pool_template" +
@@ -946,7 +957,8 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pools for game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Loaded {count} pools for game events in {Time.Diff(oldMSTime)} ms.");
                 }
             }
         }
@@ -1009,10 +1021,10 @@ namespace Game
             }
         }
 
-        public uint StartSystem()                           // return the next event delay in ms
+        public TimeSpan StartSystem()   // return the next event delay in ms
         {
             m_ActiveEvents.Clear();
-            uint delay = Update();
+            TimeSpan delay = Update();
             isSystemInit = true;
             return delay;
         }
@@ -1040,11 +1052,11 @@ namespace Game
             Log.outInfo(LogFilter.Gameevent, $"Arena Season {season} started...");
         }
 
-        public uint Update()                               // return the next event delay in ms
+        public TimeSpan Update()
         {
-            long currenttime = GameTime.GetGameTime();
-            uint nextEventDelay = Time.Day;             // 1 day
-            uint calcDelay;
+            RealmTime currenttime = LoopTime.RealmTime;
+            TimeSpan nextEventDelay = (Days)1;        // 1 day
+            TimeSpan calcDelay;
             List<ushort> activate = new();
             List<ushort> deactivate = new();
             for (ushort id = 1; id < mGameEvent.Length; ++id)
@@ -1054,11 +1066,11 @@ namespace Game
                 if (CheckOneGameEvent(id))
                 {
                     // if the world event is in NEXTPHASE state, and the time has passed to finish this event, then do so
-                    if (mGameEvent[id].state == GameEventState.WorldNextPhase && mGameEvent[id].nextstart <= currenttime)
+                    if (mGameEvent[id].state == GameEventState.WorldNextPhase && mGameEvent[id].NextStartTime <= currenttime)
                     {
                         // set this event to finished, null the nextstart time
                         mGameEvent[id].state = GameEventState.WorldFinished;
-                        mGameEvent[id].nextstart = 0;
+                        mGameEvent[id].NextStartTime = RealmTime.Zero;
                         // save the state of this gameevent
                         SaveWorldEventStateToDB(id);
                         // queue for deactivation
@@ -1104,14 +1116,16 @@ namespace Game
                 // returns true the started event completed
                 // in that case, initiate next update in 1 second
                 if (StartEvent(eventId))
-                    nextEventDelay = 0;
+                    nextEventDelay = TimeSpan.Zero;
             }
 
             foreach (var eventId in deactivate)
                 StopEvent(eventId);
 
-            Log.outInfo(LogFilter.Gameevent, "Next game event check in {0} seconds.", nextEventDelay + 1);
-            return (nextEventDelay + 1) * Time.InMilliseconds;           // Add 1 second to be sure event has started/stopped at next call
+            nextEventDelay += (Seconds)1; // Add 1 second to be sure event has started/stopped at next call
+
+            Log.outInfo(LogFilter.Gameevent, $"Next game event check in {(Seconds)nextEventDelay} seconds.");
+            return nextEventDelay;
         }
 
         void UnApplyEvent(ushort event_id)
@@ -1458,7 +1472,7 @@ namespace Game
                     {
                         if (pair.Item2 == questId)
                             return true;
-            }
+                    }
                 }
             }
             return false;
@@ -1474,7 +1488,7 @@ namespace Game
                     {
                         if (pair.Item2 == questId)
                             return true;
-            }
+                    }
                 }
             }
             return false;
@@ -1491,8 +1505,8 @@ namespace Game
                     {
                         if (id == creatureId)
                             return true;
+                    }
                 }
-            }
             }
             return false;
         }
@@ -1508,8 +1522,8 @@ namespace Game
                     {
                         if (id == goId)
                             return true;
+                    }
                 }
-            }
             }
             return false;
         }
@@ -1560,9 +1574,9 @@ namespace Game
                     {
                         if (bl.HolidayWorldState != 0)
                             Global.WorldStateMgr.SetValue(bl.HolidayWorldState, Activate ? 1 : 0, false, null);
+                    }
                 }
             }
-        }
         }
 
         public void HandleQuestComplete(int quest_id)
@@ -1629,10 +1643,9 @@ namespace Game
             // set the phase
             mGameEvent[event_id].state = GameEventState.WorldNextPhase;
             // set the followup events' start time
-            if (mGameEvent[event_id].nextstart == 0)
+            if (mGameEvent[event_id].NextStartTime == RealmTime.Zero)
             {
-                long currenttime = GameTime.GetGameTime();
-                mGameEvent[event_id].nextstart = currenttime + mGameEvent[event_id].length * 60;
+                mGameEvent[event_id].NextStartTime = LoopTime.RealmTime + mGameEvent[event_id].Length;
             }
             return true;
         }
@@ -1648,7 +1661,7 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GAME_EVENT_SAVE);
             stmt.SetUInt16(0, event_id);
             stmt.SetUInt8(1, (byte)mGameEvent[event_id].state);
-            stmt.SetInt64(2, mGameEvent[event_id].nextstart != 0 ? mGameEvent[event_id].nextstart : 0L);
+            stmt.SetInt64(2, (UnixTime64)(mGameEvent[event_id].NextStartTime != Time.Zero ? mGameEvent[event_id].NextStartTime : Time.Zero));
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
         }
@@ -1682,65 +1695,63 @@ namespace Game
                 return;
 
             var holiday = CliDB.HolidaysStorage.LookupByKey((int)gameEvent.holiday_id);
-            if (holiday.Date[0] == 0 || holiday.Duration[0] == 0) // Invalid definitions
+            if (holiday.Date(0) == HolidayTime.Zero || holiday.Duration(0) == TimeSpan.Zero) // Invalid definitions
             {
                 Log.outError(LogFilter.Sql, $"Missing date or duration for holiday {gameEvent.holiday_id}.");
                 return;
             }
 
             byte stageIndex = (byte)(gameEvent.holidayStage - 1);
-            gameEvent.length = (uint)(holiday.Duration[stageIndex] * Time.Hour / Time.Minute);
+            gameEvent.Length = holiday.Duration(stageIndex);
 
-            long stageOffset = 0;
+            TimeSpan stageOffset = TimeSpan.Zero;
             for (int i = 0; i < stageIndex; ++i)
-                stageOffset += holiday.Duration[i] * Time.Hour;
+                stageOffset += holiday.Duration(i);
 
             switch (holiday.CalendarFilterType)
             {
-                case -1: // Yearly
-                    gameEvent.occurence = Time.Year / Time.Minute; // Not all too useful
+                case EventPeriodType.Yearly:
+                    gameEvent.Occurence = Time.SpanFromDays(365);       // Not all too useful
                     break;
-                case 0: // Weekly
-                    gameEvent.occurence = Time.Week / Time.Minute;
+                case EventPeriodType.Weekly:
+                    gameEvent.Occurence = Time.SpanFromDays(7);
                     break;
-                case 1: // Defined dates only (Darkmoon Faire)
+                case EventPeriodType.Defined:
                     break;
-                case 2: // Only used for looping events (Call to Arms)
+                case EventPeriodType.Cyclical:
                     break;
             }
 
-            if (holiday.Looping != 0)
+            if (holiday.IsLooping)
             {
-                gameEvent.occurence = 0;
-                for (int i = 0; i < SharedConst.MaxHolidayDurations && holiday.Duration[i] != 0; ++i)
-                    gameEvent.occurence += (uint)(holiday.Duration[i] * Time.Hour / Time.Minute);
+                gameEvent.Occurence = TimeSpan.Zero;
+                for (int i = 0; i < SharedConst.MaxHolidayDurations && holiday.Duration(i) != TimeSpan.Zero; ++i)
+                    gameEvent.Occurence += holiday.Duration(i);
             }
 
-            bool singleDate = ((holiday.Date[0] >> 24) & 0x1F) == 31; // Events with fixed date within year have - 1
+            bool IsYearly = holiday.Date(0).IsYearly;
 
-            long curTime = GameTime.GetGameTime();
-            for (int i = 0; i < SharedConst.MaxHolidayDates && holiday.Date[i] != 0; ++i)
+            RealmTime curLocalTime = Time.Now.ToRealmTime(); //LoopTime is not initialized yet
+            for (int i = 0; i < SharedConst.MaxHolidayDates && holiday.Date(i) != HolidayTime.Zero; ++i)
             {
-                uint date = holiday.Date[i];
+                HolidayTime date = holiday.Date(i);
 
                 int year;
-                if (singleDate)
-                    year = Time.UnixTimeToDateTime(curTime).ToLocalTime().Year - 1; // First try last year (event active through New Year)
+                if (IsYearly)
+                    year = curLocalTime.Year - 1; // First try last year (event active through New Year)
                 else
-                    year = (int)((date >> 24) & 0x1F) + 100 + 1900;
+                    year = date.Year;
 
-                var timeInfo = new DateTime(year, (int)((date >> 20) & 0xF) + 1, (int)((date >> 14) & 0x3F) + 1, (int)((date >> 6) & 0x1F), (int)(date & 0x3F), 0);
+                DateTime startLocalTime = new DateTime(year, date.Month, date.Day, date.Hours, date.Minutes, 0, DateTimeKind.Local);
 
-                long startTime = Time.DateTimeToUnixTime(timeInfo);
-                if (curTime < startTime + gameEvent.length * Time.Minute)
+                if (curLocalTime < startLocalTime + gameEvent.Length)
                 {
-                    gameEvent.start = startTime + stageOffset;
+                    gameEvent.StartTime = (RealmTime)startLocalTime + stageOffset;
                     break;
                 }
-                else if (singleDate)
-                {
-                    var tmCopy = timeInfo.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year); // This year
-                    gameEvent.start = Time.DateTimeToUnixTime(tmCopy) + stageOffset;
+                else if (IsYearly)
+                {                    
+                    gameEvent.StartTime = (RealmTime)startLocalTime.AddYears(1) + stageOffset;   // This year
                     break;
                 }
                 else
@@ -1751,19 +1762,19 @@ namespace Game
             }
         }
 
-        long GetLastStartTime(ushort event_id)
+        RealmTime GetLastStartTime(ushort event_id)
         {
             if (event_id >= mGameEvent.Length)
-                return 0;
+                return RealmTime.Zero;
 
             if (mGameEvent[event_id].state != GameEventState.Normal)
-                return 0;
+                return RealmTime.Zero;
 
-            DateTime now = GameTime.GetSystemTime();
-            DateTime eventInitialStart = Time.UnixTimeToDateTime(mGameEvent[event_id].start);
-            TimeSpan occurence = TimeSpan.FromMinutes(mGameEvent[event_id].occurence);
+            RealmTime now = LoopTime.RealmTime;
+            RealmTime eventInitialStart = mGameEvent[event_id].StartTime;
+            TimeSpan occurence = mGameEvent[event_id].Occurence;
             TimeSpan durationSinceLastStart = TimeSpan.FromTicks((now - eventInitialStart).Ticks % occurence.Ticks);
-            return Time.DateTimeToUnixTime(now - durationSinceLastStart);
+            return now - durationSinceLastStart;
         }
         
         public bool IsHolidayActive(HolidayIds id)
@@ -1828,24 +1839,25 @@ namespace Game
     {
         public GameEventData()
         {
-            start = 1;
+            StartTime = RealmTime.Zero + (Seconds)1;
         }
-
-        public long start;           // occurs after this time
-        public long end;             // occurs before this time
-        public long nextstart;       // after this time the follow-up events count this phase completed
-        public uint occurence;       // time between end and start
-        public uint length;          // length of the event (Time.Minutes) after finishing all conditions
+        
+        public RealmTime StartTime;              // occurs after this time
+        public RealmTime EndTime;                // occurs before this time
+        public RealmTime NextStartTime;          // after this time the follow-up events count this phase completed
+        public TimeSpan Occurence;              // time between end and start
+        public TimeSpan Length;                 // length of the event (Time.Minutes) after finishing all conditions
         public HolidayIds holiday_id;
 
         public byte holidayStage;
-        public GameEventState state;   // state of the game event, these are saved into the game_event table on change!
+        public EventPeriodType Type;
+        public GameEventState state;     // state of the game event, these are saved into the game_event table on change!
         public Dictionary<int, GameEventFinishCondition> conditions = new();  // conditions to finish
         public List<ushort> prerequisite_events = new();  // events that must be completed before starting this event
         public string description;
-        public GameEventAnnounce announce;         // if 0 dont announce, if 1 announce, if 2 take config value
+        public GameEventAnnounce announce;        
 
-        public bool IsValid() { return length > 0 || state > GameEventState.Normal; }
+        public bool IsValid() { return Length > TimeSpan.Zero || state > GameEventState.Normal; }
     }
 
     public class ModelEquip

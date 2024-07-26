@@ -5,7 +5,7 @@ namespace Game.Entities
     public class RestMgr
     {
         Player _player;
-        long _restTime;
+        ServerTime _restTime;
         int _innAreaTriggerId;
         float[] _restBonus = new float[(int)RestTypes.Max];
         RestFlag _restFlagMask;
@@ -49,7 +49,7 @@ namespace Game.Entities
             if (restBonus > rest_bonus_max)
                 restBonus = rest_bonus_max;
 
-            uint oldBonus = (uint)(_restBonus[(int)restType]);
+            uint oldBonus = (uint)_restBonus[(int)restType];
             _restBonus[(int)restType] = restBonus;
 
             PlayerRestState oldRestState = (PlayerRestState)(int)_player.m_activePlayerData.RestInfo[(int)restType].StateID;
@@ -89,7 +89,7 @@ namespace Game.Entities
 
             if (oldRestMask == 0 && _restFlagMask != 0) // only set flag/time on the first rest state
             {
-                _restTime = GameTime.GetGameTime();
+                _restTime = LoopTime.ServerTime;
                 _player.SetPlayerFlag(PlayerFlags.Resting);
             }
 
@@ -104,7 +104,7 @@ namespace Game.Entities
 
             if (oldRestMask != 0 && _restFlagMask == 0) // only remove flag/time on the last rest state remove
             {
-                _restTime = 0;
+                _restTime = ServerTime.Zero;
                 _player.RemovePlayerFlag(PlayerFlags.Resting);
             }
         }

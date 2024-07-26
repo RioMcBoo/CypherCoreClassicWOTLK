@@ -11,7 +11,7 @@ namespace Game.Movement
     {
         int _movementId;
         Position _destination;
-        float? _speed;
+        Speed? _speed;
         bool _generatePath;
         //! if set then unit will turn to specified _orient in provided _pos
         float? _finalOrient;
@@ -20,7 +20,7 @@ namespace Game.Movement
         MovementWalkRunSpeedSelectionMode _speedSelectionMode;
         float? _closeEnoughDistance;
 
-        public PointMovementGenerator(int id, float x, float y, float z, bool generatePath, float? speed = null, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null,
+        public PointMovementGenerator(int id, float x, float y, float z, bool generatePath, Speed? speed = null, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null,
             MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
             _movementId = id;
@@ -125,7 +125,7 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             if (owner == null)
                 return false;
@@ -227,7 +227,7 @@ namespace Game.Movement
                 ownerCreature.SetNoCallAssistance(false);
                 ownerCreature.CallAssistance();
                 if (ownerCreature.IsAlive())
-                    ownerCreature.GetMotionMaster().MoveSeekAssistanceDistract((uint)WorldConfig.Values[WorldCfg.CreatureFamilyAssistanceDelay].Int32);
+                    ownerCreature.GetMotionMaster().MoveSeekAssistanceDistract(WorldConfig.Values[WorldCfg.CreatureFamilyAssistanceDelay].TimeSpan);
             }
         }
 

@@ -197,7 +197,7 @@ namespace Game.Chat
 
             // Format creation date
 
-            var createdDateTime = Time.UnixTimeToDateTime(guild.GetCreatedDate());
+            ServerTime createdDateTime = guild.GetCreatedDate();
             handler.SendSysMessage(CypherStrings.GuildInfoCreationDate, createdDateTime.ToLongDateString()); // Creation Date
             handler.SendSysMessage(CypherStrings.GuildInfoMemberCount, guild.GetMembersCount()); // Number of Members
             handler.SendSysMessage(CypherStrings.GuildInfoBankGold, guild.GetBankMoney() / 100 / 100); // Bank Gold (in gold coins)

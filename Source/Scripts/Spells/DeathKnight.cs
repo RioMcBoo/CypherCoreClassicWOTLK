@@ -572,16 +572,16 @@ namespace Scripts.Spells.DeathKnight
                 if (spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && (spellInfo.SpellFamilyFlags[2] & 0x2) != 0 &&
                     aurEff.GetCasterGUID() == caster.GetGUID())
                 {
-                    int countMin = aurEff.GetBase().GetMaxDuration();
-                    int countMax = spellInfo.GetMaxDuration();
+                    Milliseconds countMin = aurEff.GetBase().GetMaxDuration();
+                    Milliseconds countMax = spellInfo.GetMaxDuration();
 
                     // this Glyph
-                    countMax += 9000;
+                    countMax += (Seconds)9;
 
                     if (countMin < countMax)
                     {
-                        aurEff.GetBase().SetDuration(aurEff.GetBase().GetDuration() + 3000);
-                        aurEff.GetBase().SetMaxDuration(countMin + 3000);
+                        aurEff.GetBase().SetDuration(aurEff.GetBase().GetDuration() + (Seconds)3);
+                        aurEff.GetBase().SetMaxDuration(countMin + (Seconds)3);
                     }
                 }
             }
@@ -846,7 +846,7 @@ namespace Scripts.Spells.DeathKnight
 
             if (_runicPowerSpent >= 600)
             {
-                pillarOfFrost.SetDuration(pillarOfFrost.GetDuration() + 1000);
+                pillarOfFrost.SetDuration(pillarOfFrost.GetDuration() + (Seconds)1);
                 _runicPowerSpent -= 600;
             }
         }

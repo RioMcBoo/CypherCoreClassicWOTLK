@@ -14,7 +14,7 @@ namespace Game.DataStorage
     {
         public static BitSet LoadStores(string dataPath, Locale defaultLocale)
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             string db2Path = $"{dataPath}/dbc";
 
@@ -425,14 +425,14 @@ namespace Game.DataStorage
                 Environment.Exit(1);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Initialized {data.counter} DB2 data storages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Initialized {data.counter} DB2 data storages in {Time.Diff(oldMSTime)} ms.");
 
             return data.availableLocales;
         }
 
         public static void LoadGameTables(string dataPath)
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             string gtPath = dataPath + "/gt/";
 
@@ -459,7 +459,7 @@ namespace Game.DataStorage
             ShieldBlockRegularGameTable = ReadGameTable<GtShieldBlockRegularRecord>("ShieldBlockRegular.txt");
             SpellScalingGameTable = ReadGameTable<GtSpellScalingRecord>("SpellScaling.txt");
 
-            Log.outInfo(LogFilter.ServerLoading, $"Initialized {loadedFileCount} DBC GameTables data stores in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Initialized {loadedFileCount} DBC GameTables data stores in {Time.Diff(oldMSTime)} ms.");
         }
 
         #region Main Collections

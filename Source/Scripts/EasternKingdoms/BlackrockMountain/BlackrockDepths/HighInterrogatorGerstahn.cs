@@ -29,33 +29,33 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.HighInterrog
 
         public override void JustEngagedWith(Unit who)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule((Seconds)4, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.Shadowwordpain);
-                task.Repeat(TimeSpan.FromSeconds(7));
+                task.Repeat((Seconds)7);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
+            _scheduler.Schedule((Seconds)14, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.Manaburn);
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(32), task =>
+            _scheduler.Schedule((Seconds)32, task =>
             {
                 DoCastVictim(SpellIds.Psychicscream);
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)30);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 DoCast(me, SpellIds.Shadowshield);
-                task.Repeat(TimeSpan.FromSeconds(25));
+                task.Repeat((Seconds)25);
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

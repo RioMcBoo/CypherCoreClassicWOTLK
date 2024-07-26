@@ -222,7 +222,7 @@ namespace Game.Loots
 
     public class LootRoll
     {
-        static TimeSpan LOOT_ROLL_TIMEOUT = TimeSpan.FromMinutes(1);
+        static TimeSpan LOOT_ROLL_TIMEOUT = (Minutes)1;
 
         Map m_map;
         Dictionary<ObjectGuid, PlayerRollVote> m_rollVoteMap = new();
@@ -230,7 +230,7 @@ namespace Game.Loots
         LootItem m_lootItem;
         Loot m_loot;
         RollMask m_voteMask;
-        DateTime m_endTime = DateTime.MinValue;
+        ServerTime m_endTime = ServerTime.Zero;
 
         ~LootRoll()
         {
@@ -467,7 +467,7 @@ namespace Game.Loots
                 {
                     // start the roll
                     SendStartRoll();
-                    m_endTime = GameTime.Now() + LOOT_ROLL_TIMEOUT;
+                    m_endTime = LoopTime.ServerTime + LOOT_ROLL_TIMEOUT;
                     m_isStarted = true;
                     return true;
                 }
@@ -526,7 +526,7 @@ namespace Game.Loots
         {
             KeyValuePair<ObjectGuid, PlayerRollVote> winner = default;
 
-            if (AllPlayerVoted(ref winner) || m_endTime <= GameTime.Now())
+            if (AllPlayerVoted(ref winner) || m_endTime <= LoopTime.ServerTime)
             {
                 Finish(winner);
                 return true;
@@ -820,7 +820,7 @@ namespace Game.Loots
             {
                 if (pair.Value.UpdateRoll())
                     _rolls.Remove(pair.Key);
-        }
+            }
         }
 
         public void FillNotNormalLootFor(Player player)
@@ -946,9 +946,9 @@ namespace Game.Loots
                 if (maxAmount <= minAmount)
                     gold = (uint)(maxAmount * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
                 else if ((maxAmount - minAmount) < 32700)
-                    gold = (uint)(RandomHelper.URand(minAmount, maxAmount) * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
+                    gold = (uint)(RandomHelper.IRand64(minAmount, maxAmount) * WorldConfig.Values[WorldCfg.RateDropMoney].Float);
                 else
-                    gold = (uint)(RandomHelper.URand(minAmount >> 8, maxAmount >> 8) * WorldConfig.Values[WorldCfg.RateDropMoney].Float) << 8;
+                    gold = (uint)(RandomHelper.IRand64(minAmount >> 8, maxAmount >> 8) * WorldConfig.Values[WorldCfg.RateDropMoney].Float) << 8;
             }
         }
 

@@ -127,36 +127,36 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
         void SetupGroundPhase()
         {
             phase = NightbanePhases.Ground;
-            _scheduler.Schedule(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(15), MiscConst.GroupGround, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(0), Time.SpanFromSeconds(15), MiscConst.GroupGround, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(6), Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(23), MiscConst.GroupGround, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(4), Time.SpanFromSeconds(23), MiscConst.GroupGround, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target != null)
                     if (!me.HasInArc(MathF.PI, target))
                         DoCast(target, SpellIds.TailSweep);
-                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(20), Time.SpanFromSeconds(30));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(48), MiscConst.GroupGround, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(48), MiscConst.GroupGround, task =>
             {
                 DoCastAOE(SpellIds.BellowingRoar);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(18), MiscConst.GroupGround, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), Time.SpanFromSeconds(18), MiscConst.GroupGround, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.CharredEarth);
-                task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(21));
+                task.Repeat(Time.SpanFromSeconds(18), Time.SpanFromSeconds(21));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(26), TimeSpan.FromSeconds(30), MiscConst.GroupGround, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(26), Time.SpanFromSeconds(30), MiscConst.GroupGround, task =>
             {
                 DoCastVictim(SpellIds.SmolderingBreath);
-                task.Repeat(TimeSpan.FromSeconds(28), TimeSpan.FromSeconds(40));
+                task.Repeat(Time.SpanFromSeconds(28), Time.SpanFromSeconds(40));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(82), MiscConst.GroupGround, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(82), MiscConst.GroupGround, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target != null)
@@ -201,13 +201,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                 {
                     case PointIds.IntroStart:
                         me.SetStandState(UnitStandStateType.Stand);
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
+                        _scheduler.Schedule(Time.SpanFromMilliseconds(1), task =>
                         {
                             me.GetMotionMaster().MoveAlongSplineChain(PointIds.IntroEnd, SplineChainIds.IntroEnd, false);
                         });
                         break;
                     case PointIds.IntroEnd:
-                        _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
                         {
                             me.GetMotionMaster().MoveAlongSplineChain(PointIds.IntroLanding, SplineChainIds.IntroLanding, false);
                         });
@@ -215,7 +215,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                     case PointIds.IntroLanding:
                         me.SetDisableGravity(false);
                         me.HandleEmoteCommand(Emote.OneshotLand);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
                         {
                             me.SetImmuneToPC(false);
                             DoZoneInCombat();
@@ -225,14 +225,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                         phase = NightbanePhases.Ground;
                         me.SetDisableGravity(false);
                         me.HandleEmoteCommand(Emote.OneshotLand);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
                         {
                             SetupGroundPhase();
                             me.SetReactState(ReactStates.Aggressive);
                         });
                         break;
                     case PointIds.PhaseTwoEnd:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
+                        _scheduler.Schedule(Time.SpanFromMilliseconds(1), task =>
                         {
                             me.GetMotionMaster().MoveAlongSplineChain(PointIds.PhaseTwoLanding, SplineChainIds.SecondLanding, false);
                         });
@@ -245,20 +245,20 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             {
                 if (pointId == PointIds.PhaseTwoFly)
                 {
-                    _scheduler.Schedule(TimeSpan.FromSeconds(33), MiscConst.GroupFly, task =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(33), MiscConst.GroupFly, task =>
                     {
                         _scheduler.CancelGroup(MiscConst.GroupFly);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(2), MiscConst.GroupGround, landTask =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(2), MiscConst.GroupGround, landTask =>
                         {
                             Talk(TextIds.YellLandPhase);
                             me.SetDisableGravity(true);
                             me.GetMotionMaster().MoveAlongSplineChain(PointIds.PhaseTwoEnd, SplineChainIds.PhaseTwo, false);
                         });
                     });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(2), MiscConst.GroupFly, task =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(2), MiscConst.GroupFly, task =>
                     {
                         Talk(TextIds.EmoteBreath);
-                        task.Schedule(TimeSpan.FromSeconds(3), MiscConst.GroupFly, somethingTask =>
+                        task.Schedule(Time.SpanFromSeconds(3), MiscConst.GroupFly, somethingTask =>
                         {
                             ResetThreatList();
                             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
@@ -269,24 +269,24 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                             }
                         });
                     });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(21), MiscConst.GroupFly, task =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(21), MiscConst.GroupFly, task =>
                     {
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                         if (target != null)
                             DoCast(target, SpellIds.SmokingBlastT);
-                        task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(7));
+                        task.Repeat(Time.SpanFromSeconds(5), Time.SpanFromSeconds(7));
                     });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(17), MiscConst.GroupFly, task =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(17), MiscConst.GroupFly, task =>
                     {
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                         if (target != null)
                             DoCast(target, SpellIds.SmokingBlast);
-                        task.Repeat(TimeSpan.FromMilliseconds(1400));
+                        task.Repeat(Time.SpanFromMilliseconds(1400));
                     });
                 }
                 else if (pointId == PointIds.PhaseTwoPreFly)
                 {
-                    _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
+                    _scheduler.Schedule(Time.SpanFromMilliseconds(1), task =>
                     {
                         me.GetMotionMaster().MovePoint(PointIds.PhaseTwoFly, MiscConst.FlyPosition, true);
                     });
@@ -313,7 +313,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                 me.GetMotionMaster().MovePoint(PointIds.PhaseTwoFly, MiscConst.FlyPosition, true);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() && phase != NightbanePhases.Intro)
                 return;

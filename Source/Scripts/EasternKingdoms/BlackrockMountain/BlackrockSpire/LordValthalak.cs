@@ -44,15 +44,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(8), 1, task =>
+            _scheduler.Schedule((Seconds)6, (Seconds)8, 1, task =>
             {
                 DoCast(me, SpellIds.SummonSpectralAssassin);
-                task.Repeat(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+                task.Repeat((Seconds)30, (Seconds)35);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(9), TimeSpan.FromSeconds(18), task =>
+            _scheduler.Schedule((Seconds)9, (Seconds)18, task =>
             {
                 DoCastVictim(SpellIds.ShadowWrath);
-                task.Repeat(TimeSpan.FromSeconds(19), TimeSpan.FromSeconds(24));
+                task.Repeat((Seconds)19, (Seconds)24);
             });
         }
 
@@ -61,7 +61,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
             instance.SetBossState(DataTypes.LordValthalak, EncounterState.Done);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -86,10 +86,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 if (HealthBelowPct(15))
                 {
                     DoCast(me, SpellIds.Frenzy);
-                    _scheduler.Schedule(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(14), task =>
+                    _scheduler.Schedule((Seconds)7, (Seconds)14, task =>
                     {
                         DoCastVictim(SpellIds.ShadowBoltVolley);
-                        task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(6));
+                        task.Repeat((Seconds)4, (Seconds)6);
                     });
                     frenzy15 = true;
                 }

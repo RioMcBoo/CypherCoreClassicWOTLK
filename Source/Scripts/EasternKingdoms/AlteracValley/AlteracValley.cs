@@ -73,32 +73,32 @@ namespace Scripts.EasternKingdoms.AlteracValley
             Initialize();
 
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)2, (Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Charge);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
+                task.Repeat((Seconds)10, (Seconds)25);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(11), task =>
+            _scheduler.Schedule((Seconds)1, (Seconds)11, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(16));
+                task.Repeat((Seconds)10, (Seconds)16);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule((Seconds)2, task =>
             {
                 DoCast(me, SpellIds.DemoralizingShout);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)10, (Seconds)15);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)5, (Seconds)20, task =>
             {
                 DoCast(me, SpellIds.Whirlwind);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
+                task.Repeat((Seconds)10, (Seconds)25);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)5, (Seconds)20, task =>
             {
                 DoCast(me, SpellIds.Enrage);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)10, (Seconds)30);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule((Seconds)5, task =>
             {
                 Position _homePosition = me.GetHomePosition();
                 if (me.GetDistance2d(_homePosition.GetPositionX(), _homePosition.GetPositionY()) > 50.0f)
@@ -106,7 +106,7 @@ namespace Scripts.EasternKingdoms.AlteracValley
                     EnterEvadeMode();
                     return;
                 }
-                task.Repeat(TimeSpan.FromSeconds(5));
+                task.Repeat((Seconds)5);
             });
         }
 
@@ -115,7 +115,7 @@ namespace Scripts.EasternKingdoms.AlteracValley
             Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             // I have a feeling this isn't blizzlike, but owell, I'm only passing by and cleaning up.
             if (!_hasAura)
@@ -171,7 +171,7 @@ namespace Scripts.EasternKingdoms.AlteracValley
         public override void Reset()
         {
             me.SetActive(true);
-            _scheduler.Schedule(TimeSpan.FromMinutes(4), _ =>
+            _scheduler.Schedule((Minutes)4, _ =>
             {
                 ZoneScript zonescript = me.GetZoneScript();
                 if (zonescript != null)
@@ -194,7 +194,7 @@ namespace Scripts.EasternKingdoms.AlteracValley
             return true;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }

@@ -118,11 +118,11 @@ namespace Game.Networking.Packets
         {
             Hdr.Write(_worldPacket);
             _worldPacket.WriteInt32(Mapid);
-            _worldPacket.WriteUInt32(Timeout);
+            _worldPacket.WriteInt32((Milliseconds)Timeout);
             _worldPacket.WriteUInt8(Role);
         }
 
-        public uint Timeout;
+        public TimeSpan Timeout;
         public int Mapid;
         public BattlefieldStatusHeader Hdr = new();
         public byte Role;
@@ -136,18 +136,18 @@ namespace Game.Networking.Packets
         {
             Hdr.Write(_worldPacket);
             _worldPacket.WriteInt32(Mapid);
-            _worldPacket.WriteUInt32(ShutdownTimer);
-            _worldPacket.WriteUInt32(StartTimer);
+            _worldPacket.WriteInt32((Milliseconds)ShutdownTimer);
+            _worldPacket.WriteInt32((Milliseconds)StartTimer);
             _worldPacket.WriteBit(ArenaFaction != 0);
             _worldPacket.WriteBit(LeftEarly);
             _worldPacket.FlushBits();
         }
 
         public BattlefieldStatusHeader Hdr = new();
-        public uint ShutdownTimer;
+        public TimeSpan ShutdownTimer;
         public byte ArenaFaction;
         public bool LeftEarly;
-        public uint StartTimer;
+        public TimeSpan StartTimer;
         public int Mapid;
     }
 
@@ -158,8 +158,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             Hdr.Write(_worldPacket);
-            _worldPacket.WriteUInt32(AverageWaitTime);
-            _worldPacket.WriteUInt32(WaitTime);
+            _worldPacket.WriteInt32((Milliseconds)AverageWaitTime);
+            _worldPacket.WriteInt32((Milliseconds)WaitTime);
             _worldPacket.WriteInt32(Unused920);
             _worldPacket.WriteBit(AsGroup);
             _worldPacket.WriteBit(EligibleForMatchmaking);
@@ -167,12 +167,12 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public uint AverageWaitTime;
+        public TimeSpan AverageWaitTime;
         public BattlefieldStatusHeader Hdr = new();
         public bool AsGroup;
         public bool SuspendedQueue;
         public bool EligibleForMatchmaking;
-        public uint WaitTime;
+        public TimeSpan WaitTime;
         public int Unused920;
     }
 
@@ -184,13 +184,13 @@ namespace Game.Networking.Packets
         {
             Ticket.Write(_worldPacket);
             _worldPacket.WriteUInt64(QueueID);
-            _worldPacket.WriteInt32(Reason);
+            _worldPacket.WriteInt32((int)Reason);
             _worldPacket.WritePackedGuid(ClientID);
         }
 
         public ulong QueueID;
         public ObjectGuid ClientID;
-        public int Reason;
+        public GroupJoinBattlegroundResult Reason;
         public RideTicket Ticket = new();
     }
 
@@ -480,8 +480,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt8((byte)State);
-            _worldPacket.WriteInt64(StartTime);
-            _worldPacket.WriteInt64(Duration);
+            _worldPacket.WriteInt64((UnixTime64)StartTime);
+            _worldPacket.WriteInt64((Milliseconds)Duration);//TODO: Ask IDA to be sure
             _worldPacket.WriteUInt8(ArenaFaction);
             _worldPacket.WriteInt32((int)BattlemasterListID);
             _worldPacket.WriteBit(Registered);
@@ -495,8 +495,8 @@ namespace Game.Networking.Packets
 
         public int MapID;
         public PVPMatchState State = PVPMatchState.Inactive;
-        public long StartTime;
-        public long Duration; //TODO: Ask IDA to be sure
+        public ServerTime StartTime;
+        public TimeSpan Duration;
         public RatedMatchDeserterPenalty DeserterPenalty;
         public byte ArenaFaction;
         public BattlegroundTypeId BattlemasterListID;
@@ -525,8 +525,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Winner);
-            _worldPacket.WriteInt64(Duration);
+            _worldPacket.WriteUInt8((byte)Winner);
+            _worldPacket.WriteInt64((Milliseconds)Duration);//TODO: Ask IDA to be sure
             _worldPacket.WriteBit(LogData != null);
             _worldPacket.WriteBits(SoloShuffleStatus, 2);
             _worldPacket.FlushBits();
@@ -535,8 +535,8 @@ namespace Game.Networking.Packets
                 LogData.Write(_worldPacket);
         }
 
-        public byte Winner;
-        public long Duration; //TODO: Ask IDA to be sure
+        public PvPTeamId Winner;
+        public TimeSpan Duration; 
         public PVPMatchStatistics LogData;
         public uint SoloShuffleStatus;
     }
@@ -839,7 +839,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public Vector2 Pos;
         public BattlegroundCapturePointState State = BattlegroundCapturePointState.Neutral;
-        public long CaptureTime;
+        public Milliseconds CaptureTime;
         public TimeSpan CaptureTotalDuration;
     }
 }

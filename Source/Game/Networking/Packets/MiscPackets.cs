@@ -61,18 +61,19 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            ServerTime.Write(_worldPacket);
-            GameTime.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)ServerTime);
+            _worldPacket.WriteInt32((WowTime)GameTime);
             _worldPacket.WriteFloat(NewSpeed);
-            _worldPacket.WriteInt32(ServerTimeHolidayOffset);
-            _worldPacket.WriteInt32(GameTimeHolidayOffset);
+            _worldPacket.WriteInt32((WowTime)ServerTimeHolidayOffset);
+            _worldPacket.WriteInt32((WowTime)GameTimeHolidayOffset);
         }
-
+        /// <summary> InGame time speed (day/night animation + calendar) <br/>
+        /// useless, only for testing?</summary>
         public float NewSpeed;
-        public int ServerTimeHolidayOffset;
-        public WowTime GameTime;
-        public WowTime ServerTime;
-        public int GameTimeHolidayOffset;
+        public DateTime ServerTimeHolidayOffset;
+        public DateTime GameTime;
+        public DateTime ServerTime;
+        public DateTime GameTimeHolidayOffset;
     }
 
     public class ResetWeeklyCurrency : ServerPacket
@@ -274,12 +275,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             SequenceIndex = _worldPacket.ReadUInt32();
-            ClientTime = _worldPacket.ReadUInt32();
+            ClientTime = (Milliseconds)_worldPacket.ReadInt32();
         }
 
-        public DateTime GetReceivedTime() { return _worldPacket.GetReceivedTime(); }
+        public ServerTime GetReceivedTime() { return _worldPacket.GetReceivedTime(); }
 
-        public uint ClientTime; // Client ticks in ms
+        public Milliseconds ClientTime; // Client ticks in ms
         public uint SequenceIndex; // Same index as in request
     }
 
@@ -322,10 +323,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt64(Time);
+            _worldPacket.WriteInt64((UnixTime64)Time);
         }
 
-        public long Time;
+        public RealmTime Time;
     }
 
     public class TutorialFlags : ServerPacket
@@ -619,7 +620,7 @@ namespace Game.Networking.Packets
 
     public class StartMirrorTimer : ServerPacket
     {
-        public StartMirrorTimer(MirrorTimerType timer, int value, int maxValue, int scale, int spellID, bool paused) : base(ServerOpcodes.StartMirrorTimer)
+        public StartMirrorTimer(MirrorTimerType timer, Milliseconds value, Milliseconds maxValue, int scale, int spellID, bool paused) : base(ServerOpcodes.StartMirrorTimer)
         {
             Timer = timer;
             Value = value;
@@ -641,10 +642,10 @@ namespace Game.Networking.Packets
         }
 
         public int Scale;
-        public int MaxValue;
+        public Milliseconds MaxValue;
         public MirrorTimerType Timer;
         public int SpellID;
-        public int Value;
+        public Milliseconds Value;
         public bool Paused;
     }
 
@@ -1356,13 +1357,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt64(TotalTime);
-            _worldPacket.WriteInt64(TimeLeft);
+            _worldPacket.WriteInt64(TotalTime.ToSeconds());
+            _worldPacket.WriteInt64(TimeLeft.ToSeconds());
             _worldPacket.WriteInt32((int)Type);
         }
 
-        public long TotalTime;
-        public long TimeLeft;
+        public TimeSpan TotalTime;
+        public TimeSpan TimeLeft;
         public CountdownTimerType Type;
     }
 

@@ -268,7 +268,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                     nefarian.DespawnOrUnsummon();
                                 break;
                             case EncounterState.Fail:
-                                _events.ScheduleEvent(EventIds.RespawnNefarius, TimeSpan.FromMinutes(15));
+                                _events.ScheduleEvent(EventIds.RespawnNefarius, (Minutes)15);
                                 SetBossState(DataTypes.Nefarian, EncounterState.NotStarted);
                                 break;
                             default:
@@ -286,7 +286,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                     switch ((EncounterState)data)
                     {
                         case EncounterState.InProgress:
-                            _events.ScheduleEvent(EventIds.RazorSpawn, TimeSpan.FromSeconds(45));
+                            _events.ScheduleEvent(EventIds.RazorSpawn, (Seconds)45);
                             EggEvent = data;
                             EggCount = 0;
                             break;
@@ -305,7 +305,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                     razor.RemoveAurasDueToSpell(42013); // MindControl
                                     DoRemoveAurasDueToSpellOnPlayers(42013, true, true);
                                 }
-                                _events.ScheduleEvent(EventIds.RazorPhaseTwo, TimeSpan.FromSeconds(1));
+                                _events.ScheduleEvent(EventIds.RazorPhaseTwo, (Seconds)1);
                                 _events.CancelEvent(EventIds.RazorSpawn);
                             }
                             if (EggEvent == (uint)EncounterState.NotStarted)
@@ -322,7 +322,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                     SetBossState(DataTypes.RazorgoreTheUntamed, EncounterState.Done);
             }
 
-            public override void Update(uint diff)
+            public override void Update(TimeSpan diff)
             {
                 if (_events.Empty())
                     return;
@@ -340,7 +340,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                 if (summon != null)
                                     summon.GetAI().DoZoneInCombat();
                             }
-                            _events.ScheduleEvent(EventIds.RazorSpawn, TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(17));
+                            _events.ScheduleEvent(EventIds.RazorSpawn, Time.SpanFromSeconds(12), Time.SpanFromSeconds(17));
                             break;
                         case EventIds.RazorPhaseTwo:
                             _events.CancelEvent(EventIds.RazorSpawn);

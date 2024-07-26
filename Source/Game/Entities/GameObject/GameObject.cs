@@ -31,8 +31,8 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.Rotation = true;
 
-            m_respawnDelayTime = 300;
-            m_despawnDelay = 0;
+            m_respawnDelayTime = (Minutes)5;
+            m_despawnDelay = TimeSpan.Zero;
             m_lootState = LootState.NotReady;
             m_spawnedByDefault = true;
 
@@ -297,7 +297,7 @@ namespace Game.Entities
             {
                 case GameObjectTypes.FishingHole:
                     SetGoAnimProgress(animProgress);
-                    m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
+                    m_goValue.FishingHole.MaxOpens = RandomHelper.IRand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
                     break;
                 case GameObjectTypes.DestructibleBuilding:
                     m_goValue.Building.Health = 20000;//goinfo.DestructibleBuilding.intactNumHits + goinfo.DestructibleBuilding.damagedNumHits;
@@ -353,7 +353,7 @@ namespace Game.Entities
                     break;
                 case GameObjectTypes.CapturePoint:
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), m_goInfo.CapturePoint.SpellVisual1);
-                    m_goValue.CapturePoint.AssaultTimer = 0;
+                    m_goValue.CapturePoint.AssaultTimer = Milliseconds.Zero;
                     m_goValue.CapturePoint.LastTeamCapture = BattleGroundTeamId.Neutral;
                     m_goValue.CapturePoint.State = BattlegroundCapturePointState.Neutral;
                     UpdateCapturePoint();
@@ -419,7 +419,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
 
@@ -428,14 +428,14 @@ namespace Game.Entities
             else if (!AIM_Initialize())
                 Log.outError(LogFilter.Server, "Could not initialize GameObjectAI");
 
-            if (m_despawnDelay != 0)
+            if (m_despawnDelay != TimeSpan.Zero)
             {
                 if (m_despawnDelay > diff)
                     m_despawnDelay -= diff;
                 else
                 {
-                    m_despawnDelay = 0;
-                    DespawnOrUnsummon(TimeSpan.FromMilliseconds(0), m_despawnRespawnTime);
+                    m_despawnDelay = TimeSpan.Zero;
+                    DespawnOrUnsummon(TimeSpan.Zero, m_despawnRespawnTime);
                 }
             }
 
@@ -446,7 +446,7 @@ namespace Game.Entities
             {
                 foreach (var (guid, playerState) in m_perPlayerState.ToList())
                 {
-                    if (playerState.ValidUntil > GameTime.GetSystemTime())
+                    if (playerState.ValidUntil > LoopTime.ServerTime)
                         continue;
 
                     Player seer = Global.ObjAccessor.GetPlayer(this, guid);
@@ -490,11 +490,11 @@ namespace Game.Entities
                             // Bombs
                             Unit owner = GetOwner();
                             if (goInfo.Trap.charges == 2)
-                                m_cooldownTime = GameTime.GetGameTimeMS() + 10 * Time.InMilliseconds;   // Hardcoded tooltip value
+                                m_cooldownTime = LoopTime.ServerTime + (Seconds)10;   // Hardcoded tooltip value
                             else if (owner != null)
                             {
                                 if (owner.IsInCombat())
-                                    m_cooldownTime = GameTime.GetGameTimeMS() + goInfo.Trap.startDelay * Time.InMilliseconds;
+                                    m_cooldownTime = LoopTime.ServerTime + goInfo.Trap.startDelay;
                             }
                             m_lootState = LootState.Ready;
                             break;
@@ -502,7 +502,7 @@ namespace Game.Entities
                         case GameObjectTypes.FishingNode:
                         {
                             // fishing code (bobber ready)
-                            if (GameTime.GetGameTime() > m_respawnTime - 5)
+                            if (LoopTime.ServerTime > m_respawnTime - (Seconds)5)
                             {
                                 // splash bobber (bobber ready now)
                                 Unit caster = GetOwner();
@@ -514,10 +514,10 @@ namespace Game.Entities
                             return;
                         }
                         case GameObjectTypes.Chest:
-                            if (m_restockTime > GameTime.GetGameTime())
+                            if (m_restockTime > LoopTime.ServerTime)
                                 return;
                             // If there is no restock timer, or if the restock timer passed, the chest becomes ready to loot
-                            m_restockTime = 0;
+                            m_restockTime = ServerTime.Zero;
                             m_lootState = LootState.Ready;
                             ClearLoot();
                             UpdateDynamicFlagsForNearbyPlayers();
@@ -532,25 +532,25 @@ namespace Game.Entities
                 {
                     if (m_respawnCompatibilityMode)
                     {
-                        if (m_respawnTime > 0)                          // timer on
+                        if (m_respawnTime > ServerTime.Zero)                          // timer on
                         {
-                            long now = GameTime.GetGameTime();
+                            ServerTime now = LoopTime.ServerTime;
                             if (m_respawnTime <= now)            // timer expired
                             {
                                 ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.GameObject, GetMapId(), GetEntry(), m_spawnId);
-                                long linkedRespawntime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
-                                if (linkedRespawntime != 0)             // Can't respawn, the master is dead
+                                ServerTime linkedRespawntime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
+                                if (linkedRespawntime != ServerTime.Zero)             // Can't respawn, the master is dead
                                 {
                                     ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
                                     if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
-                                        SetRespawnTime(Time.Week);
+                                        SetRespawnTime((Weeks)1);
                                     else
-                                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
+                                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + (Seconds)RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
                                     SaveRespawnTime();
                                     return;
                                 }
 
-                                m_respawnTime = 0;
+                                m_respawnTime = ServerTime.Zero;
                                 m_SkillupList.Clear();
                                 m_usetimes = 0;
 
@@ -576,7 +576,7 @@ namespace Game.Entities
                                         break;
                                     case GameObjectTypes.FishingHole:
                                         // Initialize a new max fish count on respawn
-                                        m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
+                                        m_goValue.FishingHole.MaxOpens = RandomHelper.IRand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
                                         break;
                                     default:
                                         break;
@@ -604,7 +604,7 @@ namespace Game.Entities
                     }
 
                     // Set respawn timer
-                    if (!m_respawnCompatibilityMode && m_respawnTime > 0)
+                    if (!m_respawnCompatibilityMode && m_respawnTime > ServerTime.Zero)
                         SaveRespawnTime();
 
                     if (IsSpawned())
@@ -613,7 +613,7 @@ namespace Game.Entities
                         int max_charges;
                         if (goInfo.type == GameObjectTypes.Trap)
                         {
-                            if (GameTime.GetGameTimeMS() < m_cooldownTime)
+                            if (LoopTime.ServerTime < m_cooldownTime)
                                 break;
 
                             // Type 2 (bomb) does not need to be triggered by a unit and despawns after casting its spell.
@@ -716,25 +716,25 @@ namespace Game.Entities
                     {
                         case GameObjectTypes.Door:
                         case GameObjectTypes.Button:
-                            if (m_cooldownTime != 0 && GameTime.GetGameTimeMS() >= m_cooldownTime)
+                            if (m_cooldownTime != ServerTime.Zero && LoopTime.ServerTime >= m_cooldownTime)
                                 ResetDoorOrButton();
                             break;
                         case GameObjectTypes.Goober:
-                            if (GameTime.GetGameTimeMS() >= m_cooldownTime)
+                            if (LoopTime.ServerTime >= m_cooldownTime)
                             {
                                 RemoveFlag(GameObjectFlags.InUse);
 
                                 SetLootState(LootState.JustDeactivated);
-                                m_cooldownTime = 0;
+                                m_cooldownTime = ServerTime.Zero;
                             }
                             break;
                         case GameObjectTypes.Chest:
                             loot?.Update();
 
                             // Non-consumable chest was partially looted and restock time passed, restock all loot now
-                            if (GetGoInfo().Chest.consumable == 0 && m_restockTime != 0 && GameTime.GetGameTime() >= m_restockTime)
+                            if (GetGoInfo().Chest.consumable == 0 && m_restockTime != ServerTime.Zero && LoopTime.ServerTime >= m_restockTime)
                             {
-                                m_restockTime = 0;
+                                m_restockTime = ServerTime.Zero;
                                 m_lootState = LootState.Ready;
                                 ClearLoot();
                                 UpdateDynamicFlagsForNearbyPlayers();
@@ -763,7 +763,7 @@ namespace Game.Entities
                                     CastSpell(target, goInfo.Trap.spell, args);
 
                                 // Template value or 4 seconds
-                                m_cooldownTime = (GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4u)) * Time.InMilliseconds;
+                                m_cooldownTime = LoopTime.ServerTime + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : (Seconds)4);
 
                                 if (goInfo.Trap.charges == 1)
                                     SetLootState(LootState.JustDeactivated);
@@ -816,13 +816,13 @@ namespace Game.Entities
                     ClearLoot();
 
                     // Do not delete chests or goobers that are not consumed on loot, while still allowing them to despawn when they expire if summoned
-                    bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == 0;
+                    bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == ServerTime.Zero;
                     if ((GetGoType() == GameObjectTypes.Chest || GetGoType() == GameObjectTypes.Goober) && !GetGoInfo().IsDespawnAtAction() && !isSummonedAndExpired)
                     {
                         if (GetGoType() == GameObjectTypes.Chest && GetGoInfo().Chest.chestRestockTime > 0)
                         {
                             // Start restock timer when the chest is fully looted
-                            m_restockTime = GameTime.GetGameTime() + GetGoInfo().Chest.chestRestockTime;
+                            m_restockTime = LoopTime.ServerTime + GetGoInfo().Chest.chestRestockTime;
                             SetLootState(LootState.NotReady);
                             UpdateDynamicFlagsForNearbyPlayers();
                         }
@@ -833,7 +833,7 @@ namespace Game.Entities
                     }
                     else if (!GetOwnerGUID().IsEmpty() || GetSpellId() != 0)
                     {
-                        SetRespawnTime(0);
+                        SetRespawnTime(TimeSpan.Zero);
 
                         if (GetGoType() == GameObjectTypes.NewFlagDrop)
                         {
@@ -857,12 +857,12 @@ namespace Game.Entities
                             ReplaceAllFlags(goOverride.Flags);
                     }
 
-                    if (m_respawnDelayTime == 0)
+                    if (m_respawnDelayTime == TimeSpan.Zero)
                         return;
 
                     if (!m_spawnedByDefault)
                     {
-                        m_respawnTime = 0;
+                        m_respawnTime = ServerTime.Zero;
 
                         if (m_spawnId != 0)
                             UpdateObjectVisibilityOnDestroy();
@@ -872,11 +872,11 @@ namespace Game.Entities
                         return;
                     }
 
-                    uint respawnDelay = m_respawnDelayTime;
+                    Seconds respawnDelay = (Seconds)m_respawnDelayTime;
                     int scalingMode = WorldConfig.Values[WorldCfg.RespawnDynamicMode].Int32;
                     if (scalingMode > 0)
                         GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
-                    m_respawnTime = GameTime.GetGameTime() + respawnDelay;
+                    m_respawnTime = LoopTime.ServerTime + respawnDelay;
 
                     // if option not set then object will be saved at grid unload
                     // Otherwise just save respawn time to map object memory
@@ -907,7 +907,7 @@ namespace Game.Entities
         public void Refresh()
         {
             // not refresh despawned not casted GO (despawned casted GO destroyed in all cases anyway)
-            if (m_respawnTime > 0 && m_spawnedByDefault)
+            if (m_respawnTime > ServerTime.Zero && m_spawnedByDefault)
                 return;
 
             if (IsSpawned())
@@ -924,9 +924,9 @@ namespace Game.Entities
         {
             if (delay > TimeSpan.Zero)
             {
-                if (m_despawnDelay == 0 || m_despawnDelay > delay.TotalMilliseconds)
+                if (m_despawnDelay == TimeSpan.Zero || m_despawnDelay > delay)
                 {
-                    m_despawnDelay = (uint)delay.TotalMilliseconds;
+                    m_despawnDelay = delay;
                     m_despawnRespawnTime = forceRespawnTime;
                 }
             }
@@ -934,7 +934,7 @@ namespace Game.Entities
             {
                 if (m_goData != null)
                 {
-                    uint respawnDelay = (uint)((forceRespawnTime > TimeSpan.Zero) ? forceRespawnTime.TotalSeconds : m_respawnDelayTime);
+                    TimeSpan respawnDelay = forceRespawnTime > TimeSpan.Zero ? forceRespawnTime : m_respawnDelayTime;
                     SaveRespawnTime(respawnDelay);
                 }
                 Delete();
@@ -944,7 +944,7 @@ namespace Game.Entities
         void DespawnForPlayer(Player seer, TimeSpan respawnTime)
         {
             PerPlayerState perPlayerState = GetOrCreatePerPlayerStates(seer.GetGUID());
-            perPlayerState.ValidUntil = GameTime.GetSystemTime() + respawnTime;
+            perPlayerState.ValidUntil = LoopTime.ServerTime + respawnTime;
             perPlayerState.Despawned = true;
             seer.UpdateVisibilityOf(this);
         }
@@ -1069,7 +1069,7 @@ namespace Game.Entities
             data.MapId = GetMapId();
             data.SpawnPoint.Relocate(this);
             data.rotation = m_localRotation;
-            data.spawntimesecs = (int)(m_spawnedByDefault ? m_respawnDelayTime : -m_respawnDelayTime);
+            data.spawntimesecs = (Seconds)(m_spawnedByDefault ? m_respawnDelayTime : -m_respawnDelayTime);
             data.animprogress = GetGoAnimProgress();
             data.goState = GetGoState();
             data.SpawnDifficulties = spawnDifficulties;
@@ -1101,7 +1101,7 @@ namespace Game.Entities
             stmt.SetFloat(index++, m_localRotation.Y);
             stmt.SetFloat(index++, m_localRotation.Z);
             stmt.SetFloat(index++, m_localRotation.W);
-            stmt.SetUInt32(index++, m_respawnDelayTime);
+            stmt.SetInt32(index++, (Seconds)m_respawnDelayTime);
             stmt.SetUInt8(index++, GetGoAnimProgress());
             stmt.SetUInt8(index++, (byte)GetGoState());
             DB.World.Execute(stmt);
@@ -1138,18 +1138,18 @@ namespace Game.Entities
                 if (!GetGoInfo().GetDespawnPossibility() && !GetGoInfo().IsDespawnAtAction())
                 {
                     SetFlag(GameObjectFlags.NoDespawn);
-                    m_respawnDelayTime = 0;
-                    m_respawnTime = 0;
+                    m_respawnDelayTime = TimeSpan.Zero;
+                    m_respawnTime = ServerTime.Zero;
                 }
                 else
                 {
-                    m_respawnDelayTime = (uint)data.spawntimesecs;
+                    m_respawnDelayTime = data.spawntimesecs;
                     m_respawnTime = GetMap().GetGORespawnTime(m_spawnId);
 
                     // ready to respawn
-                    if (m_respawnTime != 0 && m_respawnTime <= GameTime.GetGameTime())
+                    if (m_respawnTime != ServerTime.Zero && m_respawnTime <= LoopTime.ServerTime)
                     {
-                        m_respawnTime = 0;
+                        m_respawnTime = ServerTime.Zero;
                         GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId);
                     }
                 }
@@ -1166,8 +1166,8 @@ namespace Game.Entities
                 }
 
                 m_spawnedByDefault = false;
-                m_respawnDelayTime = (uint)-data.spawntimesecs;
-                m_respawnTime = 0;
+                m_respawnDelayTime = -data.spawntimesecs;
+                m_respawnTime = ServerTime.Zero;
             }
 
             m_goData = data;
@@ -1286,9 +1286,9 @@ namespace Game.Entities
 
         public Transport ToTransport() { return GetGoInfo().type == GameObjectTypes.MapObjTransport ? (this as Transport) : null; }
 
-        public void SaveRespawnTime(uint forceDelay = 0)
+        public void SaveRespawnTime(TimeSpan forceDelay = default)
         {
-            if (m_goData != null && (forceDelay != 0 || m_respawnTime > GameTime.GetGameTime()) && m_spawnedByDefault)
+            if (m_goData != null && (forceDelay != TimeSpan.Zero || m_respawnTime > LoopTime.ServerTime) && m_spawnedByDefault)
             {
                 if (m_respawnCompatibilityMode)
                 {
@@ -1300,7 +1300,7 @@ namespace Game.Entities
                     return;
                 }
 
-                long thisRespawnTime = forceDelay != 0 ? GameTime.GetGameTime() + forceDelay : m_respawnTime;
+                ServerTime thisRespawnTime = forceDelay != TimeSpan.Zero ? LoopTime.ServerTime + forceDelay : m_respawnTime;
                 GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId());
             }
         }
@@ -1369,9 +1369,9 @@ namespace Game.Entities
 
         public void Respawn()
         {
-            if (m_spawnedByDefault && m_respawnTime > 0)
+            if (m_spawnedByDefault && m_respawnTime > ServerTime.Zero)
             {
-                m_respawnTime = GameTime.GetGameTime();
+                m_respawnTime = LoopTime.ServerTime;
                 GetMap().Respawn(SpawnObjectType.GameObject, m_spawnId);
             }
         }
@@ -1461,21 +1461,21 @@ namespace Game.Entities
             SetGoState(m_prevGoState);
 
             SetLootState(LootState.JustDeactivated);
-            m_cooldownTime = 0;
+            m_cooldownTime = ServerTime.Zero;
         }
 
-        public void UseDoorOrButton(uint time_to_restore = 0, bool alternative = false, Unit user = null)
+        public void UseDoorOrButton(TimeSpan time_to_restore = default, bool alternative = false, Unit user = null)
         {
             if (m_lootState != LootState.Ready)
                 return;
 
-            if (time_to_restore == 0)
+            if (time_to_restore == TimeSpan.Zero)
                 time_to_restore = GetGoInfo().GetAutoCloseTime();
 
             SwitchDoorOrButton(true, alternative);
             SetLootState(LootState.Activated, user);
 
-            m_cooldownTime = time_to_restore != 0 ? GameTime.GetGameTimeMS() + time_to_restore : 0;
+            m_cooldownTime = time_to_restore != TimeSpan.Zero ? LoopTime.ServerTime + time_to_restore : ServerTime.Zero;
         }
 
         public void ActivateObject(GameObjectActions action, int param, WorldObject spellCaster = null, int spellId = 0, int effectIndex = -1)
@@ -1510,7 +1510,7 @@ namespace Game.Entities
                     break;
                 case GameObjectActions.OpenAndUnlock:
                     if (unitCaster != null)
-                        UseDoorOrButton(0, false, unitCaster);
+                        UseDoorOrButton(default, false, unitCaster);
                     RemoveFlag(GameObjectFlags.Locked);
                     break;
                 case GameObjectActions.Close:
@@ -1521,7 +1521,7 @@ namespace Game.Entities
                     break;
                 case GameObjectActions.Destroy:
                     if (unitCaster != null)
-                        UseDoorOrButton(0, true, unitCaster);
+                        UseDoorOrButton(default, true, unitCaster);
                     break;
                 case GameObjectActions.Rebuild:
                     ResetDoorOrButton();
@@ -1591,7 +1591,7 @@ namespace Game.Entities
                     break;
                 case GameObjectActions.OpenAndPlayAnimKit:
                     if (unitCaster != null)
-                        UseDoorOrButton(0, false, unitCaster);
+                        UseDoorOrButton(TimeSpan.Zero, false, unitCaster);
                     SetAnimKitId((ushort)param, false);
                     break;
                 case GameObjectActions.CloseAndPlayAnimKit:
@@ -1606,7 +1606,7 @@ namespace Game.Entities
                     break;
                 case GameObjectActions.OpenAndStopAnimKit:
                     if (unitCaster != null)
-                        UseDoorOrButton(0, false, unitCaster);
+                        UseDoorOrButton(TimeSpan.Zero, false, unitCaster);
                     SetAnimKitId(0, false);
                     break;
                 case GameObjectActions.CloseAndStopAnimKit:
@@ -1687,13 +1687,13 @@ namespace Game.Entities
             }
 
             // If cooldown data present in template
-            uint cooldown = GetGoInfo().GetCooldown();
+            Seconds cooldown = GetGoInfo().GetCooldown();
             if (cooldown != 0)
             {
-                if (m_cooldownTime > GameTime.GetGameTime())
+                if (m_cooldownTime > LoopTime.ServerTime)
                     return;
 
-                m_cooldownTime = GameTime.GetGameTimeMS() + cooldown * Time.InMilliseconds;
+                m_cooldownTime = LoopTime.ServerTime + cooldown;
             }
 
             switch (GetGoType())
@@ -1701,7 +1701,7 @@ namespace Game.Entities
                 case GameObjectTypes.Door:                          //0
                 case GameObjectTypes.Button:                        //1
                     //doors/buttons never really despawn, only reset to default state/flags
-                    UseDoorOrButton(0, false, user);
+                    UseDoorOrButton(TimeSpan.Zero, false, user);
                     return;
                 case GameObjectTypes.QuestGiver:                    //2
                 {
@@ -1824,7 +1824,7 @@ namespace Game.Entities
                     if (goInfo.Trap.spell != 0)
                         CastSpell(user, goInfo.Trap.spell);
 
-                    m_cooldownTime = GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4) * Time.InMilliseconds;   // template or 4 seconds
+                    m_cooldownTime = LoopTime.ServerTime + (goInfo.Trap.cooldown != Seconds.Zero ? goInfo.Trap.cooldown : (Seconds)4);   // template or 4 seconds
 
                     if (goInfo.Trap.charges == 1)         // Deactivate after trigger
                         SetLootState(LootState.JustDeactivated);
@@ -1977,7 +1977,7 @@ namespace Game.Entities
                     if (info.Goober.AllowMultiInteract != 0 && player != null)
                     {
                         if (info.IsDespawnAtAction())
-                            DespawnForPlayer(player, TimeSpan.FromSeconds(m_respawnDelayTime));
+                            DespawnForPlayer(player, m_respawnDelayTime);
                         else
                             SetGoStateFor(GameObjectState.Active, player);
                     }
@@ -1992,7 +1992,7 @@ namespace Game.Entities
                         else
                             SetGoState(GameObjectState.Active);
 
-                        m_cooldownTime = GameTime.GetGameTimeMS() + info.GetAutoCloseTime();
+                        m_cooldownTime = LoopTime.ServerTime + info.GetAutoCloseTime();
                     }
 
                     // cast this spell later if provided
@@ -2488,7 +2488,7 @@ namespace Game.Entities
                     if (playerCondition != null)
                     {
                         if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
-                            return;                    
+                            return;
                     }
 
                     break;
@@ -2570,7 +2570,7 @@ namespace Game.Entities
                     {
                         SetLootState(LootState.Activated, player);
                         if (info.GatheringNode.ObjectDespawnDelay != 0)
-                            DespawnOrUnsummon(TimeSpan.FromSeconds(info.GatheringNode.ObjectDespawnDelay));
+                            DespawnOrUnsummon(info.GatheringNode.ObjectDespawnDelay);
                     }
 
                     // Send loot
@@ -2702,7 +2702,7 @@ namespace Game.Entities
                 {
                     if (cl.Name.Length > (int)locale && !cl.Name[(int)locale].IsEmpty())
                         return cl.Name[(int)locale];
-            }
+                }
             }
 
             return base.GetName(locale);
@@ -2857,9 +2857,9 @@ namespace Game.Entities
                             {
                                 if (effect.CalcValue(player) >= lockEntry.Skill[i])
                                     return spell;
+                            }
+                        }
                     }
-                }
-            }
                 }
             }
 
@@ -3033,8 +3033,9 @@ namespace Game.Entities
             GetAI().OnLootStateChanged(state, unit);
 
             // Start restock timer if the chest is partially looted or not looted at all
-            if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated && GetGoInfo().Chest.chestRestockTime > 0 && m_restockTime == 0 && loot != null && loot.IsChanged())
-                m_restockTime = GameTime.GetGameTime() + GetGoInfo().Chest.chestRestockTime;
+            if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated && GetGoInfo().Chest.chestRestockTime > 0
+                && m_restockTime == ServerTime.Zero && loot != null && loot.IsChanged())
+                m_restockTime = LoopTime.ServerTime + GetGoInfo().Chest.chestRestockTime;
 
             // only set collision for doors on SetGoState
             if (GetGoType() == GameObjectTypes.Door)
@@ -3084,9 +3085,9 @@ namespace Game.Entities
                     if (goInfo.Chest.consumable == 0 && goInfo.Chest.chestPersonalLoot != 0)
                     {
                         DespawnForPlayer(looter, goInfo.Chest.chestRestockTime != 0
-                            ? TimeSpan.FromSeconds(goInfo.Chest.chestRestockTime)
-                            : TimeSpan.FromSeconds(m_respawnDelayTime)); // not hiding this object permanently to prevent infinite growth of m_perPlayerState
-                                                                         // while also maintaining some sort of cheater protection (not getting rid of entries on logout)
+                            ? goInfo.Chest.chestRestockTime
+                            : m_respawnDelayTime); // not hiding this object permanently to prevent infinite growth of m_perPlayerState
+                                                   // while also maintaining some sort of cheater protection (not getting rid of entries on logout)
                     }
                     break;
                 }
@@ -3146,7 +3147,7 @@ namespace Game.Entities
         void SetGoStateFor(GameObjectState state, Player viewer)
         {
             PerPlayerState perPlayerState = GetOrCreatePerPlayerStates(viewer.GetGUID());
-            perPlayerState.ValidUntil = GameTime.GetSystemTime() + TimeSpan.FromSeconds(m_respawnDelayTime);
+            perPlayerState.ValidUntil = LoopTime.ServerTime + m_respawnDelayTime;
             perPlayerState.State = state;
 
             GameObjectSetStateLocal setStateLocal = new();
@@ -3318,7 +3319,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        public List<uint> GetPauseTimes()
+        public List<Milliseconds> GetPauseTimes()
         {
             GameObjectType.Transport transport = m_goTypeImpl as GameObjectType.Transport;
             if (transport != null)
@@ -3487,7 +3488,7 @@ namespace Game.Entities
                 return;
 
             // Cancel current timer
-            m_goValue.CapturePoint.AssaultTimer = 0;
+            m_goValue.CapturePoint.AssaultTimer = Milliseconds.Zero;
 
             if (player.GetBGTeam() == Team.Horde)
             {
@@ -3605,7 +3606,7 @@ namespace Game.Entities
                     packet.CapturePointInfo.State = m_goValue.CapturePoint.State;
                     packet.CapturePointInfo.Pos = GetPosition();
                     packet.CapturePointInfo.Guid = GetGUID();
-                    packet.CapturePointInfo.CaptureTotalDuration = TimeSpan.FromMilliseconds(GetGoInfo().CapturePoint.CaptureTime);
+                    packet.CapturePointInfo.CaptureTotalDuration = GetGoInfo().CapturePoint.CaptureTime;
                     packet.CapturePointInfo.CaptureTime = m_goValue.CapturePoint.AssaultTimer;
                     bg.SendPacketToAll(packet);
                     bg.UpdateWorldState(GetGoInfo().CapturePoint.worldState1, (int)m_goValue.CapturePoint.State);
@@ -3658,14 +3659,14 @@ namespace Game.Entities
             return newFlag.GetCarrierGUID();
         }
 
-        public long GetFlagTakenFromBaseTime()
+        public ServerTime GetFlagTakenFromBaseTime()
         {
             if (GetGoType() != GameObjectTypes.NewFlag)
-                return 0;
+                return ServerTime.Zero;
 
             GameObjectType.NewFlag newFlag = m_goTypeImpl as GameObjectType.NewFlag;
             if (newFlag == null)
-                return 0;
+                return ServerTime.Zero;
 
             return newFlag.GetTakenFromBaseTime();
         }
@@ -3742,39 +3743,41 @@ namespace Game.Entities
         }
         public int GetSpellId() { return m_spellId; }
 
-        public long GetRespawnTime() { return m_respawnTime; }
-        public long GetRespawnTimeEx()
+        public ServerTime GetRespawnTime() { return m_respawnTime; }
+
+        public ServerTime GetRespawnTimeEx()
         {
-            long now = GameTime.GetGameTime();
+            ServerTime now = LoopTime.ServerTime;
             if (m_respawnTime > now)
                 return m_respawnTime;
             else
                 return now;
         }
 
-        public void SetRespawnTime(int respawn)
+        public void SetRespawnTime(TimeSpan respawn)
         {
-            m_respawnTime = respawn > 0 ? GameTime.GetGameTime() + respawn : 0;
-            m_respawnDelayTime = (uint)(respawn > 0 ? respawn : 0);
-            if (respawn != 0 && !m_spawnedByDefault)
+            m_respawnTime = respawn > TimeSpan.Zero ? LoopTime.ServerTime + respawn : ServerTime.Zero;
+            m_respawnDelayTime = respawn > TimeSpan.Zero ? respawn : TimeSpan.Zero;
+            if (respawn != TimeSpan.Zero && !m_spawnedByDefault)
                 UpdateObjectVisibility(true);
         }
 
         public bool IsSpawned()
         {
-            return m_respawnDelayTime == 0 ||
-                (m_respawnTime > 0 && !m_spawnedByDefault) ||
-                (m_respawnTime == 0 && m_spawnedByDefault);
+            return m_respawnDelayTime == TimeSpan.Zero ||
+                (m_respawnTime != ServerTime.Zero && !m_spawnedByDefault) ||
+                (m_respawnTime == ServerTime.Zero && m_spawnedByDefault);
         }
         public bool IsSpawnedByDefault() { return m_spawnedByDefault; }
         public void SetSpawnedByDefault(bool b) { m_spawnedByDefault = b; }
-        public uint GetRespawnDelay() { return m_respawnDelayTime; }
+        public TimeSpan GetRespawnDelay() { return m_respawnDelayTime; }
 
         public bool HasFlag(GameObjectFlags flags) { return (m_gameObjectData.Flags & (uint)flags) != 0; }
         public void SetFlag(GameObjectFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void RemoveFlag(GameObjectFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void ReplaceAllFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
-        public void SetLevel(int level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
+        public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
+        public void SetLevel(int level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), (uint)level); }
 
         public GameObjectDynamicLowFlags GetDynamicFlags() { return (GameObjectDynamicLowFlags)(uint)m_objectData.DynamicFlags; }
         public bool HasDynamicFlag(GameObjectDynamicLowFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
@@ -3912,15 +3915,15 @@ namespace Game.Entities
         GameObjectData m_goData;
         long m_spawnId;
         int m_spellId;
-        long m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
-        uint m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
-        uint m_despawnDelay;
-        TimeSpan m_despawnRespawnTime;                   // override respawn time after delayed despawn
+        ServerTime m_respawnTime;                           // time of next respawn (or despawn if GO have owner()),
+        TimeSpan m_respawnDelayTime;                        // if 0 then current GO state no dependent from timer
+        TimeSpan m_despawnDelay;
+        TimeSpan m_despawnRespawnTime;                      // override respawn time after delayed despawn
         LootState m_lootState;
-        ObjectGuid m_lootStateUnitGUID;                    // GUID of the unit passed with SetLootState(LootState, Unit*)
+        ObjectGuid m_lootStateUnitGUID;                     // GUID of the unit passed with SetLootState(LootState, Unit*)
         bool m_spawnedByDefault;
-        long m_restockTime;
-        long m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
+        ServerTime m_restockTime;
+        ServerTime m_cooldownTime;                          // used as internal reaction delay time store (not state change reaction).
         // For traps this: spell casting cooldown, for doors/buttons: reset time.
 
         Player m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
@@ -4004,7 +4007,7 @@ namespace Game.Entities
             _owner = owner;
         }
 
-        public virtual void Update(uint diff) { }
+        public virtual void Update(TimeSpan diff) { }
         public virtual void OnStateChanged(GameObjectState oldState, GameObjectState newState) { }
         public virtual void OnRelocated() { }
         public virtual bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects) { return false; }
@@ -4039,7 +4042,7 @@ namespace Game.Entities
         //25 GAMEOBJECT_TYPE_FISHINGHOLE
         public struct fishinghole
         {
-            public uint MaxOpens;
+            public int MaxOpens;
         }
 
         //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
@@ -4054,7 +4057,7 @@ namespace Game.Entities
         {
             public int LastTeamCapture;
             public BattlegroundCapturePointState State;
-            public uint AssaultTimer;
+            public Milliseconds AssaultTimer;
         }
     }
 
@@ -4064,21 +4067,21 @@ namespace Game.Entities
         class Transport : GameObjectTypeBase, ITransport
         {
             TransportAnimation _animationInfo;
-            uint _pathProgress;
-            uint _stateChangeTime;
-            uint _stateChangeProgress;
-            List<uint> _stopFrames = new();
+            RelativeTime _pathProgress;
+            RelativeTime _stateChangeTime;
+            RelativeTime _stateChangeProgress;
+            List<Milliseconds> _stopFrames = new();
             bool _autoCycleBetweenStopFrames;
             TimeTracker _positionUpdateTimer = new();
             List<WorldObject> _passengers = new();
 
-            static TimeSpan PositionUpdateInterval = TimeSpan.FromMilliseconds(50);
+            static TimeSpan PositionUpdateInterval = (Milliseconds)50;
 
             public Transport(GameObject owner) : base(owner)
             {
                 _animationInfo = Global.TransportMgr.GetTransportAnimInfo(owner.GetGoInfo().entry);
-                _pathProgress = GameTime.GetGameTimeMS() % GetTransportPeriod();
-                _stateChangeTime = GameTime.GetGameTimeMS();
+                _pathProgress = LoopTime.RelativeTime % GetTransportPeriod();
+                _stateChangeTime = LoopTime.RelativeTime;
                 _stateChangeProgress = _pathProgress;
 
                 GameObjectTemplate goInfo = _owner.GetGoInfo();
@@ -4119,14 +4122,14 @@ namespace Game.Entities
 
                 if (!_stopFrames.Empty())
                 {
-                    _pathProgress = 0;
-                    _stateChangeProgress = 0;
+                    _pathProgress = RelativeTime.Zero;
+                    _stateChangeProgress = RelativeTime.Zero;
                 }
 
                 _positionUpdateTimer.Reset(PositionUpdateInterval);
             }
 
-            public override void Update(uint diff)
+            public override void Update(TimeSpan diff)
             {
                 if (_animationInfo == null)
                     return;
@@ -4137,22 +4140,22 @@ namespace Game.Entities
 
                 _positionUpdateTimer.Reset(PositionUpdateInterval);
 
-                uint now = GameTime.GetGameTimeMS();
-                uint period = GetTransportPeriod();
-                uint newProgress = 0;
+                RelativeTime now = LoopTime.RelativeTime;
+                RelativeTime period = (RelativeTime)GetTransportPeriod();
+                RelativeTime newProgress;
                 if (_stopFrames.Empty())
                     newProgress = now % period;
                 else
                 {
-                    uint stopTargetTime = 0;
+                    Milliseconds stopTargetTime = Milliseconds.Zero;
                     if (_owner.GetGoState() == GameObjectState.TransportActive)
-                        stopTargetTime = 0;
+                        stopTargetTime = Milliseconds.Zero;
                     else
                         stopTargetTime = _stopFrames[_owner.GetGoState() - GameObjectState.TransportStopped];
 
                     if (now < _owner.m_gameObjectData.Level)
                     {
-                        int timeToStop = (int)(_owner.m_gameObjectData.Level - _stateChangeTime);
+                        RelativeTime timeToStop = (RelativeTime)_owner.m_gameObjectData.Level.GetValue() - _stateChangeTime;
                         float stopSourcePathPct = _stateChangeProgress / (float)period;
                         float stopTargetPathPct = stopTargetTime / (float)period;
                         float timeSinceStopProgressPct = (now - _stateChangeTime) / (float)timeToStop;
@@ -4182,10 +4185,10 @@ namespace Game.Entities
                                 progressPct += 1.0f;
                         }
 
-                        newProgress = (uint)(period * progressPct) % period;
+                        newProgress = (RelativeTime)(period * progressPct) % period;
                     }
                     else
-                        newProgress = stopTargetTime;
+                        newProgress = (RelativeTime)stopTargetTime;
 
                     if (newProgress == stopTargetTime && newProgress != _pathProgress)
                     {
@@ -4313,7 +4316,7 @@ namespace Game.Entities
                     return;
                 }
 
-                uint stopPathProgress = 0;
+                Milliseconds stopPathProgress = Milliseconds.Zero;
 
                 if (newState != GameObjectState.TransportActive)
                 {
@@ -4323,10 +4326,10 @@ namespace Game.Entities
                     stopPathProgress = _stopFrames[stopFrame];
                 }
 
-                _stateChangeTime = GameTime.GetGameTimeMS();
+                _stateChangeTime = LoopTime.RelativeTime;
                 _stateChangeProgress = _pathProgress;
-                uint timeToStop = (uint)Math.Abs(_pathProgress - stopPathProgress);
-                _owner.SetLevel((int)(GameTime.GetGameTimeMS() + timeToStop));
+                RelativeTime timeToStop = (RelativeTime)Math.Abs(_pathProgress - stopPathProgress);
+                _owner.SetLevel(LoopTime.RelativeTime + timeToStop);
                 _owner.SetPathProgressForClient(_pathProgress / (float)GetTransportPeriod());
 
                 if (oldState == GameObjectState.Active || oldState == newState)
@@ -4376,15 +4379,15 @@ namespace Game.Entities
                 }
             }
 
-            public uint GetTransportPeriod()
+            public RelativeTime GetTransportPeriod()
             {
                 if (_animationInfo != null)
                     return _animationInfo.TotalTime;
 
-                return 1;
+                return (RelativeTime)1;
             }
 
-            public List<uint> GetPauseTimes()
+            public List<Milliseconds> GetPauseTimes()
             {
                 return _stopFrames;
             }
@@ -4466,9 +4469,9 @@ namespace Game.Entities
         class NewFlag : GameObjectTypeBase
         {
             FlagState _state;
-            long _respawnTime;
+            ServerTime _respawnTime;
             ObjectGuid _carrierGUID;
-            long _takenFromBaseTime;
+            ServerTime _takenFromBaseTime;
 
             public NewFlag(GameObject owner) : base(owner)
             {
@@ -4489,25 +4492,25 @@ namespace Game.Entities
                     _carrierGUID = ObjectGuid.Empty;
 
                 if (newState == FlagState.Taken && oldState == FlagState.InBase)
-                    _takenFromBaseTime = GameTime.GetGameTime();
+                    _takenFromBaseTime = LoopTime.ServerTime;
                 else if (newState == FlagState.InBase || newState == FlagState.Respawning)
-                    _takenFromBaseTime = 0;
+                    _takenFromBaseTime = ServerTime.Zero;
 
                 _owner.UpdateObjectVisibility();
 
                 if (newState == FlagState.Respawning)
-                    _respawnTime = GameTime.GetGameTimeMS() + _owner.GetGoInfo().NewFlag.RespawnTime;
+                    _respawnTime = LoopTime.ServerTime + _owner.GetGoInfo().NewFlag.RespawnTime;
                 else
-                    _respawnTime = 0;
+                    _respawnTime = ServerTime.Zero;
 
                 ZoneScript zoneScript = _owner.GetZoneScript();
                 if (zoneScript != null)
                     zoneScript.OnFlagStateChange(_owner, oldState, _state, player);
             }
 
-            public override void Update(uint diff)
+            public override void Update(TimeSpan diff)
             {
-                if (_state == FlagState.Respawning && GameTime.GetGameTimeMS() >= _respawnTime)
+                if (_state == FlagState.Respawning && LoopTime.ServerTime >= _respawnTime)
                     SetState(FlagState.InBase, null);
             }
 
@@ -4518,7 +4521,7 @@ namespace Game.Entities
 
             public FlagState GetState() { return _state; }
             public ObjectGuid GetCarrierGUID() { return _carrierGUID; }
-            public long GetTakenFromBaseTime() { return _takenFromBaseTime; }
+            public ServerTime GetTakenFromBaseTime() { return _takenFromBaseTime; }
         }
 
         class SetNewFlagState : GameObjectTypeBase.CustomCommand
@@ -4543,7 +4546,7 @@ namespace Game.Entities
 
     public class PerPlayerState
     {
-        public DateTime ValidUntil = DateTime.MinValue;
+        public ServerTime ValidUntil = ServerTime.Zero;
         public GameObjectState? State;
         public bool Despawned;
     }
@@ -4563,18 +4566,18 @@ namespace Game.Entities
 
 
             if (owner.GetMap().Instanceable())
-                _heartbeatRate = TimeSpan.FromSeconds(1);
+                _heartbeatRate = (Seconds)1;
             else if (owner.GetGoInfo().ControlZone.FrequentHeartbeat != 0)
-                _heartbeatRate = TimeSpan.FromSeconds(2.5);
+                _heartbeatRate = (Milliseconds)2500;
             else
-                _heartbeatRate = TimeSpan.FromSeconds(5);
+                _heartbeatRate = (Seconds)5;
 
             _heartbeatTracker = new(_heartbeatRate);
             _previousTeamId = GetControllingTeam();
             _contestedTriggered = false;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             if (_owner.HasFlag(GameObjectFlags.NotSelectable))
                 return;

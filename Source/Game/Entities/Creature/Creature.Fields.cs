@@ -19,7 +19,7 @@ namespace Game.Entities
 
         SpellFocusInfo _spellFocusInfo;
 
-        long _lastDamagedTime; // Part of Evade mechanics
+        ServerTime _lastDamagedTime; // Part of Evade mechanics
         MultiMap<byte, byte> m_textRepeat = new();
 
         CreatureStaticFlagsHolder _staticFlags;
@@ -48,7 +48,7 @@ namespace Game.Entities
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
         bool m_cannotReachTarget;
-        uint m_cannotReachTimer;
+        Milliseconds m_cannotReachTimer;
 
         SpellSchools m_meleeDamageSchool;
         public int m_originalEntry;
@@ -73,16 +73,16 @@ namespace Game.Entities
         public int[] m_spells = new int[SharedConst.MaxCreatureSpells];
 
         // Timers
-        long _pickpocketLootRestore;
-        public long m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
-        long m_respawnTime;                               // (secs) time of next respawn
-        uint m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
-        uint m_corpseDelay;                               // (secs) delay between death and corpse disappearance
+        ServerTime _pickpocketLootRestore;
+        public ServerTime m_corpseRemoveTime;                 // time for death or corpse disappearance
+        ServerTime m_respawnTime;                             // time of next respawn
+        Seconds m_respawnDelay;                               // delay between corpse disappearance and respawning
+        Seconds m_corpseDelay;                                // delay between death and corpse disappearance
         bool m_ignoreCorpseDecayRatio;
         float m_wanderDistance;
-        uint m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
-        uint m_combatPulseTime;                           // (msecs) remaining time for next zone-in-combat pulse
-        uint m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
+        Milliseconds m_boundaryCheckTime;                     // remaining time for next evade boundary check
+        Milliseconds m_combatPulseTime;                       // remaining time for next zone-in-combat pulse
+        Milliseconds m_combatPulseDelay;                      // how often the creature puts the entire zone in combat (only works in dungeons)
 
         // vendor items
         List<VendorItemCount> m_vendorItemCounts = new();
@@ -103,9 +103,9 @@ namespace Game.Entities
     struct SpellFocusInfo
     {
         public Spell Spell;
-        public uint Delay;         // ms until the creature's target should snap back (0 = no snapback scheduled)
-        public ObjectGuid Target;        // the creature's "real" target while casting
-        public float Orientation; // the creature's "real" orientation while casting
+        public Milliseconds Delay;  // time until the creature's target should snap back (0 = no snapback scheduled)
+        public ObjectGuid Target;   // the creature's "real" target while casting
+        public float Orientation;   // the creature's "real" orientation while casting
     }
 
     public struct CreatureStaticFlagsHolder

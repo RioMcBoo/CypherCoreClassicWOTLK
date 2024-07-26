@@ -54,9 +54,9 @@ namespace Game.Movement
 
             MoveSplineInit init = new(owner);
             _splineInit(init);
-            int duration = init.Launch();
+            TimeSpan duration = init.Launch();
             if (_durationTracksSpline)
-                _duration = new((uint)duration);
+                _duration = new(duration);
         }
 
         public override void Reset(Unit owner)
@@ -64,7 +64,7 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             if (owner == null || HasFlag(MovementGeneratorFlags.Finalized))
                 return false;

@@ -17,7 +17,7 @@ namespace Game
 {
     public class AuctionManager : Singleton<AuctionManager>
     {
-        const int MIN_AUCTION_TIME = 12 * Time.Hour;
+        static readonly TimeSpan MIN_AUCTION_TIME = (Hours)12;
 
         AuctionHouseObject mHordeAuctions;
         AuctionHouseObject mAllianceAuctions;
@@ -31,7 +31,7 @@ namespace Game
         int _replicateIdGenerator;
 
         Dictionary<ObjectGuid, PlayerThrottleObject> _playerThrottleObjects = new();
-        DateTime _playerThrottleObjectsCleanupTime;
+        ServerTime _playerThrottleObjectsCleanupTime;
 
         AuctionManager()
         {
@@ -40,7 +40,7 @@ namespace Game
             mNeutralAuctions = new AuctionHouseObject(1);
             mGoblinAuctions = new AuctionHouseObject(7);
             _replicateIdGenerator = 0;
-            _playerThrottleObjectsCleanupTime = GameTime.Now() + TimeSpan.FromHours(1);
+            _playerThrottleObjectsCleanupTime = (ServerTime)Time.Now + (Hours)1;
         }
 
         public AuctionHouseObject GetAuctionsMap(int factionTemplateId)
@@ -86,13 +86,13 @@ namespace Game
         public long GetCommodityAuctionDeposit(ItemTemplate item, TimeSpan time, int quantity)
         {
             long sellPrice = item.GetSellPrice();
-            return (long)(Math.Ceiling(Math.Floor(Math.Max(0.15 * quantity * sellPrice, 100.0)) / MoneyConstants.Silver) * MoneyConstants.Silver * (time.Minutes / (MIN_AUCTION_TIME / Time.Minute)));
+            return (long)(Math.Ceiling(Math.Floor(Math.Max(0.15 * quantity * sellPrice, 100.0)) / MoneyConstants.Silver) * MoneyConstants.Silver * (time.ToMinutes() / MIN_AUCTION_TIME.ToMinutes()));
         }
 
         public long GetItemAuctionDeposit(Player player, Item item, TimeSpan time)
         {
             long sellPrice = item.GetSellPrice(player);
-            return (long)(Math.Ceiling(Math.Floor(Math.Max(sellPrice * 0.15, 100.0)) / MoneyConstants.Silver) * MoneyConstants.Silver * (time.Minutes / (MIN_AUCTION_TIME / Time.Minute)));
+            return (long)(Math.Ceiling(Math.Floor(Math.Max(sellPrice * 0.15, 100.0)) / MoneyConstants.Silver) * MoneyConstants.Silver * (time.ToMinutes() / MIN_AUCTION_TIME.ToMinutes()));
         }
 
         public string BuildItemAuctionMailSubject(AuctionMailType type, AuctionPosting auction)
@@ -128,9 +128,9 @@ namespace Game
             return $"{guid}:{bid}:{buyout}:{deposit}:{consignment}:0";
         }
 
-        public string BuildAuctionInvoiceMailBody(ObjectGuid guid, long bid, long buyout, long deposit, long consignment, long moneyDelay, uint eta)
+        public string BuildAuctionInvoiceMailBody(ObjectGuid guid, long bid, long buyout, long deposit, long consignment, TimeSpan moneyDelay, ServerTime eta)
         {
-            return $"{guid}:{bid}:{buyout}:{deposit}:{consignment}:{moneyDelay}:{eta}:0";
+            return $"{guid}:{bid}:{buyout}:{deposit}:{consignment}:{(Seconds)moneyDelay}:{(WowTime)eta}:0";
         }
 
         public void LoadAuctions()
@@ -144,7 +144,7 @@ namespace Game
 
             // perfomance and quantity counters
             var count = 0;
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             {
                 SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS));
@@ -182,10 +182,10 @@ namespace Game
                     ++count;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction items in {Time.Diff(oldMSTime)} ms.");
             }            
 
-            oldMSTime = Time.GetMSTime();
+            oldMSTime = Time.NowRelative;
             count = 0;
 
             {
@@ -200,10 +200,10 @@ namespace Game
                     } while (result.NextRow());
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction bidders in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction bidders in {Time.Diff(oldMSTime)} ms.");
             }
 
-            oldMSTime = Time.GetMSTime();
+            oldMSTime = Time.NowRelative;
             count = 0;
 
             {
@@ -248,8 +248,8 @@ namespace Game
                         auction.BuyoutOrUnitPrice = result.Read<long>(5);
                         auction.Deposit = result.Read<long>(6);
                         auction.BidAmount = result.Read<long>(7);
-                        auction.StartTime = Time.UnixTimeToDateTime(result.Read<long>(8));
-                        auction.EndTime = Time.UnixTimeToDateTime(result.Read<long>(9));
+                        auction.StartTime = (ServerTime)(UnixTime64)result.Read<long>(8);
+                        auction.EndTime = (ServerTime)(UnixTime64)result.Read<long>(9);
                         auction.ServerFlags = (AuctionPostingServerFlag)result.Read<byte>(10);
 
                         if (biddersByAuction.ContainsKey(auction.Id))
@@ -263,7 +263,7 @@ namespace Game
                     DB.Characters.CommitTransaction(trans);
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auctions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auctions in {Time.Diff(oldMSTime)} ms.");
             }
         }
 
@@ -348,10 +348,10 @@ namespace Game
                     PendingAuctionInfo pendingAuction = playerPendingAuctions.Auctions[auctionIndex];
                     AuctionPosting auction = GetAuctionsById(pendingAuction.AuctionHouseId).GetAuction(pendingAuction.AuctionId);
                     if (auction != null)
-                        auction.EndTime = GameTime.GetSystemTime();
+                        auction.EndTime = LoopTime.ServerTime;
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
-                    stmt.SetUInt32(0, (uint)GameTime.GetGameTime());
+                    stmt.SetInt32(0, LoopTime.UnixServerTime);
                     stmt.SetInt32(1, pendingAuction.AuctionId);
                     trans.Append(stmt);
                     ++auctionIndex;
@@ -388,10 +388,10 @@ namespace Game
                     {
                         AuctionPosting auction = GetAuctionsById(pendingAuction.AuctionHouseId).GetAuction(pendingAuction.AuctionId);
                         if (auction != null)
-                            auction.EndTime = GameTime.GetSystemTime();
+                            auction.EndTime = LoopTime.ServerTime;
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
-                        stmt.SetUInt32(0, (uint)GameTime.GetGameTime());
+                        stmt.SetInt32(0, LoopTime.UnixServerTime);
                         stmt.SetInt32(1, pendingAuction.AuctionId);
                         trans.Append(stmt);
                     }
@@ -408,7 +408,7 @@ namespace Game
             mNeutralAuctions.Update();
             mGoblinAuctions.Update();
 
-            DateTime now = GameTime.Now();
+            ServerTime now = LoopTime.ServerTime;
             if (now >= _playerThrottleObjectsCleanupTime)
             {
                 foreach (var pair in _playerThrottleObjects.ToList())
@@ -417,7 +417,7 @@ namespace Game
                         _playerThrottleObjects.Remove(pair.Key);
                 }
 
-                _playerThrottleObjectsCleanupTime = now + TimeSpan.FromHours(1);
+                _playerThrottleObjectsCleanupTime = now + (Hours)1;
             }
         }
 
@@ -428,7 +428,7 @@ namespace Game
 
         public AuctionThrottleResult CheckThrottle(Player player, bool addonTainted, AuctionCommand command = AuctionCommand.SellItem)
         {
-            DateTime now = GameTime.Now();
+            ServerTime now = LoopTime.ServerTime;
 
             if (!_playerThrottleObjects.ContainsKey(player.GetGUID()))
                 _playerThrottleObjects[player.GetGUID()] = new PlayerThrottleObject();
@@ -436,7 +436,7 @@ namespace Game
             var throttleObject = _playerThrottleObjects[player.GetGUID()];
             if (now > throttleObject.PeriodEnd)
             {
-                throttleObject.PeriodEnd = now + TimeSpan.FromMinutes(1);
+                throttleObject.PeriodEnd = now + (Minutes)1;
                 throttleObject.QueriesRemaining = 100;
             }
 
@@ -449,7 +449,7 @@ namespace Game
             if ((--throttleObject.QueriesRemaining) == 0)
                 return new AuctionThrottleResult(throttleObject.PeriodEnd - now, false);
             else
-                return new AuctionThrottleResult(TimeSpan.FromMilliseconds(WorldConfig.Values[addonTainted ? WorldCfg.AuctionTaintedSearchDelay : WorldCfg.AuctionSearchDelay].Int32), false);
+                return new AuctionThrottleResult(WorldConfig.Values[addonTainted ? WorldCfg.AuctionTaintedSearchDelay : WorldCfg.AuctionSearchDelay].TimeSpan, false);
         }
 
         public AuctionHouseRecord GetAuctionHouseEntry(int factionTemplateId)
@@ -521,7 +521,7 @@ namespace Game
 
         class PlayerThrottleObject
         {
-            public DateTime PeriodEnd;
+            public ServerTime PeriodEnd;
             public byte QueriesRemaining = 100;
         }
     }
@@ -652,8 +652,8 @@ namespace Game
                 stmt.SetInt64(5, auction.BuyoutOrUnitPrice);
                 stmt.SetInt64(6, auction.Deposit);
                 stmt.SetInt64(7, auction.BidAmount);
-                stmt.SetInt64(8, Time.DateTimeToUnixTime(auction.StartTime));
-                stmt.SetInt64(9, Time.DateTimeToUnixTime(auction.EndTime));
+                stmt.SetInt64(8, (UnixTime64)auction.StartTime);
+                stmt.SetInt64(9, (UnixTime64)auction.EndTime);
                 stmt.SetUInt8(10, (byte)auction.ServerFlags);
                 trans.Append(stmt);
 
@@ -769,17 +769,16 @@ namespace Game
 
         public void Update()
         {
-            DateTime curTime = GameTime.GetSystemTime();
-            DateTime curTimeSteady = GameTime.Now();
+            ServerTime curTime = LoopTime.ServerTime;
             ///- Handle expired auctions
 
             // Clear expired throttled players
             foreach (var key in _replicateThrottleMap.Keys.ToList())
-                if (_replicateThrottleMap[key].NextAllowedReplication <= curTimeSteady)
+                if (_replicateThrottleMap[key].NextAllowedReplication <= curTime)
                     _replicateThrottleMap.Remove(key);
 
             foreach (var key in _commodityQuotes.Keys.ToList())
-                if (_commodityQuotes[key].ValidTo < curTimeSteady)
+                if (_commodityQuotes[key].ValidTo < curTime)
                     _commodityQuotes.Remove(key);
 
             if (_itemsByAuctionId.Empty())
@@ -787,8 +786,8 @@ namespace Game
 
             SQLTransaction trans = new();
 
-                ///- filter auctions expired on next update
-            var filteredList = _itemsByAuctionId.Values.Where(x => !(x.EndTime > curTime.AddMinutes(1)));
+            ///- filter auctions expired on next update
+            var filteredList = _itemsByAuctionId.Values.Where(x => !(x.EndTime > curTime + (Minutes)1));
 
             foreach (var auction in filteredList)
             {
@@ -1097,13 +1096,13 @@ namespace Game
 
         public void BuildReplicate(AuctionReplicateResponse replicateResponse, Player player, int global, int cursor, int tombstone, int count)
         {
-            DateTime curTime = GameTime.Now();
+            ServerTime curTime = LoopTime.ServerTime;
 
             var throttleData = _replicateThrottleMap.LookupByKey(player.GetGUID());
             if (throttleData == null)
             {
                 throttleData = new PlayerReplicateThrottleData();
-                throttleData.NextAllowedReplication = curTime + TimeSpan.FromSeconds(WorldConfig.Values[WorldCfg.AuctionReplicateDelay].Int32);                
+                throttleData.NextAllowedReplication = curTime + WorldConfig.Values[WorldCfg.AuctionReplicateDelay].TimeSpan;
                 throttleData.Global = Global.AuctionHouseMgr.GenerateReplicationId();
             }
             else
@@ -1177,7 +1176,7 @@ namespace Game
             CommodityQuote quote = _commodityQuotes[player.GetGUID()];
             quote.TotalPrice = totalPrice;
             quote.Quantity = quantity;
-            quote.ValidTo = GameTime.Now() + TimeSpan.FromSeconds(30);
+            quote.ValidTo = LoopTime.ServerTime + (Seconds)30;
             return quote;
         }
 
@@ -1326,7 +1325,7 @@ namespace Game
                 {
                     owner.UpdateCriteria(CriteriaType.MoneyEarnedFromAuctions, profit);
                     owner.UpdateCriteria(CriteriaType.HighestAuctionSale, profit);
-                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32, true);
+                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan, true);
                 }
 
                 new MailDraft(
@@ -1334,8 +1333,8 @@ namespace Game
                     Global.AuctionHouseMgr.BuildAuctionSoldMailBody(player.GetGUID(), auction.BuyoutOrUnitPrice * boughtFromAuction, boughtFromAuction, depositPart, auctionHouseCut))
                     .AddMoney(profit)
                     .SendMailTo(trans, 
-                        new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), 
-                        new MailSender(this), MailCheckFlags.Copied, (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32);
+                        new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner),
+                        new MailSender(this), MailCheckFlags.Copied, WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan);
             }
 
             player.ModifyMoney(-totalPrice);
@@ -1501,7 +1500,7 @@ namespace Game
                     owner.UpdateCriteria(CriteriaType.MoneyEarnedFromAuctions, profit);
                     owner.UpdateCriteria(CriteriaType.HighestAuctionSale, auction.BidAmount);
                     //send auction owner notification, bidder must be current!
-                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32, true);
+                    owner.GetSession().SendAuctionClosedNotification(auction, WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan, true);
                 }
 
                 new MailDraft(
@@ -1510,7 +1509,7 @@ namespace Game
                     .AddMoney(profit)
                     .SendMailTo(trans, 
                         new MailReceiver(owner, auction.Owner), 
-                        new MailSender(this), MailCheckFlags.Copied, (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32);
+                        new MailSender(this), MailCheckFlags.Copied, WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan);
             }
         }
 
@@ -1521,7 +1520,7 @@ namespace Game
             if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
                 if (owner != null)
-                    owner.GetSession().SendAuctionClosedNotification(auction, 0.0f, false);
+                    owner.GetSession().SendAuctionClosedNotification(auction, TimeSpan.Zero, false);
 
                 int itemIndex = 0;
                 while (itemIndex < auction.Items.Count)
@@ -1531,7 +1530,7 @@ namespace Game
                     for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
                         mail.AddItem(auction.Items[itemIndex]);
 
-                    mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied, 0);
+                    mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied, TimeSpan.Zero);
                 }
             }
             else
@@ -1576,14 +1575,16 @@ namespace Game
             // owner exist (online or offline)
             if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
-                WowTime eta = GameTime.GetUtcWowTime();
-                eta += TimeSpan.FromSeconds(WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32);
+                ServerTime eta = LoopTime.ServerTime;
+                eta += WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan;
                 if (owner != null)
-                    eta += owner.GetSession().GetTimezoneOffset();
+                {
+                    //eta += owner.GetSession().GetTimezoneOffset();
+                }
 
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Invoice, auction),
                     Global.AuctionHouseMgr.BuildAuctionInvoiceMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit,
-                        CalculateAuctionHouseCut(auction.BidAmount), (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32, eta.GetPackedTime()))
+                        CalculateAuctionHouseCut(auction.BidAmount), WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan, eta))
                     .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied);
             }
         }
@@ -1593,7 +1594,7 @@ namespace Game
             public int Global;
             public int Cursor;
             public int Tombstone;
-            public DateTime NextAllowedReplication = DateTime.MinValue;
+            public ServerTime NextAllowedReplication = ServerTime.Zero;
 
             public bool IsReplicationInProgress() { return Cursor != Tombstone && Global != 0; }
         }
@@ -1643,8 +1644,8 @@ namespace Game
         public long BuyoutOrUnitPrice;
         public long Deposit;
         public long BidAmount;
-        public DateTime StartTime = DateTime.MinValue;
-        public DateTime EndTime = DateTime.MinValue;
+        public ServerTime StartTime = ServerTime.Zero;
+        public ServerTime EndTime = ServerTime.Zero;
         public AuctionPostingServerFlag ServerFlags;
 
         public List<ObjectGuid> BidderHistory = new();
@@ -1715,14 +1716,14 @@ namespace Game
             }
 
             // all (not optional<>)
-            auctionItem.DurationLeft = (int)Math.Max((EndTime - GameTime.GetSystemTime()).ToMilliseconds(), 0L);
+            auctionItem.DurationLeft = Time.Max(EndTime - LoopTime.ServerTime, TimeSpan.Zero);
             auctionItem.DeleteReason = 0;
 
             // SMSG_AUCTION_LIST_ITEMS_RESULT (only if owned)
             auctionItem.CensorServerSideInfo = censorServerInfo;
             auctionItem.ItemGuid = IsCommodity() ? ObjectGuid.Empty : Items[0].GetGUID();
             auctionItem.OwnerAccountID = OwnerAccount;
-            auctionItem.EndTime = (uint)Time.DateTimeToUnixTime(EndTime);
+            auctionItem.EndTime = EndTime;
 
             // SMSG_AUCTION_LIST_BIDDER_ITEMS_RESULT, SMSG_AUCTION_LIST_ITEMS_RESULT (if has bid), SMSG_AUCTION_LIST_OWNER_ITEMS_RESULT, SMSG_AUCTION_REPLICATE_RESPONSE (if has bid)
             auctionItem.CensorBidInfo = censorBidInfo;
@@ -1921,7 +1922,7 @@ namespace Game
     {
         public long TotalPrice;
         public int Quantity;
-        public DateTime ValidTo = DateTime.MinValue;
+        public ServerTime ValidTo = ServerTime.Zero;
     }
 
     public class AuctionThrottleResult

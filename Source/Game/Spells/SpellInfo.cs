@@ -837,7 +837,7 @@ namespace Game.Spells
                 else if (Stances != 0)   // needs other shapeshift
                 {
                     return SpellCastResult.OnlyShapeshift;
-            }
+                }
             }
             else
             {
@@ -1096,7 +1096,7 @@ namespace Game.Spells
                                 || !Loots.LootStorage.Pickpocketing.HaveLootFor(targetCreature.GetCreatureDifficulty().PickPocketLootID))
                             {
                                 return SpellCastResult.TargetNoPockets;
-                        }
+                            }
                         }
 
                         // Not allow disarm unarmed player
@@ -1224,9 +1224,9 @@ namespace Game.Spells
                         {
                             if (instance.GetCombatResurrectionCharges() == 0 && instance.IsEncounterInProgress())
                                 return SpellCastResult.TargetCannotBeResurrected;
+                        }
                     }
                 }
-            }
             }
 
             return SpellCastResult.SpellCastOk;
@@ -1465,7 +1465,7 @@ namespace Game.Spells
                         || effectInfo.IsAura(AuraType.ModRoot2))
                     {
                         _auraState = AuraStateType.Frozen;
-            }
+                    }
                 }
             }
 
@@ -1738,7 +1738,7 @@ namespace Game.Spells
             return _diminishInfo.DiminishMaxLevel;
         }
 
-        public int GetDiminishingReturnsLimitDuration()
+        public Milliseconds GetDiminishingReturnsLimitDuration()
         {
             return _diminishInfo.DiminishDurationLimit;
         }
@@ -2144,7 +2144,7 @@ namespace Game.Spells
             }
         }
 
-        int DiminishingLimitDurationCompute()
+        Milliseconds DiminishingLimitDurationCompute()
         {
             // Explicit diminishing duration
             switch (SpellFamilyName)
@@ -2152,33 +2152,33 @@ namespace Game.Spells
                 case SpellFamilyNames.Mage:
                     // Dragon's Breath - 3 seconds in PvP
                     if (SpellFamilyFlags[0].HasAnyFlag(0x800000u))
-                        return 3 * Time.InMilliseconds;
+                        return (Seconds)3;
                     break;
                 case SpellFamilyNames.Warlock:
                     // Cripple - 4 seconds in PvP
                     if (Id == 170995)
-                        return 4 * Time.InMilliseconds;
+                        return (Seconds)4;
                     break;
                 case SpellFamilyNames.Hunter:
                     // Binding Shot - 3 seconds in PvP
                     if (Id == 117526)
-                        return 3 * Time.InMilliseconds;
+                        return (Seconds)3;
 
                     // Wyvern Sting - 6 seconds in PvP
                     if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
-                        return 6 * Time.InMilliseconds;
+                        return (Seconds)6;
                     break;
                 case SpellFamilyNames.Monk:
                     // Paralysis - 4 seconds in PvP regardless of if they are facing you
                     if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
-                        return 4 * Time.InMilliseconds;
+                        return (Seconds)4;
                     break;
                 case SpellFamilyNames.DemonHunter:
                     switch (Id)
                     {
                         case 217832: // Imprison
                         case 221527: // Imprison
-                            return 4 * Time.InMilliseconds;
+                            return (Seconds)4;
                         default:
                             break;
                     }
@@ -2187,7 +2187,7 @@ namespace Game.Spells
                     break;
             }
 
-            return 8 * Time.InMilliseconds;
+            return (Seconds)8;
         }
 
         public void _LoadImmunityInfo()
@@ -2504,14 +2504,14 @@ namespace Game.Spells
                             $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): " +
                             $"Spell {Id} has different value in effect {maxTargetsEffectValueHolder.Value} than expected, " +
                             $"recheck target caps (expected {maxTargets}, got {expectedValue})");
-                }
+                    }
                 }
                 else
                 {
                     Log.outError(LogFilter.Spells,
                         $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): " +
                         $"Spell {Id} does not have effect {maxTargetsEffectValueHolder.Value}");
-            }
+                }
             }
 
             if (numNonDiminishedTargetsEffectValueHolder.HasValue)
@@ -2526,15 +2526,15 @@ namespace Game.Spells
                             $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): " +
                             $"Spell {Id} has different value in effect {numNonDiminishedTargetsEffectValueHolder.Value} than expected, " +
                             $"recheck target caps (expected {numNonDiminishedTargets}, got {expectedValue})");
-                }
+                    }
                 }
                 else
                 {
                     Log.outError(LogFilter.Spells, 
                         $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): " +
                         $"Spell {Id} does not have effect {numNonDiminishedTargetsEffectValueHolder.Value}");
+                }
             }
-        }
         }
 
         public void ApplyAllSpellImmunitiesTo(Unit target, SpellEffectInfo spellEffectInfo, bool apply)
@@ -2660,13 +2660,13 @@ namespace Game.Spells
                     {
                         if (auraSpellInfo.SchoolMask.HasAnyFlag(schoolImmunity))
                             return true;
-                }
+                    }
                 }
 
                 ulong mechanicImmunity = immuneInfo.MechanicImmuneMask;
                 if (mechanicImmunity != 0)
                 {
-                    if ((mechanicImmunity & (1ul << (int)auraSpellInfo.Mechanic)) != 0)
+                    if (mechanicImmunity.HasAnyFlag(1ul << (int)auraSpellInfo.Mechanic))
                         return true;
                 }
 
@@ -2708,7 +2708,7 @@ namespace Game.Spells
                             if (!immuneInfo.AuraTypeImmune.Contains(auraName))
                                 isImmuneToAuraEffectApply = true;
 
-                            if (!isImmuneToAuraEffectApply && !auraSpellInfo.IsPositiveEffect(auraSpellEffectInfo.EffectIndex) 
+                            if (!isImmuneToAuraEffectApply && !auraSpellInfo.IsPositiveEffect(auraSpellEffectInfo.EffectIndex)
                                 && !auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                             {
                                 uint applyHarmfulAuraImmunityMask = immuneInfo.ApplyHarmfulAuraImmuneMask;
@@ -2716,7 +2716,7 @@ namespace Game.Spells
                                 {
                                     if (auraSpellInfo.GetSchoolMask().HasAnyFlag((SpellSchoolMask)applyHarmfulAuraImmunityMask))
                                         isImmuneToAuraEffectApply = true;
-                            }
+                                }
                             }
 
                             if (!isImmuneToAuraEffectApply)
@@ -2829,9 +2829,9 @@ namespace Game.Spells
             return range;
         }
 
-        public int CalcDuration(WorldObject caster = null)
+        public Milliseconds CalcDuration(WorldObject caster = null)
         {
-            int duration = GetDuration();
+            Milliseconds duration = GetDuration();
 
             if (caster != null)
             {
@@ -2843,44 +2843,44 @@ namespace Game.Spells
             return duration;
         }
 
-        public int GetDuration()
+        public Milliseconds GetDuration()
         {
             if (DurationEntry == null)
-                return IsPassive() ? -1 : 0;
+                return IsPassive() ? (Milliseconds)(-1) : (Milliseconds)0;
 
-            return (DurationEntry.Duration == -1) ? -1 : Math.Abs(DurationEntry.Duration);
+            return (DurationEntry.Duration == -1) ? (Milliseconds)(-1) : (Milliseconds)Math.Abs(DurationEntry.Duration);
         }
 
-        public int GetMaxDuration()
+        public Milliseconds GetMaxDuration()
         {
             if (DurationEntry == null)
-                return IsPassive() ? -1 : 0;
+                return IsPassive() ? (Milliseconds)(-1) : (Milliseconds)0;
 
-            return (DurationEntry.MaxDuration == -1) ? -1 : Math.Abs(DurationEntry.MaxDuration);
+            return (DurationEntry.MaxDuration == -1) ? (Milliseconds)(-1) : (Milliseconds)Math.Abs(DurationEntry.MaxDuration);
         }
 
-        public int CalcCastTime(Spell spell = null)
+        public Milliseconds CalcCastTime(Spell spell = null)
         {
-            int castTime = 0;
+            Milliseconds castTime = Milliseconds.Zero;
             if (CastTimeEntry != null)
-                castTime = Math.Max(CastTimeEntry.Base, CastTimeEntry.Minimum);
+                castTime = Time.Max(CastTimeEntry.Base, CastTimeEntry.Minimum);
 
             if (castTime <= 0)
-                return 0;
+                return Milliseconds.Zero;
 
             if (spell != null)
-                spell.GetCaster().ModSpellCastTime(this, ref castTime, spell);
+                spell.GetCaster().ModSpellCastTime(this, ref castTime.Ticks, spell);
 
             if (HasAttribute(SpellAttr0.UsesRangedSlot) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.AimedShot))
-                castTime += 500;
+                castTime += (Milliseconds)500;
 
-            return (castTime > 0) ? castTime : 0;
+            return (castTime > 0) ? castTime : Milliseconds.Zero;
         }
 
         public int GetMaxTicks()
         {
             int totalTicks = 0;
-            int DotDuration = GetDuration();
+            Milliseconds DotDuration = GetDuration();
 
             foreach (var effectInfo in GetEffects())
             {
@@ -2917,7 +2917,7 @@ namespace Game.Spells
             return totalTicks;
         }
 
-        public uint GetRecoveryTime()
+        public Milliseconds GetRecoveryTime()
         {
             return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
         }
@@ -3017,7 +3017,7 @@ namespace Game.Spells
             // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
             if (HasAttribute(SpellAttr4.WeaponSpeedCostScaling))
             {
-                uint speed = 0;
+                Milliseconds speed = Milliseconds.Zero;
                 SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)unitCaster.GetShapeshiftForm());
                 if (ss != null)
                     speed = ss.CombatRoundTime;
@@ -3030,7 +3030,7 @@ namespace Game.Spells
                     speed = unitCaster.GetBaseAttackTime(slot);
                 }
 
-                powerCost += (int)speed / 100;
+                powerCost += speed / 100;
             }
 
             if (power.PowerType != PowerType.Health)
@@ -3382,7 +3382,7 @@ namespace Game.Spells
                 {
                     if (ChainEntry.rank > spellInfo.ChainEntry.rank)
                         return true;
-            }
+                }
             }
             return false;
         }
@@ -3958,7 +3958,7 @@ namespace Game.Spells
                                 && spellEffectInfo.TargetB.GetTarget() == GetEffect(j).TargetB.GetTarget())
                             {
                                 NegativeEffects[spellEffectInfo.EffectIndex] = true;
-                        }
+                            }
                         }
 
                         break;
@@ -4120,10 +4120,10 @@ namespace Game.Spells
         public AuraType ExcludeCasterAuraType { get; set; }
         public AuraType ExcludeTargetAuraType { get; set; }
         public SpellCastTimesRecord CastTimeEntry { get; set; }
-        public uint RecoveryTime { get; set; }
-        public uint CategoryRecoveryTime { get; set; }
+        public Milliseconds RecoveryTime { get; set; }
+        public Milliseconds CategoryRecoveryTime { get; set; }
         public int StartRecoveryCategory { get; set; }
-        public uint StartRecoveryTime { get; set; }
+        public Milliseconds StartRecoveryTime { get; set; }
         public int CooldownAuraSpellId { get; set; }
         public SpellInterruptFlags InterruptFlags { get; set; }
         public SpellAuraInterruptFlags AuraInterruptFlags { get; set; }
@@ -4133,7 +4133,7 @@ namespace Game.Spells
         public ProcFlagsInit ProcFlags { get; set; }
         public int ProcChance { get; set; }
         public int ProcCharges { get; set; }
-        public uint ProcCooldown { get; set; }
+        public Milliseconds ProcCooldown { get; set; }
         public float ProcBasePPM { get; set; }
         List<SpellProcsPerMinuteModRecord> ProcPPMMods = new();
         public int MaxLevel { get; set; }
@@ -4142,8 +4142,8 @@ namespace Game.Spells
         public SpellDurationRecord DurationEntry { get; set; }
         public SpellPowerRecord[] PowerCosts = new SpellPowerRecord[SpellConst.MaxPowersPerSpell];
         public SpellRangeRecord RangeEntry { get; set; }
-        public float Speed { get; set; }
-        public float LaunchDelay { get; set; }
+        public Speed Speed { get; set; }
+        public Milliseconds LaunchDelay { get; set; }
         public int StackAmount { get; set; }
         public int[] Totem = new int[SpellConst.MaxTotems];
         public int[] TotemCategory = new int[SpellConst.MaxTotems];
@@ -4968,7 +4968,7 @@ namespace Game.Spells
 
         public SpellEffectName Effect;
         public AuraType ApplyAuraName;
-        public uint ApplyAuraPeriod;
+        public Milliseconds ApplyAuraPeriod;
         public float BasePoints;
         public float RealPointsPerLevel;
         public float PointsPerResource;
@@ -5347,7 +5347,7 @@ namespace Game.Spells
         public DiminishingGroup DiminishGroup = DiminishingGroup.None;
         public DiminishingReturnsType DiminishReturnType = DiminishingReturnsType.None;
         public DiminishingLevels DiminishMaxLevel = DiminishingLevels.Immune;
-        public int DiminishDurationLimit;
+        public Milliseconds DiminishDurationLimit;
     }
 
     public class ImmunityInfo

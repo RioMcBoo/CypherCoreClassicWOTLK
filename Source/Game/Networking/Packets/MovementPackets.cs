@@ -177,7 +177,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid MoverGUID;
         public int SequenceIndex; // Unit movement packet index, incremented each time
-        public float Speed = 1.0f;
+        public Speed Speed = (Speed)1.0f;
     }
 
     public class MoveUpdateSpeed : ServerPacket
@@ -191,7 +191,7 @@ namespace Game.Networking.Packets
         }
 
         public MovementInfo Status;
-        public float Speed = 1.0f;
+        public Speed Speed = (Speed)1.0f;
     }
 
     public class MoveSplineSetFlag : ServerPacket
@@ -523,11 +523,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Ack.Read(_worldPacket);
-            Speed = _worldPacket.ReadFloat();
+            Speed = (Speed)_worldPacket.ReadFloat();
         }
 
         public MovementAck Ack = new();
-        public float Speed;
+        public Speed Speed;
     }
 
     public class SetActiveMover : ClientPacket
@@ -667,11 +667,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             MoverGUID = _worldPacket.ReadPackedGuid();
-            TimeSkipped = _worldPacket.ReadUInt32();
+            TimeSkipped = (Milliseconds)_worldPacket.ReadInt32();
         }
 
         public ObjectGuid MoverGUID;
-        public uint TimeSkipped;
+        public Milliseconds TimeSkipped;
     }
 
     class MoveSkipTime : ServerPacket
@@ -681,11 +681,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(TimeSkipped);
+            _worldPacket.WriteInt32(TimeSkipped);
         }
 
         public ObjectGuid MoverGUID;
-        public uint TimeSkipped;
+        public Milliseconds TimeSkipped;
     }
 
     class SummonResponse : ClientPacket
@@ -914,13 +914,13 @@ namespace Game.Networking.Packets
 
     class MoveInitActiveMoverComplete : ClientPacket
     {
-        public uint Ticks;
+        public RelativeTime Ticks;
 
         public MoveInitActiveMoverComplete(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
-            Ticks = _worldPacket.ReadUInt32();
+            Ticks = (RelativeTime)_worldPacket.ReadUInt32();
         }
     }
     
@@ -1153,11 +1153,11 @@ namespace Game.Networking.Packets
 
         public void Read(WorldPacket data)
         {
-            HorzSpeed = data.ReadFloat();
-            VertSpeed = data.ReadFloat();
+            HorzSpeed = (Speed)data.ReadFloat();
+            VertSpeed = (Speed)data.ReadFloat();
         }
 
-        public float HorzSpeed;
-        public float VertSpeed;
+        public Speed HorzSpeed;
+        public Speed VertSpeed;
     }
 }

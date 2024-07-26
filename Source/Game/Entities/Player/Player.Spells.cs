@@ -9,6 +9,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -226,7 +227,7 @@ namespace Game.Entities
             petSpellsPacket.PetGUID = pet.GetGUID();
             petSpellsPacket.CreatureFamily = (ushort)pet.GetCreatureTemplate().Family;         // creature family (required for pet talents)
             petSpellsPacket.Specialization = pet.GetSpecialization();
-            petSpellsPacket.TimeLimit = (uint)pet.GetDuration();
+            petSpellsPacket.TimeLimit = (Milliseconds)pet.GetDuration();
             petSpellsPacket.ReactState = pet.GetReactState();
             petSpellsPacket.CommandState = charmInfo.GetCommandState();
 
@@ -451,7 +452,7 @@ namespace Game.Entities
             }
         }
 
-        void UpdateEnchantTime(uint time)
+        void UpdateEnchantTime(Milliseconds time)
         {
             for (var i = 0; i < m_enchantDuration.Count; ++i)
             {
@@ -848,14 +849,14 @@ namespace Game.Entities
                 if (apply)
                 {
                     // set duration
-                    uint duration = item.GetEnchantmentDuration(slot);
+                    Milliseconds duration = item.GetEnchantmentDuration(slot);
                     if (duration > 0)
                         AddEnchantmentDuration(item, slot, duration);
                 }
                 else
                 {
                     // duration == 0 will remove EnchantDuration
-                    AddEnchantmentDuration(item, slot, 0);
+                    AddEnchantmentDuration(item, slot, Milliseconds.Zero);
                 }
             }
         }
@@ -903,13 +904,13 @@ namespace Game.Entities
                 if (item.GetEnchantmentId(x) == 0)
                     continue;
 
-                uint duration = item.GetEnchantmentDuration(x);
+                Milliseconds duration = item.GetEnchantmentDuration(x);
                 if (duration > 0)
                     AddEnchantmentDuration(item, x, duration);
             }
         }
 
-        void AddEnchantmentDuration(Item item, EnchantmentSlot slot, uint duration)
+        void AddEnchantmentDuration(Item item, EnchantmentSlot slot, Milliseconds duration)
         {
             if (item == null)
                 return;
@@ -929,7 +930,7 @@ namespace Game.Entities
             }
             if (duration > 0)
             {
-                GetSession().SendItemEnchantTimeUpdate(GetGUID(), item.GetGUID(), slot, duration / 1000);
+                GetSession().SendItemEnchantTimeUpdate(GetGUID(), item.GetGUID(), slot, duration);
                 m_enchantDuration.Add(new EnchantDuration(item, slot, duration));
             }
         }
@@ -1031,7 +1032,7 @@ namespace Game.Entities
                                 GetSpellHistory().SendCooldownEvent(spellInfo, m_lastPotionId);
                         }
                     }
-            }
+                }
             }
 
             // from spell cases (m_lastPotionId set in Spell.SendSpellCooldown)
@@ -1453,7 +1454,7 @@ namespace Game.Entities
             if (skillEntry == null)
                 return 0;
 
-            if (skillEntry.ParentSkillLineID != 0 || 
+            if (skillEntry.ParentSkillLineID != 0 ||
                 (skillEntry.CategoryID != SkillCategory.Profession && skillEntry.CategoryID != SkillCategory.Secondary))
             {
                 return 0;
@@ -1807,8 +1808,8 @@ namespace Game.Entities
                 {
                     if (spell.GetState() != SpellState.Delayed && !HasItemFitToSpellRequirements(spell.m_spellInfo, pItem))
                         InterruptSpell(i);
+                }
             }
-        }
         }
 
         public bool HasItemFitToSpellRequirements(SpellInfo spellInfo, Item ignoreItem = null)
@@ -1859,8 +1860,8 @@ namespace Game.Entities
                                 {
                                     if (spellEffectInfo.IsAura())
                                         return true;
+                                }
                             }
-                        }
                         }
 
                         // tabard not have dependent spells
@@ -1871,8 +1872,8 @@ namespace Game.Entities
                             {
                                 if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                                     return true;
+                            }
                         }
-                    }
                     }
                     else
                     {
@@ -2093,7 +2094,7 @@ namespace Game.Entities
                 {
                     if (!HasAura(spell.spellId))
                         CastSpell(this, spell.spellId, true);
-        }
+                }
             }
         }
 
@@ -2570,7 +2571,7 @@ namespace Game.Entities
                 // do character spell book cleanup (all characters)
                 if (!IsInWorld && !learning)
                 {
-                    Log.outError(LogFilter.Spells, 
+                    Log.outError(LogFilter.Spells,
                         $"Player.AddSpell: Spell (ID: {spellId}) is invalid. " +
                         $"Deleting for all characters in `character_spell`.");
 
@@ -3111,7 +3112,17 @@ namespace Game.Entities
             basevalue = (double)(basevalue + totalflat) * totalmul;
         }
 
-        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref int flat, ref float pct) where T : IComparable
+        public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref Milliseconds basevalue, Spell spell = null)
+        {
+            float totalmul = 1.0f;
+            int totalflat = 0;
+
+            GetSpellModValues(spellInfo, op, spell, basevalue.Ticks, ref totalflat, ref totalmul);
+
+            basevalue = (Milliseconds)((basevalue + totalflat) * (double)totalmul);
+        }
+
+        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref int flat, ref float pct) where T: unmanaged, IComparable
         {
             flat = 0;
             pct = 1.0f;
@@ -3447,10 +3458,14 @@ namespace Game.Entities
         public void RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         {
             // remove cooldowns on spells that have < 10 min CD
+            Milliseconds cooldownLimit = (Minutes)10;
+
             GetSpellHistory().ResetCooldowns(p =>
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key, Difficulty.None);
-                return spellInfo.RecoveryTime < 10 * Time.Minute * Time.InMilliseconds && spellInfo.CategoryRecoveryTime < 10 * Time.Minute * Time.InMilliseconds && !spellInfo.HasAttribute(SpellAttr6.DoNotResetCooldownInArena);
+                return spellInfo.RecoveryTime < cooldownLimit &&
+                spellInfo.CategoryRecoveryTime < cooldownLimit &&
+                !spellInfo.HasAttribute(SpellAttr6.DoNotResetCooldownInArena);
             }, true);
 
             // pet cooldowns
@@ -3635,7 +3650,7 @@ namespace Game.Entities
                                 {
                                     if (!IsUseEquipedWeapon(true) && !IsInFeralForm())
                                         continue;
-                            }
+                                }
                             }
 
                             CastItemCombatSpell(damageInfo, item, proto);
@@ -3671,7 +3686,7 @@ namespace Game.Entities
 
                         if (proto.SpellPPMRate != 0)
                         {
-                            uint WeaponSpeed = GetBaseAttackTime(damageInfo.GetAttackType());
+                            Milliseconds WeaponSpeed = GetBaseAttackTime(damageInfo.GetAttackType());
                             chance = GetPPMProcChance(WeaponSpeed, proto.SpellPPMRate, spellInfo);
                         }
                         else if (chance > 100.0f)
@@ -3912,7 +3927,7 @@ namespace Game.Entities
         }
 
         // A spell can be queued up within 400 milliseconds before global cooldown expires or the cast finishes
-        static TimeSpan SPELL_QUEUE_TIME_WINDOW = TimeSpan.FromMilliseconds(400);
+        static readonly TimeSpan SPELL_QUEUE_TIME_WINDOW = (Milliseconds)400;
 
         public bool CanRequestSpellCast(SpellInfo spellInfo, Unit castingUnit)
         {
@@ -3922,7 +3937,7 @@ namespace Game.Entities
             foreach (CurrentSpellTypes spellSlot in new[] { CurrentSpellTypes.Melee, CurrentSpellTypes.Generic })
             {
                 Spell spell = GetCurrentSpell(spellSlot);
-                if (spell != null && TimeSpan.FromMilliseconds(spell.GetRemainingCastTime()) > SPELL_QUEUE_TIME_WINDOW)
+                if (spell != null && spell.GetRemainingCastTime() > SPELL_QUEUE_TIME_WINDOW)
                     return false;
             }
 

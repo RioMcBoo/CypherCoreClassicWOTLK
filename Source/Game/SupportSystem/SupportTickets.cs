@@ -17,7 +17,7 @@ namespace Game.SupportSystem
         protected ObjectGuid _playerGuid;
         protected int _mapId;
         protected Vector3 _pos;
-        protected long _createTime;
+        protected ServerTime _createTime;
         protected ObjectGuid _closedBy; // 0 = Open, -1 = Console, playerGuid = player abandoned ticket, other = GM who closed it.
         protected ObjectGuid _assignedTo;
         protected string _comment;
@@ -25,7 +25,7 @@ namespace Game.SupportSystem
         public Ticket() { }
         public Ticket(Player player)
         {
-            _createTime = GameTime.GetGameTime();
+            _createTime = LoopTime.ServerTime;
             _playerGuid = player.GetGUID();
         }
 
@@ -127,7 +127,7 @@ namespace Game.SupportSystem
             _id = fields.Read<int>(idx);
             _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<long>(++idx);
+            _createTime = (ServerTime)(UnixTime64)fields.Read<long>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -156,7 +156,7 @@ namespace Game.SupportSystem
             stmt.SetInt32(idx, _id);
             stmt.SetInt64(++idx, _playerGuid.GetCounter());
             stmt.SetString(++idx, _note);
-            stmt.SetInt64(++idx, _createTime);
+            stmt.SetInt64(++idx, (UnixTime64)_createTime);
             stmt.SetInt32(++idx, _mapId);
             stmt.SetFloat(++idx, _pos.X);
             stmt.SetFloat(++idx, _pos.Y);
@@ -178,12 +178,12 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            var curTime = GameTime.GetGameTime();
+            ServerTime curTime = LoopTime.ServerTime;
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
-            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
+            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.SpanToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
 
             if (!_assignedTo.IsEmpty())
                 ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistassignedto, GetAssignedToName()));
@@ -230,7 +230,7 @@ namespace Game.SupportSystem
             _id = fields.Read<int>(idx);
             _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<long>(++idx);
+            _createTime = (ServerTime)(UnixTime64)fields.Read<long>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -273,7 +273,7 @@ namespace Game.SupportSystem
             stmt.SetInt32(idx, _id);
             stmt.SetInt64(++idx, _playerGuid.GetCounter());
             stmt.SetString(++idx, _note);
-            stmt.SetInt64(++idx, _createTime);
+            stmt.SetInt64(++idx, (UnixTime64)_createTime);
             stmt.SetInt32(++idx, _mapId);
             stmt.SetFloat(++idx, _pos.X);
             stmt.SetFloat(++idx, _pos.Y);
@@ -322,12 +322,12 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            long curTime = GameTime.GetGameTime();
+            ServerTime curTime = LoopTime.ServerTime;
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
-            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
+            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.SpanToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
 
             if (!_assignedTo.IsEmpty())
                 ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistassignedto, GetAssignedToName()));
@@ -383,7 +383,7 @@ namespace Game.SupportSystem
             _id = fields.Read<int>(idx);
             _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<long>(++idx);
+            _createTime = (ServerTime)(UnixTime64)fields.Read<long>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -412,7 +412,7 @@ namespace Game.SupportSystem
             stmt.SetInt32(idx, _id);
             stmt.SetInt64(++idx, _playerGuid.GetCounter());
             stmt.SetString(++idx, _note);
-            stmt.SetInt64(++idx, _createTime);
+            stmt.SetInt64(++idx, (UnixTime64)_createTime);
             stmt.SetInt32(++idx, _mapId);
             stmt.SetFloat(++idx, _pos.X);
             stmt.SetFloat(++idx, _pos.Y);
@@ -434,12 +434,12 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            long curTime = GameTime.GetGameTime();
+            ServerTime curTime = LoopTime.ServerTime;
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
-            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
+            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.SpanToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
 
             if (!_assignedTo.IsEmpty())
                 ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistassignedto, GetAssignedToName()));

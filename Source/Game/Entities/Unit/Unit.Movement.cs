@@ -77,12 +77,12 @@ namespace Game.Entities
 
         void PropagateSpeedChange() { GetMotionMaster().PropagateSpeedChange(); }
 
-        public float GetSpeed(UnitMoveType mtype)
+        public Speed GetSpeed(UnitMoveType mtype)
         {
-            return m_speed_rate[(int)mtype] * (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
+            return (Speed)(m_speed_rate[(int)mtype] * (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]));
         }
 
-        public void SetSpeed(UnitMoveType mtype, float newValue)
+        public void SetSpeed(UnitMoveType mtype, Speed newValue)
         {
             SetSpeedRate(mtype, newValue / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]));
         }
@@ -174,7 +174,7 @@ namespace Game.Entities
             init.Stop();
         }
 
-        public void PauseMovement(uint timer = 0, MovementSlot slot = 0, bool forced = true)
+        public void PauseMovement(TimeSpan timer = default, MovementSlot slot = 0, bool forced = true)
         {
             if (MotionMaster.IsInvalidMovementSlot(slot))
                 return;
@@ -187,7 +187,7 @@ namespace Game.Entities
                 StopMoving();
         }
 
-        public void ResumeMovement(uint timer = 0, MovementSlot slot = 0)
+        public void ResumeMovement(TimeSpan timer = default, MovementSlot slot = 0)
         {
             if (MotionMaster.IsInvalidMovementSlot(slot))
                 return;
@@ -217,7 +217,7 @@ namespace Game.Entities
             init.SetFacing(ori);
 
             //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
-            UpdateSplineMovement((uint)init.Launch());
+            UpdateSplineMovement(init.Launch());
             Creature creature = ToCreature();
             if (creature != null)
                 creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
@@ -235,7 +235,7 @@ namespace Game.Entities
             init.SetFacing(GetAbsoluteAngle(obj));   // when on transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
 
             //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
-            UpdateSplineMovement((uint)init.Launch());
+            UpdateSplineMovement(init.Launch());
             Creature creature = ToCreature();
             if (creature != null)
                 creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
@@ -255,13 +255,13 @@ namespace Game.Entities
             init.SetFacing(point.GetPositionX(), point.GetPositionY(), point.GetPositionZ());
 
             //GetMotionMaster()->LaunchMoveSpline(std::move(init), EVENT_FACE, MOTION_PRIORITY_HIGHEST);
-            UpdateSplineMovement((uint)init.Launch());
+            UpdateSplineMovement(init.Launch());
             Creature creature = ToCreature();
             if (creature != null)
                 creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
         }
 
-        public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
+        public void MonsterMoveWithSpeed(float x, float y, float z, Speed speed, bool generatePath = false, bool forceDestination = false)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -271,7 +271,7 @@ namespace Game.Entities
             GetMotionMaster().LaunchMoveSpline(initializer, 0, MovementGeneratorPriority.Normal, MovementGeneratorType.Point);
         }
 
-        public void KnockbackFrom(Position origin, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
+        public void KnockbackFrom(Position origin, Speed speedXY, Speed speedZ, SpellEffectExtraData spellEffectExtraData = null)
         {
             Player player = ToPlayer();
             if (player == null)
@@ -302,7 +302,7 @@ namespace Game.Entities
             }
         }
 
-        void SendMoveKnockBack(Player player, float speedXY, float speedZ, float vcos, float vsin)
+        void SendMoveKnockBack(Player player, Speed speedXY, Speed speedZ, float vcos, float vsin)
         {
             MoveKnockBack moveKnockBack = new();
             moveKnockBack.MoverGUID = GetGUID();
@@ -453,7 +453,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void JumpTo(float speedXY, float speedZ, float angle, Position dest = null)
+        public void JumpTo(Speed speedXY, Speed speedZ, float angle, Position dest = null)
         {
             if (dest != null)
                 angle += GetRelativeAngle(dest);
@@ -468,11 +468,11 @@ namespace Game.Entities
             }
         }
 
-        public void JumpTo(WorldObject obj, float speedZ, bool withOrientation = false)
+        public void JumpTo(WorldObject obj, Speed speedZ, bool withOrientation = false)
         {
             float x, y, z;
             obj.GetContactPoint(this, out x, out y, out z);
-            float speedXY = GetExactDist2d(x, y) * 10.0f / speedZ;
+            Speed speedXY = (Speed)(GetExactDist2d(x, y) * 10.0f / speedZ);
             GetMotionMaster().MoveJump(x, y, z, GetAbsoluteAngle(obj), speedXY, speedZ, EventId.Jump, withOrientation);
         }
 
@@ -888,9 +888,9 @@ namespace Game.Entities
                     {
                         if (!HasAura(capability.ModSpellAuraID))
                             CastSpell(this, capability.ModSpellAuraID, new CastSpellExtraArgs(aurEff));
+                    }
                 }
             }
-        }
         }
 
         public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
@@ -1411,9 +1411,11 @@ namespace Game.Entities
                     caster = Global.ObjAccessor.GetUnit(this, fearAuras[0].GetCasterGUID());
                 if (caster == null)
                     caster = GetAttackerForHelper();
-
-                GetMotionMaster().MoveFleeing(caster, TimeSpan.FromMilliseconds(
-                       fearAuras.Empty() ? WorldConfig.Values[WorldCfg.CreatureFamilyFleeDelay].Int32 : 0)); // caster == NULL processed in MoveFleeing
+                                
+                GetMotionMaster().MoveFleeing(caster, 
+                        fearAuras.Empty() 
+                        ? WorldConfig.Values[WorldCfg.CreatureFamilyFleeDelay].TimeSpan 
+                        : TimeSpan.Zero); // caster == NULL processed in MoveFleeing
                 
                 SetUnitFlag(UnitFlags.Fleeing);
             }
@@ -1698,7 +1700,7 @@ namespace Game.Entities
                 MoveSetSpeed setModMovementForceMagnitude = new(ServerOpcodes.MoveSetModMovementForceMagnitude);
                 setModMovementForceMagnitude.MoverGUID = GetGUID();
                 setModMovementForceMagnitude.SequenceIndex = m_movementCounter++;
-                setModMovementForceMagnitude.Speed = modMagnitude;
+                setModMovementForceMagnitude.Speed = (Speed)modMagnitude;
                 movingPlayer.SendPacket(setModMovementForceMagnitude);
                 ++movingPlayer.m_movementForceModMagnitudeChanges;
             }
@@ -1706,7 +1708,7 @@ namespace Game.Entities
             {
                 MoveUpdateSpeed updateModMovementForceMagnitude = new(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
                 updateModMovementForceMagnitude.Status = m_movementInfo;
-                updateModMovementForceMagnitude.Speed = modMagnitude;
+                updateModMovementForceMagnitude.Speed = (Speed)modMagnitude;
                 SendMessageToSet(updateModMovementForceMagnitude, true);
             }
 
@@ -1811,12 +1813,12 @@ namespace Game.Entities
             return MoveSpline.Initialized() && !MoveSpline.Finalized();
         }
 
-        void UpdateSplineMovement(uint diff)
+        void UpdateSplineMovement(TimeSpan diff)
         {
             if (MoveSpline.Finalized())
                 return;
 
-            MoveSpline.UpdateState((int)diff);
+            MoveSpline.UpdateState((Milliseconds)diff);
             bool arrived = MoveSpline.Finalized();
 
             if (MoveSpline.IsCyclic())
@@ -1824,7 +1826,7 @@ namespace Game.Entities
                 splineSyncTimer.Update(diff);
                 if (splineSyncTimer.Passed())
                 {
-                    splineSyncTimer.Reset(5000); // Retail value, do not change
+                    splineSyncTimer.Reset((Seconds)5); // Retail value, do not change
 
                     FlightSplineSync flightSplineSync = new();
                     flightSplineSync.Guid = GetGUID();
@@ -1939,7 +1941,7 @@ namespace Game.Entities
                 // we do not update m_movementInfo for creatures so it needs to be done manually here
                 moveUpdateTeleport.Status.Guid = GetGUID();
                 moveUpdateTeleport.Status.Pos.Relocate(pos);
-                moveUpdateTeleport.Status.Time = Time.GetMSTime();
+                moveUpdateTeleport.Status.Time = Time.NowRelative;
                 var transportBase = GetDirectTransport();
                 if (transportBase != null)
                 {

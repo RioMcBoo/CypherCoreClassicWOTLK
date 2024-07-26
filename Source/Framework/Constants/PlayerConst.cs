@@ -32,17 +32,17 @@ namespace Framework.Constants
 
         public const int MaxDailyQuests = 25;
 
-        public static TimeSpan InfinityCooldownDelay = TimeSpan.FromSeconds(Time.Month);  // used for set "infinity cooldowns" for spells and check
-        public const uint infinityCooldownDelayCheck = Time.Month / 2;
-        public const int MaxPlayerSummonDelay = 2 * Time.Minute;
+        public static readonly TimeSpan InfinityCooldownDelay = (Days)30;  // used for set "infinity cooldowns" for spells and check
+        public static readonly TimeSpan infinityCooldownDelayCheck = (Days)15;
+        public static readonly TimeSpan MaxPlayerSummonDelay = (Minutes)2;
 
         // corpse reclaim times
-        public const int DeathExpireStep = (5 * Time.Minute);
+        public static readonly TimeSpan DeathExpireStep = (Minutes)5;
         public const int MaxDeathCount = 3;
 
         public const int MaxCUFProfiles = 5;
 
-        public static uint[] copseReclaimDelay = [30, 60, 120];
+        public static Seconds[] copseReclaimDelay = [(Seconds)30, (Seconds)60, (Seconds)120];
 
         public const int MaxRunes = 7;
         public const int MaxRechargingRunes = 3;

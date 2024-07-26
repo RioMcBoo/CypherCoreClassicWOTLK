@@ -312,7 +312,7 @@ namespace Game.Entities
                     TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModPeriodicDamageTaken,
                         aurEff =>
                         (aurEff.GetMiscValue() & (uint)spellProto.GetSchoolMask()) != 0);
-            }
+                }
             }
 
             // Sanctified Wrath (bypass damage reduction)
@@ -888,7 +888,7 @@ namespace Game.Entities
                 return;
 
             if (spellType == CurrentSpellTypes.Channeled)
-                spell.SendChannelUpdate(0);
+                spell.SendChannelUpdate(Milliseconds.Zero);
 
             spell.Finish(result);
         }
@@ -1046,12 +1046,13 @@ namespace Game.Entities
             return null;
         }
 
-        public int GetCurrentSpellCastTime(int spell_id)
+        public TimeSpan GetCurrentSpellCastTime(int spell_id)
         {
             Spell spell = FindCurrentSpellBySpellId(spell_id);
             if (spell != null)
                 return spell.GetCastTime();
-            return 0;
+
+            return TimeSpan.Zero;
         }
 
         public virtual bool HasSpellFocus(Spell focusSpell = null) { return false; }
@@ -1105,7 +1106,7 @@ namespace Game.Entities
             foreach (var eff in auras)
             {
                 if ((excludeAura == 0 || excludeAura != eff.GetSpellInfo().Id) && //Avoid self interrupt of channeled Crowd Control spells like Seduction
-                    eff.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Damage))
+                eff.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Damage))
                     return true;
             }
 
@@ -1212,7 +1213,7 @@ namespace Game.Entities
                 {
                     if (powerTypeEntry.HasFlag(PowerTypeFlags.UseRegenInterrupt))
                         player.InterruptPowerRegen(powerType);
-            }
+                }
             }
 
             int gain = victim.ModifyPower(powerType, damage, false);
@@ -1359,7 +1360,7 @@ namespace Game.Entities
                         if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
                         {
                             schoolImmunityMask |= pair.Key;
-                }
+                        }
                     }
                 }
 
@@ -1461,8 +1462,8 @@ namespace Game.Entities
                             ((caster != null && !IsFriendlyTo(caster)) || !spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex)))
                         {                     // Harmful
                             return true;
-                }
-            }
+                        }
+                    }
                 }
             }
 
@@ -1635,7 +1636,7 @@ namespace Game.Entities
 
         void GetProcAurasTriggeredOnEvent(List<(uint, AuraApplication)> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
         {
-            DateTime now = GameTime.Now();
+            ServerTime now = LoopTime.ServerTime;
 
             void processAuraApplication(AuraApplication aurApp)
             {
@@ -1764,7 +1765,7 @@ namespace Game.Entities
             {
                 if (GetCurrentSpell(i) != null && GetCurrentSpell(i).m_spellInfo.Id != except_spellid)
                     InterruptSpell(i, false);
-        }
+            }
         }
 
         public ushort GetMaxSkillValueForLevel(Unit target = null)
@@ -2064,7 +2065,7 @@ namespace Game.Entities
             }
         }
 
-        public void DelayOwnedAuras(int spellId, ObjectGuid caster, int delaytime)
+        public void DelayOwnedAuras(int spellId, ObjectGuid caster, Milliseconds delaytime)
         {
             var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in range)
@@ -2072,7 +2073,7 @@ namespace Game.Entities
                 if (caster.IsEmpty() || aura.GetCasterGUID() == caster)
                 {
                     if (aura.GetDuration() < delaytime)
-                        aura.SetDuration(0);
+                        aura.SetDuration(Milliseconds.Zero);
                     else
                         aura.SetDuration(aura.GetDuration() - delaytime);
 
@@ -2389,7 +2390,7 @@ namespace Game.Entities
                 {
                     if (eff.IsAffectingSpell(spell))
                         return eff;
-            }
+                }
             }
 
             return null;
@@ -2404,7 +2405,7 @@ namespace Game.Entities
                 return DiminishingLevels.Level1;
 
             // If last spell was cast more than 18 seconds ago - reset level.
-            if (diminish.Stack == 0 && Time.GetMSTimeDiffToNow(diminish.HitTime) > 18 * Time.InMilliseconds)
+            if (diminish.Stack == 0 && LoopTime.Diff(diminish.HitTime) > (Seconds)18)
                 return DiminishingLevels.Level1;
 
             return diminish.HitCount;
@@ -2421,13 +2422,13 @@ namespace Game.Entities
                 diminish.HitCount = currentLevel + 1;
         }
 
-        public bool ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref int duration, WorldObject caster, DiminishingLevels previousLevel)
+        public bool ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref Milliseconds duration, WorldObject caster, DiminishingLevels previousLevel)
         {
             DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
             if (duration == -1 || group == DiminishingGroup.None)
                 return true;
 
-            int limitDuration = auraSpellInfo.GetDiminishingReturnsLimitDuration();
+            Milliseconds limitDuration = auraSpellInfo.GetDiminishingReturnsLimitDuration();
 
             // test pet/charm masters instead pets/charmeds
             Unit targetOwner = GetCharmerOrOwner();
@@ -2514,7 +2515,7 @@ namespace Game.Entities
                     break;
             }
 
-            duration = (int)(duration * mod);
+            duration = (Milliseconds)(duration * mod);
             return duration != 0;
         }
 
@@ -2531,7 +2532,7 @@ namespace Game.Entities
 
                 // Remember time after last aura from group removed
                 if (diminish.Stack == 0)
-                    diminish.HitTime = GameTime.GetGameTimeMS();
+                    diminish.HitTime = LoopTime.RelativeTime;
             }
         }
 
@@ -2563,7 +2564,7 @@ namespace Game.Entities
                 || m_currentSpells[CurrentSpellTypes.Channeled].m_spellInfo.Id == spell_id))
             {
                 InterruptSpell(CurrentSpellTypes.Channeled, true, true);
-        }
+            }
         }
 
         public void InterruptSpell(CurrentSpellTypes spellType, bool withDelayed = true, bool withInstant = true)
@@ -2800,7 +2801,7 @@ namespace Game.Entities
                 {
                     if (aura.HasEffect(effIndex) && (casterGUID.IsEmpty() || aura.GetBase().GetCasterGUID() == casterGUID))
                         return true;
-            }
+                }
             }
 
             return false;
@@ -2821,7 +2822,7 @@ namespace Game.Entities
                     {
                         if ((mechanicMask & (1ul << (int)spellEffectInfo.Mechanic)) != 0)
                             return true;
-            }
+                    }
                 }
             }
 
@@ -2928,8 +2929,8 @@ namespace Game.Entities
                 if (spellInfo.GetDiminishingReturnsGroupForSpell() != diminishGroup)
                     continue;
 
-                int existingDuration = itr.Value.GetBase().GetDuration();
-                int newDuration = auraSpellInfo.GetMaxDuration();
+                Milliseconds existingDuration = itr.Value.GetBase().GetDuration();
+                Milliseconds newDuration = auraSpellInfo.GetMaxDuration();
                 ApplyDiminishingToDuration(auraSpellInfo, ref newDuration, caster, level);
                 if (newDuration > 0 && newDuration < existingDuration)
                     return true;
@@ -3076,7 +3077,7 @@ namespace Game.Entities
                     && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), source))
                 {
                     InterruptNonMeleeSpells(false);
-            }
+                }
             }
 
             UpdateInterruptMask();
@@ -3180,7 +3181,7 @@ namespace Game.Entities
 
                     bool stealCharge = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelRemovesCharges);
                     // Cast duration to unsigned to prevent permanent aura's such as Righteous Fury being permanently added to caster
-                    uint dur = (uint)Math.Min(2u * Time.Minute * Time.InMilliseconds, aura.GetDuration());
+                    Milliseconds dur = Time.Min((Minutes)2, aura.GetDuration());
 
                     Unit unitStealer = stealer.ToUnit();
                     if (unitStealer != null)
@@ -3192,7 +3193,7 @@ namespace Game.Entities
                                 oldAura.ModCharges(stolenCharges);
                             else
                                 oldAura.ModStackAmount(stolenCharges);
-                            oldAura.SetDuration((int)dur);
+                            oldAura.SetDuration(dur);
                         }
                         else
                         {
@@ -3216,7 +3217,7 @@ namespace Game.Entities
                                     caster.GetSingleCastAuras().Add(aura);
                                 }
                                 // FIXME: using aura.GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
-                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? stolenCharges : aura.GetCharges(), (byte)stolenCharges, recalculateMask, damage);
+                                newAura.SetLoadedState(aura.GetMaxDuration(), dur, stealCharge ? stolenCharges : aura.GetCharges(), (byte)stolenCharges, recalculateMask, damage);
                                 newAura.ApplyForTargets();
                             }
                         }
@@ -3761,10 +3762,10 @@ namespace Game.Entities
                             && (spellProto.IsPassive() || flag != AuraStateType.Enraged))
                         {
                             RemoveAura(app);
+                        }
                     }
                 }
             }
-        }
         }
         public bool HasAuraState(AuraStateType flag, SpellInfo spellProto = null, Unit caster = null)
         {

@@ -33,28 +33,28 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
         {
             base.JustEngagedWith(victim);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(45), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(45), task =>
             {
                 DoCast(me, SpellIds.Inferno);
-                task.Repeat(TimeSpan.FromSeconds(45));
+                task.Repeat(Time.SpanFromSeconds(45));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(30), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.IgniteMana);
                 if (target != null)
                     DoCast(target, SpellIds.IgniteMana);
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(30));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(35), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(35), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.LivingBomb);
-                task.Repeat(TimeSpan.FromSeconds(35));
+                task.Repeat(Time.SpanFromSeconds(35));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

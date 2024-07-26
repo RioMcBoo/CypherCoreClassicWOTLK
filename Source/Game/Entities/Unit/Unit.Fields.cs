@@ -35,12 +35,12 @@ namespace Game.Entities
 
         //Combat
         protected List<Unit> attackerList = new();
-        Dictionary<ReactiveType, uint> m_reactiveTimer = new();
+        Dictionary<ReactiveType, Milliseconds> m_reactiveTimer = new();
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
 
-        uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
+        Milliseconds[] m_baseAttackSpeed = new Milliseconds[(int)WeaponAttackType.Max];
         public float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
-        protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
+        protected Milliseconds[] m_attackTimer = new Milliseconds[(int)WeaponAttackType.Max];
         bool _isCombatDisallowed;
 
         // Threat+combat management
@@ -54,7 +54,7 @@ namespace Game.Entities
         public float ModSpellHitChance { get; set; }
         public bool m_canDualWield;
         public float BaseSpellCritChance { get; set; }
-        public uint RegenTimer { get; set; }
+        public Milliseconds RegenTimer { get; set; }
 
         int _lastExtraAttackSpell;
         Dictionary<ObjectGuid, int> extraAttacksTargets = new();
@@ -109,13 +109,13 @@ namespace Game.Entities
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
         public UnitTypeMask UnitTypeMask { get; set; }
         UnitState m_state;
-        uint m_lastManaUseTime; // msecs
+        ServerTime m_lastManaUseTime;
         protected LiquidTypeRecord _lastLiquid;
         protected DeathState m_deathState;
         public Vehicle m_vehicle { get; set; }
         public Vehicle VehicleKit { get; set; }
         bool canModifyStats;
-        public uint LastSanctuaryTime { get; set; }
+        public ServerTime LastSanctuaryTime { get; set; }
         int m_transformSpell;
         bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
@@ -152,7 +152,7 @@ namespace Game.Entities
 
     public struct DiminishingReturn
     {
-        public DiminishingReturn(uint hitTime, DiminishingLevels hitCount)
+        public DiminishingReturn(RelativeTime hitTime, DiminishingLevels hitCount)
         {
             Stack = 0;
             HitTime = hitTime;
@@ -162,12 +162,12 @@ namespace Game.Entities
         public void Clear()
         {
             Stack = 0;
-            HitTime = 0;
+            HitTime = default;
             HitCount = DiminishingLevels.Level1;
         }
 
         public uint Stack;
-        public uint HitTime;
+        public RelativeTime HitTime;
         public DiminishingLevels HitCount;
     }
 

@@ -19,8 +19,8 @@ namespace Game.Entities
     {
         MapManager()
         {
-            i_gridCleanUpDelay = (uint)WorldConfig.Values[WorldCfg.IntervalGridClean].Int32;
-            i_timer.SetInterval(WorldConfig.Values[WorldCfg.IntervalMapUpdate].Int32);
+            i_gridCleanUpDelay = WorldConfig.Values[WorldCfg.IntervalGridClean].TimeSpan;
+            i_timer.SetInterval(WorldConfig.Values[WorldCfg.IntervalMapUpdate].TimeSpan);
         }
 
         public void Initialize()
@@ -270,13 +270,13 @@ namespace Game.Entities
             }
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             i_timer.Update(diff);
             if (!i_timer.Passed())
                 return;
 
-            var time = (uint)i_timer.GetCurrent();
+            TimeSpan time = i_timer.GetCurrent();
             foreach (var (key, map) in i_maps)
             {
                 if (map.CanUnload(diff))
@@ -288,7 +288,7 @@ namespace Game.Entities
                 }
 
                 if (m_updater != null)
-                    m_updater.ScheduleUpdate(map, (uint)i_timer.GetCurrent());
+                    m_updater.ScheduleUpdate(map, i_timer.GetCurrent());
                 else
                     map.Update(time);
             }
@@ -299,7 +299,7 @@ namespace Game.Entities
             foreach (var map in i_maps)
                 map.Value.DelayedUpdate(time);
 
-            i_timer.SetCurrent(0);
+            i_timer.SetCurrent(TimeSpan.Zero);
         }
 
         bool DestroyMap(Map map)
@@ -396,7 +396,7 @@ namespace Game.Entities
             }
 
             int newInstanceId = _nextInstanceId;
-            Cypher.Assert(newInstanceId < _freeInstanceIds.Length && newInstanceId > 1);
+            Cypher.Assert(newInstanceId < _freeInstanceIds.Length && newInstanceId > 0);
             _freeInstanceIds[newInstanceId] = false;
 
             // Find the lowest available id starting from the current NextInstanceId
@@ -431,7 +431,7 @@ namespace Game.Entities
             _freeInstanceIds[instanceId] = true;
         }
 
-        public void SetGridCleanUpDelay(uint t)
+        public void SetGridCleanUpDelay(TimeSpan t)
         {
             if (t < MapConst.MinGridDelay)
                 i_gridCleanUpDelay = MapConst.MinGridDelay;
@@ -439,7 +439,7 @@ namespace Game.Entities
                 i_gridCleanUpDelay = t;
         }
 
-        public void SetMapUpdateInterval(int t)
+        public void SetMapUpdateInterval(TimeSpan t)
         {
             if (t < MapConst.MinMapUpdateDelay)
                 t = MapConst.MinMapUpdateDelay;
@@ -486,7 +486,7 @@ namespace Game.Entities
         Dictionary<(int mapId, int instanceId), Map> i_maps = new();
         IntervalTimer i_timer = new();
         object _mapsLock = new();
-        uint i_gridCleanUpDelay;
+        TimeSpan i_gridCleanUpDelay;
         BitSet _freeInstanceIds = new(1);
         int _nextInstanceId;
         MapUpdater m_updater;

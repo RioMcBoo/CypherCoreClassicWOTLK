@@ -51,7 +51,7 @@ namespace Game.Movement
             // Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
             _wanderSteps = RandomHelper.IRand(2, 10);
 
-            _timer.Reset(0);
+            _timer.Reset(TimeSpan.Zero);
             _path = null;
         }
 
@@ -61,7 +61,7 @@ namespace Game.Movement
             DoInitialize(owner);
         }
 
-        public override bool DoUpdate(Creature owner, uint diff)
+        public override bool DoUpdate(Creature owner, TimeSpan diff)
         {
             if (owner == null || !owner.IsAlive())
                 return true;
@@ -122,12 +122,12 @@ namespace Game.Movement
             {
                 if (owner.IsAIEnabled())
                     owner.GetAI().MovementInform(MovementGeneratorType.Random, 0);
-        }
+            }
         }
 
-        public override void Pause(uint timer)
+        public override void Pause(TimeSpan timer)
         {
-            if (timer != 0)
+            if (timer != TimeSpan.Zero)
             {
                 AddFlag(MovementGeneratorFlags.TimedPaused);
                 _timer.Reset(timer);
@@ -140,9 +140,9 @@ namespace Game.Movement
             }
         }
 
-        public override void Resume(uint overrideTimer)
+        public override void Resume(TimeSpan overrideTimer)
         {
-            if (overrideTimer != 0)
+            if (overrideTimer != TimeSpan.Zero)
                 _timer.Reset(overrideTimer);
 
             RemoveFlag(MovementGeneratorFlags.Paused);
@@ -170,7 +170,7 @@ namespace Game.Movement
             if (!owner.IsWithinLOS(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ()))
             {
                 // Retry later on
-                _timer.Reset(200);
+                _timer.Reset((Milliseconds)200);
                 return;
             }
 
@@ -185,14 +185,14 @@ namespace Game.Movement
             if (!result || _path.GetPathType().HasFlag(PathType.NoPath) 
                 || _path.GetPathType().HasFlag(PathType.Shortcut))// || _path.GetPathType().HasFlag(PathType.FarFromPoly))
             {
-                _timer.Reset(100);
+                _timer.Reset((Milliseconds)100);
                 return;
             }
 
             if (_path.GetPathLength() < 0.1f)
             {
                 // the path is too short for the spline system to be accepted. Let's try again soon.
-                _timer.Reset(500);
+                _timer.Reset((Milliseconds)500);
                 return;
             }
 
@@ -216,7 +216,7 @@ namespace Game.Movement
             MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(walk);
-            uint splineDuration = (uint)init.Launch();
+            TimeSpan splineDuration = init.Launch();
 
             --_wanderSteps;
             if (_wanderSteps != 0) // Creature has yet to do steps before pausing
@@ -224,7 +224,7 @@ namespace Game.Movement
             else
             {
                 // Creature has made all its steps, time for a little break
-                _timer.Reset(splineDuration + RandomHelper.URand(4, 10) * Time.InMilliseconds); // Retails seems to use rounded numbers so we do as well
+                _timer.Reset(splineDuration + (Seconds)RandomHelper.IRand(4, 10)); // Retails seems to use rounded numbers so we do as well
                 _wanderSteps = RandomHelper.IRand(2, 10);
             }
 

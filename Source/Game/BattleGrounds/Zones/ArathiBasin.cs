@@ -39,7 +39,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
             m_ReputationTics = 0;
         }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() == BattlegroundStatus.InProgress)
             {
@@ -235,7 +235,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
                         if (gameObject != null)
                         {
                             gameObject.UseDoorOrButton();
-                            gameObject.DespawnOrUnsummon(TimeSpan.FromSeconds(3));
+                            gameObject.DespawnOrUnsummon((Seconds)3);
                         }
                     }
                     break;
@@ -584,7 +584,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
             public const int ExploitTeleportLocationHorde = 3706;
 
             // Tick intervals and given points: case 0, 1, 2, 3, 4, 5 captured nodes
-            public static TimeSpan TickInterval = TimeSpan.FromSeconds(2);
+            public static TimeSpan TickInterval = (Seconds)2;
             public static int[] TickPoints = { 0, 10, 10, 10, 10, 30 };
         }
 

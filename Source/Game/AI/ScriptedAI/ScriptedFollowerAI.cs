@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
+using System;
 
 namespace Game.AI
 {
@@ -20,13 +21,13 @@ namespace Game.AI
     public class FollowerAI : ScriptedAI
     {
         ObjectGuid _leaderGUID;
-        uint _updateFollowTimer;
+        TimeSpan _updateFollowTimer;
         FollowState _followState;
         int _questForFollow;
 
         public FollowerAI(Creature creature) : base(creature)
         {
-            _updateFollowTimer = 2500;
+            _updateFollowTimer = (Milliseconds)2500;
             _followState = FollowState.None;
         }
 
@@ -85,7 +86,7 @@ namespace Game.AI
                 me.EngageWithTarget(attacker);
         }
 
-        public override void UpdateAI(uint uiDiff)
+        public override void UpdateAI(TimeSpan uiDiff)
         {
             if (HasFollowState(FollowState.Inprogress) && !me.IsEngaged())
             {
@@ -150,7 +151,7 @@ namespace Game.AI
                         return;
                     }
 
-                    _updateFollowTimer = 1000;
+                    _updateFollowTimer = (Seconds)1;
                 }
                 else
                     _updateFollowTimer -= uiDiff;
@@ -159,7 +160,7 @@ namespace Game.AI
             UpdateFollowerAI(uiDiff);
         }
 
-        void UpdateFollowerAI(uint diff)
+        void UpdateFollowerAI(TimeSpan diff)
         {
             UpdateVictim();
         }
@@ -173,7 +174,7 @@ namespace Game.AI
                     && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
                 {
                     me.SaveRespawnTime(me.GetRespawnDelay());
-            }
+                }
             }
 
             if (me.IsEngaged())

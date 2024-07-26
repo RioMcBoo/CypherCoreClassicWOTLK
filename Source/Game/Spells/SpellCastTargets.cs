@@ -372,12 +372,12 @@ namespace Game.Spells
 
         public float GetPitch() { return m_pitch; }
         public void SetPitch(float pitch) { m_pitch = pitch; }
-        float GetSpeed() { return m_speed; }
-        public void SetSpeed(float speed) { m_speed = speed; }
+        Speed GetSpeed() { return m_speed; }
+        public void SetSpeed(Speed speed) { m_speed = speed; }
 
         public float GetDist2d() { return m_src.Position.GetExactDist2d(m_dst.Position); }
-        public float GetSpeedXY() { return (float)(m_speed * Math.Cos(m_pitch)); }
-        public float GetSpeedZ() { return (float)(m_speed * Math.Sin(m_pitch)); }
+        public Speed GetSpeedXY() { return new(m_speed * Math.Cos(m_pitch)); }
+        public Speed GetSpeedZ() { return new(m_speed * Math.Sin(m_pitch)); }
 
         public string GetTargetString() { return m_strTarget; }
 
@@ -397,7 +397,7 @@ namespace Game.Spells
         SpellDestination m_dst;
 
         float m_pitch;
-        float m_speed;
+        Speed m_speed;
         string m_strTarget;
         #endregion
     }

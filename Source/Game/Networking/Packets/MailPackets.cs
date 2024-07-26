@@ -226,7 +226,7 @@ namespace Game.Networking.Packets
             foreach (var entry in Next)
             {
                 _worldPacket.WritePackedGuid(entry.SenderGuid);
-                _worldPacket.WriteFloat(entry.TimeLeft);
+                _worldPacket.WriteFloat((float)entry.TimeLeft.TotalSeconds);
                 _worldPacket.WriteInt32(entry.AltSenderID);
                 _worldPacket.WriteInt8(entry.AltSenderType);
                 _worldPacket.WriteInt32(entry.StationeryID);
@@ -257,13 +257,13 @@ namespace Game.Networking.Packets
                         break;
                 }
 
-                TimeLeft = mail.deliver_time - GameTime.GetGameTime();
+                TimeLeft = mail.deliver_time - LoopTime.ServerTime;
                 AltSenderType = (sbyte)mail.messageType;
                 StationeryID = (int)mail.stationery;
             }
 
             public ObjectGuid SenderGuid;
-            public float TimeLeft;
+            public TimeSpan TimeLeft;
             public int AltSenderID;
             public sbyte AltSenderType;
             public int StationeryID;
@@ -379,7 +379,7 @@ namespace Game.Networking.Packets
             StationeryID = (int)mail.stationery;
             SentMoney = mail.money;
             Flags = (int)mail.checkMask;
-            DaysLeft = (float)(mail.expire_time - GameTime.GetGameTime()) / Time.Day;
+            DaysLeft = mail.expire_time - LoopTime.ServerTime;
             MailTemplateID = mail.mailTemplateId;
             Subject = mail.subject;
             Body = mail.body;
@@ -400,7 +400,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(StationeryID);
             data.WriteInt64(SentMoney);
             data.WriteInt32(Flags);
-            data.WriteFloat(DaysLeft);
+            data.WriteFloat((float)DaysLeft.TotalDays);
             data.WriteInt32(MailTemplateID);
             data.WriteInt32(Attachments.Count);
 
@@ -442,7 +442,7 @@ namespace Game.Networking.Packets
         public int StationeryID;
         public long SentMoney;
         public int Flags;
-        public float DaysLeft;
+        public TimeSpan DaysLeft;
         public int MailTemplateID;
         public string Subject = string.Empty;
         public string Body = string.Empty;

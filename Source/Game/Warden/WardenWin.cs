@@ -19,7 +19,7 @@ namespace Game
         static string _luaEvalMidfix = " end R=S and T()if R then S('_TW',";
         static string _luaEvalPostfix = ",'GUILD')end";
 
-        uint _serverTicks;
+        RelativeTime _serverTicks;
         CategoryCheck[] _checks = new CategoryCheck[(int)WardenCheckCategory.Max];
         List<ushort> _currentChecks = new();
 
@@ -187,7 +187,7 @@ namespace Game
                 }
             }
 
-            _serverTicks = GameTime.GetGameTimeMS();
+            _serverTicks = LoopTime.RelativeTime;
             _currentChecks.Clear();
 
             // Build check request
@@ -340,7 +340,7 @@ namespace Game
             Log.outDebug(LogFilter.Warden, "Handle data");
 
             _dataSent = false;
-            _clientResponseTimer = 0;
+            _clientResponseTimer = TimeSpan.Zero;
 
             ushort Length = buff.ReadUInt16();
             uint Checksum = buff.ReadUInt32();
@@ -365,10 +365,10 @@ namespace Game
                     return;
                 }
 
-                uint newClientTicks = buff.ReadUInt32();
+                RelativeTime newClientTicks = (RelativeTime)buff.ReadUInt32();
 
-                uint ticksNow = GameTime.GetGameTimeMS();
-                uint ourTicks = newClientTicks + (ticksNow - _serverTicks);
+                RelativeTime ticksNow = LoopTime.RelativeTime;
+                RelativeTime ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
                 Log.outDebug(LogFilter.Warden, $"ServerTicks {ticksNow}");         // Now
                 Log.outDebug(LogFilter.Warden, $"RequestTicks {_serverTicks}");    // At request
@@ -470,8 +470,8 @@ namespace Game
             }
 
             // Set hold off timer, minimum timer should at least be 1 second
-            uint holdOff = (uint)WorldConfig.Values[WorldCfg.WardenClientCheckHoldoff].Int32;
-            _checkTimer = (holdOff < 1 ? 1 : holdOff) * Time.InMilliseconds;
+            TimeSpan holdOff = WorldConfig.Values[WorldCfg.WardenClientCheckHoldoff].TimeSpan;
+            _checkTimer = holdOff < (Seconds)1 ? (Seconds)1 : holdOff;
         }
     }
 

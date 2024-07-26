@@ -446,7 +446,7 @@ namespace Game.Entities
             if (_nextGuid >= ObjectGuid.GetMaxCounter(_highGuid) - 1)
                 HandleCounterOverflow();
 
-            if (_highGuid == HighGuid.Creature || _highGuid == HighGuid.Vehicle 
+            if (_highGuid == HighGuid.Creature || _highGuid == HighGuid.Vehicle
                 || _highGuid == HighGuid.GameObject || _highGuid == HighGuid.Transport)
             {
                 CheckGuidTrigger(_nextGuid);
@@ -476,8 +476,8 @@ namespace Game.Entities
                 && guidlow > WorldConfig.Values[WorldCfg.RespawnGuidWarnLevel].Int64)
             {
                 Global.WorldMgr.TriggerGuidWarning();
+            }
         }
-    }
     }
 
     class ObjectGuidFactory

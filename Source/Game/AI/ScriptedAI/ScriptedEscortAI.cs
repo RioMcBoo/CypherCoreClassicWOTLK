@@ -15,8 +15,8 @@ namespace Game.AI
     {
         public EscortAI(Creature creature) : base(creature)
         {
-            _pauseTimer = TimeSpan.FromSeconds(2.5);
-            _playerCheckTimer = 1000;
+            _pauseTimer = (Milliseconds)2500;
+            _playerCheckTimer = (Seconds)1;
             _maxPlayerDistance = 100;
             _activeAttacker = true;
             _despawnAtEnd = true;
@@ -104,7 +104,7 @@ namespace Game.AI
                 SetCombatMovement(true);
 
             //add a small delay before going to first waypoint, normal in near all cases
-            _pauseTimer = TimeSpan.FromSeconds(2);
+            _pauseTimer = (Seconds)2;
 
             if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
@@ -159,8 +159,8 @@ namespace Game.AI
                         {
                             if (me.IsWithinDistInMap(member, GetMaxPlayerDistance()))
                                 return true;
+                        }
                     }
-                }
                 }
                 else if (me.IsWithinDistInMap(player, GetMaxPlayerDistance()))
                     return true;
@@ -169,13 +169,13 @@ namespace Game.AI
             return false;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             //Waypoint Updating
             if (HasEscortState(EscortState.Escorting) && !me.IsEngaged() 
                 && !HasEscortState(EscortState.Returning))
             {
-                if (_pauseTimer.TotalMilliseconds <= diff)
+                if (_pauseTimer <= diff)
                 {
                     if (!HasEscortState(EscortState.Paused))
                     {
@@ -226,12 +226,12 @@ namespace Game.AI
                             _resume = false;
                             MovementGenerator movementGenerator = me.GetMotionMaster().GetCurrentMovementGenerator(MovementSlot.Default);
                             if (movementGenerator != null)
-                                movementGenerator.Resume(0);
+                                movementGenerator.Resume(TimeSpan.Zero);
                         }
                     }
                 }
                 else
-                    _pauseTimer -= TimeSpan.FromMilliseconds(diff);
+                    _pauseTimer -= diff;
             }
 
 
@@ -259,7 +259,7 @@ namespace Game.AI
                         if (_instantRespawn)
                         {
                             if (!isEscort)
-                                me.DespawnOrUnsummon(TimeSpan.Zero, TimeSpan.FromSeconds(1));
+                                me.DespawnOrUnsummon(TimeSpan.Zero, (Seconds)1);
                             else
                                 me.GetMap().Respawn(SpawnObjectType.Creature, me.GetSpawnId());
                         }
@@ -269,7 +269,7 @@ namespace Game.AI
                         return;
                     }
 
-                    _playerCheckTimer = 1000;
+                    _playerCheckTimer = (Seconds)1;
                 }
                 else
                     _playerCheckTimer -= diff;
@@ -278,7 +278,7 @@ namespace Game.AI
             UpdateEscortAI(diff);
         }
 
-        public virtual void UpdateEscortAI(uint diff)
+        public virtual void UpdateEscortAI(TimeSpan diff)
         {
             UpdateVictim();
         }
@@ -293,7 +293,7 @@ namespace Game.AI
             if (moveType == MovementGeneratorType.Point)
             {
                 if (_pauseTimer == TimeSpan.Zero)
-                    _pauseTimer = TimeSpan.FromSeconds(2);
+                    _pauseTimer = (Seconds)2;
 
                 if (Id == EscortPointIds.LastPoint)
                 {
@@ -331,7 +331,7 @@ namespace Game.AI
                 {
                     _started = false;
                     _ended = true;
-                    _pauseTimer = TimeSpan.FromSeconds(1);
+                    _pauseTimer = (Seconds)1;
                 }
             }
         }
@@ -346,7 +346,7 @@ namespace Game.AI
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new(id, x, y, z, orientation, (uint)waitTime.TotalMilliseconds);
+            WaypointNode waypoint = new(id, x, y, z, orientation, (Milliseconds)waitTime);
             waypoint.MoveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
             _path.Nodes.Add(waypoint);
         }
@@ -388,7 +388,7 @@ namespace Game.AI
                     && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
                 {
                     me.SaveRespawnTime(me.GetRespawnDelay());
-            }
+                }
             }
 
             if (me.IsEngaged())
@@ -465,7 +465,7 @@ namespace Game.AI
                     me.GetMotionMaster().GetCurrentMovementGenerator(MovementSlot.Default);
 
                 if (movementGenerator != null)
-                    movementGenerator.Pause(0);
+                    movementGenerator.Pause(TimeSpan.Zero);
             }
             else
             {
@@ -495,7 +495,7 @@ namespace Game.AI
 
         ObjectGuid _playerGUID;
         TimeSpan _pauseTimer;
-        uint _playerCheckTimer;
+        TimeSpan _playerCheckTimer;
         EscortState _escortState;
         float _maxPlayerDistance;
 

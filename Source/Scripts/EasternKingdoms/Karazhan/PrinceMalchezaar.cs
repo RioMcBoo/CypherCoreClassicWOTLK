@@ -68,7 +68,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 
         public override void MoveInLineOfSight(Unit who) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -91,8 +91,8 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                 me.SetDisplayId(me.GetNativeDisplayId());
                 me.SetUninteractible(true);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(4), task => DoCast(me, SpellIds.Hellfire));
-                _scheduler.Schedule(TimeSpan.FromSeconds(170), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(4), task => DoCast(me, SpellIds.Hellfire));
+                _scheduler.Schedule(Time.SpanFromSeconds(170), task =>
                 {
                     Creature pMalchezaar = ObjectAccessor.GetCreature(me, Malchezaar);
 
@@ -135,16 +135,16 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
         ];
 
         InstanceScript instance;
-        uint EnfeebleTimer;
-        uint EnfeebleResetTimer;
-        uint ShadowNovaTimer;
-        uint SWPainTimer;
-        uint SunderArmorTimer;
-        uint AmplifyDamageTimer;
-        uint Cleave_Timer;
-        uint InfernalTimer;
-        uint AxesTargetSwitchTimer;
-        uint InfernalCleanupTimer;
+        TimeSpan EnfeebleTimer;
+        TimeSpan EnfeebleResetTimer;
+        TimeSpan ShadowNovaTimer;
+        TimeSpan SWPainTimer;
+        TimeSpan SunderArmorTimer;
+        TimeSpan AmplifyDamageTimer;
+        TimeSpan Cleave_Timer;
+        TimeSpan InfernalTimer;
+        TimeSpan AxesTargetSwitchTimer;
+        TimeSpan InfernalCleanupTimer;
 
         List<ObjectGuid> infernals = new();
         List<Vector2> positions = new();
@@ -164,16 +164,16 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 
         void Initialize()
         {
-            EnfeebleTimer = 30000;
-            EnfeebleResetTimer = 38000;
-            ShadowNovaTimer = 35500;
-            SWPainTimer = 20000;
-            AmplifyDamageTimer = 5000;
-            Cleave_Timer = 8000;
-            InfernalTimer = 40000;
-            InfernalCleanupTimer = 47000;
-            AxesTargetSwitchTimer = RandomHelper.URand(7500, 20000);
-            SunderArmorTimer = RandomHelper.URand(5000, 10000);
+            EnfeebleTimer = Time.SpanFromMilliseconds(30000);
+            EnfeebleResetTimer = Time.SpanFromMilliseconds(38000);
+            ShadowNovaTimer = Time.SpanFromMilliseconds(35500);
+            SWPainTimer = Time.SpanFromMilliseconds(20000);
+            AmplifyDamageTimer = Time.SpanFromMilliseconds(5000);
+            Cleave_Timer = Time.SpanFromMilliseconds(8000);
+            InfernalTimer = Time.SpanFromMilliseconds(40000);
+            InfernalCleanupTimer = Time.SpanFromMilliseconds(47000);
+            AxesTargetSwitchTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(7500, 20000));
+            SunderArmorTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(5000, 10000));
             phase = 1;
 
             for (byte i = 0; i < 5; ++i)
@@ -310,7 +310,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             }
         }
 
-        void SummonInfernal(uint diff)
+        void SummonInfernal(TimeSpan diff)
         {
             Vector2 point = Vector2.Zero;
             Position pos = null;
@@ -322,7 +322,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                 pos.Relocate(point.X, point.Y, 275.5f, RandomHelper.FRand(0.0f, (MathF.PI * 2)));
             }
 
-            Creature infernal = me.SummonCreature(MiscConst.NetherspiteInfernal, pos, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(3));
+            Creature infernal = me.SummonCreature(MiscConst.NetherspiteInfernal, pos, TempSummonType.TimedDespawn, (Minutes)3);
 
             if (infernal != null)
             {
@@ -339,15 +339,15 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             Talk(TextIds.SaySummon);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
 
-            if (EnfeebleResetTimer != 0 && EnfeebleResetTimer <= diff) // Let's not forget to reset that
+            if (EnfeebleResetTimer != default && EnfeebleResetTimer <= diff) // Let's not forget to reset that
             {
                 EnfeebleResetHealth();
-                EnfeebleResetTimer = 0;
+                EnfeebleResetTimer = default;
             }
             else EnfeebleResetTimer -= diff;
 
@@ -377,7 +377,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     //models
                     SetEquipmentSlots(false, MiscConst.EquipIdAxe, MiscConst.EquipIdAxe);
 
-                    me.SetBaseAttackTime(WeaponAttackType.OffAttack, (me.GetBaseAttackTime(WeaponAttackType.BaseAttack) * 150) / 100);
+                    me.SetBaseAttackTime(WeaponAttackType.OffAttack, (Milliseconds)(me.GetBaseAttackTime(WeaponAttackType.BaseAttack) * 150 / 100));
                     me.SetCanDualWield(true);
                 }
             }
@@ -385,7 +385,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             {
                 if (HealthBelowPct(30))
                 {
-                    InfernalTimer = 15000;
+                    InfernalTimer = Time.SpanFromMilliseconds(15000);
 
                     phase = 3;
 
@@ -399,7 +399,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                     for (byte i = 0; i < 2; ++i)
                     {
-                        Creature axe = me.SummonCreature(MiscConst.MalchezarsAxe, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), 0, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
+                        Creature axe = me.SummonCreature(MiscConst.MalchezarsAxe, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), 0, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
                         if (axe != null)
                         {
                             axe.SetUninteractible(true);
@@ -413,8 +413,8 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                         }
                     }
 
-                    if (ShadowNovaTimer > 35000)
-                        ShadowNovaTimer = EnfeebleTimer + 5000;
+                    if (ShadowNovaTimer > Time.SpanFromMilliseconds(35000))
+                        ShadowNovaTimer = EnfeebleTimer + Time.SpanFromMilliseconds(5000);
 
                     return;
                 }
@@ -422,14 +422,14 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                 if (SunderArmorTimer <= diff)
                 {
                     DoCastVictim(SpellIds.SunderArmor);
-                    SunderArmorTimer = RandomHelper.URand(10000, 18000);
+                    SunderArmorTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(10000, 18000));
                 }
                 else SunderArmorTimer -= diff;
 
                 if (Cleave_Timer <= diff)
                 {
                     DoCastVictim(SpellIds.Cleave);
-                    Cleave_Timer = RandomHelper.URand(6000, 12000);
+                    Cleave_Timer = Time.SpanFromMilliseconds(RandomHelper.IRand(6000, 12000));
                 }
                 else Cleave_Timer -= diff;
             }
@@ -437,7 +437,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             {
                 if (AxesTargetSwitchTimer <= diff)
                 {
-                    AxesTargetSwitchTimer = RandomHelper.URand(7500, 20000);
+                    AxesTargetSwitchTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(7500, 20000));
 
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                     if (target != null)
@@ -461,7 +461,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                     if (target != null)
                         DoCast(target, SpellIds.AmplifyDamage);
-                    AmplifyDamageTimer = RandomHelper.URand(20000, 30000);
+                    AmplifyDamageTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(20000, 30000));
                 }
                 else AmplifyDamageTimer -= diff;
             }
@@ -470,14 +470,14 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             if (InfernalTimer <= diff)
             {
                 SummonInfernal(diff);
-                InfernalTimer = phase == 3 ? 14500 : 44500u;    // 15 secs in phase 3, 45 otherwise
+                InfernalTimer = phase == 3 ? (Milliseconds)14500 : (Milliseconds)44500;    // 15 secs in phase 3, 45 otherwise
             }
             else InfernalTimer -= diff;
 
             if (ShadowNovaTimer <= diff)
             {
                 DoCastVictim(SpellIds.Shadownova);
-                ShadowNovaTimer = phase == 3 ? 31000 : uint.MaxValue;
+                ShadowNovaTimer = phase == 3 ? (Milliseconds)31000 : Milliseconds.MaxValue;
             }
             else ShadowNovaTimer -= diff;
 
@@ -494,7 +494,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     if (target != null)
                         DoCast(target, SpellIds.SwPain);
 
-                    SWPainTimer = 20000;
+                    SWPainTimer = (Milliseconds)20000;
                 }
                 else SWPainTimer -= diff;
             }
@@ -504,9 +504,9 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                 if (EnfeebleTimer <= diff)
                 {
                     EnfeebleHealthEffect();
-                    EnfeebleTimer = 30000;
-                    ShadowNovaTimer = 5000;
-                    EnfeebleResetTimer = 9000;
+                    EnfeebleTimer = (Milliseconds)30000;
+                    ShadowNovaTimer = (Milliseconds)5000;
+                    EnfeebleResetTimer = (Milliseconds)9000;
                 }
                 else EnfeebleTimer -= diff;
             }

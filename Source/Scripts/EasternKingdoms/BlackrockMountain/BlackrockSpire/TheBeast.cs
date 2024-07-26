@@ -30,22 +30,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Thebeast
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Flamebreak);
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule((Seconds)3, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                     DoCast(target, SpellIds.Immolate);
-                task.Repeat(TimeSpan.FromSeconds(8));
+                task.Repeat((Seconds)8);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(23), task =>
+            _scheduler.Schedule((Seconds)23, task =>
             {
                 DoCastVictim(SpellIds.Terrifyingroar);
-                task.Repeat(TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)20);
             });
         }
 
@@ -54,7 +54,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Thebeast
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

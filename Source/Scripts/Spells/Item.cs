@@ -769,7 +769,7 @@ namespace Scripts.Spells.Items
             _player = player;
         }
 
-        public override bool Execute(long time, uint diff)
+        public override bool Execute(TimeSpan time, TimeSpan diff)
         {
             if (!_player.HasAura(SpellPartyTime))
                 return true;
@@ -779,7 +779,7 @@ namespace Scripts.Spells.Items
             else
                 _player.HandleEmoteCommand(RandomHelper.RAND(Emote.OneshotApplaud, Emote.OneshotDancespecial, Emote.OneshotLaugh, Emote.OneshotCheer, Emote.OneshotChicken));
 
-            _player.m_Events.AddEventAtOffset(this, RandomHelper.RAND(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15)));
+            _player.m_Events.AddEventAtOffset(this, RandomHelper.RAND(Time.SpanFromSeconds(5), Time.SpanFromSeconds(10), Time.SpanFromSeconds(15)));
 
             return false; // do not delete re-added event in EventProcessor.Update
         }
@@ -795,7 +795,7 @@ namespace Scripts.Spells.Items
                 return;
 
             player.m_Events.AddEventAtOffset(new PartyTimeEmoteEvent(player), 
-                RandomHelper.RAND(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15)));
+                RandomHelper.RAND(Time.SpanFromSeconds(5), Time.SpanFromSeconds(10), Time.SpanFromSeconds(15)));
         }
 
         public override void Register()

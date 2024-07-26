@@ -8,6 +8,7 @@ using Game.PvP;
 using Game.Networking.Packets;
 using Game.Scripting;
 using System.Collections.Generic;
+using System;
 
 namespace Scripts.OutdoorPVP.HellfirePeninsula
 {
@@ -117,7 +118,7 @@ namespace Scripts.OutdoorPVP.HellfirePeninsula
             base.HandlePlayerLeaveZone(player, zone);
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
 

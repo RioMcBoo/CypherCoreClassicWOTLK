@@ -796,7 +796,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CasterGUID);
             _worldPacket.WriteInt32(SpellID);
             Visual.Write(_worldPacket);
-            _worldPacket.WriteUInt32(ChannelDuration);
+            _worldPacket.WriteInt32(ChannelDuration);
             _worldPacket.WriteBit(InterruptImmunities.HasValue);
             _worldPacket.WriteBit(HealPrediction.HasValue);
             _worldPacket.FlushBits();
@@ -813,7 +813,7 @@ namespace Game.Networking.Packets
         public SpellChannelStartInterruptImmunities? InterruptImmunities;
         public ObjectGuid CasterGUID;
         public SpellTargetedHealPrediction? HealPrediction;
-        public uint ChannelDuration;
+        public Milliseconds ChannelDuration;
     }
 
     public class SpellChannelUpdate : ServerPacket
@@ -827,7 +827,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid CasterGUID;
-        public int TimeRemaining;
+        public Milliseconds TimeRemaining;
     }
 
     class ResurrectRequest : ServerPacket
@@ -1027,7 +1027,7 @@ namespace Game.Networking.Packets
             MoveMsgID = _worldPacket.ReadUInt16();
             SpellID = _worldPacket.ReadInt32();
             Pitch = _worldPacket.ReadFloat();
-            Speed = _worldPacket.ReadFloat();
+            Speed = (Speed)_worldPacket.ReadFloat();
             FirePos = _worldPacket.ReadVector3();
             ImpactPos = _worldPacket.ReadVector3();
             bool hasStatus = _worldPacket.HasBit();
@@ -1042,10 +1042,10 @@ namespace Game.Networking.Packets
         public ushort MoveMsgID;
         public int SpellID;
         public float Pitch;
-        public float Speed;
+        public Speed Speed;
         public Vector3 FirePos;
         public Vector3 ImpactPos;
-        public MovementInfo Status;
+        public MovementInfo Status = new();
     }
 
     public class SpellDelayed : ServerPacket
@@ -1608,11 +1608,11 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             Pitch = data.ReadFloat();
-            Speed = data.ReadFloat();
+            Speed = (Speed)data.ReadFloat();
         }
         
         public float Pitch;
-        public float Speed;
+        public Speed Speed;
     }
 
     public struct SpellWeight
@@ -1705,7 +1705,7 @@ namespace Game.Networking.Packets
         public byte SendCastFlags;
         public SpellTargetData Target = new();
         public MissileTrajectoryRequest MissileTrajectory;
-        public MovementInfo MoveUpdate;
+        public MovementInfo MoveUpdate = new();
         public List<SpellWeight> Weight = new();
         public Array<SpellCraftingReagent> OptionalReagents = new(6);
         public Array<SpellCraftingReagent> RemovedModifications = new(6);
@@ -1767,11 +1767,11 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(TravelTime);
+            data.WriteInt32((Milliseconds)TravelTime);
             data.WriteFloat(Pitch);
         }
         
-        public uint TravelTime;
+        public TimeSpan TravelTime;
         public float Pitch;
     }
 
@@ -1864,7 +1864,7 @@ namespace Game.Networking.Packets
         public SpellCastVisual Visual;
         public SpellCastFlags CastFlags;
         public SpellCastFlagsEx CastFlagsEx;
-        public uint CastTime;
+        public RelativeTime CastTime;
         public List<ObjectGuid> HitTargets = new();
         public List<ObjectGuid> MissTargets = new();
         public List<SpellMissStatus> MissStatus = new();
@@ -1936,7 +1936,7 @@ namespace Game.Networking.Packets
 
     public class SpellCooldownStruct
     {
-        public SpellCooldownStruct(int spellId, uint forcedCooldown)
+        public SpellCooldownStruct(int spellId, Milliseconds forcedCooldown)
         {
             SrecID = spellId;
             ForcedCooldown = forcedCooldown;
@@ -1945,12 +1945,12 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(SrecID);
-            data.WriteUInt32(ForcedCooldown);
+            data.WriteInt32(ForcedCooldown);
             data.WriteFloat(ModRate);
         }
 
         public int SrecID;
-        public uint ForcedCooldown;
+        public Milliseconds ForcedCooldown;
         public float ModRate = 1.0f;
     }
 

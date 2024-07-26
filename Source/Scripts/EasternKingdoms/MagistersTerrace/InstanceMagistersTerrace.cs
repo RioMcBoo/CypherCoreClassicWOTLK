@@ -223,11 +223,13 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
             public override void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker)
             {
                 if (eventId == MiscConst.EventSpawnKalecgos)
+                {
                     if (GetCreature(DataTypes.Kalecgos) == null && _events.Empty())
-                        _events.ScheduleEvent(MiscConst.EventSpawnKalecgos, TimeSpan.FromMinutes(1));
+                        _events.ScheduleEvent(MiscConst.EventSpawnKalecgos, (Minutes)1);
+                }
             }
 
-            public override void Update(uint diff)
+            public override void Update(TimeSpan diff)
             {
                 _events.Update(diff);
 

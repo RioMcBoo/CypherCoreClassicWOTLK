@@ -613,12 +613,12 @@ namespace Game
             {
                 if (_player.GetUnitBeingMoved().GetGUID() != packet.ActiveMover)
                 {
-                    Log.outError(LogFilter.Network, 
+                    Log.outError(LogFilter.Network,
                         $"HandleSetActiveMover: incorrect mover guid: " +
                         $"mover is {packet.ActiveMover} and " +
                         $"should be {_player.GetUnitBeingMoved().GetGUID()},");
+                }
             }
-        }
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveKnockBackAck, Processing = PacketProcessing.ThreadSafe)]
@@ -866,15 +866,17 @@ namespace Game
             if (!_pendingTimeSyncRequests.ContainsKey(timeSyncResponse.SequenceIndex))
                 return;
 
-            uint serverTimeAtSent = _pendingTimeSyncRequests.LookupByKey(timeSyncResponse.SequenceIndex);
+            RelativeTime serverTimeAtSent = 
+                _pendingTimeSyncRequests.LookupByKey(timeSyncResponse.SequenceIndex);
+
             _pendingTimeSyncRequests.Remove(timeSyncResponse.SequenceIndex);
 
             // time it took for the request to travel to the client, for the client to process it and reply and for response to travel back to the server.
             // we are going to make 2 assumptions:
             // 1) we assume that the request processing time equals 0.
             // 2) we assume that the packet took as much time to travel from server to client than it took to travel from client to server.
-            uint roundTripDuration = Time.GetMSTimeDiff(serverTimeAtSent, timeSyncResponse.GetReceivedTime());
-            uint lagDelay = roundTripDuration / 2;
+            Milliseconds roundTripDuration = Time.Diff(serverTimeAtSent, timeSyncResponse.GetReceivedTime());
+            Milliseconds lagDelay = (Milliseconds)(roundTripDuration / 2);
 
             /*
             clockDelta = serverTime - clientTime
@@ -886,8 +888,9 @@ namespace Game
             using the following relation:
             serverTime = clockDelta + clientTime
             */
-            long clockDelta = serverTimeAtSent + lagDelay - (long)timeSyncResponse.ClientTime;
-            _timeSyncClockDeltaQueue.PushFront(Tuple.Create(clockDelta, roundTripDuration));
+
+            Milliseconds clockDelta = lagDelay - timeSyncResponse.ClientTime + serverTimeAtSent;
+            _timeSyncClockDeltaQueue.PushFront((clockDelta, roundTripDuration));
             ComputeNewClockDelta();
         }
 
@@ -897,35 +900,36 @@ namespace Game
             // to reduce the skew induced by dropped TCP packets that get resent.
 
             //accumulator_set < uint32, features < tag::mean, tag::median, tag::variance(lazy) > > latencyAccumulator;
-            List<uint> latencyList = new();
+            List<Milliseconds> latencyList = new();
             foreach (var pair in _timeSyncClockDeltaQueue)
-                latencyList.Add(pair.Item2);
+                latencyList.Add(pair.latency);
 
-            uint latencyMedian = (uint)Math.Round(latencyList.Average(p => p));//median(latencyAccumulator));
-            uint latencyStandardDeviation = (uint)Math.Round(Math.Sqrt(latencyList.Variance()));//variance(latencyAccumulator)));
+            Milliseconds latencyMedian = (Milliseconds)Math.Round(latencyList.Average(p => p));//median(latencyAccumulator));
+            Milliseconds latencyStandardDeviation = (Milliseconds)Math.Round(Math.Sqrt(latencyList.Variance()));//variance(latencyAccumulator)));
 
             //accumulator_set<long, features<tag::mean>> clockDeltasAfterFiltering;
-            List<long> clockDeltasAfterFiltering = new();
-            uint sampleSizeAfterFiltering = 0;
+            List<Milliseconds> clockDeltasAfterFiltering = new();
+            Milliseconds sumAfterFiltering = Milliseconds.Zero;
+
             foreach (var pair in _timeSyncClockDeltaQueue)
             {
-                if (pair.Item2 < latencyStandardDeviation + latencyMedian)
+                if (pair.latency < latencyStandardDeviation + latencyMedian)
                 {
                     clockDeltasAfterFiltering.Add(pair.Item1);
-                    sampleSizeAfterFiltering++;
+                    sumAfterFiltering += pair.clockDelta;
                 }
             }
 
-            if (sampleSizeAfterFiltering != 0)
+            if (!clockDeltasAfterFiltering.Empty())
             {
-                long meanClockDelta = (long)(Math.Round(clockDeltasAfterFiltering.Average()));
-                if (Math.Abs(meanClockDelta - _timeSyncClockDelta) > 25)
+                Milliseconds meanClockDelta = (Milliseconds)Math.Round(sumAfterFiltering / (double)clockDeltasAfterFiltering.Count);
+                if (Math.Abs(meanClockDelta - _timeSyncClockDelta) > (Milliseconds)25)
                     _timeSyncClockDelta = meanClockDelta;
             }
             else if (_timeSyncClockDelta == 0)
             {
                 var back = _timeSyncClockDeltaQueue.Back();
-                _timeSyncClockDelta = back.Item1;
+                _timeSyncClockDelta = back.clockDelta;
             }
         }
 
@@ -933,7 +937,7 @@ namespace Game
         void HandleMoveInitActiveMoverComplete(MoveInitActiveMoverComplete moveInitActiveMoverComplete)
         {
             _player.SetPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
-            _player.SetTransportServerTime(GameTime.GetGameTimeMS() - moveInitActiveMoverComplete.Ticks);
+            _player.SetTransportServerTime(LoopTime.RelativeTime - moveInitActiveMoverComplete.Ticks);
 
             _player.UpdateObjectVisibility(false);
         }

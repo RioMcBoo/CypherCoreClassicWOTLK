@@ -12,7 +12,7 @@ namespace Game.Spells
         // loads the extra item creation info from DB
         public static void LoadSkillExtraItemTable()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SkillExtraItemStorage.Clear();                            // need for reload
 
@@ -81,7 +81,7 @@ namespace Game.Spells
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell specialization definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell specialization definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public static bool CanCreateExtraItems(Player player, int spellId, ref float additionalChance, ref byte additionalMax)
@@ -128,7 +128,7 @@ namespace Game.Spells
         // loads the perfection proc info from DB
         public static void LoadSkillPerfectItemTable()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SkillPerfectItemStorage.Clear(); // reload capability
 
@@ -191,7 +191,8 @@ namespace Game.Spells
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell perfection definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} spell perfection definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public static bool CanCreatePerfectItem(Player player, int spellId, ref float perfectCreateChance, ref int perfectItemType)

@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.IO;
 using System.Collections.Generic;
 using Game.DataStorage;
+using System;
 
 namespace Game.Networking.Packets
 {
@@ -45,14 +46,14 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(TableHash);
             _worldPacket.WriteInt32(RecordID);
-            _worldPacket.WriteUInt32(Timestamp);
+            _worldPacket.WriteInt32((UnixTime)Timestamp);
             _worldPacket.WriteBits((byte)Status, 3);
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data.GetData());
         }
 
         public uint TableHash;
-        public uint Timestamp;
+        public ServerTime Timestamp;
         public int RecordID;
         public HotfixRecord.Status Status = HotfixRecord.Status.Invalid;
 

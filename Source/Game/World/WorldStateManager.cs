@@ -26,7 +26,7 @@ namespace Game
 
         public void LoadFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             {
                 //                                         0   1             2       3        4
@@ -141,10 +141,10 @@ namespace Game
 
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldStateTemplates.Count} world state templates {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldStateTemplates.Count} world state templates {Time.Diff(oldMSTime)} ms.");
             }
 
-            oldMSTime = Time.GetMSTime();
+            oldMSTime = Time.NowRelative;
 
             {
                 SQLResult result = DB.Characters.Query("SELECT Id, Value FROM world_state_value");
@@ -183,7 +183,7 @@ namespace Game
                     while (result.NextRow());
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {savedValueCount} saved world state values {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {savedValueCount} saved world state values {Time.Diff(oldMSTime)} ms.");
             }
         }
 
@@ -320,15 +320,25 @@ namespace Game
         public readonly int Int32;
         [FieldOffset(0)]
         public readonly bool Bool;
+        [FieldOffset(0)]
+        public readonly Milliseconds Milliseconds;
+        [FieldOffset(0)]
+        public readonly UnixTime UnixTime;
 
         public WorldStateValue(int value) { Int32 = value; }
         public WorldStateValue(bool value) { Bool = value; }
+        public WorldStateValue(Milliseconds value) { Milliseconds = value; }
+        public WorldStateValue(UnixTime value) { UnixTime = value; }
 
         public static implicit operator WorldStateValue(int value) => new(value);
         public static implicit operator WorldStateValue(bool value) => new(value);
+        public static implicit operator WorldStateValue(Milliseconds value) => new(value);
+        public static implicit operator WorldStateValue(UnixTime value) => new(value);
 
         public static implicit operator int(WorldStateValue value) => value.Int32;
         public static implicit operator bool(WorldStateValue value) => value.Bool;
+        public static implicit operator Milliseconds(WorldStateValue value) => value.Milliseconds;
+        public static implicit operator UnixTime(WorldStateValue value) => value.UnixTime;
 
         public override string ToString() => Int32.ToString();
         public override int GetHashCode() => Int32;

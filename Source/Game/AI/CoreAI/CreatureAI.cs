@@ -136,7 +136,7 @@ namespace Game.AI
             me.SendAIReaction(AiReaction.Alert);
 
             // Face the unit (stealthed player) and set distracted state for 5 seconds
-            me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
+            me.GetMotionMaster().MoveDistract((Seconds)5, me.GetAbsoluteAngle(who));
         }
 
         // adapted from logic in Spell:EffectSummonType
@@ -307,7 +307,7 @@ namespace Game.AI
                 me.SetTappedBy(null);
             
             me.ResetPlayerDamageReq();
-            me.SetLastDamagedTime(0);
+            me.SetLastDamagedTime(ServerTime.Zero);
             me.SetCannotReachTarget(false);
             me.DoNotReacquireSpellFocusTarget();
             me.SetTarget(ObjectGuid.Empty);
@@ -520,7 +520,7 @@ namespace Game.AI
         public virtual void OwnerAttacked(Unit target) { OnOwnerCombatInteraction(target); }
 
         // called when the corpse of this creature gets removed
-        public virtual void CorpseRemoved(long respawnDelay) { }
+        public virtual void CorpseRemoved(TimeSpan respawnDelay) { }
 
         public override void AttackStart(Unit victim)
         {
@@ -593,7 +593,7 @@ namespace Game.AI
         {
             target = AITarget.Self;
             condition = AICondition.Combat;
-            cooldown = TimeSpan.FromMilliseconds(SharedConst.AIDefaultCooldown);
+            cooldown = SharedConst.AIDefaultCooldown;
         }
 
         public AITarget target;

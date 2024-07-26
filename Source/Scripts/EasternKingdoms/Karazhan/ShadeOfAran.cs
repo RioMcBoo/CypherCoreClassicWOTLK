@@ -78,26 +78,26 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
         InstanceScript instance;
 
-        uint SecondarySpellTimer;
-        uint NormalCastTimer;
-        uint SuperCastTimer;
-        uint BerserkTimer;
-        uint CloseDoorTimer;                                  // Don't close the door right on aggro in case some people are still entering.
+        TimeSpan SecondarySpellTimer;
+        TimeSpan NormalCastTimer;
+        TimeSpan SuperCastTimer;
+        TimeSpan BerserkTimer;
+        TimeSpan CloseDoorTimer;    // Don't close the door right on aggro in case some people are still entering.
 
         SuperSpell LastSuperSpell;
 
-        uint FlameWreathTimer;
-        uint FlameWreathCheckTime;
+        TimeSpan FlameWreathTimer;
+        TimeSpan FlameWreathCheckTime;
         ObjectGuid[] FlameWreathTarget = new ObjectGuid[3];
         float[] FWTargPosX = new float[3];
         float[] FWTargPosY = new float[3];
 
         int CurrentNormalSpell;
-        uint ArcaneCooldown;
-        uint FireCooldown;
-        uint FrostCooldown;
+        TimeSpan ArcaneCooldown;
+        TimeSpan FireCooldown;
+        TimeSpan FrostCooldown;
 
-        uint DrinkInterruptTimer;
+        TimeSpan DrinkInterruptTimer;
 
         bool ElementalsSpawned;
         bool Drinking;
@@ -112,23 +112,23 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
         void Initialize()
         {
-            SecondarySpellTimer = 5000;
-            NormalCastTimer = 0;
-            SuperCastTimer = 35000;
-            BerserkTimer = 720000;
-            CloseDoorTimer = 15000;
+            SecondarySpellTimer = (Milliseconds)5000;
+            NormalCastTimer = (Milliseconds)0;
+            SuperCastTimer = (Milliseconds)35000;
+            BerserkTimer = (Milliseconds)720000;
+            CloseDoorTimer = (Milliseconds)15000;
 
             LastSuperSpell = (SuperSpell)(RandomHelper.Rand32() % 3);
 
-            FlameWreathTimer = 0;
-            FlameWreathCheckTime = 0;
+            FlameWreathTimer = (Milliseconds)0;
+            FlameWreathCheckTime = (Milliseconds)0;
 
-            CurrentNormalSpell = 0;
-            ArcaneCooldown = 0;
-            FireCooldown = 0;
-            FrostCooldown = 0;
+            CurrentNormalSpell = (Milliseconds)0;
+            ArcaneCooldown = (Milliseconds)0;
+            FireCooldown = (Milliseconds)0;
+            FrostCooldown = (Milliseconds)0;
 
-            DrinkInterruptTimer = 10000;
+            DrinkInterruptTimer = (Milliseconds)10000;
 
             ElementalsSpawned = false;
             Drinking = false;
@@ -194,41 +194,41 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
 
-            if (CloseDoorTimer != 0)
+            if (CloseDoorTimer != default)
             {
                 if (CloseDoorTimer <= diff)
                 {
                     instance.HandleGameObject(instance.GetGuidData(DataTypes.GoLibraryDoor), false);
-                    CloseDoorTimer = 0;
+                    CloseDoorTimer = default;
                 }
                 else CloseDoorTimer -= diff;
             }
 
             //Cooldowns for casts
-            if (ArcaneCooldown != 0)
+            if (ArcaneCooldown != default)
             {
                 if (ArcaneCooldown >= diff)
                     ArcaneCooldown -= diff;
-                else ArcaneCooldown = 0;
+                else ArcaneCooldown = default;
             }
 
-            if (FireCooldown != 0)
+            if (FireCooldown != default)
             {
                 if (FireCooldown >= diff)
                     FireCooldown -= diff;
-                else FireCooldown = 0;
+                else FireCooldown = default;
             }
 
-            if (FrostCooldown != 0)
+            if (FrostCooldown != default)
             {
                 if (FrostCooldown >= diff)
                     FrostCooldown -= diff;
-                else FrostCooldown = 0;
+                else FrostCooldown = default;
             }
 
             if (!Drinking && me.GetMaxPower(PowerType.Mana) != 0 && me.GetPowerPct(PowerType.Mana) < 20.0f)
@@ -244,7 +244,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                     DoCast(me, SpellIds.Conjure, new CastSpellExtraArgs(false));
                     DoCast(me, SpellIds.Drink, new CastSpellExtraArgs(false));
                     me.SetStandState(UnitStandStateType.Sit);
-                    DrinkInterruptTimer = 10000;
+                    DrinkInterruptTimer = (Milliseconds)10000;
                 }
             }
 
@@ -290,17 +290,17 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                     byte AvailableSpells = 0;
 
                     //Check for what spells are not on cooldown
-                    if (ArcaneCooldown == 0)
+                    if (ArcaneCooldown == default)
                     {
                         Spells[AvailableSpells] = SpellIds.Arcmissle;
                         ++AvailableSpells;
                     }
-                    if (FireCooldown == 0)
+                    if (FireCooldown == default)
                     {
                         Spells[AvailableSpells] = SpellIds.Fireball;
                         ++AvailableSpells;
                     }
-                    if (FrostCooldown == 0)
+                    if (FrostCooldown == default)
                     {
                         Spells[AvailableSpells] = SpellIds.Frostbolt;
                         ++AvailableSpells;
@@ -313,7 +313,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                         DoCast(target, CurrentNormalSpell);
                     }
                 }
-                NormalCastTimer = 1000;
+                NormalCastTimer = (Milliseconds)1000;
             }
             else NormalCastTimer -= diff;
 
@@ -330,7 +330,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                             DoCast(target, SpellIds.Chainsofice);
                         break;
                 }
-                SecondarySpellTimer = RandomHelper.URand(5000, 20000);
+                SecondarySpellTimer = (Milliseconds)RandomHelper.IRand(5000, 20000);
             }
             else SecondarySpellTimer -= diff;
 
@@ -374,8 +374,8 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                     case SuperSpell.Flame:
                         Talk(TextIds.SayFlamewreath);
 
-                        FlameWreathTimer = 20000;
-                        FlameWreathCheckTime = 500;
+                        FlameWreathTimer = (Milliseconds)20000;
+                        FlameWreathCheckTime = (Milliseconds)500;
 
                         FlameWreathTarget[0].Clear();
                         FlameWreathTarget[1].Clear();
@@ -387,7 +387,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                     case SuperSpell.Blizzard:
                         Talk(TextIds.SayBlizzard);
 
-                        Creature pSpawn = me.SummonCreature(CreatureIds.AranBlizzard, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(25));
+                        Creature pSpawn = me.SummonCreature(CreatureIds.AranBlizzard, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawn, (Seconds)25);
                         if (pSpawn != null)
                         {
                             pSpawn.SetFaction(me.GetFaction());
@@ -396,7 +396,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                         break;
                 }
 
-                SuperCastTimer = RandomHelper.URand(35000, 40000);
+                SuperCastTimer = (Milliseconds)RandomHelper.IRand(35000, 40000);
             }
             else SuperCastTimer -= diff;
 
@@ -408,7 +408,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 {
                     Creature unit = me.SummonCreature(
                         CreatureIds.WaterElemental, 0.0f, 0.0f, 0.0f, 0.0f, 
-                        TempSummonType.TimedDespawn, TimeSpan.FromSeconds(90));
+                        TempSummonType.TimedDespawn, (Seconds)90);
 
                     if (unit != null)
                     {
@@ -426,7 +426,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 {
                     Creature unit = me.SummonCreature(
                         CreatureIds.ShadowOfAran, 0.0f, 0.0f, 0.0f, 0.0f, 
-                        TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
+                        TempSummonType.TimedDespawnOutOfCombat, (Seconds)5);
 
                     if (unit != null)
                     {
@@ -437,16 +437,16 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
                 Talk(TextIds.SayTimeover);
 
-                BerserkTimer = 60000;
+                BerserkTimer = (Milliseconds)60000;
             }
             else BerserkTimer -= diff;
 
             //Flame Wreath check
-            if (FlameWreathTimer != 0)
+            if (FlameWreathTimer != default)
             {
                 if (FlameWreathTimer >= diff)
                     FlameWreathTimer -= diff;
-                else FlameWreathTimer = 0;
+                else FlameWreathTimer = default;
 
                 if (FlameWreathCheckTime <= diff)
                 {
@@ -464,12 +464,12 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                             FlameWreathTarget[i].Clear();
                         }
                     }
-                    FlameWreathCheckTime = 500;
+                    FlameWreathCheckTime = (Milliseconds)500;
                 }
                 else FlameWreathCheckTime -= diff;
             }
 
-            me.SetCanMelee(ArcaneCooldown != 0 && FireCooldown != 0 && FrostCooldown != 0);
+            me.SetCanMelee(ArcaneCooldown != default && FireCooldown != default && FrostCooldown != default);
         }
 
         public override void DamageTaken(Unit pAttacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
@@ -492,9 +492,9 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
             switch (CurrentNormalSpell)
             {
-                case SpellIds.Arcmissle: ArcaneCooldown = 5000; break;
-                case SpellIds.Fireball: FireCooldown = 5000; break;
-                case SpellIds.Frostbolt: FrostCooldown = 5000; break;
+                case SpellIds.Arcmissle: ArcaneCooldown = (Milliseconds)5000; break;
+                case SpellIds.Fireball: FireCooldown = (Milliseconds)5000; break;
+                case SpellIds.Frostbolt: FrostCooldown = (Milliseconds)5000; break;
             }
         }
 
@@ -518,7 +518,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 Talk(TextIds.SayAtiesh);
                 me.SetFacingTo(me.GetAbsoluteAngle(player));
                 me.ClearUnitState(UnitState.Moving);
-                me.GetMotionMaster().MoveDistract(7 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
+                me.GetMotionMaster().MoveDistract((Milliseconds)7000, me.GetAbsoluteAngle(who));
                 break;
             }
         }
@@ -540,16 +540,16 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(2000 + (RandomHelper.Rand32() % 3000)), task =>
+            _scheduler.Schedule(Time.SpanFromMilliseconds(2000 + (RandomHelper.Rand32() % 3000)), task =>
             {
                 DoCastVictim(SpellIds.Waterbolt);
-                task.Repeat(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5));
+                task.Repeat(Time.SpanFromSeconds(2), Time.SpanFromSeconds(5));
             });
         }
 
         public override void JustEngagedWith(Unit who) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

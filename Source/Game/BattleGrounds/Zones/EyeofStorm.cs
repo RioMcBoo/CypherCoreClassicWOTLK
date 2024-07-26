@@ -40,7 +40,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             _flagAssaultTimer = new(Misc.FlagAssaultTimer);
         }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() == BattlegroundStatus.InProgress)
             {
@@ -82,7 +82,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
                 if (gameObject != null)
                 {
                     gameObject.UseDoorOrButton();
-                    gameObject.DespawnOrUnsummon(TimeSpan.FromSeconds(3));
+                    gameObject.DespawnOrUnsummon((Seconds)3);
                 }
             }
 
@@ -632,8 +632,8 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
     #region Constants
     struct Misc
     {
-        public static TimeSpan PointsTickTime = TimeSpan.FromSeconds(2);
-        public static TimeSpan FlagAssaultTimer = TimeSpan.FromSeconds(30);
+        public static TimeSpan PointsTickTime = (Seconds)2;
+        public static TimeSpan FlagAssaultTimer = (Seconds)30;
         public static ushort FlagBrutalAssaultStackCount = 5;
 
         public const int EventStartBattle = 13180; // Achievement: Flurry

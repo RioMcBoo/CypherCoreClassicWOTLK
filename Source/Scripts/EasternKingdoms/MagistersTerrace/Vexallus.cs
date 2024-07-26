@@ -70,19 +70,19 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             Talk(TextIds.SayAggro);
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.ChainLightning);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 20.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.ArcaneShock);
-                task.Repeat(TimeSpan.FromSeconds(8));
+                task.Repeat(Time.SpanFromSeconds(8));
             });
         }
 
@@ -108,10 +108,10 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
                 {
                     _enraged = true;
                     _scheduler.CancelAll();
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1.2), task =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(1.2), task =>
                     {
                         DoCastVictim(SpellIds.Overload);
-                        task.Repeat(TimeSpan.FromSeconds(2));
+                        task.Repeat(Time.SpanFromSeconds(2));
                     });
                     return;
                 }
@@ -131,7 +131,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

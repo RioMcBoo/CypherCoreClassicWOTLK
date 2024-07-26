@@ -63,7 +63,7 @@ namespace Game.Arenas
 
         public void LoadArenaTeams()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Clean out the trash before loading anything
             DB.Characters.DirectExecute("DELETE FROM arena_team_member WHERE arenaTeamId NOT IN (SELECT arenaTeamId FROM arena_team)");       // One-time query
@@ -102,7 +102,7 @@ namespace Game.Arenas
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} arena teams in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} arena teams in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void SetNextArenaTeamId(int Id) { NextArenaTeamId = Id; }

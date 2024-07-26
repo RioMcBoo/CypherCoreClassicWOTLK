@@ -65,14 +65,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             base.JustEngagedWith(who);
             Talk(TextIds.SayAggro);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 1);
                 if (target != null)
                     DoCast(target, SpellIds.HatefulBolt);
-                task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(7), Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), MiscConst.GroupAstralFlare, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), MiscConst.GroupAstralFlare, task =>
             {
                 if (RandomHelper.randChance(50))
                     Talk(TextIds.SaySummon);
@@ -91,9 +91,9 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
                         DoCastSelf(SpellIds.Evocation);
                     }
                 }
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(10));
             });
-            _scheduler.Schedule(TimeSpan.FromMinutes(12), ScheduleTasks =>
+            _scheduler.Schedule((Minutes)12, ScheduleTasks =>
             {
                 Talk(TextIds.SayEnrage);
                 DoCastSelf(SpellIds.Berserk, new CastSpellExtraArgs(true));
@@ -105,12 +105,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             if (!HealthAbovePct(15) && !_infused)
             {
                 _infused = true;
-                _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task => DoCastSelf(SpellIds.ArcaneInfusion, new CastSpellExtraArgs(true)));
+                _scheduler.Schedule(Time.SpanFromMilliseconds(1), task => DoCastSelf(SpellIds.ArcaneInfusion, new CastSpellExtraArgs(true)));
                 _scheduler.CancelGroup(MiscConst.GroupAstralFlare);
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -128,7 +128,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 me.SetReactState(ReactStates.Aggressive);
                 me.SetUninteractible(false);
@@ -136,7 +136,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }

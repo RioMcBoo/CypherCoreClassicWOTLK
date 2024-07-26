@@ -51,7 +51,7 @@ namespace Game.Scenarios
         {
             _scenarioDBData.Clear();
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
             if (result.IsEmpty())
@@ -98,7 +98,8 @@ namespace Game.Scenarios
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} instance scenario entries in {1} ms", _scenarioDBData.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {_scenarioDBData.Count} instance scenario entries in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadDB2Data()
@@ -139,7 +140,7 @@ namespace Game.Scenarios
 
         public void LoadScenarioPOI()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             _scenarioPOIStore.Clear(); // need for reload case
 
@@ -217,7 +218,7 @@ namespace Game.Scenarios
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} scenario POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} scenario POI definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public List<ScenarioPOI> GetScenarioPOIs(int CriteriaTreeID)

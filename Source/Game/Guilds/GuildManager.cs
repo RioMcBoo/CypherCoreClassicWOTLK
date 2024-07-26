@@ -91,7 +91,7 @@ namespace Game
         public void LoadGuilds()
         {
             uint count = 0;
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Guilds Definitions...");
             {
@@ -118,13 +118,13 @@ namespace Game
                     count++;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild definitions in {Time.Diff(oldMSTime)} ms.");
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading guild ranks...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 // Delete orphaned guild rank entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gr FROM guild_rank gr LEFT JOIN guild g ON gr.guildId = g.guildId WHERE g.guildId IS NULL");
@@ -149,7 +149,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild ranks in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild ranks in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -157,7 +157,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading guild members...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 // Delete orphaned guild member entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gm FROM guild_member gm LEFT JOIN guild g ON gm.guildId = g.guildId WHERE g.guildId IS NULL");
@@ -185,7 +185,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild members in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -193,7 +193,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading bank tab rights...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 // Delete orphaned guild bank right entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gbr FROM guild_bank_right gbr LEFT JOIN guild g ON gbr.guildId = g.guildId WHERE g.guildId IS NULL");
@@ -218,7 +218,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} bank tab rights in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} bank tab rights in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -226,7 +226,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading guild event logs...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 DB.Characters.DirectExecute($"DELETE FROM guild_eventlog WHERE LogGuid > {GuildConst.EventLogMaxRecords}");
 
@@ -250,7 +250,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild event logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild event logs in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -258,7 +258,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading guild bank event logs...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 // Remove log entries that exceed the number of allowed entries per guild
                 DB.Characters.DirectExecute($"DELETE FROM guild_bank_eventlog WHERE LogGuid > {GuildConst.BankLogMaxRecords}");
@@ -283,7 +283,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank event logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank event logs in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -291,7 +291,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Guild News...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 DB.Characters.DirectExecute($"DELETE FROM guild_newslog WHERE LogGuid > {GuildConst.NewsLogMaxRecords}");
 
@@ -313,7 +313,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild new logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild new logs in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -321,7 +321,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading guild bank tabs...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 // Delete orphaned guild bank tab entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gbt FROM guild_bank_tab gbt LEFT JOIN guild g ON gbt.guildId = g.guildId WHERE g.guildId IS NULL");
@@ -346,7 +346,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tabs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tabs in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -354,7 +354,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Filling bank tabs with items...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 // Delete orphan guild bank items
                 DB.Characters.DirectExecute("DELETE gbi FROM guild_bank_item gbi LEFT JOIN guild g ON gbi.guildId = g.guildId WHERE g.guildId IS NULL");
@@ -380,14 +380,14 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tab items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tab items in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
             // 10. Load guild achievements
             Log.outInfo(LogFilter.ServerLoading, "Loading guild achievements...");
             {
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 var achievementCount = 0;
                 var criteriaCount = 0;
@@ -405,7 +405,7 @@ namespace Game
                     (achievementCount, criteriaCount) = pair.Value.GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {achievementCount} guild achievements and {criteriaCount} criterias in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {achievementCount} guild achievements and {criteriaCount} criterias in {Time.Diff(oldMSTime)} ms.");
             }
 
             // 11. Validate loaded guild data
@@ -414,7 +414,7 @@ namespace Game
                 count = 0;
                 var validCount = 0;
 
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 foreach (var guild in GuildStore.ToList())
                 {
@@ -430,13 +430,13 @@ namespace Game
                     count++;
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Validated {validCount} datas of {count} loaded guilds in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                Log.outInfo(LogFilter.ServerLoading, $"Validated {validCount} datas of {count} loaded guilds in {Time.Diff(oldMSTime)} ms.");
             }
         }
 
         public void LoadGuildRewards()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             //                                            0      1            2         3
             SQLResult result = DB.World.Query("SELECT ItemID, MinGuildRep, RaceMask, Cost FROM guild_rewards");
@@ -496,7 +496,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} guild reward definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild reward definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void ResetTimes(bool week)
@@ -504,7 +504,7 @@ namespace Game
             DB.Characters.Execute(CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBER_WITHDRAW));
 
             foreach (var guild in GuildStore.Values)
-                    guild.ResetTimes(week);
+                guild.ResetTimes(week);
         }
 
         public void SetNextGuildId(long Id) { NextGuildId = Id; }

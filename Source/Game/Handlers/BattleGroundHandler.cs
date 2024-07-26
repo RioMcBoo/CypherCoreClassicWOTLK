@@ -26,7 +26,7 @@ namespace Game
                 return;
 
             // Stop the npc if moving
-            uint pause = unit.GetMovementTemplate().GetInteractionPauseTimer();
+            Milliseconds pause = unit.GetMovementTemplate().GetInteractionPauseTimer();
             if (pause != 0)
                 unit.PauseMovement(pause);
             unit.SetHomePosition(unit.GetPosition());
@@ -175,7 +175,7 @@ namespace Game
                 BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
                 GroupQueueInfo ginfo = bgQueue.AddGroup(GetPlayer(), null, getQueueTeam(), bracketEntry, isPremade, 0, 0);
 
-                uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
+                TimeSpan avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
                 int queueSlot = GetPlayer().AddBattlegroundQueueId(bgQueueTypeId);
 
                 Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, GetPlayer(), queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, false);
@@ -196,7 +196,7 @@ namespace Game
 
                 BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
                 GroupQueueInfo ginfo = null;
-                uint avgTime = 0;
+                TimeSpan avgTime = TimeSpan.Zero;
 
                 if (err == 0)
                 {
@@ -271,7 +271,7 @@ namespace Game
             if (!GetPlayer().InBattlegroundQueue())
             {
                 Log.outDebug(LogFilter.Battleground, "CMSG_BATTLEFIELD_PORT {0} Slot: {1}, Unk: {2}, Time: {3}, AcceptedInvite: {4}. Player not in queue!",
-                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.Time, battlefieldPort.AcceptedInvite);
+                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.JoinTime, battlefieldPort.AcceptedInvite);
                 return;
             }
 
@@ -279,7 +279,7 @@ namespace Game
             if (bgQueueTypeId == default)
             {
                 Log.outDebug(LogFilter.Battleground, "CMSG_BATTLEFIELD_PORT {0} Slot: {1}, Unk: {2}, Time: {3}, AcceptedInvite: {4}. Invalid queueSlot!",
-                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.Time, battlefieldPort.AcceptedInvite);
+                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.JoinTime, battlefieldPort.AcceptedInvite);
                 return;
             }
 
@@ -290,14 +290,14 @@ namespace Game
             if (!bgQueue.GetPlayerGroupInfoData(GetPlayer().GetGUID(), out ginfo))
             {
                 Log.outDebug(LogFilter.Battleground, "CMSG_BATTLEFIELD_PORT {0} Slot: {1}, Unk: {2}, Time: {3}, AcceptedInvite: {4}. Player not in queue (No player Group Info)!",
-                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.Time, battlefieldPort.AcceptedInvite);
+                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.JoinTime, battlefieldPort.AcceptedInvite);
                 return;
             }
             // if action == 1, then instanceId is required
             if (ginfo.IsInvitedToBGInstanceGUID == 0 && battlefieldPort.AcceptedInvite)
             {
                 Log.outDebug(LogFilter.Battleground, "CMSG_BATTLEFIELD_PORT {0} Slot: {1}, Unk: {2}, Time: {3}, AcceptedInvite: {4}. Player is not invited to any bg!",
-                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.Time, battlefieldPort.AcceptedInvite);
+                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.JoinTime, battlefieldPort.AcceptedInvite);
                 return;
             }
 
@@ -317,7 +317,7 @@ namespace Game
             if (bg == null && battlefieldPort.AcceptedInvite)
             {
                 Log.outDebug(LogFilter.Battleground, "CMSG_BATTLEFIELD_PORT {0} Slot: {1}, Unk: {2}, Time: {3}, AcceptedInvite: {4}. Cant find BG with id {5}!",
-                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.Time, battlefieldPort.AcceptedInvite, ginfo.IsInvitedToBGInstanceGUID);
+                    GetPlayerInfo(), battlefieldPort.Ticket.Id, battlefieldPort.Ticket.Type, battlefieldPort.Ticket.JoinTime, battlefieldPort.AcceptedInvite, ginfo.IsInvitedToBGInstanceGUID);
                 return;
             }
             else if (bg != null)
@@ -482,7 +482,7 @@ namespace Game
                         continue;
 
                     BattlefieldStatusNeedConfirmation battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusNeedConfirmation(out battlefieldStatus, bg, GetPlayer(), i, GetPlayer().GetBattlegroundQueueJoinTime(bgQueueTypeId), Time.GetMSTimeDiff(Time.GetMSTime(), ginfo.RemoveInviteTime), bgQueueTypeId);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusNeedConfirmation(out battlefieldStatus, bg, GetPlayer(), i, GetPlayer().GetBattlegroundQueueJoinTime(bgQueueTypeId), Time.Diff(Time.Now, ginfo.RemoveInviteTime), bgQueueTypeId);
                     SendPacket(battlefieldStatus);
                 }
                 else
@@ -496,7 +496,7 @@ namespace Game
                     if (bracketEntry == null)
                         continue;
 
-                    uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
+                    TimeSpan avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
                     BattlefieldStatusQueued battlefieldStatus;
                     Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out battlefieldStatus, _player, i, _player.GetBattlegroundQueueJoinTime(bgQueueTypeId), bgQueueTypeId, avgTime, ginfo.Players.Count > 1);
                     SendPacket(battlefieldStatus);
@@ -557,7 +557,7 @@ namespace Game
 
             BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
 
-            uint avgTime = 0;
+            TimeSpan avgTime = TimeSpan.Zero;
             GroupQueueInfo ginfo = null;
 
             ObjectGuid errorGuid;

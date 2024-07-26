@@ -16,7 +16,7 @@ namespace Game.Loots
 
         public void LoadStorageFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             _lootItemStorage.Clear();
             uint count = 0;
 
@@ -53,7 +53,7 @@ namespace Game.Loots
                         ++count;
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.Diff(oldMSTime)} ms.");
                 }
                 else
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots.");
@@ -78,7 +78,7 @@ namespace Game.Loots
                         ++count;
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.Diff(oldMSTime)} ms.");
                 }
                 else
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item money");

@@ -8,6 +8,7 @@ using Game.Groups;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -41,7 +42,7 @@ namespace Game.PvP
 
         public virtual void HandlePlayerResurrects(Player player, int zone) { }
 
-        public virtual void Update(uint diff)
+        public virtual void Update(TimeSpan diff)
         {
             foreach (var (_, capturePoint) in m_capturePoints)
                 capturePoint.Update(diff);
@@ -271,7 +272,7 @@ namespace Game.PvP
             PvP = pvp;
         }
 
-        public virtual void Update(uint diff) { }
+        public virtual void Update(TimeSpan diff) { }
 
         public virtual bool HandleCustomSpell(Player player, int spellId, GameObject go)
         {

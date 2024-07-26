@@ -76,7 +76,7 @@ namespace Scripts.Events.ZalazaneFall
         public npc_tiger_matriarch_credit(Creature creature) : base(creature)
         {
             SetCombatMovement(false);
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 List<Creature> tigers = me.GetCreatureListWithEntryInGrid(CreatureIds.TigerVehicle, 15.0f);
                 if (!tigers.Empty())
@@ -97,11 +97,11 @@ namespace Scripts.Events.ZalazaneFall
                     }
                 }
 
-                task.Repeat(TimeSpan.FromSeconds(5));
+                task.Repeat(Time.SpanFromSeconds(5));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -117,13 +117,13 @@ namespace Scripts.Events.ZalazaneFall
         public override void JustEngagedWith(Unit target)
         {
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(100), task =>
+            _scheduler.Schedule(Time.SpanFromMilliseconds(100), task =>
             {
                 DoCastVictim(SpellIds.Pounce);
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(30));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(50), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(50), task =>
             {
                 Unit tiger = ObjAccessor.GetUnit(me, _tigerGuid);
                 if (tiger != null)
@@ -195,7 +195,7 @@ namespace Scripts.Events.ZalazaneFall
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

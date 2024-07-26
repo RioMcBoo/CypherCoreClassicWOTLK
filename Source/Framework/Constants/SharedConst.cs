@@ -52,10 +52,10 @@ namespace Framework.Constants
         /// <summary>
         /// Lfg Const
         /// </summary>
-        public const uint LFGTimeRolecheck = 45;
-        public const uint LFGTimeBoot = 120;
-        public const uint LFGTimeProposal = 45;
-        public const uint LFGQueueUpdateInterval = 15 * Time.InMilliseconds;
+        public static readonly TimeSpan LFGTimeRolecheck = (Seconds)45;
+        public static readonly TimeSpan LFGTimeBoot = (Seconds)120;
+        public static readonly TimeSpan LFGTimeProposal = (Seconds)45;
+        public static readonly TimeSpan LFGQueueUpdateInterval = (Seconds)15;
         public const int LFGSpellDungeonCooldown = 71328;
         public const int LFGSpellDungeonDeserter = 71041;
         public const int LFGSpellLuckOfTheDraw = 72221;
@@ -134,19 +134,20 @@ namespace Framework.Constants
         /// <summary>
         /// Calendar Const
         /// </summary>
-        public const uint CalendarMaxEvents = 30;
-        public const uint CalendarMaxGuildEvents = 100;
-        public const uint CalendarMaxInvites = 100;
-        public const uint CalendarCreateEventCooldown = 5;
-        public const uint CalendarOldEventsDeletionTime = 1 * Time.Month;
-        public const uint CalendarDefaultResponseTime = 946684800; // 01/01/2000 00:00:00
+        public const int CalendarMaxEvents = 30;
+        public const int CalendarMaxGuildEvents = 100;
+        public const int CalendarMaxInvites = 100;
+        public static readonly TimeSpan CalendarCreateEventCooldown = (Seconds)5;
+        public static readonly TimeSpan CalendarOldEventsDeletionTime = (Days)30;
+        /// <summary> 01/01/2000 00:00:00 - (946684800 - unix) </summary>
+        public static readonly DateTime CalendarDefaultResponseTime = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
         /// <summary>
         /// Misc Const
         /// </summary>
         public const Locale DefaultLocale = Locale.enUS;
         public const int MaxAccountTutorialValues = 8;
-        public const int MinAuctionTime = (12 * Time.Hour);
+        public static readonly TimeSpan MinAuctionTime = (Hours)12;
         public const int MaxConditionTargets = 3;
 
         /// <summary>
@@ -154,14 +155,14 @@ namespace Framework.Constants
         /// </summary>
         public const float BaseMinDamage = 1.0f;
         public const float BaseMaxDamage = 2.0f;
-        public const int BaseAttackTime = 2000;
+        public static readonly Milliseconds BaseAttackTime = (Milliseconds)2000;
         public const int MaxSummonSlot = 7;
         public const int MaxTotemSlot = 5;
         public const int MaxGameObjectSlot = 4;
         public const float MaxAggroRadius = 45.0f;  // yards
-        public const int MaxAggroResetTime = 10;
+        public static readonly TimeSpan MaxAggroResetTime = (Seconds)10;
         public const int MaxVehicleSeats = 8;
-        public const int AttackDisplayDelay = 200;
+        public static readonly Milliseconds AttackDisplayDelay = (Milliseconds)200;
         public const float MaxPlayerStealthDetectRange = 30.0f;               // max distance for detection targets by player
         public const int MaxEquipmentItems = 3;
 
@@ -182,15 +183,15 @@ namespace Framework.Constants
         public const int MaxCreatureNames = 4;
         public const int MaxCreatureModelIds = 4;
         public const int MaxTrainerspellAbilityReqs = 3;
-        public const int CreatureRegenInterval = 2 * Time.InMilliseconds;
-        public const int PetFocusRegenInterval = 4 * Time.InMilliseconds;
-        public const int CreatureNoPathEvadeTime = 5 * Time.InMilliseconds;
+        public static readonly Milliseconds CreatureRegenInterval = (Seconds)2;
+        public static readonly Milliseconds PetFocusRegenInterval = (Seconds)4;
+        public static readonly Milliseconds CreatureNoPathEvadeTime = (Seconds)5;
         public const int BoundaryVisualizeCreature = 15425;
         public const float BoundaryVisualizeCreatureScale = 0.25f;
         public const int BoundaryVisualizeStepSize = 1;
         public const int BoundaryVisualizeFailsafeLimit = 750;
         public const int BoundaryVisualizeSpawnHeight = 5;
-        public const uint AIDefaultCooldown = 5000;
+        public static readonly TimeSpan AIDefaultCooldown = (Seconds)5;
         public const uint CreatureTappersSoftCap = 5;
 
         /// <summary>
@@ -248,7 +249,7 @@ namespace Framework.Constants
         public const float DefaultVisibilityDistance = VisibilityDistanceNormal;  // default visible distance, 100 yards on continents
         public const float DefaultVisibilityInstance = 170.0f;                    // default visible distance in instances, 170 yards
         public const float DefaultVisibilityBGAreans = 533.0f;                    // default visible distance in BG/Arenas, roughly 533 yards
-        public const int DefaultVisibilityNotifyPeriod = 1000;
+        public static readonly Milliseconds DefaultVisibilityNotifyPeriod = (Milliseconds)1000;
 
         public const int WorldTrigger = 12999;
 
@@ -296,7 +297,7 @@ namespace Framework.Constants
             9, 10, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, 21, -1, 23, 24, 25, 26, 27, 28,
             29, 30, 31, -1, 11, 12, 13, 14
-        ];               
+        ];
 
         public static SkillType SkillByQuestSort(int sort)
         {
@@ -441,7 +442,7 @@ namespace Framework.Constants
         ptBR = 10,
         itIT = 11,
         Total = 12,
-        
+
         AllLanguages = -1,
     }
 
@@ -683,7 +684,7 @@ namespace Framework.Constants
         Druid = 1 << (Class.Druid - 1),
         DemonHunter = 1 << (Class.DemonHunter - 1),
         Evoker = 1 << (Class.Monk - 1),
-        Adventurer = 1 << (Class.Adventurer - 1),        
+        Adventurer = 1 << (Class.Adventurer - 1),
 
         //Helpers
         Creatures = Warrior | Paladin | Rogue | Mage,
@@ -710,7 +711,7 @@ namespace Framework.Constants
         Druid = Class.Druid,
         DemonHunter = Class.DemonHunter,
         Evoker = Class.Evoker,
-        Adventurer = Class.Adventurer,        
+        Adventurer = Class.Adventurer,
         Item1 = -1,
         Consumable = -2,
         Gem1 = -3,
@@ -807,7 +808,7 @@ namespace Framework.Constants
         MagharOrc = 1 << 13,
         MechaGnome = 1 << 14,
         DracthyrHorde = 1 << 15,
-        DracthyrAlliance = 1 << 16,        
+        DracthyrAlliance = 1 << 16,
 
         //Helpers
         Alliance = Human | Dwarf | NightElf | Gnome | Draenei |
@@ -828,7 +829,7 @@ namespace Framework.Constants
     public enum Expansion : sbyte
     {
         Unk = -2,
-        LevelCurrent = -1,        
+        LevelCurrent = -1,
         Classic = 0,
         BurningCrusade = 1,
         WrathOfTheLichKing = 2,
@@ -1627,7 +1628,7 @@ namespace Framework.Constants
         AccPasschangesec,
         /// <summary cref="bool">bool</summary>
         AddonChannel,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         AhbotUpdateInterval,
         /// <summary cref="bool">bool</summary>
         AllTaxiPaths,
@@ -1653,9 +1654,9 @@ namespace Framework.Constants
         ArenaMaxRatingDifference,
         /// <summary cref="bool">bool</summary>
         ArenaQueueAnnouncerEnable,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         ArenaRatedUpdateTimer,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         ArenaRatingDiscardTimer,
         /// <summary cref="int">int</summary>
         ArenaSeasonId,
@@ -1679,17 +1680,17 @@ namespace Framework.Constants
         EnableAELoot,
         /// <summary cref="int">int</summary>
         AuctionLevelReq,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         AuctionReplicateDelay,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         AuctionSearchDelay,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         AuctionTaintedSearchDelay,
         /// <summary cref="bool">bool</summary>
         AutoBroadcast,
         /// <summary cref="int">int</summary>
         AutoBroadcastCenter,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         AutoBroadcastInterval,
         /// <summary cref="bool">bool</summary>
         BasemapLoadGrids,
@@ -1699,9 +1700,9 @@ namespace Framework.Constants
         BattlegroundInvitationType,
         /// <summary cref="bool">bool</summary>
         BattlegroundMapLoadGrids,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         BattlegroundPremadeGroupWaitForMatch,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         BattlegroundPrematureFinishTimer,
         /// <summary cref="bool">bool</summary>
         BattlegroundQueueAnnouncerEnable,
@@ -1721,7 +1722,7 @@ namespace Framework.Constants
         BgRewardWinnerConquestLast,
         /// <summary cref="int">int</summary>
         BgRewardWinnerHonorFirst,
-            /// <summary cref="int">int</summary>
+        /// <summary cref="int">int</summary>
         BgRewardWinnerHonorLast,
         /// <summary cref="bool">bool</summary>
         BgXpForKill,
@@ -1729,7 +1730,7 @@ namespace Framework.Constants
         BlackmarketEnabled,
         /// <summary cref="int">int</summary>
         BlackmarketMaxAuctions,
-        /// <summary cref="int">Hours</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Hours</summary>
         BlackmarketUpdatePeriod,
         /// <summary cref="bool">bool</summary>
         CacheDataQueries,
@@ -1769,7 +1770,7 @@ namespace Framework.Constants
         ChardeleteDeathKnightMinLevel,
         /// <summary cref="int">int</summary>
         ChardeleteDemonHunterMinLevel,
-        /// <summary cref="int">Days</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Days</summary>
         ChardeleteKeepDays,
         /// <summary cref="int">int</summary>
         ChardeleteMethod,
@@ -1791,9 +1792,9 @@ namespace Framework.Constants
         ChatFakeMessagePreventing,
         /// <summary cref="int">int</summary>
         ChatFloodMessageCount,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         ChatFloodMessageDelay,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         ChatFloodMuteTime,
         /// <summary cref="bool">bool</summary>
         ChatPartyRaidWarnings,
@@ -1811,7 +1812,7 @@ namespace Framework.Constants
         CheckGobjectLos,
         /// <summary cref="bool">bool</summary>
         CleanCharacterDb,
-        /// <summary cref="int">Hours</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Hours</summary>
         CleanOldMailTime,
         /// <summary cref="uint">uint</summary>
         ClientCacheVersion,
@@ -1822,39 +1823,39 @@ namespace Framework.Constants
         CommunityClubsEnabled,
         /// <summary cref="int">int</summary>
         Compression,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         CorpseDecayElite,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         CorpseDecayMinusMob,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         CorpseDecayNormal,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         CorpseDecayObsolete,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         CorpseDecayRare,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         CorpseDecayRareelite,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         CorpseDecayTrivial,
         /// <summary cref="bool">bool</summary>
         CreatureCheckInvalidPostion,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         CreatureFamilyAssistanceDelay,
         /// <summary cref="float">float (yards)</summary>
         CreatureFamilyAssistanceRadius,
         /// <summary cref="float">float (yards)</summary>
         CreatureFamilyFleeAssistanceRadius,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         CreatureFamilyFleeDelay,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         CreaturePickpocketRefill,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="Milliseconds">Milliseconds</summary>
         CreatureStopForPlayer,
         /// <summary cref="int">int (DayOfWeek)</summary>
         CurrencyResetDay,
         /// <summary cref="int">int</summary>
         CurrencyResetHour,
-        /// <summary cref="int">Days</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Days</summary>
         CurrencyResetInterval,
         /// <summary cref="int">int</summary>
         DailyQuestResetTimeHour,
@@ -1891,13 +1892,13 @@ namespace Framework.Constants
         FactionBalanceLevelCheckDiff,
         /// <summary cref="bool">bool</summary>
         FeatureSystemBpayStoreEnabled,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         FeatureSystemCharacterUndeleteCooldown,
         /// <summary cref="bool">bool</summary>
         FeatureSystemCharacterUndeleteEnabled,
         /// <summary cref="bool">bool</summary>
         FeatureSystemWarModeEnabled,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         ForceShutdownThreshold,
         /// <summary cref="bool">bool</summary>
         GameobjectCheckInvalidPostion,
@@ -1905,7 +1906,7 @@ namespace Framework.Constants
         GameType,
         /// <summary cref="int">int</summary>
         GmChat,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         GmFreezeDuration,
         /// <summary cref="int">int</summary>
         GmLevelInGmList,
@@ -1933,7 +1934,7 @@ namespace Framework.Constants
         GuildNewsLogCount,
         /// <summary cref="int">int</summary>
         GuildResetHour,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         GuildSaveInterval,
         /// <summary cref="int">int</summary>
         HonorAfterDuel,
@@ -1943,24 +1944,23 @@ namespace Framework.Constants
         InstanceIgnoreRaid,
         /// <summary cref="bool">bool</summary>
         InstancemapLoadGrids,
-        /// <summary >NIY</summary>
         InstanceResetTimeHour,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         InstanceUnloadDelay,
         /// <summary cref="bool">bool</summary>
         InstancesResetAnnounce,
         InstantLogout,
         /// <summary cref="bool">bool</summary>
         InstantTaxi,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         IntervalChangeweather,
         /// <summary cref="Seconds">Milliseconds</summary>
         IntervalDisconnectTolerance,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         IntervalGridClean,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         IntervalMapUpdate,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="Milliseconds">Milliseconds</summary>
         IntervalSave,
         /// <summary cref="bool">bool</summary>
         IpBasedActionLogging,
@@ -1972,11 +1972,11 @@ namespace Framework.Constants
         ListenRangeTextemote,
         /// <summary cref="float">float (yards)</summary>
         ListenRangeYell,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         LogdbClearinterval,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         LogdbCleartime,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         MailDeliveryDelay,
         /// <summary cref="int">int</summary>
         MailLevelReq,
@@ -2025,7 +2025,7 @@ namespace Framework.Constants
         Numthreads,
         /// <summary cref="bool">bool</summary>
         OffhandCheckAtSpellUnlearn,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         PacketSpoofBanduration,
         /// <summary cref="int">int</summary>
         PacketSpoofBanmode,
@@ -2044,9 +2044,9 @@ namespace Framework.Constants
         PortInstance,
         /// <summary cref="int">int</summary>
         PortWorld,
-        /// <summary cref="int">Days</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Days</summary>
         PreserveCustomChannelDuration,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         PreserveCustomChannelInterval,
         /// <summary cref="bool">bool</summary>
         PreserveCustomChannels,
@@ -2252,9 +2252,9 @@ namespace Framework.Constants
         ResetScheduleHour,
         /// <summary cref="bool">bool</summary>
         RespawnDynamicEscortNpc,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         RespawnDynamicMinimumCreature,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         RespawnDynamicMinimumGameObject,
         /// <summary cref="int">int</summary>
         RespawnDynamicMode,
@@ -2266,15 +2266,15 @@ namespace Framework.Constants
         RespawnGuidAlertLevel,
         /// <summary cref="long">long</summary>
         RespawnGuidWarnLevel,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         RespawnGuidWarningFrequency,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         RespawnMinCheckIntervalMs,
         /// <summary cref="int">int</summary>
         RespawnRestartQuietTime,
         /// <summary cref="bool">bool</summary>
         RestrictedLfgChannel,
-        /// <summary cref="int">Microseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Microseconds</summary>
         SessionAddDelay,
         /// <summary cref="bool">bool</summary>
         ShowBanInWorld,
@@ -2310,9 +2310,9 @@ namespace Framework.Constants
         SkillProspecting,
         /// <summary cref="int">int</summary>
         SkipCinematics,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         SocketTimeoutTime,
-        /// <summary cref="int">Milliseconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Milliseconds</summary>
         SocketTimeoutTimeActive,
         /// <summary cref="int">int</summary>
         StartAlliedRaceLevel,
@@ -2366,21 +2366,21 @@ namespace Framework.Constants
         TalentsInspecting,
         /// <summary cref="float">float (yards)</summary>
         ThreatRadius,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         TimeZoneOffset,
         /// <summary cref="int">int</summary>
         TradeLevelReq,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         UptimeUpdate,
         /// <summary cref="bool">bool</summary>
         VmapIndoorCheck,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         WardenClientResponseDelay,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Seconds</summary>
         WardenClientCheckHoldoff,
         /// <summary cref="int">int</summary>
         WardenClientFailAction,
-        /// <summary cref="int">Seconds</summary>
+        /// <summary cref="Seconds">Seconds</summary>
         WardenClientBanDuration,
         /// <summary cref="bool">bool</summary>
         WardenEnabled,
@@ -2394,11 +2394,11 @@ namespace Framework.Constants
         Weather,
         /// <summary cref="int">int (DayOfWeek)</summary>
         WeeklyQuestResetTimeWDay,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         WintergraspBattletime,
         /// <summary cref="bool">bool</summary>
         WintergraspEnable,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         WintergraspNobattletime,
         /// <summary cref="int">int</summary>
         WintergraspPlrMax,
@@ -2406,7 +2406,7 @@ namespace Framework.Constants
         WintergraspPlrMin,
         /// <summary cref="int">int</summary>
         WintergraspPlrMinLvl,
-        /// <summary cref="int">Minutes</summary>
+        /// <summary cref="TimeSpan">TimeSpan from Minutes</summary>
         WintergraspRestartAfterCrash,
         /// <summary cref="int">int</summary>
         WorldBossLevelDiff,

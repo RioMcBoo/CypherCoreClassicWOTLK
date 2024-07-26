@@ -51,8 +51,8 @@ namespace Game.Entities
         bool m_IsBGRandomWinner;
         public PvPInfo pvpInfo;
         int m_ArenaTeamIdInvited;
-        long m_lastHonorUpdateTime;
-        uint m_contestedPvPTimer;
+        RealmTime m_lastHonorUpdateTime;
+        Milliseconds m_contestedPvPTimer;
         bool _usePvpItemLevels;
         ObjectGuid _areaSpiritHealerGUID;
 
@@ -65,9 +65,9 @@ namespace Game.Entities
         GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
 
         Dictionary<int, int> m_recentInstances = new();
-        Dictionary<int, long> _instanceResetTimes = new();
+        Dictionary<int, ServerTime> _instanceResetTimes = new();
         int _pendingBindId;
-        uint _pendingBindTimer;
+        Milliseconds _pendingBindTimer;
         public bool m_InstanceValid;
 
         Difficulty m_dungeonDifficulty;
@@ -115,7 +115,7 @@ namespace Game.Entities
         List<Mail> m_mail = new();
         Dictionary<long, Item> mMitems = new();
         public byte unReadMails;
-        long m_nextMailDelivereTime;
+        ServerTime m_nextMailDelivereTime;
         public bool m_mailsUpdated;
 
         //Pets
@@ -126,7 +126,7 @@ namespace Game.Entities
         int m_lastpetnumber;
 
         // Player summoning
-        long m_summon_expire;
+        ServerTime m_summon_expire;
         WorldLocation m_summon_location;
         int m_summon_instanceId;
 
@@ -141,19 +141,19 @@ namespace Game.Entities
         bool m_canBlock;
         bool m_canTitanGrip;
         int m_titanGripPenaltySpellId;
-        uint m_deathTimer;
-        long m_deathExpireTime;
+        Milliseconds m_deathTimer;
+        ServerTime m_deathExpireTime;
         AttackSwingErr? m_swingErrorMsg;
-        DateTime m_regenInterruptTimestamp;
-        uint m_regenTimerCount;
-        uint m_foodEmoteTimerCount;
-        uint m_weaponChangeTimer;
+        ServerTime m_regenInterruptTimestamp;
+        Milliseconds m_regenTimerCount;
+        Milliseconds m_foodEmoteTimerCount;
+        Milliseconds m_weaponChangeTimer;
 
         //Quest
         List<int> m_timedquests = new();
         List<int> m_weeklyquests = new();
         List<int> m_monthlyquests = new();
-        Dictionary<int, Dictionary<int, long>> m_seasonalquests = new();
+        Dictionary<int, Dictionary<int, RealmTime>> m_seasonalquests = new();
         Dictionary<int, QuestStatusData> m_QuestStatus = new();
         MultiMap<(QuestObjectiveType Type, int ObjectID), QuestObjectiveStatusData> m_questObjectiveStatus = new();
         Dictionary<int, QuestSaveType> m_QuestStatusSave = new();
@@ -165,7 +165,7 @@ namespace Game.Entities
         bool m_WeeklyQuestChanged;
         bool m_MonthlyQuestChanged;
         bool m_SeasonalQuestChanged;
-        long m_lastDailyQuestTime;
+        ServerTime m_lastDailyQuestTime;
 
         CinematicManager _cinematicMgr;
 
@@ -183,10 +183,10 @@ namespace Game.Entities
         public PlayerData m_playerData;
         public ActivePlayerData m_activePlayerData;
 
-        long m_createTime;
+        ServerTime m_createTime;
         PlayerCreateMode m_createMode;
 
-        uint m_nextSave;
+        Milliseconds m_nextSave;
         byte m_cinematic;
 
         int m_movie;
@@ -207,7 +207,7 @@ namespace Game.Entities
         public bool IsDebugAreaTriggers { get; set; }
         int m_zoneUpdateId;
         int m_areaUpdateId;
-        uint m_zoneUpdateTimer;
+        Milliseconds m_zoneUpdateTimer;
 
         int m_ChampioningFaction;
         byte m_fishingSteps;
@@ -217,7 +217,7 @@ namespace Game.Entities
         int m_recall_instanceId;
         WorldLocation homebind = new();
         int homebindAreaId;
-        uint m_HomebindTimer;
+        Milliseconds m_HomebindTimer;
 
         ResurrectionData _resurrectionData;
 
@@ -230,26 +230,26 @@ namespace Game.Entities
 
         CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
         float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
-        int[] m_MirrorTimer = new int[3];
+        Milliseconds[] m_MirrorTimer = new Milliseconds[3];
 
         TimeTracker m_groupUpdateTimer;
 
         long m_GuildIdInvited;
         DeclinedName _declinedname;
         Runes m_runes = new();
-        uint m_hostileReferenceCheckTimer;
-        uint m_drunkTimer;
-        long m_logintime;
-        long m_Last_tick;
-        uint m_PlayedTimeTotal;
-        uint m_PlayedTimeLevel;
+        Milliseconds m_hostileReferenceCheckTimer;
+        Milliseconds m_drunkTimer;
+        ServerTime m_logintime;
+        ServerTime m_Last_tick;
+        Seconds m_PlayedTimeTotal;
+        Seconds m_PlayedTimeLevel;
 
         Dictionary<int, PlayerSpellState> m_traitConfigStates = new();
 
         Dictionary<byte, ActionButton> m_actionButtons = new();
         ObjectGuid m_playerSharingQuest;
         int m_sharedQuestId;
-        uint m_ingametime;
+        RelativeTime m_ingametime;
 
         PlayerCommandStates _activeCheats;
 
@@ -369,7 +369,7 @@ namespace Game.Entities
         public Dictionary<int, PlayerTalent>[] Talents = new Dictionary<int, PlayerTalent>[PlayerConst.MaxSpecializations];
         public int[][] Glyphs = new int[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
-        public long ResetTalentsTime;
+        public ServerTime ResetTalentsTime;
         public byte ActiveGroup;
         public byte BonusGroups;
     }
@@ -441,7 +441,7 @@ namespace Game.Entities
         public bool IsInHostileArea;               //> Marks if player is in an area which forces PvP flag
         public bool IsInNoPvPArea;                 //> Marks if player is in a sanctuary or friendly capital city
         public bool IsInFFAPvPArea;                //> Marks if player is in an FFAPvP area (such as Gurubashi Arena)
-        public long EndTimer;                    //> Time when player unflags himself for PvP (flag removed after 5 minutes)
+        public ServerTime EndTimer;                //> Time when player unflags himself for PvP (flag removed after 5 minutes)
     }
 
     public class DuelInfo
@@ -450,8 +450,8 @@ namespace Game.Entities
         public Player Initiator;
         public bool IsMounted;
         public DuelState State;
-        public long StartTime;
-        public long OutOfBoundsTime;
+        public ServerTime StartTime;
+        public ServerTime OutOfBoundsTime;
 
         public DuelInfo(Player opponent, Player initiator, bool isMounted)
         {
@@ -475,7 +475,7 @@ namespace Game.Entities
 
     public class EnchantDuration
     {
-        public EnchantDuration(Item _item = null, EnchantmentSlot _slot = EnchantmentSlot.Max, uint _leftduration = 0)
+        public EnchantDuration(Item _item = null, EnchantmentSlot _slot = EnchantmentSlot.Max, Milliseconds _leftduration = default)
         {
             item = _item;
             slot = _slot;
@@ -484,7 +484,7 @@ namespace Game.Entities
 
         public Item item;
         public EnchantmentSlot slot;
-        public uint leftduration;
+        public Milliseconds leftduration;
     }
 
     public class VoidStorageItem
@@ -548,7 +548,7 @@ namespace Game.Entities
     {
         public BattlegroundQueueTypeId bgQueueTypeId;
         public int invitedToInstance;
-        public uint joinTime;
+        public ServerTime joinTime;
         public bool mercenary;
     }
 
@@ -568,7 +568,7 @@ namespace Game.Entities
 
         public List<ObjectGuid> bgAfkReporter = new();
         public byte bgAfkReportedCount;
-        public long bgAfkReportedTimer;
+        public ServerTime bgAfkReportedTimer;
 
         public Team bgTeam;                          //< What side the player will be added to
 

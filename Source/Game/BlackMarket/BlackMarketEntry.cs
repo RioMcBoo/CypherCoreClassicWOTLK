@@ -6,6 +6,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game.BlackMarket
@@ -20,7 +21,7 @@ namespace Game.BlackMarket
             Item.ItemID = fields.Read<int>(2);
             Quantity = fields.Read<int>(3);
             MinBid = fields.Read<long>(4);
-            Duration = fields.Read<long>(5);
+            Duration = (Seconds)fields.Read<long>(5);
             Chance = fields.Read<float>(6);
 
             var bonusListIDsTok = new StringArray(fields.Read<string>(7), ' ');
@@ -63,20 +64,20 @@ namespace Game.BlackMarket
         public int SellerNPC;
         public int Quantity;
         public long MinBid;
-        public long Duration;
+        public TimeSpan Duration;
         public float Chance;
         public ItemInstance Item;
     }
 
     public class BlackMarketEntry
     {
-        public void Initialize(int marketId, long duration)
+        public void Initialize(int marketId, TimeSpan duration)
         {
             _marketId = marketId;
             _secondsRemaining = duration;
         }
 
-        public void Update(long newTimeOfUpdate)
+        public void Update(ServerTime newTimeOfUpdate)
         {
             _secondsRemaining = _secondsRemaining - (newTimeOfUpdate - Global.BlackMarketMgr.GetLastUpdate());
         }
@@ -86,21 +87,20 @@ namespace Game.BlackMarket
             return Global.BlackMarketMgr.GetTemplateByID(_marketId);
         }
 
-        public int GetSecondsRemaining()
+        public TimeSpan GetSecondsRemaining()
         {
-            var secondsRemaining = _secondsRemaining - (GameTime.GetGameTime() - Global.BlackMarketMgr.GetLastUpdate());
-            Cypher.Assert(secondsRemaining <= int.MaxValue);
-            return (int)secondsRemaining;
+            var secondsRemaining = _secondsRemaining - (LoopTime.ServerTime - Global.BlackMarketMgr.GetLastUpdate());
+            return secondsRemaining;
         }
 
-        long GetExpirationTime()
+        ServerTime GetExpirationTime()
         {
-            return GameTime.GetGameTime() + GetSecondsRemaining();
+            return LoopTime.ServerTime + GetSecondsRemaining();
         }
 
         public bool IsCompleted()
         {
-            return GetSecondsRemaining() <= 0;
+            return GetSecondsRemaining() <= TimeSpan.Zero;
         }
 
         public bool LoadFromDB(SQLFields fields)
@@ -117,7 +117,7 @@ namespace Game.BlackMarket
             }
 
             _currentBid = fields.Read<long>(1);
-            _secondsRemaining = (fields.Read<long>(2) - Global.BlackMarketMgr.GetLastUpdate());
+            _secondsRemaining = (ServerTime)(UnixTime64)fields.Read<long>(2) - Global.BlackMarketMgr.GetLastUpdate();
             _numBids = fields.Read<int>(3);
             _bidder = fields.Read<long>(4);
 
@@ -139,7 +139,7 @@ namespace Game.BlackMarket
 
             stmt.SetInt32(0, _marketId);
             stmt.SetInt64(1, _currentBid);
-            stmt.SetInt64(2, GetExpirationTime());
+            stmt.SetInt64(2, (UnixTime64)GetExpirationTime());
             stmt.SetInt32(3, _numBids);
             stmt.SetInt64(4, _bidder);
 
@@ -175,8 +175,8 @@ namespace Game.BlackMarket
             _currentBid = bid;
             ++_numBids;
 
-            if (GetSecondsRemaining() < 30 * Time.Minute)
-                _secondsRemaining += 30 * Time.Minute;
+            if (GetSecondsRemaining() < (Minutes)30)
+                _secondsRemaining += (Minutes)30;
 
             _bidder = player.GetGUID().GetCounter();
 
@@ -186,7 +186,7 @@ namespace Game.BlackMarket
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS);
 
             stmt.SetInt64(0, _currentBid);
-            stmt.SetInt64(1, GetExpirationTime());
+            stmt.SetInt64(1, (UnixTime64)GetExpirationTime());
             stmt.SetInt32(2, _numBids);
             stmt.SetInt64(3, _bidder);
             stmt.SetInt32(4, _marketId);
@@ -227,7 +227,7 @@ namespace Game.BlackMarket
         long _currentBid;
         int _numBids;
         long _bidder;
-        long _secondsRemaining;
+        TimeSpan _secondsRemaining;
         bool _mailSent;
     }
 }

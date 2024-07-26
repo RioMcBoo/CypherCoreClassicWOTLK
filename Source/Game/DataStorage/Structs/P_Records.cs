@@ -114,7 +114,7 @@ namespace Game.DataStorage
         public int[] ItemID = new int[4];
         public uint[] ItemCount = new uint[4];
         public ushort[] Explored = new ushort[2];
-        public uint[] Time = new uint[2];
+        private int[] _time = new int[2];
         public int[] AuraSpellID = new int[4];
         public byte[] AuraStacks = new byte[4];
         public ushort[] Achievement = new ushort[4];
@@ -135,6 +135,7 @@ namespace Game.DataStorage
         public PowerType PowerType => (PowerType)_powerType;
         public ChrSpecializationRole ChrSpecializationRole => (ChrSpecializationRole)_chrSpecializationRole;
         public ItemSubClassWeaponMask WeaponSubclassMask => (ItemSubClassWeaponMask)_weaponSubclassMask;
+        public WowTime Time(int index) => (WowTime)_time[index];
         #endregion
     }
 
@@ -159,7 +160,7 @@ namespace Game.DataStorage
         public int CenterPower;
         public int DefaultPower;
         public int DisplayModifier;
-        public int RegenInterruptTimeMS;
+        public int _regenInterruptTimeMS;
         public float RegenPeace;
         public float RegenCombat;
         private short _flags;
@@ -167,6 +168,7 @@ namespace Game.DataStorage
         #region Properties
         public PowerTypeFlags Flags => (PowerTypeFlags)_flags;
         public PowerType PowerTypeEnum => (PowerType)_powerTypeEnum;
+        public Milliseconds RegenInterruptTime => (Milliseconds)_regenInterruptTimeMS;
         #endregion
 
         #region Helpers

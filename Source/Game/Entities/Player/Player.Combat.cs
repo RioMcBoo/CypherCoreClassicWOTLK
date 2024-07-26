@@ -280,7 +280,7 @@ namespace Game.Entities
         {
             base.AtExitCombat();
             UpdatePotionCooldown();
-            m_regenInterruptTimestamp = GameTime.Now();
+            m_regenInterruptTimestamp = LoopTime.ServerTime;
         }
 
         public override float GetBlockPercent(int attackerLevel)
@@ -318,7 +318,7 @@ namespace Game.Entities
         public void RestoreHealthAfterDuel() { SetHealth(healthBeforeDuel); }
         public void RestoreManaAfterDuel() { SetPower(PowerType.Mana, manaBeforeDuel); }
 
-        void UpdateDuelFlag(long currTime)
+        void UpdateDuelFlag(ServerTime currTime)
         {
             if (duel != null && duel.State == DuelState.Countdown && duel.StartTime <= currTime)
             {
@@ -332,7 +332,7 @@ namespace Game.Entities
             }
         }
 
-        void CheckDuelDistance(long currTime)
+        void CheckDuelDistance(ServerTime currTime)
         {
             if (duel == null)
                 return;
@@ -342,11 +342,11 @@ namespace Game.Entities
             if (obj == null)
                 return;
 
-            if (duel.OutOfBoundsTime == 0)
+            if (duel.OutOfBoundsTime == ServerTime.Zero)
             {
                 if (!IsWithinDistInMap(obj, 50))
                 {
-                    duel.OutOfBoundsTime = currTime + 10;
+                    duel.OutOfBoundsTime = currTime + (Seconds)10;
                     SendPacket(new DuelOutOfBounds());
                 }
             }
@@ -354,7 +354,7 @@ namespace Game.Entities
             {
                 if (IsWithinDistInMap(obj, 40))
                 {
-                    duel.OutOfBoundsTime = 0;
+                    duel.OutOfBoundsTime = ServerTime.Zero;
                     SendPacket(new DuelInBounds());
                 }
                 else if (currTime >= duel.OutOfBoundsTime)
@@ -492,20 +492,21 @@ namespace Game.Entities
                 m_ExtraFlags &= ~PlayerExtraFlags.PVPDeath;
         }
 
-        public void SetContestedPvPTimer(uint newTime) { m_contestedPvPTimer = newTime; }
+        public void SetContestedPvPTimer(Milliseconds newTimer) { m_contestedPvPTimer = newTimer; }
 
         public void ResetContestedPvP()
         {
             ClearUnitState(UnitState.AttackPlayer);
             RemovePlayerFlag(PlayerFlags.ContestedPVP);
-            m_contestedPvPTimer = 0;
+            m_contestedPvPTimer = default;
         }
-        void UpdateAfkReport(long currTime)
+
+        void UpdateAfkReport(ServerTime currTime)
         {
             if (m_bgData.bgAfkReportedTimer <= currTime)
             {
                 m_bgData.bgAfkReportedCount = 0;
-                m_bgData.bgAfkReportedTimer = currTime + 5 * Time.Minute;
+                m_bgData.bgAfkReportedTimer = currTime + (Minutes)5;
             }
         }
 
@@ -514,7 +515,7 @@ namespace Game.Entities
             if (attackedPlayer != null && (attackedPlayer == this || (duel != null && duel.Opponent == attackedPlayer)))
                 return;
 
-            SetContestedPvPTimer(30000);
+            SetContestedPvPTimer((Seconds)30);
             if (!HasUnitState(UnitState.AttackPlayer))
             {
                 AddUnitState(UnitState.AttackPlayer);
@@ -534,7 +535,7 @@ namespace Game.Entities
             }
         }
         
-        public void UpdateContestedPvP(uint diff)
+        public void UpdateContestedPvP(TimeSpan diff)
         {
             if (m_contestedPvPTimer == 0 || IsInCombat())
                 return;
@@ -545,17 +546,17 @@ namespace Game.Entities
                 m_contestedPvPTimer -= diff;
         }
 
-        public void UpdatePvPFlag(long currTime)
+        public void UpdatePvPFlag(ServerTime currTime)
         {
             if (!IsPvP())
                 return;
 
-            if (pvpInfo.EndTimer == 0 || (currTime < pvpInfo.EndTimer + 300) || pvpInfo.IsHostile)
+            if (pvpInfo.EndTimer == ServerTime.Zero || currTime < pvpInfo.EndTimer + (Minutes)5 || pvpInfo.IsHostile)
                 return;
 
             if (pvpInfo.EndTimer <= currTime)
             {
-                pvpInfo.EndTimer = 0;
+                pvpInfo.EndTimer = ServerTime.Zero;
                 RemovePlayerFlag(PlayerFlags.PVPTimer);
             }
             
@@ -567,11 +568,11 @@ namespace Game.Entities
             if (!state || Override)
             {
                 SetPvP(state);
-                pvpInfo.EndTimer = 0;
+                pvpInfo.EndTimer = ServerTime.Zero;
             }
             else
             {
-                pvpInfo.EndTimer = GameTime.GetGameTime();
+                pvpInfo.EndTimer = LoopTime.ServerTime;
                 SetPvP(state);
             }
         }
@@ -609,13 +610,13 @@ namespace Game.Entities
 
             if (pvpInfo.IsHostile)                               // in hostile area
             {
-                if (!IsPvP() || pvpInfo.EndTimer != 0)
+                if (!IsPvP() || pvpInfo.EndTimer != ServerTime.Zero)
                     UpdatePvP(true, true);
             }
             else                                                    // in friendly area
             {
-                if (IsPvP() && !HasPlayerFlag(PlayerFlags.InPVP) && pvpInfo.EndTimer == 0)
-                    pvpInfo.EndTimer = GameTime.GetGameTime();                  // start toggle-off
+                if (IsPvP() && !HasPlayerFlag(PlayerFlags.InPVP) && pvpInfo.EndTimer == ServerTime.Zero)
+                    pvpInfo.EndTimer = LoopTime.ServerTime;                  // start toggle-off
             }
         }
 

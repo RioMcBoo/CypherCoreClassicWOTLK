@@ -145,7 +145,7 @@ namespace Game.Entities
 
                                 if (player != null)
                                     player.SendSysMessage(text);                                
-                                else
+                                else                                
                                     Log.outError(LogFilter.Spells, text);                                
                             }
                             return false;
@@ -164,9 +164,9 @@ namespace Game.Entities
                                 string text = $"Spell {spellInfo.Id} learn to invalid spell " +
                                     $"{spellEffectInfo.TriggerSpell}, and then...";
 
-                                if (player != null)
+                                if (player != null)                                
                                     player.SendSysMessage(text);                                
-                                else
+                                else                                
                                     Log.outError(LogFilter.Spells, text);                                
                             }
                             return false;
@@ -490,7 +490,7 @@ namespace Game.Entities
                 {
                     if (eventInfo.GetActionTarget() != null && !actor.IsHonorOrXPTarget(eventInfo.GetActionTarget()))
                         return false;
-            }
+                }
             }
 
             // check power requirement
@@ -688,7 +688,7 @@ namespace Game.Entities
         #region Loads
         public void LoadSpellRanks()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             Dictionary<int /*spell*/, int /*next*/> chains = new();
             List<int> hasPrev = new();
@@ -771,12 +771,12 @@ namespace Game.Entities
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {mSpellChains.Count} spell rank records in {Time.GetMSTimeDiffToNow(oldMSTime)}ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {mSpellChains.Count} spell rank records in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellRequired()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellsReqSpell.Clear();                                   // need for reload case
             mSpellReq.Clear();                                         // need for reload case
@@ -833,7 +833,7 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell required records in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell required records in {Time.Diff(oldMSTime)} ms.");
 
         }
 
@@ -879,7 +879,7 @@ namespace Game.Entities
 
         public void LoadSpellLearnSpells()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellLearnSpells.Clear();
 
@@ -1028,12 +1028,13 @@ namespace Game.Entities
                 ++dbc_count;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell learn spells, {1} found in Spell.dbc in {2} ms", count, dbc_count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} spell learn spells, {dbc_count} found in Spell.dbc in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellTargetPositions()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellTargetPositions.Clear();                                // need for reload case
 
@@ -1123,12 +1124,12 @@ namespace Game.Entities
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell teleport coordinates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell teleport coordinates in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellGroups()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellSpellGroup.Clear();                                  // need for reload case
             mSpellGroupSpell.Clear();
@@ -1204,12 +1205,12 @@ namespace Game.Entities
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell group definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell group definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellGroupStackRules()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellGroupStack.Clear();                                  // need for reload case
             mSpellSameEffectStack.Clear();
@@ -1254,10 +1255,10 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell group stack rules in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell group stack rules in {Time.Diff(oldMSTime)} ms.");
 
             count = 0;
-            oldMSTime = Time.GetMSTime();
+            oldMSTime = Time.NowRelative;
             Log.outInfo(LogFilter.ServerLoading, "Parsing SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT stack rules...");
 
             foreach (SpellGroup group_id in sameEffectGroups)
@@ -1348,19 +1349,20 @@ namespace Game.Entities
                         Log.outError(LogFilter.Sql,
                             $"SpellId {spellId} listed in `spell_group` with stack rule '3' " +
                             $"does not share aura assigned for group {group_id}");
-                }
+                    }
                 }
 
                 mSpellSameEffectStack[group_id] = auraTypes;
                 ++count;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Parsed {count} SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT stack rules in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Parsed {count} SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT stack rules in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellProcs()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellProcMap.Clear();                             // need for reload case
 
@@ -1414,7 +1416,7 @@ namespace Game.Entities
                     baseProcEntry.DisableEffectsMask = result.Read<uint>(13);
                     baseProcEntry.ProcsPerMinute = result.Read<float>(14);
                     baseProcEntry.Chance = result.Read<float>(15);
-                    baseProcEntry.Cooldown = result.Read<uint>(16);
+                    baseProcEntry.Cooldown = (Milliseconds)result.Read<int>(16);
                     baseProcEntry.Charges = result.Read<int>(17);
 
                     while (spellInfo != null)
@@ -1568,7 +1570,7 @@ namespace Game.Entities
                                     $"The `spell_proc` table entry for spellId {spellInfo.Id} " +
                                     $"has Attribute PROC_ATTR_REQ_SPELLMOD, " +
                                     $"but spell has no spell mods. Proc will not be triggered");
-                        }
+                            }
                         }
 
                         if ((procEntry.AttributesMask & ~ProcAttributes.AllAllowed) != 0)
@@ -1591,7 +1593,8 @@ namespace Game.Entities
                     }
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading,
+                    $"Loaded {count} spell proc conditions and data in {Time.Diff(oldMSTime)} ms.");
             }
             else
             {
@@ -1602,7 +1605,7 @@ namespace Game.Entities
             // This generates default procs to retain compatibility with previous proc system
             Log.outInfo(LogFilter.ServerLoading, "Generating spell proc data from SpellMap...");
             count = 0;
-            oldMSTime = Time.GetMSTime();
+            oldMSTime = Time.NowRelative;
 
             foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
             {
@@ -1762,12 +1765,13 @@ namespace Game.Entities
                 ++count;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Generated spell proc data for {0} spells in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Generated spell proc data for {count} spells in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellThreats()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellThreatMap.Clear();                                // need for reload case
 
@@ -1801,24 +1805,25 @@ namespace Game.Entities
                 count++;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SpellThreatEntries in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} SpellThreatEntries in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSkillLineAbilityMap()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSkillLineAbilityMap.Clear();
 
             foreach (var skill in CliDB.SkillLineAbilityStorage.Values)
                 mSkillLineAbilityMap.Add(skill.Spell, skill);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SkillLineAbility MultiMap Data in {1} ms", mSkillLineAbilityMap.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {mSkillLineAbilityMap.Count} SkillLineAbility MultiMap Data in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellPetAuras()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellPetAuraMap.Clear();                                  // need for reload case
 
@@ -1879,12 +1884,12 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell pet auras in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell pet auras in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellEnchantProcData()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellEnchantProcEventMap.Clear();                             // need for reload case
 
@@ -1921,12 +1926,12 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} enchant proc data definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} enchant proc data definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellLinked()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellLinkedMap.Clear();    // need for reload case
 
@@ -1963,8 +1968,8 @@ namespace Game.Entities
                                 $"The spell {Math.Abs(trigger)} Effect: " +
                                 $"{Math.Abs(effect)} listed in `spell_linked_spell` " +
                                 $"has same bp{spellEffectInfo.EffectIndex} like effect (possible hack)");
+                        }
                     }
-                }
                 }
 
                 if (!HasSpellInfo(Math.Abs(effect), Difficulty.None))
@@ -2012,12 +2017,12 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} linked spells in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} linked spells in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadPetLevelupSpellMap()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mPetLevelupSpellMap.Clear();                                   // need for reload case
 
@@ -2060,12 +2065,13 @@ namespace Game.Entities
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pet levelup and default spells for {1} families in {2} ms", count, family_count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} pet levelup and default spells for {family_count} families in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadPetDefaultSpells()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mPetDefaultSpellsMap.Clear();
 
@@ -2106,7 +2112,8 @@ namespace Game.Entities
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} summonable creature templates in {1} ms", countCreature, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {countCreature} summonable creature templates in {Time.Diff(oldMSTime)} ms.");
         }
 
         bool LoadPetDefaultSpells_helper(CreatureTemplate cInfo, PetDefaultSpellsEntry petDefSpells)
@@ -2161,7 +2168,7 @@ namespace Game.Entities
 
         public void LoadSpellAreas()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellAreaMap.Clear();                                  // need for reload case
             mSpellAreaForAreaMap.Clear();
@@ -2375,12 +2382,13 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell area requirements in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} spell area requirements in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellInfoStore()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mSpellInfoMap.Clear();
             var loadData = new Dictionary<(int Id, Difficulty difficulty), SpellInfoLoadHelper>();
@@ -2618,7 +2626,7 @@ namespace Game.Entities
                 mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value));
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo store in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void UnloadSpellInfoImplicitTargetConditionLists()
@@ -2630,7 +2638,7 @@ namespace Game.Entities
 
         public void LoadSpellInfoServerside()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             MultiMap<(int spellId, Difficulty difficulty), SpellEffectRecord> spellEffects = new();
 
@@ -2660,7 +2668,7 @@ namespace Game.Entities
                         effect.EffectAmplitude = effectsResult.Read<float>(4);
                         effect.EffectAttributes = (SpellEffectAttributes)effectsResult.Read<int>(5);
                         effect.EffectAura = (AuraType)effectsResult.Read<short>(6);
-                        effect.EffectAuraPeriod = effectsResult.Read<uint>(7);
+                        effect.EffectAuraPeriod = (Milliseconds)effectsResult.Read<int>(7);
                         effect.EffectBasePoints = effectsResult.Read<int>(8);
                         effect.EffectBonusCoefficient = effectsResult.Read<float>(9);
                         effect.EffectChainAmplitude = effectsResult.Read<float>(10);
@@ -2833,10 +2841,10 @@ namespace Game.Entities
                         spellInfo.ExcludeCasterAuraSpell = spellsResult.Read<int>(31);
                         spellInfo.ExcludeTargetAuraSpell = spellsResult.Read<int>(32);
                         spellInfo.CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(spellsResult.Read<int>(33));
-                        spellInfo.RecoveryTime = spellsResult.Read<uint>(34);
-                        spellInfo.CategoryRecoveryTime = spellsResult.Read<uint>(35);
-                        spellInfo.StartRecoveryCategory = spellsResult.Read<int>(36);
-                        spellInfo.StartRecoveryTime = spellsResult.Read<uint>(37);
+                        spellInfo.RecoveryTime = (Milliseconds)spellsResult.Read<int>(34);
+                        spellInfo.CategoryRecoveryTime = (Milliseconds)spellsResult.Read<int>(35);
+                        spellInfo.StartRecoveryCategory = (Milliseconds)spellsResult.Read<int>(36);
+                        spellInfo.StartRecoveryTime = (Milliseconds)spellsResult.Read<int>(37);
                         spellInfo.InterruptFlags = (SpellInterruptFlags)spellsResult.Read<uint>(38);
                         spellInfo.AuraInterruptFlags = (SpellAuraInterruptFlags)spellsResult.Read<uint>(39);
                         spellInfo.AuraInterruptFlags2 = (SpellAuraInterruptFlags2)spellsResult.Read<uint>(40);
@@ -2845,15 +2853,15 @@ namespace Game.Entities
                         spellInfo.ProcFlags = new ProcFlagsInit(spellsResult.Read<int>(43), spellsResult.Read<int>(44));
                         spellInfo.ProcChance = spellsResult.Read<int>(45);
                         spellInfo.ProcCharges = spellsResult.Read<int>(46);
-                        spellInfo.ProcCooldown = spellsResult.Read<uint>(47);
+                        spellInfo.ProcCooldown = (Milliseconds)spellsResult.Read<int>(47);
                         spellInfo.ProcBasePPM = spellsResult.Read<float>(48);
                         spellInfo.MaxLevel = spellsResult.Read<int>(49);
                         spellInfo.BaseLevel = spellsResult.Read<int>(50);
                         spellInfo.SpellLevel = spellsResult.Read<int>(51);
                         spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(spellsResult.Read<int>(52));
                         spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(spellsResult.Read<int>(53));
-                        spellInfo.Speed = spellsResult.Read<float>(54);
-                        spellInfo.LaunchDelay = spellsResult.Read<float>(55);
+                        spellInfo.Speed = new Speed(spellsResult.Read<float>(54));
+                        spellInfo.LaunchDelay = new Speed(spellsResult.Read<float>(55)).AsDelayMS; //TODO: Convert to int (ms)
                         spellInfo.StackAmount = spellsResult.Read<int>(56);
                         spellInfo.EquippedItemClass = (ItemClass)spellsResult.Read<int>(57);
                         spellInfo.EquippedItemSubClassMask = spellsResult.Read<int>(58);
@@ -2878,13 +2886,14 @@ namespace Game.Entities
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {mServersideSpellNames.Count} serverside spells {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {mServersideSpellNames.Count} serverside spells {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellInfoCustomAttributes()
         {
-            uint oldMSTime = Time.GetMSTime();
-            uint oldMSTime2 = oldMSTime;
+            RelativeTime oldMSTime = Time.NowRelative;
+            RelativeTime oldMSTime2 = oldMSTime;
 
             SQLResult result = DB.World.Query("SELECT entry, attributes FROM spell_custom_attr");
             if (result.IsEmpty())
@@ -2926,7 +2935,8 @@ namespace Game.Entities
                     ++count;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell custom attributes from DB in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime2));
+                Log.outInfo(LogFilter.ServerLoading, 
+                    $"Loaded {count} spell custom attributes from DB in {Time.Diff(oldMSTime2)} ms.");
             }
 
             List<int> talentSpells = new();
@@ -3266,10 +3276,10 @@ namespace Game.Entities
                 {
                     foreach (SpellInfo spellInfo in _GetSpellInfo(liquid.SpellID))
                         spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
-            }
+                }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo custom attributes in {Time.Diff(oldMSTime)} ms.");
         }
 
         void ApplySpellFix(int[] spellIds, Action<SpellInfo> fix)
@@ -3304,7 +3314,7 @@ namespace Game.Entities
 
         public void LoadSpellInfoCorrections()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Some spells have no amplitude set
             {
@@ -3324,7 +3334,7 @@ namespace Game.Entities
                 {
                     ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                     {
-                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
+                        spellEffectInfo.ApplyAuraPeriod = (Seconds)1;
                     });
                 });
 
@@ -3336,7 +3346,7 @@ namespace Game.Entities
                 {
                     ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                     {
-                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
+                        spellEffectInfo.ApplyAuraPeriod = (Seconds)1;
                     });
                 });
 
@@ -3345,7 +3355,7 @@ namespace Game.Entities
                 {
                     ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                     {
-                        spellEffectInfo.ApplyAuraPeriod = 5 * Time.InMilliseconds;
+                        spellEffectInfo.ApplyAuraPeriod = (Seconds)5;
                     });
                 });
 
@@ -3354,7 +3364,7 @@ namespace Game.Entities
                 {
                     ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                     {
-                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
+                        spellEffectInfo.ApplyAuraPeriod = (Seconds)1;
                     });
                 });
             }
@@ -3662,7 +3672,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.ApplyAuraPeriod = 3000;
+                    spellEffectInfo.ApplyAuraPeriod = (Seconds)3;
                 });
             });
 
@@ -3869,7 +3879,7 @@ namespace Game.Entities
                 44408  // Trained Rock Falcon/Hawk Hunting
              ], spellInfo =>
              {
-                 spellInfo.Speed = 0.0f;
+                 spellInfo.Speed = Speed.Zero;
              });
 
             // Summon Corpse Scarabs
@@ -3887,13 +3897,13 @@ namespace Game.Entities
                 37918  // Arcano-pince
             ], spellInfo =>
             {
-                spellInfo.RecoveryTime = 3000;
+                spellInfo.RecoveryTime = (Seconds)3;
             });
 
             // Jormungar Strike
             ApplySpellFix([56513], spellInfo =>
             {
-                spellInfo.RecoveryTime = 2000;
+                spellInfo.RecoveryTime = (Seconds)2;
             });
 
             ApplySpellFix([
@@ -3901,7 +3911,7 @@ namespace Game.Entities
                 56524  // Acid Breath
             ], spellInfo =>
             {
-                spellInfo.RecoveryTime = 6000;
+                spellInfo.RecoveryTime = (Seconds)6;
             });
 
             ApplySpellFix([
@@ -3910,7 +3920,7 @@ namespace Game.Entities
                 51752  // Stampy's Stompy-Stomp
             ], spellInfo =>
             {
-                spellInfo.RecoveryTime = 10000;
+                spellInfo.RecoveryTime = (Seconds)10;
             });
 
             ApplySpellFix([
@@ -3918,13 +3928,13 @@ namespace Game.Entities
                 54996  // Ice Slick (tooltip says 20s but sniffs say 12s)
             ], spellInfo =>
             {
-                spellInfo.RecoveryTime = 12000;
+                spellInfo.RecoveryTime = (Seconds)12;
             });
 
             // Signal Helmet to Attack
             ApplySpellFix([51748], spellInfo =>
             {
-                spellInfo.RecoveryTime = 15000;
+                spellInfo.RecoveryTime = (Seconds)15;
             });
 
             // Charge
@@ -3934,7 +3944,7 @@ namespace Game.Entities
                 37917  //Arcano-Cloak
             ], spellInfo =>
             {
-                spellInfo.RecoveryTime = 20000;
+                spellInfo.RecoveryTime = (Seconds)20;
             });
 
             // Summon Frigid Bones
@@ -4049,7 +4059,7 @@ namespace Game.Entities
             // Rocket Strike (Mimiron)
             ApplySpellFix([63036], spellInfo =>
             {
-                spellInfo.Speed = 0;
+                spellInfo.Speed = Speed.Zero;
             });
 
             // Magnetic Field (Mimiron)
@@ -4264,7 +4274,7 @@ namespace Game.Entities
             // Frost Bomb
             ApplySpellFix([69846], spellInfo =>
             {
-                spellInfo.Speed = 0.0f;    // This spell's summon happens instantly
+                spellInfo.Speed = Speed.Zero;    // This spell's summon happens instantly
             });
 
             // Chilled to the Bone
@@ -4520,7 +4530,7 @@ namespace Game.Entities
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
                     spellEffectInfo.ApplyAuraName = AuraType.ProcTriggerSpell;
-                    spellEffectInfo.ApplyAuraPeriod = 0;
+                    spellEffectInfo.ApplyAuraPeriod = Milliseconds.Zero;
                 });
                 spellInfo.ProcChance = 10;
             });
@@ -4740,12 +4750,12 @@ namespace Game.Entities
             if (properties != null) // Hungry Plaguehound
                 properties.Control = SummonCategory.Pet;
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo corrections in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo corrections in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellInfoSpellSpecificAndAuraState()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
             {
@@ -4754,12 +4764,13 @@ namespace Game.Entities
                 spellInfo._LoadAuraState();
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo SpellSpecific and AuraState in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded SpellInfo SpellSpecific and AuraState in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellInfoDiminishing()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
             {
@@ -4769,12 +4780,13 @@ namespace Game.Entities
                 spellInfo._LoadSpellDiminishInfo();
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo diminishing infos in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded SpellInfo diminishing infos in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSpellInfoImmunities()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
             {
@@ -4784,7 +4796,8 @@ namespace Game.Entities
                 spellInfo._LoadImmunityInfo();
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo immunity infos in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded SpellInfo immunity infos in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadPetFamilySpellsStore()
@@ -4824,7 +4837,7 @@ namespace Game.Entities
 
         public void LoadSpellTotemModel()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.World.Query("SELECT SpellID, RaceID, DisplayID from spell_totem_model");
             if (result.IsEmpty())
@@ -4870,7 +4883,8 @@ namespace Game.Entities
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell totem model records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} spell totem model records in {Time.Diff(oldMSTime)} ms.");
 
         }
         #endregion
@@ -5174,8 +5188,8 @@ namespace Game.Entities
         public uint DisableEffectsMask { get; set; }                            // bitmask
         public float ProcsPerMinute { get; set; }                              // if nonzero - Chance to proc is equal to value * aura caster's weapon speed / 60
         public float Chance { get; set; }                                     // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines Chance of proc to occur, not used if ProcsPerMinute set
-        public uint Cooldown { get; set; }                                   // if nonzero - cooldown in secs for aura proc, applied to aura
-        public int Charges { get; set; }                                   // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
+        public Milliseconds Cooldown { get; set; }                           // if nonzero - cooldown in secs for aura proc, applied to aura
+        public int Charges { get; set; }                                    // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
     }
 
     struct ServersideSpellName

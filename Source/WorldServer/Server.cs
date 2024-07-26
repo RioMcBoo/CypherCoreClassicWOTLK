@@ -34,12 +34,12 @@ namespace WorldServer
                 ExitNow();
 
             // Server startup begin
-            uint startupBegin = Time.GetMSTime();
+            ServerTime startupBegin = Time.Now.ToServerTime();
 
             // set server offline (not connectable)
             DB.Login.DirectExecute($"UPDATE realmlist SET flag = (flag & ~{(uint)RealmFlags.VersionMismatch}) | {(uint)RealmFlags.Offline} WHERE id = '{Global.WorldMgr.GetRealm().Id.Index}'");
 
-            Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
+            Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", (Seconds)10));
 
             Global.WorldMgr.SetInitialWorldSettings();
 
@@ -82,8 +82,8 @@ namespace WorldServer
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            uint startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
-            Log.outInfo(LogFilter.Server, "World initialized in {0} minutes {1} seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
+            TimeSpan startupDuration = Time.Diff(startupBegin);
+            Log.outInfo(LogFilter.Server, $"World initialized in {startupDuration.Minutes} minutes {startupDuration.Seconds} seconds.");
 
             //- Launch CliRunnable thread
             if (ConfigMgr.GetDefaultValue("Console.Enable", true))
@@ -98,7 +98,7 @@ namespace WorldServer
             {
                 // Shutdown starts here
                 Global.WorldMgr.KickAll();                                     // save and kick all players
-                Global.WorldMgr.UpdateSessions(1);                             // real players unload required UpdateSessions call
+                Global.WorldMgr.UpdateSessions((Milliseconds)1);               // real players unload required UpdateSessions call
 
                 // unload Battlegroundtemplates before different singletons destroyed
                 Global.BattlegroundMgr.DeleteAllBattlegrounds();
@@ -170,32 +170,45 @@ namespace WorldServer
 
         static void WorldUpdateLoop()
         {
-            int minUpdateDiff = ConfigMgr.GetDefaultValue("MinWorldUpdateTime", 1);
-            uint realPrevTime = Time.GetMSTime();
+            Milliseconds systemLimitSleepTime = (Milliseconds)1; // Thread.Sleep()'s limit
 
-            uint maxCoreStuckTime = ConfigMgr.GetDefaultValue("MaxCoreStuckTime", 60u) * 1000u;
-            uint halfMaxCoreStuckTime = maxCoreStuckTime / 2;
-            if (halfMaxCoreStuckTime == 0)
-                halfMaxCoreStuckTime = uint.MaxValue;
+            TimeSpan minUpdateDiff = ConfigMgr.GetDefaultValue("MinWorldUpdateTime", systemLimitSleepTime);
+            ServerTime lastUpdateTime = Time.Now.ToServerTime();
+
+            TimeSpan maxCoreStuckTime = ConfigMgr.GetDefaultValue("MaxCoreStuckTime", (Seconds)60);
+            TimeSpan halfMaxCoreStuckTime = maxCoreStuckTime / 2;
+            if (halfMaxCoreStuckTime == TimeSpan.Zero)
+                halfMaxCoreStuckTime = Milliseconds.MaxValue;
 
             while (!Global.WorldMgr.IsStopped)
             {
-                var realCurrTime = Time.GetMSTime();
+                ServerTime currentTime = Time.Now.ToServerTime();
 
-                uint diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
+                TimeSpan diff = Time.Diff(lastUpdateTime, currentTime);
                 if (diff < minUpdateDiff)
                 {
-                    uint sleepTime = (uint)(minUpdateDiff - diff);
+                    TimeSpan sleepTime = minUpdateDiff - diff;
                     if (sleepTime >= halfMaxCoreStuckTime)
-                        Log.outError(LogFilter.Server, $"WorldUpdateLoop() waiting for {sleepTime} ms with MaxCoreStuckTime set to {maxCoreStuckTime} ms");
+                    {
+                        Log.outError(LogFilter.Server,
+                            $"WorldUpdateLoop() waiting for {(Milliseconds)sleepTime} ms with MaxCoreStuckTime set to {(Milliseconds)maxCoreStuckTime} ms.");
+                    }
+
+                    if (sleepTime < systemLimitSleepTime)
+                    {
+                        sleepTime = systemLimitSleepTime;
+                    }
 
                     // sleep until enough time passes that we can update all timers
-                    Thread.Sleep(TimeSpan.FromMilliseconds(sleepTime));
+                    Thread.Sleep(sleepTime);
                     continue;
                 }
 
+                ///- Update the loop time
+                LoopTime.Update(currentTime);
+                Global.WorldMgr.UpdateShutDownMessage(currentTime);
                 Global.WorldMgr.Update(diff);
-                realPrevTime = realCurrTime;
+                lastUpdateTime = currentTime;
             }
         }
 

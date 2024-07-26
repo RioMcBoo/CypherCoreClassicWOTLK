@@ -1,58 +1,56 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace Game
 {
     public class UpdateTime
     {
-        uint[] _updateTimeDataTable = new uint[500];
-        uint _averageUpdateTime;
-        uint _totalUpdateTime;
-        uint _updateTimeTableIndex;
-        uint _maxUpdateTime;
-        uint _maxUpdateTimeOfLastTable;
-        uint _maxUpdateTimeOfCurrentTable;
+        Milliseconds[] _updateTimeDataTable = new Milliseconds[500];
+        Milliseconds _averageUpdateTime;
+        Milliseconds _totalUpdateTime;
+        int _updateTimeTableIndex;
+        Milliseconds _maxUpdateTime;
+        Milliseconds _maxUpdateTimeOfLastTable;
+        Milliseconds _maxUpdateTimeOfCurrentTable;
 
-        uint _recordedTime;
+        RelativeTime _recordedTime;
 
-        public uint GetAverageUpdateTime()
+        public Milliseconds GetAverageUpdateTime()
         {
             return _averageUpdateTime;
         }
 
-        public uint GetTimeWeightedAverageUpdateTime()
+        public Milliseconds GetTimeWeightedAverageUpdateTime()
         {
-            uint sum = 0, weightsum = 0;
-            foreach (uint diff in _updateTimeDataTable)
+            int sum = 0, weightsum = 0;
+            foreach (var diff in _updateTimeDataTable)
             {
                 sum += diff * diff;
                 weightsum += diff;
             }
 
             if (weightsum == 0)
-                return 0;
+                return Milliseconds.Zero;
 
-            return sum / weightsum;
+            return (Milliseconds)(sum / weightsum);
         }
 
-        public uint GetMaxUpdateTime()
+        public Milliseconds GetMaxUpdateTime()
         {
             return _maxUpdateTime;
         }
 
-        public uint GetMaxUpdateTimeOfCurrentTable()
+        public Milliseconds GetMaxUpdateTimeOfCurrentTable()
         {
-            return Math.Max(_maxUpdateTimeOfCurrentTable, _maxUpdateTimeOfLastTable);
+            return Time.Max(_maxUpdateTimeOfCurrentTable, _maxUpdateTimeOfLastTable);
         }
 
-        public uint GetLastUpdateTime()
+        public Milliseconds GetLastUpdateTime()
         {
             return _updateTimeDataTable[_updateTimeTableIndex != 0 ? _updateTimeTableIndex - 1 : _updateTimeDataTable.Length - 1u];
         }
 
-        public void UpdateWithDiff(uint diff)
+        public void Update(Milliseconds diff)
         {
             _totalUpdateTime = _totalUpdateTime - _updateTimeDataTable[_updateTimeTableIndex] + diff;
             _updateTimeDataTable[_updateTimeTableIndex] = diff;
@@ -67,27 +65,27 @@ namespace Game
             {
                 _updateTimeTableIndex = 0;
                 _maxUpdateTimeOfLastTable = _maxUpdateTimeOfCurrentTable;
-                _maxUpdateTimeOfCurrentTable = 0;
+                _maxUpdateTimeOfCurrentTable = Milliseconds.Zero;
             }
 
             if (_updateTimeDataTable[^1] != 0)
-                _averageUpdateTime = (uint)(_totalUpdateTime / _updateTimeDataTable.Length);
+                _averageUpdateTime = (Milliseconds)(_totalUpdateTime / _updateTimeDataTable.Length);
             else if (_updateTimeTableIndex != 0)
-                _averageUpdateTime = _totalUpdateTime / _updateTimeTableIndex;
+                _averageUpdateTime = (Milliseconds)(_totalUpdateTime / _updateTimeTableIndex);
         }
 
         public void RecordUpdateTimeReset()
         {
-            _recordedTime = Time.GetMSTime();
+            _recordedTime = LoopTime.RelativeTime;
         }
 
-        public void RecordUpdateTimeDuration(string text, uint minUpdateTime)
+        public void RecordUpdateTimeDuration(string text, Milliseconds minUpdateTime)
         {
-            uint thisTime = Time.GetMSTime();
-            uint diff = Time.GetMSTimeDiff(_recordedTime, thisTime);
+            RelativeTime thisTime = LoopTime.RelativeTime;
+            Milliseconds diff = Time.Diff(_recordedTime, thisTime);
 
             if (diff > minUpdateTime)
-                Log.outInfo(LogFilter.Misc, $"Recored Update Time of {text}: {diff}.");
+                Log.outInfo(LogFilter.Misc, $"Recorded Update Time of {text}: {diff}.");
 
             _recordedTime = thisTime;
         }
@@ -95,29 +93,29 @@ namespace Game
 
     public class WorldUpdateTime : UpdateTime
     {
-        uint _recordUpdateTimeInverval;
-        uint _recordUpdateTimeMin;
-        uint _lastRecordTime;
+        Milliseconds _recordUpdateTimeInverval;
+        Milliseconds _recordUpdateTimeMin;
+        RelativeTime _lastRecordTime;
 
         public void LoadFromConfig()
         {
-            _recordUpdateTimeInverval = WorldConfig.GetDefaultValue("RecordUpdateTimeDiffInterval", 60000u);
-            _recordUpdateTimeMin = WorldConfig.GetDefaultValue("MinRecordUpdateTimeDiff", 100u);
+            _recordUpdateTimeInverval = WorldConfig.GetDefaultValue("RecordUpdateTimeDiffInterval", (Milliseconds)60000);
+            _recordUpdateTimeMin = WorldConfig.GetDefaultValue("MinRecordUpdateTimeDiff", (Milliseconds)100);
         }
 
-        public void SetRecordUpdateTimeInterval(uint t)
+        public void SetRecordUpdateTimeInterval(Milliseconds interval)
         {
-            _recordUpdateTimeInverval = t;
+            _recordUpdateTimeInverval = interval;
         }
 
-        public void RecordUpdateTime(uint gameTimeMs, uint diff, uint sessionCount)
+        public void RecordUpdateTime(Milliseconds diff, int sessionCount)
         {
             if (_recordUpdateTimeInverval > 0 && diff > _recordUpdateTimeMin)
             {
-                if (Time.GetMSTimeDiff(_lastRecordTime, gameTimeMs) > _recordUpdateTimeInverval)
+                if (Time.Diff(_lastRecordTime, LoopTime.RelativeTime) > _recordUpdateTimeInverval)
                 {
                     Log.outDebug(LogFilter.Misc, $"Update time diff: {GetAverageUpdateTime()}. Players online: {sessionCount}.");
-                    _lastRecordTime = gameTimeMs;
+                    _lastRecordTime = LoopTime.RelativeTime;
                 }
             }
         }

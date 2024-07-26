@@ -178,7 +178,7 @@ namespace Game.DungeonFinding
             currentQueueStore.Remove(guid);
         }
 
-        public void AddQueueData(ObjectGuid guid, long joinTime, List<int> dungeons, Dictionary<ObjectGuid, LfgRoles> rolesMap)
+        public void AddQueueData(ObjectGuid guid, ServerTime joinTime, List<int> dungeons, Dictionary<ObjectGuid, LfgRoles> rolesMap)
         {
             QueueDataStore[guid] = new LfgQueueData(joinTime, dungeons, rolesMap);
             AddToQueue(guid);
@@ -189,32 +189,32 @@ namespace Game.DungeonFinding
             QueueDataStore.Remove(guid);
         }
 
-        public void UpdateWaitTimeAvg(int waitTime, int dungeonId)
+        public void UpdateWaitTimeAvg(TimeSpan waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesAvgStore[dungeonId];
             uint old_number = wt.number++;
-            wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
+            wt.time = (Seconds)((wt.time * old_number + (Seconds)waitTime) / wt.number);
         }
 
-        public void UpdateWaitTimeTank(int waitTime, int dungeonId)
+        public void UpdateWaitTimeTank(TimeSpan waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesTankStore[dungeonId];
             uint old_number = wt.number++;
-            wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
+            wt.time = (Seconds)((wt.time * old_number + (Seconds)waitTime) / wt.number);
         }
 
-        public void UpdateWaitTimeHealer(int waitTime, int dungeonId)
+        public void UpdateWaitTimeHealer(TimeSpan waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesHealerStore[dungeonId];
             uint old_number = wt.number++;
-            wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
+            wt.time = (Seconds)((wt.time * old_number + (Seconds)waitTime) / wt.number);
         }
 
-        public void UpdateWaitTimeDps(int waitTime, int dungeonId)
+        public void UpdateWaitTimeDps(TimeSpan waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesDpsStore[dungeonId];
             uint old_number = wt.number++;
-            wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
+            wt.time = (Seconds)((wt.time * old_number + (Seconds)waitTime) / wt.number);
         }
 
         void RemoveFromCompatibles(ObjectGuid guid)
@@ -538,7 +538,7 @@ namespace Game.DungeonFinding
             }
 
             // Create a new proposal
-            proposal.cancelTime = GameTime.GetGameTime() + SharedConst.LFGTimeProposal;
+            proposal.cancelTime = LoopTime.ServerTime + SharedConst.LFGTimeProposal;
             proposal.state = LfgProposalState.Initiating;
             proposal.leader = ObjectGuid.Empty;
             proposal.dungeonId = proposalDungeons.SelectRandom();
@@ -549,11 +549,11 @@ namespace Game.DungeonFinding
                 // Assing new leader
                 if (rolePair.Value.HasAnyFlag(LfgRoles.Leader))
                 {
-                    if (!leader || proposal.leader.IsEmpty() || Convert.ToBoolean(RandomHelper.IRand(0, 1)))
+                    if (!leader || proposal.leader.IsEmpty() || RandomHelper.IRand(0, 1) == 1)
                         proposal.leader = rolePair.Key;
                     leader = true;
                 }
-                else if (!leader && (proposal.leader.IsEmpty() || Convert.ToBoolean(RandomHelper.IRand(0, 1))))
+                else if (!leader && (proposal.leader.IsEmpty() || RandomHelper.IRand(0, 1) == 1))
                     proposal.leader = rolePair.Key;
 
                 // Assing player data and roles
@@ -582,14 +582,14 @@ namespace Game.DungeonFinding
             return LfgCompatibility.Match;
         }
 
-        public void UpdateQueueTimers(byte queueId, long currTime)
+        public void UpdateQueueTimers(byte queueId, ServerTime currTime)
         {
             Log.outDebug(LogFilter.Lfg, "Updating queue timers...");
             foreach (var itQueue in QueueDataStore)
             {
                 LfgQueueData queueinfo = itQueue.Value;
                 int dungeonId = queueinfo.dungeons.FirstOrDefault();
-                uint queuedTime = (uint)(currTime - queueinfo.joinTime);
+                Seconds queuedTime = (Seconds)(currTime - queueinfo.joinTime);
                 LfgRoles role = LfgRoles.None;
                 int waitTime = -1;
 
@@ -642,13 +642,13 @@ namespace Game.DungeonFinding
             }
         }
 
-        public long GetJoinTime(ObjectGuid guid)
+        public ServerTime GetJoinTime(ObjectGuid guid)
         {
             var queueData = QueueDataStore.LookupByKey(guid);
             if (queueData != null)
                 return queueData.joinTime;
 
-            return 0;
+            return ServerTime.Zero;
         }
 
         public string DumpQueueInfo()
@@ -766,13 +766,13 @@ namespace Game.DungeonFinding
     {
         public LfgQueueData()
         {
-            joinTime = GameTime.GetGameTime();
+            joinTime = LoopTime.ServerTime;
             tanks = SharedConst.LFGTanksNeeded;
             healers = SharedConst.LFGHealersNeeded;
             dps = SharedConst.LFGDPSNeeded;
         }
 
-        public LfgQueueData(long _joinTime, List<int> _dungeons, Dictionary<ObjectGuid, LfgRoles> _roles)
+        public LfgQueueData(ServerTime _joinTime, List<int> _dungeons, Dictionary<ObjectGuid, LfgRoles> _roles)
         {
             joinTime = _joinTime;
             tanks = SharedConst.LFGTanksNeeded;
@@ -782,7 +782,7 @@ namespace Game.DungeonFinding
             roles = _roles;
         }
 
-        public long joinTime;
+        public ServerTime joinTime;
         public byte tanks;
         public byte healers;
         public byte dps;
@@ -793,7 +793,7 @@ namespace Game.DungeonFinding
 
     public struct LfgWaitTime
     {
-        public int time;
+        public Seconds time;
         public uint number;
     }
 }

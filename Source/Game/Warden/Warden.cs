@@ -19,8 +19,8 @@ namespace Game
         internal byte[] _seed = new byte[16];
         internal SARC4 _inputCrypto;
         internal SARC4 _outputCrypto;
-        internal uint _checkTimer;                          // Timer for sending check requests
-        internal uint _clientResponseTimer;                 // Timer for client response delay
+        internal TimeSpan _checkTimer;                          // Timer for sending check requests
+        internal TimeSpan _clientResponseTimer;                 // Timer for client response delay
         internal bool _dataSent;
         internal ClientWardenModule _module;
         internal bool _initialized;
@@ -29,7 +29,7 @@ namespace Game
         {
             _inputCrypto = new SARC4();
             _outputCrypto = new SARC4();
-            _checkTimer = 10 * Time.InMilliseconds;
+            _checkTimer = (Seconds)10;
         }
 
         public void MakeModuleForClient()
@@ -86,22 +86,22 @@ namespace Game
             _session.SendPacket(packet);
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             if (!_initialized)
                 return;
 
             if (_dataSent)
             {
-                uint maxClientResponseDelay = (uint)WorldConfig.Values[WorldCfg.WardenClientResponseDelay].Int32;
-                if (maxClientResponseDelay > 0)
+                TimeSpan maxClientResponseDelay = WorldConfig.Values[WorldCfg.WardenClientResponseDelay].TimeSpan;
+                if (maxClientResponseDelay > TimeSpan.Zero)
                 {
                     // Kick player if client response delays more than set in config
-                    if (_clientResponseTimer > maxClientResponseDelay * Time.InMilliseconds)
+                    if (_clientResponseTimer > maxClientResponseDelay)
                     {
                         Log.outWarn(LogFilter.Warden, 
                             $"{_session.GetPlayerInfo()} (latency: {_session.GetLatency()}, IP: {_session.GetRemoteAddress()} exceeded Warden module ) " +
-                            $"response delay for more than {Time.secsToTimeString(maxClientResponseDelay, TimeFormat.ShortText)} - disconnecting client");
+                            $"response delay for more than {Time.SpanToTimeString(maxClientResponseDelay, TimeFormat.ShortText)} - disconnecting client");
                         
                         _session.KickPlayer("Warden::Update Warden module response delay exceeded");
                     }
@@ -179,7 +179,7 @@ namespace Game
                     if (check != null)
                         banReason += $": {check.Comment} (CheckId: {check.CheckId})";
 
-                    Global.WorldMgr.BanAccount(BanMode.Account, accountName, (uint)WorldConfig.Values[WorldCfg.WardenClientBanDuration].Int32, banReason, "Server");
+                    Global.WorldMgr.BanAccount(BanMode.Account, accountName, WorldConfig.Values[WorldCfg.WardenClientBanDuration].Seconds, banReason, "Server");
                     break;
                 }
                 case WardenActions.Log:

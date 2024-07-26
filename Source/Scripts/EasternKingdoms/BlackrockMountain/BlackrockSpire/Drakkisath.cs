@@ -29,25 +29,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Drakkisath
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule((Seconds)6, task =>
             {
                 DoCastVictim(SpellIds.Firenova);
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(8));
+                task.Repeat((Seconds)8);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule((Seconds)15, task =>
             {
                 DoCastVictim(SpellIds.Confliguration);
-                task.Repeat(TimeSpan.FromSeconds(18));
+                task.Repeat((Seconds)18);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(17), task =>
+            _scheduler.Schedule((Seconds)17, task =>
             {
                 DoCastVictim(SpellIds.Thunderclap);
-                task.Repeat(TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)20);
             });
         }
 
@@ -56,7 +56,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Drakkisath
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

@@ -24,8 +24,7 @@ namespace Scripts.World.Achievements
 
         bool IsXPBoostActive()
         {
-            long time = GameTime.GetGameTime();
-            DateTime localTm = Time.UnixTimeToDateTime(time);
+            RealmTime localTm = LoopTime.RealmTime;
             uint weekdayMaskBoosted = WorldConfig.Values[WorldCfg.XpBoostDaymask].UInt32;
             uint weekdayMask = (1u << (int)localTm.DayOfWeek);
             bool currentDayBoosted = (weekdayMask & weekdayMaskBoosted) != 0;

@@ -26,7 +26,7 @@ namespace Game
 
         public void LoadDisables()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // reload case
             m_DisableMap.Clear();
@@ -260,7 +260,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} disables in {1} ms", total_count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {total_count} disables in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void CheckQuestDisables()
@@ -271,7 +271,7 @@ namespace Game
                 return;
             }
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // check only quests, rest already done at startup
             foreach (var pair in m_DisableMap[DisableType.Quest])
@@ -291,7 +291,8 @@ namespace Game
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", m_DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Checked {m_DisableMap[DisableType.Quest].Count} quest disables in {Time.Diff(oldMSTime)} ms.");
         }
 
         public bool IsDisabledFor(DisableType type, int entry, WorldObject refe, DisableFlags flags = 0)

@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Game.BattleGrounds;
-using Game.Entities;
 using System;
 
 namespace Game.Arenas
@@ -12,7 +11,7 @@ namespace Game.Arenas
     {
         public NagrandArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -31,14 +30,14 @@ namespace Game.Arenas
             for (int i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door4; ++i)
                 DoorOpen(i);
 
-            taskScheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            taskScheduler.Schedule((Seconds)5, task =>
             {
                 for (int i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door2; ++i)
                     DelObject(i);
             });
 
             for (int i = NagrandArenaObjectTypes.Buff1; i <= NagrandArenaObjectTypes.Buff2; ++i)
-                SpawnBGObject(i, 60);
+                SpawnBGObject(i, (Seconds)60);
         }
 
         public override bool SetupBattleground()
@@ -54,8 +53,8 @@ namespace Game.Arenas
                 return false;
             }
 
-            result &= AddObject(NagrandArenaObjectTypes.Buff1, NagrandArenaObjects.Buff1, 4009.189941f, 2895.250000f, 13.052700f, -1.448624f, 0, 0, 0.6626201f, -0.7489557f, 120);
-            result &= AddObject(NagrandArenaObjectTypes.Buff2, NagrandArenaObjects.Buff2, 4103.330078f, 2946.350098f, 13.051300f, -0.06981307f, 0, 0, 0.03489945f, -0.9993908f, 120);
+            result &= AddObject(NagrandArenaObjectTypes.Buff1, NagrandArenaObjects.Buff1, 4009.189941f, 2895.250000f, 13.052700f, -1.448624f, 0, 0, 0.6626201f, -0.7489557f, (Seconds)120);
+            result &= AddObject(NagrandArenaObjectTypes.Buff2, NagrandArenaObjects.Buff2, 4103.330078f, 2946.350098f, 13.051300f, -0.06981307f, 0, 0, 0.03489945f, -0.9993908f, (Seconds)120);
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "NagrandArena: Failed to spawn buff object!");

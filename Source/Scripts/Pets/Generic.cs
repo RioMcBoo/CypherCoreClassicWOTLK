@@ -27,10 +27,10 @@ namespace Scripts.Pets.Generic
                 if (owner != null)
                     me.SetFacingToObject(owner);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), _ =>
+                _scheduler.Schedule(Time.SpanFromSeconds(1), _ =>
                 {
                     me.HandleEmoteCommand(Emote.OneshotBow);
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1), _ =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(1), _ =>
                     {
                         Unit owner = me.GetCharmerOrOwner();
                         if (owner != null)
@@ -43,7 +43,7 @@ namespace Scripts.Pets.Generic
         public override void Reset()
         {
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), focusAction);
+            _scheduler.Schedule(Time.SpanFromSeconds(1), focusAction);
         }
 
         public override void EnterEvadeMode(EvadeReason why)
@@ -62,15 +62,15 @@ namespace Scripts.Pets.Generic
             switch (emote)
             {
                 case TextEmotes.Bow:
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1), focusAction);
+                    _scheduler.Schedule(Time.SpanFromSeconds(1), focusAction);
                     break;
                 case TextEmotes.Drink:
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1), _ => me.CastSpell(me, SpellPandarenMonk, false));
+                    _scheduler.Schedule(Time.SpanFromSeconds(1), _ => me.CastSpell(me, SpellPandarenMonk, false));
                     break;
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
 

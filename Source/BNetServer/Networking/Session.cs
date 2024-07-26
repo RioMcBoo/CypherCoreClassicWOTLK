@@ -226,7 +226,7 @@ namespace BNetServer.Networking
         public bool IsLockedToIP;
         public string LockCountry;
         public string LastIP;
-        public uint LoginTicketExpiry;
+        public DateTime LoginTicketExpiry;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
 
@@ -239,7 +239,7 @@ namespace BNetServer.Networking
             IsLockedToIP = result.Read<bool>(2);
             LockCountry = result.Read<string>(3);
             LastIP = result.Read<string>(4);
-            LoginTicketExpiry = result.Read<uint>(5);
+            LoginTicketExpiry = (DateTime)(UnixTime)result.Read<int>(5);
             IsBanned = result.Read<long>(6) != 0;
             IsPermanenetlyBanned = result.Read<long>(7) != 0;
 
@@ -259,7 +259,7 @@ namespace BNetServer.Networking
         public int Id;
         public string Name;
         public string DisplayName;
-        public uint UnbanDate;
+        public DateTime UnbanDate;
         public bool IsBanned;
         public bool IsPermanentlyBanned;
         public AccountTypes SecurityLevel;
@@ -271,9 +271,9 @@ namespace BNetServer.Networking
         {
             Id = fields.Read<int>(startColumn + 0);
             Name = fields.Read<string>(startColumn + 1);
-            UnbanDate = fields.Read<uint>(startColumn + 2);
+            UnbanDate = (DateTime)(UnixTime)fields.Read<int>(startColumn + 2);
             IsPermanentlyBanned = fields.Read<int>(startColumn + 3) != 0;
-            IsBanned = IsPermanentlyBanned || UnbanDate > Time.UnixTime;
+            IsBanned = IsPermanentlyBanned || UnbanDate > Time.Now;
             SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 4);
 
             int hashPos = Name.IndexOf('#');

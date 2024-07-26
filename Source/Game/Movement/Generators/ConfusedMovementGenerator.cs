@@ -32,7 +32,7 @@ namespace Game.Movement
             owner.SetUnitFlag(UnitFlags.Confused);
             owner.StopMoving();
 
-            _timer.Reset(0);
+            _timer.Reset(TimeSpan.Zero);
             _reference = owner.GetPosition();
             _path = null;
         }
@@ -43,7 +43,7 @@ namespace Game.Movement
             DoInitialize(owner);
         }
 
-        public override bool DoUpdate(T owner, uint diff)
+        public override bool DoUpdate(T owner, TimeSpan diff)
         {
             if (owner == null || !owner.IsAlive())
                 return false;
@@ -73,7 +73,7 @@ namespace Game.Movement
                 if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
                 {
                     // Retry later on
-                    _timer.Reset(200);
+                    _timer.Reset((Milliseconds)200);
                     return true;
                 }
 
@@ -89,7 +89,7 @@ namespace Game.Movement
                     || _path.GetPathType().HasFlag(PathType.Shortcut) 
                     || _path.GetPathType().HasFlag(PathType.FarFromPoly))
                 {
-                    _timer.Reset(100);
+                    _timer.Reset((Milliseconds)100);
                     return true;
                 }
 
@@ -98,8 +98,8 @@ namespace Game.Movement
                 MoveSplineInit init = new(owner);
                 init.MovebyPath(_path.GetPath());
                 init.SetWalk(true);
-                uint traveltime = (uint)init.Launch();
-                _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
+                TimeSpan traveltime = init.Launch();
+                _timer.Reset(traveltime + (Milliseconds)RandomHelper.IRand(800, 1500));
             }
 
             return true;

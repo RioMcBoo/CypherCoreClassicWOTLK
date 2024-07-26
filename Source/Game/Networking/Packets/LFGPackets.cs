@@ -305,7 +305,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt8(LastNeeded[i]);
             }
 
-            _worldPacket.WriteUInt32(QueuedTime);
+            _worldPacket.WriteInt32(QueuedTime);
         }
 
         public RideTicket Ticket;
@@ -314,7 +314,7 @@ namespace Game.Networking.Packets
         public uint AvgWaitTime;
         public uint[] AvgWaitTimeByRole = new uint[3];
         public byte[] LastNeeded = new byte[3];
-        public uint QueuedTime;
+        public Seconds QueuedTime;
     }
 
     class LFGPlayerReward : ServerPacket
@@ -719,7 +719,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Target;
         public uint TotalVotes;
         public uint BootVotes;
-        public int TimeLeft;
+        public Seconds TimeLeft;
         public uint VotesNeeded;
         public string Reason = string.Empty;
     }
@@ -752,7 +752,7 @@ namespace Game.Networking.Packets
             RequesterGuid = data.ReadPackedGuid();
             Id = data.ReadInt32();
             Type = (RideType)data.ReadUInt32();
-            Time = data.ReadInt64();
+            JoinTime = (ServerTime)(UnixTime64)data.ReadInt64();
             Unknown925 = data.HasBit();
             data.ResetBitPos();
         }
@@ -762,7 +762,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(RequesterGuid);
             data.WriteInt32(Id);
             data.WriteUInt32((uint)Type);
-            data.WriteInt64(Time);
+            data.WriteInt64((UnixTime64)JoinTime);
             data.WriteBit(Unknown925);
             data.FlushBits();
         }
@@ -770,7 +770,7 @@ namespace Game.Networking.Packets
         public ObjectGuid RequesterGuid;
         public int Id;
         public RideType Type;
-        public long Time;
+        public ServerTime JoinTime;
         public bool Unknown925;
     }
 

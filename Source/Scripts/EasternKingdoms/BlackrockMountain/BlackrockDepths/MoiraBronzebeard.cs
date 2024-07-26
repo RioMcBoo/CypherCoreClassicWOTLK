@@ -30,25 +30,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.MoiraBronzeb
 
         public override void JustEngagedWith(Unit who)
         {
-            //_scheduler.Schedule(EventHeal, TimeSpan.FromSeconds(12s)); // not used atm // These times are probably wrong
-            _scheduler.Schedule(TimeSpan.FromSeconds(16), task =>
+            //_scheduler.Schedule(EventHeal, Time.SpanFromSeconds(12s)); // not used atm // These times are probably wrong
+            _scheduler.Schedule((Seconds)16, task =>
             {
                 DoCastVictim(SpellIds.Mindblast);
-                task.Repeat(TimeSpan.FromSeconds(14));
+                task.Repeat((Seconds)14);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule((Seconds)2, task =>
             {
                 DoCastVictim(SpellIds.Shadowwordpain);
-                task.Repeat(TimeSpan.FromSeconds(18));
+                task.Repeat((Seconds)18);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 DoCastVictim(SpellIds.Smite);
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)10);
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

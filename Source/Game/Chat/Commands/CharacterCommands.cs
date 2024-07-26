@@ -146,13 +146,13 @@ namespace Game.Chat
                             $"GM {sessionPlayer.GetName()} (Account: {session.GetAccountId()}) forced rename {newName} " +
                             $"to player {sessionPlayer.GetName()} " +
                             $"(Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sessionPlayer.GetGUID())})");
-                }
+                    }
                 }
                 else
                 {
                     Log.outCommand(0,
                         $"CONSOLE forced rename '{player.GetName()}' to '{newName}' ({player.GetGUID()})");
-            }
+                }
             }
             else
             {
@@ -536,16 +536,10 @@ namespace Game.Chat
             [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
             static bool HandleCharacterDeletedOldCommand(CommandHandler handler, ushort? days)
             {
-                int keepDays = WorldConfig.Values[WorldCfg.ChardeleteKeepDays].Int32;
-
-                if (days.HasValue)
-                    keepDays = days.Value;
-                else if (keepDays <= 0) // config option value 0 -> disabled and can't be used
-                    return false;
-
-                Player.DeleteOldCharacters(keepDays);
-
-                return true;
+                if (!days.HasValue)
+                    return Player.DeleteOldCharacters();
+                else
+                    return Player.DeleteOldCharacters(Time.SpanFromDays(days.Value)); 
             }
 
             static bool GetDeletedCharacterInfoList(List<DeletedInfo> foundList, string searchString)
@@ -591,7 +585,7 @@ namespace Game.Chat
 
                         // account name will be empty for not existed account
                         Global.AccountMgr.GetName(info.accountId, out info.accountName);
-                        info.deleteDate = result.Read<long>(3);
+                        info.deleteDate = (ServerTime)(UnixTime64)result.Read<long>(3);
                         foundList.Add(info);
                     }
                     while (result.NextRow());
@@ -611,7 +605,7 @@ namespace Game.Chat
 
                 foreach (var info in foundList)
                 {
-                    string dateStr = Time.UnixTimeToDateTime(info.deleteDate).ToShortDateString();
+                    string dateStr = info.deleteDate.ToShortDateString();
 
                     if (handler.GetSession() == null)
                     {
@@ -624,7 +618,7 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.CharacterDeletedListLineChat,
                             info.guid.ToString(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
                             info.accountId, dateStr);
-                }
+                    }
                 }
 
                 if (handler.GetSession() == null)
@@ -668,7 +662,7 @@ namespace Game.Chat
                 public string name; // the character name
                 public int accountId; // the account id
                 public string accountName; // the account name
-                public long deleteDate; // the date at which the character has been deleted
+                public ServerTime deleteDate; // the date at which the character has been deleted
             }
         }
 

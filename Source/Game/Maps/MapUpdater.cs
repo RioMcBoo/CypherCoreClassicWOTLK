@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Threading;
+using System;
 using System.Threading;
 
 namespace Game.Maps
@@ -46,7 +47,7 @@ namespace Game.Maps
             }
         }
 
-        public void ScheduleUpdate(Map map, uint diff)
+        public void ScheduleUpdate(Map map, TimeSpan diff)
         {
             lock (_lock)
             {
@@ -86,19 +87,19 @@ namespace Game.Maps
     {
         Map m_map;
         MapUpdater m_updater;
-        uint m_diff;
+        TimeSpan m_diff;
 
-        public MapUpdateRequest(Map m, uint d)
+        public MapUpdateRequest(Map m, TimeSpan diff)
         {
             m_map = m;
-            m_diff = d;
+            m_diff = diff;
         }
 
-        public MapUpdateRequest(Map m, MapUpdater u, uint d)
+        public MapUpdateRequest(Map m, MapUpdater u, TimeSpan diff)
         {
             m_map = m;
             m_updater = u;
-            m_diff = d;
+            m_diff = diff;
         }
 
         public void Call()

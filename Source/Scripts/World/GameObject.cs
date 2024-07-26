@@ -24,7 +24,7 @@ namespace Scripts.World.GameObjects
             {
                 if (player.GetQuestStatus(QuestTheFirstTrial) == QuestStatus.Incomplete)
                 {
-                    Creature stillblade = player.SummonCreature(NpcStillblade, 8106.11f, -7542.06f, 151.775f, 3.02598f, TempSummonType.DeadDespawn, TimeSpan.FromMinutes(1));
+                    Creature stillblade = player.SummonCreature(NpcStillblade, 8106.11f, -7542.06f, 151.775f, 3.02598f, TempSummonType.DeadDespawn, (Minutes)1);
                     if (stillblade != null)
                         stillblade.GetAI().AttackStart(player);
                 }
@@ -71,7 +71,7 @@ namespace Scripts.World.GameObjects
         {
             me.UseDoorOrButton();
 
-            Creature creature = player.SummonCreature(NpcPrisonEntry.SelectRandom(), me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
+            Creature creature = player.SummonCreature(NpcPrisonEntry.SelectRandom(), me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, (Seconds)30);
             if (creature != null)
             {
                 if (!creature.IsHostileTo(player))
@@ -98,9 +98,9 @@ namespace Scripts.World.GameObjects
                             Log.outError(LogFilter.Scripts,
                                 $"go_ethereum_prison summoned Creature (entry {creature.GetEntry()}) " +
                                 $"but faction ({creature.GetFaction()})are not expected by script.");
+                        }
                     }
                 }
-            }
             }
 
             return false;
@@ -118,7 +118,7 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
 
             player.SummonCreature(NpcStasisEntry.SelectRandom(), me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player),
-                TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
+                TempSummonType.TimedDespawnOutOfCombat, Time.SpanFromSeconds(30));
 
             return false;
         }
@@ -133,7 +133,7 @@ namespace Scripts.World.GameObjects
         public override bool OnGossipHello(Player player)
         {
             if (me.GetGoType() == GameObjectTypes.Goober)
-                me.SummonCreature(NpcGoggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(5));
+                me.SummonCreature(NpcGoggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, (Minutes)5);
 
             return false;
         }
@@ -202,7 +202,7 @@ namespace Scripts.World.GameObjects
         public override bool OnGossipHello(Player player)
         {
             if (me.GetGoType() == GameObjectTypes.Goober)
-                player.SummonCreature(NpcZelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
+                player.SummonCreature(NpcZelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)30);
 
             return true;
         }
@@ -303,7 +303,7 @@ namespace Scripts.World.GameObjects
                 foreach (Creature creature in childrenList)
                 {
                     player.KilledMonsterCredit(NpcCaptiveChild, creature.GetGUID());
-                    creature.DespawnOrUnsummon(TimeSpan.FromSeconds(5));
+                    creature.DespawnOrUnsummon(Time.SpanFromSeconds(5));
                     creature.GetMotionMaster().MovePoint(1, me.GetPositionX() + 5, me.GetPositionY(), me.GetPositionZ());
                     creature.GetAI().Talk(SayFree0);
                     creature.GetMotionMaster().Clear();
@@ -365,12 +365,12 @@ namespace Scripts.World.GameObjects
         public const int Goblin02 = 11814; // 1.33 min
         public const int Goblin03 = 11815; // 0.28 min
 
-        public static TimeSpan Dwarf01Time = TimeSpan.FromSeconds(95);
-        public static TimeSpan Dwarf02Time = TimeSpan.FromSeconds(155);
-        public static TimeSpan Dwarf03Time = TimeSpan.FromSeconds(23);
-        public static TimeSpan Goblin01Time = TimeSpan.FromSeconds(68);
-        public static TimeSpan Goblin02Time = TimeSpan.FromSeconds(93);
-        public static TimeSpan Goblin03Time = TimeSpan.FromSeconds(28);
+        public static TimeSpan Dwarf01Time = Time.SpanFromSeconds(95);
+        public static TimeSpan Dwarf02Time = Time.SpanFromSeconds(155);
+        public static TimeSpan Dwarf03Time = Time.SpanFromSeconds(23);
+        public static TimeSpan Goblin01Time = Time.SpanFromSeconds(68);
+        public static TimeSpan Goblin02Time = Time.SpanFromSeconds(93);
+        public static TimeSpan Goblin03Time = Time.SpanFromSeconds(28);
     }
 
     enum BrewfestMusicAreasIds
@@ -392,11 +392,11 @@ namespace Scripts.World.GameObjects
     class go_brewfest_music : GameObjectAI
     {
         uint rnd;
-        TimeSpan musicTime = TimeSpan.FromSeconds(1);
+        TimeSpan musicTime = Time.SpanFromSeconds(1);
 
         public go_brewfest_music(GameObject go) : base(go)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 if (!GameEventMgr.IsHolidayActive(HolidayIds.Brewfest)) // Check if Brewfest is active
                     return;
@@ -404,7 +404,7 @@ namespace Scripts.World.GameObjects
                 task.Repeat(musicTime); // Select new song music after play time is over
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 if (!GameEventMgr.IsHolidayActive(HolidayIds.Brewfest)) // Check if Brewfest is active
                     return;
@@ -500,11 +500,11 @@ namespace Scripts.World.GameObjects
                         break;
                 }
 
-                task.Repeat(TimeSpan.FromSeconds(5)); // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client
+                task.Repeat(Time.SpanFromSeconds(5)); // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -518,7 +518,7 @@ namespace Scripts.World.GameObjects
 
         public go_midsummer_music(GameObject go) : base(go)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 if (!GameEventMgr.IsHolidayActive(HolidayIds.MidsummerFireFestival))
                     return;
@@ -531,11 +531,11 @@ namespace Scripts.World.GameObjects
                     else
                         me.PlayDirectMusic(EventmidsummerfirefestivalA, player);
                 }
-                task.Repeat(TimeSpan.FromSeconds(5)); // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client (sniffed value)
+                task.Repeat(Time.SpanFromSeconds(5)); // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client (sniffed value)
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -548,17 +548,17 @@ namespace Scripts.World.GameObjects
 
         public go_darkmoon_faire_music(GameObject go) : base(go)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 if (!GameEventMgr.IsHolidayActive(HolidayIds.DarkmoonFaire))
                     return;
 
                 me.PlayDirectMusic(MusicDarkmoonFaireMusic);
-                task.Repeat(TimeSpan.FromSeconds(5));  // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client (sniffed value)
+                task.Repeat(Time.SpanFromSeconds(5));  // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client (sniffed value)
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -571,17 +571,17 @@ namespace Scripts.World.GameObjects
 
         public go_pirate_day_music(GameObject go) : base(go)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 if (!GameEventMgr.IsHolidayActive(HolidayIds.PiratesDay))
                     return;
 
                 me.PlayDirectMusic(MusicPirateDayMusic);
-                task.Repeat(TimeSpan.FromSeconds(5));  // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client (sniffed value)
+                task.Repeat(Time.SpanFromSeconds(5));  // Every 5 second's SmsgPlayMusic packet (PlayDirectMusic) is pushed to the client (sniffed value)
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -678,7 +678,7 @@ namespace Scripts.World.GameObjects
         {
             if (eventId == BellHourlyConst.GameEventHourlyBells && start)
             {
-                var localTm = GameTime.GetDateAndTime();
+                RealmTime localTm = LoopTime.RealmTime;
                 int _rings = localTm.Hour % 12;
                 if (_rings == 0) // 00:00 and 12:00
                 {
@@ -692,11 +692,11 @@ namespace Scripts.World.GameObjects
                 }
 
                 for (var i = 0; i < _rings; ++i)
-                    _scheduler.Schedule(TimeSpan.FromSeconds(i * 4 + 1), task => me.PlayDirectSound(_soundId));
+                    _scheduler.Schedule(Time.SpanFromSeconds(i * 4 + 1), task => me.PlayDirectSound(_soundId));
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }

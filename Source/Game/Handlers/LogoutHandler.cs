@@ -39,7 +39,7 @@ namespace Game
 
             if (reason != 0)
             {
-                SetLogoutStartTime(0);
+                SetLogoutStartTime(ServerTime.Zero);
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace Game
                 pl.SetUnitFlag(UnitFlags.Stunned);
             }
 
-            SetLogoutStartTime(GameTime.GetGameTime());
+            SetLogoutStartTime(LoopTime.ServerTime);
         }
 
         [WorldPacketHandler(ClientOpcodes.LogoutCancel)]
@@ -69,7 +69,7 @@ namespace Game
             if (GetPlayer() == null)
                 return;
 
-            SetLogoutStartTime(0);
+            SetLogoutStartTime(ServerTime.Zero);
 
             SendPacket(new LogoutCancelAck());
 

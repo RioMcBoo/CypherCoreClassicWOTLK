@@ -87,7 +87,7 @@ namespace BNetServer.Networking
 
                 accountInfo = new AccountInfo(result);
 
-                if (accountInfo.LoginTicketExpiry < Time.UnixTime)
+                if (accountInfo.LoginTicketExpiry < Time.Now)
                     return BattlenetRpcErrorCode.TimedOut;
             }
 

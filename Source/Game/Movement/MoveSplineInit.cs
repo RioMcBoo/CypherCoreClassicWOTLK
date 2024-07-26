@@ -55,7 +55,7 @@ namespace Game.Movement
             return UnitMoveType.Run;
         }
 
-        public int Launch()
+        public Milliseconds Launch()
         {
             MoveSpline move_spline = unit.MoveSpline;
 
@@ -82,7 +82,7 @@ namespace Game.Movement
 
             // should i do the things that user should do? - no.
             if (args.path.Count == 0)
-                return 0;
+                return Milliseconds.Zero;
 
             // correct first vertex
             args.path[0] = new Vector3(real_position.X, real_position.Y, real_position.Z);
@@ -114,26 +114,26 @@ namespace Game.Movement
                 if (creature != null)
                 {
                     if (creature.HasSearchedAssistance())
-                        args.velocity *= 0.66f;
-            }
+                        args.velocity.PerSec *= 0.66f;
+                }
             }
 
             // limit the speed in the same way the client does
-            float speedLimit()
+            Speed speedLimit()
             {
                 if (args.flags.HasFlag(SplineFlag.UnlimitedSpeed))
-                    return float.MaxValue;
+                    return new(float.MaxValue);
 
                 if (args.flags.HasFlag(SplineFlag.Falling) || args.flags.HasFlag(SplineFlag.Catmullrom) || args.flags.HasFlag(SplineFlag.Flying) || args.flags.HasFlag(SplineFlag.Parabolic))
-                    return 50.0f;
+                    return new(50.0f);
 
-                return Math.Max(28.0f, unit.GetSpeed(UnitMoveType.Run) * 4.0f);
+                return (Speed)Math.Max(28.0f, unit.GetSpeed(UnitMoveType.Run) * 4.0f);
             };
 
-            args.velocity = Math.Min(args.velocity, speedLimit());
+            args.velocity = (Speed)Math.Min(args.velocity, speedLimit());
 
             if (!args.Validate(unit))
-                return 0;
+                return Milliseconds.Zero;
 
             unit.m_movementInfo.SetMovementFlags(moveFlags);
             move_spline.Initialize(args);
@@ -277,7 +277,7 @@ namespace Game.Movement
 
         public void SetCyclic() { args.flags.SetUnsetFlag(SplineFlag.Cyclic); }
 
-        public void SetVelocity(float vel) { args.velocity = vel; args.HasVelocity = true; }
+        public void SetVelocity(Speed vel) { args.velocity = vel; args.HasVelocity = true; }
 
         void SetBackward() { args.flags.SetUnsetFlag(SplineFlag.Backward); }
 

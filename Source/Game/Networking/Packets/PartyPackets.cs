@@ -627,13 +627,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt8(PartyIndex);
             _worldPacket.WritePackedGuid(PartyGUID);
             _worldPacket.WritePackedGuid(InitiatorGUID);
-            _worldPacket.WriteUInt64(Duration);
+            _worldPacket.WriteInt64(Duration.ToMilliseconds());
         }
 
         public sbyte PartyIndex;
         public ObjectGuid PartyGUID;
         public ObjectGuid InitiatorGUID;
-        public ulong Duration;
+        public TimeSpan Duration;
     }
 
     class ReadyCheckResponseClient : ClientPacket

@@ -314,7 +314,7 @@ namespace Game
                             return;
                         }
 
-                        Log.outDebug(LogFilter.Maps, 
+                        Log.outDebug(LogFilter.Maps,
                             $"MAP: Player '{player.GetName()}' has corpse " +
                             $"in instance {at.target_mapId} and can enter.");
                     }
@@ -323,7 +323,7 @@ namespace Game
                         Log.outDebug(LogFilter.Maps, 
                             $"Map::CanPlayerEnter - player '{player.GetName()}' " +
                             $"is dead but does not have a corpse!");
-                }
+                    }
                 }
 
                 TransferAbortParams denyReason = Map.PlayerCannotEnter(at.target_mapId, player);
@@ -347,7 +347,7 @@ namespace Game
                             Log.outDebug(LogFilter.Maps, 
                                 $"MAP: Player '{player.GetName()}' " +
                                 $"must be in a raid group to enter map {at.target_mapId}");
-                            player.SendRaidGroupOnlyMessage(RaidGroupReason.Only, 0);
+                            player.SendRaidGroupOnlyMessage(RaidGroupReason.Only, Milliseconds.Zero);
                             break;
                         case TransferAbortReason.LockedToDifferentInstance:
                             Log.outDebug(LogFilter.Maps, 
@@ -414,8 +414,8 @@ namespace Game
                     player.TeleportTo(
                         at.target_mapId, at.target_X, at.target_Y, at.target_Z, at.target_Orientation, 
                         TeleportToOptions.NotLeaveTransport);
+                }
             }
-        }
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestPlayedTime, Processing = PacketProcessing.Inplace)]
@@ -548,7 +548,7 @@ namespace Game
             {
                 GetPlayer().SetPlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
-                if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
+                if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != ServerTime.Zero)
                     GetPlayer().UpdatePvP(true, true);
             }
             else if (!GetPlayer().IsWarModeLocalActive())
@@ -556,7 +556,7 @@ namespace Game
                 GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().SetPlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
-                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
+                    GetPlayer().pvpInfo.EndTimer = LoopTime.ServerTime; // start toggle-off
             }
         }
 
@@ -567,7 +567,7 @@ namespace Game
             {
                 GetPlayer().SetPlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
-                if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
+                if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != ServerTime.Zero)
                     GetPlayer().UpdatePvP(true, true);
             }
             else if (!GetPlayer().IsWarModeLocalActive())
@@ -575,7 +575,7 @@ namespace Game
                 GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().SetPlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
-                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
+                    GetPlayer().pvpInfo.EndTimer = LoopTime.ServerTime; // start toggle-off
             }
         }
 
@@ -604,7 +604,7 @@ namespace Game
                     Log.outDebug(LogFilter.Network,
                         $"Player {GetPlayer().GetName()} (GUID: {GetPlayer().GetGUID()}) " +
                         $"requests non-existing seer {GetPlayer().m_activePlayerData.FarsightObject}");
-            }
+                }
             }
             else
             {
@@ -830,7 +830,7 @@ namespace Game
             else
                 GetPlayer().RepopAtGraveyard();
 
-            GetPlayer().SetPendingBind(0, 0);
+            GetPlayer().SetPendingBind(0, Milliseconds.Zero);
         }
 
         [WorldPacketHandler(ClientOpcodes.Warden3Data)]

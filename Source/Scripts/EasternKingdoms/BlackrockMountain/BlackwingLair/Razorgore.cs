@@ -79,25 +79,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
 
         void DoChangePhase()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(7), Time.SpanFromSeconds(10));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(35), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(35), task =>
             {
                 DoCastVictim(SpellIds.Warstomp);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(7), task =>
             {
                 DoCastVictim(SpellIds.Fireballvolley);
-                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(12), Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 DoCastVictim(SpellIds.Conflagration);
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(30));
             });
 
             secondPhase = true;
@@ -119,7 +119,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
                 damage = 0;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

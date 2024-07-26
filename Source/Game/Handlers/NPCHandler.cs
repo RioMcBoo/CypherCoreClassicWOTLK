@@ -79,7 +79,7 @@ namespace Game
                 Log.outDebug(LogFilter.Network, 
                     $"WorldSession.SendTrainerList - Creature id {npc.GetEntry()} " +
                     $"has no trainer data.");
-        }
+            }
         }
 
         public void SendTrainerList(Creature npc, int trainerId)
@@ -162,7 +162,7 @@ namespace Game
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
 
             // Stop the npc if moving
-            uint pause = unit.GetMovementTemplate().GetInteractionPauseTimer();
+            Milliseconds pause = unit.GetMovementTemplate().GetInteractionPauseTimer();
             if (pause != 0)
                 unit.PauseMovement(pause);
 
@@ -251,7 +251,7 @@ namespace Game
                         _player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
                     {
                         GetPlayer().OnGossipSelect(unit, packet.GossipOptionID, packet.GossipID);
-                }
+                    }
                 }
                 else
                 {
@@ -259,8 +259,8 @@ namespace Game
                         _player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
                     {
                         _player.OnGossipSelect(go, packet.GossipOptionID, packet.GossipID);
+                    }
                 }
-            }
             }
             else
             {
@@ -466,7 +466,7 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             // Stop the npc if moving
-            uint pause = vendor.GetMovementTemplate().GetInteractionPauseTimer();
+            Milliseconds pause = vendor.GetMovementTemplate().GetInteractionPauseTimer();
             
             if (pause != 0)
                 vendor.PauseMovement(pause);

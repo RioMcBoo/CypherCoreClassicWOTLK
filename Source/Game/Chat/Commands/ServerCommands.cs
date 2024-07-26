@@ -119,22 +119,22 @@ namespace Game.Chat
         [Command("info", RBACPermissions.CommandServerInfo, true)]
         static bool HandleServerInfoCommand(CommandHandler handler)
         {
-            uint playersNum = Global.WorldMgr.GetPlayerCount();
-            uint maxPlayersNum = Global.WorldMgr.GetMaxPlayerCount();
+            int playersNum = Global.WorldMgr.GetPlayerCount();
+            int maxPlayersNum = Global.WorldMgr.GetMaxPlayerCount();
             int activeClientsNum = Global.WorldMgr.GetActiveSessionCount();
             int queuedClientsNum = Global.WorldMgr.GetQueuedSessionCount();
-            uint maxActiveClientsNum = Global.WorldMgr.GetMaxActiveSessionCount();
-            uint maxQueuedClientsNum = Global.WorldMgr.GetMaxQueuedSessionCount();
-            string uptime = Time.secsToTimeString(GameTime.GetUptime());
-            uint updateTime = Global.WorldMgr.GetWorldUpdateTime().GetLastUpdateTime();
+            int maxActiveClientsNum = Global.WorldMgr.GetMaxActiveSessionCount();
+            int maxQueuedClientsNum = Global.WorldMgr.GetMaxQueuedSessionCount();
+            string uptime = Time.SpanToTimeString(LoopTime.UpTime);
+            Milliseconds updateTime = Global.WorldMgr.GetWorldUpdateTime().GetLastUpdateTime();
 
             handler.SendSysMessage(CypherStrings.ConnectedPlayers, playersNum, maxPlayersNum);
             handler.SendSysMessage(CypherStrings.ConnectedUsers, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
             handler.SendSysMessage(CypherStrings.Uptime, uptime);
             handler.SendSysMessage(CypherStrings.UpdateDiff, updateTime);
             // Can't use Global.WorldMgr.ShutdownMsg here in case of console command
-            if (Global.WorldMgr.IsShuttingDown())
-                handler.SendSysMessage(CypherStrings.ShutdownTimeleft, Time.secsToTimeString(Global.WorldMgr.GetShutDownTimeLeft()));
+            if (Global.WorldMgr.IsShuttingDown)
+                handler.SendSysMessage(CypherStrings.ShutdownTimeleft, Time.SpanToTimeString(Global.WorldMgr.GetShutDownTimeLeft()));
 
             return true;
         }
@@ -174,11 +174,11 @@ namespace Game.Chat
                         Global.WorldMgr.SetPlayerSecurityLimit(AccountTypes.Administrator);
                         break;
                     case "reset":
-                        Global.WorldMgr.SetPlayerAmountLimit(ConfigMgr.GetDefaultValue("PlayerLimit", 100u));
+                        Global.WorldMgr.SetPlayerAmountLimit(ConfigMgr.GetDefaultValue("PlayerLimit", 100));
                         Global.WorldMgr.LoadDBAllowedSecurityLevel();
                         break;
                     default:
-                        if (!uint.TryParse(paramStr, out uint value))
+                        if (!int.TryParse(paramStr, out int value))
                             return false;
 
                         if (value < 0)
@@ -189,7 +189,7 @@ namespace Game.Chat
                 }
             }
 
-            uint playerAmountLimit = Global.WorldMgr.GetPlayerAmountLimit();
+            int playerAmountLimit = Global.WorldMgr.GetPlayerAmountLimit();
             AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
             string secName;
             switch (allowedAccountType)
@@ -253,8 +253,7 @@ namespace Game.Chat
             if (delayStr.IsEmpty())
                 return false;
 
-            int delay;
-            if (int.TryParse(delayStr, out delay))
+            if (Seconds.TryParse(delayStr, null, out Seconds delay))
             {
                 //  Prevent interpret wrong arg value as 0 secs shutdown time
                 if ((delay == 0 && (delayStr[0] != '0' || delayStr.Length > 1 && delayStr[1] != '\0')) || delay < 0)
@@ -262,7 +261,7 @@ namespace Game.Chat
             }
             else
             {
-                delay = (int)Time.TimeStringToSecs(delayStr);
+                delay = Time.StringToSecs(delayStr);
 
                 if (delay == 0)
                     return false;
@@ -289,15 +288,15 @@ namespace Game.Chat
                     return false;
 
             // Override parameter "delay" with the configuration value if there are still players connected and "force" parameter was not specified
-            if (delay < WorldConfig.Values[WorldCfg.ForceShutdownThreshold].Int32 
+            if (delay < WorldConfig.Values[WorldCfg.ForceShutdownThreshold].Seconds 
                 && !shutdownMask.HasAnyFlag(ShutdownMask.Force) 
                 && !IsOnlyUser(handler.GetSession()))
             {
-                delay = WorldConfig.Values[WorldCfg.ForceShutdownThreshold].Int32;
+                delay = WorldConfig.Values[WorldCfg.ForceShutdownThreshold].Seconds;
                 handler.SendSysMessage(CypherStrings.ShutdownDelayed, delay);
             }
 
-            Global.WorldMgr.ShutdownServ((uint)delay, shutdownMask, (ShutdownExitCode)exitCode, reason);
+            Global.WorldMgr.ShutdownServ(delay, shutdownMask, (ShutdownExitCode)exitCode, reason);
 
             return true;
         }
@@ -313,10 +312,10 @@ namespace Game.Chat
 
             [Command("cancel", RBACPermissions.CommandServerIdlerestartCancel, true)]
             static bool HandleServerShutDownCancelCommand(CommandHandler handler)
-            {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+            {                
+                if (Global.WorldMgr.ShutdownCancel(out var timer))
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, (Seconds)timer);
+
                 return true;
             }
         }
@@ -333,9 +332,8 @@ namespace Game.Chat
             [Command("cancel", RBACPermissions.CommandServerIdleshutdownCancel, true)]
             static bool HandleServerShutDownCancelCommand(CommandHandler handler)
             {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+                if (Global.WorldMgr.ShutdownCancel(out var timer))
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, (Seconds)timer);
 
                 return true;
             }
@@ -353,9 +351,8 @@ namespace Game.Chat
             [Command("cancel", RBACPermissions.CommandServerRestartCancel, true)]
             static bool HandleServerShutDownCancelCommand(CommandHandler handler)
             {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+                if (Global.WorldMgr.ShutdownCancel(out var timer))
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, (Seconds)timer);
 
                 return true;
             }
@@ -379,9 +376,8 @@ namespace Game.Chat
             [Command("cancel", RBACPermissions.CommandServerShutdownCancel, true)]
             static bool HandleServerShutDownCancelCommand(CommandHandler handler)
             {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+                if (Global.WorldMgr.ShutdownCancel(out var timer))
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, (Seconds)timer);
 
                 return true;
             }

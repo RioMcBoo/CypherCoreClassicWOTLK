@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using System;
 
 namespace Scripts.Pets.Mage
 {
@@ -15,10 +16,10 @@ namespace Scripts.Pets.Mage
         const int SpellMageFrostBolt = 59638;
         const int SpellMageFireBlast = 59637;
 
-        const int TimerMirrorImageFireBlast = 6500;
+        static readonly TimeSpan TimerMirrorImageFireBlast = (Milliseconds)6500;
         float ChaseDistance = 35.0f;
 
-        uint _fireBlastTimer = 0;
+        TimeSpan _fireBlastTimer;
 
         public npc_pet_mage_mirror_image(Creature creature) : base(creature) { }
 
@@ -108,7 +109,7 @@ namespace Scripts.Pets.Mage
             return true;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             Unit owner = me.GetOwner();
             if (owner == null)
@@ -117,10 +118,10 @@ namespace Scripts.Pets.Mage
                 return;
             }
 
-            if (_fireBlastTimer != 0)
+            if (_fireBlastTimer != (Milliseconds)0)
             {
                 if (_fireBlastTimer <= diff)
-                    _fireBlastTimer = 0;
+                    _fireBlastTimer = (Milliseconds)0;
                 else
                     _fireBlastTimer -= diff;
             }
@@ -131,7 +132,7 @@ namespace Scripts.Pets.Mage
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            if (_fireBlastTimer == 0)
+            if (_fireBlastTimer == (Milliseconds)0)
             {
                 DoCastVictim(SpellMageFireBlast);
                 _fireBlastTimer = TimerMirrorImageFireBlast;

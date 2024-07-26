@@ -57,7 +57,7 @@ namespace Game.Combat
             return true;
         }
 
-        public void Update(uint tdiff)
+        public void Update(TimeSpan tdiff)
         {
             foreach (var pair in _pvpRefs.ToList())
             {
@@ -472,14 +472,14 @@ namespace Game.Combat
 
     public class PvPCombatReference : CombatReference
     {
-        public static uint PVP_COMBAT_TIMEOUT = 5 * Time.InMilliseconds;
+        public static readonly TimeSpan PVP_COMBAT_TIMEOUT = (Seconds)5;
 
-        uint _combatTimer = PVP_COMBAT_TIMEOUT;
+        TimeSpan _combatTimer = PVP_COMBAT_TIMEOUT;
 
 
         public PvPCombatReference(Unit first, Unit second) : base(first, second, true) { }
 
-        public bool Update(uint tdiff)
+        public bool Update(TimeSpan tdiff)
         {
             if (_combatTimer <= tdiff)
                 return false;

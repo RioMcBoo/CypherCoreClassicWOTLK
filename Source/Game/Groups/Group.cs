@@ -28,7 +28,7 @@ namespace Game.Groups
             m_lootThreshold = ItemQuality.Uncommon;
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             if (_isLeaderOffline)
             {
@@ -1391,7 +1391,7 @@ namespace Game.Groups
             }
         }
 
-        public void StartCountdown(CountdownTimerType timerType, TimeSpan duration, long? startTime = null)
+        public void StartCountdown(CountdownTimerType timerType, TimeSpan duration, ServerTime? startTime = null)
         {
             if (timerType < 0 || (int)timerType >= _countdowns.Length)
                 return;
@@ -1449,12 +1449,12 @@ namespace Game.Groups
             return slot.roles;
         }
 
-        void UpdateReadyCheck(uint diff)
+        void UpdateReadyCheck(TimeSpan diff)
         {
             if (!m_readyCheckStarted)
                 return;
 
-            m_readyCheckTimer -= TimeSpan.FromMilliseconds(diff);
+            m_readyCheckTimer -= diff;
             if (m_readyCheckTimer <= TimeSpan.Zero)
                 EndReadyCheck();
         }
@@ -1479,7 +1479,7 @@ namespace Game.Groups
             readyCheckStarted.PartyGUID = m_guid;
             readyCheckStarted.PartyIndex = (sbyte)GetGroupCategory();
             readyCheckStarted.InitiatorGUID = starterGuid;
-            readyCheckStarted.Duration = (uint)duration.TotalMilliseconds;
+            readyCheckStarted.Duration = duration;
             BroadcastPacket(readyCheckStarted, false);
         }
 
@@ -1849,7 +1849,7 @@ namespace Game.Groups
         public void StartLeaderOfflineTimer()
         {
             _isLeaderOffline = true;
-            _leaderOfflineTimer.Reset(2 * Time.Minute * Time.InMilliseconds);
+            _leaderOfflineTimer.Reset((Minutes)2);
         }
 
         public void StopLeaderOfflineTimer()
@@ -2007,26 +2007,26 @@ namespace Game.Groups
 
     public class CountdownInfo
     {
-        long _startTime;
-        long _endTime;
+        ServerTime _startTime;
+        ServerTime _endTime;
 
-        public long GetTimeLeft()
+        public TimeSpan GetTimeLeft()
         {
-            return Math.Max(_endTime - GameTime.GetGameTime(), 0);
+            return Time.Max(_endTime - LoopTime.ServerTime, TimeSpan.Zero);
         }
 
-        public void StartCountdown(TimeSpan duration, long? startTime)
+        public void StartCountdown(TimeSpan duration, ServerTime? startTime)
         {
-            _startTime = startTime.HasValue ? startTime.Value : GameTime.GetGameTime();
-            _endTime = (long)(_startTime + duration.TotalSeconds);
+            _startTime = startTime.HasValue ? startTime.Value : LoopTime.ServerTime;
+            _endTime = _startTime + duration;
         }
 
         public bool IsRunning()
         {
-            return _endTime > GameTime.GetGameTime();
+            return _endTime > LoopTime.ServerTime;
         }
 
-        public long GetTotalTime()
+        public TimeSpan GetTotalTime()
         {
             return _endTime - _startTime;
         }

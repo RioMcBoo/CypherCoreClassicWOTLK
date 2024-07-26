@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -18,13 +19,13 @@ namespace Game.BattleGrounds.Zones
             BgObjects = new ObjectGuid[SAObjectTypes.MaxObj];
             BgCreatures = new ObjectGuid[SACreatureTypes.Max + SAGraveyards.Max];
             TimerEnabled = false;
-            UpdateWaitTimer = 0;
+            UpdateWaitTimer = TimeSpan.Zero;
             SignaledRoundTwo = false;
             SignaledRoundTwoHalfMin = false;
             InitSecondRound = false;
             Attackers = BattleGroundTeamId.Alliance;
-            TotalTime = 0;
-            EndRoundTimer = 0;
+            TotalTime = TimeSpan.Zero;
+            EndRoundTimer = TimeSpan.Zero;
             ShipsStarted = false;
             Status = SAStatus.NotStarted;
 
@@ -34,13 +35,13 @@ namespace Game.BattleGrounds.Zones
             for (byte i = 0; i < 2; i++)
             {
                 RoundScores[i].winner = BattleGroundTeamId.Alliance;
-                RoundScores[i].time = 0;
+                RoundScores[i].time = TimeSpan.Zero;
             }
         }
 
         public override void Reset()
         {
-            TotalTime = 0;
+            TotalTime = TimeSpan.Zero;
             Attackers = (RandomHelper.URand(0, 1) != 0 ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde);
             for (byte i = 0; i <= 5; i++)
                 GateStatus[i] = SAGateState.HordeGateOk;
@@ -144,7 +145,8 @@ namespace Game.BattleGrounds.Zones
             //By capturing GYs.
             for (byte i = 0; i < SACreatureTypes.Demolisher5; i++)
             {
-                if (AddCreature(SAMiscConst.NpcEntries[i], i, SAMiscConst.NpcSpawnlocs[i], Attackers == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance, 600) == null)
+                if (AddCreature(SAMiscConst.NpcEntries[i], i, SAMiscConst.NpcSpawnlocs[i], 
+                    Attackers == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance, (Milliseconds)600) == null)
                 {
                     Log.outError(LogFilter.Battleground, 
                         $"SOTA: couldn't spawn Cannon or demolisher, Entry: {SAMiscConst.NpcEntries[i]}, " +
@@ -165,7 +167,7 @@ namespace Game.BattleGrounds.Zones
             GetBGObject(SAObjectTypes.TitanRelic).SetFaction(atF);
             GetBGObject(SAObjectTypes.TitanRelic).Refresh();
 
-            TotalTime = 0;
+            TotalTime = TimeSpan.Zero;
             ShipsStarted = false;
 
             //Graveyards
@@ -312,7 +314,7 @@ namespace Game.BattleGrounds.Zones
             ShipsStarted = true;
         }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (InitSecondRound)
             {
@@ -336,14 +338,14 @@ namespace Game.BattleGrounds.Zones
             if (Status == SAStatus.Warmup)
             {
                 EndRoundTimer = SATimers.RoundLength;
-                UpdateWorldState(SAWorldStateIds.Timer, (int)(GameTime.GetGameTime() + EndRoundTimer));
+                UpdateWorldState(SAWorldStateIds.Timer, LoopTime.RealmTime + EndRoundTimer);
                 if (TotalTime >= SATimers.WarmupLength)
                 {
                     Creature creature = GetBGCreature(SACreatureTypes.Kanrethad);
                     if (creature != null)
                         SendChatMessage(creature, SATextIds.RoundStarted);
 
-                    TotalTime = 0;
+                    TotalTime = TimeSpan.Zero;
                     ToggleTimer();
                     DemolisherStartState(false);
                     Status = SAStatus.RoundOne;
@@ -360,14 +362,14 @@ namespace Game.BattleGrounds.Zones
                 else
                     EndRoundTimer = SATimers.RoundLength;
 
-                UpdateWorldState(SAWorldStateIds.Timer, (int)(GameTime.GetGameTime() + EndRoundTimer));
-                if (TotalTime >= 60000)
+                UpdateWorldState(SAWorldStateIds.Timer, LoopTime.RealmTime + EndRoundTimer);
+                if (TotalTime >= (Minutes)1)
                 {
                     Creature creature = GetBGCreature(SACreatureTypes.Kanrethad);
                     if (creature != null)
                         SendChatMessage(creature, SATextIds.RoundStarted);
 
-                    TotalTime = 0;
+                    TotalTime = TimeSpan.Zero;
                     ToggleTimer();
                     DemolisherStartState(false);
                     Status = SAStatus.RoundTwo;
@@ -381,7 +383,7 @@ namespace Game.BattleGrounds.Zones
                             player.RemoveAurasDueToSpell(BattlegroundConst.SpellPreparation);
                     }
                 }
-                if (TotalTime >= 30000)
+                if (TotalTime >= (Seconds)30)
                 {
                     if (!SignaledRoundTwoHalfMin)
                     {
@@ -400,12 +402,12 @@ namespace Game.BattleGrounds.Zones
                     {
                         CastSpellOnTeam(SASpellIds.EndOfRound, Team.Alliance);
                         CastSpellOnTeam(SASpellIds.EndOfRound, Team.Horde);
-                        RoundScores[0].winner = (uint)Attackers;
+                        RoundScores[0].winner = Attackers;
                         RoundScores[0].time = SATimers.RoundLength;
-                        TotalTime = 0;
+                        TotalTime = TimeSpan.Zero;
                         Status = SAStatus.SecondWarmup;
                         Attackers = (Attackers == BattleGroundTeamId.Alliance) ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance;
-                        UpdateWaitTimer = 5000;
+                        UpdateWaitTimer = (Seconds)5;
                         SignaledRoundTwo = false;
                         SignaledRoundTwoHalfMin = false;
                         InitSecondRound = true;
@@ -422,7 +424,7 @@ namespace Game.BattleGrounds.Zones
                         CastSpellOnTeam(SASpellIds.EndOfRound, Team.Alliance);
                         CastSpellOnTeam(SASpellIds.EndOfRound, Team.Horde);
                         RoundScores[1].time = SATimers.RoundLength;
-                        RoundScores[1].winner = (uint)((Attackers == BattleGroundTeamId.Alliance) ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance);
+                        RoundScores[1].winner = (Attackers == BattleGroundTeamId.Alliance) ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance;
                         if (RoundScores[0].time == RoundScores[1].time)
                             EndBattleground(0);
                         else if (RoundScores[0].time < RoundScores[1].time)
@@ -797,7 +799,7 @@ namespace Game.BattleGrounds.Zones
 
                     for (byte j = SACreatureTypes.Demolisher7; j <= SACreatureTypes.Demolisher8; j++)
                     {
-                        AddCreature(SAMiscConst.NpcEntries[j], j, SAMiscConst.NpcSpawnlocs[j], (Attackers == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance), 600);
+                        AddCreature(SAMiscConst.NpcEntries[j], j, SAMiscConst.NpcSpawnlocs[j], (Attackers == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance), (Seconds)600);
                         Creature dem = GetBGCreature(j);
                         if (dem != null)
                             dem.SetFaction(SAMiscConst.Factions[Attackers]);
@@ -825,7 +827,7 @@ namespace Game.BattleGrounds.Zones
 
                     for (byte j = SACreatureTypes.Demolisher5; j <= SACreatureTypes.Demolisher6; j++)
                     {
-                        AddCreature(SAMiscConst.NpcEntries[j], j, SAMiscConst.NpcSpawnlocs[j], Attackers == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance, 600);
+                        AddCreature(SAMiscConst.NpcEntries[j], j, SAMiscConst.NpcSpawnlocs[j], Attackers == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance, (Seconds)600);
 
                         Creature dem = GetBGCreature(j);
                         if (dem != null)
@@ -878,7 +880,7 @@ namespace Game.BattleGrounds.Zones
 
                     if (Status == SAStatus.RoundOne)
                     {
-                        RoundScores[0].winner = (uint)Attackers;
+                        RoundScores[0].winner = Attackers;
                         RoundScores[0].time = TotalTime;
                         // Achievement Storm the Beach (1310)
                         foreach (var pair in GetPlayers())
@@ -891,14 +893,14 @@ namespace Game.BattleGrounds.Zones
 
                         Attackers = (Attackers == BattleGroundTeamId.Alliance) ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance;
                         Status = SAStatus.SecondWarmup;
-                        TotalTime = 0;
+                        TotalTime = TimeSpan.Zero;
                         ToggleTimer();
 
                         Creature creature = GetBGCreature(SACreatureTypes.Kanrethad);
                         if (creature != null)
                             SendChatMessage(creature, SATextIds.Round1Finished);
 
-                        UpdateWaitTimer = 5000;
+                        UpdateWaitTimer = (Seconds)5;
                         SignaledRoundTwo = false;
                         SignaledRoundTwoHalfMin = false;
                         InitSecondRound = true;
@@ -909,7 +911,7 @@ namespace Game.BattleGrounds.Zones
                     }
                     else if (Status == SAStatus.RoundTwo)
                     {
-                        RoundScores[1].winner = (uint)Attackers;
+                        RoundScores[1].winner = Attackers;
                         RoundScores[1].time = TotalTime;
                         ToggleTimer();
                         // Achievement Storm the Beach (1310)
@@ -967,11 +969,11 @@ namespace Game.BattleGrounds.Zones
                             // Demolisher is not in list
                             if (!DemoliserRespawnList.ContainsKey(i))
                             {
-                                DemoliserRespawnList[i] = GameTime.GetGameTimeMS() + 30000;
+                                DemoliserRespawnList[i] = LoopTime.ServerTime + (Seconds)30;
                             }
                             else
                             {
-                                if (DemoliserRespawnList[i] < GameTime.GetGameTimeMS())
+                                if (DemoliserRespawnList[i] < LoopTime.ServerTime)
                                 {
                                     demolisher.Relocate(SAMiscConst.NpcSpawnlocs[i]);
                                     demolisher.Respawn();
@@ -1072,9 +1074,9 @@ namespace Game.BattleGrounds.Zones
         int Attackers;
 
         // Totale elapsed time of current round
-        uint TotalTime;
+        TimeSpan TotalTime;
         // Max time of round
-        uint EndRoundTimer;
+        TimeSpan EndRoundTimer;
         // For know if boats has start moving or not yet
         bool ShipsStarted;
         // Status of each gate (Destroy/Damage/Intact)
@@ -1088,14 +1090,14 @@ namespace Game.BattleGrounds.Zones
         // used for know we are in timer phase or not (used for worldstate update)
         bool TimerEnabled;
         // 5secs before starting the 1min countdown for second round
-        uint UpdateWaitTimer;
+        TimeSpan UpdateWaitTimer;
         // for know if warning about second round start has been sent
         bool SignaledRoundTwo;
         // for know if warning about second round start has been sent
         bool SignaledRoundTwoHalfMin;
         // for know if second round has been init
         bool InitSecondRound;
-        Dictionary<uint/*id*/, uint/*timer*/> DemoliserRespawnList = new();
+        Dictionary<uint/*id*/, ServerTime/*timer*/> DemoliserRespawnList = new();
     }
 
     class BattlegroundSAScore : BattlegroundScore
@@ -1135,8 +1137,8 @@ namespace Game.BattleGrounds.Zones
 
     struct SARoundScore
     {
-        public uint winner;
-        public uint time;
+        public int winner;
+        public TimeSpan time;
     }
 
     class SAGateInfo
@@ -1469,9 +1471,9 @@ namespace Game.BattleGrounds.Zones
 
     struct SATimers
     {
-        public const uint BoatStart = 60 * Time.InMilliseconds;
-        public const uint WarmupLength = 120 * Time.InMilliseconds;
-        public const uint RoundLength = 600 * Time.InMilliseconds;
+        public static TimeSpan BoatStart = (Minutes)1;
+        public static TimeSpan WarmupLength = (Minutes)2;
+        public static TimeSpan RoundLength = (Minutes)10;
     }
 
     struct SASoundIds

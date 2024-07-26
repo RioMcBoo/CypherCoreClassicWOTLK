@@ -92,25 +92,25 @@ namespace Scripts.World.Achievements
             me.SetReactState(ReactStates.Aggressive);
             DoCast(me, SpellIds.MarkOfNatureAura, true);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(4), task =>
             {
                 // Tail Sweep is cast every two seconds, no matter what goes on in front of the dragon
                 DoCast(me, SpellIds.TailSweep);
-                task.Repeat(TimeSpan.FromSeconds(2));
+                task.Repeat(Time.SpanFromSeconds(2));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(7.5), TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(7.5), Time.SpanFromSeconds(15), task =>
             {
                 // Noxious Breath is cast on random intervals, no less than 7.5 seconds between
                 DoCast(me, SpellIds.NoxiousBreath);
-                task.Repeat(TimeSpan.FromSeconds(7.5), TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(7.5), Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12.5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12.5), Time.SpanFromSeconds(20), task =>
             {
                 // Seeping Fog appears only as "pairs", and only One pair at any given time!
                 // Despawntime is 2 minutes, so reschedule it for new cast after 2 minutes + a minor "random time" (30 seconds at max)
                 DoCast(me, SpellIds.SeepingFogLeft, true);
                 DoCast(me, SpellIds.SeepingFogRight, true);
-                task.Repeat(TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(2.5));
+                task.Repeat(Time.SpanFromMinutes(2), Time.SpanFromMinutes(2.5));
             });
         }
 
@@ -121,7 +121,7 @@ namespace Scripts.World.Achievements
                 who.CastSpell(who, SpellIds.MarkOfNature, true);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -147,19 +147,19 @@ namespace Scripts.World.Achievements
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(0), task =>
             {
                 // Chase target, but don't attack - otherwise just roam around
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target != null)
                 {
-                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+                    task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(30));
                     me.GetMotionMaster().Clear();
                     me.GetMotionMaster().MoveChase(target, 0.2f);
                 }
                 else
                 {
-                    task.Repeat(TimeSpan.FromSeconds(2.5));
+                    task.Repeat(Time.SpanFromSeconds(2.5));
                     me.GetMotionMaster().Clear();
                     me.GetMotionMaster().MoveRandom(25.0f);
                 }
@@ -174,7 +174,7 @@ namespace Scripts.World.Achievements
             Initialize();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -203,10 +203,10 @@ namespace Scripts.World.Achievements
             Initialize();
             base.Reset();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 DoCastVictim(SpellIds.LightningWave);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
+                task.Repeat(Time.SpanFromSeconds(10), Time.SpanFromSeconds(20));
             });
         }
 
@@ -249,10 +249,10 @@ namespace Scripts.World.Achievements
         {
             Initialize();
             base.Reset();
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 me.CastSpell(null, SpellIds.ShadowBoltWhirl, false);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(30));
             });
         }
 
@@ -277,7 +277,7 @@ namespace Scripts.World.Achievements
             if (spellInfo.Id == SpellIds.DrawSpirit && target.IsPlayer())
             {
                 Position targetPos = target.GetPosition();
-                me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(50));
+                me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, Time.SpanFromSeconds(50));
             }
         }
     }
@@ -304,7 +304,7 @@ namespace Scripts.World.Achievements
             if (moveType == MovementGeneratorType.Follow && data == _summonerGuid.GetCounter())
             {
                 me.CastSpell(null, SpellIds.DarkOffering, false);
-                me.DespawnOrUnsummon(TimeSpan.FromSeconds(1));
+                me.DespawnOrUnsummon(Time.SpanFromSeconds(1));
             }
         }
     }
@@ -329,10 +329,10 @@ namespace Scripts.World.Achievements
             Initialize();
             base.Reset();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 DoCastVictim(SpellIds.VolatileInfection);
-                task.Repeat(TimeSpan.FromSeconds(120));
+                task.Repeat(Time.SpanFromSeconds(120));
             });
         }
 
@@ -365,7 +365,7 @@ namespace Scripts.World.Achievements
     class boss_taerar : emerald_dragon
     {
         bool _banished;                              // used for shades activation testing
-        uint _banishedTimer;                         // counter for banishment timeout
+        TimeSpan _banishedTimer;                         // counter for banishment timeout
         byte _shades;                                // keep track of how many shades are dead
         byte _stage;                                 // check which "shade phase" we're at (75-50-25 percentage counters)
 
@@ -379,7 +379,7 @@ namespace Scripts.World.Achievements
             _stage = 1;
             _shades = 0;
             _banished = false;
-            _banishedTimer = 0;
+            _banishedTimer = TimeSpan.Zero;
         }
 
         public override void Reset()
@@ -390,15 +390,15 @@ namespace Scripts.World.Achievements
 
             base.Reset();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 DoCast(SpellIds.ArcaneBlast);
-                task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(12));
+                task.Repeat(Time.SpanFromSeconds(7), Time.SpanFromSeconds(12));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(30), task =>
             {
                 DoCast(SpellIds.BellowingRoar);
-                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(20), Time.SpanFromSeconds(30));
             });
         }
 
@@ -420,7 +420,7 @@ namespace Scripts.World.Achievements
             if (!_banished && !HealthAbovePct(100 - 25 * _stage))
             {
                 _banished = true;
-                _banishedTimer = 60000;
+                _banishedTimer = (Minutes)1;
 
                 me.InterruptNonMeleeSpells(false);
                 DoStopAttack();
@@ -441,7 +441,7 @@ namespace Scripts.World.Achievements
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!me.IsInCombat())
                 return;

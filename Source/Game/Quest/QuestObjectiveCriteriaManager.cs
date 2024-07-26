@@ -73,12 +73,12 @@ namespace Game
 
             if (!criteriaResult.IsEmpty())
             {
-                long now = GameTime.GetGameTime();
+                ServerTime now = LoopTime.ServerTime;
                 do
                 {
                     int criteriaId = criteriaResult.Read<int>(0);
                     long counter = criteriaResult.Read<long>(1);
-                    long date = criteriaResult.Read<long>(2);
+                    ServerTime date = (ServerTime)(UnixTime64)criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(criteriaId);
                     if (criteria == null)
@@ -95,7 +95,7 @@ namespace Game
                         continue;
                     }
 
-                    if (criteria.Entry.StartTimer != 0 && date + criteria.Entry.StartTimer < now)
+                    if (criteria.Entry.StartTimer != TimeSpan.Zero && date + criteria.Entry.StartTimer < now)
                         continue;
 
                     CriteriaProgress progress = new();
@@ -104,9 +104,9 @@ namespace Game
                     progress.Changed = false;
 
                     _criteriaProgress[criteriaId] = progress;
-            }
+                }
                 while (criteriaResult.NextRow());
-        }
+            }
         }
 
         public void SaveToDB(SQLTransaction trans)
@@ -144,7 +144,7 @@ namespace Game
                         stmt.SetInt64(0, _owner.GetGUID().GetCounter());
                         stmt.SetInt32(1, pair.Key);
                         stmt.SetInt64(2, pair.Value.Counter);
-                        stmt.SetInt64(3, pair.Value.Date);
+                        stmt.SetInt64(3, (UnixTime64)pair.Value.Date);
                         trans.Append(stmt);
                     }
 
@@ -176,8 +176,8 @@ namespace Game
                 criteriaUpdate.PlayerGUID = _owner.GetGUID();
                 criteriaUpdate.Flags = 0;
 
-                criteriaUpdate.CurrentTime.SetUtcTimeFromUnixTime(criteriaProgres.Date);
-                criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
+                criteriaUpdate.CurrentTime = (RealmTime)criteriaProgres.Date;
+                //criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
                 criteriaUpdate.CreationTime = 0;
 
                 SendPacket(criteriaUpdate);
@@ -209,11 +209,11 @@ namespace Game
             criteriaUpdate.Quantity = progress.Counter;
             criteriaUpdate.PlayerGUID = _owner.GetGUID();
             criteriaUpdate.Flags = 0;
-            if (criteria.Entry.StartTimer != 0)
-                criteriaUpdate.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
+            if (criteria.Entry.StartTimer != TimeSpan.Zero)
+                criteriaUpdate.Flags = timedCompleted ? 1u : 0u; // 1 is for keeping the counter at 0 in client
 
-            criteriaUpdate.CurrentTime.SetUtcTimeFromUnixTime(progress.Date);
-            criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
+            criteriaUpdate.CurrentTime = (RealmTime)progress.Date;
+            //criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
             criteriaUpdate.ElapsedTime = (uint)timeElapsed.TotalSeconds;
             criteriaUpdate.CreationTime = 0;
 

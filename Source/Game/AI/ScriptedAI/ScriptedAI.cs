@@ -42,7 +42,7 @@ namespace Game.AI
         }
 
         //Called at World update tick
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             //Check if we have a current target
             UpdateVictim();
@@ -199,7 +199,7 @@ namespace Game.AI
                     who.SetTappedBy(null);
 
                 who.ResetPlayerDamageReq();
-                who.SetLastDamagedTime(0);
+                who.SetLastDamagedTime(ServerTime.Zero);
                 who.SetCannotReachTarget(false);
             }
         }
@@ -333,10 +333,10 @@ namespace Game.AI
             return apSpell[RandomHelper.IRand(0, (int)(spellCount - 1))];
         }
 
-        public void DoTeleportTo(float x, float y, float z, uint time = 0)
+        public void DoTeleportTo(float x, float y, float z, Milliseconds time = default)
         {
             me.Relocate(x, y, z);
-            float speed = me.GetDistance(x, y, z) / (time * 0.001f);
+            Speed speed = new(me.GetDistance(x, y, z) / (time / (float)Time.MillisecondsInSecond));
             me.MonsterMoveWithSpeed(x, y, z, speed);
         }
 
@@ -373,8 +373,7 @@ namespace Game.AI
             {
                 if (player.IsAlive())
                     player.TeleportTo(me.GetMapId(), x, y, z, o, TeleportToOptions.NotLeaveCombat);
-
-        }
+            }
         }
 
         //Returns friendly unit with the most amount of hp missing from max hp
@@ -566,7 +565,7 @@ namespace Game.AI
             if (!me.IsAlive())
                 return;
 
-            me.SetCombatPulseDelay(0);
+            me.SetCombatPulseDelay(Seconds.Zero);
             me.ResetLootMode();
             _events.Reset();
             summons.DespawnAll();
@@ -597,7 +596,7 @@ namespace Game.AI
                 instance.SetBossState(_bossId, EncounterState.InProgress);
             }
 
-            me.SetCombatPulseDelay(5);
+            me.SetCombatPulseDelay((Seconds)5);
             me.SetActive(true);
             DoZoneInCombat();
             ScheduleTasks();
@@ -634,7 +633,7 @@ namespace Game.AI
                     creature.LoadCreaturesAddon();
                     creature.SetTappedBy(null);
                     creature.ResetPlayerDamageReq();
-                    creature.SetLastDamagedTime(0);
+                    creature.SetLastDamagedTime(ServerTime.Zero);
                     creature.SetCannotReachTarget(false);
                 }
             }
@@ -652,7 +651,7 @@ namespace Game.AI
             summons.Despawn(summon);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -674,18 +673,18 @@ namespace Game.AI
 
         public void _DespawnAtEvade()
         {
-            _DespawnAtEvade(TimeSpan.FromSeconds(30));
+            _DespawnAtEvade((Seconds)30);
         }
 
         public void _DespawnAtEvade(TimeSpan delayToRespawn, Creature who = null)
         {
-            if (delayToRespawn < TimeSpan.FromSeconds(2))
+            if (delayToRespawn < (Seconds)2)
             {
                 Log.outError(LogFilter.ScriptsAi, 
                     $"BossAI::_DespawnAtEvade: called with delay " +
                     $"of {delayToRespawn} seconds, defaulting to 2 (me: {me.GetGUID()})");
 
-                delayToRespawn = TimeSpan.FromSeconds(2);
+                delayToRespawn = (Seconds)2;
             }
 
             if (who == null)
@@ -768,7 +767,7 @@ namespace Game.AI
             summons.Despawn(summon);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

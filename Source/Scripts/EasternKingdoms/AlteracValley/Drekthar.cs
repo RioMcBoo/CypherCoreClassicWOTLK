@@ -41,27 +41,27 @@ namespace Scripts.EasternKingdoms.AlteracValley.Drekthar
         public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayAggro);
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)1, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Whirlwind);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(18));
+                task.Repeat((Seconds)8, (Seconds)18);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)1, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Whirlwind2);
-                task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(25));
+                task.Repeat((Seconds)7, (Seconds)25);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Knockdown);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)10, (Seconds)15);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule((Seconds)6, task =>
             {
                 DoCastVictim(SpellIds.Frenzy);
-                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)20, (Seconds)30);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule((Seconds)20, (Seconds)30, task =>
             {
                 Talk(TextIds.SayRandom);
                 task.Repeat();
@@ -86,7 +86,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Drekthar
             return true;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() || !CheckInRoom())
                 return;

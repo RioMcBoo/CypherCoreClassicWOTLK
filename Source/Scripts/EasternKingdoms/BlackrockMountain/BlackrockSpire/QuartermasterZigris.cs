@@ -30,15 +30,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Quartermaster
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule((Seconds)1, task =>
             {
                 DoCastVictim(SpellIds.Shoot);
-                task.Repeat(TimeSpan.FromMilliseconds(500));
+                task.Repeat((Milliseconds)500);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(16), task =>
+            _scheduler.Schedule((Seconds)16, task =>
             {
                 DoCastVictim(SpellIds.Stunbomb);
-                task.Repeat(TimeSpan.FromSeconds(14));
+                task.Repeat((Seconds)14);
             });
         }
 
@@ -47,7 +47,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Quartermaster
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

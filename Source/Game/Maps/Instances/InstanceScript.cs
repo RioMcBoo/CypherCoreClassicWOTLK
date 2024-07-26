@@ -144,7 +144,7 @@ namespace Game.Maps
             {
                 for (int i = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
                     bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
-        }
+            }
         }
 
         public virtual void UpdateDoorState(GameObject door)
@@ -369,8 +369,8 @@ namespace Game.Maps
                             {
                                 if (minion.IsWorldBoss() && minion.IsAlive())
                                     return false;
+                            }
                         }
-                    }
                     }
 
                     DungeonEncounterRecord dungeonEncounter = null;
@@ -378,7 +378,7 @@ namespace Game.Maps
                     {
                         case EncounterState.InProgress:
                         {
-                            uint resInterval = GetCombatResurrectionChargeInterval();
+                            TimeSpan resInterval = GetCombatResurrectionChargeInterval();
                             InitializeCombatResurrections(1, resInterval);
                             SendEncounterStart(1, 9, resInterval, resInterval);
 
@@ -544,7 +544,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: HandleGameObject failed");
         }
 
-        public void DoUseDoorOrButton(ObjectGuid uiGuid, uint withRestoreTime = 0, bool useAlternativeState = false)
+        public void DoUseDoorOrButton(ObjectGuid uiGuid, Milliseconds withRestoreTime = default, bool useAlternativeState = false)
         {
             if (uiGuid.IsEmpty())
                 return;
@@ -564,7 +564,7 @@ namespace Game.Maps
                     Log.outError(LogFilter.Scripts,
                         $"InstanceScript: DoUseDoorOrButton can't use gameobject entry {go.GetEntry()}, " +
                         $"because Type is {go.GetGoType()}.");
-            }
+                }
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton failed");
@@ -588,7 +588,7 @@ namespace Game.Maps
                     Log.outError(LogFilter.Scripts,
                         $"InstanceScript: DoCloseDoorOrButton can't use gameobject entry {go.GetEntry()}, " +
                         $"because Type is {go.GetGoType()}.");
-            }
+                }
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton failed");
@@ -618,7 +618,7 @@ namespace Game.Maps
                 if (go.IsSpawned())
                     return;
 
-                go.SetRespawnTime((int)timeToDespawn.TotalSeconds);
+                go.SetRespawnTime(timeToDespawn);
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject failed");
@@ -678,8 +678,8 @@ namespace Game.Maps
                 {
                     if (controlled.IsInWorld && controlled.IsCreature())
                         controlled.RemoveAurasDueToSpell(spell);
+                }
             }
-        }
         }
 
         // Cast spell on all players in instance
@@ -719,8 +719,8 @@ namespace Game.Maps
                 {
                     if (controlled.IsInWorld && controlled.IsCreature())
                         controlled.CastSpell(player, spell, true);
+                }
             }
-        }
         }
 
         public DungeonEncounterRecord GetBossDungeonEncounter(int id)
@@ -848,13 +848,13 @@ namespace Game.Maps
             }
         }
 
-        void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, uint inCombatResChargeRecovery = 0, uint nextCombatResChargeTime = 0)
+        void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, TimeSpan inCombatResChargeRecovery = default, TimeSpan nextCombatResChargeTime = default)
         {
             InstanceEncounterStart encounterStartMessage = new();
             encounterStartMessage.InCombatResCount = inCombatResCount;
             encounterStartMessage.MaxInCombatResCount = maxInCombatResCount;
-            encounterStartMessage.CombatResChargeRecovery = inCombatResChargeRecovery;
-            encounterStartMessage.NextCombatResChargeTime = nextCombatResChargeTime;
+            encounterStartMessage.CombatResChargeRecovery = (Milliseconds)inCombatResChargeRecovery;
+            encounterStartMessage.NextCombatResChargeTime = (Milliseconds)nextCombatResChargeTime;
 
             instance.SendToPlayers(encounterStartMessage);
         }
@@ -893,7 +893,7 @@ namespace Game.Maps
             instance.DoOnPlayers(player => PhasingHandler.SendToPlayer(player));
         }
 
-        public void UpdateCombatResurrection(uint diff)
+        public void UpdateCombatResurrection(TimeSpan diff)
         {
             if (!_combatResurrectionTimerStarted)
                 return;
@@ -904,10 +904,10 @@ namespace Game.Maps
                 _combatResurrectionTimer -= diff;
         }
 
-        void InitializeCombatResurrections(byte charges = 1, uint interval = 0)
+        void InitializeCombatResurrections(byte charges = 1, TimeSpan interval = default)
         {
             _combatResurrectionCharges = charges;
-            if (interval == 0)
+            if (interval == default)
                 return;
 
             _combatResurrectionTimer = interval;
@@ -922,7 +922,7 @@ namespace Game.Maps
 
             var gainCombatResurrectionCharge = new InstanceEncounterGainCombatResurrectionCharge();
             gainCombatResurrectionCharge.InCombatResCount = _combatResurrectionCharges;
-            gainCombatResurrectionCharge.CombatResChargeRecovery = _combatResurrectionTimer;
+            gainCombatResurrectionCharge.CombatResChargeRecovery = (Milliseconds)_combatResurrectionTimer;
             instance.SendToPlayers(gainCombatResurrectionCharge);
         }
 
@@ -936,16 +936,16 @@ namespace Game.Maps
         public void ResetCombatResurrections()
         {
             _combatResurrectionCharges = 0;
-            _combatResurrectionTimer = 0;
+            _combatResurrectionTimer = TimeSpan.Zero;
             _combatResurrectionTimerStarted = false;
         }
 
-        public uint GetCombatResurrectionChargeInterval()
+        public TimeSpan GetCombatResurrectionChargeInterval()
         {
-            uint interval = 0;
+            TimeSpan interval = default;
             int playerCount = instance.GetPlayers().Count;
             if (playerCount != 0)
-                interval = (uint)(90 * Time.Minute * Time.InMilliseconds / playerCount);
+                interval = Time.SpanFromMinutes(90) / playerCount;
 
             return interval;
         }
@@ -959,7 +959,7 @@ namespace Game.Maps
             return false;
         }
 
-        public virtual void Update(uint diff) { }
+        public virtual void Update(TimeSpan diff) { }
 
         // Called when a player successfully enters the instance.
         public virtual void OnPlayerEnter(Player player) { }
@@ -1056,7 +1056,7 @@ namespace Game.Maps
         List<int> _activatedAreaTriggers = new();
         int _entranceId;
         int _temporaryEntranceId;
-        uint _combatResurrectionTimer;
+        TimeSpan _combatResurrectionTimer;
         byte _combatResurrectionCharges; // the counter for available battle resurrections
         bool _combatResurrectionTimerStarted;
     }

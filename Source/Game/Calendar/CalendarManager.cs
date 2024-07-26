@@ -25,15 +25,15 @@ namespace Game
         public void LoadFromDB()
         {
             uint count = 0;
-            uint oldMSTime = Time.GetMSTime();
-                        
+            RelativeTime oldMSTime = Time.NowRelative;
+
             _maxEventId = 0;
             _maxInviteId = 0;
 
             {
                 //                                              0        1      2      3            4          5          6     7      8
                 SQLResult result = DB.Characters.Query("SELECT EventID, Owner, Title, Description, EventType, TextureID, Date, Flags, LockDate FROM calendar_events");
-            
+
                 if (!result.IsEmpty())
                 {
                     do
@@ -44,9 +44,9 @@ namespace Game
                         string description = result.Read<string>(3);
                         CalendarEventType type = (CalendarEventType)result.Read<byte>(4);
                         int textureID = result.Read<int>(5);
-                        long date = result.Read<long>(6);
+                        RealmTime date = (RealmTime)(UnixTime64)result.Read<long>(6);
                         CalendarFlags flags = (CalendarFlags)result.Read<uint>(7);
-                        long lockDate = result.Read<long>(8);
+                        RealmTime lockDate = (RealmTime)(UnixTime64)result.Read<long>(8);
                         long guildID = 0;
 
                         if (flags.HasAnyFlag(CalendarFlags.GuildEvent) || flags.HasAnyFlag(CalendarFlags.WithoutInvites))
@@ -61,16 +61,16 @@ namespace Game
                     }
                     while (result.NextRow());
                 }
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar events in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar events in {Time.Diff(oldMSTime)} ms.");
             }
 
             count = 0;
-            oldMSTime = Time.GetMSTime();
+            oldMSTime = Time.NowRelative;
 
             {
                 //                                    0         1        2        3       4       5             6               7
                 SQLResult result = DB.Characters.Query("SELECT InviteID, EventID, Invitee, Sender, Status, ResponseTime, ModerationRank, Note FROM calendar_invites");
-            
+
                 if (!result.IsEmpty())
                 {
                     do
@@ -80,7 +80,7 @@ namespace Game
                         ObjectGuid invitee = ObjectGuid.Create(HighGuid.Player, result.Read<long>(2));
                         ObjectGuid senderGUID = ObjectGuid.Create(HighGuid.Player, result.Read<long>(3));
                         CalendarInviteStatus status = (CalendarInviteStatus)result.Read<byte>(4);
-                        long responseTime = result.Read<long>(5);
+                        RealmTime responseTime = (RealmTime)(UnixTime64)result.Read<long>(5);
                         CalendarModerationRank rank = (CalendarModerationRank)result.Read<byte>(6);
                         string note = result.Read<string>(7);
 
@@ -94,7 +94,7 @@ namespace Game
                     while (result.NextRow());
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar invites in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar invites in {Time.Diff(oldMSTime)} ms.");
             }
 
             for (long i = 1; i < _maxEventId; ++i)
@@ -107,7 +107,7 @@ namespace Game
             {
                 if (GetInvite(i) == null)
                     _freeInviteIds.Add(i);
-        }
+            }
         }
 
         public void AddEvent(CalendarEvent calendarEvent, CalendarSendEventType sendType)
@@ -234,9 +234,9 @@ namespace Game
             stmt.SetString(3, calendarEvent.Description);
             stmt.SetUInt8(4, (byte)calendarEvent.EventType);
             stmt.SetInt32(5, calendarEvent.TextureId);
-            stmt.SetInt64(6, calendarEvent.Date);
+            stmt.SetInt64(6, (UnixTime64)calendarEvent.Date);
             stmt.SetUInt32(7, (uint)calendarEvent.Flags);
-            stmt.SetInt64(8, calendarEvent.LockDate);
+            stmt.SetInt64(8, (UnixTime64)calendarEvent.LockDate);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
         }
@@ -249,7 +249,7 @@ namespace Game
             stmt.SetInt64(2, invite.InviteeGuid.GetCounter());
             stmt.SetInt64(3, invite.SenderGuid.GetCounter());
             stmt.SetUInt8(4, (byte)invite.Status);
-            stmt.SetInt64(5, invite.ResponseTime);
+            stmt.SetInt64(5, (UnixTime64)invite.ResponseTime);
             stmt.SetUInt8(6, (byte)invite.Rank);
             stmt.SetString(7, invite.Note);
             DB.Characters.ExecuteOrAppend(trans, stmt);
@@ -285,8 +285,8 @@ namespace Game
                     if (calendarEvent.IsGuildEvent() && calendarEvent.GuildId == guildId)
                     {
                         RemoveInvite(playerCalendarEvent.InviteId, playerCalendarEvent.EventId, guid);
-            }
-        }
+                    }
+                }
             }
         }
 
@@ -352,7 +352,7 @@ namespace Game
 
         public void DeleteOldEvents()
         {
-            long oldEventsTime = GameTime.GetGameTime() - SharedConst.CalendarOldEventsDeletionTime;
+            RealmTime oldEventsTime = LoopTime.RealmTime - SharedConst.CalendarOldEventsDeletionTime;
 
             foreach (var calendarEvent in _events)
             {
@@ -386,7 +386,7 @@ namespace Game
                 {
                     if (calendarEvent.GuildId == guildId)
                         result.Add(calendarEvent);
-            }
+                }
             }
 
             return result;
@@ -413,7 +413,7 @@ namespace Game
                 {
                     if (calendarEvent.GuildId == player.GetGuildId())
                         events.Add(calendarEvent);
-            }
+                }
             }
 
             return events;
@@ -475,8 +475,8 @@ namespace Game
                 packet.InviteGuid = invitee;
                 packet.InviteID = calendarEvent != null ? invite.InviteId : 0;
                 packet.Level = (byte)level;
-                packet.ResponseTime.SetUtcTimeFromUnixTime(invite.ResponseTime);
-                packet.ResponseTime += receiver.GetSession().GetTimezoneOffset();
+                packet.ResponseTime = invite.ResponseTime;
+                //packet.ResponseTime += receiver.GetSession().GetTimezoneOffset();
                 packet.Status = invite.Status;
                 packet.Type = (byte)(calendarEvent != null ? calendarEvent.IsGuildEvent() ? 1 : 0 : 0); // Correct ?
                 packet.ClearPending = calendarEvent != null ? !calendarEvent.IsGuildEvent() : true; // Correct ?
@@ -496,28 +496,32 @@ namespace Game
                 {
                     foreach (Player receiver in GetAllEventRelatives(calendarEvent))
                         packetBuilder(receiver);
+                }
             }
         }
-        }
 
-        public void SendCalendarEventUpdateAlert(CalendarEvent calendarEvent, long originalDate)
+        public void SendCalendarEventUpdateAlert(CalendarEvent calendarEvent, RealmTime originalDate)
         {
             var packetBuilder = (Player receiver) =>
             {
                 CalendarEventUpdatedAlert packet = new();
                 packet.ClearPending = calendarEvent.OwnerGuid == receiver.GetGUID();
-                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
-                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.Date = calendarEvent.Date;
+                //packet.Date += receiver.GetSession().GetTimezoneOffset();
                 packet.Description = calendarEvent.Description;
                 packet.EventID = calendarEvent.EventId;
+                packet.EventClubID = calendarEvent.GuildId;
                 packet.EventName = calendarEvent.Title;
                 packet.EventType = calendarEvent.EventType;
                 packet.Flags = calendarEvent.Flags;
-                packet.LockDate.SetUtcTimeFromUnixTime(calendarEvent.LockDate); // Always 0 ?
-                if (calendarEvent.LockDate != 0)
-                    packet.LockDate += receiver.GetSession().GetTimezoneOffset();
-                packet.OriginalDate.SetUtcTimeFromUnixTime(originalDate);
-                packet.OriginalDate += receiver.GetSession().GetTimezoneOffset();
+                packet.LockDate = calendarEvent.LockDate; // Always 0 ?
+                if (calendarEvent.LockDate != RealmTime.Zero)
+                {
+                    //packet.LockDate += receiver.GetSession().GetTimezoneOffset();
+                }
+
+                packet.OriginalDate = originalDate;
+                //packet.OriginalDate += receiver.GetSession().GetTimezoneOffset();
                 packet.TextureID = calendarEvent.TextureId;
 
                 receiver.SendPacket(packet);
@@ -533,13 +537,13 @@ namespace Game
             {
                 CalendarInviteStatusPacket packet = new();
                 packet.ClearPending = invite.InviteeGuid == receiver.GetGUID();
-                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
-                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.Date = calendarEvent.Date;
+                //packet.Date += receiver.GetSession().GetTimezoneOffset();
                 packet.EventID = calendarEvent.EventId;
                 packet.Flags = calendarEvent.Flags;
                 packet.InviteGuid = invite.InviteeGuid;
-                packet.ResponseTime.SetUtcTimeFromUnixTime(invite.ResponseTime);
-                packet.ResponseTime += receiver.GetSession().GetTimezoneOffset();
+                packet.ResponseTime = invite.ResponseTime;
+                //packet.ResponseTime += receiver.GetSession().GetTimezoneOffset();
                 packet.Status = invite.Status;
 
                 receiver.SendPacket(packet);
@@ -555,8 +559,8 @@ namespace Game
             {
                 CalendarEventRemovedAlert packet = new();
                 packet.ClearPending = calendarEvent.OwnerGuid == receiver.GetGUID();
-                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
-                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.Date = calendarEvent.Date;
+                //packet.Date += receiver.GetSession().GetTimezoneOffset();
                 packet.EventID = calendarEvent.EventId;
 
                 receiver.SendPacket(packet);
@@ -593,8 +597,8 @@ namespace Game
             var packetBuilder = (Player receiver) =>
             {
                 CalendarInviteAlert packet = new();
-                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
-                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.Date = calendarEvent.Date;
+                //packet.Date += receiver.GetSession().GetTimezoneOffset();
                 packet.EventID = calendarEvent.EventId;
                 packet.EventName = calendarEvent.Title;
                 packet.EventType = calendarEvent.EventType;
@@ -631,17 +635,19 @@ namespace Game
                 return;
 
             CalendarSendEvent packet = new();
-            packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
-            packet.Date += player.GetSession().GetTimezoneOffset();
+            packet.Date = calendarEvent.Date;
+            //packet.Date += player.GetSession().GetTimezoneOffset();
             packet.Description = calendarEvent.Description;
             packet.EventID = calendarEvent.EventId;
             packet.EventName = calendarEvent.Title;
             packet.EventType = sendType;
             packet.Flags = calendarEvent.Flags;
             packet.GetEventType = calendarEvent.EventType;
-            packet.LockDate.SetUtcTimeFromUnixTime(calendarEvent.LockDate); // Always 0 ?
-            if (calendarEvent.LockDate != 0)
-                packet.LockDate += player.GetSession().GetTimezoneOffset();
+            packet.LockDate = calendarEvent.LockDate; // Always 0 ?
+            if (calendarEvent.LockDate != Time.Zero)
+            {
+                //packet.LockDate += player.GetSession().GetTimezoneOffset();
+            }
             packet.OwnerGuid = calendarEvent.OwnerGuid;
             packet.TextureID = calendarEvent.TextureId;
             packet.EventGuildID = calendarEvent.GuildId;
@@ -663,6 +669,7 @@ namespace Game
                 inviteInfo.InviteType = (byte)(calendarEvent.IsGuildEvent() && calendarEvent.GuildId == inviteeGuildId ? 1 : 0);
                 inviteInfo.InviteID = calendarInvite.InviteId;
                 inviteInfo.ResponseTime = calendarInvite.ResponseTime;
+                //inviteInfo.ResponseTime += player.GetSession().GetTimezoneOffset();
                 inviteInfo.Notes = calendarInvite.Note;
 
                 packet.Invites.Add(inviteInfo);
@@ -677,8 +684,8 @@ namespace Game
             if (player != null)
             {
                 CalendarInviteRemovedAlert packet = new();
-                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
-                packet.Date += player.GetSession().GetTimezoneOffset();
+                packet.Date = calendarEvent.Date;
+                //packet.Date += player.GetSession().GetTimezoneOffset();
                 packet.EventID = calendarEvent.EventId;
                 packet.Flags = calendarEvent.Flags;
                 packet.Status = status;
@@ -743,7 +750,7 @@ namespace Game
                 {
                     if (!calendarEvent.IsGuildEvent() || player.GetGuildId() != calendarEvent.GuildId)
                         relatedPlayers.Add(player);
-            }
+                }
             }
 
             return relatedPlayers;
@@ -764,7 +771,12 @@ namespace Game
         public long EventId { get; set; }
         public ObjectGuid InviteeGuid { get; set; }
         public ObjectGuid SenderGuid { get; set; }
-        public long ResponseTime { get; set; }
+        /// <summary>
+        /// Save ResponseTime as RealmTime to keep <br/>
+        /// <text cref="Framework.Constants.SharedConst.CalendarDefaultResponseTime">the minimal WowTime</text><br/>
+        /// from time shifting when converting between RealmTime/ServerTime
+        /// </summary>
+        public RealmTime ResponseTime { get; set; } 
         public CalendarInviteStatus Status { get; set; }
         public CalendarModerationRank Rank { get; set; }
         public string Note { get; set; }
@@ -772,7 +784,7 @@ namespace Game
         public CalendarInvite()
         {
             InviteId = 1;
-            ResponseTime = 0;
+            ResponseTime = RealmTime.Zero;
             Status = CalendarInviteStatus.Invited;
             Rank = CalendarModerationRank.Player;
             Note = "";
@@ -790,7 +802,7 @@ namespace Game
             Note = calendarInvite.Note;
         }
 
-        public CalendarInvite(long inviteId, long eventId, ObjectGuid invitee, ObjectGuid senderGUID, long responseTime, CalendarInviteStatus status, CalendarModerationRank rank, string note)
+        public CalendarInvite(long inviteId, long eventId, ObjectGuid invitee, ObjectGuid senderGUID, RealmTime responseTime, CalendarInviteStatus status, CalendarModerationRank rank, string note)
         {
             InviteId = inviteId;
             EventId = eventId;
@@ -817,11 +829,11 @@ namespace Game
         public long GuildId { get; set; }
         public CalendarEventType EventType { get; set; }
         public int TextureId { get; set; }
-        public long Date { get; set; }
+        public RealmTime Date { get; set; }
         public CalendarFlags Flags { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public long LockDate { get; set; }
+        public RealmTime LockDate { get; set; }
 
         public CalendarEvent(CalendarEvent calendarEvent, long eventId)
         {
@@ -837,7 +849,7 @@ namespace Game
             Description = calendarEvent.Description;
         }
 
-        public CalendarEvent(long eventId, ObjectGuid ownerGuid, long guildId, CalendarEventType type, int textureId, long date, CalendarFlags flags, string title, string description, long lockDate)
+        public CalendarEvent(long eventId, ObjectGuid ownerGuid, long guildId, CalendarEventType type, int textureId, RealmTime date, CalendarFlags flags, string title, string description, RealmTime lockDate)
         {
             EventId = eventId;
             OwnerGuid = ownerGuid;
@@ -867,12 +879,14 @@ namespace Game
 
         public string BuildCalendarMailBody(Player invitee)
         {
-            WowTime time = new();
-            time.SetUtcTimeFromUnixTime(Date);
-            if (invitee != null)
-                time += invitee.GetSession().GetTimezoneOffset();
+             RealmTime time = Date;
 
-            return time.GetPackedTime().ToString();
+            if (invitee != null)
+            {
+                //time = Date + invitee.GetSession().GetTimezoneOffset();
+            }
+
+            return ((WowTime)time).ToString();
         }
 
         public bool IsGuildEvent() { return IsGuildEvent(Flags); }

@@ -633,7 +633,7 @@ namespace Game
                 var rewards = Global.GuildMgr.GetGuildRewards();
 
                 GuildRewardList rewardList = new();
-                rewardList.Version = GameTime.GetGameTime();
+                rewardList.Version = LoopTime.ServerTime;
 
                 for (int i = 0; i < rewards.Count; i++)
                 {

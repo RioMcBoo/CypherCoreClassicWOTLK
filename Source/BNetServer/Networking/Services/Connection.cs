@@ -18,8 +18,8 @@ namespace BNetServer.Networking
 
             response.ServerId = new ProcessId();
             response.ServerId.Label = (uint)Environment.ProcessId;
-            response.ServerId.Epoch = (uint)Time.UnixTime;
-            response.ServerTime = (ulong)Time.UnixTimeMilliseconds;
+            response.ServerId.Epoch = (uint)(UnixTime)Time.Now;
+            response.ServerTime = (ulong)(UnixTimeMS)Time.Now;
 
             response.UseBindlessRpc = request.UseBindlessRpc;
 

@@ -26,7 +26,7 @@ namespace Game.Entities
 
         public static void LoadMountDefinitions()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.World.Query("SELECT spellId, otherFactionSpellId FROM mount_definitions");
             if (result.IsEmpty())
@@ -59,7 +59,8 @@ namespace Game.Entities
                 FactionSpecificMounts[spellId] = otherFactionSpellId;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} mount definitions in {1} ms", FactionSpecificMounts.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {FactionSpecificMounts.Count} mount definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public CollectionMgr(WorldSession owner)

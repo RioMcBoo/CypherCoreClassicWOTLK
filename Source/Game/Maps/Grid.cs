@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Maps
@@ -11,16 +12,16 @@ namespace Game.Maps
     {
         public GridInfo()
         {
-            i_timer = new TimeTracker(0);
-            vis_Update = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
+            i_timer = new TimeTracker();
+            vis_Update = new PeriodicTimer(Milliseconds.Zero, (Milliseconds)RandomHelper.IRand(0, 1000));
             i_unloadActiveLockCount = 0;
             i_unloadExplicitLock = false;
         }
 
-        public GridInfo(long expiry, bool unload = true)
+        public GridInfo(TimeSpan expiry, bool unload = true)
         {
-            i_timer = new TimeTracker((uint)expiry);
-            vis_Update = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
+            i_timer = new TimeTracker(expiry);
+            vis_Update = new PeriodicTimer(Milliseconds.Zero, (Milliseconds)RandomHelper.IRand(0, 1000));
             i_unloadActiveLockCount = 0;
             i_unloadExplicitLock = !unload;
         }
@@ -55,14 +56,14 @@ namespace Game.Maps
             i_timer = pTimer;
         }
 
-        public void ResetTimeTracker(long interval)
+        public void ResetTimeTracker(TimeSpan interval)
         {
-            i_timer.Reset((uint)interval);
+            i_timer.Reset(interval);
         }
 
-        public void UpdateTimeTracker(long diff)
+        public void UpdateTimeTracker(TimeSpan diff)
         {
-            i_timer.Update((uint)diff);
+            i_timer.Update(diff);
         }
 
         public PeriodicTimer GetRelocationTimer()
@@ -79,7 +80,7 @@ namespace Game.Maps
 
     public class Grid
     {
-        public Grid(int id, int x, int y, long expiry, bool unload = true)
+        public Grid(int id, int x, int y, TimeSpan expiry, bool unload = true)
         {
             gridId = id;
             gridX = x;
@@ -96,7 +97,7 @@ namespace Game.Maps
             }
         }
 
-        public Grid(Cell cell, uint expiry, bool unload = true) : this(cell.GetId(), cell.GetGridX(), cell.GetGridY(), expiry, unload) { }
+        public Grid(Cell cell, TimeSpan expiry, bool unload = true) : this(cell.GetId(), cell.GetGridX(), cell.GetGridY(), expiry, unload) { }
 
         public GridCell GetGridCell(int x, int y)
         {
@@ -173,17 +174,17 @@ namespace Game.Maps
             gridInfo.DecUnloadActiveLock();
         }
 
-        public void ResetTimeTracker(long interval)
+        public void ResetTimeTracker(TimeSpan interval)
         {
             gridInfo.ResetTimeTracker(interval);
         }
 
-        public void UpdateTimeTracker(long diff)
+        public void UpdateTimeTracker(TimeSpan diff)
         {
             gridInfo.UpdateTimeTracker(diff);
         }
 
-        public void Update(Map map, uint diff)
+        public void Update(Map map, TimeSpan diff)
         {
             switch (GetGridState())
             {
@@ -234,7 +235,7 @@ namespace Game.Maps
             {
                 for (int y = 0; y < MapConst.MaxCells; ++y)
                     GetGridCell(x, y).Visit(visitor);
-        }
+            }
         }
 
         public void VisitGrid(int x, int y, Visitor visitor)

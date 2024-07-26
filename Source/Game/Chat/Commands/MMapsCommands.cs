@@ -77,7 +77,7 @@ namespace Game.Chat
             for (uint i = 0; i < pointPath.Length; ++i)
             {
                 player.SummonCreature(1, pointPath[i].X, pointPath[i].Y, pointPath[i].Z, 0, 
-                    TempSummonType.TimedDespawn, TimeSpan.FromSeconds(9));
+                    TempSummonType.TimedDespawn, (Seconds)9);
             }
             return true;
         }
@@ -256,7 +256,7 @@ namespace Game.Chat
                 handler.SendSysMessage($"Found {creatureList.Count} Creatures.");
 
                 uint paths = 0;
-                uint uStartTime = Time.GetMSTime();
+                RelativeTime uStartTime = Time.NowRelative;
 
                 float gx, gy, gz;
                 obj.GetPosition(out gx, out gy, out gz);
@@ -266,9 +266,7 @@ namespace Game.Chat
                     path.CalculatePath(gx, gy, gz);
                     ++paths;
                 }
-
-                uint uPathLoadTime = Time.GetMSTimeDiffToNow(uStartTime);
-                handler.SendSysMessage("Generated {0} paths in {1} ms", paths, uPathLoadTime);
+                handler.SendSysMessage($"Generated {paths} paths in {Time.Diff(uStartTime)} ms.");
             }
             else
                 handler.SendSysMessage($"No creatures in {radius} yard range.");

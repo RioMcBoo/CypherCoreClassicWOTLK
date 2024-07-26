@@ -51,25 +51,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Blastwave);
-                task.Repeat(TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)20);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule((Seconds)2, task =>
             {
                 DoCastVictim(SpellIds.Shout);
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule((Seconds)6, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(7));
+                task.Repeat((Seconds)7);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Knockaway);
-                task.Repeat(TimeSpan.FromSeconds(14));
+                task.Repeat((Seconds)14);
             });
         }
 
@@ -78,7 +78,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -88,10 +88,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                 {
-                    Creature warlord = me.SummonCreature(MiscConst.NpcSpirestoneWarlord, MiscConst.SummonLocation1, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+                    Creature warlord = me.SummonCreature(MiscConst.NpcSpirestoneWarlord, MiscConst.SummonLocation1, TempSummonType.TimedDespawn, (Minutes)5);
                     if (warlord != null)
                         warlord.GetAI().AttackStart(target);
-                    Creature berserker = me.SummonCreature(MiscConst.NpcSmolderthornBerserker, MiscConst.SummonLocation2, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+                    Creature berserker = me.SummonCreature(MiscConst.NpcSmolderthornBerserker, MiscConst.SummonLocation2, TempSummonType.TimedDespawn, (Minutes)5);
                     if (berserker != null)
                         berserker.GetAI().AttackStart(target);
                     Summoned = true;

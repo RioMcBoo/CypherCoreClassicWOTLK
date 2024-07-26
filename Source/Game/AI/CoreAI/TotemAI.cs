@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
+using System;
 
 namespace Game.AI
 {
@@ -19,7 +20,7 @@ namespace Game.AI
             _victimGuid = ObjectGuid.Empty;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (me.ToTotem().GetTotemType() != TotemType.Active)
                 return;

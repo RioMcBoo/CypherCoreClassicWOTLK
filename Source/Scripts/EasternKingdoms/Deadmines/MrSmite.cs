@@ -7,6 +7,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Spells;
+using System;
 
 namespace Scripts.EasternKingdoms.Deadmines
 {
@@ -34,13 +35,13 @@ namespace Scripts.EasternKingdoms.Deadmines
     class boss_mr_smite : ScriptedAI
     {
         InstanceScript instance;
-        uint uiTrashTimer;
-        uint uiSlamTimer;
+        TimeSpan uiTrashTimer;
+        TimeSpan uiSlamTimer;
 
         byte uiHealth;
 
         uint uiPhase;
-        uint uiTimer;
+        TimeSpan uiTimer;
 
         bool uiIsMoving;
 
@@ -52,13 +53,13 @@ namespace Scripts.EasternKingdoms.Deadmines
 
         void Initialize()
         {
-            uiTrashTimer = RandomHelper.URand(5000, 9000);
-            uiSlamTimer = 9000;
+            uiTrashTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(5000, 9000));
+            uiSlamTimer = Time.SpanFromMilliseconds(9000);
 
             uiHealth = 0;
 
             uiPhase = 0;
-            uiTimer = 0;
+            uiTimer = TimeSpan.Zero;
 
             uiIsMoving = false;
         }
@@ -84,7 +85,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                 return true;
         }
 
-        public override void UpdateAI(uint uiDiff)
+        public override void UpdateAI(TimeSpan uiDiff)
         {
             if (!UpdateVictim())
                 return;
@@ -95,7 +96,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                 {
                     if (bCheckChances())
                         DoCast(me, SpellIds.Trash);
-                    uiTrashTimer = RandomHelper.URand(6000, 15500);
+                    uiTrashTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(6000, 15500));
                 }
                 else uiTrashTimer -= uiDiff;
 
@@ -103,7 +104,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                 {
                     if (bCheckChances())
                         DoCastVictim(SpellIds.SmiteSlam);
-                    uiSlamTimer = 11000;
+                    uiSlamTimer = Time.SpanFromMilliseconds(11000);
                 }
                 else uiSlamTimer -= uiDiff;
 
@@ -117,7 +118,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                 me.AttackStop();
                 me.InterruptNonMeleeSpells(false);
                 me.SetReactState(ReactStates.Passive);
-                uiTimer = 2500;
+                uiTimer = Time.SpanFromMilliseconds(2500);
                 uiPhase = 1;
 
                 switch (uiHealth)
@@ -156,12 +157,12 @@ namespace Scripts.EasternKingdoms.Deadmines
                                 SetEquipmentSlots(false, EquipIds.Axe, EquipIds.Axe);
                             else
                                 SetEquipmentSlots(false, EquipIds.Mace, 0);
-                            uiTimer = 500;
+                            uiTimer = Time.SpanFromMilliseconds(500);
                             uiPhase = 3;
                             break;
                         case 3:
                             me.SetStandState(UnitStandStateType.Stand);
-                            uiTimer = 750;
+                            uiTimer = Time.SpanFromMilliseconds(750);
                             uiPhase = 4;
                             break;
                         case 4:
@@ -185,7 +186,7 @@ namespace Scripts.EasternKingdoms.Deadmines
             me.SetFacingTo(5.47f);
             me.SetStandState(UnitStandStateType.Kneel);
 
-            uiTimer = 2000;
+            uiTimer = Time.SpanFromMilliseconds(2000);
             uiPhase = 2;
         }
     }

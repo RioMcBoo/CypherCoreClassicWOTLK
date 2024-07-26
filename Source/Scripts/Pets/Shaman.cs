@@ -19,14 +19,14 @@ namespace Scripts.Pets.Shaman
         public override void Reset()
         {
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(0), task =>
             {
                 DoCastVictim(SpellShamanAngeredearth);
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+                task.Repeat(Time.SpanFromSeconds(5), Time.SpanFromSeconds(20));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -47,24 +47,24 @@ namespace Scripts.Pets.Shaman
         public override void Reset()
         {
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), Time.SpanFromSeconds(20), task =>
             {
                 DoCastVictim(SpellShamanFirenova);
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+                task.Repeat(Time.SpanFromSeconds(5), Time.SpanFromSeconds(20));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), Time.SpanFromSeconds(20), task =>
             {
                 DoCastVictim(SpellShamanFireblast);
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+                task.Repeat(Time.SpanFromSeconds(5), Time.SpanFromSeconds(20));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(0), task =>
             {
                 DoCastVictim(SpellShamanFireshield);
-                task.Repeat(TimeSpan.FromSeconds(2));
+                task.Repeat(Time.SpanFromSeconds(2));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

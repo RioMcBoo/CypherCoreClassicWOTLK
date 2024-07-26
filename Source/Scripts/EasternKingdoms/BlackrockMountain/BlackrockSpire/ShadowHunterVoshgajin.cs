@@ -31,22 +31,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.ShadowHunterV
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule((Seconds)2, task =>
             {
                 DoCastVictim(SpellIds.Curseofblood);
-                task.Repeat(TimeSpan.FromSeconds(45));
+                task.Repeat((Seconds)45);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                     DoCast(target, SpellIds.Hex);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)15);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
+            _scheduler.Schedule((Seconds)14, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(7));
+                task.Repeat((Seconds)7);
             });
         }
 
@@ -55,7 +55,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.ShadowHunterV
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

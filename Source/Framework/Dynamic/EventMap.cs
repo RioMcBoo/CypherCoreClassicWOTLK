@@ -22,17 +22,8 @@ namespace Framework.Dynamic
         /// <summary>
         /// Updates the timer of the event map.
         /// </summary>
-        /// <param name="time">Value in ms to be added to time.</param>
-        public void Update(uint time)
-        {
-            Update(TimeSpan.FromMilliseconds(time));
-        }
-
-        /// <summary>
-        /// Updates the timer of the event map.
-        /// </summary>
-        /// <param name="time">Value in ms to be added to time.</param>
-        void Update(TimeSpan time)
+        /// <param name="time">Value in TimeSpan to be added to time.</param>
+        public void Update(TimeSpan time)
         {
             _time += time;
         }

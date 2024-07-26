@@ -88,13 +88,13 @@ namespace Scripts.World.NpcsSpecial
         {
             Creature guard = ObjectAccessor.GetCreature(me, _myGuard);
 
-            if (guard == null && (guard = me.SummonCreature(_spawn.OtherEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(5))) != null)
+            if (guard == null && (guard = me.SummonCreature(_spawn.OtherEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, (Minutes)5)) != null)
                 _myGuard = guard.GetGUID();
 
             return guard;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (_toAttack.Empty())
                 return;
@@ -182,10 +182,10 @@ namespace Scripts.World.NpcsSpecial
 
         void Initialize()
         {
-            ResetFlagTimer = 120000;
+            ResetFlagTimer = (Milliseconds)120000;
         }
 
-        uint ResetFlagTimer;
+        TimeSpan ResetFlagTimer;
 
         public override void Reset()
         {
@@ -196,7 +196,7 @@ namespace Scripts.World.NpcsSpecial
 
         public override void JustEngagedWith(Unit who) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             // Reset flags after a certain time has passed
             // so that the next player has to start the 'event' again
@@ -269,7 +269,7 @@ namespace Scripts.World.NpcsSpecial
             me.Relocate(x, y, z + 1.05f);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -280,7 +280,7 @@ namespace Scripts.World.NpcsSpecial
                 player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()) 
                 && me.IsWithinDistInMap(player, 30.0f))
             {
-                // She responds to emotes not instantly but ~TimeSpan.FromMilliseconds(1500) later
+                // She responds to emotes not instantly but ~Time.SpanFromMilliseconds(1500) later
                 // If you first /bow, then /wave before dancing flames bow back,
                 // it doesnt bow at all and only does wave
                 // If you're performing emotes too fast, she will not respond to them
@@ -290,19 +290,19 @@ namespace Scripts.World.NpcsSpecial
                 switch (emote)
                 {
                     case TextEmotes.Kiss:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                        _scheduler.Schedule(Time.SpanFromMilliseconds(1500), 
                             context => me.HandleEmoteCommand(Emote.OneshotShy));
                         break;
                     case TextEmotes.Wave:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                        _scheduler.Schedule(Time.SpanFromMilliseconds(1500), 
                             context => me.HandleEmoteCommand(Emote.OneshotWave));
                         break;
                     case TextEmotes.Bow:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                        _scheduler.Schedule(Time.SpanFromMilliseconds(1500), 
                             context => me.HandleEmoteCommand(Emote.OneshotBow));
                         break;
                     case TextEmotes.Joke:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), 
+                        _scheduler.Schedule(Time.SpanFromMilliseconds(1500), 
                             context => me.HandleEmoteCommand(Emote.OneshotLaugh));
                         break;
                     case TextEmotes.Dance:
@@ -326,18 +326,18 @@ namespace Scripts.World.NpcsSpecial
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), context =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), context =>
             {
                 me.CastSpell(null, SpellTorchTargetPicker);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(3), 
+                _scheduler.Schedule(Time.SpanFromSeconds(3), 
                     context => me.CastSpell(null, SpellTorchTargetPicker));
 
-                context.Repeat(TimeSpan.FromSeconds(5));
+                context.Repeat(Time.SpanFromSeconds(5));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -376,7 +376,7 @@ namespace Scripts.World.NpcsSpecial
                 return;
 
             running = true;
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(1), context =>
+            _scheduler.Schedule(Time.SpanFromMilliseconds(1), context =>
             {
                 if (checkNearbyPlayers())
                 {
@@ -388,7 +388,7 @@ namespace Scripts.World.NpcsSpecial
                 if (go != null)
                     me.CastSpell(go, SpellRedFireRing, true);
 
-                context.Schedule(TimeSpan.FromSeconds(5), _ =>
+                context.Schedule(Time.SpanFromSeconds(5), _ =>
                 {
                     if (checkNearbyPlayers())
                     {
@@ -400,7 +400,7 @@ namespace Scripts.World.NpcsSpecial
                     if (go != null)
                         me.CastSpell(go, SpellBlueFireRing, true);
 
-                    context.Repeat(TimeSpan.FromSeconds(5));
+                    context.Repeat(Time.SpanFromSeconds(5));
                 });
             });
         }
@@ -416,7 +416,7 @@ namespace Scripts.World.NpcsSpecial
             return players.Empty();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!running)
                 return;
@@ -479,7 +479,7 @@ namespace Scripts.World.NpcsSpecial
     {
         ObjectGuid PlayerGUID;
 
-        uint SummonPatientTimer;
+        TimeSpan SummonPatientTimer;
         int SummonPatientCount;
         int PatientDiedCount;
         int PatientSavedCount;
@@ -498,7 +498,7 @@ namespace Scripts.World.NpcsSpecial
         {
             PlayerGUID.Clear();
 
-            SummonPatientTimer = 10000;
+            SummonPatientTimer = (Milliseconds)10000;
             SummonPatientCount = 0;
             PatientDiedCount = 0;
             PatientSavedCount = 0;
@@ -519,7 +519,7 @@ namespace Scripts.World.NpcsSpecial
         {
             PlayerGUID = player.GetGUID();
 
-            SummonPatientTimer = 10000;
+            SummonPatientTimer = (Milliseconds)10000;
             SummonPatientCount = 0;
             PatientDiedCount = 0;
             PatientSavedCount = 0;
@@ -602,7 +602,7 @@ namespace Scripts.World.NpcsSpecial
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (Event && SummonPatientCount >= 20)
             {
@@ -635,7 +635,7 @@ namespace Scripts.World.NpcsSpecial
 
                     var point = Coordinates[RandomHelper.IRand(0, Coordinates.Count - 1)];
 
-                    Creature patient = me.SummonCreature(patientEntry, point, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
+                    Creature patient = me.SummonCreature(patientEntry, point, TempSummonType.TimedDespawnOutOfCombat, Time.SpanFromSeconds(5));
                     if (patient != null)
                     {
                         //303, this flag appear to be required for client side item.spell
@@ -654,7 +654,7 @@ namespace Scripts.World.NpcsSpecial
                         Coordinates.Remove(point);
                     }
 
-                    SummonPatientTimer = 10000;
+                    SummonPatientTimer = (Milliseconds)10000;
                     ++SummonPatientCount;
                 }
                 else
@@ -768,7 +768,7 @@ namespace Scripts.World.NpcsSpecial
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             //lower Hp on every world tick makes it a useful counter, not officlone though
             if (me.IsAlive() && me.GetHealth() > 6)
@@ -857,7 +857,7 @@ namespace Scripts.World.NpcsSpecial
             CanRun = false;
 
             _scheduler.SetValidator(() => CanRun && !me.IsInCombat());
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), task =>
             {
                 Unit unit = ObjAccessor.GetUnit(me, CasterGUID);
                 if (unit != null)
@@ -879,7 +879,7 @@ namespace Scripts.World.NpcsSpecial
                 else
                     EnterEvadeMode(EvadeReason.Other);                       //something went wrong
 
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(30));
             });
         }
 
@@ -934,7 +934,7 @@ namespace Scripts.World.NpcsSpecial
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
             base.UpdateAI(diff);
@@ -955,7 +955,7 @@ namespace Scripts.World.NpcsSpecial
 
         public override void JustEngagedWith(Unit who) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1126,7 +1126,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellStormwindAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcGnomereganMechanostrider:
                 {
@@ -1142,7 +1142,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellGnomereganAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcDarkSpearRaptor:
                 {
@@ -1158,7 +1158,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellSenJinAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcArgentHawkstriderAspirant:
                 case TournamentPennantIds.NpcSilvermoonHawkstrider:
@@ -1175,7 +1175,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellSilvermoonAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcDarnassianNightsaber:
                 {
@@ -1191,7 +1191,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellDarnassusAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcExodarElekk:
                 {
@@ -1207,7 +1207,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellExodarAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcIronforgeRam:
                 {
@@ -1223,7 +1223,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellIronforgeAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcForsakenWarhorse:
                 {
@@ -1239,7 +1239,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellUndercityAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcOrgrimmarWolf:
                 {
@@ -1255,7 +1255,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellOrgrimmarAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcThunderBluffKodo:
                 {
@@ -1271,7 +1271,7 @@ namespace Scripts.World.NpcsSpecial
                     else
                     {
                         return TournamentPennantIds.SpellThunderBluffAspirant;
-                }
+                    }
                 }
                 case TournamentPennantIds.NpcArgentWarhorse:
                 {
@@ -1340,14 +1340,14 @@ namespace Scripts.World.NpcsSpecial
         public override void Reset()
         {
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), Time.SpanFromSeconds(2), task =>
             {
                 List<Creature> creatureList = me.GetCreatureListWithEntryInGrid(NpcBrewfestReveler, 5.0f);
                 foreach (Creature creature in creatureList)
                     if (creature != me)
                         _revelerGuids.Add(creature.GetGUID());
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), faceToTask =>
+                _scheduler.Schedule(Time.SpanFromSeconds(1), Time.SpanFromSeconds(2), faceToTask =>
                 {
                     // Turn to random brewfest reveler within set range
                     if (!_revelerGuids.Empty())
@@ -1357,7 +1357,7 @@ namespace Scripts.World.NpcsSpecial
                             me.SetFacingToObject(creature);
                     }
 
-                    _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(6), emoteTask =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(2), Time.SpanFromSeconds(6), emoteTask =>
                     {
                         // Play random emote or dance
 
@@ -1369,20 +1369,20 @@ namespace Scripts.World.NpcsSpecial
 
                             // Random EventEmote or EventFaceto
                             if (RandomHelper.randChance(50))
-                                faceToTask.Repeat(TimeSpan.FromSeconds(1));
+                                faceToTask.Repeat(Time.SpanFromSeconds(1));
                             else
-                                emoteTask.Repeat(TimeSpan.FromSeconds(1));
+                                emoteTask.Repeat(Time.SpanFromSeconds(1));
                         };
 
                         if (RandomHelper.randChance(50))
                         {
                             me.HandleEmoteCommand(BrewfestRandomEmote.SelectRandom());
-                            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(6), taskContext);
+                            _scheduler.Schedule(Time.SpanFromSeconds(4), Time.SpanFromSeconds(6), taskContext);
                         }
                         else
                         {
                             me.SetEmoteState(Emote.StateDance);
-                            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12), taskContext);
+                            _scheduler.Schedule(Time.SpanFromSeconds(8), Time.SpanFromSeconds(12), taskContext);
                         }
                     });
                 });
@@ -1399,7 +1399,7 @@ namespace Scripts.World.NpcsSpecial
                 me.CastSpell(player, SpellBrewfestToast, false);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             UpdateVictim();
 
@@ -1416,7 +1416,7 @@ namespace Scripts.World.NpcsSpecial
 
         public override void JustEnteredCombat(Unit who)
         {
-            _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(5);
+            _combatTimer[who.GetGUID()] = Time.SpanFromSeconds(5);
         }
 
         public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
@@ -1426,15 +1426,15 @@ namespace Scripts.World.NpcsSpecial
             if (attacker == null || damageType == DamageEffectType.DOT)
                 return;
 
-            _combatTimer[attacker.GetGUID()] = TimeSpan.FromSeconds(5);
+            _combatTimer[attacker.GetGUID()] = Time.SpanFromSeconds(5);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             foreach (var key in _combatTimer.Keys.ToList())
             {
-                _combatTimer[key] -= TimeSpan.FromMilliseconds(diff);
-                if (_combatTimer[key] <= TimeSpan.FromSeconds(0))
+                _combatTimer[key] -= diff;
+                if (_combatTimer[key] <= TimeSpan.Zero)
                 {
                     // The attacker has not dealt any damage to the dummy for over 5 seconds. End combat.
                     var pveRefs = me.GetCombatManager().GetPvECombatRefs();
@@ -1568,7 +1568,7 @@ namespace Scripts.World.NpcsSpecial
         {
             rabbitGUID.Clear();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10), 1, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), Time.SpanFromSeconds(10), 1, task =>
             {
                 Creature rabbit = me.FindNearestCreature(NpcSpringRabbit, 10.0f);
                 if (rabbit != null)
@@ -1587,7 +1587,7 @@ namespace Scripts.World.NpcsSpecial
                 task.Repeat();
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), Time.SpanFromSeconds(10), task =>
             {
                 Unit rabbit = ObjAccessor.GetUnit(me, rabbitGUID);
                 if (rabbit != null)
@@ -1595,10 +1595,10 @@ namespace Scripts.World.NpcsSpecial
                 task.Repeat();
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), Time.SpanFromSeconds(20), task =>
             {
                 DoCast(SpellSummonBabyBunny);
-                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(40));
+                task.Repeat(Time.SpanFromSeconds(20), Time.SpanFromSeconds(40));
             });
         }
 
@@ -1620,7 +1620,7 @@ namespace Scripts.World.NpcsSpecial
                 owner.CastSpell(owner, SpellSpringFling, true);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -1644,7 +1644,7 @@ namespace Scripts.World.NpcsSpecial
             if (summoner.IsPlayer())
             {
                 summonerGUID = summoner.GetGUID();
-                _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
                 {
                     Player owner = ObjAccessor.GetPlayer(me, summonerGUID);
                     if (owner != null)
@@ -1658,7 +1658,7 @@ namespace Scripts.World.NpcsSpecial
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -1684,7 +1684,7 @@ namespace Scripts.World.NpcsSpecial
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 GameObject target = me.FindNearestGameObject(GoToyTrain, 15.0f);
                 if (target != null)
@@ -1696,7 +1696,7 @@ namespace Scripts.World.NpcsSpecial
                     return;
                 }
 
-                task.Repeat(TimeSpan.FromSeconds(3));
+                task.Repeat(Time.SpanFromSeconds(3));
             });
         }
 
@@ -1713,11 +1713,11 @@ namespace Scripts.World.NpcsSpecial
                 return target;
 
             me.HandleEmoteCommand(Emote.OneshotRude);
-            me.DespawnOrUnsummon(TimeSpan.FromSeconds(3));
+            me.DespawnOrUnsummon(Time.SpanFromSeconds(3));
             return null;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -1731,7 +1731,7 @@ namespace Scripts.World.NpcsSpecial
                 {
                     GameObject target = VerifyTarget();
                     if (target != null)
-                        me.GetMotionMaster().MoveJump(target, 5.0f, 10.0f, MoveidJump);
+                        me.GetMotionMaster().MoveJump(target, (Speed)5.0f, (Speed)10.0f, MoveidJump);
                 });
             }
             else if (id == MoveidJump)
@@ -1743,17 +1743,17 @@ namespace Scripts.World.NpcsSpecial
                     {
                         me.SetFacingTo(target.GetOrientation());
                         me.HandleEmoteCommand(Emote.OneshotAttack1h);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(1.5), task =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(1.5), task =>
                         {
                             GameObject target = VerifyTarget();
                             if (target != null)
                             {
                                 me.CastSpell(target, SpellWreckTrain, false);
-                                _scheduler.Schedule(TimeSpan.FromSeconds(2), danceTask =>
+                                _scheduler.Schedule(Time.SpanFromSeconds(2), danceTask =>
                                 {
                                     me.UpdateEntry(NpcExultingWindUpTrainWrecker);
                                     me.SetEmoteState(Emote.OneshotDance);
-                                    me.DespawnOrUnsummon(TimeSpan.FromSeconds(5));
+                                    me.DespawnOrUnsummon(Time.SpanFromSeconds(5));
                                 });
                             }
                         });
@@ -1945,7 +1945,7 @@ namespace Scripts.World.NpcsSpecial
             _spellId = spellId;
         }
 
-        public override bool Execute(long execTime, uint diff)
+        public override bool Execute(TimeSpan execTime, TimeSpan diff)
         {
             _owner.CastSpell(_owner, _spellId, true);
             return true;
@@ -2012,7 +2012,7 @@ namespace Scripts.World.NpcsSpecial
             who.m_Events.AddEvent(
                 new CastFoodSpell(
                     who, BountifulTableIds.ChairSpells.LookupByKey(who.GetEntry())), 
-                who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
+                who.m_Events.CalculateTime(Time.SpanFromSeconds(1)));
 
             Creature creature = who.ToCreature();
             if (creature != null)
@@ -2034,10 +2034,10 @@ namespace Scripts.World.NpcsSpecial
 
         public override void JustAppeared()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task => DoCastSelf(SpellConsumption));
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task => DoCastSelf(SpellConsumption));
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }

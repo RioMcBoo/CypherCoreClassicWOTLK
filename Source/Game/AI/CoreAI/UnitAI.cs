@@ -333,8 +333,8 @@ namespace Game.AI
                 else
                     AIInfo.condition = AICondition.Combat;
 
-                if (AIInfo.cooldown.TotalMilliseconds < spellInfo.RecoveryTime)
-                    AIInfo.cooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
+                if (AIInfo.cooldown < spellInfo.RecoveryTime)
+                    AIInfo.cooldown = spellInfo.RecoveryTime;
 
                 if (spellInfo.GetMaxRange(false) != 0)
                 {
@@ -368,7 +368,7 @@ namespace Game.AI
                     }
                 }
 
-                AIInfo.realCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime + spellInfo.StartRecoveryTime);
+                AIInfo.realCooldown = spellInfo.RecoveryTime + spellInfo.StartRecoveryTime;
                 AIInfo.maxRange = spellInfo.GetMaxRange(false) * 3 / 4;
 
                 AIInfo.Effects = 0;
@@ -447,7 +447,7 @@ namespace Game.AI
 
         public virtual bool CanAIAttack(Unit victim) { return true; }
 
-        public virtual void UpdateAI(uint diff) { }
+        public virtual void UpdateAI(TimeSpan diff) { }
 
         public virtual void InitializeAI()
         {
@@ -491,7 +491,7 @@ namespace Game.AI
         public virtual void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null) { }
         public virtual void HealReceived(Unit by, int addhealth) { }
         public virtual void HealDone(Unit to, int addhealth) { }
-        public virtual void SpellInterrupted(int spellId, uint unTimeMs) { }
+        public virtual void SpellInterrupted(int spellId, TimeSpan unTimeMs) { }
 
         /// <summary>
         /// Called when a game event starts or ends

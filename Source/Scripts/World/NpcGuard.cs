@@ -33,14 +33,14 @@ namespace Scripts.World.NpcGuard
         {
             _scheduler.CancelAll();
             _combatScheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), context =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), context =>
             {
                 // Find a spell that targets friendly and applies an aura (these are generally buffs)
                 SpellInfo spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Aura);
                 if (spellInfo != null)
                     DoCast(me, spellInfo.Id);
 
-                context.Repeat(TimeSpan.FromMinutes(10));
+                context.Repeat((Minutes)10);
             });
         }
 
@@ -92,7 +92,7 @@ namespace Scripts.World.NpcGuard
             if (me.GetEntry() == NpcCenarionHoldInfantry)
                 Talk(SayGuardSilAggro, who);
 
-            _combatScheduler.Schedule(TimeSpan.FromSeconds(1), meleeContext =>
+            _combatScheduler.Schedule(Time.SpanFromSeconds(1), meleeContext =>
             {
                 Unit victim = me.GetVictim();
                 if (!me.IsAttackReady() || !me.IsWithinMeleeRange(victim))
@@ -111,7 +111,7 @@ namespace Scripts.World.NpcGuard
                     }
                 }
                 meleeContext.Repeat();
-            }).Schedule(TimeSpan.FromSeconds(5), spellContext =>
+            }).Schedule(Time.SpanFromSeconds(5), spellContext =>
             {
                 bool healing = false;
                 SpellInfo spellInfo = null;
@@ -133,14 +133,14 @@ namespace Scripts.World.NpcGuard
                         DoCast(me, spellInfo.Id);
                     else
                         DoCastVictim(spellInfo.Id);
-                    spellContext.Repeat(TimeSpan.FromSeconds(5));
+                    spellContext.Repeat(Time.SpanFromSeconds(5));
                 }
                 else
-                    spellContext.Repeat(TimeSpan.FromSeconds(1));
+                    spellContext.Repeat(Time.SpanFromSeconds(1));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
 
@@ -175,7 +175,7 @@ namespace Scripts.World.NpcGuard
             ScheduleVanish();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -185,14 +185,14 @@ namespace Scripts.World.NpcGuard
 
         void ScheduleVanish()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), banishContext =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), banishContext =>
             {
                 Unit temp = me.GetVictim();
                 if (temp != null && temp.IsPlayer())
                 {
                     DoCast(temp, me.GetEntry() == NpcAldorVindicator ? SpellBanishedShattrathS : SpellBanishedShattrathA);
                     ObjectGuid playerGUID = temp.GetGUID();
-                    banishContext.Schedule(TimeSpan.FromSeconds(9), exileContext =>
+                    banishContext.Schedule(Time.SpanFromSeconds(9), exileContext =>
                     {
                         Unit temp = ObjAccessor.GetUnit(me, playerGUID);
                         if (temp != null)

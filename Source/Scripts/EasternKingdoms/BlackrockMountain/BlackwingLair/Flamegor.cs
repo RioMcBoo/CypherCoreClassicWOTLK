@@ -29,27 +29,27 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Flamegor
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)10, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Shadowflame);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)10, (Seconds)20);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule((Seconds)30, task =>
             {
                 DoCastVictim(SpellIds.Wingbuffet);
                 if (GetThreat(me.GetVictim()) != 0)
                     ModifyThreatByPercent(me.GetVictim(), -75);
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)30);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule((Seconds)10, task =>
             {
                 Talk(TextIds.EmoteFrenzy);
                 DoCast(me, SpellIds.Frenzy);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)8, (Seconds)10);
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

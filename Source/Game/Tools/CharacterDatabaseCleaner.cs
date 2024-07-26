@@ -21,7 +21,7 @@ namespace Game
 
             Log.outInfo(LogFilter.Server, "Cleaning character database...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             CleaningFlags flags = (CleaningFlags)Global.WorldMgr.GetPersistentWorldVariable(WorldManager.CharacterDatabaseCleaningFlagsVarId);
 
@@ -48,7 +48,7 @@ namespace Game
 
             Global.WorldMgr.SetCleaningFlags(flags);
 
-            Log.outInfo(LogFilter.ServerLoading, "Cleaned character database in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Cleaned character database in {Time.Diff(oldMSTime)} ms.");
         }
 
         delegate bool CheckFor(int id);

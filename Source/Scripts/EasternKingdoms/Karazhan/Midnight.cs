@@ -76,32 +76,32 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         {
             Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
             if (midnight != null)
-                base._DespawnAtEvade(TimeSpan.FromSeconds(10), midnight);
+                base._DespawnAtEvade(Time.SpanFromSeconds(10), midnight);
 
             me.DespawnOrUnsummon();
         }
 
         public override void ScheduleTasks()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25), task =>
             {
                 DoCastVictim(SpellIds.Shadowcleave);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(25), Time.SpanFromSeconds(45), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
                 if (target != null)
                     DoCast(target, SpellIds.IntangiblePresence);
 
-                task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45));
+                task.Repeat(Time.SpanFromSeconds(25), Time.SpanFromSeconds(45));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(30), Time.SpanFromSeconds(60), task =>
             {
                 Talk(TextIds.SayRandom);
-                task.Repeat(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60));
+                task.Repeat(Time.SpanFromSeconds(30), Time.SpanFromSeconds(60));
             });
         }
 
@@ -156,7 +156,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                 _phase = Phases.Mounted;
                 DoCastSelf(SpellIds.SpawnSmoke);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(10), Time.SpanFromSeconds(25), task =>
                 {
                     Unit target = null;
                     List<Unit> targetList = new();
@@ -174,13 +174,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                         target = targetList.SelectRandom();
 
                     DoCast(target, SpellIds.Charge);
-                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
+                    task.Repeat(Time.SpanFromSeconds(10), Time.SpanFromSeconds(25));
                 });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(25), Time.SpanFromSeconds(35), task =>
                 {
                     DoCastVictim(SpellIds.Knockdown);
-                    task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                    task.Repeat(Time.SpanFromSeconds(25), Time.SpanFromSeconds(35));
                 });
             }
         }
@@ -201,7 +201,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                 _midnightGUID = guid;
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() && _phase != Phases.None)
                 return;
@@ -234,7 +234,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                     me.GetMotionMaster().MoveFollow(midnight, 2.0f, 0.0f);
                     Talk(TextIds.SayMount);
 
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
                     {
                         Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
                         if (midnight != null)
@@ -319,16 +319,16 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25), task =>
             {
                 DoCastVictim(SpellIds.Knockdown);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25));
             });
         }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
-            base._DespawnAtEvade(TimeSpan.FromSeconds(10));
+            base._DespawnAtEvade(Time.SpanFromSeconds(10));
         }
 
         public override void KilledUnit(Unit victim)
@@ -341,7 +341,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() || _phase == Phases.Mounted)
                 return;

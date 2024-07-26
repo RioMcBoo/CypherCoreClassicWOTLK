@@ -23,7 +23,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        void _LoadInventory(SQLResult result, uint timeDiff)
+        void _LoadInventory(SQLResult result, Seconds timeDiff)
         {
             if (!result.IsEmpty())
             {
@@ -90,7 +90,7 @@ namespace Game.Entities
                             {
                                 if (item.IsBag())
                                     invalidBagMap.Add(item.GetGUID(), item);
-                        }
+                            }
                         }
                         else
                         {
@@ -111,9 +111,9 @@ namespace Game.Entities
                             }
                             else
                             {
-                                Log.outError(LogFilter.Player, 
-                                    $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: { item.GetGUID()}, " + 
-                                    $"entry: {item.GetEntry()}) which doesnt have a valid bag (Bag GUID: {bagGuid}, slot: {slot}). Possible cheat?");                                  
+                                Log.outError(LogFilter.Player,
+                                    $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: {item.GetGUID()}, " +
+                                    $"entry: {item.GetEntry()}) which doesnt have a valid bag (Bag GUID: {bagGuid}, slot: {slot}). Possible cheat?");
                                 item.DeleteFromInventoryDB(trans);
                                 continue;
                             }
@@ -154,7 +154,7 @@ namespace Game.Entities
             _ApplyAllItemMods();
         }
 
-        Item _LoadItem(SQLTransaction trans, int zoneId, uint timeDiff, SQLFields fields)
+        Item _LoadItem(SQLTransaction trans, int zoneId, Seconds timeDiff, SQLFields fields)
         {
             Item item = null;
             long itemGuid = fields.Read<long>(0);
@@ -184,7 +184,7 @@ namespace Game.Entities
                     }
                     if (item.IsRefundable())
                     {
-                        if (item.GetPlayedTime() > (2 * Time.Hour))
+                        if (item.IsRefundExpired())
                         {
                             Log.outDebug(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: {1}) has item (GUID: {2}, entry: {3}) with expired refund time ({4}). Deleting refund data and removing " +
                                 "efundable flag.", GetGUID().ToString(), GetName(), item.GetGUID().ToString(), item.GetEntry(), item.GetPlayedTime());
@@ -451,7 +451,7 @@ namespace Game.Entities
             }
         }
 
-        void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
+        void _LoadAuras(SQLResult auraResult, SQLResult effectResult, Seconds timediff)
         {
             Log.outDebug(LogFilter.Player, $"Loading auras for player {GetGUID()}");
 
@@ -490,8 +490,8 @@ namespace Game.Entities
                     uint recalculateMask = auraResult.Read<uint>(4);
                     Difficulty difficulty = (Difficulty)auraResult.Read<byte>(5);
                     byte stackCount = auraResult.Read<byte>(6);
-                    int maxDuration = auraResult.Read<int>(7);
-                    int remainTime = auraResult.Read<int>(8);
+                    Milliseconds maxDuration = (Milliseconds)auraResult.Read<int>(7);
+                    Milliseconds remainTime = (Milliseconds)auraResult.Read<int>(8);
                     byte remainCharges = auraResult.Read<byte>(9);
                     int castItemId = auraResult.Read<int>(10);
                     int castItemLevel = auraResult.Read<int>(11);
@@ -514,10 +514,10 @@ namespace Game.Entities
                     // negative effects should continue counting down after logout
                     if (remainTime != -1 && (!spellInfo.IsPositive() || spellInfo.HasAttribute(SpellAttr4.AuraExpiresOffline)))
                     {
-                        if (remainTime / Time.InMilliseconds <= timediff)
+                        if (remainTime <= timediff)
                             continue;
 
-                        remainTime -= (int)(timediff * Time.InMilliseconds);
+                        remainTime -= timediff;
                     }
 
                     // prevent wrong values of remaincharges
@@ -701,8 +701,8 @@ namespace Game.Entities
         {
             ushort slot = 0;
 
-            long lastDailyReset = Global.WorldMgr.GetNextDailyQuestsResetTime() - Time.Day;
-            long lastWeeklyReset = Global.WorldMgr.GetNextWeeklyQuestsResetTime() - Time.Week;
+            RealmTime lastDailyReset = Global.WorldMgr.GetNextDailyQuestsResetTime() - (Days)1;
+            RealmTime lastWeeklyReset = Global.WorldMgr.GetNextWeeklyQuestsResetTime() -(Days)30;
 
             if (!result.IsEmpty())
             {
@@ -731,11 +731,11 @@ namespace Game.Entities
 
                     questStatusData.Explored = result.Read<byte>(2) > 0;
 
-                    questStatusData.AcceptTime = result.Read<long>(3);
+                    questStatusData.AcceptTime = (ServerTime)(UnixTime64)result.Read<long>(3);
                     if (quest.HasFlag(QuestFlagsEx.RemoveOnPeriodicReset))
                     {
-                        if ((quest.IsDaily() && questStatusData.AcceptTime < lastDailyReset)
-                            || (quest.IsWeekly() && questStatusData.AcceptTime < lastWeeklyReset))
+                        if ((quest.IsDaily() && (RealmTime)questStatusData.AcceptTime < lastDailyReset)
+                            || (quest.IsWeekly() && (RealmTime)questStatusData.AcceptTime < lastWeeklyReset))
                         {
                             questStatusData.Status = QuestStatus.None;
                             m_QuestStatusSave[questId] = QuestSaveType.Delete;
@@ -743,18 +743,18 @@ namespace Game.Entities
                         }
                     }
 
-                    long endTime = result.Read<long>(4);
-                    if (quest.LimitTime != 0 && !GetQuestRewardStatus(questId))
+                    ServerTime endTime = (ServerTime)(UnixTime64)result.Read<long>(4);
+                    if (quest.LimitTime != TimeSpan.Zero && !GetQuestRewardStatus(questId))
                     {
                         AddTimedQuest(questId);
 
-                        if (endTime <= GameTime.GetGameTime())
-                            questStatusData.Timer = 1;
+                        if (endTime <= LoopTime.ServerTime)
+                            questStatusData.Timer = (Milliseconds)1;
                         else
-                            questStatusData.Timer = (uint)((endTime - GameTime.GetGameTime()) * Time.InMilliseconds);
+                            questStatusData.Timer = endTime - LoopTime.ServerTime;
                     }
                     else
-                        endTime = 0;
+                        endTime = ServerTime.Zero;
 
                     // add to quest log
                     if (slot < SharedConst.MaxQuestLogSize && questStatusData.Status != QuestStatus.None)
@@ -817,15 +817,15 @@ namespace Game.Entities
                         }
                         else
                         {
-                            Log.outError(LogFilter.Player, 
+                            Log.outError(LogFilter.Player,
                                 $"Player {GetName()} ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
-                    }
+                        }
                     }
                     else
                     {
-                        Log.outError(LogFilter.Player, 
+                        Log.outError(LogFilter.Player,
                             $"Player {GetName()} ({GetGUID()}) does not have quest {questID} but has objective data for it.");
-                }
+                    }
                 }
                 while (result.NextRow());
             }
@@ -908,13 +908,13 @@ namespace Game.Entities
                         if (qQuest.IsDFQuest())
                         {
                             m_DFQuests.Add(qQuest.Id);
-                            m_lastDailyQuestTime = result.Read<uint>(1);
+                            m_lastDailyQuestTime = (ServerTime)(UnixTime64)result.Read<long>(1);
                             continue;
                         }
                     }
 
                     // save _any_ from daily quest times (it must be after last reset anyway)
-                    m_lastDailyQuestTime = result.Read<long>(1);
+                    m_lastDailyQuestTime = (ServerTime)(UnixTime64)result.Read<long>(1);
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest == null)
@@ -969,7 +969,7 @@ namespace Game.Entities
                 {
                     int quest_id = result.Read<int>(0);
                     int event_id = result.Read<int>(1);
-                    long completedTime = result.Read<long>(2);
+                    RealmTime completedTime = (RealmTime)(UnixTime64)result.Read<long>(2);
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest == null)
                         continue;
@@ -1326,8 +1326,8 @@ namespace Game.Entities
                     m.receiver = mailsResult.Read<long>(3);
                     m.subject = mailsResult.Read<string>(4);
                     m.body = mailsResult.Read<string>(5);
-                    m.expire_time = mailsResult.Read<long>(6);
-                    m.deliver_time = mailsResult.Read<long>(7);
+                    m.expire_time = (ServerTime)(UnixTime64)mailsResult.Read<long>(6);
+                    m.deliver_time = (ServerTime)(UnixTime64)mailsResult.Read<long>(7);
                     m.money = mailsResult.Read<long>(8);
                     m.COD = mailsResult.Read<long>(9);
                     m.checkMask = (MailCheckFlags)mailsResult.Read<byte>(10);
@@ -1536,7 +1536,7 @@ namespace Game.Entities
 
             do
             {
-                _instanceResetTimes.Add(result.Read<int>(0), result.Read<long>(1));
+                _instanceResetTimes.Add(result.Read<int>(0), (ServerTime)(UnixTime64)result.Read<long>(1));
             } while (result.NextRow());
         }
 
@@ -1690,7 +1690,7 @@ namespace Game.Entities
                 petInfo.Health = result.Read<int>(9);
                 petInfo.Mana = result.Read<int>(10);
                 petInfo.ActionBar = result.Read<string>(11);
-                petInfo.LastSaveTime = result.Read<uint>(12);
+                petInfo.LastSaveTime = (ServerTime)(UnixTime)result.Read<int>(12);
                 petInfo.CreatedBySpellId = result.Read<int>(13);
                 petInfo.Type = (PetType)result.Read<byte>(14);
                 petInfo.SpecializationId = (ChrSpecialization)result.Read<ushort>(15);
@@ -1749,7 +1749,7 @@ namespace Game.Entities
                 {
                     if (itemTemplate.HasFlag(ItemFlags.HasLoot))
                         Global.LootItemStorage.RemoveStoredLootForContainer(item.GetGUID().GetCounter());
-            }
+                }
             }
 
             // Updated played time for refundable items. We don't do this in Player.Update because there's simply no need for it,
@@ -2196,7 +2196,7 @@ namespace Game.Entities
                         stmt.SetInt32(1, save.Key);
                         stmt.SetUInt8(2, (byte)data.Status);
                         stmt.SetBool(3, data.Explored);
-                        stmt.SetInt64(4, data.AcceptTime);
+                        stmt.SetInt64(4, (UnixTime64)data.AcceptTime);
                         stmt.SetInt64(5, GetQuestSlotEndTime(data.Slot));
                         trans.Append(stmt);
 
@@ -2279,7 +2279,7 @@ namespace Game.Entities
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_QUESTSTATUS_DAILY);
                 stmt.SetInt64(0, GetGUID().GetCounter());
                 stmt.SetInt32(1, questId);
-                stmt.SetInt64(2, m_lastDailyQuestTime);
+                stmt.SetInt64(2, (UnixTime64)m_lastDailyQuestTime);
                 trans.Append(stmt);
 
             }
@@ -2291,7 +2291,7 @@ namespace Game.Entities
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_QUESTSTATUS_DAILY);
                     stmt.SetInt64(0, GetGUID().GetCounter());
                     stmt.SetInt32(1, id);
-                    stmt.SetInt64(2, m_lastDailyQuestTime);
+                    stmt.SetInt64(2, (UnixTime64)m_lastDailyQuestTime);
                     trans.Append(stmt);
                 }
             }
@@ -2341,7 +2341,7 @@ namespace Game.Entities
                     stmt.SetInt64(0, GetGUID().GetCounter());
                     stmt.SetInt32(1, questId);
                     stmt.SetInt32(2, eventId);
-                    stmt.SetInt64(3, completedTime);
+                    stmt.SetInt64(3, (UnixTime64)completedTime);
                     trans.Append(stmt);
                 }
             }
@@ -2502,8 +2502,8 @@ namespace Game.Entities
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_MAIL);
                     stmt.SetInt32(0, m.HasItems() ? 1 : 0);
-                    stmt.SetInt64(1, m.expire_time);
-                    stmt.SetInt64(2, m.deliver_time);
+                    stmt.SetInt64(1, (UnixTime64)m.expire_time);
+                    stmt.SetInt64(2, (UnixTime64)m.deliver_time);
                     stmt.SetInt64(3, m.money);
                     stmt.SetInt64(4, m.COD);
                     stmt.SetUInt8(5, (byte)m.checkMask);
@@ -2812,7 +2812,7 @@ namespace Game.Entities
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ACCOUNT_INSTANCE_LOCK_TIMES);
                 stmt.SetInt32(0, GetSession().GetAccountId());
                 stmt.SetInt32(1, pair.Key);
-                stmt.SetInt64(2, pair.Value);
+                stmt.SetInt64(2, (UnixTime64)pair.Value);
                 trans.Append(stmt);
             }
         }
@@ -2870,16 +2870,16 @@ namespace Game.Entities
             int mapId = result.Read<ushort>(fieldIndex++);
             var orientation = result.Read<float>(fieldIndex++);
             var taximask = result.Read<string>(fieldIndex++);
-            var createTime = result.Read<long>(fieldIndex++);
+            var createTime = (UnixTime64)result.Read<long>(fieldIndex++);
             var createMode = (PlayerCreateMode)result.Read<byte>(fieldIndex++);
             var cinematic = result.Read<byte>(fieldIndex++);
-            var totaltime = result.Read<uint>(fieldIndex++);
-            var leveltime = result.Read<uint>(fieldIndex++);
+            var totaltime = (Seconds)result.Read<int>(fieldIndex++);
+            var leveltime = (Seconds)result.Read<int>(fieldIndex++);
             var rest_bonus = result.Read<float>(fieldIndex++);
-            var logout_time = result.Read<long>(fieldIndex++);
+            var logout_time = (UnixTime64)result.Read<long>(fieldIndex++);
             var is_logout_resting = result.Read<byte>(fieldIndex++);
             var resettalents_cost = result.Read<uint>(fieldIndex++);
-            var resettalents_time = result.Read<long>(fieldIndex++);
+            var resettalents_time = (UnixTime64)result.Read<long>(fieldIndex++);
             var activeTalentGroup = result.Read<byte>(fieldIndex++);
             var bonusTalentGroups = result.Read<byte>(fieldIndex++);
             var trans_x = result.Read<float>(fieldIndex++);
@@ -2892,7 +2892,7 @@ namespace Game.Entities
             var atLoginFlags = (AtLoginFlags)result.Read<ushort>(fieldIndex++);
             var zone = result.Read<ushort>(fieldIndex++);
             var online = result.Read<byte>(fieldIndex++);
-            var death_expire_time = result.Read<long>(fieldIndex++);
+            var death_expire_time = (UnixTime64)result.Read<long>(fieldIndex++);
             var taxi_path = result.Read<string>(fieldIndex++);
             var dungeonDifficulty = (Difficulty)result.Read<byte>(fieldIndex++);
             var totalKills = result.Read<int>(fieldIndex++);
@@ -3356,33 +3356,33 @@ namespace Game.Entities
 
             // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
             // this must help in case next save after mass player load after server startup
-            m_nextSave = RandomHelper.URand(m_nextSave / 2, m_nextSave * 3 / 2);
+            m_nextSave = (Milliseconds)RandomHelper.IRand(m_nextSave / 2, m_nextSave * 3 / 2);
 
             SaveRecallPosition();
 
-            long now = GameTime.GetGameTime();
-            long logoutTime = logout_time;
+            ServerTime now = LoopTime.ServerTime;
+            ServerTime logoutTime = (ServerTime)logout_time;
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LogoutTime), logoutTime);
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LogoutTime), logout_time);
 
             // since last logout (in seconds)
-            uint time_diff = (uint)(now - logoutTime);
+            Seconds time_diff = LoopTime.UnixServerTime - logout_time;
 
             // set value, including drunk invisibility detection
             // calculate sobering. after 15 minutes logged out, the player will be sober again
-            if (time_diff < (uint)GetDrunkValue() * 9)
+            if (time_diff < (Seconds)(GetDrunkValue() * 9))
                 SetDrunkValue((byte)(GetDrunkValue() - time_diff / 9));
             else
                 SetDrunkValue(0);
 
-            m_createTime = createTime;
+            m_createTime = (ServerTime)createTime;
             m_createMode = createMode;
             m_cinematic = cinematic;
             m_PlayedTimeTotal = totaltime;
             m_PlayedTimeLevel = leveltime;
 
             SetTalentResetCost(resettalents_cost);
-            SetTalentResetTime(resettalents_time);
+            SetTalentResetTime((ServerTime)resettalents_time);
 
             m_taxi.LoadTaxiMask(taximask);            // must be before InitTaxiNodesForLevel
 
@@ -3390,12 +3390,12 @@ namespace Game.Entities
 
             // Honor system
             // Update Honor kills data
-            m_lastHonorUpdateTime = logoutTime;
+            m_lastHonorUpdateTime = (RealmTime)logoutTime;
             UpdateHonorFields();
 
-            m_deathExpireTime = death_expire_time;
+            m_deathExpireTime = (ServerTime)death_expire_time;
             if (m_deathExpireTime > now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep)
-                m_deathExpireTime = now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep - 1;
+                m_deathExpireTime = now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep - (Seconds)1;
 
             RemoveUnitFlag2(UnitFlags2.ForceMovement);
 
@@ -3658,7 +3658,7 @@ namespace Game.Entities
         public void SaveToDB(SQLTransaction loginTransaction, SQLTransaction characterTransaction, bool create = false)
         {
             // delay auto save at any saves (manual, in code, or autosave)
-            m_nextSave = (uint)WorldConfig.Values[WorldCfg.IntervalSave].Int32;
+            m_nextSave = WorldConfig.Values[WorldCfg.IntervalSave].Milliseconds;
 
             //lets allow only players in world to be saved
             if (IsBeingTeleportedFar())
@@ -3728,24 +3728,24 @@ namespace Game.Entities
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.SetString(index++, ss.ToString());
-                stmt.SetInt64(index++, m_createTime);
+                stmt.SetInt64(index++, (UnixTime64)m_createTime);
                 stmt.SetUInt8(index++, (byte)m_createMode);
                 stmt.SetUInt8(index++, m_cinematic);
-                stmt.SetUInt32(index++, m_PlayedTimeTotal);
-                stmt.SetUInt32(index++, m_PlayedTimeLevel);
+                stmt.SetInt32(index++, m_PlayedTimeTotal);
+                stmt.SetInt32(index++, m_PlayedTimeLevel);
                 stmt.SetFloat(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
-                stmt.SetInt64(index++, GameTime.GetGameTime());
+                stmt.SetInt64(index++, LoopTime.UnixServerTime);
                 stmt.SetInt32(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
                 //save, but in tavern/city
                 stmt.SetUInt32(index++, GetTalentResetCost());
-                stmt.SetInt64(index++, GetTalentResetTime());
+                stmt.SetInt64(index++, (UnixTime64)GetTalentResetTime());
                 stmt.SetUInt8(index++, GetActiveTalentGroup());
                 stmt.SetUInt8(index++, GetBonusTalentGroupCount());
                 stmt.SetUInt16(index++, (ushort)m_ExtraFlags);
                 stmt.SetInt32(index++, 0); // summonedPetNumber
                 stmt.SetUInt16(index++, (ushort)atLoginFlags);
-                stmt.SetInt64(index++, m_deathExpireTime);
+                stmt.SetInt64(index++, (UnixTime64)m_deathExpireTime);
 
                 ss.Clear();
                 ss.Append(m_taxi.SaveTaxiDestinationsToString());
@@ -3860,15 +3860,15 @@ namespace Game.Entities
 
                 stmt.SetString(index++, ss.ToString());
                 stmt.SetUInt8(index++, m_cinematic);
-                stmt.SetUInt32(index++, m_PlayedTimeTotal);
-                stmt.SetUInt32(index++, m_PlayedTimeLevel);
+                stmt.SetInt32(index++, m_PlayedTimeTotal);
+                stmt.SetInt32(index++, m_PlayedTimeLevel);
                 stmt.SetFloat(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
-                stmt.SetInt64(index++, GameTime.GetGameTime());
+                stmt.SetInt64(index++, LoopTime.UnixServerTime);
                 stmt.SetInt32(index++, HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0);
                 //save, far from tavern/city
                 //save, but in tavern/city
                 stmt.SetUInt32(index++, GetTalentResetCost());
-                stmt.SetInt64(index++, GetTalentResetTime());
+                stmt.SetInt64(index++, (UnixTime64)GetTalentResetTime());
                 stmt.SetUInt8(index++, GetNumRespecs());
                 stmt.SetUInt8(index++, GetActiveTalentGroup());
                 stmt.SetUInt8(index++, GetBonusTalentGroupCount());
@@ -3880,7 +3880,7 @@ namespace Game.Entities
                     stmt.SetInt32(index++, 0); // summonedPetNumber
                 stmt.SetUInt16(index++, (ushort)atLoginFlags);
                 stmt.SetUInt16(index++, (ushort)GetZoneId());
-                stmt.SetInt64(index++, m_deathExpireTime);
+                stmt.SetInt64(index++, (UnixTime64)m_deathExpireTime);
 
                 ss.Clear();
                 ss.Append(m_taxi.SaveTaxiDestinationsToString());
@@ -4012,7 +4012,7 @@ namespace Game.Entities
             stmt.SetInt32(3, Global.WorldMgr.GetRealmId().Index);
             stmt.SetString(4, GetName());
             stmt.SetInt64(5, GetGUID().GetCounter());
-            stmt.SetUInt32(6, (uint)GameTime.GetGameTime());
+            stmt.SetInt32(6, LoopTime.UnixServerTime);
             loginTransaction.Append(stmt);
 
             // save pet (hunter pet level and experience and all Type pets health/mana).
@@ -4520,22 +4520,27 @@ namespace Game.Entities
                 Global.WorldMgr.UpdateRealmCharCount(accountId);
         }
 
-        public static void DeleteOldCharacters()
+        public static bool DeleteOldCharacters()
         {
-            int keepDays = WorldConfig.Values[WorldCfg.ChardeleteKeepDays].Int32;
-            if (keepDays == 0)
-                return;
-
-            DeleteOldCharacters(keepDays);
+            TimeSpan keepTime = WorldConfig.Values[WorldCfg.ChardeleteKeepDays].TimeSpan;
+            return DeleteOldCharacters(keepTime);
         }
 
-        public static void DeleteOldCharacters(int keepDays)
+        public static bool DeleteOldCharacters(TimeSpan keepTime)
         {
+            if (keepTime <= TimeSpan.Zero)
+            {
+                Log.outDebug(LogFilter.Player,
+                    $"Player:DeleteOldChars: There are nothing to delete " +
+                    $"for negative or zero-time ({Time.SpanToTimeString(keepTime)}).");
+                return false;
+            }                
+
             Log.outInfo(LogFilter.Player, 
-                $"Player:DeleteOldChars: Deleting all characters which have been deleted {keepDays} days before...");
+                $"Player:DeleteOldChars: Deleting all characters which have been deleted {Time.SpanToTimeString(keepTime)} before...");
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_OLD_CHARS);
-            stmt.SetUInt32(0, (uint)(GameTime.GetGameTime() - keepDays * Time.Day));
+            stmt.SetInt64(0, (UnixTime64)(LoopTime.ServerTime - keepTime));
             SQLResult result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
@@ -4549,6 +4554,8 @@ namespace Game.Entities
                 while (result.NextRow());
                 Log.outDebug(LogFilter.Player, $"Player:DeleteOldChars: Deleted {count} character(s)");
             }
+
+            return true;
         }
 
         public static void SavePositionInDB(WorldLocation loc, int zoneId, ObjectGuid guid, SQLTransaction trans = null)

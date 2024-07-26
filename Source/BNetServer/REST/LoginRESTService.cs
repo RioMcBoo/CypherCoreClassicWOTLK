@@ -161,7 +161,7 @@ namespace BNetServer.REST
                             return name;
                     };
 
-                    long now = Time.UnixTime;
+                    UnixTime64 now = (UnixTime64)Time.Now;
                     do
                     {
                         GameAccountInfo gameAccount = new();
@@ -273,7 +273,8 @@ namespace BNetServer.REST
 
                 uint failedLogins = result.Read<uint>(4);
                 string loginTicket = result.Read<string>(5);
-                uint loginTicketExpiry = result.Read<uint>(6);
+                DateTime loginTicketExpiry = (DateTime)(UnixTime)result.Read<int>(6);
+
                 bool isBanned = result.Read<ulong>(7) != 0;
 
                 if (!passwordCorrect)
@@ -334,12 +335,12 @@ namespace BNetServer.REST
                     return;
                 }
 
-                if (loginTicket.IsEmpty() || loginTicketExpiry < Time.UnixTime)
+                if (loginTicket.IsEmpty() || loginTicketExpiry < Time.Now)
                     loginTicket = "TC-" + RandomHelper.GetRandomBytes(20).ToHexString();
 
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_AUTHENTICATION);
                 stmt.SetString(0, loginTicket);
-                stmt.SetInt64(1, Time.UnixTime + _loginTicketDuration);
+                stmt.SetInt64(1, (UnixTime)Time.Now + _loginTicketDuration);
                 stmt.SetUInt32(2, accountId);
                 callback.WithCallback(_ =>
                 {
@@ -458,14 +459,15 @@ namespace BNetServer.REST
                 LoginRefreshResult loginRefreshResult = new();
                 if (!result.IsEmpty())
                 {
-                    uint loginTicketExpiry = result.Read<uint>(0);
-                    long now = Time.UnixTime;
+                    UnixTime loginTicketExpiry = (UnixTime)result.Read<int>(0);
+                    UnixTime now = (UnixTime)Time.Now;
+
                     if (loginTicketExpiry > now)
                     {
-                        loginRefreshResult.LoginTicketExpiry = (now + _loginTicketDuration);
+                        loginRefreshResult.LoginTicketExpiry = now + _loginTicketDuration;
 
                         PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_EXISTING_AUTHENTICATION);
-                        stmt.SetUInt32(0, (uint)(now + _loginTicketDuration));
+                        stmt.SetUInt32(0, (uint)now + _loginTicketDuration);
                         stmt.SetString(1, ticket);
                         DB.Login.Execute(stmt);
                     }
@@ -525,14 +527,14 @@ namespace BNetServer.REST
                 return;
 
             Log.outInfo(_logger, "Updating password hashes...");
-            uint start = Time.GetMSTime();
+            RelativeTime start = Time.NowRelative;
             // the auth update query nulls salt/verifier if they cannot be converted
             // if they are non-null but s/v have been cleared, that means a legacy tool touched our auth DB (otherwise, the core might've done it itself, it used to use those hacks too)
             SQLResult result = DB.Login.Query("SELECT id, sha_pass_hash, IF((salt IS null) OR (verifier IS null), 0, 1) AS " +
                 "shouldWarn FROM battlenet_accounts WHERE sha_pass_hash != DEFAULT(sha_pass_hash) OR salt IS NULL OR verifier IS NULL");
             if (result.IsEmpty())
             {
-                Log.outInfo(_logger, $"No password hashes to update - this took us {Time.GetMSTimeDiffToNow(start)} ms to realize");
+                Log.outInfo(_logger, $"No password hashes to update - this took us {Time.Diff(start)} ms to realize");
                 return;
             }
 
@@ -580,7 +582,7 @@ namespace BNetServer.REST
             } while (result.NextRow());
             DB.Login.CommitTransaction(tx);
 
-            Log.outInfo(_logger, $"{count} password hashes updated in {Time.GetMSTimeDiffToNow(start)} ms.");
+            Log.outInfo(_logger, $"{count} password hashes updated in {Time.Diff(start)} ms.");
         }
 
         public int GetPort() { return _port; }

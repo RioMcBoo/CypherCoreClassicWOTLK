@@ -76,7 +76,7 @@ namespace Game.Entities
             }
         }
 
-        bool Create(AreaTriggerId areaTriggerCreatePropertiesId, Map map, Position pos, int duration, AreaTriggerSpawn spawnData = null, Unit caster = null, Unit target = null, SpellCastVisual spellVisual = default, SpellInfo spellInfo = null, Spell spell = null, AuraEffect aurEff = null)
+        bool Create(AreaTriggerId areaTriggerCreatePropertiesId, Map map, Position pos, Milliseconds duration, AreaTriggerSpawn spawnData = null, Unit caster = null, Unit target = null, SpellCastVisual spellVisual = default, SpellInfo spellInfo = null, Spell spell = null, AuraEffect aurEff = null)
         {
             _targetGuid = target != null ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -176,7 +176,7 @@ namespace Game.Entities
 
             UpdateShape();
 
-            uint timeToTarget = GetCreateProperties().TimeToTarget != 0 ? GetCreateProperties().TimeToTarget : m_areaTriggerData.Duration;
+            Milliseconds timeToTarget = GetCreateProperties().TimeToTarget != 0 ? GetCreateProperties().TimeToTarget : m_areaTriggerData.Duration;
 
             if (GetCreateProperties().OrbitInfo != null)
             {
@@ -234,7 +234,7 @@ namespace Game.Entities
             return true;
         }
 
-        public static AreaTrigger CreateAreaTrigger(AreaTriggerId areaTriggerCreatePropertiesId, Position pos, int duration, Unit caster, Unit target, SpellCastVisual spellVisual = default, SpellInfo spellInfo = null, Spell spell = null, AuraEffect aurEff = null)
+        public static AreaTrigger CreateAreaTrigger(AreaTriggerId areaTriggerCreatePropertiesId, Position pos, Milliseconds duration, Unit caster, Unit target, SpellCastVisual spellVisual = default, SpellInfo spellInfo = null, Spell spell = null, AuraEffect aurEff = null)
         {
             AreaTrigger at = new();
             if (!at.Create(areaTriggerCreatePropertiesId, caster.GetMap(), pos, duration, null, caster, target, spellVisual, spellInfo, spell, aurEff))
@@ -268,10 +268,10 @@ namespace Game.Entities
                 if (spellInfo != null)
                     spellVisual.SpellXSpellVisualID = spellInfo.GetSpellXSpellVisualId();
             }
-            return Create(spawnData.Id, map, spawnData.SpawnPoint, -1, spawnData, null, null, spellVisual, spellInfo);
+            return Create(spawnData.Id, map, spawnData.SpawnPoint, (Milliseconds)(-1), spawnData, null, null, spellVisual, spellInfo);
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
             _timeSinceCreated += diff;
@@ -326,7 +326,7 @@ namespace Game.Entities
             if (GetDuration() != -1)
             {
                 if (GetDuration() > diff)
-                    _UpdateDuration((int)(_duration - diff));
+                    _UpdateDuration(_duration - diff);
                 else
                 {
                     Remove(); // expired
@@ -350,7 +350,7 @@ namespace Game.Entities
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
         }
 
-        void SetOverrideScaleCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
+        void SetOverrideScaleCurve(Vector2[] points, RelativeTime? startTimeOffset, CurveInterpolationMode interpolation)
         {
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), points, startTimeOffset, interpolation);
         }
@@ -365,7 +365,7 @@ namespace Game.Entities
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), extraScale);
         }
 
-        void SetExtraScaleCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
+        void SetExtraScaleCurve(Vector2[] points, RelativeTime? startTimeOffset, CurveInterpolationMode interpolation)
         {
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), points, startTimeOffset, interpolation);
         }
@@ -382,7 +382,7 @@ namespace Game.Entities
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveZ), z);
         }
 
-        void SetOverrideMoveCurve(Vector2[] xCurvePoints, Vector2[] yCurvePoints, Vector2[] zCurvePoints, uint? startTimeOffset, CurveInterpolationMode interpolation)
+        void SetOverrideMoveCurve(Vector2[] xCurvePoints, Vector2[] yCurvePoints, Vector2[] zCurvePoints, RelativeTime? startTimeOffset, CurveInterpolationMode interpolation)
         {
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveX), xCurvePoints, startTimeOffset, interpolation);
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveY), yCurvePoints, startTimeOffset, interpolation);
@@ -396,23 +396,23 @@ namespace Game.Entities
             ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveZ));
         }
 
-        public void SetDuration(int newDuration)
+        public void SetDuration(Milliseconds newDuration)
         {
             _duration = newDuration;
             _totalDuration = newDuration;
 
             // negative duration (permanent areatrigger) sent as 0
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Duration), (uint)Math.Max(newDuration, 0));
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Duration), Time.Max(newDuration, (Milliseconds)0));
         }
 
-        void _UpdateDuration(int newDuration)
+        void _UpdateDuration(Milliseconds newDuration)
         {
             _duration = newDuration;
 
             // should be sent in object create packets only
             DoWithSuppressingObjectUpdates(() =>
             {
-                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Duration), (uint)_duration);
+                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Duration), _duration);
                 m_areaTriggerData.ClearChanged(m_areaTriggerData.Duration);
             });
         }
@@ -439,10 +439,10 @@ namespace Game.Entities
             if (_totalDuration <= 0)
                 return 1.0f;
 
-            return Math.Clamp(GetTimeSinceCreated() / (float)GetTotalDuration(), 0.0f, 1.0f);
+            return Math.Clamp(GetTimeSinceCreated() / GetTotalDuration(), 0.0f, 1.0f);
         }
 
-        float GetScaleCurveProgress(ScaleCurve scaleCurve, uint timeTo)
+        float GetScaleCurveProgress(ScaleCurve scaleCurve, Milliseconds timeTo)
         {
             if (timeTo == 0)
                 return 0.0f;
@@ -468,7 +468,7 @@ namespace Game.Entities
             return Global.DB2Mgr.GetCurveValueAt(mode, points.AsSpan(0, pointCount).ToArray(), x);
         }
 
-        float GetScaleCurveValue(ScaleCurve scaleCurve, uint timeTo)
+        float GetScaleCurveValue(ScaleCurve scaleCurve, Milliseconds timeTo)
         {
             return GetScaleCurveValueAtProgress(scaleCurve, GetScaleCurveProgress(scaleCurve, timeTo));
         }
@@ -480,7 +480,7 @@ namespace Game.Entities
             SetScaleCurve(scaleCurve, curveTemplate);
         }
 
-        void SetScaleCurve(ScaleCurve scaleCurve, Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
+        void SetScaleCurve(ScaleCurve scaleCurve, Vector2[] points, RelativeTime? startTimeOffset, CurveInterpolationMode interpolation)
         {
             AreaTriggerScaleCurvePointsTemplate curve = new();
             curve.Mode = interpolation;
@@ -1033,7 +1033,7 @@ namespace Game.Entities
             }
         }
 
-        void InitSplineOffsets(List<Vector3> offsets, uint timeToTarget)
+        void InitSplineOffsets(List<Vector3> offsets, Milliseconds timeToTarget)
         {
             float angleSin = (float)Math.Sin(GetOrientation());
             float angleCos = (float)Math.Cos(GetOrientation());
@@ -1055,12 +1055,12 @@ namespace Game.Entities
             InitSplines(rotatedPoints.ToArray(), timeToTarget);
         }
 
-        public void InitSplines(Vector3[] splinePoints, uint timeToTarget)
+        public void InitSplines(Vector3[] splinePoints, Milliseconds timeToTarget)
         {
             if (splinePoints.Length < 2)
                 return;
 
-            _movementTime = 0;
+            _movementTime = Milliseconds.Zero;
 
             _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear);
             _spline.InitLengths();
@@ -1068,7 +1068,7 @@ namespace Game.Entities
             // should be sent in object create packets only
             DoWithSuppressingObjectUpdates(() =>
             {
-                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
+                SetTimeToTarget(timeToTarget);
                 m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
             });
 
@@ -1093,7 +1093,7 @@ namespace Game.Entities
             _reachedDestination = false;
         }
 
-        void InitOrbit(AreaTriggerOrbitInfo orbit, uint timeToTarget)
+        void InitOrbit(AreaTriggerOrbitInfo orbit, Milliseconds timeToTarget)
         {
             // Circular movement requires either a center position or an attached unit
             Cypher.Assert(orbit.Center.HasValue || orbit.PathTarget.HasValue);
@@ -1110,7 +1110,7 @@ namespace Game.Entities
             _orbitInfo = orbit;
 
             _orbitInfo.TimeToTarget = timeToTarget;
-            _orbitInfo.ElapsedTimeForMovement = 0;
+            _orbitInfo.ElapsedTimeForMovement = Milliseconds.Zero;
 
             if (IsInWorld)
             {
@@ -1195,12 +1195,12 @@ namespace Game.Entities
             return new Position(x, y, z, orientation);
         }
 
-        void UpdateOrbitPosition(uint diff)
+        void UpdateOrbitPosition(TimeSpan diff)
         {
             if (_orbitInfo.StartDelay > GetElapsedTimeForMovement())
                 return;
 
-            _orbitInfo.ElapsedTimeForMovement = (int)(GetElapsedTimeForMovement() - _orbitInfo.StartDelay);
+            _orbitInfo.ElapsedTimeForMovement = (Milliseconds)(GetElapsedTimeForMovement() - _orbitInfo.StartDelay);
 
             Position pos = CalculateOrbitPosition();
 
@@ -1209,7 +1209,7 @@ namespace Game.Entities
             DebugVisualizePosition();
         }
 
-        void UpdateSplinePosition(uint diff)
+        void UpdateSplinePosition(TimeSpan diff)
         {
             if (_reachedDestination)
                 return;
@@ -1410,7 +1410,7 @@ namespace Game.Entities
                 Player player = caster.ToPlayer();
                 if (player != null)
                     if (player.IsDebugAreaTriggers)
-                        player.SummonCreature(1, this, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(GetTimeToTarget()));
+                        player.SummonCreature(1, this, TempSummonType.TimedDespawn, GetTimeToTarget());
             }
         }
 
@@ -1423,24 +1423,24 @@ namespace Game.Entities
         public bool IsRemoved() { return _isRemoved; }
         public int GetSpellId() { return m_areaTriggerData.SpellID; }
         public AuraEffect GetAuraEffect() { return _aurEff; }
-        public uint GetTimeSinceCreated() { return _timeSinceCreated; }
+        public RelativeTime GetTimeSinceCreated() { return _timeSinceCreated; }
 
-        public uint GetTimeToTarget() { return m_areaTriggerData.TimeToTarget; }
-        public void SetTimeToTarget(uint timeToTarget) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget); }
+        public Milliseconds GetTimeToTarget() { return m_areaTriggerData.TimeToTarget.GetValue(); }
+        public void SetTimeToTarget(Milliseconds timeToTarget) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget); }
 
-        public uint GetTimeToTargetScale() { return m_areaTriggerData.TimeToTargetScale; }
-        public void SetTimeToTargetScale(uint timeToTargetScale) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetScale), timeToTargetScale); }
+        public Milliseconds GetTimeToTargetScale() { return m_areaTriggerData.TimeToTargetScale.GetValue(); }
+        public void SetTimeToTargetScale(Milliseconds timeToTargetScale) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetScale), timeToTargetScale); }
 
-        public uint GetTimeToTargetExtraScale() { return m_areaTriggerData.TimeToTargetExtraScale; }
-        public void SetTimeToTargetExtraScale(uint timeToTargetExtraScale) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetExtraScale), timeToTargetExtraScale); }
+        public Milliseconds GetTimeToTargetExtraScale() { return m_areaTriggerData.TimeToTargetExtraScale.GetValue(); }
+        public void SetTimeToTargetExtraScale(Milliseconds timeToTargetExtraScale) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetExtraScale), timeToTargetExtraScale); }
 
-        public uint GetTimeToTargetPos() { return m_areaTriggerData.TimeToTargetPos; }
-        public void SetTimeToTargetPos(uint timeToTargetPos) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetPos), timeToTargetPos); }
+        public Milliseconds GetTimeToTargetPos() { return m_areaTriggerData.TimeToTargetPos.GetValue(); }
+        public void SetTimeToTargetPos(Milliseconds timeToTargetPos) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetPos), timeToTargetPos); }
 
-        public int GetDuration() { return _duration; }
-        public int GetTotalDuration() { return _totalDuration; }
+        public Milliseconds GetDuration() { return _duration; }
+        public Milliseconds GetTotalDuration() { return _totalDuration; }
 
-        public void Delay(int delaytime) { SetDuration(GetDuration() - delaytime); }
+        public void Delay(Milliseconds delaytime) { SetDuration(GetDuration() - delaytime); }
 
         public List<ObjectGuid> GetInsideUnits() { return _insideUnits; }
 
@@ -1456,7 +1456,7 @@ namespace Game.Entities
 
         public bool HasSplines() { return !_spline.Empty(); }
         public Spline<int> GetSpline() { return _spline; }
-        public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
+        public RelativeTime GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
 
         public AreaTriggerOrbitInfo GetOrbit() { return _orbitInfo; }
 
@@ -1470,9 +1470,9 @@ namespace Game.Entities
 
         Position _stationaryPosition;
         AreaTriggerShapeInfo _shape;
-        int _duration;
-        int _totalDuration;
-        uint _timeSinceCreated;
+        Milliseconds _duration;
+        Milliseconds _totalDuration;
+        RelativeTime _timeSinceCreated;
         float _verticesUpdatePreviousOrientation;
         bool _isRemoved;
 
@@ -1483,7 +1483,7 @@ namespace Game.Entities
 
         bool _reachedDestination;
         int _lastSplineIndex;
-        uint _movementTime;
+        Milliseconds _movementTime;
 
         AreaTriggerOrbitInfo _orbitInfo;
 

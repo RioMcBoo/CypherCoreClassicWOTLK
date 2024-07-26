@@ -18,10 +18,10 @@ namespace Game.Arenas
 
         public Arena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
-            StartDelayTimes[BattlegroundConst.EventIdFirst] = BattlegroundStartTimeIntervals.Delay1m;
-            StartDelayTimes[BattlegroundConst.EventIdSecond] = BattlegroundStartTimeIntervals.Delay30s;
-            StartDelayTimes[BattlegroundConst.EventIdThird] = BattlegroundStartTimeIntervals.Delay15s;
-            StartDelayTimes[BattlegroundConst.EventIdFourth] = BattlegroundStartTimeIntervals.None;
+            StartDelayTimes[BattlegroundConst.EventIdFirst] = (Minutes)1;
+            StartDelayTimes[BattlegroundConst.EventIdSecond] = (Seconds)30;
+            StartDelayTimes[BattlegroundConst.EventIdThird] = (Seconds)15;
+            StartDelayTimes[BattlegroundConst.EventIdFourth] = TimeSpan.Zero;
 
             StartMessageIds[BattlegroundConst.EventIdFirst] = ArenaBroadcastTexts.OneMinute;
             StartMessageIds[BattlegroundConst.EventIdSecond] = ArenaBroadcastTexts.ThirtySeconds;
@@ -111,7 +111,7 @@ namespace Game.Arenas
                     // left a rated match while the encounter was in progress, consider as loser
                     if (winnerArenaTeam != null && loserArenaTeam != null && winnerArenaTeam != loserArenaTeam)
                     {
-                        Player player = _GetPlayer(guid, bgPlayer.OfflineRemoveTime != 0, "Arena.RemovePlayerAtLeave");
+                        Player player = _GetPlayer(guid, bgPlayer.OfflineRemoveTime != ServerTime.Zero, "Arena.RemovePlayerAtLeave");
                         if (player != null)
                             loserArenaTeam.MemberLost(player, GetArenaMatchmakerRating(GetOtherTeam(bgPlayer.Team)));
                         else
@@ -221,7 +221,7 @@ namespace Game.Arenas
                     {
                         Team team = pair.Value.Team;
 
-                        if (pair.Value.OfflineRemoveTime != 0)
+                        if (pair.Value.OfflineRemoveTime != ServerTime.Zero)
                         {
                             // if rated arena match - make member lost!
                             if (team == winner)
@@ -236,7 +236,7 @@ namespace Game.Arenas
                             continue;
                         }
 
-                        Player player = _GetPlayer(pair.Key, pair.Value.OfflineRemoveTime != 0, "Arena.EndBattleground");
+                        Player player = _GetPlayer(pair.Key, pair.Value.OfflineRemoveTime != ServerTime.Zero, "Arena.EndBattleground");
                         if (player == null)
                             continue;
 

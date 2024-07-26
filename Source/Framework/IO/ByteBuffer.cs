@@ -133,11 +133,6 @@ namespace Framework.IO
             readStream.BaseStream.Position += count;
         }
 
-        public uint ReadPackedTime()
-        {
-            return (uint)Time.GetUnixTimeFromPackedTime(ReadUInt32());
-        }
-
         public Vector3 ReadVector3()
         {
             return new Vector3(ReadFloat(), ReadFloat(), ReadFloat());
@@ -373,23 +368,7 @@ namespace Framework.IO
         public void WriteBits(ushort bits, int count)
         {
             WriteBits((uint)bits, count);
-        }
-
-        public void WritePackedTime32(long time)
-        {
-            WriteUInt32(Time.GetPackedTimeFromUnixTime(time));
-        }
-
-        public void WritePackedTime64(long time)
-        {
-            WriteUInt32(Time.GetPackedTimeFromUnixTime(time));
-            WriteUInt32(0); // this is a hack. this is a packed time written as int64
-        }
-
-        public void WritePackedTime32()
-        {
-            WriteUInt32(Time.GetPackedTimeFromDateTime(DateTime.Now));
-        }
+        }        
         #endregion
 
         public bool HasUnfinishedBitPack()

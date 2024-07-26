@@ -25,27 +25,27 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.AmbassadorFl
 
         public override void JustEngagedWith(Unit who)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule((Seconds)2, task =>
             {
                 DoCastVictim(SpellIds.Fireblast);
-                task.Repeat(TimeSpan.FromSeconds(7));
+                task.Repeat((Seconds)7);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(24), task =>
+            _scheduler.Schedule((Seconds)24, task =>
             {
                 for (uint i = 0; i < 4; ++i)
                     SummonSpirit(me.GetVictim());
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)30);
             });
         }
 
         void SummonSpirit(Unit victim)
         {
-            Creature spirit = DoSpawnCreature(9178, RandomHelper.FRand(-9, 9), RandomHelper.FRand(-9, 9), 0, 0, Framework.Constants.TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(60));
+            Creature spirit = DoSpawnCreature(9178, RandomHelper.FRand(-9, 9), RandomHelper.FRand(-9, 9), 0, 0, Framework.Constants.TempSummonType.TimedOrCorpseDespawn, (Seconds)60);
             if (spirit != null)
                 spirit.GetAI().AttackStart(victim);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

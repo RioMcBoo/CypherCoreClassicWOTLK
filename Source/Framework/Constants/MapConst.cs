@@ -29,13 +29,13 @@ namespace Framework.Constants
         public const uint MaxRaidSubGroups = MaxRaidSize / MaxGroupSize;
         public const uint TargetIconsCount = 8;
         public const uint RaidMarkersCount = 8;
-        public const uint ReadycheckDuration = 35000;
+        public static readonly TimeSpan ReadycheckDuration = (Seconds)35;
 
         //Liquid
         public const float LiquidTileSize = (533.333f / 128.0f);
 
-        public const int MinMapUpdateDelay = 1;
-        public const int MinGridDelay = (Time.Minute * Time.InMilliseconds);
+        public static readonly TimeSpan MinMapUpdateDelay = (Milliseconds)1;
+        public static readonly TimeSpan MinGridDelay = (Minutes)1;
 
         public const int MapResolution = 128;
         public const float DefaultHeightSearch = 50.0f;

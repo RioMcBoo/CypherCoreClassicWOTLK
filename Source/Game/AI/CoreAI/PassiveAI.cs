@@ -16,7 +16,7 @@ namespace Game.AI
             me.SetCanMelee(false);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (me.IsEngaged() && !me.IsInCombat())
                 EnterEvadeMode(EvadeReason.NoHostiles);
@@ -39,7 +39,7 @@ namespace Game.AI
             me.Attack(target, true);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (me.GetVictim() != null)
             {
@@ -85,7 +85,7 @@ namespace Game.AI
         public override void AttackStart(Unit unit) { }
         public override  void JustStartedThreateningMe(Unit unit)  { }
         public override void JustEnteredCombat(Unit who) { }
-        public override void UpdateAI(uint diff) { }
+        public override void UpdateAI(TimeSpan diff) { }
         public override void JustAppeared() { }
         public override void EnterEvadeMode(EvadeReason why) { }
         public override void OnCharmed(bool isNew) { }
@@ -103,11 +103,11 @@ namespace Game.AI
 
         public override void JustEngagedWith(Unit who)
         {
-            me.StartDefaultCombatMovement(who);            
-            _evadeTimer.Reset(TimeSpan.FromMilliseconds(WorldConfig.Values[WorldCfg.CreatureFamilyFleeDelay].Int32));
+            me.StartDefaultCombatMovement(who);
+            _evadeTimer.Reset(WorldConfig.Values[WorldCfg.CreatureFamilyFleeDelay].TimeSpan);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (me.IsEngaged())
             {

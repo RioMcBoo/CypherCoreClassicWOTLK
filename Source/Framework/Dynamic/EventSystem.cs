@@ -11,16 +11,16 @@ namespace Framework.Dynamic
     {
         public EventSystem()
         {
-            m_time = 0;
+            m_time = TimeSpan.Zero;
         }
 
-        public void Update(uint p_time)
+        public void Update(TimeSpan p_time)
         {
             // update time
             m_time += p_time;
 
             // main event loop
-            KeyValuePair<long, BasicEvent> i;
+            KeyValuePair<TimeSpan, BasicEvent> i;
             while ((i = m_events.FirstOrDefault()).Value != null && i.Key <= m_time)
             {
                 var Event = i.Value;
@@ -44,7 +44,7 @@ namespace Framework.Dynamic
 
                 // Reschedule non deletable events to be checked at
                 // the next update tick
-                AddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
+                AddEvent(Event, CalculateTime((Milliseconds)1), false);
             }
         }
 
@@ -78,8 +78,8 @@ namespace Framework.Dynamic
             if (set_addtime)
                 Event.m_addTime = m_time;
 
-            Event.m_execTime = (long)e_time.TotalMilliseconds;
-            m_events.Add((long)e_time.TotalMilliseconds, Event);
+            Event.m_execTime = e_time;
+            m_events.Add(e_time, Event);
         }
 
         public void AddEvent(Action action, TimeSpan e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); }
@@ -97,22 +97,22 @@ namespace Framework.Dynamic
                 if (pair.Value != Event)
                     continue;
 
-                Event.m_execTime = (long)newTime.TotalMilliseconds;
+                Event.m_execTime = newTime;
                 m_events.Remove(pair);
-                m_events.Add((long)newTime.TotalMilliseconds, Event);
+                m_events.Add(newTime, Event);
                 break;
             }
         }
 
         public TimeSpan CalculateTime(TimeSpan t_offset)
         {
-            return TimeSpan.FromMilliseconds(m_time) + t_offset;
+            return m_time + t_offset;
         }
 
-        public SortedMultiMap<long, BasicEvent> GetEvents() { return m_events; }
+        public SortedMultiMap<TimeSpan, BasicEvent> GetEvents() { return m_events; }
 
-        long m_time;
-        SortedMultiMap<long, BasicEvent> m_events = new();
+        TimeSpan m_time;
+        SortedMultiMap<TimeSpan, BasicEvent> m_events = new();
     }
 
     public class BasicEvent
@@ -138,19 +138,19 @@ namespace Framework.Dynamic
         // this method executes when the event is triggered
         // return false if event does not want to be deleted
         // e_time is execution time, p_time is update interval
-        public virtual bool Execute(long e_time, uint p_time) { return true; }
+        public virtual bool Execute(TimeSpan e_time, TimeSpan p_time) { return true; }
 
         public virtual bool IsDeletable() { return true; }   // this event can be safely deleted
 
-        public virtual void Abort(long e_time) { } // this method executes when the event is aborted
+        public virtual void Abort(TimeSpan e_time) { } // this method executes when the event is aborted
 
         public bool IsRunning() { return m_abortState == AbortState.Running; }
         public bool IsAbortScheduled() { return m_abortState == AbortState.Scheduled; }
         public bool IsAborted() { return m_abortState == AbortState.Aborted; }
 
         AbortState m_abortState; // set by externals when the event is aborted, aborted events don't execute
-        public long m_addTime; // time when the event was added to queue, filled by event handler
-        public long m_execTime; // planned time of next execution, filled by event handler
+        public TimeSpan m_addTime; // time when the event was added to queue, filled by event handler
+        public TimeSpan m_execTime; // planned time of next execution, filled by event handler
     }
 
     class LambdaBasicEvent : BasicEvent
@@ -162,7 +162,7 @@ namespace Framework.Dynamic
             _callback = callback;
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
             _callback();
             return true;

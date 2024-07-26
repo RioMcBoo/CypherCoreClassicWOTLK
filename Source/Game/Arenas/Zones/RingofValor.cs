@@ -75,19 +75,19 @@ namespace Game.Arenas
         public override void StartingEventOpenDoors()
         {
             // Buff respawn
-            SpawnBGObject(RingofValorObjectTypes.Buff1, 90);
-            SpawnBGObject(RingofValorObjectTypes.Buff2, 90);
+            SpawnBGObject(RingofValorObjectTypes.Buff1, (Seconds)90);
+            SpawnBGObject(RingofValorObjectTypes.Buff2, (Seconds)90);
             // Elevators
             DoorOpen(RingofValorObjectTypes.Elevator1);
             DoorOpen(RingofValorObjectTypes.Elevator2);
 
-            _events.ScheduleEvent(RingofValorEvents.OpenFences, TimeSpan.FromSeconds(20));
+            _events.ScheduleEvent(RingofValorEvents.OpenFences, (Seconds)20);
 
             // Should be false at first, TogglePillarCollision will do it.
             TogglePillarCollision(true);
         }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -102,17 +102,17 @@ namespace Game.Arenas
                         // Open fire (only at game start)
                         for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
                             DoorOpen(i);
-                        _events.ScheduleEvent(RingofValorEvents.CloseFire, TimeSpan.FromSeconds(5));
+                        _events.ScheduleEvent(RingofValorEvents.CloseFire, (Seconds)5);
                         break;
                     case RingofValorEvents.CloseFire:
                         for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
                             DoorClose(i);
                         // Fire got closed after five seconds, leaves twenty seconds before toggling pillars
-                        _events.ScheduleEvent(RingofValorEvents.SwitchPillars, TimeSpan.FromSeconds(20));
+                        _events.ScheduleEvent(RingofValorEvents.SwitchPillars, (Seconds)20);
                         break;
                     case RingofValorEvents.SwitchPillars:
                         TogglePillarCollision(true);
-                        _events.Repeat(TimeSpan.FromSeconds(25));
+                        _events.Repeat((Seconds)25);
                         break;
                 }
             });

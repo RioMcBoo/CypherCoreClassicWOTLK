@@ -1237,7 +1237,7 @@ namespace Game.Entities
 
             if (victim.GetTypeId() == TypeId.Unit && (victim.ToCreature().GetCreatureTemplate().FlagsExtra & CreatureFlagsExtra.NoSkillGains) != 0)
                 return;
-
+                        
             int weapon_skill_gain = WorldConfig.Values[WorldCfg.SkillGainWeapon].Int32;
 
             Item tmpitem = GetWeaponForAttack(attType, true);

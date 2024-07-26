@@ -18,7 +18,7 @@ namespace Game.Entities
             m_type = TotemType.Passive;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             if (!GetOwner().IsAlive() || !IsAlive())
             {
@@ -26,13 +26,13 @@ namespace Game.Entities
                 return;
             }
 
-            if (m_duration <= TimeSpan.FromMilliseconds(diff))
+            if (m_duration <= diff)
             {
                 UnSummon();                                         // remove self
                 return;
             }
 
-            m_duration -= TimeSpan.FromMilliseconds(diff);
+            m_duration -= diff;
 
             base.Update(diff);
 
@@ -64,12 +64,12 @@ namespace Game.Entities
                     SetDisplayId(totemDisplayId);
                 else
                 {
-                    Log.outDebug(LogFilter.Misc, 
+                    Log.outDebug(LogFilter.Misc,
                         $"Totem with entry {GetEntry()}, " +
                         $"does not have a specialized model " +
                         $"for spell {m_unitData.CreatedBySpell} " +
                         $"and race {owner.GetRace()}. Set to default.");
-            }
+                }
             }
 
             base.InitStats(summoner, duration);
@@ -93,11 +93,11 @@ namespace Game.Entities
                 CastSpell(this, GetSpell(1), true);
         }
 
-        public override void UnSummon(uint msTime = 0)
+        public override void UnSummon(TimeSpan time = default)
         {
-            if (msTime != 0)
+            if (time != TimeSpan.Zero)
             {
-                m_Events.AddEvent(new ForcedUnsummonDelayEvent(this), m_Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
+                m_Events.AddEvent(new ForcedUnsummonDelayEvent(this), m_Events.CalculateTime(time));
                 return;
             }
 

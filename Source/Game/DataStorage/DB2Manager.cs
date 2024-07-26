@@ -603,7 +603,7 @@ namespace Game.DataStorage
 
         public void LoadHotfixData(BitSet availableDb2Locales)
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.Hotfix.Query("SELECT Id, UniqueId, TableHash, RecordId, Status FROM hotfix_data ORDER BY Id");
             if (result.IsEmpty())
@@ -674,12 +674,12 @@ namespace Game.DataStorage
                 }
             }
 
-            Log.outInfo(LogFilter.Server, "Loaded {0} hotfix info entries in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.Server, $"Loaded {count} hotfix info entries in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadHotfixBlob(BitSet availableDb2Locales)
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Blob` FROM hotfix_blob ORDER BY TableHash");
             if (result.IsEmpty())
@@ -720,7 +720,8 @@ namespace Game.DataStorage
                 hotfixBlobCount++;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {hotfixBlobCount} hotfix blob records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {hotfixBlobCount} hotfix blob records in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadHotfixOptionalData(BitSet availableDb2Locales)
@@ -728,7 +729,7 @@ namespace Game.DataStorage
             // Register allowed optional data keys
             _allowedHotfixOptionalData.Add(BroadcastTextStorage.GetTableHash(), (TactKeyStorage.GetTableHash(), ValidateBroadcastTextTactKeyOptionalData));
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Key`, `Data` FROM hotfix_optional_data ORDER BY TableHash");
             if (result.IsEmpty())
@@ -804,7 +805,8 @@ namespace Game.DataStorage
                 hotfixOptionalDataCount++;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {hotfixOptionalDataCount} hotfix optional data records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {hotfixOptionalDataCount} hotfix optional data records in {Time.Diff(oldMSTime)} ms.");
         }
 
         public bool ValidateBroadcastTextTactKeyOptionalData(byte[] data)

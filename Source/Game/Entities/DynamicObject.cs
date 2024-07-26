@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Entities
@@ -90,7 +91,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellXSpellVisualID), spellVisual.SpellXSpellVisualID);
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellID), spell.Id);
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Radius), radius);
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
+            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), LoopTime.RelativeTime);
 
             if (IsStoredInWorldObjectGridContainer())
                 SetActive(true);    //must before add to map to be put in world container
@@ -118,7 +119,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             // caster has to be always available and in the same map
             Cypher.Assert(_caster != null);
@@ -129,7 +130,7 @@ namespace Game.Entities
             if (_aura != null)
             {
                 if (!_aura.IsRemoved())
-                    _aura.UpdateOwner(diff, this);
+                    _aura.UpdateOwner((Milliseconds)diff, this);
 
                 // _aura may be set to null in Aura.UpdateOwner call
                 if (_aura != null && (_aura.IsRemoved() || _aura.IsExpired()))
@@ -138,7 +139,7 @@ namespace Game.Entities
             else
             {
                 if (GetDuration() > diff)
-                    _duration -= (int)diff;
+                    _duration -= diff;
                 else
                     expired = true;
             }
@@ -155,7 +156,7 @@ namespace Game.Entities
                 AddObjectToRemoveList();
         }
 
-        int GetDuration()
+        Milliseconds GetDuration()
         {
             if (_aura == null)
                 return _duration;
@@ -163,7 +164,7 @@ namespace Game.Entities
                 return _aura.GetDuration();
         }
 
-        public void SetDuration(int newDuration)
+        public void SetDuration(Milliseconds newDuration)
         {
             if (_aura == null)
                 _duration = newDuration;
@@ -171,7 +172,7 @@ namespace Game.Entities
                 _aura.SetDuration(newDuration);
         }
 
-        public void Delay(int delaytime)
+        public void Delay(Milliseconds delaytime)
         {
             SetDuration(GetDuration() - delaytime);
         }
@@ -311,7 +312,7 @@ namespace Game.Entities
         Aura _aura;
         Aura _removedAura;
         Unit _caster;
-        int _duration; // for non-aura dynobjects
+        Milliseconds _duration; // for non-aura dynobjects
         bool _isViewpoint;
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>

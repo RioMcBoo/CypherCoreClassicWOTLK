@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System;
 
 namespace Game.Chat
 {
@@ -29,15 +30,17 @@ namespace Game.Chat
             bool active = activeEvents.Contains(eventId);
             string activeStr = active ? Global.ObjectMgr.GetCypherString(CypherStrings.Active) : "";
 
-            string startTimeStr = Time.UnixTimeToDateTime(eventData.start).ToLongDateString();
-            string endTimeStr = Time.UnixTimeToDateTime(eventData.end).ToLongDateString();
+            string startTimeStr = eventData.StartTime.ToLongDateString();
+            string endTimeStr = eventData.EndTime.ToLongDateString();
 
-            uint delay = Global.GameEventMgr.NextCheck(eventId);
-            long nextTime = GameTime.GetGameTime() + delay;
-            string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(GameTime.GetGameTime() + delay).ToShortTimeString() : "-";
+            TimeSpan delay = Global.GameEventMgr.NextCheck(eventId);
+            RealmTime nextTime = LoopTime.RealmTime + delay;
 
-            string occurenceStr = Time.secsToTimeString(eventData.occurence * Time.Minute);
-            string lengthStr = Time.secsToTimeString(eventData.length * Time.Minute);
+            string nextStr = nextTime >= eventData.StartTime && nextTime < eventData.EndTime ?
+                (LoopTime.RealmTime + delay).ToShortTimeString() : "-";
+
+            string occurenceStr = Time.SpanToTimeString(eventData.Occurence);
+            string lengthStr = Time.SpanToTimeString(eventData.Length);
 
             handler.SendSysMessage(CypherStrings.EventInfo, eventId, eventData.description, activeStr,
                 startTimeStr, endTimeStr, occurenceStr, lengthStr, nextStr);

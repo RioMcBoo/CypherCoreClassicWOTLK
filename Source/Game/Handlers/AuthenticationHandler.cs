@@ -23,7 +23,7 @@ namespace Game
                 response.SuccessInfo.ActiveExpansionLevel = (byte)GetExpansion();
                 response.SuccessInfo.AccountExpansionLevel = (byte)GetAccountExpansion();
                 response.SuccessInfo.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-                response.SuccessInfo.Time = (uint)GameTime.GetGameTime();
+                response.SuccessInfo.Time = LoopTime.UnixServerTime;
 
                 var realm = Global.WorldMgr.GetRealm();
 
@@ -65,7 +65,7 @@ namespace Game
         {
             ClientCacheVersion cache = new();
             cache.CacheVersion = version;
-            SendPacket(cache);//enabled it
+            SendPacket(cache);
         }
 
         public void SendSetTimeZoneInformation()
@@ -79,7 +79,7 @@ namespace Game
             packet.GameTimeTZ = clientSupportedTZ;
             packet.ServerRegionalTZ = clientSupportedTZ;
 
-            SendPacket(packet);//enabled it
+            SendPacket(packet);
         }
 
         public void SendFeatureSystemStatusGlueScreen()

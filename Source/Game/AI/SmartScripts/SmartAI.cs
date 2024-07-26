@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +22,7 @@ namespace Game.AI
 
         bool _isCharmed;
         int _followCreditType;
-        uint _followArrivedTimer;
+        TimeSpan _followArrivedTimer;
         int _followCredit;
         int _followArrivedEntry;
         ObjectGuid _followGuid;
@@ -30,10 +31,10 @@ namespace Game.AI
 
         SmartEscortState _escortState;
         NPCFlags1 _escortNPCFlags;
-        uint _escortInvokerCheckTimer;
+        TimeSpan _escortInvokerCheckTimer;
         int _currentWaypointNodeId;
         bool _waypointReached;
-        uint _waypointPauseTimer;
+        TimeSpan _waypointPauseTimer;
         bool _waypointPauseForced;
         bool _repeatWaypointPath;
         bool _OOCReached;
@@ -44,19 +45,19 @@ namespace Game.AI
         bool _canCombatMove;
         int _invincibilityHpLevel;
 
-        uint _despawnTime;
+        TimeSpan _despawnTime;
         uint _despawnState;
 
         // Vehicle conditions
         bool _hasConditions;
-        uint _conditionsTimer;
+        TimeSpan _conditionsTimer;
 
         // Gossip
         bool _gossipReturn;
 
         public SmartAI(Creature creature) : base(creature)
         {
-            _escortInvokerCheckTimer = 1000;
+            _escortInvokerCheckTimer = (Seconds)1;
             _run = true;
             _canCombatMove = true;
 
@@ -114,7 +115,7 @@ namespace Game.AI
             return path;
         }
 
-        public void PausePath(uint delay, bool forced)
+        public void PausePath(TimeSpan delay, bool forced)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
@@ -162,7 +163,7 @@ namespace Game.AI
             return HasEscortState(SmartEscortState.Paused);
         }
 
-        public void StopPath(uint despawnTime = 0, int quest = 0, bool fail = false)
+        public void StopPath(TimeSpan despawnTime = default, int quest = 0, bool fail = false)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
@@ -206,7 +207,7 @@ namespace Game.AI
         {
             RemoveEscortState(SmartEscortState.Escorting | SmartEscortState.Paused | SmartEscortState.Returning);
 
-            _waypointPauseTimer = 0;
+            _waypointPauseTimer = TimeSpan.Zero;
 
             if (_escortNPCFlags != 0)
             {
@@ -285,7 +286,7 @@ namespace Game.AI
 
             _waypointPauseForced = false;
             _waypointReached = false;
-            _waypointPauseTimer = 0;
+            _waypointPauseTimer = TimeSpan.Zero;
 
             SetRun(_run);
             me.ResumeMovement();
@@ -300,7 +301,7 @@ namespace Game.AI
             me.GetMotionMaster().MovePoint(EventId.SmartEscortLastOCCPoint, me.GetHomePosition());
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!me.IsAlive())
             {
@@ -375,7 +376,7 @@ namespace Game.AI
 
             GetScript().ProcessEventsFor(SmartEvents.WaypointReached, null, _currentWaypointNodeId, pathId);
 
-            if (_waypointPauseTimer != 0 && !_waypointPauseForced)
+            if (_waypointPauseTimer != TimeSpan.Zero && !_waypointPauseForced)
             {
                 _waypointReached = true;
                 me.PauseMovement();
@@ -529,7 +530,7 @@ namespace Game.AI
         {
             GetScript().OnInitialize(me);
 
-            _despawnTime = 0;
+            _despawnTime = TimeSpan.Zero;
             _despawnState = 0;
             _escortState = SmartEscortState.None;
 
@@ -537,7 +538,7 @@ namespace Game.AI
             _followDist = 0;
             _followAngle = 0;
             _followCredit = 0;
-            _followArrivedTimer = 1000;
+            _followArrivedTimer = (Seconds)1;
             _followArrivedEntry = 0;
             _followCreditType = 0;
         }
@@ -566,7 +567,7 @@ namespace Game.AI
                     if (me.GetWaypointPathId() != 0)
                         me.GetMotionMaster().MovePath(me.GetWaypointPathId(), true);
                 }
-                
+
                 me.ResumeMovement();
             }
             else if (formation.IsFormed())
@@ -688,9 +689,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.SummonDespawned, summon, summon.GetEntry());
         }
 
-        public override void CorpseRemoved(long respawnDelay)
+        public override void CorpseRemoved(TimeSpan respawnDelay)
         {
-            GetScript().ProcessEventsFor(SmartEvents.CorpseRemoved, null, (int)respawnDelay);
+            GetScript().ProcessEventsFor(SmartEvents.CorpseRemoved, null, (Seconds)respawnDelay);
         }
 
         public override void OnDespawn()
@@ -868,7 +869,7 @@ namespace Game.AI
             _followGuid = target.GetGUID();
             _followDist = dist;
             _followAngle = angle;
-            _followArrivedTimer = 1000;
+            _followArrivedTimer = (Seconds)1;
             _followCredit = credit;
             _followArrivedEntry = end;
             _followCreditType = creditType;
@@ -882,7 +883,7 @@ namespace Game.AI
             _followDist = 0;
             _followAngle = 0;
             _followCredit = 0;
-            _followArrivedTimer = 1000;
+            _followArrivedTimer = (Seconds)1;
             _followArrivedEntry = 0;
             _followCreditType = 0;
             me.GetMotionMaster().Clear();
@@ -901,7 +902,7 @@ namespace Game.AI
                     player.GroupEventHappens(_followCredit, me);
             }
 
-            SetDespawnTime(5000);
+            SetDespawnTime((Seconds)5);
             StartDespawn();
             GetScript().ProcessEventsFor(SmartEvents.FollowCompleted, player);
         }
@@ -924,7 +925,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.OnSpellclick, clicker);
         }
 
-        void CheckConditions(uint diff)
+        void CheckConditions(TimeSpan diff)
         {
             if (!_hasConditions)
                 return;
@@ -953,13 +954,13 @@ namespace Game.AI
                     }
                 }
 
-                _conditionsTimer = 1000;
+                _conditionsTimer = (Seconds)1;
             }
             else
                 _conditionsTimer -= diff;
         }
 
-        void UpdatePath(uint diff)
+        void UpdatePath(TimeSpan diff)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
                 return;
@@ -968,14 +969,14 @@ namespace Game.AI
             {
                 if (!IsEscortInvokerInRange())
                 {
-                    StopPath(0, EscortQuestID, true);
+                    StopPath(TimeSpan.Zero, EscortQuestID, true);
 
                     // allow to properly hook out of range despawn action, which in most cases should perform the same operation as dying
                     GetScript().ProcessEventsFor(SmartEvents.Death, me);
                     me.DespawnOrUnsummon();
                     return;
                 }
-                _escortInvokerCheckTimer = 1000;
+                _escortInvokerCheckTimer = (Seconds)1;
             }
             else
                 _escortInvokerCheckTimer -= diff;
@@ -984,7 +985,7 @@ namespace Game.AI
             if (HasEscortState(SmartEscortState.Paused) && (_waypointReached || _waypointPauseForced))
             {
                 // Resume only if there was a pause timer set
-                if (_waypointPauseTimer != 0 && !me.IsInCombat() 
+                if (_waypointPauseTimer != TimeSpan.Zero && !me.IsInCombat() 
                     && !HasEscortState(SmartEscortState.Returning))
                 {
                     if (_waypointPauseTimer <= diff)
@@ -1012,7 +1013,7 @@ namespace Game.AI
             }
         }
 
-        void UpdateFollow(uint diff)
+        void UpdateFollow(TimeSpan diff)
         {
             if (_followGuid.IsEmpty())
             {
@@ -1024,14 +1025,14 @@ namespace Game.AI
                         return;
                     }
 
-                    _followArrivedTimer = 1000;
+                    _followArrivedTimer = (Seconds)1;
                 }
                 else
                     _followArrivedTimer -= diff;
             }
         }
 
-        void UpdateDespawn(uint diff)
+        void UpdateDespawn(TimeSpan diff)
         {
             if (_despawnState <= 1 || _despawnState > 3)
                 return;
@@ -1041,7 +1042,7 @@ namespace Game.AI
                 if (_despawnState == 2)
                 {
                     me.SetVisible(false);
-                    _despawnTime = 5000;
+                    _despawnTime = (Seconds)5;
                     _despawnState++;
                 }
                 else
@@ -1068,15 +1069,15 @@ namespace Game.AI
 
         public void SetInvincibilityHpLevel(int level) { _invincibilityHpLevel = level; }
 
-        public void SetDespawnTime(uint t, uint r = 0)
+        public void SetDespawnTime(TimeSpan t, uint r = 0)
         {
             _despawnTime = t;
-            _despawnState = t != 0 ? 1 : 0u;
+            _despawnState = t != TimeSpan.Zero ? 1 : 0u;
         }
 
         public void StartDespawn() { _despawnState = 2; }
 
-        public void SetWPPauseTimer(uint time) { _waypointPauseTimer = time; }
+        public void SetWPPauseTimer(TimeSpan time) { _waypointPauseTimer = time; }
 
         public void SetGossipReturn(bool val) { _gossipReturn = val; }
     }
@@ -1090,7 +1091,7 @@ namespace Game.AI
 
         public SmartGameObjectAI(GameObject go) : base(go) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             GetScript().OnUpdate(diff);
         }
@@ -1213,7 +1214,7 @@ namespace Game.AI
             GetScript().OnInitialize(at);
         }
 
-        public override void OnUpdate(uint diff)
+        public override void OnUpdate(TimeSpan diff)
         {
             GetScript().OnUpdate(diff);
         }

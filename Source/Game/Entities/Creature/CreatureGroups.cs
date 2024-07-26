@@ -73,7 +73,7 @@ namespace Game.Entities
 
         public static void LoadCreatureFormations()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             //Get group data
             SQLResult result = DB.World.Query("SELECT leaderGUID, memberGUID, dist, angle, groupAI, point_1, point_2 FROM creature_formations ORDER BY leaderGUID");
@@ -146,7 +146,8 @@ namespace Game.Entities
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in formations in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} creatures in formations in {Time.Diff(oldMSTime)} ms.");
         }
 
         public static FormationInfo GetFormationInfo(long spawnId)
@@ -254,7 +255,7 @@ namespace Game.Entities
                     && other.IsValidAttackTarget(target))
                 {
                     other.EngageWithTarget(target);
-            }
+                }
             }
 
             _engaging = false;

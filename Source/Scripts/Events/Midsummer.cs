@@ -120,10 +120,10 @@ namespace Scripts.Events
             Aura aur = target.GetAura(SpellRibbonDance);
             if (aur != null)
             {
-                aur.SetMaxDuration(Math.Min(3600000, aur.GetMaxDuration() + 180000));
+                aur.SetMaxDuration(Time.Min((Hours)1, aur.GetMaxDuration() + (Minutes)3));
                 aur.RefreshDuration();
 
-                if (aur.GetMaxDuration() == 3600000 && target.HasAura(SpellHasFullMidsummerSet))
+                if (aur.GetMaxDuration() == (Hours)1 && target.HasAura(SpellHasFullMidsummerSet))
                     target.CastSpell(target, SpellBurningHotPoleDance, true);
             }
             else
@@ -254,7 +254,7 @@ namespace Scripts.Events
                 || player.GetQuestStatus(JugglingTorch.QuestTorchCatchingH) == QuestStatus.Rewarded)
             {
                 player.CastSpell(player, JugglingTorch.SpellGiveTorch);
-        }
+            }
         }
 
         public override void Register()

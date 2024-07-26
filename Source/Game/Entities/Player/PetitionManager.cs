@@ -16,7 +16,7 @@ namespace Game.Entities
 
         public void LoadPetitions()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             _petitionStorage.Clear();
 
             SQLResult result = DB.Characters.Query("SELECT petitionguid, ownerguid, name FROM petition");
@@ -33,12 +33,12 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} petitions in: {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} petitions in: {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSignatures()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.Characters.Query("SELECT petitionguid, player_account, playerguid FROM petition_sign");
             if (result.IsEmpty())
@@ -58,7 +58,7 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Petition signs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Petition signs in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void AddPetition(ObjectGuid petitionGuid, ObjectGuid ownerGuid, string name, bool isLoading)

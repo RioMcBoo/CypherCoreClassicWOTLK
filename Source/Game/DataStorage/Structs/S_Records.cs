@@ -365,7 +365,7 @@ namespace Game.DataStorage
         public int Id;
         private byte _difficultyID;
         public int CumulativeAura;
-        public uint ProcCategoryRecovery;
+        private int _procCategoryRecovery;
         public byte ProcChance;
         public int ProcCharges;
         public ushort SpellProcsPerMinuteID;
@@ -374,6 +374,7 @@ namespace Game.DataStorage
 
         #region Properties
         public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        public Milliseconds ProcCategoryRecovery => (Milliseconds)_procCategoryRecovery;
         #endregion
     }
 
@@ -399,9 +400,14 @@ namespace Game.DataStorage
     public sealed class SpellCastTimesRecord
     {
         public int Id;
-        public int Base;
+        private int _base;
         public short PerLevel;
-        public int Minimum;
+        private int _minimum;
+
+        #region Properties
+        public Milliseconds Base => (Milliseconds)_base;
+        public Milliseconds Minimum => (Milliseconds)_minimum;
+        #endregion
     }
 
     public sealed class SpellCastingRequirementsRecord
@@ -443,11 +449,12 @@ namespace Game.DataStorage
         private int _flags;
         public byte UsesPerWeek;
         public sbyte MaxCharges;
-        public int ChargeRecoveryTime;
+        private int _chargeRecoveryTime;
         public uint TypeMask;
 
         #region Properties
         public SpellCategoryFlags Flags => (SpellCategoryFlags)_flags;
+        public Milliseconds ChargeRecoveryTime => (Milliseconds)_chargeRecoveryTime;
         #endregion
 
         #region Helpers
@@ -480,22 +487,31 @@ namespace Game.DataStorage
     {
         public int Id;
         private byte _difficultyID;
-        public uint CategoryRecoveryTime;
-        public uint RecoveryTime;
-        public uint StartRecoveryTime;
+        private int _categoryRecoveryTime;
+        private int _recoveryTime;
+        private int _startRecoveryTime;
         public int SpellID;
 
         #region Properties
         public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        public Milliseconds CategoryRecoveryTime => (Milliseconds)_categoryRecoveryTime;
+        public Milliseconds RecoveryTime => (Milliseconds)_recoveryTime;
+        public Milliseconds StartRecoveryTime => (Milliseconds)_startRecoveryTime;
         #endregion
     }
 
     public sealed class SpellDurationRecord
     {
         public int Id;
-        public int Duration;
-        public uint DurationPerLevel;
-        public int MaxDuration;
+        private int _duration;
+        private int _durationPerLevel;
+        private int _maxDuration;
+
+        #region Properties
+        public Milliseconds Duration => (Milliseconds)_duration;        
+        public Milliseconds DurationPerLevel => (Milliseconds)_durationPerLevel;
+        public Milliseconds MaxDuration => (Milliseconds)_maxDuration;
+        #endregion
     }
 
     public sealed class SpellEffectRecord
@@ -507,7 +523,7 @@ namespace Game.DataStorage
         public float EffectAmplitude;
         private int _effectAttributes;
         private short _effectAura;
-        public uint EffectAuraPeriod;
+        private int _effectAuraPeriod;
         public int EffectBasePoints;
         public float EffectBonusCoefficient;
         public float EffectChainAmplitude;
@@ -536,6 +552,7 @@ namespace Game.DataStorage
         public SpellEffectName Effect { get => (SpellEffectName)_effect; set => _effect = (int)value; }
         public AuraType EffectAura { get => (AuraType)_effectAura; set => _effectAura = (short)value; }
         public SpellEffectAttributes EffectAttributes { get => (SpellEffectAttributes)_effectAttributes; set => _effectAttributes = (int)value; }
+        public Milliseconds EffectAuraPeriod { get => (Milliseconds)_effectAuraPeriod; set => _effectAuraPeriod = value; }
         #endregion
     }
 
@@ -676,9 +693,9 @@ namespace Game.DataStorage
         public ushort DurationIndex;
         public ushort RangeIndex;
         public byte SchoolMask;
-        public float Speed;
-        public float LaunchDelay;
-        public float MinDuration;
+        private float _speed;
+        private float _launchDelay;
+        private float _minDuration;
         public int SpellIconFileDataID;
         public int ActiveIconFileDataID;
         public int ContentTuningID;
@@ -687,6 +704,9 @@ namespace Game.DataStorage
 
         #region Properties
         public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        public Speed Speed => (Speed)_speed;
+        public Milliseconds LaunchDelay => (Milliseconds)(Seconds)_launchDelay;
+        public Milliseconds MinDuration => (Milliseconds)(Seconds)_minDuration;
         #endregion
     }
 
@@ -834,7 +854,7 @@ namespace Game.DataStorage
         private int _flags;
         public int AttackIconFileID;
         public sbyte BonusActionBar;
-        public ushort CombatRoundTime;
+        private ushort _combatRoundTime;
         public float DamageVariance;
         public ushort MountTypeID;
         public int[] CreatureDisplayID = new int[4];
@@ -842,6 +862,7 @@ namespace Game.DataStorage
 
         #region Properties
         public SpellShapeshiftFormFlags Flags => (SpellShapeshiftFormFlags)_flags;
+        public Milliseconds CombatRoundTime => (Milliseconds)_combatRoundTime;
         #endregion
 
         #region Helpers

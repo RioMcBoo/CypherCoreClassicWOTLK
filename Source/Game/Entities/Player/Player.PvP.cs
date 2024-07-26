@@ -21,12 +21,12 @@ namespace Game.Entities
         public void UpdateHonorFields()
         {
             // called when rewarding honor and at each save
-            long now = GameTime.GetGameTime();
-            long today = (GameTime.GetGameTime() / Time.Day) * Time.Day;
+            RealmTime now = LoopTime.RealmTime;
+            RealmTime today = now.Date;
 
             if (m_lastHonorUpdateTime < today)
             {
-                long yesterday = today - Time.Day;
+                RealmTime yesterday = today - (Days)1;
 
                 // update yesterday's contribution
                 if (m_lastHonorUpdateTime >= yesterday)
@@ -307,8 +307,8 @@ namespace Game.Entities
                 Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
                 if (aura != null)
                 {
-                    aura.SetMaxDuration(-1);
-                    aura.SetDuration(-1);
+                    aura.SetMaxDuration(new(-1));
+                    aura.SetDuration(new(-1));
                 }
             }
 
@@ -443,7 +443,7 @@ namespace Game.Entities
                 {
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = val;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
-                    m_bgBattlegroundQueueID[i].joinTime = (uint)GameTime.GetGameTime();
+                    m_bgBattlegroundQueueID[i].joinTime = LoopTime.ServerTime;
 
                     m_bgBattlegroundQueueID[i].mercenary = 
                         HasAura(BattlegroundConst.SpellMercenaryContractHorde) || HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
@@ -473,7 +473,7 @@ namespace Game.Entities
                 {
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = default;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
-                    m_bgBattlegroundQueueID[i].joinTime = 0;
+                    m_bgBattlegroundQueueID[i].joinTime = ServerTime.Zero;
                     m_bgBattlegroundQueueID[i].mercenary = false;
                     return;
                 }
@@ -486,7 +486,7 @@ namespace Game.Entities
             {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     m_bgBattlegroundQueueID[i].invitedToInstance = instanceId;
-        }
+            }
         }
 
         public bool IsInvitedForBattlegroundInstance(int instanceId)
@@ -506,7 +506,7 @@ namespace Game.Entities
             {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     m_bgBattlegroundQueueID[i].mercenary = mercenary;
-        }
+            }
         }
 
         public bool IsMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId)
@@ -526,12 +526,15 @@ namespace Game.Entities
         public int GetBattlegroundId() { return m_bgData.bgInstanceID; }
         public BattlegroundTypeId GetBattlegroundTypeId() { return m_bgData.bgTypeID; }
 
-        public uint GetBattlegroundQueueJoinTime(BattlegroundQueueTypeId bgQueueTypeId)
+        public ServerTime GetBattlegroundQueueJoinTime(BattlegroundQueueTypeId bgQueueTypeId)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+            {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     return m_bgBattlegroundQueueID[i].joinTime;
-            return 0;
+            }
+
+            return ServerTime.Zero;
         }
 
         public bool CanUseBattlegroundObject(GameObject gameobject)

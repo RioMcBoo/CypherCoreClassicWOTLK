@@ -98,7 +98,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 for (byte j = 0; j < 9; j++)
                     m_Team_QuestStatus[i][j] = 0;
 
-                _captainBuffTimer[i] = new(120000 + RandomHelper.URand(0, 4) * 60); //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
+                _captainBuffTimer[i] = new((Minutes)(2 + RandomHelper.IRand(0, 4))); //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
             }
 
             _mineInfo[(byte)AlteracValleyMine.North] = new AlteracValleyMineInfo(Team.Other, new StaticMineInfo(WorldStateIds.IrondeepMineOwner, WorldStateIds.IrondeepMineAllianceControlled, WorldStateIds.IrondeepMineHordeControlled, WorldStateIds.IrondeepMineTroggControlled, (byte)TextIds.IrondeepMineAllianceTaken, (byte)TextIds.IrondeepMineHordeTaken));
@@ -346,7 +346,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             }
         }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -388,7 +388,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                             creature.GetAI().DoAction(MiscConst.ActionBuffYell);
                     }
 
-                    _captainBuffTimer[i].Reset(120000 + RandomHelper.URand(0, 4) * 60000); //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
+                    _captainBuffTimer[i].Reset((Minutes)(2 + RandomHelper.IRand(0, 4))); //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
                 }
             }
         }
@@ -440,7 +440,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 if (gameObject != null)
                 {
                     gameObject.UseDoorOrButton();
-                    TimeSpan delay = gameObject.GetEntry() == (uint)GameObjectIds.GhostGate ? TimeSpan.Zero : TimeSpan.FromSeconds(3);
+                    TimeSpan delay = gameObject.GetEntry() == (int)GameObjectIds.GhostGate ? TimeSpan.Zero : (Seconds)3;
                     gameObject.DespawnOrUnsummon(delay);
                 }
             }
@@ -1096,7 +1096,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
         public const int ScoreInitialPoints = 700;
         public const int EventStartBattle = 9166; // Achievement: The Alterac Blitz
 
-        public static TimeSpan MineResourceTimer = TimeSpan.FromSeconds(45);
+        public static TimeSpan MineResourceTimer = (Seconds)45;
 
         public static StaticNodeInfo[] BGAVNodeInfo =
         {

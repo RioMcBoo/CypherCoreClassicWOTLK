@@ -41,7 +41,7 @@ namespace Game.Guilds
             m_info = "";
             m_motd = "No message set.";
             m_bankMoney = 0;
-            m_createdDate = GameTime.GetGameTime();
+            m_createdDate = LoopTime.ServerTime;
 
             Log.outDebug(LogFilter.Guild, 
                 $"GUILD: creating guild [{name}] for leader {pLeader.GetName()} ({m_leaderGuid})");
@@ -59,7 +59,7 @@ namespace Game.Guilds
             stmt.SetInt64(++index, m_leaderGuid.GetCounter());
             stmt.SetString(++index, m_info);
             stmt.SetString(++index, m_motd);
-            stmt.SetInt64(++index, m_createdDate);
+            stmt.SetInt64(++index, (UnixTime64)m_createdDate);
             stmt.SetInt32(++index, m_emblemInfo.GetStyle());
             stmt.SetInt32(++index, m_emblemInfo.GetColor());
             stmt.SetInt32(++index, m_emblemInfo.GetBorderStyle());
@@ -204,8 +204,8 @@ namespace Game.Guilds
         {
             GuildRoster roster = new();
             roster.NumAccounts = m_accountsNumber;
-            roster.CreateDate.SetUtcTimeFromUnixTime(m_createdDate);
-            roster.CreateDate += session.GetTimezoneOffset();
+            roster.CreateDate = (RealmTime)m_createdDate;
+            //roster.CreateDate += session.GetTimezoneOffset();
             roster.GuildFlags = 0;
 
             bool sendOfficerNote = _HasRankRight(session.GetPlayer(), GuildRankRights.ViewOffNote);
@@ -218,7 +218,7 @@ namespace Game.Guilds
                 memberData.AreaID = member.GetZoneId();
                 memberData.PersonalAchievementPoints = member.GetAchievementPoints();
                 memberData.GuildReputation = member.GetTotalReputation();
-                memberData.LastSave = member.GetInactiveDays();
+                memberData.InactiveDays = member.GetInactiveDays();
 
                 memberData.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
                 memberData.Status = (byte)member.GetFlags();
@@ -1054,7 +1054,7 @@ namespace Game.Guilds
             foreach (var newsLogEntry in newsLog)
             {
                 newsLogEntry.WritePacket(packet);
-                packet.NewsEvents.Last().CompletedDate += session.GetTimezoneOffset();
+                //packet.NewsEvents.Last().CompletedDate += session.GetTimezoneOffset();
             }
 
             session.SendPacket(packet);
@@ -1274,7 +1274,7 @@ namespace Game.Guilds
 
             m_info = fields.Read<string>(8);
             m_motd = fields.Read<string>(9);
-            m_createdDate = fields.Read<uint>(10);
+            m_createdDate = (ServerTime)(UnixTime)fields.Read<int>(10);
             m_bankMoney = fields.Read<long>(11);
 
             byte purchasedTabs = (byte)fields.Read<uint>(12);
@@ -1336,12 +1336,12 @@ namespace Game.Guilds
             {
                 m_eventLog.LoadEvent(new EventLogEntry(
                     m_id,                                       // guild id
-                    field.Read<int>(1),                      // guid
-                    field.Read<long>(6),              // timestamp
-                    (GuildEventLogTypes)field.Read<byte>(2),   // event Type
-                    field.Read<long>(3),                      // player guid 1
-                    field.Read<long>(4),                      // player guid 2
-                    field.Read<byte>(5)));                     // rank
+                    field.Read<int>(1),                         // guid
+                    (ServerTime)(UnixTime64)field.Read<long>(6),// timestamp
+                    (GuildEventLogTypes)field.Read<byte>(2),    // event Type
+                    field.Read<long>(3),                        // player guid 1
+                    field.Read<long>(4),                        // player guid 2
+                    field.Read<byte>(5)));                      // rank
                 return true;
             }
             return false;
@@ -1378,15 +1378,15 @@ namespace Game.Guilds
                     }
 
                     pLog.LoadEvent(new BankEventLogEntry(
-                        m_id,                                   // guild id
-                        guid,                                   // guid
-                        field.Read<long>(8),          // timestamp
-                        dbTabId,                                // tab id
-                        eventType,                              // event Type
-                        field.Read<long>(4),                  // player guid
-                        field.Read<long>(5),                  // item or money
-                        field.Read<ushort>(6),                  // itam stack count
-                        field.Read<byte>(7)));                 // dest tab id
+                        m_id,                                           // guild id
+                        guid,                                           // guid
+                        (ServerTime)(UnixTime64)field.Read<long>(8),    // timestamp
+                        dbTabId,                                        // tab id
+                        eventType,                                      // event Type
+                        field.Read<long>(4),                            // player guid
+                        field.Read<long>(5),                            // item or money
+                        field.Read<ushort>(6),                          // itam stack count
+                        field.Read<byte>(7)));                          // dest tab id
                 }
             }
             return true;
@@ -1398,13 +1398,13 @@ namespace Game.Guilds
                 return;
 
             var news = new NewsLogEntry(
-                m_id,                                       // guild id
-                field.Read<int>(1),                      // guid
-                field.Read<long>(6),                      // timestamp //64 bits?
-                (GuildNews)field.Read<byte>(2),            // Type
-                ObjectGuid.Create(HighGuid.Player, field.Read<long>(3)),                      // player guid
-                field.Read<uint>(4),                      // Flags
-                field.Read<int>(5));                    // value)
+                m_id,                                                       // guild id
+                field.Read<int>(1),                                         // guid
+                (ServerTime)(UnixTime64)field.Read<long>(6),                // timestamp
+                (GuildNews)field.Read<byte>(2),                             // Type
+                ObjectGuid.Create(HighGuid.Player, field.Read<long>(3)),    // player guid
+                field.Read<uint>(4),                                        // Flags
+                field.Read<int>(5));                                        // value)
 
             m_newsLog.LoadEvent(news);
 
@@ -1522,9 +1522,9 @@ namespace Game.Guilds
                             && !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()))
                         {
                             player.SendPacket(data);
+                        }
+                    }
                 }
-            }
-        }
             }
         }
 
@@ -1546,10 +1546,10 @@ namespace Game.Guilds
                             && player.GetSession().IsAddonRegistered(prefix))
                         {
                             player.SendPacket(data);
+                        }
                     }
                 }
             }
-        }
         }
 
         public void BroadcastPacketToRank(ServerPacket packet, GuildRankId rankId)
@@ -2455,8 +2455,8 @@ namespace Game.Guilds
             {
                 GuildNewsPkt newsPacket = new();
                 news.WritePacket(newsPacket);
-                newsPacket.NewsEvents.Last().CompletedDate += receiver.GetSession().GetTimezoneOffset();
-
+                //newsPacket.NewsEvents.Last().CompletedDate += receiver.GetSession().GetTimezoneOffset();
+                
                 receiver.SendPacket(newsPacket);
             };
 
@@ -2488,7 +2488,7 @@ namespace Game.Guilds
 
             GuildNewsPkt newsPacket = new();
             newsLog.WritePacket(newsPacket);
-            newsPacket.NewsEvents.Last().CompletedDate += session.GetTimezoneOffset();
+            //newsPacket.NewsEvents.Last().CompletedDate += session.GetTimezoneOffset();
             session.SendPacket(newsPacket);
         }
 
@@ -2498,7 +2498,7 @@ namespace Game.Guilds
         public string GetName() { return m_name; }
         public string GetMOTD() { return m_motd; }
         public string GetInfo() { return m_info; }
-        public long GetCreatedDate() { return m_createdDate; }
+        public ServerTime GetCreatedDate() { return m_createdDate; }
         public long GetBankMoney() { return m_bankMoney; }
 
         public void BroadcastWorker(IDoWork<Player> _do, Player except = null)
@@ -2612,7 +2612,7 @@ namespace Game.Guilds
         ObjectGuid m_leaderGuid;
         string m_motd;
         string m_info;
-        long m_createdDate;
+        ServerTime m_createdDate;
 
         EmblemInfo m_emblemInfo = new();
         int m_accountsNumber;
@@ -2640,7 +2640,7 @@ namespace Game.Guilds
                 m_level = 0;
                 m_class = 0;
                 m_flags = GuildMemberFlags.None;
-                m_logoutTime = (ulong)GameTime.GetGameTime();
+                m_logoutTime = LoopTime.ServerTime;
                 m_accountId = 0;
                 m_rankId = rankId;
                 m_achievementPoints = 0;
@@ -2737,14 +2737,14 @@ namespace Game.Guilds
                 m_bankWithdrawMoney = field.Read<long>(13);
 
                 SetStats(field.Read<string>(14),
-                         field.Read<byte>(15),                          // characters.level
-                         (Race)field.Read<byte>(16),                    // characters.race
-                         (Class)field.Read<byte>(17),                   // characters.class
-                         (Gender)field.Read<byte>(18),                  // characters.gender
-                         field.Read<ushort>(19),                        // characters.zone
-                         field.Read<int>(20),                          // characters.account
+                         field.Read<byte>(15),                                  // characters.level
+                         (Race)field.Read<byte>(16),                            // characters.race
+                         (Class)field.Read<byte>(17),                           // characters.class
+                         (Gender)field.Read<byte>(18),                          // characters.gender
+                         field.Read<ushort>(19),                                // characters.zone
+                         field.Read<int>(20),                                   // characters.account
                          0);
-                m_logoutTime = field.Read<ulong>(21);                    // characters.logout_time
+                m_logoutTime = (ServerTime)(UnixTime64)field.Read<long>(21);    // characters.logout_time
                 m_totalActivity = 0;
                 m_weekActivity = 0;
                 m_weekReputation = 0;
@@ -2790,7 +2790,7 @@ namespace Game.Guilds
             {
                 if (IsOnline())
                     return 0.0f;
-                return (float)((GameTime.GetGameTime() - (long)GetLogoutTime()) / (float)Time.Day);
+                return (float)(LoopTime.ServerTime - GetLogoutTime()).TotalDays;
             }
 
             // Decreases amount of slots left for today.
@@ -2850,7 +2850,7 @@ namespace Game.Guilds
             public string GetName() { return m_name; }
             public int GetAccountId() { return m_accountId; }
             public GuildRankId GetRankId() { return m_rankId; }
-            public ulong GetLogoutTime() { return m_logoutTime; }
+            public ServerTime GetLogoutTime() { return m_logoutTime; }
             public string GetPublicNote() { return m_publicNote; }
             public string GetOfficerNote() { return m_officerNote; }
             public Race GetRace() { return m_race; }
@@ -2869,7 +2869,7 @@ namespace Game.Guilds
             public bool IsTrackingCriteriaId(int criteriaId) { return m_trackedCriteriaIds.Contains(criteriaId); }
             public bool IsOnline() { return m_flags.HasFlag(GuildMemberFlags.Online); }
 
-            public void UpdateLogoutTime() { m_logoutTime = (ulong)GameTime.GetGameTime(); }
+            public void UpdateLogoutTime() { m_logoutTime = LoopTime.ServerTime; }
             public bool IsRank(GuildRankId rankId) { return m_rankId == rankId; }
             public bool IsSamePlayer(ObjectGuid guid) { return m_guid == guid; }
 
@@ -2889,7 +2889,7 @@ namespace Game.Guilds
             Class m_class;
             Gender _gender;
             GuildMemberFlags m_flags;
-            ulong m_logoutTime;
+            ServerTime m_logoutTime;
             int m_accountId;
             GuildRankId m_rankId;
             string m_publicNote = "";
@@ -2913,10 +2913,10 @@ namespace Game.Guilds
             {
                 m_guildId = guildId;
                 m_guid = guid;
-                m_timestamp = GameTime.GetGameTime();
+                m_timestamp = LoopTime.ServerTime;
             }
 
-            public LogEntry(long guildId, int guid, long timestamp)
+            public LogEntry(long guildId, int guid, ServerTime timestamp)
             {
                 m_guildId = guildId;
                 m_guid = guid;
@@ -2924,13 +2924,13 @@ namespace Game.Guilds
             }
 
             public int GetGUID() { return m_guid; }
-            public long GetTimestamp() { return m_timestamp; }
+            public ServerTime GetTimestamp() { return m_timestamp; }
 
             public virtual void SaveToDB(SQLTransaction trans) { }
 
             public long m_guildId;
             public int m_guid;
-            public long m_timestamp;
+            public ServerTime m_timestamp;
         }
 
         public class EventLogEntry : LogEntry
@@ -2944,7 +2944,7 @@ namespace Game.Guilds
                 m_newRank = newRank;
             }
 
-            public EventLogEntry(long guildId, int guid, long timestamp, GuildEventLogTypes eventType, long playerGuid1, long playerGuid2, byte newRank)
+            public EventLogEntry(long guildId, int guid, ServerTime timestamp, GuildEventLogTypes eventType, long playerGuid1, long playerGuid2, byte newRank)
                 : base(guildId, guid, timestamp)
             {
                 m_eventType = eventType;
@@ -2968,7 +2968,7 @@ namespace Game.Guilds
                 stmt.SetInt64(++index, m_playerGuid1);
                 stmt.SetInt64(++index, m_playerGuid2);
                 stmt.SetUInt8(++index, m_newRank);
-                stmt.SetInt64(++index, m_timestamp);
+                stmt.SetInt64(++index, (UnixTime64)m_timestamp);
                 trans.Append(stmt);
             }
 
@@ -2981,7 +2981,7 @@ namespace Game.Guilds
                 eventEntry.PlayerGUID = playerGUID;
                 eventEntry.OtherGUID = otherGUID;
                 eventEntry.TransactionType = (byte)m_eventType;
-                eventEntry.TransactionDate = (uint)(GameTime.GetGameTime() - m_timestamp);
+                eventEntry.TransactionDate = (Seconds)(LoopTime.ServerTime - m_timestamp);
                 eventEntry.RankID = m_newRank;
                 packet.Entry.Add(eventEntry);
             }
@@ -3005,7 +3005,7 @@ namespace Game.Guilds
                 m_destTabId = destTabId;
             }
 
-            public BankEventLogEntry(long guildId, int guid, long timestamp, byte tabId, GuildBankEventLogTypes eventType, long playerGuid, long itemOrMoney, ushort itemStackCount, byte destTabId)
+            public BankEventLogEntry(long guildId, int guid, ServerTime timestamp, byte tabId, GuildBankEventLogTypes eventType, long playerGuid, long itemOrMoney, ushort itemStackCount, byte destTabId)
                 : base(guildId, guid, timestamp)
             {
                 m_eventType = eventType;
@@ -3050,7 +3050,7 @@ namespace Game.Guilds
                 stmt.SetInt64(++index, m_itemOrMoney);
                 stmt.SetUInt16(++index, m_itemStackCount);
                 stmt.SetUInt8(++index, m_destTabId);
-                stmt.SetInt64(++index, m_timestamp);
+                stmt.SetInt64(++index, (UnixTime64)m_timestamp);
                 trans.Append(stmt);
             }
 
@@ -3067,7 +3067,7 @@ namespace Game.Guilds
 
                 GuildBankLogEntry bankLogEntry = new();
                 bankLogEntry.PlayerGUID = logGuid;
-                bankLogEntry.TimeOffset = (uint)(GameTime.GetGameTime() - m_timestamp);
+                bankLogEntry.TimeOffset = (Seconds)(LoopTime.ServerTime - m_timestamp);
                 bankLogEntry.EntryType = (sbyte)m_eventType;
 
                 if (hasStack)
@@ -3104,7 +3104,7 @@ namespace Game.Guilds
                 m_value = value;
             }
 
-            public NewsLogEntry(long guildId, int guid, long timestamp, GuildNews type, ObjectGuid playerGuid, uint flags, int value)
+            public NewsLogEntry(long guildId, int guid, ServerTime timestamp, GuildNews type, ObjectGuid playerGuid, uint flags, int value)
                 : base(guildId, guid, timestamp)
             {
                 m_type = type;
@@ -3139,7 +3139,7 @@ namespace Game.Guilds
                 stmt.SetInt64(++index, GetPlayerGuid().GetCounter());
                 stmt.SetInt32(++index, GetFlags());
                 stmt.SetInt32(++index, GetValue());
-                stmt.SetInt64(++index, GetTimestamp());
+                stmt.SetInt64(++index, (UnixTime64)GetTimestamp());
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
@@ -3148,7 +3148,7 @@ namespace Game.Guilds
                 GuildNewsEvent newsEvent = new();
                 newsEvent.Id = GetGUID();
                 newsEvent.MemberGuid = GetPlayerGuid();
-                newsEvent.CompletedDate.SetUtcTimeFromUnixTime(GetTimestamp());
+                newsEvent.CompletedDate = (RealmTime)GetTimestamp();
                 newsEvent.Flags = GetFlags();
                 newsEvent.Type = (int)GetNewsType();
 

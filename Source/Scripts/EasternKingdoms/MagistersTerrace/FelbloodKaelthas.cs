@@ -111,12 +111,12 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             base.JustEngagedWith(who);
             _phase = Phase.One;
 
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(1), groupFireBall, task =>
+            _scheduler.Schedule(Time.SpanFromMilliseconds(1), groupFireBall, task =>
             {
                 DoCastVictim(SpellIds.Fireball);
-                task.Repeat(TimeSpan.FromSeconds(2.5));
+                task.Repeat(Time.SpanFromSeconds(2.5));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(44), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(44), task =>
             {
                 Talk(TextIds.SayFlameStrike);
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40.0f, true);
@@ -124,27 +124,27 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     DoCast(target, SpellIds.FlameStrike);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 Talk(TextIds.SaySummonPhoenix);
                 DoCastSelf(SpellIds.Phoenix);
-                task.Repeat(TimeSpan.FromSeconds(45));
+                task.Repeat(Time.SpanFromSeconds(45));
             });
 
             if (IsHeroic())
             {
-                _scheduler.Schedule(TimeSpan.FromMinutes(1) + TimeSpan.FromSeconds(1), task =>
+                _scheduler.Schedule((Seconds)1 + (Minutes)1, task =>
                 {
                     Talk(TextIds.SayAnnouncePyroblast);
                     DoCastSelf(SpellIds.ShockBarrier);
-                    task.RescheduleGroup(groupFireBall, TimeSpan.FromSeconds(2.5));
-                    task.Schedule(TimeSpan.FromSeconds(2), pyroBlastTask =>
+                    task.RescheduleGroup(groupFireBall, Time.SpanFromSeconds(2.5));
+                    task.Schedule((Seconds)2, pyroBlastTask =>
                     {
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40.0f, true);
                         if (target != null)
                             DoCast(target, SpellIds.Pyroblast);
                     });
-                    task.Repeat(TimeSpan.FromMinutes(1));
+                    task.Repeat((Minutes)1);
                 });
             }
         }
@@ -186,23 +186,23 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                 _phase = Phase.Outro;
                 _scheduler.CancelAll();
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
                 {
                     DoCastSelf(SpellIds.EmoteTalkExclamation);
                 });
-                _scheduler.Schedule(TimeSpan.FromSeconds(3.8), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(3.8), task =>
                 {
                     DoCastSelf(SpellIds.EmotePoint);
                 });
-                _scheduler.Schedule(TimeSpan.FromSeconds(7.4), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(7.4), task =>
                 {
                     DoCastSelf(SpellIds.EmoteRoar);
                 });
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
                 {
                     DoCastSelf(SpellIds.EmoteRoar);
                 });
-                _scheduler.Schedule(TimeSpan.FromSeconds(11), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(11), task =>
                 {
                     DoCastSelf(SpellIds.QuiteSuicide);
                 });
@@ -213,36 +213,36 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             {
                 _phase = Phase.Two;
                 _scheduler.CancelAll();
-                _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
+                _scheduler.Schedule(Time.SpanFromMilliseconds(1), task =>
                 {
                     Talk(_firstGravityLapse ? TextIds.SayGravityLapse1 : TextIds.SayGravityLapse2);
                     _firstGravityLapse = false;
                     me.SetReactState(ReactStates.Passive);
                     me.AttackStop();
                     me.GetMotionMaster().Clear();
-                    task.Schedule(TimeSpan.FromSeconds(1), _ =>
+                    task.Schedule(Time.SpanFromSeconds(1), _ =>
                     {
                         DoCastSelf(SpellIds.GravityLapseCenterTeleport);
-                        task.Schedule(TimeSpan.FromSeconds(1), _ =>
+                        task.Schedule(Time.SpanFromSeconds(1), _ =>
                         {
                             _gravityLapseTargetCount = 0;
                             DoCastAOE(SpellIds.GravityLapseInitial);
-                            _scheduler.Schedule(TimeSpan.FromSeconds(4), _ =>
+                            _scheduler.Schedule(Time.SpanFromSeconds(4), _ =>
                             {
                                 for (byte i = 0; i < 3; i++)
                                     DoCastSelf(SpellIds.SummonArcaneSphere, new CastSpellExtraArgs(true));
                             });
-                            _scheduler.Schedule(TimeSpan.FromSeconds(5), _ =>
+                            _scheduler.Schedule(Time.SpanFromSeconds(5), _ =>
                             {
                                 DoCastAOE(SpellIds.GravityLapseBeamVisualPeriodic);
                             });
-                            _scheduler.Schedule(TimeSpan.FromSeconds(35), _ =>
+                            _scheduler.Schedule(Time.SpanFromSeconds(35), _ =>
                             {
                                 Talk(TextIds.SayPowerFeedback);
                                 DoCastAOE(SpellIds.ClearFlight);
                                 DoCastSelf(DungeonMode(SpellIds.PowerFeedback, SpellIds.HPowerFeedback));
                                 summons.DespawnEntry(CreatureIds.ArcaneSphere);
-                                task.Repeat(TimeSpan.FromSeconds(11));
+                                task.Repeat(Time.SpanFromSeconds(11));
                             });
                         });
                     });
@@ -263,20 +263,20 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     return;
 
                 me.SetImmuneToPC(true);
-                _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
                 {
                     Talk(TextIds.SayIntro1);
                     me.SetEmoteState(Emote.StateTalk);
-                    _scheduler.Schedule(TimeSpan.FromSeconds(20.6), _ =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(20.6), _ =>
                     {
                         Talk(TextIds.SayIntro2);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(15) + TimeSpan.FromMilliseconds(500), _ =>
+                        _scheduler.Schedule(Time.SpanFromMilliseconds(15500), _ =>
                         {
                             me.SetEmoteState(Emote.OneshotNone);
                             me.SetImmuneToPC(false);
                         });
                     });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(15.6), _ => me.HandleEmoteCommand(Emote.OneshotLaughNoSheathe));
+                    _scheduler.Schedule(Time.SpanFromSeconds(15.6), _ => me.HandleEmoteCommand(Emote.OneshotLaughNoSheathe));
                 });
             }
         }
@@ -297,7 +297,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                         target.CastSpell(target, DungeonMode(SpellIds.GravityLapse, SpellIds.HGravityLapse));
                         target.CastSpell(target, SpellIds.GravityLapseFly);
 
-                    }, TimeSpan.FromMilliseconds(400));
+                    }, Time.SpanFromMilliseconds(400));
                     _gravityLapseTargetCount++;
                     break;
                 }
@@ -323,14 +323,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     break;
                 case CreatureIds.FlameStrike:
                     summon.CastSpell(summon, SpellIds.FlameStrikeDummy);
-                    summon.DespawnOrUnsummon(TimeSpan.FromSeconds(15));
+                    summon.DespawnOrUnsummon(Time.SpanFromSeconds(15));
                     break;
                 default:
                     break;
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() && _phase != Phase.Intro)
                 return;
@@ -364,7 +364,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             DoZoneInCombat();
             DoCastSelf(SpellIds.Burn);
             DoCastSelf(SpellIds.Rebirth);
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task => me.SetReactState(ReactStates.Aggressive));
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task => me.SetReactState(ReactStates.Aggressive));
         }
 
         public override void JustEngagedWith(Unit who) { }
@@ -381,7 +381,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     me.SetUninteractible(true);
                     DoCastSelf(SpellIds.EmberBlast);
                     // DoCastSelf(SpellSummonPhoenixEgg); -- We do a manual summon for now. Feel free to move it to spelleffect_dbc
-                    Creature egg = DoSummon(CreatureIds.PhoenixEgg, me.GetPosition(), TimeSpan.FromSeconds(0));
+                    Creature egg = DoSummon(CreatureIds.PhoenixEgg, me.GetPosition(), Time.SpanFromSeconds(0));
                     if (egg != null)
                     {
                         Creature kaelthas = _instance.GetCreature(DataTypes.KaelthasSunstrider);
@@ -392,23 +392,23 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                         }
                     }
 
-                    _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+                    _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
                     {
                         Creature egg = ObjectAccessor.GetCreature(me, _eggGUID);
                         if (egg != null)
                             egg.DespawnOrUnsummon();
 
                         me.RemoveAllAuras();
-                        task.Schedule(TimeSpan.FromSeconds(2), rebirthTask =>
+                        task.Schedule(Time.SpanFromSeconds(2), rebirthTask =>
                         {
                             DoCastSelf(SpellIds.Rebirth);
-                            rebirthTask.Schedule(TimeSpan.FromSeconds(2), engageTask =>
+                            rebirthTask.Schedule(Time.SpanFromSeconds(2), engageTask =>
                             {
                                 _isInEgg = false;
                                 DoCastSelf(SpellIds.FullHeal);
                                 DoCastSelf(SpellIds.Burn);
                                 me.SetUninteractible(false);
-                                engageTask.Schedule(TimeSpan.FromSeconds(2), task => me.SetReactState(ReactStates.Aggressive));
+                                engageTask.Schedule(Time.SpanFromSeconds(2), task => me.SetReactState(ReactStates.Aggressive));
                             });
                         });
                     });
@@ -425,7 +425,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             me.DespawnOrUnsummon();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

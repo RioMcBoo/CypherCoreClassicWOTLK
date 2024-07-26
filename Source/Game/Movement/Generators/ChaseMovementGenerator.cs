@@ -10,7 +10,7 @@ namespace Game.Movement
 {
     class ChaseMovementGenerator : MovementGenerator
     {
-        static uint RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
+        static Milliseconds RANGE_CHECK_INTERVAL = (Milliseconds)100; // time (ms) until we attempt to recalculate
 
         ChaseRange? _range;
         ChaseAngle? _angle;
@@ -52,7 +52,7 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             // owner might be dead or gone (can we even get nullptr here?)
             if (owner == null || !owner.IsAlive())

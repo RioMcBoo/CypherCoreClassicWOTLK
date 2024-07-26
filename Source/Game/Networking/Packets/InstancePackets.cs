@@ -110,7 +110,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Reason);
         }
 
-        public int Delay;
+        public Milliseconds Delay;
         public RaidGroupReason Reason;
     }
 
@@ -127,7 +127,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public int TimeUntilLock;
+        public Milliseconds TimeUntilLock;
         public uint CompletedMask;
         public bool Extending;
         public bool WarningOnly;
@@ -246,16 +246,16 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(InCombatResCount);
             _worldPacket.WriteUInt32(MaxInCombatResCount);
-            _worldPacket.WriteUInt32(CombatResChargeRecovery);
-            _worldPacket.WriteUInt32(NextCombatResChargeTime);
+            _worldPacket.WriteInt32(CombatResChargeRecovery);
+            _worldPacket.WriteInt32(NextCombatResChargeTime);
             _worldPacket.WriteBit(InProgress);
             _worldPacket.FlushBits();
         }
 
         public uint InCombatResCount; // amount of usable battle ressurections
         public uint MaxInCombatResCount;
-        public uint CombatResChargeRecovery;
-        public uint NextCombatResChargeTime;
+        public Milliseconds CombatResChargeRecovery;
+        public Milliseconds NextCombatResChargeTime;
         public bool InProgress = true;
     }
 
@@ -280,11 +280,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(InCombatResCount);
-            _worldPacket.WriteUInt32(CombatResChargeRecovery);
+            _worldPacket.WriteInt32(CombatResChargeRecovery);
         }
 
         public int InCombatResCount;
-        public uint CombatResChargeRecovery;
+        public Milliseconds CombatResChargeRecovery;
     }
 
     class BossKill : ServerPacket
@@ -318,7 +318,7 @@ namespace Game.Networking.Packets
         public long InstanceID;
         public int MapID;
         public Difficulty DifficultyID;
-        public int TimeRemaining;
+        public Seconds TimeRemaining;
         public uint CompletedMask;
 
         public bool Locked;

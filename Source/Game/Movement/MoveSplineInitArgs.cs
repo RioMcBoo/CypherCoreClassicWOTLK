@@ -14,7 +14,7 @@ namespace Game.Movement
         public MoveSplineInitArgs(int path_capacity = 16)
         {
             path_Idx_offset = 0;
-            velocity = 0.0f;
+            velocity = (Speed)0.0f;
             parabolic_amplitude = 0.0f;
             effect_start_time_percent = 0.0f;
             splineId = 0;
@@ -27,7 +27,7 @@ namespace Game.Movement
         public FacingInfo facing = new();
         public MoveSplineFlag flags = new();
         public int path_Idx_offset;
-        public float velocity;
+        public Speed velocity;
         public float parabolic_amplitude;
         public float vertical_acceleration;
         public float effect_start_time_percent; // fraction of total spline duration

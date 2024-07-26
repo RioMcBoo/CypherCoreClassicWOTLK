@@ -44,9 +44,14 @@ namespace Game.DataStorage
         /// <summary>
         /// Date of first raid reset, all other resets are calculated as this date plus interval
         /// </summary>
-        public uint Raidorigin;
+        private int _raidorigin;
         public byte RegionGroupMask;
-        public uint ChallengeOrigin;
+        private int _challengeOrigin;
+
+        #region Properties
+        public UnixTime Raidorigin => (UnixTime)_raidorigin;
+        public UnixTime ChallengeOrigin => (UnixTime)_challengeOrigin;
+        #endregion
     }
 
     public sealed class CharTitlesRecord
@@ -528,7 +533,7 @@ namespace Game.DataStorage
         public int Id;
         public int BroadcastTextID;
         public int SpellVisualKitID;
-        public int AdditionalDuration;
+        public Milliseconds AdditionalDuration;
         public ushort NextConversationLineID;
         public ushort AnimKitID;
         public byte SpeechType;
@@ -668,16 +673,19 @@ namespace Game.DataStorage
         public int ModifierTreeId;
         public int StartEvent;
         public int StartAsset;
-        public ushort StartTimer;
+        private ushort _startTimer;
         public int FailEvent;
         public int FailAsset;
         private int _flags;
-        public short EligibilityWorldStateID;
-        public sbyte EligibilityWorldStateValue;
+        private short _eligibilityWorldStateID;
+        private sbyte _eligibilityWorldStateValue;
 
         #region Properties
         public CriteriaType Type => (CriteriaType)_type;
         public CriteriaFlags Flags => (CriteriaFlags)_flags;
+        public int EligibilityWorldStateID => _eligibilityWorldStateID;
+        public int EligibilityWorldStateValue => _eligibilityWorldStateValue;
+        public TimeSpan StartTimer => (Seconds)_startTimer;
         #endregion
 
         #region Helpers

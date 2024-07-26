@@ -92,12 +92,15 @@ namespace Game.Chat
             int nativeid = target.GetNativeDisplayId();
             int entry = target.GetEntry();
 
-            long curRespawnDelay = target.GetRespawnCompatibilityMode() ? target.GetRespawnTimeEx() - GameTime.GetGameTime() : target.GetMap().GetCreatureRespawnTime(target.GetSpawnId()) - GameTime.GetGameTime();
-            if (curRespawnDelay < 0)
-                curRespawnDelay = 0;
+            TimeSpan curRespawnDelay = target.GetRespawnCompatibilityMode() 
+                ? target.GetRespawnTimeEx() - LoopTime.ServerTime 
+                : target.GetMap().GetCreatureRespawnTime(target.GetSpawnId()) - LoopTime.ServerTime;
 
-            string curRespawnDelayStr = Time.secsToTimeString(curRespawnDelay, TimeFormat.ShortText);
-            string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
+            if (curRespawnDelay < TimeSpan.Zero)
+                curRespawnDelay = TimeSpan.Zero;
+
+            string curRespawnDelayStr = Time.SpanToTimeString(curRespawnDelay, TimeFormat.ShortText);
+            string defRespawnDelayStr = Time.SpanToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
 
             handler.SendSysMessage(CypherStrings.NpcinfoChar, target.GetName(), target.GetSpawnId(), target.GetGUID().ToString(), entry, faction, npcflags, displayid, nativeid);
             if (target.GetCreatureData() != null && target.GetCreatureData().spawnGroupData.groupId != 0)
@@ -208,7 +211,7 @@ namespace Game.Chat
 
             // respawn selected creature at the new location
             if (creature != null)
-                creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(1));
+                creature.DespawnOrUnsummon((Seconds)0, (Seconds)1);
 
             handler.SendSysMessage(CypherStrings.CommandCreaturemoved);
             return true;
@@ -628,7 +631,7 @@ namespace Game.Chat
             }
 
             [Command("item", RBACPermissions.CommandNpcAddItem)]
-            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, int itemId, int? mc, uint? it, int? ec, [OptionalArg] string bonusListIds)
+            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, int itemId, int? mc, int? it, int? ec, [OptionalArg] string bonusListIds)
             {
                 if (itemId == 0)
                 {
@@ -644,7 +647,7 @@ namespace Game.Chat
                 }
 
                 int maxcount = mc.GetValueOrDefault(0);
-                uint incrtime = it.GetValueOrDefault(0);
+                Seconds incrtime = (Seconds)it.GetValueOrDefault(0);
                 int extendedcost = ec.GetValueOrDefault(0);
                 int vendor_entry = vendor.GetEntry();
 
@@ -767,8 +770,8 @@ namespace Game.Chat
                 Player chr = handler.GetSession().GetPlayer();
                 chr.SummonCreature(id, chr.GetPosition(), loot 
                     ? TempSummonType.CorpseTimedDespawn 
-                    : TempSummonType.CorpseDespawn, 
-                    TimeSpan.FromSeconds(30));
+                    : TempSummonType.CorpseDespawn,
+                    (Seconds)30);
 
                 return true;
             }
@@ -1283,18 +1286,18 @@ namespace Game.Chat
             }
 
             [Command("spawntime", RBACPermissions.CommandNpcSetSpawntime)]
-            static bool HandleNpcSetSpawnTimeCommand(CommandHandler handler, uint spawnTime)
+            static bool HandleNpcSetSpawnTimeCommand(CommandHandler handler, int spawnTime)
             {
                 Creature creature = handler.GetSelectedCreature();
                 if (creature == null)
                     return false;
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_TIME_SECS);
-                stmt.SetUInt32(0, spawnTime);
+                stmt.SetInt32(0, spawnTime);
                 stmt.SetInt64(1, creature.GetSpawnId());
                 DB.World.Execute(stmt);
 
-                creature.SetRespawnDelay(spawnTime);
+                creature.SetRespawnDelay((Seconds)spawnTime);
                 handler.SendSysMessage(CypherStrings.CommandSpawntime, spawnTime);
 
                 return true;

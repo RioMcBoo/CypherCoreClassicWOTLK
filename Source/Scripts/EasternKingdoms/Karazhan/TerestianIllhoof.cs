@@ -52,19 +52,19 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
             summons.DoAction(MiscConst.ActionDespawnImps, pred);
             _Reset();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0);
                 if (target != null)
                     DoCast(target, SpellIds.ShadowBolt);
-                task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(4), Time.SpanFromSeconds(10));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
             {
                 me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
                 DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(30), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
                 if (target != null)
@@ -73,18 +73,18 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
                     target.CastSpell(target, SpellIds.SummonDemonchains, true);
                     Talk(TextIds.SaySacrifice);
                 }
-                task.Repeat(TimeSpan.FromSeconds(42));
+                task.Repeat(Time.SpanFromSeconds(42));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 Talk(TextIds.SaySummonPortal);
                 DoCastAOE(SpellIds.FiendishPortal1);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(11), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(11), task =>
             {
                 DoCastAOE(SpellIds.FiendishPortal2, new CastSpellExtraArgs(true));
             });
-            _scheduler.Schedule(TimeSpan.FromMinutes(10), task =>
+            _scheduler.Schedule((Minutes)10, task =>
             {
                 DoCastSelf(SpellIds.Berserk, new CastSpellExtraArgs(true));
             });
@@ -100,7 +100,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         {
             if (spellInfo.Id == SpellIds.BrokenPact)
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(32), task =>
+                _scheduler.Schedule(Time.SpanFromSeconds(32), task =>
                 {
                     me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
                     DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
@@ -122,7 +122,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -135,20 +135,20 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
                 {
                     DoCastVictim(SpellIds.AmplifyFlames);
-                    task.Repeat(TimeSpan.FromSeconds(9));
+                    task.Repeat(Time.SpanFromSeconds(9));
                 });
         }
 
         public override void JustDied(Unit killer)
         {
             DoCastAOE(SpellIds.BrokenPact, new CastSpellExtraArgs(true));
-            me.DespawnOrUnsummon(TimeSpan.FromSeconds(15));
+            me.DespawnOrUnsummon(Time.SpanFromSeconds(15));
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -190,7 +190,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(2400), TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromMilliseconds(2400), Time.SpanFromSeconds(8), task =>
                 {
                     DoCastAOE(SpellIds.SummonFiendishImp, new CastSpellExtraArgs(true));
                     task.Repeat();
@@ -209,7 +209,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
             DoZoneInCombat(summon);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -222,16 +222,16 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 DoCastVictim(SpellIds.Firebolt);
-                task.Repeat(TimeSpan.FromMilliseconds(2400));
+                task.Repeat(Time.SpanFromMilliseconds(2400));
             });
 
             me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Fire, true);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

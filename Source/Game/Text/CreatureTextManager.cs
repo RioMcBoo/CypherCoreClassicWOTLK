@@ -22,7 +22,7 @@ namespace Game
 
         public void LoadCreatureTexts()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mTextMap.Clear(); // for reload case
             //all currently used temp texts are NOT reset
@@ -134,12 +134,12 @@ namespace Game
                 ++textCount;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {textCount} creature texts for {creatureCount} creatures in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {textCount} creature texts for {creatureCount} creatures in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadCreatureTextLocales()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mLocaleTextMap.Clear(); // for reload case
 
@@ -167,7 +167,8 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature localized texts in {1} ms", mLocaleTextMap.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {mLocaleTextMap.Count} creature localized texts in {Time.Diff(oldMSTime)} ms.");
         }
 
         public uint SendChat(Creature source, byte textGroup, WorldObject whisperTarget = null, ChatMsg msgType = ChatMsg.Addon, Language language = Language.Addon,

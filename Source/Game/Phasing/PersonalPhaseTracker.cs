@@ -11,7 +11,7 @@ namespace Game
 {
     class PersonalPhaseSpawns
     {
-        public static TimeSpan DELETE_TIME_DEFAULT = TimeSpan.FromMinutes(1);
+        public static TimeSpan DELETE_TIME_DEFAULT = (Minutes)1;
 
         public List<WorldObject> Objects = new();
         public List<ushort> Grids = new();
@@ -61,13 +61,13 @@ namespace Game
                 spawns.DurationRemaining = PersonalPhaseSpawns.DELETE_TIME_DEFAULT;
         }
 
-        public void Update(Map map, uint diff)
+        public void Update(Map map, TimeSpan diff)
         {
             foreach (var itr in _spawns.ToList())
             {
                 if (itr.Value.DurationRemaining.HasValue)
                 {
-                    itr.Value.DurationRemaining = itr.Value.DurationRemaining.Value - TimeSpan.FromMilliseconds(diff);
+                    itr.Value.DurationRemaining = itr.Value.DurationRemaining.Value - diff;
                     if (itr.Value.DurationRemaining.Value <= TimeSpan.Zero)
                     {
                         DespawnPhase(map, itr.Value);
@@ -196,7 +196,7 @@ namespace Game
                 playerTracker.MarkAllPhasesForDeletion();
         }
 
-        public void Update(Map map, uint diff)
+        public void Update(Map map, TimeSpan diff)
         {
             foreach (var itr in _playerData.ToList())
             {

@@ -28,7 +28,7 @@ namespace Game.Chat
 
         public void LoadLanguages()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Load languages from Languages.db2. Just the id, we don't need the name
             foreach (LanguagesRecord langEntry in CliDB.LanguagesStorage.Values)
@@ -58,12 +58,13 @@ namespace Game.Chat
             _langsMap.Add((int)Language.AddonLogged, new LanguageDesc());
 
             // Log load time
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_langsMap.Count} languages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {_langsMap.Count} languages in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadLanguagesWords()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             int wordsNum = 0;
             foreach (LanguageWordsRecord wordEntry in CliDB.LanguageWordsStorage.Values)
@@ -77,7 +78,8 @@ namespace Game.Chat
             }
 
             // log load time
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_wordsMap.Count} word groups from {wordsNum} words in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {_wordsMap.Count} word groups from {wordsNum} words in {Time.Diff(oldMSTime)} ms.");
         }
 
         List<string> FindWordGroup(int language, int wordLen)

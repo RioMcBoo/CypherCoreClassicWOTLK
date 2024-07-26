@@ -16,7 +16,7 @@ namespace Game.DataStorage
 
         public void LoadAreaTriggerTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             MultiMap<AreaTriggerId, Vector2> verticesByCreateProperties = new();
             MultiMap<AreaTriggerId, Vector2> verticesTargetByCreateProperties = new();
             MultiMap<AreaTriggerId, Vector3> splinesByCreateProperties = new();
@@ -208,8 +208,8 @@ namespace Game.DataStorage
                         createProperties.AnimKitId = areatriggerCreateProperties.Read<int>(10);
                         createProperties.DecalPropertiesId = areatriggerCreateProperties.Read<int>(11);
 
-                        createProperties.TimeToTarget = areatriggerCreateProperties.Read<uint>(12);
-                        createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(13);
+                        createProperties.TimeToTarget = (Milliseconds)areatriggerCreateProperties.Read<int>(12);
+                        createProperties.TimeToTargetScale = (Milliseconds)areatriggerCreateProperties.Read<int>(13);
 
                         createProperties.Shape.TriggerType = shape;
                         unsafe
@@ -278,7 +278,7 @@ namespace Game.DataStorage
 
                         AreaTriggerOrbitInfo orbitInfo = new();
 
-                        orbitInfo.StartDelay = circularMovementInfos.Read<uint>(2);
+                        orbitInfo.StartDelay = (RelativeTime)circularMovementInfos.Read<uint>(2);
 
                         float ValidateAndSetFloat(float value)
                         {
@@ -316,7 +316,8 @@ namespace Game.DataStorage
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_areaTriggerTemplateStore.Count} spell areatrigger templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {_areaTriggerTemplateStore.Count} spell areatrigger templates in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadAreaTriggerSpawns()
@@ -326,7 +327,7 @@ namespace Game.DataStorage
             foreach (var mapDifficulty in CliDB.MapDifficultyStorage.Values)
                 spawnMasks.Add(mapDifficulty.MapID, mapDifficulty.DifficultyID);
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             // Load area trigger positions (to put them on the server)
             //                                          0        1                              2         3      4                  5     6     7     8            9              10       11          12               13
             SQLResult result = DB.World.Query("SELECT SpawnId, AreaTriggerCreatePropertiesId, IsCustom, MapId, SpawnDifficulties, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, SpellForVisuals, ScriptName FROM `areatrigger`");
@@ -448,7 +449,8 @@ namespace Game.DataStorage
                 } while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_areaTriggerSpawnsBySpawnId.Count} areatrigger spawns in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {_areaTriggerSpawnsBySpawnId.Count} areatrigger spawns in {Time.Diff(oldMSTime)} ms.");
         }
 
         public AreaTriggerTemplate GetAreaTriggerTemplate(AreaTriggerId areaTriggerId)

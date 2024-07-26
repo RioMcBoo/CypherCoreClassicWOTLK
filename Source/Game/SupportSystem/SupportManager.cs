@@ -54,7 +54,7 @@ namespace Game.SupportSystem
 
         public void LoadBugTickets()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             _bugTicketList.Clear();
 
             _lastBugId = 0;
@@ -85,12 +85,12 @@ namespace Game.SupportSystem
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GM bugs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} GM bugs in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadComplaintTickets()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             _complaintTicketList.Clear();
 
             _lastComplaintId = 0;
@@ -133,12 +133,12 @@ namespace Game.SupportSystem
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GM complaints in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} GM complaints in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadSuggestionTickets()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             _suggestionTicketList.Clear();
 
             _lastSuggestionId = 0;
@@ -169,7 +169,7 @@ namespace Game.SupportSystem
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GM suggestions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} GM suggestions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void AddTicket<T>(T ticket)where T : Ticket
@@ -337,7 +337,7 @@ namespace Game.SupportSystem
             }
         }
 
-        long GetAge(long t) { return (GameTime.GetGameTime() - t) / Time.Day; }
+        long GetAge(UnixTime64 t) { return (LoopTime.UnixServerTime - t).Ticks / Time.Day.Ticks; }
 
         IEnumerable<KeyValuePair<int, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
         {
@@ -357,7 +357,7 @@ namespace Game.SupportSystem
         public void SetComplaintSystemStatus(bool status) { _complaintSystemStatus = status; }
         public void SetSuggestionSystemStatus(bool status) { _suggestionSystemStatus = status; }
 
-        public void UpdateLastChange() { _lastChange = GameTime.GetGameTime(); }
+        public void UpdateLastChange() { _lastChange = LoopTime.UnixServerTime; }
 
         public int GenerateBugId() { return ++_lastBugId; }
         public int GenerateComplaintId() { return ++_lastComplaintId; }

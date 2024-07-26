@@ -34,8 +34,8 @@ namespace Game.Networking.Packets
         public int MapID;
 
         List<(int state, WorldStateValue value)> Worldstates = new();
-
-            }
+        
+    }
 
     public class UpdateWorldState : ServerPacket
     {
@@ -52,5 +52,5 @@ namespace Game.Networking.Packets
         public WorldStateValue Value;
         public bool Hidden; // @todo: research
         public int VariableID;
-    }
+    }    
 }

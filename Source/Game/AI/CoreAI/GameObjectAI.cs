@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
 using Game.Spells;
+using System;
 
 namespace Game.AI
 {
@@ -22,7 +23,7 @@ namespace Game.AI
             _events = new EventMap();
         }
 
-        public virtual void UpdateAI(uint diff) { }
+        public virtual void UpdateAI(TimeSpan diff) { }
 
         public virtual void InitializeAI() { Reset(); }
 

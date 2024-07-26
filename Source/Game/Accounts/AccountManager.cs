@@ -376,7 +376,7 @@ namespace Game
             _defaultPermissions.Clear();
 
             Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC");
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             uint count1 = 0;
             uint count2 = 0;
             uint count3 = 0;
@@ -457,7 +457,8 @@ namespace Game
                 while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} permission definitions, {1} linked permissions and {2} default permissions in {3} ms", count1, count2, count3, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count1} permission definitions, {count2} linked permissions and {count3} default permissions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void UpdateAccountAccess(RBACData rbac, int accountId, byte securityLevel, int realmId)

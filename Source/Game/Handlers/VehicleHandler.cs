@@ -102,9 +102,9 @@ namespace Game
                     {
                         if (vehicle.HasEmptySeat((sbyte)packet.DstSeatIndex))
                             vehUnit.HandleSpellClick(GetPlayer(), (sbyte)packet.DstSeatIndex);
+                    }
                 }
             }
-        }
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehicleSwitchSeat, Processing = PacketProcessing.Inplace)]
@@ -135,9 +135,9 @@ namespace Game
                     {
                         if (vehicle.HasEmptySeat((sbyte)packet.SeatIndex))
                             vehUnit.HandleSpellClick(GetPlayer(), (sbyte)packet.SeatIndex);
+                    }
                 }
             }
-        }
         }
 
         [WorldPacketHandler(ClientOpcodes.RideVehicleInteract)]
@@ -176,7 +176,7 @@ namespace Game
                 Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Passenger);
                 if (unit == null)
                 {
-                    Log.outError(LogFilter.Network, 
+                    Log.outError(LogFilter.Network,
                         $"{GetPlayer().GetGUID()} tried to eject {packet.Passenger} " +
                         $"from vehicle, but the latter was not found in world!");
                     return;
@@ -184,7 +184,7 @@ namespace Game
 
                 if (!unit.IsOnVehicle(vehicle.GetBase()))
                 {
-                    Log.outError(LogFilter.Network, 
+                    Log.outError(LogFilter.Network,
                         $"{GetPlayer().GetGUID()} tried to eject {packet.Passenger}," +
                         $" but they are not in the same vehicle");
                     return;
@@ -196,9 +196,9 @@ namespace Game
                     unit.ExitVehicle();
                 else
                 {
-                    Log.outError(LogFilter.Network, 
+                    Log.outError(LogFilter.Network,
                         $"{GetPlayer().GetGUID()} attempted to eject {packet.Passenger} from non-ejectable seat.");
-            }
+                }
             }
             else
             {

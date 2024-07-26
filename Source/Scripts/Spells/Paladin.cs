@@ -115,7 +115,7 @@ namespace Scripts.Spells.Paladin
             {
                 AuraEffect ashen = caster.GetAuraEffect(SpellIds.AshenHallow, 1);
                 if (ashen != null)
-                    _period = TimeSpan.FromMilliseconds(ashen.GetPeriod());
+                    _period = Time.SpanFromMilliseconds(ashen.GetPeriod());
             }
         }
 
@@ -125,11 +125,11 @@ namespace Scripts.Spells.Paladin
             _refreshTimer = _period;
         }
 
-        public override void OnUpdate(uint diff)
+        public override void OnUpdate(TimeSpan diff)
         {
-            _refreshTimer -= TimeSpan.FromMilliseconds(diff);
+            _refreshTimer -= diff;
 
-            while (_refreshTimer <= TimeSpan.FromSeconds(0))
+            while (_refreshTimer <= Time.SpanFromSeconds(0))
             {
                 Unit caster = at.GetCaster();
                 if (caster != null)

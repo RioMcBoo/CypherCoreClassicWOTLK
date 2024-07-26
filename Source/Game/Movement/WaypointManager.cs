@@ -25,7 +25,7 @@ namespace Game
         {
             _pathStorage.Clear();
 
-            var oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             //                                            0       1         2
             SQLResult result = DB.World.Query("SELECT  PathId, MoveType, Flags FROM waypoint_path");
@@ -44,12 +44,12 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} waypoint paths in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} waypoint paths in {Time.Diff(oldMSTime)} ms.");
         }
 
         void _LoadPathNodes()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             //                                          0       1          2          3          4            5      6
             SQLResult result = DB.World.Query("SELECT PathId, NodeId, PositionX, PositionY, PositionZ, Orientation, Delay FROM waypoint_path_node ORDER BY PathId, NodeId");
@@ -69,7 +69,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} waypoint path nodes in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} waypoint path nodes in {Time.Diff(oldMSTime)} ms.");
             DoPostLoadingChecks();
         }
 
@@ -114,7 +114,7 @@ namespace Game
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new(fields.Read<int>(1), x, y, z, o, fields.Read<uint>(6));
+            WaypointNode waypoint = new(fields.Read<int>(1), x, y, z, o, (Milliseconds)fields.Read<int>(6));
             _pathStorage[pathId].Nodes.Add(waypoint);
         }
 
@@ -313,7 +313,7 @@ namespace Game
     public class WaypointNode
     {
         public WaypointNode() { MoveType = WaypointMoveType.Run; }
-        public WaypointNode(int id, float x, float y, float z, float? orientation = null, uint delay = 0)
+        public WaypointNode(int id, float x, float y, float z, float? orientation = null, Milliseconds delay = default)
         {
             Id = id;
             X = x;
@@ -329,7 +329,7 @@ namespace Game
         public float Y;
         public float Z;
         public float? Orientation;
-        public uint Delay;
+        public Milliseconds Delay;
         public WaypointMoveType MoveType;
     }
 

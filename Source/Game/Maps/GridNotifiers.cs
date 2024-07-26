@@ -186,8 +186,8 @@ namespace Game.Maps
                 {
                     if (visionPlayer.seerView == creature)
                         visionPlayer.UpdateVisibilityOf(i_objects);
+                }
             }
-        }
         }
 
         public override void Visit(IList<DynamicObject> objs)
@@ -537,7 +537,7 @@ namespace Game.Maps
                     {
                         if (visionPlayer.seerView == player)
                             SendPacket(visionPlayer);
-                }
+                    }
                 }
 
                 if (player.seerView == player || player.GetVehicle() != null)
@@ -563,9 +563,9 @@ namespace Game.Maps
                     {
                         if (player.seerView == creature)
                             SendPacket(player);
+                    }
                 }
             }
-        }
         }
 
         public override void Visit(IList<DynamicObject> objs)
@@ -602,7 +602,7 @@ namespace Game.Maps
 
     public class UpdaterNotifier : Notifier
     {
-        public UpdaterNotifier(uint diff)
+        public UpdaterNotifier(TimeSpan diff)
         {
             i_timeDiff = diff;
         }
@@ -621,7 +621,7 @@ namespace Game.Maps
             }
         }
 
-        uint i_timeDiff;
+        TimeSpan i_timeDiff;
     }
 
     public class PlayerWorker : Notifier
@@ -880,9 +880,9 @@ namespace Game.Maps
                     {
                         if (caster.m_activePlayerData.FarsightObject == dynamicObject.GetGUID())
                             BuildPacket(caster);
+                    }
                 }
             }
-        }
         }
 
         void BuildPacket(Player player)
@@ -1558,9 +1558,9 @@ namespace Game.Maps
                 {
                     if (i_check.Invoke(gameObject))
                         i_objects.Add(gameObject);
+                }
             }
         }
-    }
     }
 
     public class UnitSearcher : Notifier
@@ -1673,8 +1673,8 @@ namespace Game.Maps
                 {
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
+                }
             }
-        }
         }
 
         public override void Visit(IList<Creature> objs)
@@ -1686,9 +1686,9 @@ namespace Game.Maps
                 {
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
+                }
             }
         }
-    }
     }
 
     public class CreatureSearcher : Notifier
@@ -1776,9 +1776,9 @@ namespace Game.Maps
                 {
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
+                }
             }
         }
-    }
     }
 
     public class PlayerSearcher : Notifier
@@ -1872,9 +1872,9 @@ namespace Game.Maps
                 {
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
+                }
             }
         }
-    }
     }
 
     //Checks
@@ -2358,7 +2358,7 @@ namespace Game.Maps
                 {
                     if (c.IsCivilian())
                         return false;
-            }
+                }
             }
 
             return true;

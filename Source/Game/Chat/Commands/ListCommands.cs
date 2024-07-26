@@ -318,8 +318,8 @@ namespace Game.Chat.Commands
                                 long receiverId = result1.Read<long>(3);
                                 string receiver = result1.Read<string>(4);
                                 string subject = result1.Read<string>(5);
-                                long deliverTime = result1.Read<long>(6);
-                                long expireTime = result1.Read<long>(7);
+                                ServerTime deliverTime = (ServerTime)(UnixTime64)result1.Read<long>(6);
+                                ServerTime expireTime = (ServerTime)(UnixTime64)result1.Read<long>(7);
                                 long money = result1.Read<long>(8);
                                 byte hasItem = result1.Read<byte>(9);
                                 int gold = (int)(money / MoneyConstants.Gold);
@@ -329,7 +329,7 @@ namespace Game.Chat.Commands
                                 string senderStr = handler.PlayerLink(sender);
                                 handler.SendSysMessage(CypherStrings.ListMailInfo1, messageId, subject, gold, silv, copp);
                                 handler.SendSysMessage(CypherStrings.ListMailInfo2, senderStr, senderId, receiverStr, receiverId);
-                                handler.SendSysMessage(CypherStrings.ListMailInfo3, Time.UnixTimeToDateTime(deliverTime).ToLongDateString(), Time.UnixTimeToDateTime(expireTime).ToLongDateString());
+                                handler.SendSysMessage(CypherStrings.ListMailInfo3, deliverTime.ToLongDateString(), expireTime.ToLongDateString());
 
                                 if (hasItem == 1)
                                 {
@@ -522,7 +522,7 @@ namespace Game.Chat.Commands
                     int gridY = ri.gridId / MapConst.MaxGrids;
                     int gridX = ri.gridId % MapConst.MaxGrids;
 
-                    string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString(ri.respawnTime - GameTime.GetGameTime(), TimeFormat.ShortText) : stringOverdue;
+                    string respawnTime = ri.respawnTime > LoopTime.ServerTime ? Time.SpanToTimeString(ri.respawnTime - LoopTime.ServerTime, TimeFormat.ShortText) : stringOverdue;
                     handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX:2},{gridY:2}] | {GetZoneName(respawnZoneId, locale)} ({respawnZoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
                 }
             }

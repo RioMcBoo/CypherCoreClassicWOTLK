@@ -33,7 +33,7 @@ namespace Game.Movement
             _walk = info.IsWalkMode;
             _nextIndex = info.SplineIndex;
             _nextFirstWP = info.PointIndex;
-            _msToNext = info.TimeToNext;
+            _timeToNext = info.TimeToNext;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -63,8 +63,8 @@ namespace Game.Movement
                 Log.outWarn(LogFilter.Movement, 
                     $"SplineChainMovementGenerator::Initialize: " +
                     $"couldn't initialize generator, _nextIndex is >= _chainSize ({owner.GetGUID()})");
-
-                _msToNext = 0;
+                                
+                _timeToNext = TimeSpan.Zero;
                 return;
             }
 
@@ -96,19 +96,19 @@ namespace Game.Movement
 
                 ++_nextIndex;
                 if (_nextIndex >= _chainSize)
-                    _msToNext = 0;
-                else if (_msToNext == 0)
-                    _msToNext = 1;
+                    _timeToNext = TimeSpan.Zero;
+                else if (_timeToNext == TimeSpan.Zero)
+                    _timeToNext = (Milliseconds)1;
                 _nextFirstWP = 0;
             }
             else
             {
-                _msToNext = Math.Max(_chain[_nextIndex].TimeToNext, 1u);
-                SendSplineFor(owner, _nextIndex, ref _msToNext);
+                _timeToNext = Time.Max(_chain[_nextIndex].TimeToNext, (Milliseconds)1);
+                SendSplineFor(owner, _nextIndex, ref _timeToNext);
 
                 ++_nextIndex;
                 if (_nextIndex >= _chainSize)
-                    _msToNext = 0;
+                    _timeToNext = (Milliseconds)0;
             }
         }
 
@@ -120,13 +120,13 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             if (owner == null || HasFlag(MovementGeneratorFlags.Finalized))
                 return false;
 
             // _msToNext being zero here means we're on the final spline
-            if (_msToNext == 0)
+            if (_timeToNext == TimeSpan.Zero)
             {
                 if (owner.MoveSpline.Finalized())
                 {
@@ -136,25 +136,25 @@ namespace Game.Movement
                 return true;
             }
 
-            if (_msToNext <= diff)
+            if (_timeToNext <= diff)
             {
                 // Send next spline
                 Log.outDebug(LogFilter.Movement, 
                     $"SplineChainMovementGenerator::Update: " +
-                    $"sending spline on index {_nextIndex} ({diff - _msToNext} ms late). ({owner.GetGUID()})");
+                    $"sending spline on index {_nextIndex} ({(Milliseconds)(diff - _timeToNext)} ms late). ({owner.GetGUID()})");
 
-                _msToNext = Math.Max(_chain[_nextIndex].TimeToNext, 1u);
-                SendSplineFor(owner, _nextIndex, ref _msToNext);
+                _timeToNext = Time.Max(_chain[_nextIndex].TimeToNext, (Milliseconds)1);
+                SendSplineFor(owner, _nextIndex, ref _timeToNext);
                 ++_nextIndex;
                 if (_nextIndex >= _chainSize)
                 {
                     // We have reached the final spline, once it finalizes we should also finalize the movegen (start checking on next update)
-                    _msToNext = 0;
+                    _timeToNext = TimeSpan.Zero;
                     return true;
                 }
             }
             else
-                _msToNext -= diff;
+                _timeToNext -= diff;
 
             return true;
         }
@@ -180,7 +180,7 @@ namespace Game.Movement
             }
         }
 
-        uint SendPathSpline(Unit owner, float velocity, Span<Vector3> path)
+        Milliseconds SendPathSpline(Unit owner, Speed velocity, Span<Vector3> path)
         {
             int nodeCount = path.Length;
             Cypher.Assert(nodeCount > 1, 
@@ -198,10 +198,10 @@ namespace Game.Movement
                 init.SetVelocity(velocity);
 
             init.SetWalk(_walk);
-            return (uint)init.Launch();
+            return init.Launch();
         }
 
-        void SendSplineFor(Unit owner, int index, ref uint duration)
+        void SendSplineFor(Unit owner, int index, ref TimeSpan duration)
         {
             Cypher.Assert(index < _chainSize, 
                 $"SplineChainMovementGenerator::SendSplineFor: " +
@@ -212,35 +212,38 @@ namespace Game.Movement
                 $"sending spline on index: {index}. ({owner.GetGUID()})");
 
             SplineChainLink thisLink = _chain[index];
-            uint actualDuration = SendPathSpline(owner, thisLink.Velocity, new Span<Vector3>(thisLink.Points.ToArray()));
+            TimeSpan actualDuration = SendPathSpline(owner, thisLink.Velocity, new Span<Vector3>(thisLink.Points.ToArray()));
             if (actualDuration != thisLink.ExpectedDuration)
             {
                 Log.outDebug(LogFilter.Movement, 
                     $"SplineChainMovementGenerator::SendSplineFor: sent spline on index: {index}, " +
-                    $"duration: {actualDuration} ms. Expected duration: {thisLink.ExpectedDuration} ms " +
-                    $"(delta {actualDuration - thisLink.ExpectedDuration} ms). Adjusting. ({owner.GetGUID()})");
-                duration = (uint)(actualDuration / (double)thisLink.ExpectedDuration * duration);
+                    $"duration: {actualDuration}. Expected duration: {thisLink.ExpectedDuration} " +
+                    $"(delta {actualDuration - thisLink.ExpectedDuration}). Adjusting. ({owner.GetGUID()})");
+
+                duration = actualDuration / thisLink.ExpectedDuration * duration;
             }
             else
             {
-                Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::SendSplineFor: sent spline on index {index}, duration: {actualDuration} ms. ({owner.GetGUID()})");
+                Log.outDebug(LogFilter.Movement, 
+                    $"SplineChainMovementGenerator::SendSplineFor: " +
+                    $"sent spline on index {index}, duration: {actualDuration}. ({owner.GetGUID()})");
             }
         }
 
         SplineChainResumeInfo GetResumeInfo(Unit owner)
         {
             if (_nextIndex == 0)
-                return new SplineChainResumeInfo(_id, _chain, _walk, 0, 0, _msToNext);
+                return new SplineChainResumeInfo(_id, _chain, _walk, 0, 0, _timeToNext);
 
             if (owner.MoveSpline.Finalized())
             {
                 if (_nextIndex < _chainSize)
-                    return new SplineChainResumeInfo(_id, _chain, _walk, _nextIndex, 0, 1u);
+                    return new SplineChainResumeInfo(_id, _chain, _walk, _nextIndex, 0, (Milliseconds)1);
                 else
                     return new SplineChainResumeInfo();
             }
 
-            return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)owner.MoveSpline.CurrentSplineIdx(), _msToNext);
+            return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)owner.MoveSpline.CurrentSplineIdx(), _timeToNext);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.SplineChain; }
@@ -253,6 +256,6 @@ namespace Game.Movement
         bool _walk;
         byte _nextIndex;
         byte _nextFirstWP; // only used for resuming
-        uint _msToNext;
+        TimeSpan _timeToNext;
     }
 }

@@ -66,38 +66,148 @@ namespace Framework.Constants
     public enum CalendarError : byte
     {
         Ok = 0,
-        GuildEventsExceeded = 1,
+
+        // 1
+
+        /// <summary>
+        /// You have reached your limit of 30 created events.
+        /// </summary>
         EventsExceeded = 2,
+        /// <summary>
+        /// Maximum number of invites reached. <br/>
+        /// Remove an old event to add an additional one.
+        /// </summary>
         SelfInvitesExceeded = 3,
+        /// <summary>
+        /// { Player } has the maximum number of events.<br/>
+        /// They need to remove one to be invited to another.
+        /// </summary>
         OtherInvitesExceeded = 4,
+        /// <summary>
+        /// You don't have permission to do that.
+        /// </summary>
         Permissions = 5,
+        /// <summary>
+        /// Event not found.
+        /// </summary>
         EventInvalid = 6,
+        /// <summary>
+        /// You are not invited to this event.
+        /// </summary>
         NotInvited = 7,
+        /// <summary>
+        /// Internal Calendar error.
+        /// </summary>
         Internal = 8,
+        /// <summary>
+        /// You are not in a guild.
+        /// </summary>
         GuildPlayerNotInGuild = 9,
-        AlreadyInvitedToEventS = 10,
-        PlayerNotFound = 11,
-        NotAllied = 12,
-        IgnoringYouS = 13,
-        InvitesExceeded = 14,
-        InvalidDate = 16,
-        InvalidTime = 17,
 
-        NeedsTitle = 19,
-        EventPassed = 20,
-        EventLocked = 21,
-        DeleteCreatorFailed = 22,
-        SystemDisabled = 24,
-        RestrictedAccount = 25,
-        ArenaEventsExceeded = 26,
-        RestrictedLevel = 27,
-        UserSquelched = 28,
-        NoInvite = 29,
+        // 10
 
-        EventWrongServer = 36,
-        InviteWrongServer = 37,
-        NoGuildInvites = 38,
+        /// <summary>
+        /// { Player } has already been invited.
+        /// </summary>
+        AlreadyInvitedToEventS = 11,
+        /// <summary>
+        /// Can't find that player.
+        /// </summary>
+        PlayerInvalid = 12,
+        /// <summary>
+        /// You cannot invite player from the opposing alliance.
+        /// </summary>
+        NotAllied = 13,
+        /// <summary>
+        /// { Player } is ignoring you.
+        /// </summary>
+        IgnoringYouS = 14,
+        /// <summary>
+        /// You cannot invite more than 100 players to this event.
+        /// </summary>
+        InvitesExceeded = 15,
+
+        // 16
+
+        /// <summary>
+        /// Enter a valid date.
+        /// </summary>
+        InvalidDate = 17,
+        /// <summary>
+        /// Enter a valid time.
+        /// </summary>
+        InvalidTime = 18,
+        /// <summary>
+        /// Did not find any players matching the conditions.
+        /// </summary>
+        PlayerNotFound = 19,
+        /// <summary>
+        /// Enter a title.
+        /// </summary>
+        NeedsTitle = 20,
+        /// <summary>
+        /// This event has already occured.
+        /// </summary>
+        EventPassed = 21,
+        /// <summary>
+        /// This event is locked.
+        /// </summary>
+        EventLocked = 22,
+        /// <summary>
+        /// You cannot remove the creator of the event.
+        /// </summary>
+        DeleteCreatorFailed = 23,
+
+        // 24
+
+        /// <summary>
+        /// This system is currently disabled.
+        /// </summary>
+        SystemDisabled = 25,
+        /// <summary>
+        /// Free Trial accounts cannot perform this action
+        /// </summary>
+        RestrictedAccount = 26,
+        /// <summary>
+        /// Your arena team has reached the limit of created events.
+        /// </summary>
+        ArenaEventsExceeded = 27,
+        /// <summary>
+        /// You need to have at least a level 20 character on your account.
+        /// </summary>
+        RestrictedLevel = 28,
+        /// <summary>
+        /// We have temporarily suspended your chat and mail privileges. <br/>
+        /// Check your mail for more details.
+        /// </summary>
+        UserSquelched = 29,
+        /// <summary>
+        /// Invite not found.
+        /// </summary>
+        NoInvite = 30,
+
+        /// <summary>
+        /// You cannot create events on this server.
+        /// </summary>
+        EventWrongServer = 37,
+        // 38
+        /// <summary>
+        /// You cannot sign up to this event.
+        /// </summary>
         InvalidSignup = 39,
-        NoModerator = 40
+        /// <summary>
+        /// Invites to sign up events are not allowed to be moderators.
+        /// </summary>
+        NoModerator = 40,
+        /// <summary>
+        /// Free Trial accounts cannot modify Calendar events.
+        /// </summary>
+        RestrictedAccount2 = 41, //cannot modify calendar events
+
+
+        //deprecated?
+        NoGuildInvites,
+        InviteWrongServer,
+        GuildEventsExceeded,
     }
 }

@@ -52,7 +52,7 @@ namespace Game.Entities
             return null;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
 
@@ -61,8 +61,7 @@ namespace Game.Entities
                 UnSummon();
                 return;
             }
-
-            TimeSpan msDiff = TimeSpan.FromMilliseconds(diff);
+            
             switch (m_type)
             {
                 case TempSummonType.ManualDespawn:
@@ -70,26 +69,26 @@ namespace Game.Entities
                     break;
                 case TempSummonType.TimedDespawn:
                 {
-                    if (m_timer <= msDiff)
+                    if (m_timer <= diff)
                     {
                         UnSummon();
                         return;
                     }
 
-                    m_timer -= msDiff;
+                    m_timer -= diff;
                     break;
                 }
                 case TempSummonType.TimedDespawnOutOfCombat:
                 {
                     if (!IsInCombat())
                     {
-                        if (m_timer <= msDiff)
+                        if (m_timer <= diff)
                         {
                             UnSummon();
                             return;
                         }
 
-                        m_timer -= msDiff;
+                        m_timer -= diff;
                     }
                     else if (m_timer != m_lifetime)
                         m_timer = m_lifetime;
@@ -101,13 +100,13 @@ namespace Game.Entities
                 {
                     if (m_deathState == DeathState.Corpse)
                     {
-                        if (m_timer <= msDiff)
+                        if (m_timer <= diff)
                         {
                             UnSummon();
                             return;
                         }
 
-                        m_timer -= msDiff;
+                        m_timer -= diff;
                     }
                     break;
                 }
@@ -132,13 +131,13 @@ namespace Game.Entities
 
                     if (!IsInCombat())
                     {
-                        if (m_timer <= msDiff)
+                        if (m_timer <= diff)
                         {
                             UnSummon();
                             return;
                         }
                         else
-                            m_timer -= msDiff;
+                            m_timer -= diff;
                     }
                     else if (m_timer != m_lifetime)
                         m_timer = m_lifetime;
@@ -148,13 +147,13 @@ namespace Game.Entities
                 {
                     if (!IsInCombat() && IsAlive())
                     {
-                        if (m_timer <= msDiff)
+                        if (m_timer <= diff)
                         {
                             UnSummon();
                             return;
                         }
                         else
-                            m_timer -= msDiff;
+                            m_timer -= diff;
                     }
                     else if (m_timer != m_lifetime)
                         m_timer = m_lifetime;
@@ -307,13 +306,13 @@ namespace Game.Entities
             m_type = type;
         }
 
-        public virtual void UnSummon(uint msTime = 0)
+        public virtual void UnSummon(TimeSpan time = default)
         {
-            if (msTime != 0)
+            if (time != TimeSpan.Zero)
             {
                 ForcedUnsummonDelayEvent pEvent = new(this);
 
-                m_Events.AddEvent(pEvent, m_Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
+                m_Events.AddEvent(pEvent, m_Events.CalculateTime(time));
                 return;
             }
 
@@ -351,7 +350,7 @@ namespace Game.Entities
                     {
                         if (summonSlot == GetGUID())
                             summonSlot.Clear();
-            }
+                    }
                 }
             }
 
@@ -1197,7 +1196,7 @@ namespace Game.Entities
                 Cypher.Assert(false);
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
             //check if caster is channelling?
@@ -1219,7 +1218,7 @@ namespace Game.Entities
             m_owner = owner;
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
             m_owner.UnSummon();
             return true;

@@ -26,7 +26,7 @@ namespace Game
                 if (store != null && store.HasRecord(record.RecordID))
                 {
                     dbReply.Status = HotfixRecord.Status.Valid;
-                    dbReply.Timestamp = (uint)GameTime.GetGameTime();
+                    dbReply.Timestamp = LoopTime.ServerTime;
                     store.WriteRecord(record.RecordID, GetSessionDbcLocale(), dbReply.Data);
 
                     var optionalDataEntries = Global.DB2Mgr.GetHotfixOptionalData(dbQuery.TableHash, record.RecordID, GetSessionDbcLocale());
@@ -43,7 +43,7 @@ namespace Game
                         $"requested non-existing entry {record.RecordID} " +
                         $"in datastore: {dbQuery.TableHash}");
 
-                    dbReply.Timestamp = (uint)GameTime.GetGameTime();
+                    dbReply.Timestamp = LoopTime.ServerTime;
                 }
 
                 SendPacket(dbReply);

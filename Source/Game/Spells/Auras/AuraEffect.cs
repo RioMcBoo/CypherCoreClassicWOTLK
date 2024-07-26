@@ -152,13 +152,13 @@ namespace Game.Spells
 
         public static float CalculateEstimatedfTotalPeriodicAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, float amount, byte stack)
         {
-            int maxDuration = Aura.CalcMaxDuration(spellInfo, caster, null);
+            Milliseconds maxDuration = Aura.CalcMaxDuration(spellInfo, caster, null);
             if (maxDuration <= 0)
                 return 0.0f;
 
-            int period = (int)spellEffectInfo.ApplyAuraPeriod;
+            Milliseconds period = spellEffectInfo.ApplyAuraPeriod;
             if (period == 0)
-                return 0.0f;
+                return 0f;
 
             Player modOwner = caster.GetSpellModOwner();
             if (modOwner != null)
@@ -168,9 +168,9 @@ namespace Game.Spells
             if (spellInfo.IsChanneled())
                 caster.ModSpellDurationTime(spellInfo, ref period);
             else if (spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
-                period = (int)(period * caster.m_unitData.ModCastingSpeed);
+                period = (Milliseconds)(period * caster.m_unitData.ModCastingSpeed);
             else if (spellInfo.HasAttribute(SpellAttr8.MeleeHasteAffectsPeriodic))
-                period = (int)(period * caster.m_unitData.ModHaste);
+                period = (Milliseconds)(period * caster.m_unitData.ModHaste);
 
             if (period == 0)
                 return 0.0f;
@@ -182,12 +182,12 @@ namespace Game.Spells
             return totalTicks * CalculateEstimatedAmount(caster, target, spellInfo, spellEffectInfo, (int)amount, stack, null).GetValueOrDefault(amount);
         }
 
-        public uint GetTotalTicks()
+        public int GetTotalTicks()
         {
-            uint totalTicks = 0;
+            int totalTicks = 0;
             if (_period != 0 && !GetBase().IsPermanent())
             {
-                totalTicks = (uint)(GetBase().GetMaxDuration() / _period);
+                totalTicks = (int)(GetBase().GetMaxDuration() / _period);
                 if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                     ++totalTicks;
             }
@@ -200,7 +200,7 @@ namespace Game.Spells
             _ticksDone = 0;
             if (resetPeriodicTimer)
             {
-                _periodicTimer = 0;
+                _periodicTimer = Milliseconds.Zero;
                 // Start periodic on next tick or at aura apply
                 if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                     _periodicTimer = _period;
@@ -209,7 +209,7 @@ namespace Game.Spells
 
         public void CalculatePeriodic(Unit caster, bool resetPeriodicTimer = true, bool load = false)
         {
-            _period = (int)GetSpellEffectInfo().ApplyAuraPeriod;
+            _period = GetSpellEffectInfo().ApplyAuraPeriod;
 
             // prepare periodics
             switch (GetAuraType())
@@ -254,9 +254,9 @@ namespace Game.Spells
                     if (m_spellInfo.IsChanneled())
                         caster.ModSpellDurationTime(m_spellInfo, ref _period);
                     else if (m_spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
-                        _period = (int)(_period * caster.m_unitData.ModCastingSpeed);
+                        _period = (Milliseconds)(_period * caster.m_unitData.ModCastingSpeed);
                     else if (m_spellInfo.HasAttribute(SpellAttr8.MeleeHasteAffectsPeriodic))
-                        _period = (int)(_period * caster.m_unitData.ModHaste);
+                        _period = (Milliseconds)(_period * caster.m_unitData.ModHaste);
                 }
             }
             else // prevent infinite loop on Update
@@ -266,9 +266,9 @@ namespace Game.Spells
             {
                 if (_period != 0 && !GetBase().IsPermanent())
                 {
-                    uint elapsedTime = (uint)(GetBase().GetMaxDuration() - GetBase().GetDuration());
-                    _ticksDone = elapsedTime / (uint)_period;
-                    _periodicTimer = (int)(elapsedTime % _period);
+                    Milliseconds elapsedTime = GetBase().GetMaxDuration() - GetBase().GetDuration();
+                    _ticksDone = elapsedTime.Ticks / _period.Ticks;
+                    _periodicTimer = elapsedTime % _period;
                 }
 
                 if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
@@ -479,14 +479,14 @@ namespace Game.Spells
             }
         }
 
-        public void Update(uint diff, Unit caster)
+        public void Update(Milliseconds diff, Unit caster)
         {
             if (!m_isPeriodic || (GetBase().GetDuration() < 0 && !GetBase().IsPassive() && !GetBase().IsPermanent()))
                 return;
 
-            uint totalTicks = GetTotalTicks();
+            int totalTicks = GetTotalTicks();
 
-            _periodicTimer += (int)diff;
+            _periodicTimer += diff;
             while (_periodicTimer >= _period)
             {
                 _periodicTimer -= _period;
@@ -869,7 +869,7 @@ namespace Game.Spells
         public int GetId() { return m_spellInfo.Id; }
         public int GetEffIndex() { return _effectInfo.EffectIndex; }
         public int GetBaseAmount() { return m_baseAmount; }
-        public int GetPeriod() { return _period; }
+        public Milliseconds GetPeriod() { return _period; }
 
         public int GetMiscValueB() { return GetSpellEffectInfo().MiscValueB; }
         public int GetMiscValue() { return GetSpellEffectInfo().MiscValue; }
@@ -880,8 +880,8 @@ namespace Game.Spells
 
         public float? GetEstimatedAmount() { return _estimatedAmount; }
 
-        public int GetPeriodicTimer() { return _periodicTimer; }
-        public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
+        public Milliseconds GetPeriodicTimer() { return _periodicTimer; }
+        public void SetPeriodicTimer(Milliseconds periodicTimer) { _periodicTimer = periodicTimer; }
 
         public void RecalculateAmount(AuraEffect triggeredBy = null)
         {
@@ -903,8 +903,8 @@ namespace Game.Spells
         public void SetCanBeRecalculated(bool val) { m_canBeRecalculated = val; }
 
         public void ResetTicks() { _ticksDone = 0; }
-        public uint GetTickNumber() { return _ticksDone; }
-        public uint GetRemainingTicks() { return GetTotalTicks() - _ticksDone; }
+        public int GetTickNumber() { return _ticksDone; }
+        public int GetRemainingTicks() { return GetTotalTicks() - _ticksDone; }
 
         public bool IsPeriodic() { return m_isPeriodic; }
         public void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
@@ -931,9 +931,9 @@ namespace Game.Spells
         float? _estimatedAmount;   // for periodic damage and healing auras this will include damage done bonuses
 
         // periodic stuff
-        int _periodicTimer;
-        int _period; // time between consecutive ticks
-        uint _ticksDone; // ticks counter
+        Milliseconds _periodicTimer;
+        Milliseconds _period; // time between consecutive ticks
+        int _ticksDone; // ticks counter
 
         bool m_canBeRecalculated;
         bool m_isPeriodic;
@@ -1611,7 +1611,7 @@ namespace Game.Spells
                     // for players, start regeneration after 1s (in polymorph fast regeneration case)
                     // only if caster is Player (after patch 2.4.2)
                     if (GetCasterGUID().IsPlayer())
-                        target.ToPlayer().SetRegenTimerCount(1 * Time.InMilliseconds);
+                        target.ToPlayer().SetRegenTimerCount((Seconds)1);
 
                     //dismount polymorphed target (after patch 2.4.2)
                     if (target.IsMounted())
@@ -1898,8 +1898,8 @@ namespace Game.Spells
                         if (spell.m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
                             // Stop spells on prepare or casting state
                             target.InterruptSpell(i, false);
+                    }
                 }
-            }
             }
             else
             {
@@ -2187,7 +2187,7 @@ namespace Game.Spells
                         {
                             if (effect.IsEffect(SpellEffectName.Summon) && effect.MiscValue == GetMiscValue())
                                 displayId = 0;
-                    }
+                        }
                     }
 
                     target.Mount(displayId, vehicleId, creatureEntry);
@@ -2243,7 +2243,7 @@ namespace Game.Spells
             {
                 if (!apply && !target.IsGravityDisabled())
                     target.GetMotionMaster().MoveFall();
-        }
+            }
         }
 
         [AuraEffectHandler(AuraType.WaterWalk)]
@@ -2559,7 +2559,7 @@ namespace Game.Spells
             {
                 if (!apply && !target.IsFlying())
                     target.GetMotionMaster().MoveFall();
-        }
+            }
         }
 
         [AuraEffectHandler(AuraType.ModStunDisableGravity)]
@@ -2588,7 +2588,7 @@ namespace Game.Spells
             {
                 if (!apply && !target.IsFlying())
                     target.GetMotionMaster().MoveFall();
-        }
+            }
         }
 
         /***************************/
@@ -2786,7 +2786,7 @@ namespace Game.Spells
             if (GetAuraType() == AuraType.ModIncreaseMountedFlightSpeed)
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-                if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask) 
+                if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask)
                     && (apply || (!target.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !target.HasAuraType(AuraType.Fly))))
                 {
                     target.SetCanTransitionBetweenSwimAndFly(apply);
@@ -2795,7 +2795,7 @@ namespace Game.Spells
                     {
                         if (!apply && !target.IsGravityDisabled())
                             target.GetMotionMaster().MoveFall();
-                }
+                    }
                 }
 
                 //! Someone should clean up these hacks and remove it from this function. It doesn't even belong here.
@@ -3123,8 +3123,8 @@ namespace Game.Spells
                 {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
                         target.HandleStatFlatModifier(UnitMods.ResistanceStart + i, UnitModifierFlatType.Total, GetAmount(), apply);
+                }
             }
-        }
         }
 
         [AuraEffectHandler(AuraType.ModTargetResistance)]
@@ -3332,7 +3332,7 @@ namespace Game.Spells
                 && m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
             {
                 target.SetHealth(Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1)));
-        }
+            }
         }
 
         [AuraEffectHandler(AuraType.ModExpertise)]
@@ -4056,7 +4056,7 @@ namespace Game.Spells
             {
                 if (Convert.ToBoolean(GetMiscValue() & (1 << rating)))
                     target.ToPlayer().ApplyRatingMod((CombatRating)rating, GetAmount(), apply);
-        }
+            }
         }
 
         [AuraEffectHandler(AuraType.ModRatingPct)]
@@ -4075,7 +4075,7 @@ namespace Game.Spells
             {
                 if (Convert.ToBoolean(GetMiscValue() & (1 << rating)))
                     target.ToPlayer().UpdateRating((CombatRating)rating);
-        }
+            }
         }
 
         /********************************/
@@ -5134,7 +5134,7 @@ namespace Game.Spells
                 {
                     if (caster != null)
                     {
-                        damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, 
+                        damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT,
                             GetSpellEffectInfo(), stackAmountForBonuses, null, this);
                     }
 
@@ -5202,7 +5202,7 @@ namespace Game.Spells
                     || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
                 {
                     damage = target.CalculateAOEAvoidance(damage, m_spellInfo.SchoolMask, (caster != null && !caster.IsControlledByPlayer()) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe));
-            }
+                }
             }
 
             int dmg = damage;
@@ -6035,9 +6035,8 @@ namespace Game.Spells
                         GameObject droppedFlag = gameObjectCaster.SummonGameObject(
                             gameObjectCaster.GetGoInfo().NewFlag.FlagDrop, target.GetPosition(), 
                             Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(
-                                target.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(
-                                    gameObjectCaster.GetGoInfo().NewFlag.ExpireDuration / 1000), 
-                            GameObjectSummonType.TimedDespawn);
+                                target.GetOrientation(), 0.0f, 0.0f)), gameObjectCaster.GetGoInfo().NewFlag.ExpireDuration, 
+                                GameObjectSummonType.TimedDespawn);
                         
                         if (droppedFlag != null)
                             droppedFlag.SetOwnerGUID(gameObjectCaster.GetGUID());

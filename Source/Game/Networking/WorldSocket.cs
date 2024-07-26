@@ -354,7 +354,7 @@ namespace Game.Networking
                         }
 
                         if (opcode == ClientOpcodes.TimeSyncResponse)
-                            packet.SetReceiveTime(DateTime.Now);
+                            packet.SetReceiveTime(Time.Now.ToServerTime());
 
                         // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
                         _worldSession.ResetTimeOutTime(false);
@@ -658,7 +658,7 @@ namespace Game.Networking
             //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
             if (mutetime < 0)
             {
-                mutetime = GameTime.GetGameTime() + mutetime;
+                mutetime = LoopTime.UnixServerTime + mutetime;
 
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME_LOGIN);
                 stmt.SetInt64(0, mutetime);
@@ -707,7 +707,7 @@ namespace Game.Networking
             Global.ScriptMgr.OnAccountLogin(account.game.Id);
 
             _worldSession = new WorldSession(account.game.Id, authSession.RealmJoinTicket, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
-                mutetime, account.game.OS, account.game.TimezoneOffset, account.battleNet.Locale, account.game.Recruiter, account.game.IsRectuiter);
+                (ServerTime)(UnixTime64)mutetime, account.game.OS, account.game.TimezoneOffset, account.battleNet.Locale, account.game.Recruiter, account.game.IsRectuiter);
 
             // Initialize Warden system only if it is enabled by config
             //if (wardenActive)
@@ -851,10 +851,10 @@ namespace Game.Networking
         bool HandlePing(Ping ping)
         {
             if (_LastPingTime == 0)
-                _LastPingTime = GameTime.GetGameTime(); // for 1st ping
+                _LastPingTime = LoopTime.UnixServerTime; // for 1st ping
             else
             {
-                long now = GameTime.GetGameTime();
+                long now = LoopTime.UnixServerTime;
                 long diff = now - _LastPingTime;
                 _LastPingTime = now;
 
@@ -922,7 +922,7 @@ namespace Game.Networking
             battleNet.Locale = (Locale)fields.Read<byte>(7);
             game.Recruiter = fields.Read<int>(8);
             game.OS = fields.Read<string>(9);
-            game.TimezoneOffset = TimeSpan.FromMinutes(fields.Read<short>(10));
+            game.TimezoneOffset = (Minutes)fields.Read<short>(10);
             battleNet.Id = fields.Read<int>(11);
             game.Security = (AccountTypes)fields.Read<byte>(12);
             battleNet.IsBanned = fields.Read<uint>(13) != 0;

@@ -387,7 +387,7 @@ namespace Scripts.Spells.Druid
                 _count = count;
             }
 
-            public override bool Execute(long e_time, uint p_time)
+            public override bool Execute(TimeSpan e_time, TimeSpan p_time)
             {
                 spell_dru_eclipse_common.SetSpellCount(_owner, SpellIds.EclipseSolarSpellCnt, _count);
                 spell_dru_eclipse_common.SetSpellCount(_owner, SpellIds.EclipseLunarSpellCnt, _count);
@@ -415,7 +415,7 @@ namespace Scripts.Spells.Druid
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // counters are applied with a delay
-            GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), aurEff.GetAmount()), TimeSpan.FromSeconds(1));
+            GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), aurEff.GetAmount()), Time.SpanFromSeconds(1));
         }
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1355,8 +1355,8 @@ namespace Scripts.Spells.Druid
                 {
                     if (RandomHelper.randChance(shootingStars.GetAmount()))
                         caster.CastSpell(GetTarget(), SpellIds.ShootingStarsDamage, true);
+                }
             }
-        }
         }
 
         public override void Register()

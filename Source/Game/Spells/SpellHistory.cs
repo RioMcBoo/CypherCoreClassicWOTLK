@@ -32,17 +32,17 @@ namespace Game.Spells
 
                     if (typeof(T) == typeof(Pet))
                     {
-                        cooldownEntry.CooldownEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(1));
+                        cooldownEntry.CooldownEnd = (ServerTime)(UnixTime64)cooldownsResult.Read<long>(1);
                         cooldownEntry.ItemId = 0;
                         cooldownEntry.CategoryId = (SpellCategories)cooldownsResult.Read<int>(2);
-                        cooldownEntry.CategoryEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(3));
+                        cooldownEntry.CategoryEnd = (ServerTime)(UnixTime64)cooldownsResult.Read<long>(3);
                     }
                     else
                     {
-                        cooldownEntry.CooldownEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(2));
+                        cooldownEntry.CooldownEnd = (ServerTime)(UnixTime64)cooldownsResult.Read<long>(2);
                         cooldownEntry.ItemId = cooldownsResult.Read<int>(1);
                         cooldownEntry.CategoryId = (SpellCategories)cooldownsResult.Read<int>(3);
-                        cooldownEntry.CategoryEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(4));
+                        cooldownEntry.CategoryEnd = (ServerTime)(UnixTime64)cooldownsResult.Read<long>(4);
                     }
 
                     _spellCooldowns[cooldownEntry.SpellId] = cooldownEntry;
@@ -62,8 +62,8 @@ namespace Game.Spells
                         continue;
 
                     ChargeEntry charges;
-                    charges.RechargeStart = Time.UnixTimeToDateTime(chargesResult.Read<long>(1));
-                    charges.RechargeEnd = Time.UnixTimeToDateTime(chargesResult.Read<long>(2));
+                    charges.RechargeStart = (ServerTime)(UnixTime64)chargesResult.Read<long>(1);
+                    charges.RechargeEnd = (ServerTime)(UnixTime64)chargesResult.Read<long>(2);
                     _categoryCharges.Add(categoryId, charges);
 
                 } while (chargesResult.NextRow());
@@ -92,9 +92,9 @@ namespace Game.Spells
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL_COOLDOWN);
                         stmt.SetInt32(index++, _owner.GetCharmInfo().GetPetNumber());
                         stmt.SetInt32(index++, pair.Key);
-                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
+                        stmt.SetInt64(index++, (UnixTime64)pair.Value.CooldownEnd);
                         stmt.SetInt32(index++, (int)pair.Value.CategoryId);
-                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
+                        stmt.SetInt64(index++, (UnixTime64)pair.Value.CategoryEnd);
                         trans.Append(stmt);
                     }
                 }
@@ -105,8 +105,8 @@ namespace Game.Spells
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL_CHARGES);
                     stmt.SetInt32(index++, _owner.GetCharmInfo().GetPetNumber());
                     stmt.SetInt32(index++, (int)pair.Key);
-                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
-                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
+                    stmt.SetInt64(index++, (UnixTime64)pair.Value.RechargeStart);
+                    stmt.SetInt64(index++, (UnixTime64)pair.Value.RechargeEnd);
                     trans.Append(stmt);
                 }
             }
@@ -130,9 +130,9 @@ namespace Game.Spells
                         stmt.SetInt64(index++, _owner.GetGUID().GetCounter());
                         stmt.SetInt32(index++, pair.Key);
                         stmt.SetInt32(index++, pair.Value.ItemId);
-                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
+                        stmt.SetInt64(index++, (UnixTime64)pair.Value.CooldownEnd);
                         stmt.SetInt32(index++, (int)pair.Value.CategoryId);
-                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
+                        stmt.SetInt64(index++, (UnixTime64)pair.Value.CategoryEnd);
                         trans.Append(stmt);
                     }
                 }
@@ -143,8 +143,8 @@ namespace Game.Spells
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_CHARGES);
                     stmt.SetInt64(index++, _owner.GetGUID().GetCounter());
                     stmt.SetInt32(index++, (int)pair.Key);
-                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
-                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
+                    stmt.SetInt64(index++, (UnixTime64)pair.Value.RechargeStart);
+                    stmt.SetInt64(index++, (UnixTime64)pair.Value.RechargeEnd);
                     trans.Append(stmt);
                 }
             }
@@ -152,7 +152,7 @@ namespace Game.Spells
 
         public void Update()
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             foreach (var pair in _categoryCooldowns.ToList())
             {
                 if (pair.Value.CategoryEnd < now)
@@ -226,7 +226,7 @@ namespace Game.Spells
 
         public void WritePacket(SendSpellHistory sendSpellHistory)
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             foreach (var p in _spellCooldowns)
             {
                 SpellHistoryEntry historyEntry = new();
@@ -258,7 +258,7 @@ namespace Game.Spells
 
         public void WritePacket(SendSpellCharges sendSpellCharges)
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             foreach (var key in _categoryCharges.Keys)
             {
                 var list = _categoryCharges[key];
@@ -279,7 +279,7 @@ namespace Game.Spells
 
         public void WritePacket(PetSpells petSpells)
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
 
             foreach (var pair in _spellCooldowns)
             {
@@ -323,16 +323,16 @@ namespace Game.Spells
             }
         }
 
-        public void StartCooldown(SpellInfo spellInfo, int itemId, Spell spell = null, bool onHold = false, TimeSpan? forcedCooldown = null)
+        public void StartCooldown(SpellInfo spellInfo, int itemId, Spell spell = null, bool onHold = false, Milliseconds? forcedCooldown = null)
         {
             // init cooldown values
             SpellCategories categoryId = 0;
-            TimeSpan cooldown = TimeSpan.Zero;
-            TimeSpan categoryCooldown = TimeSpan.Zero;
+            Milliseconds cooldown = Milliseconds.Zero;
+            Milliseconds categoryCooldown = Milliseconds.Zero;
 
-            DateTime curTime = GameTime.GetSystemTime();
-            DateTime catrecTime;
-            DateTime recTime;
+            ServerTime curTime = LoopTime.ServerTime;
+            ServerTime catrecTime;
+            ServerTime recTime;
             bool needsCooldownPacket = false;
 
             if (!forcedCooldown.HasValue)
@@ -344,8 +344,8 @@ namespace Game.Spells
             if (onHold)
             {
                 // use +MONTH as infinite cooldown marker
-                catrecTime = categoryCooldown > TimeSpan.Zero ? (curTime + PlayerConst.InfinityCooldownDelay) : curTime;
-                recTime = cooldown > TimeSpan.Zero ? (curTime + PlayerConst.InfinityCooldownDelay) : catrecTime;
+                catrecTime = categoryCooldown > 0 ? (curTime + PlayerConst.InfinityCooldownDelay) : curTime;
+                recTime = cooldown > 0 ? (curTime + PlayerConst.InfinityCooldownDelay) : catrecTime;
             }
             else
             {
@@ -355,33 +355,27 @@ namespace Game.Spells
                     Player modOwner = _owner.GetSpellModOwner();
                     if (modOwner != null)
                     {
-                        void applySpellMod(ref TimeSpan value)
-                        {
-                            int intValue = (int)value.TotalMilliseconds;
-                            modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref intValue, spell);
-                            value = TimeSpan.FromMilliseconds(intValue);
-                        }
 
-                        if (cooldown >= TimeSpan.Zero)
-                            applySpellMod(ref cooldown);
+                        if (cooldown >= 0)
+                            modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref cooldown, spell);
 
-                        if (categoryCooldown >= TimeSpan.Zero && !spellInfo.HasAttribute(SpellAttr6.NoCategoryCooldownMods))
-                            applySpellMod(ref categoryCooldown);
+                        if (categoryCooldown >= 0 && !spellInfo.HasAttribute(SpellAttr6.NoCategoryCooldownMods))
+                            modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref categoryCooldown, spell);
                     }
 
                     if (_owner.HasAuraTypeWithAffectMask(AuraType.ModSpellCooldownByHaste, spellInfo))
                     {
-                        cooldown = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner.m_unitData.ModSpellHaste);
-                        categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.m_unitData.ModSpellHaste);
+                        cooldown = (Milliseconds)(cooldown * _owner.m_unitData.ModSpellHaste);
+                        categoryCooldown = (Milliseconds)(categoryCooldown * _owner.m_unitData.ModSpellHaste);
                     }
 
                     if (_owner.HasAuraTypeWithAffectMask(AuraType.ModCooldownByHasteRegen, spellInfo))
                     {
-                        cooldown = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner.m_unitData.ModHasteRegen);
-                        categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.m_unitData.ModHasteRegen);
+                        cooldown = (Milliseconds)(cooldown * _owner.m_unitData.ModHasteRegen);
+                        categoryCooldown = (Milliseconds)(categoryCooldown * _owner.m_unitData.ModHasteRegen);
                     }
 
-                    int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
+                    Milliseconds cooldownMod = (Milliseconds)_owner.GetTotalAuraModifier(AuraType.ModCooldown);
                     if (cooldownMod != 0)
                     {
                         // Apply SPELL_AURA_MOD_COOLDOWN only to own spells
@@ -389,7 +383,7 @@ namespace Game.Spells
                         if (playerOwner == null || playerOwner.HasSpell(spellInfo.Id))
                         {
                             needsCooldownPacket = true;
-                            cooldown += TimeSpan.FromMilliseconds(cooldownMod);   // SPELL_AURA_MOD_COOLDOWN does not affect category cooldows, verified with shaman shocks
+                            cooldown += cooldownMod;   // SPELL_AURA_MOD_COOLDOWN does not affect category cooldows, verified with shaman shocks
                         }
                     }
 
@@ -397,37 +391,37 @@ namespace Game.Spells
                     // Note: This aura applies its modifiers to all cooldowns of spells with set category, not to category cooldown only
                     if (categoryId != 0)
                     {
-                        int categoryModifier = _owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
+                        Milliseconds categoryModifier = (Milliseconds)_owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
                         if (categoryModifier != 0)
                         {
-                            if (cooldown > TimeSpan.Zero)
-                                cooldown += TimeSpan.FromMilliseconds(categoryModifier);
+                            if (cooldown > 0)
+                                cooldown += categoryModifier;
 
-                            if (categoryCooldown > TimeSpan.Zero)
-                                categoryCooldown += TimeSpan.FromMilliseconds(categoryModifier);
+                            if (categoryCooldown > 0)
+                                categoryCooldown += categoryModifier;
                         }
 
                         SpellCategoryRecord categoryEntry = CliDB.SpellCategoryStorage.LookupByKey((int)categoryId);
                         if (categoryEntry.HasFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
-                            categoryCooldown = Time.UnixTimeToDateTime(Global.WorldMgr.GetNextDailyQuestsResetTime()) - GameTime.GetSystemTime();
+                            categoryCooldown = (Milliseconds)(Global.WorldMgr.GetNextDailyQuestsResetTime() - LoopTime.RealmTime);
                     }
                 }
                 else
                     needsCooldownPacket = true;
 
                 // replace negative cooldowns by 0
-                if (cooldown < TimeSpan.Zero)
-                    cooldown = TimeSpan.Zero;
+                if (cooldown < 0)
+                    cooldown = Milliseconds.Zero;
 
-                if (categoryCooldown < TimeSpan.Zero)
-                    categoryCooldown = TimeSpan.Zero;
+                if (categoryCooldown < 0)
+                    categoryCooldown = Milliseconds.Zero;
 
                 // no cooldown after applying spell mods
-                if (cooldown == TimeSpan.Zero && categoryCooldown == TimeSpan.Zero)
+                if (cooldown == 0 && categoryCooldown == 0)
                     return;
 
-                catrecTime = categoryCooldown != TimeSpan.Zero ? curTime + categoryCooldown : curTime;
-                recTime = cooldown != TimeSpan.Zero ? curTime + cooldown : catrecTime;
+                catrecTime = categoryCooldown != 0 ? curTime + categoryCooldown : curTime;
+                recTime = cooldown != 0 ? curTime + cooldown : catrecTime;
             }
 
             // self spell cooldown
@@ -443,7 +437,7 @@ namespace Game.Spells
                         SpellCooldownPkt spellCooldown = new();
                         spellCooldown.Caster = _owner.GetGUID();
                         spellCooldown.Flags = SpellCooldownFlags.None;
-                        spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellInfo.Id, (uint)cooldown.TotalMilliseconds));
+                        spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellInfo.Id, cooldown));
                         playerOwner.SendPacket(spellCooldown);
                     }
                 }
@@ -477,11 +471,11 @@ namespace Game.Spells
 
         public void AddCooldown(int spellId, int itemId, TimeSpan cooldownDuration)
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             AddCooldown(spellId, itemId, now + cooldownDuration, 0, now);
         }
 
-        public void AddCooldown(int spellId, int itemId, DateTime cooldownEnd, SpellCategories categoryId, DateTime categoryEnd, bool onHold = false)
+        public void AddCooldown(int spellId, int itemId, ServerTime cooldownEnd, SpellCategories categoryId, ServerTime categoryEnd, bool onHold = false)
         {
             CooldownEntry cooldownEntry = new();
             // scripts can start multiple cooldowns for a given spell, only store the longest one
@@ -511,7 +505,7 @@ namespace Game.Spells
 
         void ModifySpellCooldown(CooldownEntry cooldownEntry, TimeSpan cooldownMod, bool withoutCategoryCooldown)
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
 
             cooldownEntry.CooldownEnd += cooldownMod;
 
@@ -656,7 +650,7 @@ namespace Game.Spells
 
         public TimeSpan GetRemainingCooldown(SpellInfo spellInfo)
         {
-            DateTime end;
+            ServerTime end;
             var entry = _spellCooldowns.LookupByKey(spellInfo.Id);
             if (entry != null)
                 end = entry.CooldownEnd;
@@ -669,7 +663,7 @@ namespace Game.Spells
                 end = cooldownEntry.CategoryEnd;
             }
 
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             if (end < now)
                 return TimeSpan.Zero;
 
@@ -679,14 +673,14 @@ namespace Game.Spells
 
         public TimeSpan GetRemainingCategoryCooldown(SpellCategories categoryId)
         {
-            DateTime end;
+            ServerTime end;
             var cooldownEntry = _categoryCooldowns.LookupByKey(categoryId);
             if (cooldownEntry == null)
                 return TimeSpan.Zero;
 
             end = cooldownEntry.CategoryEnd;
 
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             if (end < now)
                 return TimeSpan.Zero;
 
@@ -701,8 +695,8 @@ namespace Game.Spells
 
         public void LockSpellSchool(SpellSchoolMask schoolMask, TimeSpan lockoutTime)
         {
-            DateTime now = GameTime.GetSystemTime();
-            DateTime lockoutEnd = now + lockoutTime;
+            ServerTime now = LoopTime.ServerTime;
+            ServerTime lockoutEnd = now + lockoutTime;
             for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
             {
                 if (schoolMask.HasSchool(i))
@@ -717,7 +711,7 @@ namespace Game.Spells
                 {
                     if (p.Value.State != PlayerSpellState.Removed)
                         knownSpells.Add(p.Key);
-            }
+                }
             }
             else if (_owner.IsPet())
             {
@@ -726,7 +720,7 @@ namespace Game.Spells
                 {
                     if (p.Value.state != PetSpellState.Removed)
                         knownSpells.Add(p.Key);
-            }
+                }
             }
             else
             {
@@ -735,7 +729,7 @@ namespace Game.Spells
                 {
                     if (creatureOwner.m_spells[i] != 0)
                         knownSpells.Add(creatureOwner.m_spells[i]);
-            }
+                }
             }
 
             SpellCooldownPkt spellCooldown = new();
@@ -757,7 +751,7 @@ namespace Game.Spells
                     AddCooldown(spellId, 0, lockoutEnd, 0, now);
 
                 // always send cooldown, even if it will be shorter than already existing cooldown for LossOfControl UI
-                spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellId, (uint)lockoutTime.TotalMilliseconds));
+                spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellId, (Milliseconds)lockoutTime));
             }
 
             Player player = GetPlayerOwner();
@@ -765,12 +759,12 @@ namespace Game.Spells
             {
                 if (!spellCooldown.SpellCooldowns.Empty())
                     player.SendPacket(spellCooldown);
-        }
+            }
         }
 
         public bool IsSchoolLocked(SpellSchoolMask schoolMask)
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             for (var i = SpellSchools.Normal; i < SpellSchools.Max; ++i)
             {
                 if (schoolMask.HasSchool(i))
@@ -788,17 +782,17 @@ namespace Game.Spells
             if (!CliDB.SpellCategoryStorage.ContainsKey((int)chargeCategoryId))
                 return false;
 
-            var chargeRecovery = GetChargeRecoveryTime(chargeCategoryId);
+            Milliseconds chargeRecovery = GetChargeRecoveryTime(chargeCategoryId);
             if (chargeRecovery > 0 && GetMaxCharges(chargeCategoryId) > 0)
             {
-                DateTime recoveryStart;
+                ServerTime recoveryStart;
                 var charges = _categoryCharges.LookupByKey(chargeCategoryId);
                 if (charges.Empty())
-                    recoveryStart = GameTime.GetSystemTime();
+                    recoveryStart = LoopTime.ServerTime;
                 else
                     recoveryStart = charges.Last().RechargeEnd;
 
-                _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
+                _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, chargeRecovery));
                 return true;
             }
 
@@ -815,7 +809,7 @@ namespace Game.Spells
             if (chargeList == null || chargeList.Empty())
                 return;
 
-            var now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
 
             for (var i = 0; i < chargeList.Count; ++i)
             {
@@ -900,14 +894,14 @@ namespace Game.Spells
             return charges;
         }
 
-        public uint GetChargeRecoveryTime(SpellCategories chargeCategoryId)
+        public Milliseconds GetChargeRecoveryTime(SpellCategories chargeCategoryId)
         {
             SpellCategoryRecord chargeCategoryEntry = CliDB.SpellCategoryStorage.LookupByKey((int)chargeCategoryId);
             if (chargeCategoryEntry == null)
-                return 0;
+                return Milliseconds.Zero;
 
-            int recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
-            recoveryTime += _owner.GetTotalAuraModifierByMiscValue(AuraType.ChargeRecoveryMod, (int)chargeCategoryId);
+            Milliseconds recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
+            recoveryTime += (Milliseconds)_owner.GetTotalAuraModifierByMiscValue(AuraType.ChargeRecoveryMod, (int)chargeCategoryId);
 
             float recoveryTimeF = recoveryTime;
             recoveryTimeF *= _owner.GetTotalAuraMultiplierByMiscValue(AuraType.ChargeRecoveryMultiplier, (int)chargeCategoryId);
@@ -918,30 +912,30 @@ namespace Game.Spells
             if (_owner.HasAuraTypeWithMiscvalue(AuraType.ChargeRecoveryAffectedByHasteRegen, (int)chargeCategoryId))
                 recoveryTimeF *= _owner.m_unitData.ModHasteRegen;
 
-            return (uint)Math.Floor(recoveryTimeF);
+            return (Milliseconds)Math.Floor(recoveryTimeF);
         }
 
         public bool HasGlobalCooldown(SpellInfo spellInfo)
         {
-            return _globalCooldowns.ContainsKey(spellInfo.StartRecoveryCategory) && _globalCooldowns[spellInfo.StartRecoveryCategory] > GameTime.GetSystemTime();
+            return _globalCooldowns.ContainsKey(spellInfo.StartRecoveryCategory) && _globalCooldowns[spellInfo.StartRecoveryCategory] > LoopTime.ServerTime;
         }
 
-        public void AddGlobalCooldown(SpellInfo spellInfo, TimeSpan durationMs)
+        public void AddGlobalCooldown(SpellInfo spellInfo, Milliseconds durationMs)
         {
-            _globalCooldowns[spellInfo.StartRecoveryCategory] = GameTime.GetSystemTime() + durationMs;
+            _globalCooldowns[spellInfo.StartRecoveryCategory] = LoopTime.ServerTime + durationMs;
         }
 
         public void CancelGlobalCooldown(SpellInfo spellInfo)
         {
-            _globalCooldowns[spellInfo.StartRecoveryCategory] = new DateTime();
+            _globalCooldowns[spellInfo.StartRecoveryCategory] = ServerTime.Zero;
         }
 
         public TimeSpan GetRemainingGlobalCooldown(SpellInfo spellInfo)
         {
-            if (!_globalCooldowns.TryGetValue(spellInfo.StartRecoveryCategory, out DateTime end))
+            if (!_globalCooldowns.TryGetValue(spellInfo.StartRecoveryCategory, out ServerTime end))
                 return TimeSpan.Zero;
 
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
             if (end < now)
                 return TimeSpan.Zero;
 
@@ -952,7 +946,7 @@ namespace Game.Spells
 
         public void PauseCooldowns()
         {
-            _pauseTime = GameTime.GetSystemTime().TimeOfDay;
+            _pauseTime = LoopTime.ServerTime.TimeOfDay;
         }
 
         public void ResumeCooldowns()
@@ -960,7 +954,7 @@ namespace Game.Spells
             if (!_pauseTime.HasValue)
                 return;
 
-            TimeSpan pausedDuration = GameTime.GetSystemTime().TimeOfDay - _pauseTime.Value;
+            TimeSpan pausedDuration = LoopTime.ServerTime.TimeOfDay - _pauseTime.Value;
 
             foreach (var itr in _spellCooldowns)
                 itr.Value.CooldownEnd += pausedDuration;
@@ -1013,15 +1007,15 @@ namespace Game.Spells
         
         void GetCooldownDurations(SpellInfo spellInfo, int itemId, ref SpellCategories categoryId)
         {
-            TimeSpan notUsed = TimeSpan.Zero;
+            Milliseconds notUsed = Milliseconds.Zero;
             GetCooldownDurations(spellInfo, itemId, ref notUsed, ref categoryId, ref notUsed);
         }
 
-        void GetCooldownDurations(SpellInfo spellInfo, int itemId, ref TimeSpan cooldown, ref SpellCategories categoryId, ref TimeSpan categoryCooldown)
+        void GetCooldownDurations(SpellInfo spellInfo, int itemId, ref Milliseconds cooldown, ref SpellCategories categoryId, ref Milliseconds categoryCooldown)
         {
-            TimeSpan tmpCooldown = TimeSpan.MinValue;
+            Milliseconds tmpCooldown = Milliseconds.Zero;
             SpellCategories tmpCategoryId = SpellCategories.None;
-            TimeSpan tmpCategoryCooldown = TimeSpan.MinValue;
+            Milliseconds tmpCategoryCooldown = Milliseconds.Zero;
 
             // cooldown information stored in ItemEffect.db2, overriding normal cooldown and category
             if (itemId != 0)
@@ -1033,9 +1027,9 @@ namespace Game.Spells
                     {
                         if (itemEffect.SpellID == spellInfo.Id)
                         {
-                            tmpCooldown = TimeSpan.FromMilliseconds(itemEffect.CoolDownMSec);
+                            tmpCooldown = itemEffect.CoolDown;
                             tmpCategoryId = itemEffect.SpellCategoryID;
-                            tmpCategoryCooldown = TimeSpan.FromMilliseconds(itemEffect.CategoryCoolDownMSec);
+                            tmpCategoryCooldown = itemEffect.CategoryCoolDown;
                             break;
                         }
                     }
@@ -1043,11 +1037,11 @@ namespace Game.Spells
             }
 
             // if no cooldown found above then base at DBC data
-            if (tmpCooldown < TimeSpan.Zero && tmpCategoryCooldown < TimeSpan.Zero)
+            if (tmpCooldown < 0 && tmpCategoryCooldown < 0)
             {
-                tmpCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
+                tmpCooldown = spellInfo.RecoveryTime;
                 tmpCategoryId = spellInfo.GetCategory();
-                tmpCategoryCooldown = TimeSpan.FromMilliseconds(spellInfo.CategoryRecoveryTime);
+                tmpCategoryCooldown = spellInfo.CategoryRecoveryTime;
             }
 
             cooldown = tmpCooldown;
@@ -1070,7 +1064,7 @@ namespace Game.Spells
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(c.Key, Difficulty.None);
 
-                    if (spellInfo.RecoveryTime > 10 * Time.Minute * Time.InMilliseconds || spellInfo.CategoryRecoveryTime > 10 * Time.Minute * Time.InMilliseconds)
+                    if (spellInfo.RecoveryTime > (Minutes)10 || spellInfo.CategoryRecoveryTime > (Minutes)10)
                         _spellCooldownsBeforeDuel[c.Key] = _spellCooldowns[c.Key];
                 }
 
@@ -1088,11 +1082,11 @@ namespace Game.Spells
 
                 foreach (var c in _spellCooldowns)
                 {
-                    DateTime now = GameTime.GetSystemTime();
-                    uint cooldownDuration = c.Value.CooldownEnd > now ? (uint)(c.Value.CooldownEnd - now).TotalMilliseconds : 0;
+                    ServerTime now = LoopTime.ServerTime;
+                    Milliseconds cooldownDuration = c.Value.CooldownEnd > now ? (Milliseconds)(c.Value.CooldownEnd - now) : Milliseconds.Zero;
 
                     // cooldownDuration must be between 0 and 10 minutes in order to avoid any visual bugs
-                    if (cooldownDuration <= 0 || cooldownDuration > 10 * Time.Minute * Time.InMilliseconds || c.Value.OnHold)
+                    if (cooldownDuration <= 0 || cooldownDuration > (Minutes)10 || c.Value.OnHold)
                         continue;
 
                     spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(c.Key, cooldownDuration));
@@ -1106,31 +1100,31 @@ namespace Game.Spells
         Dictionary<int, CooldownEntry> _spellCooldowns = new();
         Dictionary<int, CooldownEntry> _spellCooldownsBeforeDuel = new();
         Dictionary<SpellCategories, CooldownEntry> _categoryCooldowns = new();
-        DateTime[] _schoolLockouts = new DateTime[(int)SpellSchools.Max];
+        ServerTime[] _schoolLockouts = new ServerTime[(int)SpellSchools.Max];
         MultiMap<SpellCategories, ChargeEntry> _categoryCharges = new();
-        Dictionary<int, DateTime> _globalCooldowns = new();
+        Dictionary<int, ServerTime> _globalCooldowns = new();
         TimeSpan? _pauseTime;
 
         public class CooldownEntry
         {
             public int SpellId;
-            public DateTime CooldownEnd;
+            public ServerTime CooldownEnd;
             public int ItemId;
             public SpellCategories CategoryId;
-            public DateTime CategoryEnd;
+            public ServerTime CategoryEnd;
             public bool OnHold;
         }
 
         public struct ChargeEntry
         {
-            public ChargeEntry(DateTime startTime, TimeSpan rechargeTime)
+            public ChargeEntry(ServerTime startTime, TimeSpan rechargeTime)
             {
                 RechargeStart = startTime;
                 RechargeEnd = startTime + rechargeTime;
             }
 
-            public DateTime RechargeStart;
-            public DateTime RechargeEnd;
+            public ServerTime RechargeStart;
+            public ServerTime RechargeEnd;
         }
     }
 }

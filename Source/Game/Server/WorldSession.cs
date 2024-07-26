@@ -25,9 +25,9 @@ namespace Game
 {
     public partial class WorldSession : IDisposable
     {
-        public WorldSession(int id, string name, int battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset, Locale locale, int recruiter, bool isARecruiter)
+        public WorldSession(int id, string name, int battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, ServerTime mute_time, string os, TimeSpan timezoneOffset, Locale locale, int recruiter, bool isARecruiter)
         {
-            m_muteTime = mute_time;
+            m_mutedUntilTime = mute_time;
             AntiDOS = new DosProtection(this);
             m_Socket[(int)ConnectionType.Realm] = sock;
             _security = sec;
@@ -42,7 +42,7 @@ namespace Game
             _timezoneOffset = timezoneOffset;
             recruiterId = recruiter;
             isRecruiter = isARecruiter;
-            expireTime = 60000; // 1 min after socket loss, session is deleted
+            expireTime = (Minutes)1; // 1 min after socket loss, session is deleted
             _battlePetMgr = new BattlePetMgr(this);
             _collectionMgr = new CollectionMgr(this);
 
@@ -109,7 +109,7 @@ namespace Game
                 else if (GetPlayer().HasPendingBind())
                 {
                     _player.RepopAtGraveyard();
-                    _player.SetPendingBind(0, 0);
+                    _player.SetPendingBind(0, Milliseconds.Zero);
                 }
 
                 //drop a flag if player is carrying it
@@ -165,7 +165,7 @@ namespace Game
                         int eslot = j - InventorySlots.BuyBackStart;
                         _player.SetInvSlot(j, ObjectGuid.Empty);
                         _player.SetBuybackPrice(eslot, 0);
-                        _player.SetBuybackTimestamp(eslot, 0);
+                        _player.SetBuybackTimestamp(eslot, TimeSpan.Zero);
                     }
                     _player.SaveToDB();
                 }
@@ -231,10 +231,10 @@ namespace Game
             m_playerLogout = false;
             m_playerSave = false;
             m_playerRecentlyLogout = true;
-            SetLogoutStartTime(0);
+            SetLogoutStartTime(ServerTime.Zero);
         }
 
-        public bool Update(uint diff, PacketFilter updater)
+        public bool Update(TimeSpan diff, PacketFilter updater)
         {
             // Before we process anything:
             /// If necessary, kick the player because the client didn't send anything for too long
@@ -244,7 +244,7 @@ namespace Game
 
             WorldPacket firstDelayedPacket = null;
             uint processedPackets = 0;
-            long currentTime = GameTime.GetGameTime();
+            ServerTime currentTime = LoopTime.ServerTime;
 
             WorldPacket packet;
             //Check for any packets they was not recived yet.
@@ -331,7 +331,7 @@ namespace Game
             if (!updater.ProcessUnsafe()) // <=> updater is of Type MapSessionFilter
             {
                 // Send time sync packet every 10s.
-                if (_timeSyncTimer > 0)
+                if (_timeSyncTimer > TimeSpan.Zero)
                 {
                     if (diff >= _timeSyncTimer)
                         SendTimeSync();
@@ -455,7 +455,7 @@ namespace Game
         {
             AccountDataTimes accountDataTimes = new();
             accountDataTimes.PlayerGuid = playerGuid;
-            accountDataTimes.ServerTime = GameTime.GetGameTime();
+            accountDataTimes.ServerTime = LoopTime.UnixServerTime;
             for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
             {
                 if (mask.HasType(i))
@@ -603,7 +603,7 @@ namespace Game
 
         public bool CanSpeak()
         {
-            return m_muteTime <= GameTime.GetGameTime();
+            return m_mutedUntilTime <= LoopTime.ServerTime;
         }
 
         bool ValidateHyperlinksAndMaybeKick(string str)
@@ -713,20 +713,20 @@ namespace Game
         public string GetOS() { return _os; }
         public void SetInQueue(bool state) { m_inQueue = state; }
 
-        public bool IsLogingOut() { return _logoutTime != 0 || m_playerLogout; }
+        public bool IsLogingOut() { return _logoutTime != Time.Zero || m_playerLogout; }
 
         public long GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
 
         public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
 
-        void SetLogoutStartTime(long requestTime)
+        void SetLogoutStartTime(ServerTime requestTime)
         {
             _logoutTime = requestTime;
         }
 
-        bool ShouldLogOut(long currTime)
+        bool ShouldLogOut(ServerTime currTime)
         {
-            return (_logoutTime > 0 && currTime >= _logoutTime + 20);
+            return _logoutTime > ServerTime.Zero && currTime >= _logoutTime + (Seconds)20;
         }
 
         void ProcessQueryCallbacks()
@@ -914,23 +914,23 @@ namespace Game
             timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
             SendPacket(timeSyncRequest);
 
-            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
+            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.NowRelative;
 
             // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
-            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
+            _timeSyncTimer = _timeSyncNextCounter == 0 ? (Seconds)5 : (Seconds)10;
             _timeSyncNextCounter++;
         }
 
-        uint AdjustClientMovementTime(uint time)
+        RelativeTime AdjustClientMovementTime(RelativeTime time)
         {
             long movementTime = time + _timeSyncClockDelta;
-            if (_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
+            if (_timeSyncClockDelta == TimeSpan.Zero || movementTime < 0 || movementTime > RelativeTime.MaxValue)
             {
                 Log.outWarn(LogFilter.Misc, "The computed movement time using clockDelta is erronous. Using fallback instead");
-                return GameTime.GetGameTimeMS();
+                return LoopTime.RelativeTime;
             }
             else
-                return (uint)movementTime;
+                return (RelativeTime)movementTime;
         }
 
         public Locale GetSessionDbcLocale() { return m_sessionDbcLocale; }
@@ -944,22 +944,22 @@ namespace Game
         public void ResetTimeOutTime(bool onlyActive)
         {
             if (GetPlayer() != null)
-                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.Values[WorldCfg.SocketTimeoutTimeActive].Int32;
+                m_timeOutTime = LoopTime.ServerTime + WorldConfig.Values[WorldCfg.SocketTimeoutTimeActive].TimeSpan;
             else if (!onlyActive)
-                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.Values[WorldCfg.SocketTimeoutTime].Int32;
+                m_timeOutTime = LoopTime.ServerTime + WorldConfig.Values[WorldCfg.SocketTimeoutTime].TimeSpan;
         }
 
         bool IsConnectionIdle()
         {
-            return m_timeOutTime < GameTime.GetGameTime() && !m_inQueue;
+            return m_timeOutTime < LoopTime.ServerTime && !m_inQueue;
         }
 
         public int GetRecruiterId() { return recruiterId; }
         public bool IsARecruiter() { return isRecruiter; }
 
         // Packets cooldown
-        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
-        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
+        public ServerTime GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
+        public void SetCalendarEventCreationCooldown(ServerTime cooldown) { _calendarEventCreationCooldown = cooldown; }
 
         // Battle Pets
         public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
@@ -985,13 +985,13 @@ namespace Game
         Expansion m_expansion;
         string _os;
 
-        uint expireTime;
+        Milliseconds expireTime;
         bool forceExit;
 
         DosProtection AntiDOS;
         Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
 
-        long _logoutTime;
+        ServerTime _logoutTime;
         bool m_inQueue;
         ObjectGuid m_playerLoading;                               // code processed in LoginPlayer
         bool m_playerLogout;                                // code processed in LogoutPlayer
@@ -1015,25 +1015,25 @@ namespace Game
         int recruiterId;
         bool isRecruiter;
 
-        public long m_muteTime;
-        long m_timeOutTime;
+        public ServerTime m_mutedUntilTime;
+        ServerTime m_timeOutTime;
 
         ConcurrentQueue<WorldPacket> _recvQueue = new();
         RBACData _RBACData;
 
-        CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
-        long _timeSyncClockDelta;
+        CircularBuffer<(Milliseconds clockDelta, Milliseconds latency)> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
+        Milliseconds _timeSyncClockDelta;
 
-        Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server time when packet with that counter was sent.
+        Dictionary<uint, RelativeTime> _pendingTimeSyncRequests = new(); // key: counter. value: server time when packet with that counter was sent.
         uint _timeSyncNextCounter;
-        uint _timeSyncTimer;
+        Milliseconds _timeSyncTimer;
 
         CollectionMgr _collectionMgr;
 
         ConnectToKey _instanceConnectKey;
 
         // Packets cooldown
-        long _calendarEventCreationCooldown;
+        ServerTime _calendarEventCreationCooldown;
 
         BattlePetMgr _battlePetMgr;
 
@@ -1074,7 +1074,7 @@ namespace Game
         }
 
         //todo fix me
-        public bool EvaluateOpcode(WorldPacket packet, long time)
+        public bool EvaluateOpcode(WorldPacket packet, ServerTime time)
         {
             uint maxPacketCounterAllowed = 0;// GetMaxPacketCounterAllowed(p.GetOpcode());
 
@@ -1110,7 +1110,7 @@ namespace Game
                     return false;
                 case Policy.Ban:
                     BanMode bm = (BanMode)WorldConfig.Values[WorldCfg.PacketSpoofBanmode].Int32;
-                    uint duration = (uint)WorldConfig.Values[WorldCfg.PacketSpoofBanduration].Int32; // in seconds
+                    Seconds duration = WorldConfig.Values[WorldCfg.PacketSpoofBanduration].Seconds;
                     string nameOrIp = "";
                     switch (bm)
                     {
@@ -1143,7 +1143,7 @@ namespace Game
 
     struct PacketCounter
     {
-        public long lastReceiveTime;
+        public ServerTime lastReceiveTime;
         public uint amountCounter;
     }
 

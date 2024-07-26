@@ -23,7 +23,7 @@ namespace Game.DataStorage
                 SQLResult lineTemplates = DB.World.Query("SELECT Id, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
                 if (!lineTemplates.IsEmpty())
                 {
-                    uint oldMSTime = Time.GetMSTime();
+                    RelativeTime oldMSTime = Time.NowRelative;
 
                     do
                     {
@@ -48,7 +48,8 @@ namespace Game.DataStorage
                     }
                     while (lineTemplates.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Conversation line templates in {1} ms", _conversationLineTemplateStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        $"Loaded {_conversationLineTemplateStorage.Count} Conversation line templates in {Time.Diff(oldMSTime)} ms.");
                 }
                 else
                 {
@@ -61,7 +62,7 @@ namespace Game.DataStorage
                 SQLResult actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx, CreatureId, CreatureDisplayInfoId, NoActorObject, ActivePlayerObject FROM conversation_actors");
                 if (!actorResult.IsEmpty())
                 {
-                    uint oldMSTime = Time.GetMSTime();
+                    RelativeTime oldMSTime = Time.NowRelative;
                     uint count = 0;
 
                     do
@@ -98,7 +99,7 @@ namespace Game.DataStorage
                         ++count;
                     } while (actorResult.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Conversation actors in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Conversation actors in {Time.Diff(oldMSTime)} ms.");
                 }
                 else
                 {
@@ -126,7 +127,7 @@ namespace Game.DataStorage
                 SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, Flags, ScriptName FROM conversation_template");
                 if (!templateResult.IsEmpty())
                 {
-                    uint oldMSTime = Time.GetMSTime();
+                    RelativeTime oldMSTime = Time.NowRelative;
 
                 do
                 {
@@ -161,7 +162,7 @@ namespace Game.DataStorage
                                 conversationTemplate.Lines.Add(conversationLineTemplate);
                             else
                             {
-                                Log.outError(LogFilter.Sql, 
+                                Log.outError(LogFilter.Sql,
                                     $"Table `conversation_line_template` has missing template " +
                                     $"for line (ID: {currentConversationLine.Id}) " +
                                     $"in Conversation {conversationTemplate.Id}, skipped");
@@ -177,7 +178,8 @@ namespace Game.DataStorage
                     }
                     while (templateResult.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Conversation templates in {1} ms", _conversationTemplateStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        $"Loaded {_conversationTemplateStorage.Count} Conversation templates in {Time.Diff(oldMSTime)} ms.");
                 }
                 else
                 {
@@ -238,7 +240,7 @@ namespace Game.DataStorage
 
                 if (CreatureId != 0)
                 {
-                    Log.outError(LogFilter.Sql, 
+                    Log.outError(LogFilter.Sql,
                         $"Table `conversation_actors` with ConversationActorGuid " +
                         $"cannot have CreatureId ({CreatureId}). " +
                         $"Conversation {ConversationId} and Idx {ActorIndex}.");
@@ -246,7 +248,7 @@ namespace Game.DataStorage
 
                 if (CreatureDisplayInfoId != 0)
                 {
-                    Log.outError(LogFilter.Sql, 
+                    Log.outError(LogFilter.Sql,
                         $"Table `conversation_actors` with ConversationActorGuid " +
                         $"cannot have CreatureDisplayInfoId ({CreatureDisplayInfoId}). " +
                         $"Conversation {ConversationId} and Idx {ActorIndex}.");
@@ -275,7 +277,7 @@ namespace Game.DataStorage
 
                 if (SpawnId != 0)
                 {
-                    Log.outError(LogFilter.Sql, 
+                    Log.outError(LogFilter.Sql,
                         $"Table `conversation_actors` with NoActorObject " +
                         $"cannot have ConversationActorGuid ({SpawnId}). " +
                         $"Conversation {ConversationId} and Idx {ActorIndex}.");

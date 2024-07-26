@@ -48,36 +48,36 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
             base.JustEngagedWith(who);
             Talk(TextIds.SayAggro);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(7));
+                task.Repeat((Seconds)7);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Blastwave);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16));
+                task.Repeat((Seconds)8, (Seconds)16);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Mortalstrike);
-                task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                task.Repeat((Seconds)25, (Seconds)35);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule((Seconds)30, task =>
             {
                 DoCastVictim(SpellIds.Knockback);
                 if (GetThreat(me.GetVictim()) != 0)
                     ModifyThreatByPercent(me.GetVictim(), -50);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)15, (Seconds)30);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule((Seconds)1, task =>
             {
                 if (me.GetDistance(me.GetHomePosition()) > 150.0f)
                 {
                     Talk(TextIds.SayLeash);
                     EnterEvadeMode(EvadeReason.Boundary);
                 }
-                task.Repeat(TimeSpan.FromSeconds(1));
+                task.Repeat((Seconds)1);
             });
         }
 
@@ -90,7 +90,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
                 go.GetAI().DoAction(ActionIds.Deactivate);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -119,10 +119,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
                 return;
             }
 
-            _events.ScheduleEvent(EventIds.SuppressionCast, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(5));
+            _events.ScheduleEvent(EventIds.SuppressionCast, (Seconds)0, Time.SpanFromSeconds(5));
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _events.Update(diff);
 
@@ -136,7 +136,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
                             me.CastSpell(null, SpellIds.SuppressionAura, true);
                             me.SendCustomAnim(0);
                         }
-                        _events.ScheduleEvent(EventIds.SuppressionCast, TimeSpan.FromSeconds(5));
+                        _events.ScheduleEvent(EventIds.SuppressionCast, (Seconds)5);
                         break;
                     case EventIds.SuppressionReset:
                         Activate();
@@ -152,7 +152,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
                 case LootState.Activated:
                     Deactivate();
                     _events.CancelEvent(EventIds.SuppressionCast);
-                    _events.ScheduleEvent(EventIds.SuppressionReset, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(120));
+                    _events.ScheduleEvent(EventIds.SuppressionReset, (Seconds)30, Time.SpanFromSeconds(120));
                     break;
                 case LootState.JustDeactivated: // This case prevents the Gameobject despawn by Disarm Trap
                     me.SetLootState(LootState.Ready);
@@ -178,7 +178,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
                 me.SetGoState(GameObjectState.Ready);
             me.SetLootState(LootState.Ready);
             me.RemoveFlag(GameObjectFlags.NotSelectable);
-            _events.ScheduleEvent(EventIds.SuppressionCast, TimeSpan.FromSeconds(0));
+            _events.ScheduleEvent(EventIds.SuppressionCast, (Seconds)0);
         }
 
         void Deactivate()

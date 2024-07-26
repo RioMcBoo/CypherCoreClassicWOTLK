@@ -61,12 +61,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 
         bool PortalPhase;
         bool Berserk;
-        uint PhaseTimer; // timer for phase switching
-        uint VoidZoneTimer;
-        uint NetherInfusionTimer; // berserking timer
-        uint NetherbreathTimer;
-        uint EmpowermentTimer;
-        uint PortalTimer; // timer for beam checking
+        TimeSpan PhaseTimer; // timer for phase switching
+        TimeSpan VoidZoneTimer;
+        TimeSpan NetherInfusionTimer; // berserking timer
+        TimeSpan NetherbreathTimer;
+        TimeSpan EmpowermentTimer;
+        TimeSpan PortalTimer; // timer for beam checking
         ObjectGuid[] PortalGUID = new ObjectGuid[3]; // guid's of portals
         ObjectGuid[] BeamerGUID = new ObjectGuid[3]; // guid's of auxiliary beaming portals
         ObjectGuid[] BeamTarget = new ObjectGuid[3]; // guid's of portals' current targets
@@ -77,17 +77,17 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             instance = creature.GetInstanceScript();
 
             PortalPhase = false;
-            PhaseTimer = 0;
-            EmpowermentTimer = 0;
-            PortalTimer = 0;
+            PhaseTimer = TimeSpan.Zero;
+            EmpowermentTimer = TimeSpan.Zero;
+            PortalTimer = TimeSpan.Zero;
         }
 
         void Initialize()
         {
             Berserk = false;
-            NetherInfusionTimer = 540000;
-            VoidZoneTimer = 15000;
-            NetherbreathTimer = 3000;
+            NetherInfusionTimer = Time.SpanFromMilliseconds(540000);
+            VoidZoneTimer = Time.SpanFromMilliseconds(15000);
+            NetherbreathTimer = Time.SpanFromMilliseconds(3000);
         }
 
         bool IsBetween(WorldObject u1, WorldObject target, WorldObject u2) // the in-line checker
@@ -140,7 +140,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                         MiscConst.PortalCoord[pos[i]].X, 
                         MiscConst.PortalCoord[pos[i]].Y, 
                         MiscConst.PortalCoord[pos[i]].Z, 
-                        0, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+                        0, TempSummonType.TimedDespawn, (Minutes)1);
 
                 if (portal != null)
                 {
@@ -212,7 +212,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                             BeamerGUID[j].Clear();
                         }
                         // create new one and start beaming on the target
-                        Creature beamer1 = portal.SummonCreature(MiscConst.PortalID[j], portal.GetPositionX(), portal.GetPositionY(), portal.GetPositionZ(), portal.GetOrientation(), TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+                        Creature beamer1 = portal.SummonCreature(MiscConst.PortalID[j], portal.GetPositionX(), portal.GetPositionY(), portal.GetPositionZ(), portal.GetOrientation(), TempSummonType.TimedDespawn, (Minutes)1);
                         if (beamer1 != null)
                         {
                             beamer1.CastSpell(target, MiscConst.PortalBeam[j], false);
@@ -231,10 +231,10 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             me.RemoveAurasDueToSpell(SpellIds.BanishRoot);
             me.RemoveAurasDueToSpell(SpellIds.BanishVisual);
             SummonPortals();
-            PhaseTimer = 60000;
+            PhaseTimer = Time.SpanFromMilliseconds(60000);
             PortalPhase = true;
-            PortalTimer = 10000;
-            EmpowermentTimer = 10000;
+            PortalTimer = Time.SpanFromMilliseconds(10000);
+            EmpowermentTimer = Time.SpanFromMilliseconds(10000);
             Talk(TextIds.EmotePhasePortal);
         }
 
@@ -245,7 +245,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             DoCast(me, SpellIds.BanishVisual, new CastSpellExtraArgs(true));
             DoCast(me, SpellIds.BanishRoot, new CastSpellExtraArgs(true));
             DestroyPortals();
-            PhaseTimer = 30000;
+            PhaseTimer = Time.SpanFromMilliseconds(30000);
             PortalPhase = false;
             Talk(TextIds.EmotePhaseBanish);
 
@@ -272,7 +272,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             DestroyPortals();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -282,8 +282,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             {
                 DoCast(SelectTarget(SelectTargetMethod.Random, 1, 45, true), 
                     SpellIds.Voidzone, new CastSpellExtraArgs(true));
-
-                VoidZoneTimer = 15000;
+                                
+                VoidZoneTimer = Time.SpanFromMilliseconds(15000);
             }
             else VoidZoneTimer -= diff;
 
@@ -302,7 +302,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                 if (PortalTimer <= diff)
                 {
                     UpdatePortals();
-                    PortalTimer = 1000;
+                    PortalTimer = Time.SpanFromMilliseconds(1000);
                 }
                 else PortalTimer -= diff;
 
@@ -311,7 +311,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                 {
                     DoCast(me, SpellIds.Empowerment);
                     me.AddAura(SpellIds.NetherburnAura, me);
-                    EmpowermentTimer = 90000;
+                    EmpowermentTimer = Time.SpanFromMilliseconds(90000);
                 }
                 else EmpowermentTimer -= diff;
 
@@ -333,7 +333,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
                     if (target != null)
                         DoCast(target, SpellIds.Netherbreath);
-                    NetherbreathTimer = RandomHelper.URand(5000, 7000);
+                    NetherbreathTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(5000, 7000));
                 }
                 else NetherbreathTimer -= diff;
 

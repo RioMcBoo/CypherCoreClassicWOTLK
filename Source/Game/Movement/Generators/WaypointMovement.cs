@@ -21,7 +21,7 @@ namespace Game.Movement
         int _currentNode;
 
         TimeTracker _duration;
-        float? _speed;
+        Speed? _speed;
         MovementWalkRunSpeedSelectionMode _speedSelectionMode;
         (TimeSpan min, TimeSpan max)? _waitTimeRangeAtPathEnd;
         float? _wanderDistanceAtPathEnds;
@@ -29,11 +29,11 @@ namespace Game.Movement
         bool _isReturningToStart;
         bool _generatePath;
 
-        public WaypointMovementGenerator(int pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+        public WaypointMovementGenerator(int pathId = 0, bool repeating = true, TimeSpan? duration = null, Speed? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
             (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
 
         {
-            _nextMoveTime = new TimeTracker(0);
+            _nextMoveTime = new TimeTracker();
             _pathId = pathId;
             _repeating = repeating;
             _loadedFromDB = true;
@@ -54,10 +54,10 @@ namespace Game.Movement
                 _duration = new(duration.Value);
         }
 
-        public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+        public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, Speed? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
             (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
         {
-            _nextMoveTime = new TimeTracker(0);
+            _nextMoveTime = new TimeTracker();
             _repeating = repeating;
             _path = path;
             _speed = speed;
@@ -77,9 +77,9 @@ namespace Game.Movement
                 _duration = new(duration.Value);
         }
 
-        public override void Pause(uint timer)
+        public override void Pause(TimeSpan timer)
         {
-            if (timer != 0)
+            if (timer != TimeSpan.Zero)
             {
                 // Don't try to paused an already paused generator
                 if (HasFlag(MovementGeneratorFlags.Paused))
@@ -92,18 +92,18 @@ namespace Game.Movement
             else
             {
                 AddFlag(MovementGeneratorFlags.Paused);
-                _nextMoveTime.Reset(1); // Needed so that Update does not behave as if node was reached
+                _nextMoveTime.Reset((Milliseconds)1); // Needed so that Update does not behave as if node was reached
                 RemoveFlag(MovementGeneratorFlags.TimedPaused);
             }
         }
 
-        public override void Resume(uint overrideTimer)
+        public override void Resume(TimeSpan overrideTimer)
         {
-            if (overrideTimer != 0)
+            if (overrideTimer != TimeSpan.Zero)
                 _nextMoveTime.Reset(overrideTimer);
 
             if (_nextMoveTime.Passed())
-                _nextMoveTime.Reset(1); // Needed so that Update does not behave as if node was reached
+                _nextMoveTime.Reset((Milliseconds)1); // Needed so that Update does not behave as if node was reached
 
             RemoveFlag(MovementGeneratorFlags.Paused);
         }
@@ -155,7 +155,7 @@ namespace Game.Movement
 
             owner.StopMoving();
 
-            _nextMoveTime.Reset(1000);
+            _nextMoveTime.Reset((Seconds)1);
         }
 
         public override void DoReset(Creature owner)
@@ -165,15 +165,15 @@ namespace Game.Movement
             owner.StopMoving();
 
             if (!HasFlag(MovementGeneratorFlags.Finalized) && _nextMoveTime.Passed())
-                _nextMoveTime.Reset(1); // Needed so that Update does not behave as if node was reached
+                _nextMoveTime.Reset((Milliseconds)1); // Needed so that Update does not behave as if node was reached
         }
 
-        public override bool DoUpdate(Creature owner, uint diff)
+        public override bool DoUpdate(Creature owner, TimeSpan diff)
         {
             if (owner == null || !owner.IsAlive())
                 return true;
 
-            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused) 
+            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused)
                 || _path == null || _path.Nodes.Empty())
             {
                 return true;
@@ -330,8 +330,8 @@ namespace Game.Movement
         void StartMove(Creature owner, bool relaunch = false)
         {
             // sanity checks
-            if (owner == null || !owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized) 
-                || _path == null || _path.Nodes.Empty() || 
+            if (owner == null || !owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized)
+                || _path == null || _path.Nodes.Empty() ||
                 (relaunch && (HasFlag(MovementGeneratorFlags.InformEnabled) || !HasFlag(MovementGeneratorFlags.Initialized))))
             {
                 return;
@@ -340,7 +340,7 @@ namespace Game.Movement
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() 
                 || (owner.IsFormationLeader() && !owner.IsFormationLeaderMoveAllowed())) // if cannot move OR cannot move because of formation
             {
-                _nextMoveTime.Reset(1000); // delay 1s
+                _nextMoveTime.Reset((Seconds)1);
                 return;
             }
 
@@ -508,12 +508,12 @@ namespace Game.Movement
             return $"Current Node: {_currentNode}\n{base.GetDebugInfo()}";
         }
 
-        bool UpdateTimer(uint diff)
+        bool UpdateTimer(TimeSpan diff)
         {
             _nextMoveTime.Update(diff);
             if (_nextMoveTime.Passed())
             {
-                _nextMoveTime.Reset(0);
+                _nextMoveTime.Reset(default);
                 return true;
             }
             return false;

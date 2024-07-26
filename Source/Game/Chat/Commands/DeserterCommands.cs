@@ -20,7 +20,7 @@ namespace Game.Chat.Commands
         class DeserterInstanceCommands
         {
             [Command("add", RBACPermissions.CommandDeserterInstanceAdd)]
-            static bool HandleDeserterInstanceAdd(CommandHandler handler, uint time)
+            static bool HandleDeserterInstanceAdd(CommandHandler handler, int time)
             {
                 return HandleDeserterAdd(handler, time, true);
             }
@@ -36,7 +36,7 @@ namespace Game.Chat.Commands
         class DeserterBGCommands
         {
             [Command("add", RBACPermissions.CommandDeserterBgAdd)]
-            static bool HandleDeserterBGAdd(CommandHandler handler, uint time)
+            static bool HandleDeserterBGAdd(CommandHandler handler, int time)
             {
                 return HandleDeserterAdd(handler, time, false);
             }
@@ -48,7 +48,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        static bool HandleDeserterAdd(CommandHandler handler, uint time, bool isInstance)
+        static bool HandleDeserterAdd(CommandHandler handler, int time, bool isInstance)
         {
             Player player = handler.GetSelectedPlayer();
             if (player == null)
@@ -63,7 +63,7 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
-            aura.SetDuration((int)(time * Time.InMilliseconds));
+            aura.SetDuration((Seconds)time);
 
             return true;
         }

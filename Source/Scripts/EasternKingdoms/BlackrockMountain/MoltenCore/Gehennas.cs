@@ -25,28 +25,28 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Gehennas
         {
             base.JustEngagedWith(victim);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 DoCastVictim(SpellIds.GehennasCurse);
-                task.Repeat(TimeSpan.FromSeconds(22), TimeSpan.FromSeconds(30));
+                task.Repeat(Time.SpanFromSeconds(22), Time.SpanFromSeconds(30));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
                 if (target != null)
                     DoCast(target, SpellIds.RainOfFire);
-                task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(12));
+                task.Repeat(Time.SpanFromSeconds(4), Time.SpanFromSeconds(12));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 1);
                 if (target != null)
                     DoCast(target, SpellIds.ShadowBolt);
-                task.Repeat(TimeSpan.FromSeconds(7));
+                task.Repeat(Time.SpanFromSeconds(7));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

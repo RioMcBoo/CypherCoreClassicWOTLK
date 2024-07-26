@@ -49,8 +49,8 @@ namespace Scripts.EasternKingdoms.Deadmines
 
     struct MiscConst
     {
-        public const uint DataCannonBlastTimer = 3000;
-        public const uint DataPiratesDelayTimer = 1000;
+        public static readonly TimeSpan DataCannonBlastTimer = (Seconds)3;
+        public static readonly TimeSpan DataPiratesDelayTimer = (Seconds)1;
     }
 
     class instance_deadmines : InstanceMapScript
@@ -67,8 +67,8 @@ namespace Scripts.EasternKingdoms.Deadmines
             ObjectGuid DefiasPirate2GUID;
 
             DMCannonState State;
-            uint CannonBlast_Timer;
-            uint PiratesDelay_Timer;
+            TimeSpan CannonBlast_Timer;
+            TimeSpan PiratesDelay_Timer;
             ObjectGuid uiSmiteChestGUID;
 
             public instance_deadmines_InstanceMapScript(InstanceMap map) : base(map)
@@ -76,11 +76,11 @@ namespace Scripts.EasternKingdoms.Deadmines
                 SetHeaders("DM");
 
                 State = DMCannonState.CannonNotUsed;
-                CannonBlast_Timer = 0;
-                PiratesDelay_Timer = 0;
+                CannonBlast_Timer = TimeSpan.Zero;
+                PiratesDelay_Timer = TimeSpan.Zero;
             }
 
-            public override void Update(uint diff)
+            public override void Update(TimeSpan diff)
             {
                 if (IronCladDoorGUID.IsEmpty() || DefiasCannonGUID.IsEmpty() || DoorLeverGUID.IsEmpty())
                     return;
@@ -129,8 +129,8 @@ namespace Scripts.EasternKingdoms.Deadmines
                 GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
                 if (pIronCladDoor != null)
                 {
-                    Creature DefiasPirate1 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() - 2, pIronCladDoor.GetPositionY() - 7, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
-                    Creature DefiasPirate2 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() + 3, pIronCladDoor.GetPositionY() - 6, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
+                    Creature DefiasPirate1 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() - 2, pIronCladDoor.GetPositionY() - 7, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, (Seconds)3);
+                    Creature DefiasPirate2 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() + 3, pIronCladDoor.GetPositionY() - 6, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, (Seconds)3);
 
                     DefiasPirate1GUID = DefiasPirate1.GetGUID();
                     DefiasPirate2GUID = DefiasPirate2.GetGUID();

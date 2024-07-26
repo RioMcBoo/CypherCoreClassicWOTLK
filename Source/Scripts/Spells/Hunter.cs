@@ -174,8 +174,8 @@ namespace Scripts.Spells.Hunter
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.Exhilaration, -TimeSpan.FromSeconds(aurEff.GetAmount()));
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.ExhilarationPet, -TimeSpan.FromSeconds(aurEff.GetAmount()));
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.Exhilaration, -Time.SpanFromSeconds(aurEff.GetAmount()));
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.ExhilarationPet, -Time.SpanFromSeconds(aurEff.GetAmount()));
         }
 
         public override void Register()

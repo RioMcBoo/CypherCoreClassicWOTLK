@@ -21,7 +21,7 @@ namespace Game.Maps
 {
     public class Map : IDisposable
     {
-        public Map(int id, long expiry, int instanceId, Difficulty spawnmode)
+        public Map(int id, TimeSpan expiry, int instanceId, Difficulty spawnmode)
         {
             i_mapRecord = CliDB.MapStorage.LookupByKey(id);
             i_spawnMode = spawnmode;
@@ -46,7 +46,7 @@ namespace Game.Maps
             //lets initialize visibility distance for map
             InitVisibilityDistance();
             _weatherUpdateTimer = new IntervalTimer();
-            _weatherUpdateTimer.SetInterval(1 * Time.InMilliseconds);
+            _weatherUpdateTimer.SetInterval((Seconds)1);
 
             GetGuidSequenceGenerator(HighGuid.Transport).Set(Global.ObjectMgr.GetGenerator(HighGuid.Transport).GetNextAfterMaxUsed());
 
@@ -95,7 +95,7 @@ namespace Game.Maps
             {
                 for (uint cellY = 0; cellY < MapConst.TotalCellsPerMap; cellY++)
                     LoadGrid((cellX + 0.5f - MapConst.CenterGridCellId) * MapConst.SizeofCells, (cellY + 0.5f - MapConst.CenterGridCellId) * MapConst.SizeofCells);
-        }
+            }
         }
 
         public virtual void InitVisibilityDistance()
@@ -561,7 +561,7 @@ namespace Game.Maps
             ++_zonePlayerCountMap[newZone];
         }
 
-        public virtual void Update(uint diff)
+        public virtual void Update(TimeSpan diff)
         {
             _dynamicTree.Update(diff);
 
@@ -582,7 +582,7 @@ namespace Game.Maps
             {
                 ProcessRespawns();
                 UpdateSpawnGroupConditions();
-                _respawnCheckTimer = (uint)WorldConfig.Values[WorldCfg.RespawnMinCheckIntervalMs].Int32;
+                _respawnCheckTimer = WorldConfig.Values[WorldCfg.RespawnMinCheckIntervalMs].TimeSpan;
             }
             else
                 _respawnCheckTimer -= diff;
@@ -622,7 +622,7 @@ namespace Game.Maps
                         {
                             if (unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                 toVisit.Add(unit);
-                    }
+                        }
                     }
 
                     foreach (Unit unit in toVisit)
@@ -638,7 +638,7 @@ namespace Game.Maps
                         {
                             if (!caster.IsPlayer() && !caster.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                 toVisit.Add(caster);
-                    }
+                        }
                     }
                     foreach (Unit unit in toVisit)
                         VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
@@ -657,8 +657,8 @@ namespace Game.Maps
                             {
                                 if (unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                     toVisit.Add(unit);
+                            }
                         }
-                    }
                     }
 
                     foreach (Unit unit in toVisit)
@@ -699,7 +699,7 @@ namespace Game.Maps
             {
                 foreach (var zoneInfo in _zoneDynamicInfo)
                 {
-                    if (zoneInfo.Value.DefaultWeather != null && !zoneInfo.Value.DefaultWeather.Update((uint)_weatherUpdateTimer.GetInterval()))
+                    if (zoneInfo.Value.DefaultWeather != null && !zoneInfo.Value.DefaultWeather.Update(_weatherUpdateTimer.GetInterval()))
                         zoneInfo.Value.DefaultWeather = null;
                 }
 
@@ -719,7 +719,7 @@ namespace Game.Maps
             Global.ScriptMgr.OnMapUpdate(this, diff);
         }
 
-        void ProcessRelocationNotifies(uint diff)
+        void ProcessRelocationNotifies(TimeSpan diff)
         {
             for (int x = 0; x < MapConst.MaxGrids; ++x)
             {
@@ -732,7 +732,7 @@ namespace Game.Maps
                     if (grid.GetGridState() != GridState.Active)
                         continue;
 
-                    grid.GetGridInfoRef().GetRelocationTimer().TUpdate((int)diff);
+                    grid.GetGridInfoRef().GetRelocationTimer().TUpdate((Milliseconds)diff);
                     if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
                         continue;
 
@@ -782,7 +782,7 @@ namespace Game.Maps
                     if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
                         continue;
 
-                    grid.GetGridInfoRef().GetRelocationTimer().TReset((int)diff, m_VisibilityNotifyPeriod);
+                    grid.GetGridInfoRef().GetRelocationTimer().TReset((Milliseconds)diff, m_VisibilityNotifyPeriod);
 
                     int gx = grid.GetX();
                     int gy = grid.GetY();
@@ -1265,7 +1265,7 @@ namespace Game.Maps
                 {
                     Log.outDebug(LogFilter.Maps,
                         $"DynamicObject (GUID: {dynObj.GetGUID()}) cannot be moved to unloaded grid.");
-            }
+                }
             }
 
             _dynamicObjectsToMove.Clear();
@@ -1731,7 +1731,7 @@ namespace Game.Maps
                     && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
                 {
                     return new TransferAbortParams(TransferAbortReason.TooManyInstances);
-            }
+                }
             }
 
             return null;
@@ -1878,7 +1878,7 @@ namespace Game.Maps
             // First, check if this creature's spawn group is inactive
             if (!IsSpawnGroupActive(data.spawnGroupData.groupId))
             {
-                info.respawnTime = 0;
+                info.respawnTime = ServerTime.Zero;
                 return false;
             }
 
@@ -1921,7 +1921,7 @@ namespace Game.Maps
 
             if (alreadyExists)
             {
-                info.respawnTime = 0;
+                info.respawnTime = ServerTime.Zero;
                 return false;
             }
 
@@ -1931,17 +1931,17 @@ namespace Game.Maps
                 ? ObjectGuid.Create(HighGuid.GameObject, GetId(), info.entry, info.spawnId) 
                 : ObjectGuid.Create(HighGuid.Creature, GetId(), info.entry, info.spawnId);
             
-            long linkedTime = GetLinkedRespawnTime(thisGUID);
-            if (linkedTime != 0)
+            ServerTime linkedTime = GetLinkedRespawnTime(thisGUID);
+            if (linkedTime != Time.Zero)
             {
-                long now = GameTime.GetGameTime();
-                long respawnTime;
-                if (linkedTime == long.MaxValue)
+                ServerTime now = LoopTime.ServerTime;
+                ServerTime respawnTime;
+                if (linkedTime == ServerTime.Infinity)
                     respawnTime = linkedTime;
                 else if (Global.ObjectMgr.GetLinkedRespawnGuid(thisGUID) == thisGUID) // never respawn, save "something" in DB
-                    respawnTime = now + Time.Week;
+                    respawnTime = now + (Weeks)1;
                 else // set us to check again shortly after linked unit
-                    respawnTime = Math.Max(now, linkedTime) + RandomHelper.IRand(5, 15);
+                    respawnTime = (ServerTime)Time.Max(now, linkedTime) + (Seconds)RandomHelper.IRand(5, 15);
                 
                 info.respawnTime = respawnTime;
                 return false;
@@ -1960,10 +1960,10 @@ namespace Game.Maps
 
         public void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
         {
-            if (info.respawnTime <= GameTime.GetGameTime())
+            if (info.respawnTime <= LoopTime.ServerTime)
                 return;
 
-            info.respawnTime = GameTime.GetGameTime();
+            info.respawnTime = LoopTime.ServerTime;
             SaveRespawnInfoDB(info, dbTrans);
         }
 
@@ -2024,7 +2024,7 @@ namespace Game.Maps
                     else
                         return false;
                 }
-                Cypher.Assert(!bySpawnIdMap.ContainsKey(info.spawnId), 
+                Cypher.Assert(!bySpawnIdMap.ContainsKey(info.spawnId),
                     $"Insertion of respawn info with id ({info.type},{info.spawnId}) " +
                     $"into spawn id map failed - state desync.");
             }
@@ -2160,7 +2160,7 @@ namespace Game.Maps
 
         void ProcessRespawns()
         {
-            long now = GameTime.GetGameTime();
+            ServerTime now = LoopTime.ServerTime;
             while (!_respawnTimes.Empty())
             {
                 RespawnInfo next = _respawnTimes.First();
@@ -2194,7 +2194,7 @@ namespace Game.Maps
                     RemoveRespawnTime(next.type, next.spawnId, null, true);
                     GetRespawnMapForType(next.type).Remove(next.spawnId);
                 }
-                else if (next.respawnTime == 0)
+                else if (next.respawnTime == ServerTime.Zero)
                 { // just remove this respawn entry without rescheduling
                     _respawnTimes.Remove(next);
                     GetRespawnMapForType(next.type).Remove(next.spawnId);
@@ -2208,7 +2208,7 @@ namespace Game.Maps
             }
         }
 
-        public void ApplyDynamicModeRespawnScaling(WorldObject obj, long spawnId, ref uint respawnDelay, int mode)
+        public void ApplyDynamicModeRespawnScaling(WorldObject obj, long spawnId, ref Seconds respawnDelay, int mode)
         {
             Cypher.Assert(mode == 1);
             Cypher.Assert(obj.GetMap() == this);
@@ -2247,12 +2247,12 @@ namespace Game.Maps
             if (adjustFactor >= 1.0) // nothing to do here
                 return;
 
-            uint timeMinimum = (uint)WorldConfig.Values[type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicMinimumGameObject : WorldCfg.RespawnDynamicMinimumCreature].Int32;
+            Seconds timeMinimum = WorldConfig.Values[type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicMinimumGameObject : WorldCfg.RespawnDynamicMinimumCreature].Seconds;
             
             if (respawnDelay <= timeMinimum)
                 return;
 
-            respawnDelay = (uint)Math.Max(Math.Ceiling(respawnDelay * adjustFactor), timeMinimum);
+            respawnDelay = (Seconds)Math.Max(Math.Ceiling(respawnDelay * adjustFactor), timeMinimum);
         }
 
         public bool ShouldBeSpawnedOnGridLoad<T>(long spawnId) { return ShouldBeSpawnedOnGridLoad(SpawnData.TypeFor<T>(), spawnId); }
@@ -2261,7 +2261,7 @@ namespace Game.Maps
         {
             Cypher.Assert(SpawnData.TypeHasData(type));
             // check if the object is on its respawn timer
-            if (GetRespawnTime(type, spawnId) != 0)
+            if (GetRespawnTime(type, spawnId) != ServerTime.Zero)
                 return false;
 
             SpawnMetadata spawnData = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
@@ -2329,7 +2329,7 @@ namespace Game.Maps
                         {
                             if ((data.type != SpawnObjectType.Creature) || obj.ToCreature().IsAlive())
                                 continue;
-                    }
+                        }
                     }
 
                     toSpawn.Add(data.ToSpawnData());
@@ -2505,7 +2505,7 @@ namespace Game.Maps
             _farSpellCallbacks.Enqueue(new FarSpellCallback(callback));
         }
 
-        public virtual void DelayedUpdate(uint diff)
+        public virtual void DelayedUpdate(TimeSpan diff)
         {
             while (_farSpellCallbacks.TryDequeue(out FarSpellCallback callback))
                 callback(this);
@@ -2587,7 +2587,7 @@ namespace Game.Maps
                         Corpse corpse = ObjectAccessor.GetCorpse(obj, obj.GetGUID());
                         if (corpse == null)
                         {
-                            Log.outError(LogFilter.Maps, 
+                            Log.outError(LogFilter.Maps,
                                 $"Tried to delete corpse/bones {obj.GetGUID()} that is not in map.");
                         }
                         else
@@ -2775,7 +2775,7 @@ namespace Game.Maps
             m_activeNonPlayers.Remove(obj);
         }
 
-        public void SaveRespawnTime(SpawnObjectType type, long spawnId, int entry, long respawnTime, int gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
+        public void SaveRespawnTime(SpawnObjectType type, long spawnId, int entry, ServerTime respawnTime, int gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
         {
             SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
             if (data == null)
@@ -2786,7 +2786,7 @@ namespace Game.Maps
                 return;
             }
 
-            if (respawnTime == 0)
+            if (respawnTime == ServerTime.Zero)
             {
                 // Delete only
                 RemoveRespawnTime(data.type, data.SpawnId, dbTrans);
@@ -2808,7 +2808,7 @@ namespace Game.Maps
                     Log.outError(LogFilter.Maps,
                         $"Attempt to load saved respawn {respawnTime} " +
                         $"for ({type},{spawnId}) failed - duplicate respawn? Skipped.");
-            }
+                }
             }
             else if (success)
                 SaveRespawnInfoDB(ri, dbTrans);
@@ -2822,7 +2822,7 @@ namespace Game.Maps
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_RESPAWN);
             stmt.SetUInt16(0, (ushort)info.type);
             stmt.SetInt64(1, info.spawnId);
-            stmt.SetInt64(2, info.respawnTime);
+            stmt.SetInt64(2, (UnixTime64)info.respawnTime);
             stmt.SetInt32(3, GetId());
             stmt.SetInt32(4, GetInstanceId());
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);
@@ -2843,14 +2843,14 @@ namespace Game.Maps
                 {
                     SpawnObjectType type = (SpawnObjectType)result.Read<ushort>(0);
                     var spawnId = result.Read<long>(1);
-                    var respawnTime = result.Read<long>(2);
+                    var respawnTime = (ServerTime)(UnixTime64)result.Read<long>(2);
 
                     if (SpawnData.TypeHasData(type))
                     {
                         SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
                         if (data != null)
                         {
-                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, 
+                            SaveRespawnTime(type, spawnId, data.Id, respawnTime,
                                 GridDefines.ComputeGridCoord(
                                     data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId(), null, true);
                         }
@@ -2859,7 +2859,7 @@ namespace Game.Maps
                             Log.outError(LogFilter.Maps,
                                 $"Loading saved respawn time of {respawnTime} " +
                                 $"for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
-                    }
+                        }
                     }
                     else
                     {
@@ -2889,7 +2889,7 @@ namespace Game.Maps
             DB.Characters.Execute(stmt);
         }
 
-        public long GetLinkedRespawnTime(ObjectGuid guid)
+        public ServerTime GetLinkedRespawnTime(ObjectGuid guid)
         {
             ObjectGuid linkedGuid = Global.ObjectMgr.GetLinkedRespawnGuid(guid);
             switch (linkedGuid.GetHigh())
@@ -2902,7 +2902,7 @@ namespace Game.Maps
                     break;
             }
 
-            return 0L;
+            return ServerTime.Zero;
         }
 
         public void LoadCorpseData()
@@ -3093,7 +3093,7 @@ namespace Game.Maps
 
         public void RemoveOldCorpses()
         {
-            long now = GameTime.GetGameTime();
+            ServerTime now = LoopTime.ServerTime;
 
             List<ObjectGuid> corpses = new();
 
@@ -3277,8 +3277,8 @@ namespace Game.Maps
                 {
                     if (player.GetZoneId() == zoneId)
                         player.SendPacket(overrideLight);
+                }
             }
-        }
         }
 
         public void UpdateAreaDependentAuras()
@@ -3309,9 +3309,9 @@ namespace Game.Maps
             return i_mapRecord;
         }
 
-        public bool CanUnload(uint diff)
+        public bool CanUnload(TimeSpan diff)
         {
-            if (m_unloadTimer == 0)
+            if (m_unloadTimer == TimeSpan.Zero)
                 return false;
 
             if (m_unloadTimer <= diff)
@@ -3347,10 +3347,10 @@ namespace Game.Maps
 
         public void ResetGridExpiry(Grid grid, float factor = 1)
         {
-            grid.ResetTimeTracker((long)(i_gridExpiry * factor));
+            grid.ResetTimeTracker(i_gridExpiry * factor);
         }
 
-        public long GetGridExpiry()
+        public TimeSpan GetGridExpiry()
         {
             return i_gridExpiry;
         }
@@ -3601,22 +3601,29 @@ namespace Game.Maps
             return 0;
         }
 
-        public long GetRespawnTime(SpawnObjectType type, long spawnId)
+        public ServerTime GetRespawnTime(SpawnObjectType type, long spawnId)
         {
             var map = GetRespawnMapForType(type);
             if (map != null)
             {
                 var respawnInfo = map.LookupByKey(spawnId);
-                return (respawnInfo == null) ? 0 : respawnInfo.respawnTime;
+                return (respawnInfo == null) ? ServerTime.Zero : respawnInfo.respawnTime;
             }
-            return 0;
+
+            return ServerTime.Zero;
         }
 
-        public long GetCreatureRespawnTime(long spawnId) { return GetRespawnTime(SpawnObjectType.Creature, spawnId); }
+        public ServerTime GetCreatureRespawnTime(long spawnId) 
+        { 
+            return GetRespawnTime(SpawnObjectType.Creature, spawnId); 
+        }
 
-        public long GetGORespawnTime(long spawnId) { return GetRespawnTime(SpawnObjectType.GameObject, spawnId); }
+        public ServerTime GetGORespawnTime(long spawnId) 
+        { 
+            return GetRespawnTime(SpawnObjectType.GameObject, spawnId); 
+        }
 
-        void SetTimer(uint t)
+        void SetTimer(Milliseconds t)
         {
             i_gridExpiry = t < MapConst.MinGridDelay ? MapConst.MinGridDelay : t;
         }
@@ -3945,7 +3952,7 @@ namespace Game.Maps
             var scripts = Global.ObjectMgr.GetScriptsMapByType(scriptsType);
 
             // Find the script map
-            MultiMap<int, ScriptInfo> list = scripts.LookupByKey(id);
+            MultiMap<Milliseconds, ScriptInfo> list = scripts.LookupByKey(id);
             if (list == null)
                 return;
 
@@ -3967,7 +3974,7 @@ namespace Game.Maps
                 sa.ownerGUID = ownerGUID;
 
                 sa.script = script.Value;
-                m_scriptSchedule.Add(GameTime.GetGameTime() + script.Key, sa);
+                m_scriptSchedule.Add(LoopTime.ServerTime + script.Key, sa);
                 if (script.Key == 0)
                     immedScript = true;
 
@@ -3982,7 +3989,7 @@ namespace Game.Maps
             }
         }
 
-        public void ScriptCommandStart(ScriptInfo script, uint delay, WorldObject source, WorldObject target)
+        public void ScriptCommandStart(ScriptInfo script, Milliseconds delay, WorldObject source, WorldObject target)
         {
             // NOTE: script record _must_ exist until command executed
 
@@ -3997,7 +4004,7 @@ namespace Game.Maps
             sa.ownerGUID = ownerGUID;
 
             sa.script = script;
-            m_scriptSchedule.Add(GameTime.GetGameTime() + delay, sa);
+            m_scriptSchedule.Add(LoopTime.ServerTime + delay, sa);
 
             Global.MapMgr.IncreaseScheduledScriptsCount();
 
@@ -4044,7 +4051,7 @@ namespace Game.Maps
             Creature creature = null;
             if (source == null && target == null)
             {
-                Log.outError(LogFilter.Scripts, 
+                Log.outError(LogFilter.Scripts,
                     $"{scriptInfo.GetDebugInfo()} source and target objects are NULL.");
             }
             else
@@ -4077,7 +4084,7 @@ namespace Game.Maps
                         $"target: TypeId: {(target != null ? target.GetTypeId() : 0)}, " +
                         $"Entry: {(target != null ? target.GetEntry() : 0)}, {(target != null ? target.GetGUID() : "")}), " +
                         $"skipping.");
-            }
+                }
             }
             return creature;
         }
@@ -4119,7 +4126,7 @@ namespace Game.Maps
                         $"target: TypeId: {(target != null ? target.GetTypeId() : 0)}, " +
                         $"Entry: {(target != null ? target.GetEntry() : 0)}, {(target != null ? target.GetGUID() : ObjectGuid.Empty)}), " +
                         $"skipping.");
-            }
+                }
             }
             return gameobject;
         }
@@ -4146,7 +4153,7 @@ namespace Game.Maps
                     Log.outError(LogFilter.Scripts,
                             $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} " +
                             $"object could not be casted to unit.");
-            }
+                }
             }
             return unit;
         }
@@ -4167,7 +4174,7 @@ namespace Game.Maps
                     Log.outError(LogFilter.Scripts,
                         $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is not a player " +
                         $"(TypeId: {obj.GetTypeId()}, Entry: {obj.GetEntry()}, GUID: {obj.GetGUID()}).");
-            }
+                }
             }
             return player;
         }
@@ -4188,7 +4195,7 @@ namespace Game.Maps
                     Log.outError(LogFilter.Scripts,
                         $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is not a creature " +
                         $"(TypeId: {obj.GetTypeId()}, Entry: {obj.GetEntry()}, GUID: {obj.GetGUID()}).");
-            }
+                }
             }
             return creature;
         }
@@ -4209,7 +4216,7 @@ namespace Game.Maps
                     Log.outError(LogFilter.Scripts,
                         $"{scriptInfo.GetDebugInfo()} {(isSource ? "source" : "target")} object is not a world object " +
                         $"(TypeId: {obj.GetTypeId()}, Entry: {obj.GetEntry()}, GUID: {obj.GetGUID()}).");
-            }
+                }
             }
             return pWorldObject;
         }
@@ -4218,7 +4225,7 @@ namespace Game.Maps
         {
             bool bOpen = false;
             long guid = scriptInfo.ToggleDoor.GOGuid;
-            int nTimeToToggle = Math.Max(15, (int)scriptInfo.ToggleDoor.ResetDelay);
+            Milliseconds nTimeToToggle = Time.Max((Milliseconds)15, scriptInfo.ToggleDoor.ResetDelay);
             switch (scriptInfo.command)
             {
                 case ScriptCommands.OpenDoor:
@@ -4268,11 +4275,11 @@ namespace Game.Maps
                     }
                     else if (bOpen == (pDoor.GetGoState() == GameObjectState.Ready))
                     {
-                        pDoor.UseDoorOrButton((uint)nTimeToToggle);
+                        pDoor.UseDoorOrButton(nTimeToToggle);
 
                         GameObject goTarget = target?.ToGameObject();
                         if (goTarget != null && goTarget.GetGoType() == GameObjectTypes.Button)
-                            goTarget.UseDoorOrButton((uint)nTimeToToggle);
+                            goTarget.UseDoorOrButton(nTimeToToggle);
 
                     }
                 }
@@ -4296,7 +4303,7 @@ namespace Game.Maps
 
             // Process overdue queued scripts
             var iter = m_scriptSchedule.First();
-            while (!m_scriptSchedule.Empty() && (iter.Key <= GameTime.GetGameTime()))
+            while (!m_scriptSchedule.Empty() && (iter.Key <= LoopTime.ServerTime))
             {
                 ScriptAction step = iter.Value;
 
@@ -4446,9 +4453,9 @@ namespace Game.Maps
                             Unit unit = cSource.ToUnit();
                             if (step.script.MoveTo.TravelTime != 0)
                             {
-                                float speed =
+                                Speed speed = new(
                                     unit.GetDistance(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
-                                        step.script.MoveTo.DestZ) / (step.script.MoveTo.TravelTime * 0.001f);
+                                        step.script.MoveTo.DestZ) / (step.script.MoveTo.TravelTime / (float)Time.MillisecondsInSecond));
                                 
                                 unit.MonsterMoveWithSpeed(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
                                     step.script.MoveTo.DestZ, speed);
@@ -4469,7 +4476,7 @@ namespace Game.Maps
                             {
                                 cSource.NearTeleportTo(step.script.TeleportTo.DestX, step.script.TeleportTo.DestY,
                                     step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
-                        }
+                            }
                         }
                         else
                         {
@@ -4479,7 +4486,7 @@ namespace Game.Maps
                             {
                                 player.TeleportTo(step.script.TeleportTo.MapID, step.script.TeleportTo.DestX,
                                     step.script.TeleportTo.DestY, step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
-                        }
+                            }
                         }
                         break;
                     }
@@ -4600,7 +4607,9 @@ namespace Game.Maps
                             // Check that GO is not spawned
                             if (!pGO.IsSpawned())
                             {
-                                int nTimeToDespawn = Math.Max(5, (int)step.script.RespawnGameObject.DespawnDelay);
+                                TimeSpan nTimeToDespawn = (Seconds)5;
+                                if (step.script.RespawnGameObject.DespawnDelay > nTimeToDespawn)
+                                    nTimeToDespawn = step.script.RespawnGameObject.DespawnDelay;
 
                                 pGO.SetLootState(LootState.Ready);
                                 pGO.SetRespawnTime(nTimeToDespawn);
@@ -4629,7 +4638,7 @@ namespace Game.Maps
                                 float o = step.script.TempSummonCreature.Orientation;
 
                                 if (pSummoner.SummonCreature(
-                                    step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
+                                    step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, step.script.TempSummonCreature.DespawnDelay) == null)
                                 {
                                     Log.outError(LogFilter.Scripts, 
                                         $"{step.script.GetDebugInfo()} creature was not spawned " +
@@ -4789,12 +4798,12 @@ namespace Game.Maps
                         // First try with target or source creature, then with target or source gameobject
                         Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true);
                         if (cSource != null)
-                            cSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
+                            cSource.DespawnOrUnsummon(step.script.DespawnSelf.DespawnDelay);
                         else
                         {
                             GameObject goSource = _GetScriptGameObjectSourceOrTarget(source, target, step.script, true);
                             if (goSource != null)
-                                goSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
+                                goSource.DespawnOrUnsummon(step.script.DespawnSelf.DespawnDelay);
                         }
                         break;
                     }
@@ -4861,7 +4870,7 @@ namespace Game.Maps
                         {
                             if (cSource.IsDead())
                             {
-                                Log.outError(LogFilter.Scripts, 
+                                Log.outError(LogFilter.Scripts,
                                     $"{step.script.GetDebugInfo()} creature is already dead " +
                                     $"(Entry: {cSource.GetEntry()}, GUID: {cSource.GetGUID()})");
                             }
@@ -4991,7 +5000,7 @@ namespace Game.Maps
         Dictionary<long, RespawnInfo> _creatureRespawnTimesBySpawnId = new();
         Dictionary<long, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new();
         List<int> _toggledSpawnGroupIds = new();
-        uint _respawnCheckTimer;
+        TimeSpan _respawnCheckTimer;
         Dictionary<int, int> _zonePlayerCountMap = new();
 
         List<Transport> _transports = new();
@@ -5007,17 +5016,17 @@ namespace Game.Maps
         ushort m_forceEnabledNavMeshFilterFlags;
         ushort m_forceDisabledNavMeshFilterFlags;
 
-        SortedMultiMap<long, ScriptAction> m_scriptSchedule = new();
+        SortedMultiMap<ServerTime, ScriptAction> m_scriptSchedule = new();
 
         BitSet marked_cells = new(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
         public Dictionary<long, CreatureGroup> CreatureGroupHolder = new();
         internal int i_InstanceId;
-        long i_gridExpiry;
+        TimeSpan i_gridExpiry;
         bool i_scriptLock;
 
-        public int m_VisibilityNotifyPeriod;
+        public Milliseconds m_VisibilityNotifyPeriod;
         public float m_VisibleDistance;
-        internal uint m_unloadTimer;
+        internal TimeSpan m_unloadTimer;
 
         Dictionary<int, ZoneDynamicInfo> _zoneDynamicInfo = new();
         IntervalTimer _weatherUpdateTimer;
@@ -5044,7 +5053,8 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        public InstanceMap(int id, long expiry, int InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
+        public static readonly Milliseconds InstanceLockTime = (Minutes)1;
+        public InstanceMap(int id, TimeSpan expiry, int InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
         {
             i_instanceLock = instanceLock;
 
@@ -5053,7 +5063,7 @@ namespace Game.Maps
 
             // the timer is started by default, and stopped when the first player joins
             // this make sure it gets unloaded if for some reason no player joins
-            m_unloadTimer = (uint)Math.Max(WorldConfig.Values[WorldCfg.InstanceUnloadDelay].Int32, 1);
+            m_unloadTimer = Time.Max(WorldConfig.Values[WorldCfg.InstanceUnloadDelay].TimeSpan, (Milliseconds)1);
 
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == BattleGroundTeamId.Alliance ? 1 : 0, false, this);
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == BattleGroundTeamId.Horde ? 1 : 0, false, this);
@@ -5122,7 +5132,7 @@ namespace Game.Maps
         public override bool AddPlayerToMap(Player player, bool initPlayer = true)
         {
             // increase current instances (hourly limit)
-            player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
+            player.AddInstanceEnterTime(GetInstanceId(), LoopTime.ServerTime);
 
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
             if (entries.MapDifficulty.HasResetSchedule && i_instanceLock != null && !i_instanceLock.IsNew())
@@ -5134,13 +5144,13 @@ namespace Game.Maps
                         playerLock.GetData().CompletedEncountersMask != i_instanceLock.GetData().CompletedEncountersMask)
                     {
                         PendingRaidLock pendingRaidLock = new();
-                        pendingRaidLock.TimeUntilLock = 60000;
+                        pendingRaidLock.TimeUntilLock = InstanceLockTime;
                         pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
                         pendingRaidLock.Extending = playerLock != null && playerLock.IsExtended();
                         pendingRaidLock.WarningOnly = entries.Map.IsFlexLocking; // events it triggers:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
                         player.GetSession().SendPacket(pendingRaidLock);
                         if (!entries.Map.IsFlexLocking)
-                            player.SetPendingBind(GetInstanceId(), 60000);
+                            player.SetPendingBind(GetInstanceId(), InstanceLockTime);
                     }
                 }
             }
@@ -5150,7 +5160,7 @@ namespace Game.Maps
                 $"'{GetInstanceId()}' of map '{GetMapName()}'");
 
             // initialize unload state
-            m_unloadTimer = 0;
+            m_unloadTimer = TimeSpan.Zero;
 
             // this will acquire the same mutex so it cannot be in the previous block
             base.AddPlayerToMap(player, initPlayer);
@@ -5164,7 +5174,7 @@ namespace Game.Maps
             return true;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
 
@@ -5177,7 +5187,7 @@ namespace Game.Maps
             if (i_scenario != null)
                 i_scenario.Update(diff);
 
-            if (i_instanceExpireEvent.HasValue && i_instanceExpireEvent.Value < GameTime.GetSystemTime())
+            if (i_instanceExpireEvent.HasValue && i_instanceExpireEvent.Value < LoopTime.ServerTime)
             {
                 Reset(InstanceResetMethod.Expire);
                 i_instanceExpireEvent = Global.InstanceLockMgr.GetNextResetTime(new MapDb2Entries(GetEntry(), GetMapDifficulty()));
@@ -5194,8 +5204,13 @@ namespace Game.Maps
                 i_data.OnPlayerLeave(player);
 
             // if last player set unload timer
-            if (m_unloadTimer == 0 && GetPlayers().Count == 1)
-                m_unloadTimer = (i_instanceLock != null && i_instanceLock.IsExpired()) ? 1 : (uint)Math.Max(WorldConfig.Values[WorldCfg.InstanceUnloadDelay].Int32, 1);
+            if (m_unloadTimer == TimeSpan.Zero && GetPlayers().Count == 1)
+            {
+                m_unloadTimer =
+                    (i_instanceLock != null && i_instanceLock.IsExpired()) 
+                    ? (Milliseconds)1 
+                    : Time.Max(WorldConfig.Values[WorldCfg.InstanceUnloadDelay].TimeSpan, (Milliseconds)1);
+            }
 
             if (i_scenario != null)
                 i_scenario.OnPlayerExit(player);
@@ -5284,7 +5299,7 @@ namespace Game.Maps
                         if (i_data != null)
                         {
                             PendingRaidLock pendingRaidLock = new();
-                            pendingRaidLock.TimeUntilLock = 60000;
+                            pendingRaidLock.TimeUntilLock = (Minutes)1;
                             pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
                             pendingRaidLock.Extending = true;
                             pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking;
@@ -5295,7 +5310,7 @@ namespace Game.Maps
                                 player.SendPacket(pendingRaidLock);
 
                                 if (!pendingRaidLock.WarningOnly)
-                                    player.SetPendingBind(GetInstanceId(), 60000);
+                                    player.SetPendingBind(GetInstanceId(), (Minutes)1);
                             }
                         }
                         break;
@@ -5309,7 +5324,7 @@ namespace Game.Maps
             else
             {
                 // unloaded at next update
-                m_unloadTimer = 1;
+                m_unloadTimer = (Milliseconds)1;
             }
 
             return InstanceResetResult.Success;
@@ -5491,7 +5506,7 @@ namespace Game.Maps
 
     public class BattlegroundMap : Map
     {
-        public BattlegroundMap(int id, uint expiry, int InstanceId, Difficulty spawnMode)
+        public BattlegroundMap(int id, TimeSpan expiry, int InstanceId, Difficulty spawnMode)
             : base(id, expiry, InstanceId, spawnMode)
         {
             InitVisibilityDistance();
@@ -5537,7 +5552,7 @@ namespace Game.Maps
 
         public void SetUnload()
         {
-            m_unloadTimer = 1;
+            m_unloadTimer = (Milliseconds)1;
         }
 
         public override void RemoveAllPlayers()
@@ -5548,7 +5563,7 @@ namespace Game.Maps
                 {
                     if (!player.IsBeingTeleportedFar())
                         player.TeleportTo(player.GetBattlegroundEntryPoint());
-        }
+                }
             }
         }
 
@@ -5630,7 +5645,7 @@ namespace Game.Maps
         public SpawnObjectType type;
         public long spawnId;
         public int entry;
-        public long respawnTime;
+        public ServerTime respawnTime;
         public int gridId;
 
         public RespawnInfo() { }

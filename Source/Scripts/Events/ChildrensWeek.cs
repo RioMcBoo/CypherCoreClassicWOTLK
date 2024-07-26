@@ -180,24 +180,24 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ =>
                         {
                             orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ());
                             orphan.GetAI().Talk(TextIds.OracleOrphan1);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(3), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(3), _ =>
                         {
                             orphan.SetFacingToObject(me);
                             Talk(TextIds.WinterfinPlaymate1);
                             me.HandleEmoteCommand(Emote.StateDance);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(6), _ => orphan.GetAI().Talk(TextIds.OracleOrphan2));
+                        _scheduler.Schedule(Time.SpanFromSeconds(6), _ => orphan.GetAI().Talk(TextIds.OracleOrphan2));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(9), _ => Talk(TextIds.WinterfinPlaymate2));
+                        _scheduler.Schedule(Time.SpanFromSeconds(9), _ => Talk(TextIds.WinterfinPlaymate2));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(14), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(14), _ =>
                         {
                             orphan.GetAI().Talk(TextIds.OracleOrphan3);
                             me.HandleEmoteCommand(Emote.StateNone);
@@ -210,7 +210,7 @@ namespace Scripts.Events.ChildrensWeek
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -262,28 +262,28 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ =>
                         {
                             orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ());
                             orphan.GetAI().Talk(TextIds.WolvarOrphan1);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(5), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(5), _ =>
                         {
                             orphan.SetFacingToObject(me);
                             Talk(TextIds.SnowfallGladePlaymate1);
                             DoCast(orphan, Misc.SpellSnowball);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(10), _ => Talk(TextIds.SnowfallGladePlaymate2));
+                        _scheduler.Schedule(Time.SpanFromSeconds(10), _ => Talk(TextIds.SnowfallGladePlaymate2));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(15), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(15), _ =>
                         {
                             orphan.GetAI().Talk(TextIds.WolvarOrphan2);
                             orphan.CastSpell(me, Misc.SpellSnowball);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(20), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(20), _ =>
                         {
                             orphan.GetAI().Talk(TextIds.WolvarOrphan3);
                             player.GroupEventHappens(QuestIds.PlaymateWolvar, me);
@@ -295,7 +295,7 @@ namespace Scripts.Events.ChildrensWeek
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -348,15 +348,15 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ => orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ()));
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ => orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ()));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(2), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(2), _ =>
                         {
                             orphan.SetFacingToObject(me);
                             orphan.GetAI().Talk(TextIds.OracleOrphan4);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(7), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(7), _ =>
                         {
                             player.GroupEventHappens(QuestIds.TheBiggestTreeEver, me);
                             orphan.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
@@ -367,7 +367,7 @@ namespace Scripts.Events.ChildrensWeek
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -419,19 +419,19 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ =>
                         {
                             orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ());
                             orphan.GetAI().Talk(TextIds.OracleOrphan5);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(3), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(3), _ =>
                         {
                             orphan.SetFacingToObject(me);
                             Talk(TextIds.SooRoo1);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(9), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(9), _ =>
                         {
                             orphan.GetAI().Talk(TextIds.OracleOrphan6);
                             player.GroupEventHappens(QuestIds.TheBronzeDragonshrineOracle, me);
@@ -443,7 +443,7 @@ namespace Scripts.Events.ChildrensWeek
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -495,15 +495,15 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ =>
                         {
                             orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ());
                             orphan.GetAI().Talk(TextIds.WolvarOrphan4);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(3), _ => Talk(TextIds.ElderKekek1));
+                        _scheduler.Schedule(Time.SpanFromSeconds(3), _ => Talk(TextIds.ElderKekek1));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(9), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(9), _ =>
                         {
                             orphan.GetAI().Talk(TextIds.WolvarOrphan5);
                             player.GroupEventHappens(QuestIds.TheBronzeDragonshrineWolvar, me);
@@ -515,7 +515,7 @@ namespace Scripts.Events.ChildrensWeek
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -580,23 +580,23 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ =>
                         {
                             orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ());
                             orphan.GetAI().Talk(TextIds.OracleOrphan7);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(5), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(5), _ =>
                         {
                             orphan.SetFacingToObject(me);
                             orphan.GetAI().Talk(TextIds.OracleOrphan8);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(10), _ => orphan.GetAI().Talk(TextIds.OracleOrphan9));
+                        _scheduler.Schedule(Time.SpanFromSeconds(10), _ => orphan.GetAI().Talk(TextIds.OracleOrphan9));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(15), _ => orphan.GetAI().Talk(TextIds.OracleOrphan10));
+                        _scheduler.Schedule(Time.SpanFromSeconds(15), _ => orphan.GetAI().Talk(TextIds.OracleOrphan10));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(20), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(20), _ =>
                         {
                             orphan.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
                             player.GroupEventHappens(QuestIds.MeetingAGreatOne, me);
@@ -608,7 +608,7 @@ namespace Scripts.Events.ChildrensWeek
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -677,30 +677,30 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ =>
                         {
                             orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ());
                             orphan.GetAI().Talk(TextIds.OracleOrphan11);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(5), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(5), _ =>
                         {
                             orphan.SetFacingToObject(me);
                             orphan.GetAI().Talk(TextIds.OracleOrphan12);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(10), _ => orphan.GetAI().Talk(TextIds.OracleOrphan13));
+                        _scheduler.Schedule(Time.SpanFromSeconds(10), _ => orphan.GetAI().Talk(TextIds.OracleOrphan13));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(15), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(15), _ =>
                         {
                             Talk(TextIds.Alexstrasza2);
                             me.SetStandState(UnitStandStateType.Kneel);
                             me.SetFacingToObject(orphan);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(20), _ => orphan.GetAI().Talk(TextIds.OracleOrphan14));
+                        _scheduler.Schedule(Time.SpanFromSeconds(20), _ => orphan.GetAI().Talk(TextIds.OracleOrphan14));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(25), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(25), _ =>
                         {
                             me.SetStandState(UnitStandStateType.Stand);
                             me.SetOrientation(me.GetHomePosition().GetOrientation());
@@ -725,13 +725,13 @@ namespace Scripts.Events.ChildrensWeek
 
                         working = true;
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(0), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(0), _ =>
                         {
                             orphan.GetMotionMaster().MovePoint(0, me.GetPositionX() + MathF.Cos(me.GetOrientation()) * 5, me.GetPositionY() + MathF.Sin(me.GetOrientation()) * 5, me.GetPositionZ());
                             orphan.GetAI().Talk(TextIds.WolvarOrphan11);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(5), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(5), _ =>
                         {
                             Creature krasus = me.FindNearestCreature(CreatureIds.Krasus, 10.0f);
                             if (krasus != null)
@@ -741,17 +741,17 @@ namespace Scripts.Events.ChildrensWeek
                             }
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(10), _ => orphan.GetAI().Talk(TextIds.WolvarOrphan12));
+                        _scheduler.Schedule(Time.SpanFromSeconds(10), _ => orphan.GetAI().Talk(TextIds.WolvarOrphan12));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(15), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(15), _ =>
                         {
                             orphan.SetFacingToObject(me);
                             Talk(TextIds.Alexstrasza2);
                         });
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(20), _ => orphan.GetAI().Talk(TextIds.WolvarOrphan13));
+                        _scheduler.Schedule(Time.SpanFromSeconds(20), _ => orphan.GetAI().Talk(TextIds.WolvarOrphan13));
 
-                        _scheduler.Schedule(TimeSpan.FromSeconds(25), _ =>
+                        _scheduler.Schedule(Time.SpanFromSeconds(25), _ =>
                         {
                             player.GroupEventHappens(QuestIds.TheDragonQueenWolvar, me);
                             orphan.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
@@ -763,7 +763,7 @@ namespace Scripts.Events.ChildrensWeek
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }

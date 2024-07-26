@@ -24,7 +24,7 @@ namespace Game
 
         public void LoadWardenChecks()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Check if Warden is enabled by config before loading anything
             if (!WorldConfig.Values[WorldCfg.WardenEnabled].Bool)
@@ -134,12 +134,12 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden checks in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden checks in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadWardenOverrides()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Check if Warden is enabled by config before loading anything
             if (!WorldConfig.Values[WorldCfg.WardenEnabled].Bool)
@@ -167,7 +167,7 @@ namespace Game
                 // Check if action value is in range (0-2, see WardenActions enum)
                 if (action > WardenActions.Ban)
                 {
-                    Log.outError(LogFilter.Warden, 
+                    Log.outError(LogFilter.Warden,
                         $"Warden check override action out of range (ID: {checkId}, action: {action})");
                 }
                 // Check if check actually exists before accessing the CheckStore vector
@@ -185,7 +185,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden action overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden action overrides in {Time.Diff(oldMSTime)} ms.");
         }
 
         public WardenCheck GetCheckData(ushort Id)

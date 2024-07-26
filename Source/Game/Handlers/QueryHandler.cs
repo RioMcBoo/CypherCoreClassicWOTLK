@@ -53,7 +53,7 @@ namespace Game
         void SendQueryTimeResponse()
         {
             QueryTimeResponse queryTimeResponse = new();
-            queryTimeResponse.CurrentTime = GameTime.GetGameTime();
+            queryTimeResponse.CurrentTime = LoopTime.RealmTime;
             SendPacket(queryTimeResponse);
         }
 

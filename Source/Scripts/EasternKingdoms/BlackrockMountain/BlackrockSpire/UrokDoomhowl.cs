@@ -35,15 +35,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.UrokDoomhowl
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(17), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)17, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Rend);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)8, (Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)10, (Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Strike);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)8, (Seconds)10);
             });
 
             Talk(TextIds.SayAggro);
@@ -54,7 +54,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.UrokDoomhowl
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

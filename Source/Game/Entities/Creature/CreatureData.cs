@@ -33,8 +33,8 @@ namespace Game.Entities
         public float Scale;
         public CreatureClassifications Classification;
         public SpellSchools DmgSchool;
-        public uint BaseAttackTime;
-        public uint RangeAttackTime;
+        public Milliseconds BaseAttackTime;
+        public Milliseconds RangeAttackTime;
         public float BaseVariance;
         public float RangeVariance;
         public Class UnitClass;
@@ -187,7 +187,8 @@ namespace Game.Entities
             foreach (var model in Models)
             {
                 stats.Display.TotalProbability += model.Probability;
-                stats.Display.CreatureDisplay.Add(new CreatureXDisplay(model.CreatureDisplayID, model.DisplayScale, model.Probability));
+                stats.Display.CreatureDisplay.Add(
+                    new CreatureXDisplay(model.CreatureDisplayID, model.DisplayScale, model.Probability));
             }
 
             stats.HpMulti = creatureDifficulty.HealthModifier;
@@ -325,7 +326,7 @@ namespace Game.Entities
         public bool Rooted;
         public CreatureChaseMovementType Chase;
         public CreatureRandomMovementType Random;
-        public uint InteractionPauseTimer;
+        public Milliseconds InteractionPauseTimer;
 
         public CreatureMovementData()
         {
@@ -335,7 +336,7 @@ namespace Game.Entities
             Rooted = false;
             Chase = CreatureChaseMovementType.Run;
             Random = CreatureRandomMovementType.Walk;
-            InteractionPauseTimer = (uint)WorldConfig.Values[WorldCfg.CreatureStopForPlayer].Int32;
+            InteractionPauseTimer = WorldConfig.Values[WorldCfg.CreatureStopForPlayer].Milliseconds;
         }
 
         public bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }
@@ -346,7 +347,7 @@ namespace Game.Entities
         public CreatureChaseMovementType GetChase() { return Chase; }
         public CreatureRandomMovementType GetRandom() { return Random; }
 
-        public uint GetInteractionPauseTimer() { return InteractionPauseTimer; }
+        public Milliseconds GetInteractionPauseTimer() { return InteractionPauseTimer; }
 
         public override string ToString()
         {
@@ -410,7 +411,7 @@ namespace Game.Entities
     public class VendorItem
     {
         public VendorItem() { }
-        public VendorItem(int _item, int _maxcount, uint _incrtime, int _ExtendedCost, ItemVendorType _Type)
+        public VendorItem(int _item, int _maxcount, Seconds _incrtime, int _ExtendedCost, ItemVendorType _Type)
         {
             item = _item;
             maxcount = _maxcount;
@@ -421,7 +422,7 @@ namespace Game.Entities
 
         public int item;
         public int maxcount;                                        // 0 for infinity item amount
-        public uint incrtime;                                        // time for restore items amount if maxcount != 0
+        public Seconds incrtime;                                    // time for restore items amount if maxcount != 0
         public int ExtendedCost;
         public ItemVendorType Type;
         public List<int> BonusListIDs = new();

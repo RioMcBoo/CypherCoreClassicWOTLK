@@ -26,7 +26,7 @@ namespace Game.AI
 
         public void LoadFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             for (byte i = 0; i < (int)SmartScriptType.Max; i++)
                 _eventMap[i].Clear();  //Drop Existing SmartAI List
@@ -402,7 +402,8 @@ namespace Game.AI
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SmartAI scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} SmartAI scripts in {Time.Diff(oldMSTime)} ms.");
         }
 
         static bool EventHasInvoker(SmartEvents smartEvent)
@@ -750,7 +751,7 @@ namespace Game.AI
                     Log.outWarn(LogFilter.Sql,
                         $"SmartAIMgr: {e} has unused event_param{index + 1} " +
                         $"with value {value}, it should be 0.");
-            }
+                }
             }
 
             return true;
@@ -931,7 +932,7 @@ namespace Game.AI
                     Log.outWarn(LogFilter.Sql,
                         $"SmartAIMgr: {e} has unused action_param{index + 1} " +
                         $"with value {value}, it should be 0.");
-            }
+                }
             }
 
             return true;
@@ -1002,7 +1003,7 @@ namespace Game.AI
                     Log.outWarn(LogFilter.Sql,
                         $"SmartAIMgr: {e} has unused target_param{index + 1} " +
                         $"with value {value}, it must be 0, skipped.");
-            }
+                }
             }
 
             return true;
@@ -1654,8 +1655,8 @@ namespace Game.AI
                                     $"targetA: {spellEffectInfo.TargetA.GetTarget()} - " +
                                     $"targetB: {spellEffectInfo.TargetB.GetTarget()}) " +
                                     $"has invalid target for this Action");
+                            }
                         }
-                    }
                     }
                     break;
                 }
@@ -2675,7 +2676,7 @@ namespace Game.AI
                     Log.outDebug(LogFilter.ScriptsAi,
                         $"SmartAIMgr.GetScript: Could not load Script " +
                         $"for Entry {entry} ScriptType {type}.");
-            }
+                }
             }
             return temp;
         }
@@ -2818,8 +2819,8 @@ namespace Game.AI
                 Log.outError(LogFilter.Sql, 
                     $"SmartAIMgr: {e} uses param {valueName} of Type Boolean with value {value}, " +
                     $"valid values are 0 or 1, skipped.");
+            }
         }
-    }
     }
 
     public class SmartScriptHolder : IComparable<SmartScriptHolder>
@@ -2835,7 +2836,7 @@ namespace Game.AI
         public SmartEvent Event;
         public SmartAction Action;
         public SmartTarget Target;
-        public uint Timer;
+        public TimeSpan Timer;
         public int Priority;
         public bool Active;
         public bool RunOnce;
@@ -3014,16 +3015,16 @@ namespace Game.AI
         #region Structs
         public struct MinMaxRepeat
         {
-            public uint min;
-            public uint max;
-            public uint repeatMin;
-            public uint repeatMax;
+            public int min;
+            public int max;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
         }
 
         public struct Kill
         {
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
             public int playerOnly;
             public int creature;
         }
@@ -3032,16 +3033,16 @@ namespace Game.AI
         {
             public int spell;
             public int school;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct Los
         {
             public int hostilityMode;
             public int maxDist;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
             public int playerOnly;
         }
 
@@ -3054,44 +3055,44 @@ namespace Game.AI
 
         public struct MinMax
         {
-            public uint repeatMin;
-            public uint repeatMax;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
         }
 
         public struct TargetCasting
         {
-            public uint repeatMin;
-            public uint repeatMax;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
             public int spellId;
         }
 
         public struct FriendlyCC
         {
             public int radius;
-            public uint repeatMin;
-            public uint repeatMax;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
         }
 
         public struct MissingBuff
         {
             public int spell;
             public int radius;
-            public uint repeatMin;
-            public uint repeatMax;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
         }
 
         public struct Summoned
         {
             public int creature;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct Quest
         {
             public int questId;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct QuestObjective
@@ -3102,16 +3103,16 @@ namespace Game.AI
         public struct Emote
         {
             public int emoteId;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct Aura
         {
             public int spell;
             public int count;
-            public uint repeatMin;
-            public uint repeatMax;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
         }
 
         public struct Charm
@@ -3129,8 +3130,8 @@ namespace Game.AI
         {
             public int id;
             public int value;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct Waypoint
@@ -3152,8 +3153,8 @@ namespace Game.AI
         public struct InstancePlayerEnter
         {
             public int team;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct Areatrigger
@@ -3207,8 +3208,8 @@ namespace Game.AI
         {
             public int minHpPct;
             public int maxHpPct;
-            public uint repeatMin;
-            public uint repeatMax;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
             public int radius;
         }
 
@@ -3217,22 +3218,22 @@ namespace Game.AI
             public int guid;
             public int entry;
             public int dist;
-            public uint repeat;
+            public Milliseconds repeat;
         }
 
         public struct Counter
         {
             public int id;
             public int value;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct SpellCast
         {
             public int spell;
-            public uint cooldownMin;
-            public uint cooldownMax;
+            public Milliseconds cooldownMin;
+            public Milliseconds cooldownMax;
         }
 
         public struct Spell
@@ -3579,14 +3580,14 @@ namespace Game.AI
         public struct Talk
         {
             public int textGroupId;
-            public uint duration;
+            public Milliseconds duration;
             public int useTalkTarget;
         }
 
         public struct SimpleTalk
         {
             public int textGroupId;
-            public uint duration;
+            public Milliseconds duration;
         }
 
         public struct Faction
@@ -3661,7 +3662,7 @@ namespace Game.AI
         {
             public int creature;
             public int type;
-            public int duration;
+            public Milliseconds duration;
             public int storageID;
             public int attackInvoker;
             public int flags; // SmartActionSummonCreatureFlags
@@ -3781,8 +3782,8 @@ namespace Game.AI
 
         public struct ForceDespawn
         {
-            public int delay;
-            public uint forceRespawnTimer;
+            public Milliseconds delay;
+            public Seconds forceRespawnTimer;
         }
 
         public struct InvincHP
@@ -3822,7 +3823,7 @@ namespace Game.AI
         public struct SummonGO
         {
             public int entry;
-            public int despawnTime;
+            public Seconds despawnTime;
             public int summonType;
         }
 
@@ -3842,18 +3843,18 @@ namespace Game.AI
             public int pathID;
             public int repeat;
             public int quest;
-            public uint despawnTime;
+            public Milliseconds despawnTime;
             //public int reactState; DO NOT REUSE
         }
 
         public struct WpPause
         {
-            public uint delay;
+            public Milliseconds delay;
         }
 
         public struct WpStop
         {
-            public uint despawnTime;
+            public Milliseconds despawnTime;
             public int quest;
             public int fail;
         }
@@ -3894,10 +3895,10 @@ namespace Game.AI
         public struct TimeEvent
         {
             public int id;
-            public uint min;
-            public uint max;
-            public uint repeatMin;
-            public uint repeatMax;
+            public int min;
+            public int max;
+            public Milliseconds repeatMin;
+            public Milliseconds repeatMax;
             public int chance;
         }
 
@@ -3964,8 +3965,8 @@ namespace Game.AI
 
         public struct Jump
         {
-            public int SpeedXY;
-            public int SpeedZ;
+            public Speed SpeedXY;
+            public Speed SpeedZ;
             public int Gravity;
             public int UseDefaultGravity;
             public int PointId;
@@ -3979,7 +3980,7 @@ namespace Game.AI
 
         public struct EnableTempGO
         {
-            public int duration;
+            public Milliseconds duration;
         }
 
         public struct MoveToPos
@@ -4076,7 +4077,7 @@ namespace Game.AI
 
         public struct CorpseDelay
         {
-            public uint timer;
+            public Seconds timer;
             public int includeDecayRatio;
         }
 
@@ -4088,8 +4089,8 @@ namespace Game.AI
         public struct GroupSpawn
         {
             public int groupId;
-            public uint minDelay;
-            public uint maxDelay;
+            public Milliseconds minDelay;
+            public Milliseconds maxDelay;
             public uint spawnflags;
         }
 
@@ -4108,7 +4109,7 @@ namespace Game.AI
         public struct PauseMovement
         {
             public int movementSlot;
-            public uint pauseTimer;
+            public Milliseconds pauseTimer;
             public int force;
         }
 
@@ -4153,7 +4154,7 @@ namespace Game.AI
             public int zoneId;
             public int areaLightId;
             public int overrideLightId;
-            public int transitionMilliseconds;
+            public Milliseconds transition;
         }
 
         public struct OverrideWeather
@@ -4212,7 +4213,7 @@ namespace Game.AI
         public struct BecomePersonalClone
         {
             public int type;
-            public int duration;
+            public Milliseconds duration;
         }
 
         public struct TriggerGameEvent

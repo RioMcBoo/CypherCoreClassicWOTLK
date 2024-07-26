@@ -347,7 +347,7 @@ namespace Scripts.Spells.Rogue
         void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             Spell procSpell = procInfo.GetProcSpell();
-            int amount = aurEff.GetAmount() * procSpell.GetPowerTypeCostAmount(PowerType.ComboPoints).Value * 1000;
+            Milliseconds amount = (Milliseconds)(aurEff.GetAmount() * procSpell.GetPowerTypeCostAmount(PowerType.ComboPoints).Value * Time.MillisecondsInSecond);
 
             Unit target = GetTarget();
             if (target != null)
@@ -574,7 +574,7 @@ namespace Scripts.Spells.Rogue
 
                 SpellHistory history = GetTarget().GetSpellHistory();
                 foreach (var spellId in Spells)
-                    history.ModifyCooldown(spellId, TimeSpan.FromSeconds(cdExtra), true);
+                    history.ModifyCooldown(spellId, Time.SpanFromSeconds(cdExtra), true);
             }
         }
 
@@ -729,10 +729,11 @@ namespace Scripts.Spells.Rogue
                 }
 
                 // Grant 10 seconds of slice and dice
-                int duration = SpellMgr.GetSpellInfo(SpellIds.PremeditationPassive, Difficulty.None).GetEffect(0).CalcValue(GetCaster());
+                Milliseconds duration = (Milliseconds)(SpellMgr.GetSpellInfo(SpellIds.PremeditationPassive, Difficulty.None).GetEffect(0).CalcValue(GetCaster())
+                    * Time.MillisecondsInSecond);
 
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.AddSpellMod(SpellValueMod.Duration, duration * Time.InMilliseconds);
+                args.AddSpellMod(SpellValueMod.Duration, duration);
                 caster.CastSpell(caster, SpellIds.SliceAndDice, args);
             }
         }
@@ -821,7 +822,7 @@ namespace Scripts.Spells.Rogue
                 Aura masterOfSubtletyAura = GetTarget().GetAura(SpellIds.MasterOfSubtletyDamagePercent);
                 if (masterOfSubtletyAura != null)
                 {
-                    masterOfSubtletyAura.SetMaxDuration(masterOfSubtletyPassive.GetAmount());
+                    masterOfSubtletyAura.SetMaxDuration((Milliseconds)masterOfSubtletyPassive.GetAmount());
                     masterOfSubtletyAura.RefreshDuration();
                 }
             }
@@ -877,7 +878,7 @@ namespace Scripts.Spells.Rogue
                 || !GetTarget().HasAura(SpellIds.TricksOfTheTradeProc))
             {
                 GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.TricksOfTheTrade);
-        }
+            }
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

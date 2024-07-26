@@ -188,7 +188,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                         SummonMajordomoExecutus();
 
                 if (bossId == DataTypes.MajordomoExecutus && state == EncounterState.Done)
-                    DoRespawnGameObject(_cacheOfTheFirelordGUID, TimeSpan.FromDays(7));
+                    DoRespawnGameObject(_cacheOfTheFirelordGUID, (Weeks)1);
 
                 return true;
             }

@@ -275,7 +275,7 @@ namespace Scripts.Spells.Mage
     [Script] // 4658 - AreaTrigger Create Properties
     class areatrigger_mage_blizzard : AreaTriggerAI
     {
-        TimeSpan TickPeriod = TimeSpan.FromMilliseconds(1000);
+        TimeSpan TickPeriod = (Seconds)1;
 
         TimeSpan _tickTimer;
 
@@ -284,11 +284,11 @@ namespace Scripts.Spells.Mage
             _tickTimer = TickPeriod;
         }
 
-        public override void OnUpdate(uint diff)
+        public override void OnUpdate(TimeSpan diff)
         {
-            _tickTimer -= TimeSpan.FromMilliseconds(diff);
+            _tickTimer -= diff;
 
-            while (_tickTimer <= TimeSpan.FromSeconds(0))
+            while (_tickTimer <= TimeSpan.Zero)
             {
                 Unit caster = at.GetCaster();
                 if (caster != null)
@@ -426,7 +426,7 @@ namespace Scripts.Spells.Mage
             _dest = dest;
         }
 
-        public override bool Execute(long time, uint diff)
+        public override bool Execute(TimeSpan time, TimeSpan diff)
         {
             Position destPosition = new(_dest.GetPositionX() + RandomHelper.FRand(-3.0f, 3.0f), _dest.GetPositionY() + RandomHelper.FRand(-3.0f, 3.0f), _dest.GetPositionZ());
             _caster.CastSpell(destPosition, SpellIds.CometStormVisual,
@@ -436,7 +436,7 @@ namespace Scripts.Spells.Mage
             if (_count >= 7)
                 return true;
 
-            _caster.m_Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+            _caster.m_Events.AddEvent(this, time + RandomHelper.RandTime(Time.SpanFromMilliseconds(100), Time.SpanFromMilliseconds(275)));
             return false;
         }
     }
@@ -451,7 +451,7 @@ namespace Scripts.Spells.Mage
 
         void EffectHit(int effIndex)
         {
-            GetCaster().m_Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().m_castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+            GetCaster().m_Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().m_castId, GetHitDest()), RandomHelper.RandTime(Time.SpanFromMilliseconds(100), Time.SpanFromMilliseconds(275)));
         }
 
         public override void Register()
@@ -574,14 +574,14 @@ namespace Scripts.Spells.Mage
             if (reductionEffect == null)
                 return;
 
-            TimeSpan reduction = TimeSpan.FromSeconds(reductionEffect.GetAmount()) * targets.Count;
+            TimeSpan reduction = Time.SpanFromSeconds(reductionEffect.GetAmount()) * targets.Count;
 
             AuraEffect cap = GetCaster().GetAuraEffect(SpellIds.EtherealBlink, 3);
             if (cap != null)
-                if (reduction > TimeSpan.FromSeconds(cap.GetAmount()))
-                    reduction = TimeSpan.FromSeconds(cap.GetAmount());
+                if (reduction > Time.SpanFromSeconds(cap.GetAmount()))
+                    reduction = Time.SpanFromSeconds(cap.GetAmount());
 
-            if (reduction > TimeSpan.FromSeconds(0))
+            if (reduction > TimeSpan.Zero)
             {
                 GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.Blink, -reduction);
                 GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.Shimmer, -reduction);
@@ -726,7 +726,7 @@ namespace Scripts.Spells.Mage
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
-            amount = -(int)MathFunctions.GetPctOf(GetEffectInfo(2).CalcValue() * Time.InMilliseconds, CliDB.SpellCategoryStorage.LookupByKey((int)SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId).ChargeRecoveryTime);
+            amount = -(int)MathFunctions.GetPctOf(GetEffectInfo(2).CalcValue() * Time.MillisecondsInSecond, CliDB.SpellCategoryStorage.LookupByKey((int)SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId).ChargeRecoveryTime);
         }
 
         public override void Register()
@@ -753,7 +753,7 @@ namespace Scripts.Spells.Mage
                 _count = count;
             }
 
-            public override bool Execute(long time, uint diff)
+            public override bool Execute(TimeSpan time, TimeSpan diff)
             {
                 Unit target = ObjAccessor.GetUnit(_caster, _target);
 
@@ -765,7 +765,7 @@ namespace Scripts.Spells.Mage
                 if (--_count == 0)
                     return true;
 
-                _caster.m_Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(400)));
+                _caster.m_Events.AddEvent(this, time + RandomHelper.RandTime(Time.SpanFromMilliseconds(300), Time.SpanFromMilliseconds(400)));
                 return false;
             }
         }
@@ -777,7 +777,7 @@ namespace Scripts.Spells.Mage
 
         void EffectHit(int effIndex)
         {
-            GetCaster().m_Events.AddEventAtOffset(new FlurryEvent(GetCaster(), GetHitUnit().GetGUID(), GetSpell().m_castId, GetEffectValue() - 1), RandomHelper.RandTime(TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(400)));
+            GetCaster().m_Events.AddEventAtOffset(new FlurryEvent(GetCaster(), GetHitUnit().GetGUID(), GetSpell().m_castId, GetEffectValue() - 1), RandomHelper.RandTime(Time.SpanFromMilliseconds(300), Time.SpanFromMilliseconds(400)));
         }
 
         public override void Register()
@@ -938,7 +938,7 @@ namespace Scripts.Spells.Mage
                     {
                         Aura icyVeins = caster.GetAura(SpellIds.IcyVeins);
                         if (icyVeins != null)
-                            icyVeins.SetDuration(icyVeins.GetDuration() + thermalVoid.GetSpellInfo().GetEffect(0).CalcValue(caster) * Time.InMilliseconds);
+                            icyVeins.SetDuration(icyVeins.GetDuration() + (Milliseconds)(thermalVoid.GetSpellInfo().GetEffect(0).CalcValue(caster) * Time.MillisecondsInSecond));
                     }
                 }
 

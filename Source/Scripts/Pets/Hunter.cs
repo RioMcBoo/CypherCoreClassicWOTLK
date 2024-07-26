@@ -6,6 +6,7 @@ using Game.AI;
 using Game.Combat;
 using Game.Entities;
 using Game.Scripting;
+using System;
 using System.Collections.Generic;
 
 namespace Scripts.Pets.Hunter
@@ -20,7 +21,7 @@ namespace Scripts.Pets.Hunter
         const int NpcHunterViper = 19921;
 
         bool _isViper;
-        uint _spellTimer;
+        TimeSpan _spellTimer;
 
         public npc_pet_hunter_snake_trap(Creature creature) : base(creature) { }
 
@@ -32,7 +33,7 @@ namespace Scripts.Pets.Hunter
 
             me.SetMaxHealth((int)(107 * (me.GetLevel() - 40) * 0.025f));
             // Add delta to make them not all hit the same time
-            me.SetBaseAttackTime(WeaponAttackType.BaseAttack, me.GetBaseAttackTime(WeaponAttackType.BaseAttack) + RandomHelper.URand(0, 6));
+            me.SetBaseAttackTime(WeaponAttackType.BaseAttack, me.GetBaseAttackTime(WeaponAttackType.BaseAttack) + (Milliseconds)RandomHelper.IRand(0, 6));
 
             if (!_isViper && !me.HasAura(SpellHunterDeadlyPoisonPassive))
                 DoCast(me, SpellHunterDeadlyPoisonPassive, true);
@@ -41,7 +42,7 @@ namespace Scripts.Pets.Hunter
         // Redefined for random target selection:
         public override void MoveInLineOfSight(Unit who) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (me.GetVictim() != null && me.GetVictim().HasBreakableByDamageCrowdControlAura())
             { // don't break cc
@@ -94,7 +95,7 @@ namespace Scripts.Pets.Hunter
                     if (RandomHelper.IRand(0, 2) == 0) // 33% chance to cast
                         DoCastVictim(RandomHelper.RAND(SpellHunterMindNumbingPoison, SpellHunterCripplingPoison));
 
-                    _spellTimer = 3000;
+                    _spellTimer = (Seconds)3;
                 }
                 else
                     _spellTimer -= diff;

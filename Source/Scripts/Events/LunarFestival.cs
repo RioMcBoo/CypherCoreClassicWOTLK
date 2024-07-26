@@ -269,7 +269,7 @@ namespace Scripts.Events.LunarFestival
                             case 1:
                             case 2:
                             case 3:
-                                Creature minion = me.SummonCreature(CreatureIds.MinionOfOmen, me.GetPositionX() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionY() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionZ(), 0.0f, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(20));
+                                Creature minion = me.SummonCreature(CreatureIds.MinionOfOmen, me.GetPositionX() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionY() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionZ(), 0.0f, TempSummonType.CorpseTimedDespawn, (Seconds)20);
                                 if (minion != null)
                                     minion.GetAI().AttackStart(me.SelectNearestPlayer(20.0f));
                                 break;
@@ -284,7 +284,7 @@ namespace Scripts.Events.LunarFestival
 
                 float displacement = 0.7f;
                 for (byte i = 0; i < 4; i++)
-                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(1));
+                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f)), Time.SpanFromSeconds(1));
             }
             else
                 //me.CastSpell(me, GetFireworkSpell(me.GetEntry()), true);
@@ -325,18 +325,18 @@ namespace Scripts.Events.LunarFestival
         {
             _scheduler.CancelAll();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(3), Time.SpanFromSeconds(5), task =>
             {
                 DoCastVictim(SpellOmenCleave);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(8), Time.SpanFromSeconds(10));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10), 1, task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), Time.SpanFromSeconds(10), 1, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
                 if (target != null)
                     DoCast(target, SpellOmenStarfall);
-                task.Repeat(TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(16));
+                task.Repeat(Time.SpanFromSeconds(14), Time.SpanFromSeconds(16));
             });
         }
 
@@ -352,11 +352,11 @@ namespace Scripts.Events.LunarFestival
                 if (me.HasAura(SpellOmenStarfall))
                     me.RemoveAurasDueToSpell(SpellOmenStarfall);
 
-                _scheduler.RescheduleGroup(1, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(16));
+                _scheduler.RescheduleGroup(1, Time.SpanFromSeconds(14), Time.SpanFromSeconds(16));
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -376,7 +376,7 @@ namespace Scripts.Events.LunarFestival
         public override void Reset()
         {
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromMinutes(5), _ =>
+            _scheduler.Schedule((Minutes)5, _ =>
             {
                 GameObject trap = me.FindNearestGameObject(GoEluneTrap1, 5.0f);
                 if (trap != null)
@@ -394,7 +394,7 @@ namespace Scripts.Events.LunarFestival
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }

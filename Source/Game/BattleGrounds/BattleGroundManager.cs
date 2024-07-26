@@ -21,7 +21,7 @@ namespace Game.BattleGrounds
     {
         BattlegroundManager()
         {
-            m_NextRatedArenaUpdate = (uint)WorldConfig.Values[WorldCfg.ArenaRatedUpdateTimer].Int32;
+            m_NextRatedArenaUpdate = WorldConfig.Values[WorldCfg.ArenaRatedUpdateTimer].TimeSpan;
         }
 
         public void DeleteAllBattlegrounds()
@@ -38,10 +38,10 @@ namespace Game.BattleGrounds
             m_BGFreeSlotQueue.Clear();
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             m_UpdateTimer += diff;
-            if (m_UpdateTimer > 1000)
+            if (m_UpdateTimer > (Seconds)1)
             {
                 foreach (var data in bgDataStore.Values)
                 {
@@ -65,7 +65,7 @@ namespace Game.BattleGrounds
                     }
                 }
 
-                m_UpdateTimer = 0;
+                m_UpdateTimer = TimeSpan.Zero;
             }
             // update events timer
             foreach (var pair in m_BattlegroundQueues)
@@ -88,7 +88,7 @@ namespace Game.BattleGrounds
 
             // if rating difference counts, maybe force-update queues
             if (WorldConfig.Values[WorldCfg.ArenaMaxRatingDifference].Int32 != 0 
-                && WorldConfig.Values[WorldCfg.ArenaRatedUpdateTimer].Int32 != 0)
+                && WorldConfig.Values[WorldCfg.ArenaRatedUpdateTimer].TimeSpan != TimeSpan.Zero)
             {
                 // it's time to force update
                 if (m_NextRatedArenaUpdate < diff)
@@ -102,20 +102,20 @@ namespace Game.BattleGrounds
                             GetBattlegroundQueue(ratedArenaQueueId).BattlegroundQueueUpdate(diff, bracket, 0);
                     }
 
-                    m_NextRatedArenaUpdate = (uint)WorldConfig.Values[WorldCfg.ArenaRatedUpdateTimer].Int32;
+                    m_NextRatedArenaUpdate = WorldConfig.Values[WorldCfg.ArenaRatedUpdateTimer].TimeSpan;
                 }
                 else
                     m_NextRatedArenaUpdate -= diff;
             }
         }
 
-        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Player player, int ticketId, uint joinTime, BattlegroundQueueTypeId queueId)
+        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Player player, int ticketId, ServerTime joinTime, BattlegroundQueueTypeId queueId)
         {
             header.Ticket = new RideTicket();
             header.Ticket.RequesterGuid = player.GetGUID();
             header.Ticket.Id = ticketId;
             header.Ticket.Type = RideType.Battlegrounds;
-            header.Ticket.Time = (int)joinTime;
+            header.Ticket.JoinTime = joinTime;
             header.QueueID.Add(queueId.GetPacked());
             header.RangeMin = 0; // seems to always be 0
             header.RangeMax = SharedConst.DefaultMaxPlayerLevel; // alwyas max level of current expansion. Might be limited to account
@@ -125,16 +125,16 @@ namespace Game.BattleGrounds
             header.TournamentRules = false;
         }
 
-        public void BuildBattlegroundStatusNone(out BattlefieldStatusNone battlefieldStatus, Player player, int ticketId, uint joinTime)
+        public void BuildBattlegroundStatusNone(out BattlefieldStatusNone battlefieldStatus, Player player, int ticketId, ServerTime joinTime)
         {
             battlefieldStatus = new BattlefieldStatusNone();
             battlefieldStatus.Ticket.RequesterGuid = player.GetGUID();
             battlefieldStatus.Ticket.Id = ticketId;
             battlefieldStatus.Ticket.Type = RideType.Battlegrounds;
-            battlefieldStatus.Ticket.Time = (int)joinTime;
+            battlefieldStatus.Ticket.JoinTime = joinTime;
         }
 
-        public void BuildBattlegroundStatusNeedConfirmation(out BattlefieldStatusNeedConfirmation battlefieldStatus, Battleground bg, Player player, int ticketId, uint joinTime, uint timeout, BattlegroundQueueTypeId queueId)
+        public void BuildBattlegroundStatusNeedConfirmation(out BattlefieldStatusNeedConfirmation battlefieldStatus, Battleground bg, Player player, int ticketId, ServerTime joinTime, TimeSpan timeout, BattlegroundQueueTypeId queueId)
         {
             battlefieldStatus = new BattlefieldStatusNeedConfirmation();
             BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
@@ -143,7 +143,7 @@ namespace Game.BattleGrounds
             battlefieldStatus.Role = 0;
         }
 
-        public void BuildBattlegroundStatusActive(out BattlefieldStatusActive battlefieldStatus, Battleground bg, Player player, int ticketId, uint joinTime, BattlegroundQueueTypeId queueId)
+        public void BuildBattlegroundStatusActive(out BattlefieldStatusActive battlefieldStatus, Battleground bg, Player player, int ticketId, ServerTime joinTime, BattlegroundQueueTypeId queueId)
         {
             battlefieldStatus = new BattlefieldStatusActive();
             BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
@@ -154,7 +154,7 @@ namespace Game.BattleGrounds
             battlefieldStatus.Mapid = bg.GetMapId();
         }
 
-        public void BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatus, Player player, int ticketId, uint joinTime, BattlegroundQueueTypeId queueId, uint avgWaitTime, bool asGroup)
+        public void BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatus, Player player, int ticketId, ServerTime joinTime, BattlegroundQueueTypeId queueId, TimeSpan avgWaitTime, bool asGroup)
         {
             battlefieldStatus = new BattlefieldStatusQueued();
             BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
@@ -162,7 +162,7 @@ namespace Game.BattleGrounds
             battlefieldStatus.AsGroup = asGroup;
             battlefieldStatus.SuspendedQueue = false;
             battlefieldStatus.EligibleForMatchmaking = true;
-            battlefieldStatus.WaitTime = Time.GetMSTimeDiffToNow(joinTime);
+            battlefieldStatus.WaitTime = Time.Diff(joinTime);
         }
 
         public void BuildBattlegroundStatusFailed(out BattlefieldStatusFailed battlefieldStatus, BattlegroundQueueTypeId queueId, Player pPlayer, int ticketId, GroupJoinBattlegroundResult result, ObjectGuid errorGuid = default)
@@ -171,9 +171,9 @@ namespace Game.BattleGrounds
             battlefieldStatus.Ticket.RequesterGuid = pPlayer.GetGUID();
             battlefieldStatus.Ticket.Id = ticketId;
             battlefieldStatus.Ticket.Type = RideType.Battlegrounds;
-            battlefieldStatus.Ticket.Time = (int)pPlayer.GetBattlegroundQueueJoinTime(queueId);
+            battlefieldStatus.Ticket.JoinTime = pPlayer.GetBattlegroundQueueJoinTime(queueId);
             battlefieldStatus.QueueID = queueId.GetPacked();
-            battlefieldStatus.Reason = (int)result;
+            battlefieldStatus.Reason = result;
             if (!errorGuid.IsEmpty() && (result == GroupJoinBattlegroundResult.NotInBattleground || result == GroupJoinBattlegroundResult.JoinTimedOut))
                 battlefieldStatus.ClientID = errorGuid;
         }
@@ -318,7 +318,7 @@ namespace Game.BattleGrounds
 
         public void LoadBattlegroundTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             //                                         0   1                 2              3             4       5
             SQLResult result = DB.World.Query("SELECT ID, AllianceStartLoc, HordeStartLoc, StartMaxDist, Weight, ScriptName FROM battleground_template");
@@ -402,7 +402,7 @@ namespace Game.BattleGrounds
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Battlegrounds in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Battlegrounds in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void SendBattlegroundList(Player player, ObjectGuid guid, BattlegroundTypeId bgTypeId)
@@ -430,7 +430,7 @@ namespace Game.BattleGrounds
                 Team team = player.GetBGTeam();
 
                 WorldSafeLocsEntry pos = bg.GetTeamStartPosition(Battleground.GetTeamIndexByTeamId(team));
-                Log.outDebug(LogFilter.Battleground, 
+                Log.outDebug(LogFilter.Battleground,
                     $"BattlegroundMgr.SendToBattleground: " +
                     $"Sending {player.GetName()} to map {mapid}, {pos.Loc} (bgType {bgTypeId})");
                 player.TeleportTo(pos.Loc);
@@ -528,19 +528,19 @@ namespace Game.BattleGrounds
             return diff;
         }
 
-        public uint GetRatingDiscardTimer()
+        public TimeSpan GetRatingDiscardTimer()
         {
-            return (uint)WorldConfig.Values[WorldCfg.ArenaRatingDiscardTimer].Int32;
+            return WorldConfig.Values[WorldCfg.ArenaRatingDiscardTimer].TimeSpan;
         }
 
-        public uint GetPrematureFinishTime()
+        public TimeSpan GetPrematureFinishTime()
         {
-            return (uint)WorldConfig.Values[WorldCfg.BattlegroundPrematureFinishTimer].Int32;
+            return WorldConfig.Values[WorldCfg.BattlegroundPrematureFinishTimer].TimeSpan;
         }
 
         public void LoadBattleMastersEntry()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             mBattleMastersMap.Clear();                                  // need for reload case
 
@@ -591,7 +591,7 @@ namespace Game.BattleGrounds
 
             CheckBattleMasters();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} battlemaster entries in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} battlemaster entries in {Time.Diff(oldMSTime)} ms.");
         }
 
         void CheckBattleMasters()
@@ -790,8 +790,8 @@ namespace Game.BattleGrounds
             }
         }
         List<ScheduledQueueUpdate> m_QueueUpdateScheduler = new();
-        uint m_NextRatedArenaUpdate;
-        uint m_UpdateTimer;
+        TimeSpan m_NextRatedArenaUpdate;
+        TimeSpan m_UpdateTimer;
         bool m_ArenaTesting;
         bool m_Testing;
     }

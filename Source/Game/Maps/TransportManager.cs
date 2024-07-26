@@ -24,7 +24,7 @@ namespace Game.Maps
 
         public void LoadTransportTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.World.Query("SELECT entry FROM gameobject_template WHERE Type = 15 ORDER BY entry ASC");
 
@@ -101,7 +101,7 @@ namespace Game.Maps
             } while (result.NextRow());
 
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} transports in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} transports in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadTransportAnimationAndRotation()
@@ -118,7 +118,7 @@ namespace Game.Maps
             if (_transportTemplates.Empty())
                 return;
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SQLResult result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
 
@@ -212,10 +212,11 @@ namespace Game.Maps
                 } while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Spawned {count} continent transports in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Spawned {count} continent transports in {Time.Diff(oldMSTime)} ms.");
         }
 
-        static void InitializeLeg(TransportPathLeg leg, List<TransportPathEvent> outEvents, List<TaxiPathNodeRecord> pathPoints, List<TaxiPathNodeRecord> pauses, List<TaxiPathNodeRecord> events, GameObjectTemplate goInfo, ref uint totalTime)
+        static void InitializeLeg(TransportPathLeg leg, List<TransportPathEvent> outEvents, List<TaxiPathNodeRecord> pathPoints, List<TaxiPathNodeRecord> pauses, List<TaxiPathNodeRecord> events, GameObjectTemplate goInfo, ref RelativeTime totalTime)
         {
             List<Vector3> splinePath = new(pathPoints.Select(node => new Vector3(node.Loc.X, node.Loc.Y, node.Loc.Z)));
             SplineRawInitializer initer = new(splinePath);
@@ -224,33 +225,33 @@ namespace Game.Maps
             leg.Spline.InitSplineCustom(initer);
             leg.Spline.InitLengths();
 
-            uint legTimeAccelDecel(double dist)
+            Milliseconds legTimeAccelDecel(double dist)
             {
                 double speed = goInfo.MoTransport.moveSpeed;
                 double accel = goInfo.MoTransport.accelRate;
                 double accelDist = 0.5 * speed * speed / accel;
                 if (accelDist >= dist * 0.5)
-                    return (uint)(Math.Sqrt(dist / accel) * 2000.0);
+                    return (Milliseconds)(Math.Sqrt(dist / accel) * 2000.0);
                 else
-                    return (uint)((dist - (accelDist + accelDist)) / speed * 1000.0 + speed / accel * 2000.0);
+                    return (Milliseconds)((dist - (accelDist + accelDist)) / speed * 1000.0 + speed / accel * 2000.0);
             }
 
-            uint legTimeAccel(double dist)
+            Milliseconds legTimeAccel(double dist)
             {
                 double speed = goInfo.MoTransport.moveSpeed;
                 double accel = goInfo.MoTransport.accelRate;
                 double accelDist = 0.5 * speed * speed / accel;
                 if (accelDist >= dist)
-                    return (uint)(Math.Sqrt((dist + dist) / accel) * 1000.0);
+                    return (Milliseconds)(Math.Sqrt((dist + dist) / accel) * 1000.0);
                 else
-                    return (uint)(((dist - accelDist) / speed + speed / accel) * 1000.0);
+                    return (Milliseconds)(((dist - accelDist) / speed + speed / accel) * 1000.0);
             };
 
             // Init segments
             int pauseItr = 0;
             int eventItr = 0;
             double splineLengthToPreviousNode = 0.0;
-            uint delaySum = 0;
+            Milliseconds delaySum = Milliseconds.Zero;
             if (!pauses.Empty())
             {
                 for (; pauseItr < pauses.Count; ++pauseItr)
@@ -266,7 +267,8 @@ namespace Game.Maps
                             break;
 
                         double eventLength = leg.Spline.Length(eventPointIndex) - splineLengthToPreviousNode;
-                        uint eventSplineTime = 0;
+                        Milliseconds eventSplineTime = Milliseconds.Zero;
+
                         if (pauseItr != 0)
                             eventSplineTime = legTimeAccelDecel(eventLength);
                         else
@@ -283,7 +285,7 @@ namespace Game.Maps
                         if (pathPoints[eventPointIndex].DepartureEventID != 0)
                         {
                             TransportPathEvent Event = new();
-                            Event.Timestamp = totalTime + eventSplineTime + leg.Duration + (pausePointIndex == eventPointIndex ? pathPoints[eventPointIndex].Delay * Time.InMilliseconds : 0);
+                            Event.Timestamp = totalTime + eventSplineTime + leg.Duration + (pausePointIndex == eventPointIndex ? pathPoints[eventPointIndex].Delay : Milliseconds.Zero);
                             Event.EventId = pathPoints[eventPointIndex].DepartureEventID;
                             outEvents.Add(Event);
                         }
@@ -291,7 +293,7 @@ namespace Game.Maps
 
                     double splineLengthToCurrentNode = leg.Spline.Length(pausePointIndex);
                     double length1 = splineLengthToCurrentNode - splineLengthToPreviousNode;
-                    uint movementTime = 0;
+                    Milliseconds movementTime = Milliseconds.Zero;
                     if (pauseItr != 0)
                         movementTime = legTimeAccelDecel(length1);
                     else
@@ -299,11 +301,11 @@ namespace Game.Maps
 
                     leg.Duration += movementTime;
                     TransportPathSegment segment = new();
-                    segment.SegmentEndArrivalTimestamp = leg.Duration + delaySum;
-                    segment.Delay = pathPoints[pausePointIndex].Delay * Time.InMilliseconds;
+                    segment.SegmentEndArrivalTimestamp = (RelativeTime)(leg.Duration + delaySum);
+                    segment.Delay = pathPoints[pausePointIndex].Delay;
                     segment.DistanceFromLegStartAtEnd = splineLengthToCurrentNode;
                     leg.Segments.Add(segment);
-                    delaySum += pathPoints[pausePointIndex].Delay * Time.InMilliseconds;
+                    delaySum += pathPoints[pausePointIndex].Delay;
                     splineLengthToPreviousNode = splineLengthToCurrentNode;
                 }
             }
@@ -316,11 +318,11 @@ namespace Game.Maps
                     break;
 
                 double eventLength = leg.Spline.Length(eventPointIndex) - splineLengthToPreviousNode;
-                uint eventSplineTime = 0;
+                Milliseconds eventSplineTime = Milliseconds.Zero;
                 if (pauseItr != 0)
                     eventSplineTime = legTimeAccel(eventLength);
                 else
-                    eventSplineTime = (uint)(eventLength / goInfo.MoTransport.moveSpeed * 1000.0);
+                    eventSplineTime = (Milliseconds)(eventLength / goInfo.MoTransport.moveSpeed * 1000.0);
 
                 if (pathPoints[eventPointIndex].ArrivalEventID != 0)
                 {
@@ -341,17 +343,17 @@ namespace Game.Maps
 
             // Add segment after last pause
             double length = leg.Spline.Length() - splineLengthToPreviousNode;
-            uint splineTime = 0;
+            Milliseconds splineTime = Milliseconds.Zero;
             if (pauseItr != 0)
                 splineTime = legTimeAccel(length);
             else
-                splineTime = (uint)(length / goInfo.MoTransport.moveSpeed * 1000.0);
+                splineTime = (Milliseconds)(length / goInfo.MoTransport.moveSpeed * 1000.0);
 
             leg.StartTimestamp = totalTime;
             leg.Duration += splineTime + delaySum;
             TransportPathSegment pauseSegment = new();
-            pauseSegment.SegmentEndArrivalTimestamp = leg.Duration;
-            pauseSegment.Delay = 0;
+            pauseSegment.SegmentEndArrivalTimestamp = (RelativeTime)leg.Duration;
+            pauseSegment.Delay = Milliseconds.Zero;
             pauseSegment.DistanceFromLegStartAtEnd = leg.Spline.Length();
             leg.Segments.Add(pauseSegment);
             totalTime += leg.Segments[pauseItr].SegmentEndArrivalTimestamp + leg.Segments[pauseItr].Delay;
@@ -380,7 +382,7 @@ namespace Game.Maps
             TransportPathLeg leg = transport.PathLegs[0];
             leg.MapId = path[0].ContinentID;
             bool prevNodeWasTeleport = false;
-            uint totalTime = 0;
+            RelativeTime totalTime = RelativeTime.Zero;
 
             foreach (TaxiPathNodeRecord node in path)
             {
@@ -421,7 +423,7 @@ namespace Game.Maps
             return true;
         }
         
-        public void AddPathNodeToTransport(int transportEntry, uint timeSeg, TransportAnimationRecord node)
+        public void AddPathNodeToTransport(int transportEntry, RelativeTime timeSeg, TransportAnimationRecord node)
         {
             if (!_transportAnimations.ContainsKey(transportEntry))
                 _transportAnimations[transportEntry] = new();
@@ -433,7 +435,7 @@ namespace Game.Maps
             animNode.Path[timeSeg] = node;
         }
 
-        public void AddPathRotationToTransport(int transportEntry, uint timeSeg, TransportRotationRecord node)
+        public void AddPathRotationToTransport(int transportEntry, RelativeTime timeSeg, TransportRotationRecord node)
         {
             if (!_transportAnimations.ContainsKey(transportEntry))
                 _transportAnimations[transportEntry] = new();
@@ -476,7 +478,7 @@ namespace Game.Maps
                 return null;
             }
 
-            Position startingPosition = tInfo.ComputePosition(0, out _, out _);
+            Position startingPosition = tInfo.ComputePosition(RelativeTime.Zero, out _, out _);
             if (startingPosition == null)
             {
                 Log.outError(LogFilter.Sql, 
@@ -552,14 +554,14 @@ namespace Game.Maps
 
     public class TransportPathSegment
     {
-        public uint SegmentEndArrivalTimestamp;
-        public uint Delay;
+        public RelativeTime SegmentEndArrivalTimestamp;
+        public Milliseconds Delay;
         public double DistanceFromLegStartAtEnd;
     }
 
     public struct TransportPathEvent
     {
-        public uint Timestamp;
+        public RelativeTime Timestamp;
         public int EventId;
     }
 
@@ -567,14 +569,14 @@ namespace Game.Maps
     {
         public int MapId;
         public Spline<double> Spline;
-        public uint StartTimestamp;
-        public uint Duration;
+        public RelativeTime StartTimestamp;
+        public Milliseconds Duration;
         public List<TransportPathSegment> Segments = new();
     }
 
     public class TransportTemplate
     {
-        public uint TotalPathTime;
+        public RelativeTime TotalPathTime;
         public double Speed;
         public double AccelerationRate;
         public double AccelerationTime;
@@ -584,7 +586,7 @@ namespace Game.Maps
 
         public HashSet<int> MapIds = new();
 
-        public Position ComputePosition(uint time, out TransportMovementState moveState, out int legIndex)
+        public Position ComputePosition(RelativeTime time, out TransportMovementState moveState, out int legIndex)
         {
             moveState = TransportMovementState.Moving;
             legIndex = 0;
@@ -597,7 +599,7 @@ namespace Game.Maps
                 return null;
 
             // find segment
-            uint prevSegmentTime = leg.StartTimestamp;
+            RelativeTime prevSegmentTime = leg.StartTimestamp;
             var segmentIndex = 0;
             double distanceMoved = 0.0;
             bool isOnPause = false;
@@ -644,7 +646,7 @@ namespace Game.Maps
             return new Position(pos.X, pos.Y, pos.Z, MathF.Atan2(dir.Y, dir.X) + MathF.PI);
         }
 
-        public TransportPathLeg GetLegForTime(uint time)
+        public TransportPathLeg GetLegForTime(RelativeTime time)
         {
             int legIndex = 0;
             while (PathLegs[legIndex].StartTimestamp + PathLegs[legIndex].Duration <= time)
@@ -658,7 +660,7 @@ namespace Game.Maps
             return PathLegs[legIndex];
         }
 
-        public uint GetNextPauseWaypointTimestamp(uint time)
+        public RelativeTime GetNextPauseWaypointTimestamp(RelativeTime time)
         {
             TransportPathLeg leg = GetLegForTime(time);
             if (leg == null)
@@ -754,11 +756,11 @@ namespace Game.Maps
 
     public class TransportAnimation
     {
-        public SortedList<uint, TransportAnimationRecord> Path = new();
-        public SortedList<uint, TransportRotationRecord> Rotations = new();
-        public uint TotalTime;
+        public SortedList<RelativeTime, TransportAnimationRecord> Path = new();
+        public SortedList<RelativeTime, TransportRotationRecord> Rotations = new();
+        public RelativeTime TotalTime;
 
-        public TransportAnimationRecord GetPrevAnimNode(uint time)
+        public TransportAnimationRecord GetPrevAnimNode(RelativeTime time)
         {
             if (Path.Empty())
                 return null;
@@ -773,7 +775,7 @@ namespace Game.Maps
             return Path.LastOrDefault().Value;
         }
 
-        public TransportRotationRecord GetPrevAnimRotation(uint time)
+        public TransportRotationRecord GetPrevAnimRotation(RelativeTime time)
         {
             if (Rotations.Empty())
                 return null;
@@ -788,7 +790,7 @@ namespace Game.Maps
             return Rotations.LastOrDefault().Value;
         }
 
-        public TransportAnimationRecord GetNextAnimNode(uint time)
+        public TransportAnimationRecord GetNextAnimNode(RelativeTime time)
         {
             if (Path.Empty())
                 return null;
@@ -799,7 +801,7 @@ namespace Game.Maps
             return Path.FirstOrDefault().Value;
         }
 
-        public TransportRotationRecord GetNextAnimRotation(uint time)
+        public TransportRotationRecord GetNextAnimRotation(RelativeTime time)
         {
             if (Rotations.Empty())
                 return null;

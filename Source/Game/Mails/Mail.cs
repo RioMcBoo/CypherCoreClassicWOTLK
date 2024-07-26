@@ -43,8 +43,8 @@ namespace Game.Mails
         public string body;
         public List<MailItemInfo> items = new();
         public List<long> removedItems = new();
-        public long expire_time;
-        public long deliver_time;
+        public ServerTime expire_time;
+        public ServerTime deliver_time;
         public long money;
         public long COD;
         public MailCheckFlags checkMask;

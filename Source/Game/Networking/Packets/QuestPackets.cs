@@ -193,7 +193,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Info.CompleteSoundKitID);
 
                 _worldPacket.WriteInt32(Info.AreaGroupID);
-                _worldPacket.WriteInt64(Info.TimeAllowed);
+                _worldPacket.WriteInt64(Info.TimeAllowed.ToSeconds());
 
                 _worldPacket.WriteInt32(Info.Objectives.Count);
                 _worldPacket.WriteUInt64((ulong)Info.AllowableRaces);
@@ -663,7 +663,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(QuestGiverGUID);
-            _worldPacket.WriteUInt32(GreetEmoteDelay);
+            _worldPacket.WriteInt32(GreetEmoteDelay);
             _worldPacket.WriteUInt32(GreetEmoteType);
             _worldPacket.WriteInt32(QuestDataText.Count);
             _worldPacket.WriteBits(Greeting.GetByteCount(), 11);
@@ -676,7 +676,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid QuestGiverGUID;
-        public uint GreetEmoteDelay;
+        public Milliseconds GreetEmoteDelay;
         public uint GreetEmoteType;
         public List<ClientGossipText> QuestDataText = new();
         public string Greeting = string.Empty;
@@ -1055,7 +1055,7 @@ namespace Game.Networking.Packets
         public int AcceptedSoundKitID;
         public int CompleteSoundKitID;
         public int AreaGroupID;
-        public long TimeAllowed;
+        public TimeSpan TimeAllowed;
         public int TreasurePickerID;
         public int Expansion;
         public int ManagedWorldStateID;

@@ -51,17 +51,17 @@ namespace Game.Networking.Packets
 
     public class DuelCountdown : ServerPacket
     {
-        public DuelCountdown(uint countdown) : base(ServerOpcodes.DuelCountdown)
+        public DuelCountdown(Milliseconds countdown) : base(ServerOpcodes.DuelCountdown)
         {
             Countdown = countdown;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Countdown);
+            _worldPacket.WriteInt32(Countdown);
         }
 
-        uint Countdown;
+        Milliseconds Countdown;
     }
 
     public class DuelInBounds : ServerPacket

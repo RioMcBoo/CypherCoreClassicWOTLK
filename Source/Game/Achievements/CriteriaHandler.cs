@@ -197,13 +197,15 @@ namespace Game.Achievements
                         break;
                     case CriteriaType.CompleteAnyDailyQuestPerDay:
                     {
-                        long nextDailyResetTime = Global.WorldMgr.GetNextDailyQuestsResetTime();
+                        ServerTime yesterdayDailyResetTime = 
+                            (ServerTime)Global.WorldMgr.GetNextDailyQuestsResetTime() - (Days)2;
+
                         CriteriaProgress progress = GetCriteriaProgress(criteria);
 
                         if (miscValue1 == 0) // Login case.
                         {
                             // reset if player missed one day.
-                            if (progress != null && progress.Date < (nextDailyResetTime - 2 * Time.Day))
+                            if (progress != null && progress.Date < yesterdayDailyResetTime)
                                 SetCriteriaProgress(criteria, 0, referencePlayer);
                             continue;
                         }
@@ -212,14 +214,14 @@ namespace Game.Achievements
                         if (progress == null)
                             // 1st time. Start count.
                             progressType = ProgressType.Set;
-                        else if (progress.Date < (nextDailyResetTime - 2 * Time.Day))
-                            // last progress is older than 2 days. Player missed 1 day => Restart count.
+                        else if (progress.Date < yesterdayDailyResetTime)
+                            // Player missed 1 day => Restart count.
                             progressType = ProgressType.Set;
-                        else if (progress.Date < (nextDailyResetTime - Time.Day))
-                            // last progress is between 1 and 2 days. => 1st time of the day.
+                        else if (progress.Date < yesterdayDailyResetTime + (Days)1)
+                            // last progress is between yesterday's and today's DailyResetTime. => 1st time of the day.
                             progressType = ProgressType.Accumulate;
                         else
-                            // last progress is within the day before the reset => Already counted today.
+                            // => subsequent times of the day (before NextDailyQuestsResetTime)
                             continue;
 
                         SetCriteriaProgress(criteria, 1, referencePlayer, progressType);
@@ -449,15 +451,15 @@ namespace Game.Achievements
             }
         }
 
-        public void UpdateTimedCriteria(TimeSpan timeDiff)
+        public void UpdateTimedCriteria(TimeSpan diff)
         {
             List<int> toRemove = new();
 
             foreach (var item in _startedCriteria)
             {
                 // Time is up, remove timer and reset progress
-                if (item.Value > timeDiff)
-                    _startedCriteria[item.Key] -= timeDiff;                
+                if (item.Value > diff)
+                    _startedCriteria[item.Key] -= diff;                
                 else
                     toRemove.Add(item.Key);
             }
@@ -479,8 +481,8 @@ namespace Game.Achievements
             foreach (Criteria criteria in criteriaList)
             {
                 TimeSpan timeLimit = TimeSpan.MaxValue; // this value is for criteria that have a start event requirement but no time limit
-                if (criteria.Entry.StartTimer != 0)
-                    timeLimit = TimeSpan.FromSeconds(criteria.Entry.StartTimer);
+                if (criteria.Entry.StartTimer != TimeSpan.Zero)
+                    timeLimit = criteria.Entry.StartTimer;
 
                 timeLimit -= timeLost;
 
@@ -558,7 +560,7 @@ namespace Game.Achievements
             {
                 // not create record for 0 counter but allow it for timed criteria
                 // we will need to send 0 progress to client to start the timer
-                if (changeValue == 0 && criteria.Entry.StartTimer == 0)
+                if (changeValue == 0 && criteria.Entry.StartTimer == TimeSpan.Zero)
                     return;
 
                 progress = new CriteriaProgress();
@@ -586,24 +588,24 @@ namespace Game.Achievements
                 }
 
                 // not update (not mark as changed) if counter will have same value
-                if (progress.Counter == newValue && criteria.Entry.StartTimer == 0)
+                if (progress.Counter == newValue && criteria.Entry.StartTimer == TimeSpan.Zero)
                     return;
 
                 progress.Counter = newValue;
             }
 
             progress.Changed = true;
-            progress.Date = GameTime.GetGameTime(); // set the date to the latest update.
+            progress.Date = LoopTime.ServerTime; // set the date to the latest update.
             progress.PlayerGUID = referencePlayer != null ? referencePlayer.GetGUID() : ObjectGuid.Empty;
             _criteriaProgress[criteria.Id] = progress;
 
             TimeSpan timeElapsed = TimeSpan.Zero;
-            if (criteria.Entry.StartTimer != 0)
+            if (criteria.Entry.StartTimer != TimeSpan.Zero)
             {
                 if (_startedCriteria.TryGetValue(criteria.Id, out TimeSpan startedTime))
                 {
                     // Client expects this in packet
-                    timeElapsed = TimeSpan.FromSeconds(criteria.Entry.StartTimer) - startedTime;
+                    timeElapsed = criteria.Entry.StartTimer - startedTime;
 
                     // Remove the timer, we wont need it anymore
                     var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
@@ -677,7 +679,7 @@ namespace Game.Achievements
                             {
                                 if (criteriaProgress.Counter > progress)
                                     progress = criteriaProgress.Counter;
-                        }
+                            }
                         }
                     });
                     return progress >= requiredCount;
@@ -696,8 +698,8 @@ namespace Game.Achievements
                                 {
                                     if (++progress >= requiredCount)
                                         return true;
-                        }
-                    }
+                                }
+                            }
                         }
                     }
 
@@ -1827,12 +1829,10 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.TimeBetween: // 109
                 {
-                    WowTime from = new();
-                    from.SetPackedTime((uint)reqValue);
-                    WowTime to = new();
-                    to.SetPackedTime((uint)secondaryAsset);
+                    RealmTime from = (RealmTime)(WowTime)reqValue;
+                    RealmTime to = (RealmTime)(WowTime)secondaryAsset;
 
-                    if (!GameTime.GetWowTime().IsInRange(from, to))
+                    if (!Time.IsInRange(LoopTime.RealmTime, from, to))
                         return false;
                     break;
                 }
@@ -2001,7 +2001,7 @@ namespace Game.Achievements
                         {
                             if (species.PetTypeEnum == secondaryAsset)
                                 ++count;
-                    }
+                        }
                     }
 
                     if (count < reqValue)
@@ -2162,7 +2162,7 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerCreatedCharacterLessThanHoursAgoRealTime: // 204 NYI
                     return false;
                 case ModifierTreeType.PlayerCreatedCharacterLessThanHoursAgoGameTime: // 205
-                    if (TimeSpan.FromHours(reqValue) >= TimeSpan.FromSeconds(referencePlayer.GetTotalPlayedTime()))
+                    if (referencePlayer.GetTotalPlayedTime() <= (Hours)reqValue)
                         return false;
                     break;
                 case ModifierTreeType.QuestHasQuestInfoId: // 206
@@ -2211,7 +2211,7 @@ namespace Game.Achievements
                         {
                             if (itr.GetSource() != referencePlayer && referencePlayer.m_playerData.VirtualPlayerRealm == itr.GetSource().m_playerData.VirtualPlayerRealm)
                                 ++memberCount;
-                    }
+                        }
                     }
 
                     if (memberCount < reqValue)
@@ -2308,9 +2308,9 @@ namespace Game.Achievements
                                 {
                                     if (itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
                                         itemSubclass = itemModifiedAppearaceExtra.DisplayWeaponSubclassID.Weapon;
+                                }
                             }
                         }
-                    }
                     }
 
                     if (itemSubclass != (ItemSubClassWeapon)reqValue)
@@ -2336,9 +2336,9 @@ namespace Game.Achievements
                                 {
                                     if (itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
                                         itemSubclass = itemModifiedAppearaceExtra.DisplayWeaponSubclassID.Weapon;
+                                }
                             }
                         }
-                    }
                     }
 
                     if (itemSubclass != (ItemSubClassWeapon)reqValue)
@@ -2689,17 +2689,17 @@ namespace Game.Achievements
                     return false;                 
                 case ModifierTreeType.HasTimeEventPassed: // 289
                 {
-                    long eventTimestamp = GameTime.GetGameTime();
+                    UnixTime eventTimestamp = LoopTime.UnixRealmTime;
                     switch (reqValue)
                     {
                         case 111: // Battle for Azeroth Season 4 Start
-                            eventTimestamp = 1579618800L; // January 21, 2020 8:00
+                            eventTimestamp = (UnixTime)1579618800L; // January 21, 2020 8:00
                             break;
                         case 120: // Patch 9.0.1
-                            eventTimestamp = 1602601200L; // October 13, 2020 8:00
+                            eventTimestamp = (UnixTime)1602601200L; // October 13, 2020 8:00
                             break;
                         case 121: // Shadowlands Season 1 Start
-                            eventTimestamp = 1607439600L; // December 8, 2020 8:00
+                            eventTimestamp = (UnixTime)1607439600L; // December 8, 2020 8:00
                             break;
                         case 123: // Shadowlands Season 1 End
                                   // timestamp = unknown
@@ -2708,10 +2708,10 @@ namespace Game.Achievements
                                   // timestamp = unknown
                             break;
                         case 349: // Dragonflight Season 3 Start (pre-season)
-                            eventTimestamp = 1699340400L; // November 7, 2023 8:00
+                            eventTimestamp = (UnixTime)1699340400L; // November 7, 2023 8:00
                             break;
                         case 350: // Dragonflight Season 3 Start
-                            eventTimestamp = 1699945200L; // November 14, 2023 8:00
+                            eventTimestamp = (UnixTime)1699945200L; // November 14, 2023 8:00
                             break;
                         case 352: // Dragonflight Season 3 End
                                   // eventTimestamp = time_t(); unknown
@@ -2719,7 +2719,7 @@ namespace Game.Achievements
                         default:
                             break;
                     }
-                    if (GameTime.GetGameTime() < eventTimestamp)
+                    if (LoopTime.UnixRealmTime < eventTimestamp)
                         return false;
                     break;
                 }
@@ -2780,7 +2780,7 @@ namespace Game.Achievements
                         {
                             if (!itr.GetSource().HasAchieved(reqValue))
                                 return false;
-                    }
+                        }
                     }
                     else if (!referencePlayer.HasAchieved(reqValue))
                         return false;
@@ -2959,7 +2959,7 @@ namespace Game.Achievements
                             {
                                 if (traitEntry.TraitNodeEntryID == reqValue)
                                     return true;
-                        }
+                            }
                         }
 
                         return false;
@@ -2986,7 +2986,7 @@ namespace Game.Achievements
                             {
                                 if (traitEntry.TraitNodeEntryID == secondaryAsset)
                                     return (short)traitEntry.Rank;
-                        }
+                            }
                         }
                         return null;
                     })();
@@ -2996,7 +2996,7 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.PlayerDaysSinceLogout: // 344
-                    if (GameTime.GetGameTime() - referencePlayer.m_playerData.LogoutTime < reqValue * Time.Day)
+                    if (LoopTime.UnixServerTime - referencePlayer.m_playerData.LogoutTime.GetValue() < (Seconds)(reqValue * Time.Day))
                         return false;
                     break;
                 case ModifierTreeType.PlayerHasPerksProgramPendingReward: // 350
@@ -3031,7 +3031,7 @@ namespace Game.Achievements
                         {
                             if (CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.NodeEntryType == TraitNodeEntryType.ProfPath)
                                 ranks += (uint)(traitEntry.Rank + traitEntry.GrantedRanks);
-                    }
+                        }
                     }
 
                     if (ranks < reqValue)
@@ -3148,7 +3148,7 @@ namespace Game.Achievements
 
         public void LoadCriteriaModifiersTree()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             if (CliDB.ModifierTreeStorage.Empty())
             {
@@ -3172,7 +3172,7 @@ namespace Game.Achievements
                     parentNode.Children.Add(treeNode);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_criteriaModifiers.Count} criteria modifiers in {Time.Diff(oldMSTime)} ms.");
         }
 
         T GetEntry<T>(Dictionary<int, T> map, CriteriaTreeRecord tree) where T : new()
@@ -3199,7 +3199,7 @@ namespace Game.Achievements
 
         public void LoadCriteriaList()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             Dictionary<int /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
             foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
@@ -3375,12 +3375,14 @@ namespace Game.Achievements
                     _criteriasByFailEvent[criteriaEntry.FailEvent].Add(criteriaEntry.FailAsset, criteria);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria " +
+                $"and {questObjectiveCriterias} quest objective criteria in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadCriteriaData()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             _criteriaDataMap.Clear();                              // need for reload case
 
@@ -3413,7 +3415,7 @@ namespace Game.Achievements
                 {
                     if (dataType != CriteriaDataType.Script)
                     {
-                        Log.outError(LogFilter.Sql, 
+                        Log.outError(LogFilter.Sql,
                             $"Table `criteria_data` contains a ScriptName for non-scripted data Type " +
                             $"(Entry: {criteria_id}, Type {dataType}), useless data.");
                     }
@@ -3440,7 +3442,7 @@ namespace Game.Achievements
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} additional criteria data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} additional criteria data in {Time.Diff(oldMSTime)} ms.");
         }
 
         public CriteriaTree GetCriteriaTree(int criteriaTreeId)
@@ -3614,8 +3616,8 @@ namespace Game.Achievements
     public class CriteriaProgress
     {
         public long Counter;
-        public long Date;                                            // latest update time.
-        public ObjectGuid PlayerGUID;                               // GUID of the player that completed this criteria (guild achievements)
+        public ServerTime Date;         // latest update time.
+        public ObjectGuid PlayerGUID;   // GUID of the player that completed this criteria (guild achievements)
         public bool Changed;
     }
 

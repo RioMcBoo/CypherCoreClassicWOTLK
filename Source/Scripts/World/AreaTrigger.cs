@@ -76,7 +76,7 @@ namespace Scripts.World.Areatriggers
             if (!player.IsDead() && player.GetQuestStatus(QuestScentOfLarkorwi) == QuestStatus.Incomplete)
             {
                 if (player.FindNearestCreature(NpcLarkorwiMate, 15) == null)
-                    player.SummonCreature(NpcLarkorwiMate, player.GetPositionX() + 5, player.GetPositionY(), player.GetPositionZ(), 3.3f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
+                    player.SummonCreature(NpcLarkorwiMate, player.GetPositionX() + 5, player.GetPositionY(), player.GetPositionZ(), 3.3f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)100);
             }
 
             return false;
@@ -137,7 +137,7 @@ namespace Scripts.World.Areatriggers
             {
                 if (player.FindNearestCreature(NpcLurkingShark, 20.0f) == null)
                 {
-                    Creature shark = player.SummonCreature(NpcLurkingShark, -4246.243f, -3922.356f, -7.488f, 5.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
+                    Creature shark = player.SummonCreature(NpcLurkingShark, -4246.243f, -3922.356f, -7.488f, 5.0f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)100);
                     if (shark != null)
                         shark.GetAI().AttackStart(player);
 
@@ -159,21 +159,21 @@ namespace Scripts.World.Areatriggers
 
         const int SayWelcome = 4;
 
-        const int AreatriggerTalkCooldown = 5; // in seconds
+        static readonly Seconds AreatriggerTalkCooldown = (Seconds)5;
 
-        Dictionary<int, long> _triggerTimes = new();
+        Dictionary<int, DateTime> _triggerTimes = new();
 
         public AreaTrigger_at_brewfest() : base("at_brewfest")
         {
             // Initialize for cooldown
-            _triggerTimes[AtBrewfestDurotar] = _triggerTimes[AtBrewfestDunMorogh] = 0;
+            _triggerTimes[AtBrewfestDurotar] = _triggerTimes[AtBrewfestDunMorogh] = Time.Zero;
         }
 
         public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
             int triggerId = trigger.Id;
             // Second trigger happened too early after first, skip for now
-            if (GameTime.GetGameTime() - _triggerTimes[triggerId] < AreatriggerTalkCooldown)
+            if (LoopTime.ServerTime - _triggerTimes[triggerId] < AreatriggerTalkCooldown)
                 return false;
 
             switch (triggerId)
@@ -192,7 +192,7 @@ namespace Scripts.World.Areatriggers
                     break;
             }
 
-            _triggerTimes[triggerId] = GameTime.GetGameTime();
+            _triggerTimes[triggerId] = LoopTime.ServerTime;
             return false;
         }
     }
@@ -202,18 +202,18 @@ namespace Scripts.World.Areatriggers
     {
         const int SpellA52Neuralyzer = 34400;
         const int NpcSpotlight = 19913;
-        const int SummonCooldown = 5;
+        static readonly Seconds SummonCooldown = (Seconds)5;
 
         const int AtArea52South = 4472;
         const int AtArea52North = 4466;
         const int AtArea52West = 4471;
         const int AtArea52East = 4422;
 
-        Dictionary<int, long> _triggerTimes = new();
+        Dictionary<int, ServerTime> _triggerTimes = new();
 
         public AreaTrigger_at_area_52_entrance() : base("at_area_52_entrance")
         {
-            _triggerTimes[AtArea52South] = _triggerTimes[AtArea52North] = _triggerTimes[AtArea52West] = _triggerTimes[AtArea52East] = 0;
+            _triggerTimes[AtArea52South] = _triggerTimes[AtArea52North] = _triggerTimes[AtArea52West] = _triggerTimes[AtArea52East] = ServerTime.Zero;
         }
 
         public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
@@ -224,7 +224,7 @@ namespace Scripts.World.Areatriggers
                 return false;
 
             int triggerId = trigger.Id;
-            if (GameTime.GetGameTime() - _triggerTimes[triggerId] < SummonCooldown)
+            if (LoopTime.ServerTime - _triggerTimes[triggerId] < SummonCooldown)
                 return false;
 
             switch (triggerId)
@@ -251,9 +251,9 @@ namespace Scripts.World.Areatriggers
                     break;
             }
 
-            player.SummonCreature(NpcSpotlight, x, y, z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
+            player.SummonCreature(NpcSpotlight, x, y, z, 0.0f, TempSummonType.TimedDespawn, (Seconds)5);
             player.AddAura(SpellA52Neuralyzer, player);
-            _triggerTimes[trigger.Id] = GameTime.GetGameTime();
+            _triggerTimes[trigger.Id] = LoopTime.ServerTime;
             return false;
         }
     }
@@ -290,7 +290,7 @@ namespace Scripts.World.Areatriggers
             if (stormforgedEradictor != null)
                 return false;
 
-            stormforgedMonitor = player.SummonCreature(NpcStormforgedMonitor, stormforgedMonitorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(1));
+            stormforgedMonitor = player.SummonCreature(NpcStormforgedMonitor, stormforgedMonitorPosition, TempSummonType.TimedDespawnOutOfCombat, (Minutes)1);
             if (stormforgedMonitor != null)
             {
                 stormforgedMonitorGUID = stormforgedMonitor.GetGUID();
@@ -300,7 +300,7 @@ namespace Scripts.World.Areatriggers
                 stormforgedMonitor.GetMotionMaster().MovePath((NpcStormforgedMonitor * 100) << 3, false);
             }
 
-            stormforgedEradictor = player.SummonCreature(NpcStormforgedEradictor, stormforgedEradictorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(1));
+            stormforgedEradictor = player.SummonCreature(NpcStormforgedEradictor, stormforgedEradictorPosition, TempSummonType.TimedDespawnOutOfCombat, (Minutes)1);
             if (stormforgedEradictor != null)
             {
                 stormforgedEradictorGUID = stormforgedEradictor.GetGUID();

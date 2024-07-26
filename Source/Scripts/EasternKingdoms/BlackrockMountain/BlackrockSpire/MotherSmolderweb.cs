@@ -30,15 +30,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)20, task =>
             {
                 DoCast(me, SpellIds.Crystalize);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)15);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule((Seconds)10, task =>
             {
                 DoCast(me, SpellIds.Mothersmilk);
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(12500));
+                task.Repeat((Seconds)5, Time.SpanFromMilliseconds(12500));
             });
         }
 
@@ -53,7 +53,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
                 DoCast(me, SpellIds.SummonSpireSpiderling, new CastSpellExtraArgs(true));
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

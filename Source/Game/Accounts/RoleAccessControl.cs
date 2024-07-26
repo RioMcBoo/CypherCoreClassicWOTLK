@@ -125,7 +125,7 @@ namespace Game.Accounts
             // Do not save to db when loading data from DB (realmId = 0)
             if (realmId != 0)
             {
-                Log.outDebug(LogFilter.Rbac, 
+                Log.outDebug(LogFilter.Rbac,
                     $"RBACData.DenyPermission [Id: {GetId()} Name: {GetName()}] " +
                     $"(Permission {permissionId}, RealmId {realmId}). Ok and DB updated");
 
@@ -170,7 +170,7 @@ namespace Game.Accounts
             // Do not save to db when loading data from DB (realmId = 0)
             if (realmId != 0)
             {
-                Log.outDebug(LogFilter.Rbac, 
+                Log.outDebug(LogFilter.Rbac,
                     $"RBACData.RevokePermission [Id: {GetId()} Name: {GetName()}] " +
                     $"(Permission {permissionId}, RealmId {realmId}). " +
                     $"Ok and DB updated");
@@ -185,7 +185,7 @@ namespace Game.Accounts
             }
             else
             {
-                Log.outDebug(LogFilter.Rbac, 
+                Log.outDebug(LogFilter.Rbac,
                     $"RBACData.RevokePermission [Id: {GetId()} Name: {GetName()}] " +
                     $"(Permission {permissionId}, RealmId {realmId}). Ok");
             }

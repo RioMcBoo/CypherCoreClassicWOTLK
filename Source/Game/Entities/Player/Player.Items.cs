@@ -1256,12 +1256,12 @@ namespace Game.Entities
                         {
                             m_weaponChangeTimer = spellProto.StartRecoveryTime;
 
-                            GetSpellHistory().AddGlobalCooldown(spellProto, TimeSpan.FromMilliseconds(m_weaponChangeTimer));
+                            GetSpellHistory().AddGlobalCooldown(spellProto, m_weaponChangeTimer);
 
                             SpellCooldownPkt spellCooldown = new();
                             spellCooldown.Caster = GetGUID();
                             spellCooldown.Flags = SpellCooldownFlags.IncludeGCD;
-                            spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(cooldownSpell, 0));
+                            spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(cooldownSpell, default));
                             SendPacket(spellCooldown);
                         }
                     }
@@ -2115,14 +2115,14 @@ namespace Game.Entities
 
         void AddItemDurations(Item item)
         {
-            if (item.m_itemData.Expiration != 0)
+            if (item.m_itemData.Expiration.GetValue() != 0)
             {
                 m_itemDuration.Add(item);
                 item.SendTimeUpdate(this);
             }
         }
 
-        void UpdateItemDuration(uint time, bool realtimeonly = false)
+        void UpdateItemDuration(Seconds time, bool realtimeonly = false)
         {
             if (m_itemDuration.Empty())
                 return;
@@ -2139,7 +2139,7 @@ namespace Game.Entities
         void SendEnchantmentDurations()
         {
             foreach (var enchantDuration in m_enchantDuration)
-                GetSession().SendItemEnchantTimeUpdate(GetGUID(), enchantDuration.item.GetGUID(), enchantDuration.slot, enchantDuration.leftduration / 1000);
+                GetSession().SendItemEnchantTimeUpdate(GetGUID(), enchantDuration.item.GetGUID(), enchantDuration.slot, enchantDuration.leftduration);
         }
 
         void SendItemDurations()
@@ -2522,7 +2522,7 @@ namespace Game.Entities
                 // if current back slot non-empty search oldest or free
                 if (m_items[slot] != null)
                 {
-                    long oldest_time = m_activePlayerData.BuybackTimestamp[0];
+                    TimeSpan oldest_time = m_activePlayerData.BuybackTimestamp[0];
                     var oldest_slot = InventorySlots.BuyBackStart;
 
                     for (byte i = InventorySlots.BuyBackStart + 1; i < InventorySlots.BuyBackEnd; ++i)
@@ -2534,7 +2534,7 @@ namespace Game.Entities
                             break;
                         }
 
-                        long i_time = m_activePlayerData.BuybackTimestamp[i - InventorySlots.BuyBackStart];
+                        TimeSpan i_time = m_activePlayerData.BuybackTimestamp[i - InventorySlots.BuyBackStart];
                         if (oldest_time > i_time)
                         {
                             oldest_time = i_time;
@@ -2551,8 +2551,8 @@ namespace Game.Entities
                     $"STORAGE: AddItemToBuyBackSlot item = {pItem.GetEntry()}, slot = {slot}");
 
                 m_items[slot] = pItem;
-                var time = GameTime.GetGameTime();
-                uint etime = (uint)(time - m_logintime + (30 * 3600));
+                ServerTime time = LoopTime.ServerTime;
+                TimeSpan etime = time - m_logintime + (Hours)30;
                 var eslot = (byte)(slot - InventorySlots.BuyBackStart);
 
                 SetInvSlot(slot, pItem.GetGUID());
@@ -3004,7 +3004,10 @@ namespace Game.Entities
             SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackPrice, slot), price); 
         }
 
-        public void SetBuybackTimestamp(int slot, long timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, slot), timestamp); }
+        public void SetBuybackTimestamp(int slot, TimeSpan timestamp) 
+        { 
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, slot), timestamp); 
+        }
 
         public Item GetItemFromBuyBackSlot(int slot)
         {
@@ -3039,7 +3042,7 @@ namespace Game.Entities
                 var eslot = slot - InventorySlots.BuyBackStart;
                 SetInvSlot(slot, ObjectGuid.Empty);
                 SetBuybackPrice(eslot, 0);
-                SetBuybackTimestamp(eslot, 0);
+                SetBuybackTimestamp(eslot, TimeSpan.Zero);
 
                 // if current backslot is filled set to now free slot
                 if (m_items[m_currentBuybackSlot] != null)
@@ -3464,7 +3467,9 @@ namespace Game.Entities
             if (pItem.GetTemplate().HasFlag(ItemFlags.NoEquipCooldown))
                 return;
 
-            DateTime now = GameTime.Now();
+            ServerTime now = LoopTime.ServerTime;
+            TimeSpan equipCooldown = (Seconds)30;  //Always 30secs?
+
             foreach (ItemEffectRecord effectData in pItem.GetEffects())
             {
                 SpellInfo effectSpellInfo = Global.SpellMgr.GetSpellInfo(effectData.SpellID, Difficulty.None);
@@ -3494,15 +3499,15 @@ namespace Game.Entities
                     continue;
 
                 // Don't replace longer cooldowns by equip cooldown if we have any.
-                if (GetSpellHistory().GetRemainingCooldown(effectSpellInfo) > TimeSpan.FromSeconds(30))
+                if (GetSpellHistory().GetRemainingCooldown(effectSpellInfo) > equipCooldown)
                     continue;
 
-                GetSpellHistory().AddCooldown(effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
+                GetSpellHistory().AddCooldown(effectData.SpellID, pItem.GetEntry(), equipCooldown);
 
                 ItemCooldown data = new();
                 data.ItemGuid = pItem.GetGUID();
                 data.SpellID = effectData.SpellID;
-                data.Cooldown = 30 * Time.InMilliseconds; //Always 30secs?
+                data.Cooldown = (Milliseconds)equipCooldown;
                 SendPacket(data);
             }
         }
@@ -4390,8 +4395,8 @@ namespace Game.Entities
                     {
                         if (slots[i] == slot)
                             return slot;
-            }
-            }
+                    }
+                }
             }
             else
             {
@@ -4403,7 +4408,7 @@ namespace Game.Entities
                         // in case 2hand equipped weapon (without titan grip) offhand slot empty but not free
                         if (slots[i] != EquipmentSlot.OffHand || !IsTwoHandUsed())
                             return slots[i];
-                }
+                    }
                 }
 
                 // if not found free and can swap return slot with lower item level equipped
@@ -4504,7 +4509,7 @@ namespace Game.Entities
                             {
                                 if (bg.IsArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
                                     return InventoryResult.NotDuringArenaMatch;
-                        }
+                            }
                         }
 
                         if (IsInCombat() && (pProto.GetClass() == ItemClass.Weapon || pProto.GetInventoryType() == InventoryType.Relic) && m_weaponChangeTimer != 0)
@@ -4522,7 +4527,7 @@ namespace Game.Entities
                         {
                             if (!currentChanneledSpell.GetSpellInfo().HasAttribute(SpellAttr6.AllowEquipWhileCasting))
                                 return InventoryResult.ClientLockedOut;
-                    }
+                        }
                     }
 
                     ContentTuningLevels? requiredLevels = null;
@@ -4572,10 +4577,10 @@ namespace Game.Entities
                                             return (pBagProto.GetSubClass() == (uint)ItemSubClassQuiver.AmmoPouch)
                                                 ? InventoryResult.OnlyOneAmmo
                                                 : InventoryResult.OnlyOneQuiver;
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
                         }
                     }
 
@@ -5424,7 +5429,7 @@ namespace Game.Entities
             // If not released spirit, do it !
             if (m_deathTimer > 0)
             {
-                m_deathTimer = 0;
+                m_deathTimer = Milliseconds.Zero;
                 BuildPlayerRepop();
                 RepopAtGraveyard();
             }
@@ -5718,7 +5723,7 @@ namespace Game.Entities
                     {
                         if (!callback(item))
                             return false;
-                }
+                    }
                 }
 
                 for (byte i = ProfessionSlots.Start; i < ProfessionSlots.End; ++i)
@@ -5728,8 +5733,8 @@ namespace Game.Entities
                     {
                         if (!callback(pItem))
                             return false;
+                    }
                 }
-            }
             }
 
             if (location.HasAnyFlag(ItemSearchLocation.Inventory))
@@ -5742,7 +5747,7 @@ namespace Game.Entities
                     {
                         if (!callback(item))
                             return false;
-                }
+                    }
                 }
 
                 for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; i++)
@@ -5752,7 +5757,7 @@ namespace Game.Entities
                     {
                         if (!callback(item))
                             return false;
-                }
+                    }
                 }
 ;
                 for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; i++)
@@ -5762,7 +5767,7 @@ namespace Game.Entities
                     {
                         if (!callback(item))
                             return false;
-                }
+                    }
                 }
 
                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
@@ -5777,10 +5782,10 @@ namespace Game.Entities
                             {
                                 if (!callback(pItem))
                                     return false;
+                            }
                         }
                     }
                 }
-            }
             }
 
             if (location.HasAnyFlag(ItemSearchLocation.Bank))
@@ -5792,7 +5797,7 @@ namespace Game.Entities
                     {
                         if (!callback(item))
                             return false;
-                }
+                    }
                 }
 
                 for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
@@ -5807,10 +5812,10 @@ namespace Game.Entities
                             {
                                 if (!callback(pItem))
                                     return false;
+                            }
                         }
                     }
                 }
-            }
             }
 
             if (location.HasAnyFlag(ItemSearchLocation.ReagentBank))
@@ -5822,8 +5827,8 @@ namespace Game.Entities
                     {
                         if (!callback(item))
                             return false;
+                    }
                 }
-            }
             }
 
             return true;
@@ -5934,7 +5939,7 @@ namespace Game.Entities
                                 {
                                     if (slotData1.guid == item.GetGUID())
                                         return;
-                            }
+                                }
                             }
 
                             ref var slotData = ref bestItemLevels[slot];
@@ -5972,8 +5977,8 @@ namespace Game.Entities
                         && item.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand) // 2h weapon counts twice
                     {
                         totalItemLevel += itemLevel;
+                    }
                 }
-            }
             }
 
             totalItemLevel /= 16.0f;

@@ -58,7 +58,7 @@ namespace Game
 
         public void LoadFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             Dictionary<int, (List<QuestPool>, int)> lookup = new(); // poolId -> (list, index)
 
             _poolLookup.Clear();
@@ -212,7 +212,7 @@ namespace Game
                             bool otherStatus = pool.activeQuests.Contains(id);
                             if (status != otherStatus)
                             {
-                                Log.outWarn(LogFilter.Sql, 
+                                Log.outWarn(LogFilter.Sql,
                                     $"Table `pool_quest_save` {(status ? "does not have" : "has")} " +
                                     $"quest {id} (in pool {pool.poolId}, index {i}) saved, " +
                                     $"but its index is{(status ? "" : " not")} active " +
@@ -279,7 +279,9 @@ namespace Game
             }
             DB.Characters.CommitTransaction(trans);
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_dailyPools.Count} daily, {_weeklyPools.Count} weekly and {_monthlyPools.Count} monthly quest pools in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {_dailyPools.Count} daily, {_weeklyPools.Count} weekly " +
+                $"and {_monthlyPools.Count} monthly quest pools in {Time.Diff(oldMSTime)} ms.");
         }
 
         void Regenerate(List<QuestPool> pools)

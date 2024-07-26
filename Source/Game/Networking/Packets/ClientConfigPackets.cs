@@ -20,7 +20,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid PlayerGuid;
-        public long ServerTime;
+        public UnixTime64 ServerTime;
         public long[] AccountTimes = new long[(int)AccountDataTypes.Max];
     }
 

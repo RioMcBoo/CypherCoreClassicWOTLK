@@ -608,8 +608,8 @@ namespace Game
                     && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
                 {
                     SetVisible(factionEntry);
-        }
-        }
+                }
+            }
         }
 
         public void SetVisible(FactionRecord factionEntry)
@@ -888,7 +888,7 @@ namespace Game
                     && (raceMask == RaceMask.None || raceMask.HasRace(race)))
                 {
                     return factionEntry.ReputationBase[i];
-            }
+                }
             }
 
             return 0;

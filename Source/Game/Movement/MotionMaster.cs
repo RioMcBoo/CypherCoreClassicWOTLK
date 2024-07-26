@@ -72,7 +72,8 @@ namespace Game.Movement
     public class MotionMaster
     {
         public const double gravity = 19.29110527038574;
-        public const float SPEED_CHARGE = 42.0f;
+        public static readonly Speed SPEED_CHARGE = new(42.0f);
+
         static IdleMovementGenerator staticIdleMovement = new();
         static int splineId;
 
@@ -296,7 +297,7 @@ namespace Game.Movement
             return value;
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             if (_owner == null)
                 return;
@@ -641,12 +642,12 @@ namespace Game.Movement
                 Add(new FleeingMovementGenerator(enemy.GetGUID()));
         }
 
-        public void MovePoint(int id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
+        public void MovePoint(int id, Position pos, bool generatePath = true, float? finalOrient = null, Speed? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
             MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient, speed, speedSelectionMode, closeEnoughDistance);
         }
 
-        public void MovePoint(int id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
+        public void MovePoint(int id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, Speed? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePoint: '{_owner.GetGUID()}', targeted point Id: {id} (X: {x}, Y: {y}, Z: {z})");
             Add(new PointMovementGenerator(id, x, y, z, generatePath, speed, finalOrient, null, null, speedSelectionMode, closeEnoughDistance));
@@ -676,7 +677,7 @@ namespace Game.Movement
             }
         }
 
-        public void MoveLand(int id, Position pos, int? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
+        public void MoveLand(int id, Position pos, int? tierTransitionId = null, Speed? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -701,7 +702,7 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
-        public void MoveTakeoff(int id, Position pos, int? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
+        public void MoveTakeoff(int id, Position pos, int? tierTransitionId = null, Speed? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -726,7 +727,12 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
-        public void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, int id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveCharge(float x, float y, float z, int id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
+        {
+            MoveCharge(x, y, z, SPEED_CHARGE, id, generatePath, target, spellEffectExtraData);
+        }
+
+        public void MoveCharge(float x, float y, float z, Speed speed, int id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             /*
             if (_slot[(int)MovementSlot.Controlled] != null && _slot[(int)MovementSlot.Controlled].GetMovementGeneratorType() != MovementGeneratorType.Distract)
@@ -740,7 +746,12 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveCharge(PathGenerator path, float speed = SPEED_CHARGE, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveCharge(PathGenerator path, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
+        {
+            MoveCharge(path, SPEED_CHARGE, target, spellEffectExtraData);
+        }
+
+        public void MoveCharge(PathGenerator path, Speed speed, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             Vector3 dest = path.GetActualEndPosition();
 
@@ -759,7 +770,7 @@ namespace Game.Movement
             init.Launch();
         }
 
-        public void MoveKnockbackFrom(Position origin, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveKnockbackFrom(Position origin, Speed speedXY, Speed speedZ, SpellEffectExtraData spellEffectExtraData = null)
         {
             //This function may make players fall below map
             if (_owner.IsTypeId(TypeId.Player))
@@ -771,7 +782,7 @@ namespace Game.Movement
             Position dest = _owner.GetPosition();
             float moveTimeHalf = (float)(speedZ / gravity);
             float dist = 2 * moveTimeHalf * speedXY;
-            float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
+            float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ.PerSec);
 
             // Use a mmap raycast to get a valid destination.
             _owner.MovePositionToFirstCollision(dest, dist, _owner.GetRelativeAngle(origin) + MathF.PI);
@@ -792,7 +803,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveJumpTo(float angle, float speedXY, float speedZ)
+        public void MoveJumpTo(float angle, Speed speedXY, Speed speedZ)
         {
             //This function may make players fall below map
             if (_owner.IsTypeId(TypeId.Player))
@@ -806,12 +817,12 @@ namespace Game.Movement
             MoveJump(x, y, z, 0.0f, speedXY, speedZ);
         }
 
-        public void MoveJump(Position pos, float speedXY, float speedZ, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveJump(Position pos, Speed speedXY, Speed speedZ, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), speedXY, speedZ, id, hasOrientation, arrivalCast, spellEffectExtraData);
         }
 
-        public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveJump(float x, float y, float z, float o, Speed speedXY, Speed speedZ, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             Log.outDebug(LogFilter.Server, 
                 $"Unit ({_owner.GetGUID()}) jump to point (X: {x} Y: {y} Z: {z})");
@@ -847,7 +858,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveJumpWithGravity(Position pos, Speed speedXY, float gravity, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             Log.outDebug(LogFilter.Movement, 
                 $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', " +
@@ -884,7 +895,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
+        public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount, TimeSpan? duration = null, Speed? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -1042,7 +1053,7 @@ namespace Game.Movement
             Creature creature = _owner.ToCreature();
             if (creature != null)
             {
-                Log.outDebug(LogFilter.Movement, 
+                Log.outDebug(LogFilter.Movement,
                     $"MotionMaster::MoveSeekAssistance: '{creature.GetGUID()}', " +
                     $"seeks assistance (X: {x}, Y: {y}, Z: {z})");
 
@@ -1060,7 +1071,7 @@ namespace Game.Movement
             }
         }
 
-        public void MoveSeekAssistanceDistract(uint time)
+        public void MoveSeekAssistanceDistract(TimeSpan time)
         {
             if (_owner.IsCreature())
                 Add(new AssistanceDistractMovementGenerator(time, _owner.GetOrientation()));
@@ -1078,13 +1089,13 @@ namespace Game.Movement
             {
                 if (path < CliDB.TaxiPathNodesByPath.Count)
                 {
-                    Log.outDebug(LogFilter.Server, 
+                    Log.outDebug(LogFilter.Server,
                         $"MotionMaster::MoveTaxiFlight: {_owner.GetGUID()} taxi " +
                         $"to Path Id: {path} (node {pathnode})");
 
                     // Only one FLIGHT_MOTION_TYPE is allowed
-                    bool hasExisting = 
-                        HasMovementGenerator(gen => 
+                    bool hasExisting =
+                        HasMovementGenerator(gen =>
                         gen.GetMovementGeneratorType() == MovementGeneratorType.Flight
                         );
 
@@ -1109,7 +1120,7 @@ namespace Game.Movement
             }
         }
 
-        public void MoveDistract(uint timer, float orientation)
+        public void MoveDistract(TimeSpan timer, float orientation)
         {
             /*
             if (_slot[(int)MovementSlot.Controlled] != null)
@@ -1119,7 +1130,7 @@ namespace Game.Movement
             Add(new DistractMovementGenerator(timer, orientation));
         }
 
-        public void MovePath(int pathId, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+        public void MovePath(int pathId, bool repeatable, TimeSpan? duration = null, Speed? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
             (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
         {
             if (pathId == 0)
@@ -1135,7 +1146,7 @@ namespace Game.Movement
                 MovementSlot.Default);
         }
 
-        public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+        public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, Speed? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
             (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
         {
             Log.outDebug(LogFilter.Movement, 
@@ -1158,7 +1169,11 @@ namespace Game.Movement
         /// <param name="totalTurnAngle">Total angle of the entire movement, infinite if not set</param>
         public void MoveRotate(int id, RotateDirection direction, TimeSpan? time = null, float? turnSpeed = null, float? totalTurnAngle = null)
         {
-            Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveRotate: '{_owner.GetGUID()}', starts rotate (time: {time.GetValueOrDefault(TimeSpan.Zero)}ms, turnSpeed: {turnSpeed}, totalTurnAngle: {totalTurnAngle}, direction: {direction})");
+            Log.outDebug(LogFilter.Movement, 
+                $"MotionMaster::MoveRotate: '{_owner.GetGUID()}', " +
+                $"starts rotate (time: {time.GetValueOrDefault(TimeSpan.Zero)}, " +
+                $"turnSpeed: {turnSpeed}, totalTurnAngle: {totalTurnAngle}, " +
+                $"direction: {direction})");
 
             Add(new RotateMovementGenerator(id, direction, time, turnSpeed, totalTurnAngle));
         }
@@ -1185,14 +1200,14 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void CalculateJumpSpeeds(float dist, UnitMoveType moveType, float speedMultiplier, float minHeight, float maxHeight, out float speedXY, out float speedZ)
+        public void CalculateJumpSpeeds(float dist, UnitMoveType moveType, float speedMultiplier, float minHeight, float maxHeight, out Speed speedXY, out Speed speedZ)
         {
             float baseSpeed = _owner.IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)moveType] : SharedConst.baseMoveSpeed[(int)moveType];
             Creature creature = _owner.ToCreature();
             if (creature != null)
                 baseSpeed *= creature.GetCreatureTemplate().SpeedRun;
 
-            speedXY = Math.Min(baseSpeed * 3.0f * speedMultiplier, Math.Max(28.0f, _owner.GetSpeed(moveType) * 4.0f));
+            speedXY = new(Math.Min(baseSpeed * 3.0f * speedMultiplier, Math.Max(28.0f, _owner.GetSpeed(moveType) * 4.0f)));
 
             float duration = dist / speedXY;
             float durationSqr = duration * duration;
@@ -1204,7 +1219,7 @@ namespace Game.Movement
             else
                 height = (float)(gravity * durationSqr / 8);
 
-            speedZ = (float)Math.Sqrt(2 * gravity * height);
+            speedZ = new(Math.Sqrt(2 * gravity * height));
         }
 
         void ResolveDelayedActions()
@@ -1422,7 +1437,7 @@ namespace Game.Movement
 
     public class JumpChargeParams
     {
-        public float Speed;
+        public Speed Speed;
 
         public bool TreatSpeedAsMoveTimeSeconds;
 

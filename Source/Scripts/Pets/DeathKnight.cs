@@ -81,7 +81,7 @@ namespace Scripts.Pets.DeathKnight
             me.GetMotionMaster().MovePoint(0, x, y, z);
 
             // Despawn as soon as possible
-            me.DespawnOrUnsummon(TimeSpan.FromSeconds(4));
+            me.DespawnOrUnsummon((Seconds)4);
         }
     }
 

@@ -90,7 +90,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading creature loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet, lootIdSetUsed = new();
             int count = Creature.LoadAndCollectLootIds(out lootIdSet);
@@ -121,7 +121,7 @@ namespace Game.Loots
             Creature.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -133,7 +133,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading disenchanting loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet, lootIdSetUsed = new();
             int count = Disenchant.LoadAndCollectLootIds(out lootIdSet);
@@ -154,7 +154,7 @@ namespace Game.Loots
             Disenchant.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} disenchanting loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} disenchanting loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -166,7 +166,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading fishing loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             int count = Fishing.LoadAndCollectLootIds(out lootIdSet);
@@ -180,7 +180,7 @@ namespace Game.Loots
             Fishing.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} fishing loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} fishing loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -192,7 +192,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading gameobject loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet, lootIdSetUsed = new();
             int count = Gameobject.LoadAndCollectLootIds(out lootIdSet);
@@ -230,7 +230,7 @@ namespace Game.Loots
             Gameobject.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -242,7 +242,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading item loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             int count = Items.LoadAndCollectLootIds(out lootIdSet);
@@ -257,7 +257,7 @@ namespace Game.Loots
             Items.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} item loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -269,7 +269,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading milling loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             int count = Milling.LoadAndCollectLootIds(out lootIdSet);
@@ -289,7 +289,7 @@ namespace Game.Loots
             Milling.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} milling loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} milling loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -301,7 +301,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading pickpocketing loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             List<int> lootIdSetUsed = new();
@@ -330,19 +330,19 @@ namespace Game.Loots
             Pickpocketing.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pickpocketing loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} pickpocketing loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
                     "Loaded 0 pickpocketing loot templates. DB table `pickpocketing_loot_template` is empty");
-            }        
+            }
         }
 
         public static void LoadLootTemplates_Prospecting()
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading prospecting loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             int count = Prospecting.LoadAndCollectLootIds(out lootIdSet);
@@ -362,7 +362,7 @@ namespace Game.Loots
             Prospecting.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} prospecting loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} prospecting loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -374,7 +374,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading mail loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             int count = Mail.LoadAndCollectLootIds(out lootIdSet);
@@ -388,7 +388,7 @@ namespace Game.Loots
             Mail.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} mail loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} mail loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -400,7 +400,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading skinning loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             List<int> lootIdSetUsed = new();
@@ -429,7 +429,7 @@ namespace Game.Loots
             Skinning.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skinning loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} skinning loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -442,7 +442,7 @@ namespace Game.Loots
             // TODO: change this to use MiscValue from spell effect as id instead of spell id
             Log.outInfo(LogFilter.ServerLoading, "Loading spell loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             int count = Spell.LoadAndCollectLootIds(out lootIdSet);
@@ -475,7 +475,7 @@ namespace Game.Loots
             Spell.ReportUnusedIds(lootIdSet);
 
             if (count != 0)
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell loot templates in {Time.Diff(oldMSTime)} ms.");
             else
             {
                 Log.outInfo(LogFilter.ServerLoading, 
@@ -487,7 +487,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading reference loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             List<int> lootIdSet;
             Reference.LoadAndCollectLootIds(out lootIdSet);
@@ -508,7 +508,7 @@ namespace Game.Loots
             // output error for any still listed ids (not referenced from any loot table)
             Reference.ReportUnusedIds(lootIdSet);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded reference loot templates in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded reference loot templates in {Time.Diff(oldMSTime)} ms.");
         }
     }
 
@@ -846,8 +846,8 @@ namespace Game.Loots
                             true, item.conditions))
                     {
                         loot.AddItem(item);
+                    }
                 }
-            }
             }
 
             // Now processing groups
@@ -977,7 +977,7 @@ namespace Game.Loots
                     strictUsabilityCheck, lootStoreItem.conditions))
                 {
                     return true;                                    // active quest drop found
-            }
+                }
             }
 
             // Now checking groups

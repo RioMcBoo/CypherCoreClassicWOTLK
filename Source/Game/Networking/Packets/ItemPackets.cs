@@ -105,10 +105,10 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(ItemGUID);
             Contents.Write(_worldPacket);
             _worldPacket.WriteUInt32(Flags);
-            _worldPacket.WriteUInt32(PurchaseTime);
+            _worldPacket.WriteInt32(PurchaseTime);
         }
 
-        public uint PurchaseTime;
+        public Seconds PurchaseTime;
         public uint Flags;
         public ItemPurchaseContents Contents = new();
         public ObjectGuid ItemGUID;
@@ -196,11 +196,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ItemGuid);
-            _worldPacket.WriteUInt32(DurationLeft);
+            _worldPacket.WriteInt32(DurationLeft);
         }
 
         public ObjectGuid ItemGuid;
-        public uint DurationLeft;
+        public Seconds DurationLeft;
     }
 
     public class SetProficiency : ServerPacket
@@ -532,12 +532,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(ItemGuid);
             _worldPacket.WriteInt32(SpellID);
-            _worldPacket.WriteUInt32(Cooldown);
+            _worldPacket.WriteInt32(Cooldown);
         }
 
         public ObjectGuid ItemGuid;
         public int SpellID;
-        public uint Cooldown;
+        public Milliseconds Cooldown;
     }
 
     class EnchantmentLog : ServerPacket
@@ -569,14 +569,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ItemGuid);
-            _worldPacket.WriteUInt32(DurationLeft);
+            _worldPacket.WriteInt32(DurationLeft);
             _worldPacket.WriteInt32((int)Slot);
             _worldPacket.WritePackedGuid(OwnerGuid);
         }
 
         public ObjectGuid OwnerGuid;
         public ObjectGuid ItemGuid;
-        public uint DurationLeft;
+        public Seconds DurationLeft;
         public EnchantmentSlot Slot;
     }
 
@@ -985,7 +985,7 @@ namespace Game.Networking.Packets
     public class ItemEnchantData
     {
         public ItemEnchantData() { }
-        public ItemEnchantData(int id, uint expiration, int charges, byte slot)
+        public ItemEnchantData(int id, Milliseconds expiration, int charges, byte slot)
         {
             ID = id;
             Expiration = expiration;
@@ -996,13 +996,13 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(ID);
-            data.WriteUInt32(Expiration);
+            data.WriteInt32(Expiration);
             data.WriteInt32(Charges);
             data.WriteUInt8(Slot);
         }
 
         public int ID;
-        public uint Expiration;
+        public Milliseconds Expiration;
         public int Charges;
         public byte Slot;
     }

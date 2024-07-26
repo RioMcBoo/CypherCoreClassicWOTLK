@@ -12,7 +12,7 @@ namespace Game.Entities
     {
         public static void LoadRandomEnchantmentsTable()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             RandomEnchantmentData.Clear();
 
@@ -59,7 +59,8 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.Player, $"Loaded {count} Random item enchantment definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.Player, 
+                $"Loaded {count} Random item enchantment definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public static int GetRandomPropertyPoints(int itemLevel, ItemQuality quality, InventoryType inventoryType)

@@ -28,15 +28,7 @@ namespace Game.BattleGrounds
                     m_QueuedGroups[i][c] = new List<GroupQueueInfo>();
             }
 
-            for (var i = 0; i < SharedConst.PvpTeamsCount; ++i)
-            {
-                m_WaitTimes[i] = new uint[(int)BattlegroundBracketId.Max][];
-                for (var c = 0; c < (int)BattlegroundBracketId.Max; ++c)
-                    m_WaitTimes[i][c] = new uint[SharedConst.CountOfPlayersToAverageWaitTime];
-
-                m_WaitTimeLastPlayer[i] = new uint[(int)BattlegroundBracketId.Max];
-                m_SumOfWaitTimes[i] = new uint[(int)BattlegroundBracketId.Max];
-            }
+            m_QueueTimeInfos = new(SharedConst.PvpTeamsCount * (int)BattlegroundBracketId.Max);
 
             m_SelectionPools[0] = new SelectionPool();
             m_SelectionPools[1] = new SelectionPool();
@@ -51,8 +43,8 @@ namespace Game.BattleGrounds
             GroupQueueInfo ginfo = new();
             ginfo.ArenaTeamId = arenateamid;
             ginfo.IsInvitedToBGInstanceGUID = 0;
-            ginfo.JoinTime = GameTime.GetGameTimeMS();
-            ginfo.RemoveInviteTime = 0;
+            ginfo.JoinTime = LoopTime.ServerTime;
+            ginfo.RemoveInviteTime = ServerTime.Zero;
             ginfo.Team = team;
             ginfo.ArenaTeamRating = ArenaRating;
             ginfo.ArenaMatchmakerRating = MatchmakerRating;
@@ -72,7 +64,7 @@ namespace Game.BattleGrounds
                 $"Adding Group to BattlegroundQueue bgTypeId : {m_queueId.BattlemasterListId}, " +
                 $"bracket_id : {bracketId}, index : {index}");
 
-            uint lastOnlineTime = GameTime.GetGameTimeMS();
+            ServerTime lastOnlineTime = LoopTime.ServerTime;
 
             //announce world (this don't need mutex)
             if (m_queueId.Rated && WorldConfig.Values[WorldCfg.ArenaQueueAnnouncerEnable].Bool)
@@ -82,7 +74,7 @@ namespace Game.BattleGrounds
                 {
                     Global.WorldMgr.SendWorldText(
                         CypherStrings.ArenaQueueAnnounceWorldJoin, arenaTeam.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, ginfo.ArenaTeamRating);
-            }
+                }
             }
 
             //add players from group to ginfo
@@ -157,9 +149,8 @@ namespace Game.BattleGrounds
         }
 
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo ginfo, BattlegroundBracketId bracket_id)
-        {
-            uint timeInQueue = Time.GetMSTimeDiff(ginfo.JoinTime, GameTime.GetGameTimeMS());
-            uint team_index = BattleGroundTeamId.Alliance;                    //default set to TeamIndex.Alliance - or non rated arenas!
+        {            
+            int team_index = BattleGroundTeamId.Alliance;                    //default set to TeamIndex.Alliance - or non rated arenas!
             if (m_queueId.TeamSize == 0)
             {
                 if (ginfo.Team == Team.Horde)
@@ -171,22 +162,22 @@ namespace Game.BattleGrounds
                     team_index = BattleGroundTeamId.Horde;                     //for rated arenas use TeamIndex.Horde
             }
 
-            //store pointer to arrayindex of player that was added first
-            uint lastPlayerAddedPointer = m_WaitTimeLastPlayer[team_index][(int)bracket_id];
-            //remove his time from sum
-            m_SumOfWaitTimes[team_index][(int)bracket_id] -= m_WaitTimes[team_index][(int)bracket_id][lastPlayerAddedPointer];
-            //set average time to new
-            m_WaitTimes[team_index][(int)bracket_id][lastPlayerAddedPointer] = timeInQueue;
-            //add new time to sum
-            m_SumOfWaitTimes[team_index][(int)bracket_id] += timeInQueue;
-            //set index of last player added to next one
-            lastPlayerAddedPointer++;
-            m_WaitTimeLastPlayer[team_index][(int)bracket_id] = lastPlayerAddedPointer % SharedConst.CountOfPlayersToAverageWaitTime;
+            m_QueueTimeInfos.TryGetValue((team_index, bracket_id), out var waitInfo);
+
+            if (waitInfo == null)
+            {
+                waitInfo = new(SharedConst.CountOfPlayersToAverageWaitTime, LoopTime.ServerTime);
+                m_QueueTimeInfos[(team_index, bracket_id)] = waitInfo;
+            }
+            else
+            {
+                waitInfo.Add(LoopTime.ServerTime);
+            }
         }
 
-        public uint GetAverageQueueWaitTime(GroupQueueInfo ginfo, BattlegroundBracketId bracket_id)
+        public TimeSpan GetAverageQueueWaitTime(GroupQueueInfo ginfo, BattlegroundBracketId bracket_id)
         {
-            uint team_index = BattleGroundTeamId.Alliance;                    //default set to TeamIndex.Alliance - or non rated arenas!
+            int team_index = BattleGroundTeamId.Alliance;                    //default set to TeamIndex.Alliance - or non rated arenas!
             if (m_queueId.TeamSize == 0)
             {
                 if (ginfo.Team == Team.Horde)
@@ -197,12 +188,18 @@ namespace Game.BattleGrounds
                 if (m_queueId.Rated)
                     team_index = BattleGroundTeamId.Horde;                     //for rated arenas use TeamIndex.Horde
             }
-            //check if there is enought values(we always add values > 0)
-            if (m_WaitTimes[team_index][(int)bracket_id][SharedConst.CountOfPlayersToAverageWaitTime - 1] != 0)
-                return (m_SumOfWaitTimes[team_index][(int)bracket_id] / SharedConst.CountOfPlayersToAverageWaitTime);
-            else
+
+            m_QueueTimeInfos.TryGetValue((team_index, bracket_id), out var waitInfo);
+
+            if (waitInfo == null)
+            {
                 //if there aren't enough values return 0 - not available
-                return 0;
+                return TimeSpan.Zero;
+            }
+            else
+            {
+                return waitInfo.AverageTime;
+            }            
         }
 
         //remove player from queue and from group info, if group info is empty then remove it too
@@ -292,7 +289,7 @@ namespace Game.BattleGrounds
                 {
                     Global.WorldMgr.SendWorldText(
                         CypherStrings.ArenaQueueAnnounceWorldExit, team.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, group.ArenaTeamRating);
-            }
+                }
             }
 
             // if player leaves queue and he is invited to rated arena match, then he have to lose
@@ -346,7 +343,7 @@ namespace Game.BattleGrounds
         }
 
         //returns true when player pl_guid is in queue and is invited to bgInstanceGuid
-        public bool IsPlayerInvited(ObjectGuid pl_guid, int bgInstanceGuid, uint removeTime)
+        public bool IsPlayerInvited(ObjectGuid pl_guid, int bgInstanceGuid, ServerTime removeTime)
         {
             var queueInfo = m_QueuedPlayers.LookupByKey(pl_guid);
             return (queueInfo != null
@@ -389,7 +386,7 @@ namespace Game.BattleGrounds
                 if (bg.IsArena() && bg.IsRated())
                     bg.SetArenaTeamIdForTeam(ginfo.Team, ginfo.ArenaTeamId);
 
-                ginfo.RemoveInviteTime = GameTime.GetGameTimeMS() + BattlegroundConst.InviteAcceptWaitTime;
+                ginfo.RemoveInviteTime = LoopTime.ServerTime + BattlegroundConst.InviteAcceptWaitTime;
 
                 // loop through the players
                 foreach (var guid in ginfo.Players.Keys)
@@ -410,10 +407,10 @@ namespace Game.BattleGrounds
 
                     // create remind invite events
                     BGQueueInviteEvent inviteEvent = new(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, ginfo.RemoveInviteTime, m_queueId);
-                    m_events.AddEvent(inviteEvent, m_events.CalculateTime(TimeSpan.FromMilliseconds(BattlegroundConst.InvitationRemindTime)));
+                    m_events.AddEvent(inviteEvent, m_events.CalculateTime(BattlegroundConst.InvitationRemindTime));
                     // create automatic remove events
                     BGQueueRemoveEvent removeEvent = new(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgQueueTypeId, ginfo.RemoveInviteTime);
-                    m_events.AddEvent(removeEvent, m_events.CalculateTime(TimeSpan.FromMilliseconds(BattlegroundConst.InviteAcceptWaitTime)));
+                    m_events.AddEvent(removeEvent, m_events.CalculateTime(BattlegroundConst.InviteAcceptWaitTime));
 
                     var queueSlot = player.GetBattlegroundQueueIndex(bgQueueTypeId);
 
@@ -595,7 +592,7 @@ namespace Game.BattleGrounds
             // this could be 2 cycles but i'm checking only first team in queue - it can cause problem -
             // if first is invited to BG and seconds timer expired, but we can ignore it, because players have only 80 seconds to click to enter bg
             // and when they click or after 80 seconds the queue info is removed from queue
-            uint time_before = GameTime.GetGameTimeMS() - (uint)WorldConfig.Values[WorldCfg.BattlegroundPremadeGroupWaitForMatch].Int32;
+            ServerTime time_before = LoopTime.ServerTime - WorldConfig.Values[WorldCfg.BattlegroundPremadeGroupWaitForMatch].TimeSpan;
             for (int i = 0; i < SharedConst.PvpTeamsCount; i++)
             {
                 if (!m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueuePremadeAlliance + i].Empty())
@@ -730,7 +727,7 @@ namespace Game.BattleGrounds
             return true;
         }
 
-        public void UpdateEvents(uint diff)
+        public void UpdateEvents(TimeSpan diff)
         {
             m_events.Update(diff);
         }
@@ -746,7 +743,7 @@ namespace Game.BattleGrounds
         /// <param name="arenaType"></param>
         /// <param name="isRated"></param>
         /// <param name="arenaRating"></param>
-        public void BattlegroundQueueUpdate(uint diff, BattlegroundBracketId bracket_id, int arenaRating)
+        public void BattlegroundQueueUpdate(TimeSpan diff, BattlegroundBracketId bracket_id, int arenaRating)
         {
             //if no players in queue - do nothing
             if (m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueuePremadeAlliance].Empty() &&
@@ -903,7 +900,7 @@ namespace Game.BattleGrounds
                 // (after what time the ratings aren't taken into account when making teams) then
                 // the discard time is current_time - time_to_discard, teams that joined after that, will have their ratings taken into account
                 // else leave the discard time on 0, this way all ratings will be discarded
-                int discardTime = (int)(GameTime.GetGameTimeMS() - Global.BattlegroundMgr.GetRatingDiscardTimer());
+                ServerTime discardTime = LoopTime.ServerTime - Global.BattlegroundMgr.GetRatingDiscardTimer();
 
                 // we need to find 2 teams which will play next game
                 GroupQueueInfo[] queueArray = new GroupQueueInfo[SharedConst.PvpTeamsCount];
@@ -1008,10 +1005,58 @@ namespace Game.BattleGrounds
         /// </summary>
         List<GroupQueueInfo>[][] m_QueuedGroups = new List<GroupQueueInfo>[(int)BattlegroundBracketId.Max][];
 
-        uint[][][] m_WaitTimes = new uint[SharedConst.PvpTeamsCount][][];
-        uint[][] m_WaitTimeLastPlayer = new uint[SharedConst.PvpTeamsCount][];
-        uint[][] m_SumOfWaitTimes = new uint[SharedConst.PvpTeamsCount][];
+        class AverageQueueTimeInfo
+        {
+            public AverageQueueTimeInfo(int CountOfPlayersToAverageWaitTime, ServerTime queueCreateTime)
+            {
+                pointer = 0;
+                maxCount = CountOfPlayersToAverageWaitTime;
+                timeSumm = TimeSpan.Zero;
+                lastJoinTime = queueCreateTime;
+                waitTimeSpans = new TimeSpan[CountOfPlayersToAverageWaitTime];
+            }
 
+            public void Add(ServerTime joinTime)
+            {
+                Update(joinTime);
+
+                lastJoinTime = joinTime;
+            }
+
+            public void Update(ServerTime updateTime)
+            {
+                timeSumm -= waitTimeSpans[pointer];
+                waitTimeSpans[pointer] = updateTime - lastJoinTime;
+                timeSumm += waitTimeSpans[pointer];
+
+                pointer++;
+                pointer %= maxCount;
+            }
+
+            public TimeSpan AverageTime
+            {
+                get
+                {
+                    if (waitTimeSpans[maxCount - 1] != TimeSpan.Zero)
+                    {
+                        return timeSumm / maxCount;
+                    }
+                    else
+                    {
+                        return TimeSpan.Zero;
+                    }
+                }                
+            }
+
+            readonly int maxCount;
+            int pointer;
+            TimeSpan timeSumm;
+            ServerTime lastJoinTime;
+            TimeSpan[] waitTimeSpans;
+        }
+
+        Dictionary<(int team, BattlegroundBracketId), AverageQueueTimeInfo> m_QueueTimeInfos;
+                
         // Event handler
         EventSystem m_events = new();
 
@@ -1165,7 +1210,7 @@ namespace Game.BattleGrounds
     /// </summary>
     public class PlayerQueueInfo
     {
-        public uint LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
+        public ServerTime LastOnlineTime;                            // for tracking and removing offline players from queue after 5 minutes
         public GroupQueueInfo GroupInfo;                             // pointer to the associated groupqueueinfo
     }
 
@@ -1175,10 +1220,10 @@ namespace Game.BattleGrounds
     public class GroupQueueInfo
     {
         public Dictionary<ObjectGuid, PlayerQueueInfo> Players = new();             // player queue info map
-        public Team Team;                                           // Player team (ALLIANCE/HORDE)
+        public Team Team;                                          // Player team (ALLIANCE/HORDE)
         public int ArenaTeamId;                                    // team id if rated match
-        public uint JoinTime;                                       // time when group was added
-        public uint RemoveInviteTime;                               // time when we will remove invite for players in group
+        public ServerTime JoinTime;                                // time when group was added
+        public ServerTime RemoveInviteTime;                        // time when we will remove invite for players in group
         public int IsInvitedToBGInstanceGUID;                      // was invited to certain BG
         public int ArenaTeamRating;                                // if rated match, inited to the rating of the team
         public int ArenaMatchmakerRating;                          // if rated match, inited to the rating of the team
@@ -1192,7 +1237,7 @@ namespace Game.BattleGrounds
     /// </summary>
     class BGQueueInviteEvent : BasicEvent
     {
-        public BGQueueInviteEvent(ObjectGuid plGuid, int bgInstanceGUID, BattlegroundTypeId bgTypeId, uint removeTime, BattlegroundQueueTypeId queueId)
+        public BGQueueInviteEvent(ObjectGuid plGuid, int bgInstanceGUID, BattlegroundTypeId bgTypeId, ServerTime removeTime, BattlegroundQueueTypeId queueId)
         {
             m_PlayerGuid = plGuid;
             m_BgInstanceGUID = bgInstanceGUID;
@@ -1201,7 +1246,7 @@ namespace Game.BattleGrounds
             m_QueueId = queueId;
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
             Player player = Global.ObjAccessor.FindPlayer(m_PlayerGuid);
             // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
@@ -1228,12 +1273,12 @@ namespace Game.BattleGrounds
             return true;                                            //event will be deleted
         }
 
-        public override void Abort(long e_time) { }
+        public override void Abort(TimeSpan e_time) { }
 
         ObjectGuid m_PlayerGuid;
         int m_BgInstanceGUID;
         BattlegroundTypeId m_BgTypeId;
-        uint m_RemoveTime;
+        ServerTime m_RemoveTime;
         BattlegroundQueueTypeId m_QueueId;
     }
 
@@ -1244,7 +1289,7 @@ namespace Game.BattleGrounds
     /// </summary>
     class BGQueueRemoveEvent : BasicEvent
     {
-        public BGQueueRemoveEvent(ObjectGuid plGuid, int bgInstanceGUID, BattlegroundQueueTypeId bgQueueTypeId, uint removeTime)
+        public BGQueueRemoveEvent(ObjectGuid plGuid, int bgInstanceGUID, BattlegroundQueueTypeId bgQueueTypeId, ServerTime removeTime)
         {
             m_PlayerGuid = plGuid;
             m_BgInstanceGUID = bgInstanceGUID;
@@ -1252,7 +1297,7 @@ namespace Game.BattleGrounds
             m_BgQueueTypeId = bgQueueTypeId;
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
             Player player = Global.ObjAccessor.FindPlayer(m_PlayerGuid);
             if (player == null)
@@ -1290,11 +1335,11 @@ namespace Game.BattleGrounds
             return true;
         }
 
-        public override void Abort(long e_time) { }
+        public override void Abort(TimeSpan e_time) { }
 
         ObjectGuid m_PlayerGuid;
         int m_BgInstanceGUID;
-        uint m_RemoveTime;
+        ServerTime m_RemoveTime;
         BattlegroundQueueTypeId m_BgQueueTypeId;
     }
 }

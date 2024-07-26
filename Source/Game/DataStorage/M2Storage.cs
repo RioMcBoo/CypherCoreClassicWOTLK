@@ -45,7 +45,7 @@ namespace Game.DataStorage
                 M2Array targTsArray = reader.Read<M2Array>();
 
                 reader.BaseStream.Position = targTsArray.offset_elements;
-                uint[] targTimestamps = reader.ReadArray<uint>(targTsArray.number);
+                Milliseconds[] targTimestamps = reader.ReadArray<Milliseconds>(targTsArray.number);
 
                 reader.BaseStream.Position = cam.target_positions.values.offset_elements;
                 M2Array targArray = reader.Read<M2Array>();
@@ -77,7 +77,7 @@ namespace Game.DataStorage
                 M2Array posTsArray = reader.Read<M2Array>();
 
                 reader.BaseStream.Position = posTsArray.offset_elements;
-                uint[] posTimestamps = reader.ReadArray<uint>(posTsArray.number);
+                Milliseconds[] posTimestamps = reader.ReadArray<Milliseconds>(posTsArray.number);
 
                 reader.BaseStream.Position = cam.positions.values.offset_elements;
                 M2Array posArray = reader.Read<M2Array>();
@@ -120,14 +120,14 @@ namespace Game.DataStorage
                         // Now, the timestamps for target cam and position can be different. So, if they differ we interpolate
                         if (lastTarget.timeStamp != posTimestamps[i])
                         {
-                            uint timeDiffTarget = nextTarget.timeStamp - lastTarget.timeStamp;
-                            uint timeDiffThis = posTimestamps[i] - lastTarget.timeStamp;
+                            Milliseconds timeDiffTarget = nextTarget.timeStamp - lastTarget.timeStamp;
+                            Milliseconds timeDiffThis = posTimestamps[i] - lastTarget.timeStamp;
                             float xDiff = nextTarget.locations.X - lastTarget.locations.X;
                             float yDiff = nextTarget.locations.Y - lastTarget.locations.Y;
                             float zDiff = nextTarget.locations.Z - lastTarget.locations.Z;
-                            x = lastTarget.locations.X + (xDiff * ((float)timeDiffThis / timeDiffTarget));
-                            y = lastTarget.locations.Y + (yDiff * ((float)timeDiffThis / timeDiffTarget));
-                            z = lastTarget.locations.Z + (zDiff * ((float)timeDiffThis / timeDiffTarget));
+                            x = (float)(lastTarget.locations.X + (xDiff * (timeDiffThis / timeDiffTarget)));
+                            y = (float)(lastTarget.locations.Y + (yDiff * (timeDiffThis / timeDiffTarget)));
+                            z = (float)(lastTarget.locations.Z + (zDiff * (timeDiffThis / timeDiffTarget)));
                         }
                         float xDiff1 = x - thisCam.locations.X;
                         float yDiff1 = y - thisCam.locations.Y;
@@ -149,7 +149,7 @@ namespace Game.DataStorage
             FlyByCameraStorage.Clear();
             Log.outInfo(LogFilter.ServerLoading, "Loading Cinematic Camera files");
 
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             foreach (CinematicCameraRecord cameraEntry in CliDB.CinematicCameraStorage.Values)
             {
                 string filename = $@"{dataPath}/cameras/FILE{cameraEntry.FileDataID:X8}.xxx";
@@ -188,7 +188,8 @@ namespace Game.DataStorage
                     Log.outError(LogFilter.ServerLoading, $"File {filename} not found!!!!");
                 }
             }
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {FlyByCameraStorage.Keys.Count} cinematic waypoint sets in {Time.Diff(oldMSTime)} ms.");
         }
 
         public static List<FlyByCamera> GetFlyByCameras(int cameraId)
@@ -201,7 +202,7 @@ namespace Game.DataStorage
 
     public class FlyByCamera
     {
-        public uint timeStamp;
+        public Milliseconds timeStamp;
         public Vector4 locations;
     }
 }

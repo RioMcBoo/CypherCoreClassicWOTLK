@@ -263,7 +263,7 @@ namespace Game.Entities
         public ushort GetMaxDamage(int index) { return BasicData.MaxDamage[index]; }
         public int GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
         public SpellSchools GetDamageType() { return ExtendedData.DamageType; }
-        public uint GetDelay() { return ExtendedData.ItemDelay; }
+        public Milliseconds GetDelay() { return ExtendedData.ItemDelay; }
         public float GetRangedModRange() { return ExtendedData.ItemRange; }
         public ItemBondingType GetBonding() { return (ItemBondingType)ExtendedData.Bonding; }
         public int GetPageText() { return ExtendedData.PageID; }
@@ -290,7 +290,7 @@ namespace Game.Entities
         public int GetSocketBonus() { return ExtendedData.SocketMatchEnchantmentId; }
         public int GetGemProperties() { return ExtendedData.GemProperties; }
         public float GetQualityModifier() { return ExtendedData.QualityModifier; }
-        public uint GetDuration() { return ExtendedData.DurationInInventory; }
+        public Seconds GetDuration() { return ExtendedData.DurationInInventory; }
         public int GetItemLimitCategory() { return ExtendedData.LimitCategory; }
         public HolidayIds GetHolidayID() { return (HolidayIds)ExtendedData.RequiredHoliday; }
         public float GetDmgVariance() { return ExtendedData.DmgVariance; }

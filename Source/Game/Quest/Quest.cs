@@ -103,7 +103,7 @@ namespace Game
             SoundAccept = fields.Read<int>(101);
             SoundTurnIn = fields.Read<int>(102);
             AreaGroupID = fields.Read<int>(103);
-            LimitTime = fields.Read<uint>(104);
+            LimitTime = (Seconds)fields.Read<int>(104);
             AllowableRaces = (RaceMask)fields.Read<ulong>(105);
             TreasurePickerID = fields.Read<int>(106);
             Expansion = fields.Read<int>(107);
@@ -235,7 +235,7 @@ namespace Game
             ExclusiveGroup = fields.Read<int>(6);
             BreadcrumbForQuestId = fields.Read<int>(7);
             RewardMailTemplateId = fields.Read<int>(8);
-            RewardMailDelay = fields.Read<uint>(9);
+            RewardMailDelay = (Seconds)fields.Read<int>(9);
             RequiredSkillId = (SkillType)fields.Read<ushort>(10);
             RequiredSkillPoints = fields.Read<ushort>(11);
             RequiredMinRepFaction = fields.Read<ushort>(12);
@@ -896,7 +896,7 @@ namespace Game
         public int SoundAccept { get; set; }
         public int SoundTurnIn { get; set; }
         public int AreaGroupID;
-        public long LimitTime;
+        public TimeSpan LimitTime;
         public RaceMask AllowableRaces { get; set; }
         public int TreasurePickerID;
         public int Expansion;
@@ -954,7 +954,7 @@ namespace Game
         public int ExclusiveGroup { get; set; }
         public int BreadcrumbForQuestId { get; set; }
         public int RewardMailTemplateId { get; set; }
-        public uint RewardMailDelay { get; set; }
+        public Seconds RewardMailDelay { get; set; }
         public SkillType RequiredSkillId { get; set; }
         public int RequiredSkillPoints { get; set; }
         public int RequiredMinRepFaction { get; set; }
@@ -982,8 +982,8 @@ namespace Game
     {
         public ushort Slot = SharedConst.MaxQuestLogSize;
         public QuestStatus Status;
-        public long AcceptTime;
-        public uint Timer;
+        public ServerTime AcceptTime;
+        public TimeSpan Timer;
         public bool Explored;
     }
 
@@ -994,7 +994,7 @@ namespace Game
             Text = "";
         }
 
-        public QuestGreeting(ushort emoteType, uint emoteDelay, string text)
+        public QuestGreeting(ushort emoteType, Milliseconds emoteDelay, string text)
         {
             EmoteType = emoteType;
             EmoteDelay = emoteDelay;
@@ -1002,7 +1002,7 @@ namespace Game
         }
 
         public ushort EmoteType;
-        public uint EmoteDelay;
+        public Milliseconds EmoteDelay;
         public string Text;
     }
 

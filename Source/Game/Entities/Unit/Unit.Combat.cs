@@ -146,8 +146,8 @@ namespace Game.Entities
                     {
                         if (summon.IsAttackingPlayer())
                             return true;
+                    }
                 }
-            }
             }
 
             return false;
@@ -219,7 +219,7 @@ namespace Game.Entities
             {
                 if (!IsValidAttackTarget(victim))
                     AttackStop();
-        }
+            }
         }
 
         public void StopAttackFaction(int factionId)
@@ -384,7 +384,10 @@ namespace Game.Entities
 
             // delay offhand weapon attack by 50% of the base attack time
             if (HaveOffhandWeapon() && GetTypeId() != TypeId.Player)
-                SetAttackTimer(WeaponAttackType.OffAttack, Math.Max(GetAttackTimer(WeaponAttackType.OffAttack), GetAttackTimer(WeaponAttackType.BaseAttack) + MathFunctions.CalculatePct(GetBaseAttackTime(WeaponAttackType.BaseAttack), 50)));
+            {
+                Milliseconds baseSpeed150 = new(MathFunctions.CalculatePct(GetBaseAttackTime(WeaponAttackType.BaseAttack).Ticks, 50));
+                SetAttackTimer(WeaponAttackType.OffAttack, Time.Max(GetAttackTimer(WeaponAttackType.OffAttack), GetAttackTimer(WeaponAttackType.BaseAttack) + baseSpeed150));
+            }
 
             if (meleeAttack)
                 SendMeleeAttackStart(victim);
@@ -432,7 +435,7 @@ namespace Game.Entities
             {
                 Log.outInfo(LogFilter.Unit, 
                     $"{UnitTypeAttaker} {GetGUID()} stopped attacking");
-        }
+            }
         }
 
         public ObjectGuid GetTarget() { return m_unitData.Target; }
@@ -531,15 +534,15 @@ namespace Game.Entities
 
         public void ResetAttackTimer(WeaponAttackType type = WeaponAttackType.BaseAttack)
         {
-            m_attackTimer[(int)type] = (uint)(GetBaseAttackTime(type) * m_modAttackSpeedPct[(int)type]);
+            m_attackTimer[(int)type] = (Milliseconds)(GetBaseAttackTime(type) * m_modAttackSpeedPct[(int)type]);
         }
 
-        public void SetAttackTimer(WeaponAttackType type, uint time)
+        public void SetAttackTimer(WeaponAttackType type, Milliseconds time)
         {
             m_attackTimer[(int)type] = time;
         }
 
-        public uint GetAttackTimer(WeaponAttackType type)
+        public Milliseconds GetAttackTimer(WeaponAttackType type)
         {
             return m_attackTimer[(int)type];
         }
@@ -549,7 +552,7 @@ namespace Game.Entities
             return m_attackTimer[(int)type] == 0;
         }
 
-        public uint GetBaseAttackTime(WeaponAttackType att)
+        public Milliseconds GetBaseAttackTime(WeaponAttackType att)
         {
             return m_baseAttackSpeed[(int)att];
         }
@@ -572,7 +575,7 @@ namespace Game.Entities
                     || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
                 {
                     return;
-            }
+                }
             }
 
             Unit victim = GetVictim();
@@ -606,7 +609,7 @@ namespace Game.Entities
                     ResetAttackTimer(WeaponAttackType.BaseAttack);
                 }
                 else
-                    SetAttackTimer(WeaponAttackType.BaseAttack, 100);
+                    SetAttackTimer(WeaponAttackType.BaseAttack, (Milliseconds)100);
 
                 Player attackerPlayer = ToPlayer();
                 if (attackerPlayer != null)
@@ -627,7 +630,7 @@ namespace Game.Entities
                     ResetAttackTimer(WeaponAttackType.OffAttack);
                 }
                 else
-                    SetAttackTimer(WeaponAttackType.OffAttack, 100);
+                    SetAttackTimer(WeaponAttackType.OffAttack, (Milliseconds)100);
             }
         }
 
@@ -742,7 +745,7 @@ namespace Game.Entities
                         i.GetBase().DropCharge(AuraRemoveMode.Expire);
                         return magnet;
                     }
-            }
+                }
             }
             return victim;
         }
@@ -1571,7 +1574,7 @@ namespace Game.Entities
             if (minDamage > maxDamage)
                 Extensions.Swap(ref minDamage, ref maxDamage);
 
-            return (int)RandomHelper.URand(minDamage, maxDamage);
+            return RandomHelper.IRand((int)minDamage, (int)maxDamage);
         }
 
         public float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type)
@@ -1663,7 +1666,7 @@ namespace Game.Entities
             return Math.Max(range, SharedConst.NominalMeleeRange);
         }
 
-        public void SetBaseAttackTime(WeaponAttackType att, uint val)
+        public void SetBaseAttackTime(WeaponAttackType att, Milliseconds val)
         {
             m_baseAttackSpeed[(int)att] = val;
             UpdateAttackTimeField(att);
@@ -1710,7 +1713,7 @@ namespace Game.Entities
             }
 
             UpdateAttackTimeField(att);
-            m_attackTimer[(int)att] = (uint)(m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att] * remainingTimePct);
+            m_attackTimer[(int)att] = (Milliseconds)(m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att] * remainingTimePct);
         }
 
         /// <summary>
@@ -1763,7 +1766,7 @@ namespace Game.Entities
                     m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, i);
                     ForceUpdateFieldChange();
                 }
+            }
         }
     }
-}
 }

@@ -476,9 +476,9 @@ namespace Game.Entities
             }
         }
 
-        public uint GetAutoCloseTime()
+        public Milliseconds GetAutoCloseTime()
         {
-            uint autoCloseTime = 0;
+            Milliseconds autoCloseTime = Milliseconds.Zero;
             switch (type)
             {
                 case GameObjectTypes.Door:
@@ -624,7 +624,7 @@ namespace Game.Entities
         };
 
         // Cooldown preventing goober and traps to cast spell
-        public uint GetCooldown()
+        public Seconds GetCooldown()
         {
             switch (type)
             {
@@ -633,7 +633,7 @@ namespace Game.Entities
                 case GameObjectTypes.Goober:
                     return Goober.cooldown;
                 default:
-                    return 0;
+                    return Seconds.Zero;
             }
         }
 
@@ -820,7 +820,7 @@ namespace Game.Entities
         {
             public int startOpen;                               // 0 startOpen, enum { false, true, }; Default: false
             public int open;                                    // 1 open, References: Lock_, NoValue = 0
-            public uint autoClose;                               // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
+            public Milliseconds autoClose;                      // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
             public int noDamageImmune;                          // 3 noDamageImmune, enum { false, true, }; Default: false
             public uint openTextID;                              // 4 openTextID, References: BroadcastText, NoValue = 0
             public uint closeTextID;                             // 5 closeTextID, References: BroadcastText, NoValue = 0
@@ -838,7 +838,7 @@ namespace Game.Entities
         {
             public int startOpen;                               // 0 startOpen, enum { false, true, }; Default: false
             public int open;                                    // 1 open, References: Lock_, NoValue = 0
-            public uint autoClose;                               // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
+            public Milliseconds autoClose;                      // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
             public int linkedTrap;                              // 3 linkedTrap, References: GameObjects, NoValue = 0
             public int noDamageImmune;                          // 4 noDamageImmune, enum { false, true, }; Default: false
             public int GiganticAOI;                             // 5 Gigantic AOI, enum { false, true, }; Default: false
@@ -870,7 +870,7 @@ namespace Game.Entities
         {
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public int chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
-            public uint chestRestockTime;                        // 2 chestRestockTime, int, Min value: 0, Max value: 1800000, Default value: 0
+            public Seconds chestRestockTime;                    // 2 chestRestockTime, int, Min value: 0, Max value: 1800000, Default value: 0
             public int consumable;                              // 3 consumable, enum { false, true, }; Default: false
             public int minRestock;                              // 4 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public int maxRestock;                              // 5 maxRestock, int, Min value: 0, Max value: 65535, Default value: 0
@@ -932,9 +932,9 @@ namespace Game.Entities
             public int radius;                                  // 2 radius, int, Min value: 0, Max value: 100, Default value: 0
             public int spell;                                   // 3 spell, References: Spell, NoValue = 0
             public int charges;                                 // 4 charges, int, Min value: 0, Max value: 65535, Default value: 1
-            public uint cooldown;                                // 5 cooldown, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint autoClose;                               // 6 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
-            public uint startDelay;                              // 7 startDelay, int, Min value: 0, Max value: 65535, Default value: 0
+            public Seconds cooldown;                            // 5 cooldown, int, Min value: 0, Max value: 65535, Default value: 0
+            public Milliseconds autoClose;                      // 6 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Seconds startDelay;                          // 7 startDelay, int, Min value: 0, Max value: 65535, Default value: 0
             public int serverOnly;                              // 8 serverOnly, enum { false, true, }; Default: false
             public int stealthed;                               // 9 stealthed, enum { false, true, }; Default: false
             public int GiganticAOI;                             // 10 Gigantic AOI, enum { false, true, }; Default: false
@@ -998,10 +998,10 @@ namespace Game.Entities
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public int questID;                                 // 1 questID, References: QuestV2, NoValue = 0
             public int eventID;                                 // 2 eventID, References: GameEvents, NoValue = 0
-            public uint autoClose;                               // 3 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
+            public Milliseconds autoClose;                      // 3 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
             public int customAnim;                              // 4 customAnim, int, Min value: 0, Max value: 4, Default value: 0
             public int consumable;                              // 5 consumable, enum { false, true, }; Default: false
-            public uint cooldown;                                // 6 cooldown, int, Min value: 0, Max value: 65535, Default value: 0
+            public Seconds cooldown;                               // 6 cooldown, int, Min value: 0, Max value: 65535, Default value: 0
             public int pageID;                                  // 7 pageID, References: PageText, NoValue = 0
             public int language;                                // 8 language, References: Languages, NoValue = 0
             public int pageMaterial;                            // 9 pageMaterial, References: PageTextMaterial, NoValue = 0
@@ -1033,27 +1033,27 @@ namespace Game.Entities
 
         public struct transport
         {
-            public uint Timeto2ndfloor;                          // 0 Time to 2nd floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
-            public uint startOpen;                               // 1 startOpen, enum { false, true, }; Default: false
-            public uint autoClose;                               // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto2ndfloor;                 // 0 Time to 2nd floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint startOpen;                              // 1 startOpen, enum { false, true, }; Default: false
+            public Milliseconds autoClose;                      // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached1stfloor;                         // 3 Reached 1st floor, References: GameEvents, NoValue = 0
             public int Reached2ndfloor;                         // 4 Reached 2nd floor, References: GameEvents, NoValue = 0
-            public int SpawnMap;                                 // 5 Spawn Map, References: Map, NoValue = -1
-            public uint Timeto3rdfloor;                          // 6 Time to 3rd floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public int SpawnMap;                                // 5 Spawn Map, References: Map, NoValue = -1
+            public Milliseconds Timeto3rdfloor;                 // 6 Time to 3rd floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached3rdfloor;                         // 7 Reached 3rd floor, References: GameEvents, NoValue = 0
-            public uint Timeto4thfloor;                          // 8 Time to 4th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto4thfloor;                 // 8 Time to 4th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached4thfloor;                         // 9 Reached 4th floor, References: GameEvents, NoValue = 0
-            public uint Timeto5thfloor;                          // 10 Time to 5th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto5thfloor;                 // 10 Time to 5th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached5thfloor;                         // 11 Reached 5th floor, References: GameEvents, NoValue = 0
-            public uint Timeto6thfloor;                          // 12 Time to 6th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto6thfloor;                 // 12 Time to 6th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached6thfloor;                         // 13 Reached 6th floor, References: GameEvents, NoValue = 0
-            public uint Timeto7thfloor;                          // 14 Time to 7th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto7thfloor;                 // 14 Time to 7th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached7thfloor;                         // 15 Reached 7th floor, References: GameEvents, NoValue = 0
-            public uint Timeto8thfloor;                          // 16 Time to 8th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto8thfloor;                 // 16 Time to 8th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached8thfloor;                         // 17 Reached 8th floor, References: GameEvents, NoValue = 0
-            public uint Timeto9thfloor;                          // 18 Time to 9th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto9thfloor;                 // 18 Time to 9th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached9thfloor;                         // 19 Reached 9th floor, References: GameEvents, NoValue = 0
-            public uint Timeto10thfloor;                         // 20 Time to 10th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds Timeto10thfloor;                // 20 Time to 10th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int Reached10thfloor;                        // 21 Reached 10th floor, References: GameEvents, NoValue = 0
             public int onlychargeheightcheck;                   // 22 only charge height check. (yards), int, Min value: 0, Max value: 65535, Default value: 0
             public int onlychargetimecheck;                     // 23 only charge time check, int, Min value: 0, Max value: 65535, Default value: 0
@@ -1063,11 +1063,11 @@ namespace Game.Entities
         public struct areadamage
         {
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
-            public uint radius;                                  // 1 radius, int, Min value: 0, Max value: 50, Default value: 3
+            public uint radius;                                 // 1 radius, int, Min value: 0, Max value: 50, Default value: 3
             public int damageMin;                               // 2 damageMin, int, Min value: 0, Max value: 65535, Default value: 0
             public int damageMax;                               // 3 damageMax, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint damageSchool;                            // 4 damageSchool, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint autoClose;                               // 5 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint damageSchool;                           // 4 damageSchool, int, Min value: 0, Max value: 65535, Default value: 0
+            public Milliseconds autoClose;                      // 5 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int openTextID;                              // 6 openTextID, References: BroadcastText, NoValue = 0
             public int closeTextID;                             // 7 closeTextID, References: BroadcastText, NoValue = 0
             public int InteractRadiusOverride;                  // 8 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
@@ -1076,7 +1076,7 @@ namespace Game.Entities
         public struct camera
         {
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
-            public int _camera;                                  // 1 camera, References: CinematicSequences, NoValue = 0
+            public int _camera;                                 // 1 camera, References: CinematicSequences, NoValue = 0
             public int eventID;                                 // 2 eventID, References: GameEvents, NoValue = 0
             public int openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
             public int conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
@@ -1317,13 +1317,13 @@ namespace Game.Entities
         {
             public uint AutoLink;                                // 0 Auto Link, enum { false, true, }; Default: false
             public uint startOpen;                               // 1 startOpen, enum { false, true, }; Default: false
-            public uint autoClose;                               // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public Milliseconds autoClose;                       // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint BlocksPathsDown;                         // 3 Blocks Paths Down, enum { false, true, }; Default: false
             public int PathBlockerBump;                          // 4 Path Blocker Bump (ft), int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint GiganticAOI;                             // 5 Gigantic AOI, enum { false, true, }; Default: false
             public uint InfiniteAOI;                             // 6 Infinite AOI, enum { false, true, }; Default: false
             public uint DoorisOpaque;                            // 7 Door is Opaque (Disable portal on close), enum { false, true, }; Default: false
-            public int InteractRadiusOverride;                  // 8 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public int InteractRadiusOverride;                   // 8 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct newflag
@@ -1335,10 +1335,10 @@ namespace Game.Entities
             public int conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
             public int GiganticAOI;                             // 5 Gigantic AOI, enum { false, true, }; Default: false
             public int InfiniteAOI;                             // 6 Infinite AOI, enum { false, true, }; Default: false
-            public uint ExpireDuration;                          // 7 Expire Duration, int, Min value: 0, Max value: 3600000, Default value: 10000
-            public uint RespawnTime;                             // 8 Respawn Time, int, Min value: 0, Max value: 3600000, Default value: 20000
+            public Milliseconds ExpireDuration;                 // 7 Expire Duration, int, Min value: 0, Max value: 3600000, Default value: 10000
+            public Seconds RespawnTime;                         // 8 Respawn Time, int, Min value: 0, Max value: 3600000, Default value: 20000
             public int FlagDrop;                                // 9 Flag Drop, References: GameObjects, NoValue = 0
-            public int ExclusiveCategory;                        // 10 Exclusive Category (BGs Only), int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public int ExclusiveCategory;                       // 10 Exclusive Category (BGs Only), int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public int worldState1;                             // 11 worldState1, References: WorldState, NoValue = 0
             public int ReturnonDefenderInteract;                // 12 Return on Defender Interact, enum { false, true, }; Default: false
             public int SpawnVignette;                           // 13 Spawn Vignette, References: vignette, NoValue = 0
@@ -1379,7 +1379,7 @@ namespace Game.Entities
 
         public struct capturepoint
         {
-            public uint CaptureTime;                             // 0 Capture Time (ms), int, Min value: 0, Max value: 2147483647, Default value: 60000
+            public Milliseconds CaptureTime;                    // 0 Capture Time (ms), int, Min value: 0, Max value: 2147483647, Default value: 60000
             public int GiganticAOI;                             // 1 Gigantic AOI, enum { false, true, }; Default: false
             public int highlight;                               // 2 highlight, enum { false, true, }; Default: true
             public int open;                                    // 3 open, References: Lock_, NoValue = 0
@@ -1471,7 +1471,7 @@ namespace Game.Entities
             public int notInCombat;                             // 3 notInCombat, enum { false, true, }; Default: false
             public int trivialSkillLow;                         // 4 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
             public int trivialSkillHigh;                        // 5 trivialSkillHigh, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint ObjectDespawnDelay;                      // 6 Object Despawn Delay, int, Min value: 0, Max value: 600, Default value: 15
+            public Seconds ObjectDespawnDelay;                  // 6 Object Despawn Delay, int, Min value: 0, Max value: 600, Default value: 15
             public int triggeredEvent;                          // 7 triggeredEvent, References: GameEvents, NoValue = 0
             public int requireLOS;                              // 8 require LOS, enum { false, true, }; Default: false
             public int openTextID;                              // 9 openTextID, References: BroadcastText, NoValue = 0

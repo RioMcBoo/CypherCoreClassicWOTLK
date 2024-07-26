@@ -168,7 +168,7 @@ namespace Game.Entities
                 ReplaceAllFlags(goOverride.Flags);
             }
 
-            _pathProgress = goinfo.MoTransport.allowstopping == 0 ? Time.GetMSTime() /*might be called before world update loop begins, don't use GameTime*/ % tInfo.TotalPathTime : 0;
+            _pathProgress = goinfo.MoTransport.allowstopping == 0 ? Time.NowRelative /*might be called before world update loop begins, don't use LoopTime*/ % tInfo.TotalPathTime : RelativeTime.Zero;
             SetPathProgressForClient(_pathProgress / (float)tInfo.TotalPathTime);
             SetObjectScale(goinfo.size);
             SetPeriod(tInfo.TotalPathTime);
@@ -206,9 +206,9 @@ namespace Game.Entities
             base.CleanupsBeforeDelete(finalCleanup);
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
-            TimeSpan positionUpdateDelay = TimeSpan.FromMilliseconds(200);
+            TimeSpan positionUpdateDelay = (Milliseconds)200;
 
             if (GetAI() != null)
                 GetAI().UpdateAI(diff);
@@ -219,23 +219,23 @@ namespace Game.Entities
 
             _positionChangeTimer.Update(diff);
 
-            uint cycleId = _pathProgress / GetTransportPeriod();
+            int cycleId = GetCycleId(_pathProgress, GetTransportPeriod());
             if (GetGoInfo().MoTransport.allowstopping == 0)
-                _pathProgress = GameTime.GetGameTimeMS();
+                _pathProgress = LoopTime.RelativeTime;
             else if (!_requestStopTimestamp.HasValue || _requestStopTimestamp > _pathProgress + diff)
                 _pathProgress += diff;
             else
                 _pathProgress = _requestStopTimestamp.Value;
 
-            if (_pathProgress / GetTransportPeriod() != cycleId)
+            if (GetCycleId(_pathProgress, GetTransportPeriod()) != cycleId)
             {
                 // reset cycle
                 _eventsToTrigger.SetAll(true);
             }
 
-            SetPathProgressForClient(_pathProgress / (float)GetTransportPeriod());
+            SetPathProgressForClient(GetProgress(_pathProgress, GetTransportPeriod()));
 
-            uint timer = _pathProgress % GetTransportPeriod();
+            RelativeTime timer = GetTimer(_pathProgress, GetTransportPeriod());
 
             int eventToTriggerIndex = -1;
             for (var i = 0; i < _eventsToTrigger.Count; i++)
@@ -330,6 +330,21 @@ namespace Game.Entities
                 if (m_model != null)
                     GetMap().InsertGameObjectModel(m_model);
             }
+
+            int GetCycleId(RelativeTime pathProgress, RelativeTime transportPeriod)
+            {
+                return (int)(pathProgress.Milliseconds / transportPeriod.Milliseconds);
+            }
+
+            float GetProgress(RelativeTime pathProgress, RelativeTime transportPeriod)
+            {
+                return pathProgress.Milliseconds / (float)transportPeriod.Milliseconds;
+            }
+
+            RelativeTime GetTimer(RelativeTime pathProgress, RelativeTime transportPeriod)
+            {
+                return (RelativeTime)(pathProgress.Milliseconds % transportPeriod.Milliseconds);
+            }
         }
 
         public void AddPassenger(WorldObject passenger)
@@ -371,7 +386,7 @@ namespace Game.Entities
         public Creature CreateNPCPassenger(long guid, CreatureData data)
         {
             Map map = GetMap();
-            if (map.GetCreatureRespawnTime(guid) != 0)
+            if (map.GetCreatureRespawnTime(guid) != ServerTime.Zero)
                 return null;
 
             Creature creature = Creature.CreateCreatureFromDB(guid, map, false, true);
@@ -416,7 +431,7 @@ namespace Game.Entities
         GameObject CreateGOPassenger(long guid, GameObjectData data)
         {
             Map map = GetMap();
-            if (map.GetGORespawnTime(guid) != 0)
+            if (map.GetGORespawnTime(guid) != ServerTime.Zero)
                 return null;
 
             GameObject go = CreateGameObjectFromDB(guid, map, false);
@@ -653,7 +668,7 @@ namespace Game.Entities
 
             if (!enabled)
             {
-                _requestStopTimestamp = (_pathProgress / GetTransportPeriod()) * GetTransportPeriod() + _transportInfo.GetNextPauseWaypointTimestamp(_pathProgress);
+                _requestStopTimestamp = (RelativeTime)(_pathProgress / GetTransportPeriod()) * GetTransportPeriod() + _transportInfo.GetNextPauseWaypointTimestamp(_pathProgress);
             }
             else
             {
@@ -798,17 +813,17 @@ namespace Game.Entities
         public ObjectGuid GetTransportGUID() { return GetGUID(); }
         public float GetTransportOrientation() { return GetOrientation(); }
 
-        public uint GetTransportPeriod() { return (uint)m_gameObjectData.Level.GetValue(); }
-        public void SetPeriod(uint period) { SetLevel((int)period); }
-        public uint GetTimer() { return _pathProgress; }
+        public RelativeTime GetTransportPeriod() { return (RelativeTime)m_gameObjectData.Level.GetValue(); }
+        public void SetPeriod(RelativeTime period) { SetLevel(period); }
+        public RelativeTime GetTimer() { return _pathProgress; }
 
         TransportTemplate _transportInfo;
 
         TransportMovementState _movementState;
         BitArray _eventsToTrigger;
         int _currentPathLeg;
-        uint? _requestStopTimestamp;
-        uint _pathProgress;
+        RelativeTime? _requestStopTimestamp;
+        RelativeTime _pathProgress;
         TimeTracker _positionChangeTimer = new();
 
         HashSet<WorldObject> _passengers = new();

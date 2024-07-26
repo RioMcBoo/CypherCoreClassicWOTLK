@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Loots;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Mails
@@ -113,17 +114,18 @@ namespace Game.Mails
             }
 
             // If theres is an item, there is a one hour delivery delay.
-            uint deliver_delay = needItemDelay ? (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32 : 0;
+            TimeSpan deliver_delay = needItemDelay ? WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan : TimeSpan.Zero;
 
             // will delete item or place to receiver mail list
             SendMailTo(trans, new MailReceiver(receiver, receiver_guid), new MailSender(MailMessageType.Normal, senderGuid), MailCheckFlags.Returned, deliver_delay);
         }
 
-        public void SendMailTo(SQLTransaction trans, Player receiver, MailSender sender, MailCheckFlags checkMask = MailCheckFlags.None, uint deliver_delay = 0)
+        public void SendMailTo(SQLTransaction trans, Player receiver, MailSender sender, MailCheckFlags checkMask = MailCheckFlags.None, TimeSpan deliver_delay = default)
         {
             SendMailTo(trans, new MailReceiver(receiver), sender, checkMask, deliver_delay);
         }
-        public void SendMailTo(SQLTransaction trans, MailReceiver receiver, MailSender sender, MailCheckFlags checkMask = MailCheckFlags.None, uint deliver_delay = 0)
+
+        public void SendMailTo(SQLTransaction trans, MailReceiver receiver, MailSender sender, MailCheckFlags checkMask = MailCheckFlags.None, TimeSpan deliver_delay = default)
         {
             Player pReceiver = receiver.GetPlayer();               // can be NULL
             Player pSender = sender.GetMailMessageType() == MailMessageType.Normal ? Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, sender.GetSenderId())) : null;
@@ -133,22 +135,22 @@ namespace Game.Mails
 
             long mailId = Global.ObjectMgr.GenerateMailID();
 
-            long deliver_time = GameTime.GetGameTime() + deliver_delay;
+            ServerTime deliver_time = LoopTime.ServerTime + deliver_delay;
 
             //expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
-            uint expire_delay;
+            TimeSpan expire_delay;
 
             // auction mail without any items and money
             if (sender.GetMailMessageType() == MailMessageType.Auction && m_items.Empty() && m_money == 0)
-                expire_delay = (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32;
+                expire_delay = WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan;
             // default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
+            else if (m_COD != 0)
+                expire_delay = (Days)3;            
             else
-                if (m_COD != 0)
-                expire_delay = 3 * Time.Day;
-            else
-                expire_delay = (uint)(pSender != null && pSender.IsGameMaster() ? 90 * Time.Day : 30 * Time.Day);
+                expire_delay = pSender != null && pSender.IsGameMaster() ? (Days)90 : (Days)30;
+            
 
-            long expire_time = deliver_time + expire_delay;
+            ServerTime expire_time = deliver_time + expire_delay;
 
             // Add to DB
             byte index = 0;
@@ -162,8 +164,8 @@ namespace Game.Mails
             stmt.SetString(++index, GetSubject());
             stmt.SetString(++index, GetBody());
             stmt.SetBool(++index, !m_items.Empty());
-            stmt.SetInt64(++index, expire_time);
-            stmt.SetInt64(++index, deliver_time);
+            stmt.SetInt64(++index, (UnixTime64)expire_time);
+            stmt.SetInt64(++index, (UnixTime64)deliver_time);
             stmt.SetInt64(++index, m_money);
             stmt.SetInt64(++index, m_COD);
             stmt.SetUInt8(++index, (byte)checkMask);

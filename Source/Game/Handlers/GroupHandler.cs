@@ -6,7 +6,6 @@ using Game.Entities;
 using Game.Groups;
 using Game.Networking;
 using Game.Networking.Packets;
-using System;
 
 namespace Game
 {
@@ -548,7 +547,7 @@ namespace Game
                 return;
 
             // everything's fine, do it
-            group.StartReadyCheck(GetPlayer().GetGUID(), TimeSpan.FromMilliseconds(MapConst.ReadycheckDuration));
+            group.StartReadyCheck(GetPlayer().GetGUID(), MapConst.ReadycheckDuration);
         }
 
         [WorldPacketHandler(ClientOpcodes.ReadyCheckResponse, Processing = PacketProcessing.Inplace)]

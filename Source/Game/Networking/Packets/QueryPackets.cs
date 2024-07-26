@@ -373,10 +373,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt64(CurrentTime);
+            _worldPacket.WriteInt64((UnixTime64)CurrentTime);
         }
 
-        public long CurrentTime;
+        public RealmTime CurrentTime;
     }
 
     public class QuestPOIQuery : ClientPacket
@@ -497,7 +497,7 @@ namespace Game.Networking.Packets
 
         public bool HasDeclined;
         public DeclinedName DeclinedNames = new();
-        public long Timestamp;
+        public UnixTime64 Timestamp;
         public string Name = string.Empty;
     }
 

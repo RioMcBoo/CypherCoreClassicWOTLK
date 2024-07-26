@@ -151,7 +151,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         {
             PlayersKilled = 0;
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 long health = me.GetHealth();
                 Unit target = me;
@@ -166,7 +166,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 task.Repeat();
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 Unit target = me;
 
@@ -178,10 +178,10 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 }
 
                 DoCast(target, SpellIds.RenewNormal);
-                task.Repeat(TimeSpan.FromSeconds(5));
+                task.Repeat(Time.SpanFromSeconds(5));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 Unit target = me;
 
@@ -193,19 +193,19 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 }
 
                 DoCast(target, SpellIds.Shield);
-                task.Repeat(TimeSpan.FromSeconds(7.5));
+                task.Repeat(Time.SpanFromSeconds(7.5));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                     DoCast(target, SpellIds.SwPainNormal);
 
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(10));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(7.5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(7.5), task =>
             {
                 Unit target = null;
 
@@ -226,10 +226,10 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 if (target != null)
                     DoCast(target, SpellIds.DispelMagic);
 
-                task.Repeat(TimeSpan.FromSeconds(12));
+                task.Repeat(Time.SpanFromSeconds(12));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), task =>
             {
                 me.GetHomePosition(out _, out _, out float z, out _);
                 if (me.GetPositionZ() >= z + 10)
@@ -335,7 +335,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 me.RemoveDynamicFlag(UnitDynFlags.Lootable);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -366,7 +366,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             // For later development, some alternative threat system should be made
             // We do not know what this system is based upon, but one theory is class (healers=high threat, dps=medium, etc)
             // We reset their threat frequently as an alternative until such a system exist
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), Time.SpanFromSeconds(20), task =>
             {
                 ResetThreatList();
                 task.Repeat();
@@ -450,7 +450,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UsedPotion && HealthBelowPct(25))
             {
@@ -475,17 +475,17 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(5.5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5.5), task =>
             {
                 DoCastVictim(SpellIds.Gouge);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(7), task =>
             {
                 DoCastVictim(SpellIds.Kick);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 DoCast(me, SpellIds.Vanish);
 
@@ -498,8 +498,8 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
                 InVanish = true;
                 me.SetCanMelee(false);
-                task.Repeat(TimeSpan.FromSeconds(30));
-                task.Schedule(TimeSpan.FromSeconds(10), waitTask =>
+                task.Repeat(Time.SpanFromSeconds(30));
+                task.Schedule(Time.SpanFromSeconds(10), waitTask =>
                 {
                     if (InVanish)
                     {
@@ -512,10 +512,10 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                     waitTask.Repeat();
                 });
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 DoCastVictim(SpellIds.Eviscerate);
-                task.Repeat(TimeSpan.FromSeconds(4));
+                task.Repeat(Time.SpanFromSeconds(4));
             });
 
             InVanish = false;
@@ -530,7 +530,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -552,34 +552,34 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 DoCastVictim(SpellIds.Immolate);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
             {
                 DoCastVictim(SpellIds.ShadowBolt);
-                task.Repeat(TimeSpan.FromSeconds(5));
+                task.Repeat(Time.SpanFromSeconds(5));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
                 if (unit != null)
                     DoCast(unit, SpellIds.SeedOfCorruption);
 
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(10));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
                 if (unit != null)
                     DoCast(unit, SpellIds.CurseOfAgony);
 
-                task.Repeat(TimeSpan.FromSeconds(13));
+                task.Repeat(Time.SpanFromSeconds(13));
             });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
                 if (unit != null)
@@ -601,7 +601,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             DoCast(me, SpellIds.SummonImp);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -623,12 +623,12 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 DoCastVictim(SpellIds.Knockdown);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4.5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(4.5), task =>
             {
                 DoCastVictim(SpellIds.SnapKick);
                 task.Repeat();
@@ -642,7 +642,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -668,16 +668,16 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         {
             HasIceBlocked = false;
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
                 if (target != null)
                 {
                     DoCast(target, SpellIds.Polymorph);
-                    task.Repeat(TimeSpan.FromSeconds(20));
+                    task.Repeat(Time.SpanFromSeconds(20));
                 }
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
                 if (unit != null)
@@ -685,22 +685,22 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 DoCastVictim(SpellIds.IceLance);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCastVictim(SpellIds.ConeOfCold);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
             {
                 DoCastVictim(SpellIds.Frostbolt);
-                task.Repeat(TimeSpan.FromSeconds(8));
+                task.Repeat(Time.SpanFromSeconds(8));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 bool InMeleeRange = false;
                 foreach (var pair in me.GetCombatManager().GetPvECombatRefs())
@@ -727,7 +727,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -755,7 +755,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(500), task =>
+            _scheduler.Schedule(Time.SpanFromMilliseconds(500), task =>
             {
                 bool InMeleeRange = false;
                 foreach (var pair in me.GetCombatManager().GetPvECombatRefs())
@@ -775,32 +775,32 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                         DoCast(unit, SpellIds.InterceptStun);
                 }
 
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(10));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 DoCastVictim(SpellIds.Disarm);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCastVictim(SpellIds.PiercingHowl);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(18), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(18), task =>
             {
                 DoCastVictim(SpellIds.FrighteningShout);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4.5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(4.5), task =>
             {
                 DoCastVictim(SpellIds.Hamstring);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 DoCastVictim(SpellIds.MortalStrike);
-                task.Repeat(TimeSpan.FromSeconds(4.5));
+                task.Repeat(Time.SpanFromSeconds(4.5));
             });
         }
 
@@ -816,7 +816,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             DoCast(me, SpellIds.BattleShout);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -842,39 +842,39 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 DoCastVictim(SpellIds.AimedShot);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2.5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2.5), task =>
             {
                 DoCastVictim(SpellIds.Shoot);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 DoCastVictim(SpellIds.ConcussiveShot);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCastVictim(SpellIds.MultiShot);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(4), task =>
             {
                 DoCastVictim(SpellIds.WingClip);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 //attempt find go summoned from spell (cast by me)
                 GameObject go = me.GetGameObject(SpellIds.FreezingTrap);
 
                 //if we have a go, we need to wait (only one trap at a time)
                 if (go != null)
-                    task.Repeat(TimeSpan.FromSeconds(2.5));
+                    task.Repeat(Time.SpanFromSeconds(2.5));
                 else
                 {
                     //if go does not exist, then we can cast
@@ -900,7 +900,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             m_uiPetGUID = summoned.GetGUID();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -928,31 +928,31 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         void Initialize()
         {
             Totem_Amount = 1;
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 DoCast(me, RandomHelper.RAND(SpellIds.WindfuryTotem, SpellIds.FireNovaTotem, SpellIds.EarthbindTotem));
                 ++Totem_Amount;
-                task.Repeat(TimeSpan.FromMilliseconds(Totem_Amount * 2000));
+                task.Repeat(Time.SpanFromMilliseconds(Totem_Amount * 2000));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCast(me, SpellIds.WarStomp);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
                 if (unit != null)
                     DoCast(unit, SpellIds.Purge);
 
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(5), task =>
             {
                 DoCast(me, SpellIds.LesserHealingWave);
                 task.Repeat();
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(7), task =>
             {
                 DoCastVictim(SpellIds.FrostShock);
                 task.Repeat();
@@ -966,7 +966,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -988,17 +988,17 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
         void Initialize()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(20), task =>
             {
                 DoCastVictim(SpellIds.GoblinDragonGun);
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(10));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(7), task =>
             {
                 DoCastVictim(SpellIds.RocketLaunch);
-                task.Repeat(TimeSpan.FromSeconds(9));
+                task.Repeat(Time.SpanFromSeconds(9));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(4), task =>
             {
                 foreach (var guid in m_auiLackeyGUIDs)
                 {
@@ -1009,14 +1009,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                         break;
                     }
                 }
-                task.Repeat(TimeSpan.FromSeconds(2));
+                task.Repeat(Time.SpanFromSeconds(2));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCast(me, SpellIds.HighExplosiveSheep);
-                task.Repeat(TimeSpan.FromSeconds(65));
+                task.Repeat(Time.SpanFromSeconds(65));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 DoCastVictim(SpellIds.FelIronBomb);
                 task.Repeat();
@@ -1030,7 +1030,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.Reset();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

@@ -55,17 +55,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             me.RemoveAura(SpellIds.EmberseerGrowing);
             me.RemoveAura(SpellIds.EmberseerGrowingTrigger);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule((Seconds)5, task =>
             {
                 instance.SetData(DataTypes.BlackhandIncarcerator, 1);
                 instance.SetBossState(DataTypes.PyrogaurdEmberseer, EncounterState.NotStarted);
             });
             // Hack for missing trigger spell
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule((Seconds)3, task =>
             {
                 // #### Spell isn't doing any damage ??? ####
                 DoCast(me, SpellIds.FireShield);
-                task.Repeat(TimeSpan.FromSeconds(3));
+                task.Repeat((Seconds)3);
             });
         }
 
@@ -74,7 +74,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             switch (data)
             {
                 case 1:
-                    _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+                    _scheduler.Schedule((Seconds)5, task =>
                     {
                         // As of Patch 3.0.8 only one person needs to channel the altar
                         bool _hasAura = false;
@@ -90,7 +90,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
 
                         if (_hasAura)
                         {
-                            task.Schedule(TimeSpan.FromSeconds(1), preFlightTask1 =>
+                            task.Schedule((Seconds)1, preFlightTask1 =>
                             {
                                 // Set data on all Blackhand Incarcerators
                                 List<Creature> creatureList = me.GetCreatureListWithEntryInGrid(CreaturesIds.BlackhandIncarcerator, 35.0f);
@@ -104,7 +104,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
                                     }
                                 }
                                 me.RemoveAura(SpellIds.EncagedEmberseer);
-                                preFlightTask1.Schedule(TimeSpan.FromSeconds(32), preFlightTask2 =>
+                                preFlightTask1.Schedule((Seconds)32, preFlightTask2 =>
                                 {
                                     me.CastSpell(me, SpellIds.FreezeAnim);
                                     me.CastSpell(me, SpellIds.EmberseerGrowing);
@@ -123,22 +123,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
         public override void JustEngagedWith(Unit who)
         {
             // ### Todo Check combat timing ###
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule((Seconds)6, task =>
             {
                 DoCast(me, SpellIds.Firenova);
-                task.Repeat(TimeSpan.FromSeconds(6));
+                task.Repeat((Seconds)6);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule((Seconds)3, task =>
             {
                 DoCast(me, SpellIds.Flamebuffet);
-                task.Repeat(TimeSpan.FromSeconds(14));
+                task.Repeat((Seconds)14);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
+            _scheduler.Schedule((Seconds)14, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                     DoCast(target, SpellIds.Pyroblast);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)15);
             });
         }
 
@@ -174,7 +174,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
                     Talk(TextIds.YellFreeOfBonds);
                     me.SetUninteractible(false);
                     me.SetImmuneToPC(false);
-                    _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+                    _scheduler.Schedule((Seconds)2, task =>
                     {
                         AttackStart(me.SelectNearestPlayer(30.0f));
                     });
@@ -208,7 +208,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
                 rune7.SetGoState(state);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
 
@@ -237,15 +237,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
                     DoZoneInCombat(creature);    // GetAI().AttackStart(me.GetVictim());
             }
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16), task =>
+            _scheduler.Schedule((Seconds)8, (Seconds)16, task =>
             {
                 DoCastVictim(SpellIds.Strike, new CastSpellExtraArgs(true));
-                task.Repeat(TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(23));
+                task.Repeat((Seconds)14, (Seconds)23);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)10, (Seconds)20, task =>
             {
                 DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.Encage, new CastSpellExtraArgs(true));
-                task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(12));
+                task.Repeat((Seconds)6, (Seconds)12);
             });
         }
 
@@ -256,7 +256,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             me.SetImmuneToAll(true);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

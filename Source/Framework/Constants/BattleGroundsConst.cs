@@ -1,24 +1,26 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.﻿
 
+using System;
+
 namespace Framework.Constants
 {
     public struct BattlegroundConst
     {
         //Time Intervals
-        public const uint CheckPlayerPositionInverval = 1000;   // Ms
-        public const uint ResurrectionInterval = 30000;         // Ms
-        //RemindInterval                 = 10000,               // Ms
-        public const uint InvitationRemindTime = 20000;         // Ms
-        public const uint InviteAcceptWaitTime = 90000;         // Ms
-        public const uint AutocloseBattleground = 120000;       // Ms
-        public const uint MaxOfflineTime = 300;                 // Secs
-        public const uint RespawnOneDay = 86400;                // Secs
-        public const uint RespawnImmediately = 0;               // Secs
-        public const uint BuffRespawnTime = 180;                // Secs
-        public const uint BattlegroundCountdownMax = 120;       // Secs
-        public const uint ArenaCountdownMax = 60;               // Secs
-        public const uint PlayerPositionUpdateInterval = 5000;  // Ms
+        public static readonly TimeSpan CheckPlayerPositionInverval = (Seconds)1;
+        public static readonly TimeSpan ResurrectionInterval = (Seconds)30;
+        public static readonly TimeSpan RemindInterval = (Seconds)10;
+        public static readonly TimeSpan InvitationRemindTime = (Seconds)20;
+        public static readonly TimeSpan InviteAcceptWaitTime = (Seconds)90;
+        public static readonly TimeSpan AutocloseBattleground = (Seconds)120;
+        public static readonly TimeSpan MaxOfflineTime = (Minutes)5;
+        public static readonly TimeSpan RespawnOneDay = (Days)1;
+        public static readonly TimeSpan RespawnImmediately = (Seconds)0;
+        public static readonly TimeSpan BuffRespawnTime = (Seconds)180;
+        public static readonly TimeSpan BattlegroundCountdownMax = (Seconds)120;
+        public static readonly TimeSpan ArenaCountdownMax = (Seconds)60;
+        public static readonly TimeSpan PlayerPositionUpdateInterval = (Seconds)5;
 
         //EventIds
         public const int EventIdFirst = 0;

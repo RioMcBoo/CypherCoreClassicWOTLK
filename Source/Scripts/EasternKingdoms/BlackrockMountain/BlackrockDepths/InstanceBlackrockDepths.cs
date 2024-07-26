@@ -88,7 +88,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
 
     struct MiscConst
     {
-        public const int TimerTombOfTheSeven = 15000;
+        public static TimeSpan TimerTombOfTheSeven = (Seconds)15;
         public const int MaxEncounter = 6;
         public const int TombOfSevenBossNum = 7;
     }
@@ -131,7 +131,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
             int GhostKillCount;
             ObjectGuid[] TombBossGUIDs = new ObjectGuid[MiscConst.TombOfSevenBossNum];
             ObjectGuid TombEventStarterGUID;
-            uint TombTimer;
+            TimeSpan TombTimer;
             uint TombEventCounter;
 
             public instance_blackrock_depths_InstanceMapScript(InstanceMap map) : base(map)
@@ -363,14 +363,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
 
             void TombOfSevenEnd()
             {
-                DoRespawnGameObject(GoChestGUID, TimeSpan.FromHours(24));
+                DoRespawnGameObject(GoChestGUID, (Hours)24);
                 HandleGameObject(GoTombExitGUID, true);//event done, open exit door
                 HandleGameObject(GoTombEnterGUID, true);//event done, open entrance door
                 TombEventStarterGUID.Clear();
                 SetData(DataTypes.TypeTombOfSeven, (int)EncounterState.Done);
             }
 
-            public override void Update(uint diff)
+            public override void Update(TimeSpan diff)
             {
                 if (!TombEventStarterGUID.IsEmpty() && GhostKillCount < MiscConst.TombOfSevenBossNum)
                 {

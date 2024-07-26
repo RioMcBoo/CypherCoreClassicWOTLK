@@ -38,20 +38,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
         public override void JustEngagedWith(Unit who)
         {
             phase = Phases.One;
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 DoCastVictim(SpellIds.Mightyblow);
-                task.Repeat(TimeSpan.FromSeconds(18));
+                task.Repeat((Seconds)18);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Hamstring);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)15);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(16), task =>
+            _scheduler.Schedule((Seconds)16, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(9));
+                task.Repeat((Seconds)9);
             });
         }
 
@@ -60,35 +60,35 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
             if (me.HealthBelowPctDamaged(20, damage) && phase == Phases.One)
             {
                 phase = Phases.Two;
-                _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+                _scheduler.Schedule((Seconds)0, task =>
                 {
                         for (byte i = 0; i < 2; ++i)
                             SummonMedic(me.GetVictim());
                 });
-                _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+                _scheduler.Schedule((Seconds)0, task =>
                 {
                         for (byte i = 0; i < 3; ++i)
                             SummonAdd(me.GetVictim());
-                        task.Repeat(TimeSpan.FromSeconds(25));
+                        task.Repeat((Seconds)25);
                 });
             }
         }
 
         void SummonAdd(Unit victim)
         {
-            Creature SummonedAdd = DoSpawnCreature(8901, RandomHelper.IRand(-14, 14), RandomHelper.IRand(-14, 14), 0, 0, TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(120));
+            Creature SummonedAdd = DoSpawnCreature(8901, RandomHelper.IRand(-14, 14), RandomHelper.IRand(-14, 14), 0, 0, TempSummonType.TimedOrCorpseDespawn, (Seconds)120);
             if (SummonedAdd != null)
                 SummonedAdd.GetAI().AttackStart(victim);
         }
 
         void SummonMedic(Unit victim)
         {
-            Creature SummonedMedic = DoSpawnCreature(8894, RandomHelper.IRand(-9, 9), RandomHelper.IRand(-9, 9), 0, 0, TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(120));
+            Creature SummonedMedic = DoSpawnCreature(8894, RandomHelper.IRand(-9, 9), RandomHelper.IRand(-9, 9), 0, 0, TempSummonType.TimedOrCorpseDespawn, (Seconds)120);
             if (SummonedMedic != null)
                 SummonedMedic.GetAI().AttackStart(victim);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

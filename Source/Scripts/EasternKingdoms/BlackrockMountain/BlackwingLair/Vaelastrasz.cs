@@ -69,31 +69,31 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
             // now drop damage requirement to be able to take loot
             me.ResetPlayerDamageReq();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 DoCastVictim(SpellIds.Flamebreath);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(14));
+                task.Repeat(Time.SpanFromSeconds(8), Time.SpanFromSeconds(14));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(20), task =>
             {
                 DoCastVictim(SpellIds.Firenova);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(11), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(11), task =>
             {
                 //Only cast if we are behind
                 if (!me.HasInArc(MathF.PI, me.GetVictim()))
                 {
                     DoCast(me.GetVictim(), SpellIds.Tailswipe);
                 }
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 //selects a random target that isn't the current victim and is a mana user (selects mana users) but not pets
                 //it also ignores targets who have the aura. We don't want to place the debuff on the same target twice.
@@ -106,13 +106,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
                 if (target != null)
                     me.CastSpell(target, SpellIds.Burningadrenaline, true);
 
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(45), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(45), task =>
             {
                 //Vael has to cast it himself; contrary to the previous commit's comment. Nothing happens otherwise.
                 me.CastSpell(me.GetVictim(), SpellIds.Burningadrenaline, true);
-                task.Repeat(TimeSpan.FromSeconds(45));
+                task.Repeat(Time.SpanFromSeconds(45));
             });
         }
 
@@ -120,20 +120,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
         {
             PlayerGUID = target.GetGUID();
             me.RemoveNpcFlag(NPCFlags1.Gossip);
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(1), task =>
             {
                 Talk(TextIds.SayLine1);
                 me.SetStandState(UnitStandStateType.Stand);
                 me.HandleEmoteCommand(Emote.OneshotTalk);
-                task.Schedule(TimeSpan.FromSeconds(12), speechTask2 =>
+                task.Schedule(Time.SpanFromSeconds(12), speechTask2 =>
                 {
                     Talk(TextIds.SayLine2);
                     me.HandleEmoteCommand(Emote.OneshotTalk);
-                    speechTask2.Schedule(TimeSpan.FromSeconds(12), speechTask3 =>
+                    speechTask2.Schedule(Time.SpanFromSeconds(12), speechTask3 =>
                     {
                         Talk(TextIds.SayLine3);
                         me.HandleEmoteCommand(Emote.OneshotTalk);
-                        speechTask3.Schedule(TimeSpan.FromSeconds(16), speechTask4 =>
+                        speechTask3.Schedule(Time.SpanFromSeconds(16), speechTask4 =>
                         {
                             me.SetFaction(FactionTemplates.DragonflightBlack);
                             Player player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
@@ -153,7 +153,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
             Talk(TextIds.SayKilltarget, victim);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
 

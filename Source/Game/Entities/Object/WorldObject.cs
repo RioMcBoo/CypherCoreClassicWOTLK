@@ -245,7 +245,7 @@ namespace Game.Entities
 
         public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags, Player target)
         {
-            List<uint> PauseTimes = null;
+            List<Milliseconds> PauseTimes = null;
             GameObject go = ToGameObject();
             if (go != null)
                 PauseTimes = go.GetPauseTimes();
@@ -410,7 +410,7 @@ namespace Game.Entities
                 data.WritePackedGuid(ToUnit().GetVictim().GetGUID());                      // CombatVictim
 
             if (flags.ServerTime)
-                data.WriteUInt32(GameTime.GetGameTimeMS());
+                data.WriteUInt32(LoopTime.RelativeTime);
 
             if (flags.Vehicle)
             {
@@ -430,8 +430,10 @@ namespace Game.Entities
                 data.WriteInt64(ToGameObject().GetPackedLocalRotation());                 // Rotation
 
             if (PauseTimes != null && !PauseTimes.Empty())
+            {
                 foreach (var stopFrame in PauseTimes)
-                    data.WriteUInt32(stopFrame);
+                    data.WriteInt32(stopFrame);
+            }
 
             if (flags.MovementTransport)
             {
@@ -495,7 +497,7 @@ namespace Game.Entities
 
                 if (hasAreaTriggerSpline)
                 {
-                    data.WriteUInt32(areaTrigger.GetTimeToTarget());
+                    data.WriteInt32(areaTrigger.GetTimeToTarget());
                     data.WriteUInt32(areaTrigger.GetElapsedTimeForMovement());
 
                     areaTrigger.GetSpline().Write(data);
@@ -999,7 +1001,7 @@ namespace Game.Entities
             return false;
         }
 
-        public virtual void Update(uint diff)
+        public virtual void Update(TimeSpan diff)
         {
             m_Events.Update(diff);
         }
@@ -1246,8 +1248,8 @@ namespace Game.Entities
                             {
                                 if (corpse.IsWithinDist(obj, GetSightRange(obj), false))
                                     corpseVisibility = true;
+                            }
                         }
-                    }
                     }
 
                     Unit target = obj.ToUnit();
@@ -1656,7 +1658,7 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(go, this);
 
-            go.SetRespawnTime((int)respawnTime.TotalSeconds);
+            go.SetRespawnTime(respawnTime);
             if (IsPlayer() || (IsCreature() && summonType == GameObjectSummonType.TimedOrCorpseDespawn)) //not sure how to handle this
                 ToUnit().AddGameObject(go);
             else
@@ -1931,13 +1933,13 @@ namespace Game.Entities
             return value;
         }
 
-        public int CalcSpellDuration(SpellInfo spellInfo, List<SpellPowerCost> powerCosts)
+        public Milliseconds CalcSpellDuration(SpellInfo spellInfo, List<SpellPowerCost> powerCosts)
         {
-            int minduration = spellInfo.GetDuration();
+            Milliseconds minduration = spellInfo.GetDuration();
             if (minduration <= 0)
                 return minduration;
 
-            int maxduration = spellInfo.GetMaxDuration();
+            Milliseconds maxduration = spellInfo.GetMaxDuration();
             if (minduration == maxduration)
                 return minduration;
 
@@ -1965,10 +1967,10 @@ namespace Game.Entities
                 baseComboCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, powerCostRecord.PowerCostPct);
 
             float durationPerComboPoint = (float)(maxduration - minduration) / baseComboCost;
-            return minduration + (int)(durationPerComboPoint * consumedCost.Amount);
+            return minduration + (Milliseconds)(durationPerComboPoint * consumedCost.Amount);
         }
 
-        public int ModSpellDuration(SpellInfo spellInfo, WorldObject target, int duration, bool positive, uint effectMask)
+        public Milliseconds ModSpellDuration(SpellInfo spellInfo, WorldObject target, Milliseconds duration, bool positive, uint effectMask)
         {
             // don't mod permanent auras duration
             if (duration < 0)
@@ -2001,7 +2003,7 @@ namespace Game.Entities
                 // Select strongest negative mod
                 int durationMod = Math.Min(durationMod_always, durationMod_not_stack);
                 if (durationMod != 0)
-                    MathFunctions.AddPct(ref duration, durationMod);
+                    MathFunctions.AddPct(ref duration.Ticks, durationMod);
 
                 // there are only negative mods currently
                 durationMod_always = unitTarget.GetTotalAuraModifierByMiscValue(AuraType.ModAuraDurationByDispel, (int)spellInfo.Dispel);
@@ -2009,7 +2011,7 @@ namespace Game.Entities
 
                 durationMod = Math.Min(durationMod_always, durationMod_not_stack);
                 if (durationMod != 0)
-                    MathFunctions.AddPct(ref duration, durationMod);
+                    MathFunctions.AddPct(ref duration.Ticks, durationMod);
             }
             else
             {
@@ -2025,12 +2027,12 @@ namespace Game.Entities
                     {
                         SpellEffectInfo effect = spellInfo.GetEffect(0);
                         if (unitTarget.HasAura(53042) && effect != null && unitTarget.HasSpell(effect.TriggerSpell))
-                            duration *= 2;
+                            duration.Ticks *= 2;
                     }
                 }
             }
 
-            return Math.Max(duration, 0);
+            return Time.Max(duration, Milliseconds.Zero);
         }
 
         public void ModSpellCastTime(SpellInfo spellInfo, ref int castTime, Spell spell = null)
@@ -2057,7 +2059,7 @@ namespace Game.Entities
                 castTime = 500;
         }
 
-        public void ModSpellDurationTime(SpellInfo spellInfo, ref int duration, Spell spell = null)
+        public void ModSpellDurationTime(SpellInfo spellInfo, ref Milliseconds duration, Spell spell = null)
         {
             if (spellInfo == null || duration < 0)
                 return;
@@ -2076,9 +2078,9 @@ namespace Game.Entities
 
             if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.IgnoreCasterModifiers)) &&
                 ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
-                duration = (int)(duration * unitCaster.m_unitData.ModCastingSpeed);
+                duration = (Milliseconds)(duration * unitCaster.m_unitData.ModCastingSpeed);
             else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
-                duration = (int)(duration * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
+                duration = (Milliseconds)(duration * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
         }
 
         public virtual float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
@@ -2271,7 +2273,7 @@ namespace Game.Entities
                     case TypeId.GameObject:
                         if (factionId != 0) // Gameobjects may have faction template id = 0
                         {
-                            Log.outError(LogFilter.Unit, 
+                            Log.outError(LogFilter.Unit,
                                 $"GameObject (template id: {ToGameObject().GetGoInfo().entry}) " +
                                 $"has invalid faction (faction template Id) #{factionId}");
                         }
@@ -2741,8 +2743,8 @@ namespace Game.Entities
                                 {
                                     if (!repState.Flags.HasFlag(ReputationFlags.AtWar))
                                         return false;
+                                }
                             }
-                        }
                         }
 
                     }
@@ -2896,8 +2898,8 @@ namespace Game.Entities
                     {
                         if (unit.IsInSanctuary() && !unitTarget.IsInSanctuary())
                             return false;
+                    }
                 }
-            }
             }
             // PvC case - player can assist creature only if has specific Type flags
             // !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
@@ -2942,15 +2944,14 @@ namespace Game.Entities
                         if (spellInfo.HasHitDelay())
                         {
                             // Set up missile speed based delay
-                            float hitDelay = spellInfo.LaunchDelay;
+                            Milliseconds hitDelay = spellInfo.LaunchDelay;
                             if (spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
-                                hitDelay += spellInfo.Speed;
-                            else if (spellInfo.Speed > 0.0f)
-                                hitDelay += Math.Max(victim.GetDistance(this), 5.0f) / spellInfo.Speed;
+                                hitDelay += spellInfo.Speed.AsDelayMS;
+                            else if (spellInfo.Speed > 0)
+                                hitDelay += (Milliseconds)(Math.Max(victim.GetDistance(this), 5.0f) / spellInfo.Speed.PerMS);
 
-                            uint delay = (uint)Math.Floor(hitDelay * 1000.0f);
                             // Schedule charge drop
-                            aurEff.GetBase().DropChargeDelayed(delay, AuraRemoveMode.Expire);
+                            aurEff.GetBase().DropChargeDelayed(hitDelay, AuraRemoveMode.Expire);
                         }
                         else
                             aurEff.GetBase().DropCharge(AuraRemoveMode.Expire);
@@ -3971,7 +3972,7 @@ namespace Game.Entities
         MovementFlag2 flags2;
         MovementFlags3 flags3;
         public Position Pos { get; set; }
-        public uint Time { get; set; }
+        public RelativeTime Time { get; set; }
         public TransportInfo transport;
         public float Pitch { get; set; }
         public Inertia? inertia;
@@ -3985,7 +3986,7 @@ namespace Game.Entities
             Guid = ObjectGuid.Empty;
             flags = MovementFlag.None;
             flags2 = MovementFlag2.None;
-            Time = 0;
+            Time = default;
             Pitch = 0.0f;
 
             Pos = new Position();

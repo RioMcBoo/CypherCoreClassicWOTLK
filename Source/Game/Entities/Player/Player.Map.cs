@@ -80,7 +80,7 @@ namespace Game.Entities
             return difficulty;
         }
 
-        public void SendRaidGroupOnlyMessage(RaidGroupReason reason, int delay)
+        public void SendRaidGroupOnlyMessage(RaidGroupReason reason, Milliseconds delay)
         {
             RaidGroupOnly raidGroupOnly = new();
             raidGroupOnly.Delay = delay;
@@ -154,7 +154,7 @@ namespace Game.Entities
 
             int oldZone = m_zoneUpdateId;
             m_zoneUpdateId = newZone;
-            m_zoneUpdateTimer = 1 * Time.InMilliseconds;
+            m_zoneUpdateTimer = (Seconds)1;
 
             GetMap().UpdatePlayerZoneStats(oldZone, newZone);
 
@@ -307,7 +307,7 @@ namespace Game.Entities
                 map.CreateInstanceLockForPlayer(this);
         }
 
-        public void SetPendingBind(int instanceId, uint bindTimer)
+        public void SetPendingBind(int instanceId, Milliseconds bindTimer)
         {
             _pendingBindId = instanceId;
             _pendingBindTimer = bindTimer;
@@ -315,7 +315,7 @@ namespace Game.Entities
 
         public void SendRaidInfo()
         {
-            DateTime now = GameTime.GetSystemTime();
+            ServerTime now = LoopTime.ServerTime;
 
             var instanceLocks = Global.InstanceLockMgr.GetInstanceLocksForPlayer(GetGUID());
 
@@ -327,7 +327,7 @@ namespace Game.Entities
                 lockInfos.InstanceID = instanceLock.GetInstanceId();
                 lockInfos.MapID = instanceLock.GetMapId();
                 lockInfos.DifficultyID = instanceLock.GetDifficultyId();
-                lockInfos.TimeRemaining = (int)Math.Max((instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds, 0);
+                lockInfos.TimeRemaining = (Seconds)Time.Max(instanceLock.GetEffectiveExpiryTime() - now, TimeSpan.Zero);
                 lockInfos.CompletedMask = instanceLock.GetData().CompletedEncountersMask;
 
                 lockInfos.Locked = !instanceLock.IsExpired();
@@ -402,7 +402,7 @@ namespace Game.Entities
                     {
                         if (leader == null || !leader.HasAchieved(ar.achievement))
                             missingAchievement = ar.achievement;
-                }
+                    }
                 }
 
                 if (LevelMin != 0 || LevelMax != 0 || failedMapDifficultyXCondition != 0 || missingItem != 0 || missingQuest != 0 || missingAchievement != 0)
@@ -492,10 +492,10 @@ namespace Game.Entities
             return _instanceResetTimes.ContainsKey(instanceId);
         }
 
-        public void AddInstanceEnterTime(int instanceId, long enterTime)
+        public void AddInstanceEnterTime(int instanceId, ServerTime enterTime)
         {
             if (!_instanceResetTimes.ContainsKey(instanceId))
-                _instanceResetTimes.Add(instanceId, enterTime + Time.Hour);
+                _instanceResetTimes.Add(instanceId, enterTime + (Hours)1);
         }
 
         public WorldSafeLocsEntry GetInstanceEntrance(int targetMapId)

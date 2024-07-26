@@ -14,14 +14,14 @@ namespace Game.AI
     public class PetAI : CreatureAI
     {
         List<ObjectGuid> _allySet = new();
-        uint _updateAlliesTimer;
+        TimeSpan _updateAlliesTimer;
 
         public PetAI(Creature creature) : base(creature)
         {
             UpdateAllies();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!me.IsAlive() || me.GetCharmInfo() == null)
                 return;
@@ -587,7 +587,8 @@ namespace Game.AI
 
         void UpdateAllies()
         {
-            _updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
+            // update friendly targets every 10 seconds, lesser checks increase performance
+            _updateAlliesTimer = (Seconds)10;
 
             Unit owner = me.GetCharmerOrOwner();
             if (owner == null)

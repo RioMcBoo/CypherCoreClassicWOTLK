@@ -351,7 +351,7 @@ namespace Game
 
         public void LoadConditions(bool isReload = false)
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             Clean();
 
@@ -534,7 +534,7 @@ namespace Game
             foreach (var (id, conditions) in ConditionStorage[ConditionSourceType.Graveyard])
                 AddToGraveyardData(id, conditions);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} conditions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} conditions in {Time.Diff(oldMSTime)} ms.");
         }
 
         void AddToLootTemplate(ConditionId id, List<Condition> conditions, LootTemplate loot)
@@ -2399,20 +2399,18 @@ namespace Game
                     return false;
             }
 
-            if (condition.Time[0] != 0)
+            if (condition.Time(0) != WowTime.Zero)
             {
-                WowTime time0 = new();
-                time0.SetPackedTime(condition.Time[0]);
+                RealmTime time0 = (RealmTime)condition.Time(0);
 
-                if (condition.Time[1] != 0)
+                if (condition.Time(1) != WowTime.Zero)
                 {
-                    WowTime time1 = new();
-                    time1.SetPackedTime(condition.Time[1]);
+                    RealmTime time1 = (RealmTime)condition.Time(1);
 
-                    if (!GameTime.GetWowTime().IsInRange(time0, time1))
+                    if (!Time.IsInRange(LoopTime.RealmTime, time0, time1))
                         return false;
                 }
-                else if (GameTime.GetWowTime() != time0)
+                else if (LoopTime.RealmTime != time0)
                     return false;
             }
 
@@ -2889,8 +2887,8 @@ namespace Game
                 }
                 case WorldStateExpressionValueType.WorldState:
                 {
-                    uint worldStateId = buffer.ReadUInt32();
-                    value = Global.WorldStateMgr.GetValue((int)worldStateId, map);
+                    int worldStateId = buffer.ReadInt32();
+                    value = Global.WorldStateMgr.GetValue(worldStateId, map);
                     break;
                 }
                 case WorldStateExpressionValueType.Function:
@@ -2917,18 +2915,18 @@ namespace Game
             switch (functionType)
             {
                 case WorldStateExpressionFunctions.Random:
-                    return (int)RandomHelper.URand(Math.Min(arg1, arg2), Math.Max(arg1, arg2));
+                    return RandomHelper.IRand(Math.Min(arg1, arg2), Math.Max(arg1, arg2));
                 case WorldStateExpressionFunctions.Month:
-                    return GameTime.GetDateAndTime().Month + 1;
+                    return LoopTime.ServerTime.Month + 1;
                 case WorldStateExpressionFunctions.Day:
-                    return GameTime.GetDateAndTime().Day + 1;
+                    return LoopTime.ServerTime.Day + 1;
                 case WorldStateExpressionFunctions.TimeOfDay:
-                    DateTime localTime = GameTime.GetDateAndTime();
+                    ServerTime localTime = LoopTime.ServerTime;
                     return localTime.Hour * Time.Minute + localTime.Minute;
                 case WorldStateExpressionFunctions.Region:
                     return Global.WorldMgr.GetRealmId().Region;
                 case WorldStateExpressionFunctions.ClockHour:
-                    int currentHour = GameTime.GetDateAndTime().Hour + 1;
+                    int currentHour = LoopTime.ServerTime.Hour + 1;
                     return currentHour <= 12 ? (currentHour != 0 ? currentHour : 12) : currentHour - 12;
                 case WorldStateExpressionFunctions.OldDifficultyId:
                     var difficulty = CliDB.DifficultyStorage.LookupByKey(map.GetDifficultyID());
@@ -2939,10 +2937,10 @@ namespace Game
                 case WorldStateExpressionFunctions.HolidayActive:
                     return Global.GameEventMgr.IsHolidayActive((HolidayIds)arg1) ? 1 : 0;
                 case WorldStateExpressionFunctions.TimerCurrentTime:
-                    return (int)GameTime.GetGameTime();
+                    return LoopTime.UnixServerTime;
                 case WorldStateExpressionFunctions.WeekNumber:
-                    long now = GameTime.GetGameTime();
-                    uint raidOrigin = 1135695600;
+                    UnixTime now = LoopTime.UnixServerTime;
+                    UnixTime raidOrigin = (UnixTime)1135695600;
                     Cfg_RegionsRecord region = CliDB.CfgRegionsStorage.LookupByKey(Global.WorldMgr.GetRealmId().Region);
                     if (region != null)
                         raidOrigin = region.Raidorigin;

@@ -43,12 +43,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
         public override void JustEngagedWith(Unit victim)
         {
             base.JustEngagedWith(victim);
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(7), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
                 if (target != null)
                     DoCast(target, SpellIds.Pyroblast);
-                task.Repeat(TimeSpan.FromSeconds(7));
+                task.Repeat(Time.SpanFromSeconds(7));
             });
         }
 
@@ -58,14 +58,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
                 return;
 
             DoCast(me, SpellIds.Enrage, new CastSpellExtraArgs(true));
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
             {
                 DoCastVictim(SpellIds.Earthquake);
-                task.Repeat(TimeSpan.FromSeconds(3));
+                task.Repeat(Time.SpanFromSeconds(3));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -91,10 +91,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
 
         public override void JustEngagedWith(Unit who)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task => // These times are probably wrong
+            _scheduler.Schedule(Time.SpanFromSeconds(7), task => // These times are probably wrong
         {
             DoCastVictim(SpellIds.Mangle);
-            task.Repeat(TimeSpan.FromSeconds(10));
+            task.Repeat(Time.SpanFromSeconds(10));
         });
         }
 
@@ -115,7 +115,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

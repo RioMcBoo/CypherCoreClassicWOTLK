@@ -175,7 +175,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+            _scheduler.Schedule((Seconds)0, task =>
             {
                 // Remove old vulnerabilty spell
                 if (CurrentVurln_Spell != 0)
@@ -186,19 +186,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                 DoCast(me, spell);
                 CurrentVurln_Spell = spell;
                 Talk(TextIds.EmoteShimmer);
-                task.Repeat(TimeSpan.FromSeconds(45));
+                task.Repeat((Seconds)45);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule((Seconds)30, task =>
             {
                 DoCastVictim(Breath1_Spell);
-                task.Repeat(TimeSpan.FromSeconds(60));
+                task.Repeat((Seconds)60);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(60), task =>
+            _scheduler.Schedule((Seconds)60, task =>
             {
                 DoCastVictim(Breath2_Spell);
-                task.Repeat(TimeSpan.FromSeconds(60));
+                task.Repeat((Seconds)60);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule((Seconds)10, task =>
             {
                 var players = me.GetMap().GetPlayers();
                 foreach (var player in players)
@@ -219,16 +219,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                     }
                 }
 
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule((Seconds)15, task =>
             {
                 DoCast(me, SpellIds.Frenzy);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+                task.Repeat((Seconds)10, (Seconds)15);
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

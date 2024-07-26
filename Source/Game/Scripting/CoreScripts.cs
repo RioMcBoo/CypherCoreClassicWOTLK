@@ -141,7 +141,7 @@ namespace Game.Scripting
         public virtual void OnShutdownCancel() { }
 
         // Called on every world tick (don't execute too heavy code here).
-        public virtual void OnUpdate(uint diff) { }
+        public virtual void OnUpdate(TimeSpan diff) { }
 
         // Called when the world is started.
         public virtual void OnStartup() { }
@@ -201,7 +201,7 @@ namespace Game.Scripting
         // Called when a player leaves the map.
         public virtual void OnPlayerLeave(T map, Player player) { }
 
-        public virtual void OnUpdate(T obj, uint diff) { }
+        public virtual void OnUpdate(T obj, TimeSpan diff) { }
 
         MapRecord _mapEntry;
     }
@@ -468,7 +468,7 @@ namespace Game.Scripting
         // Called when the weather changes in the zone this script is associated with.
         public virtual void OnChange(Weather weather, WeatherState state, float grade) { }
 
-        public virtual void OnUpdate(Weather obj, uint diff) { }
+        public virtual void OnUpdate(Weather obj, TimeSpan diff) { }
     }
 
     public class AuctionHouseScript : ScriptObject
@@ -537,7 +537,7 @@ namespace Game.Scripting
             Global.ScriptMgr.AddScript(this);
         }
 
-        public virtual void OnUpdate(DynamicObject obj, uint diff) { }
+        public virtual void OnUpdate(DynamicObject obj, TimeSpan diff) { }
     }
 
     public class TransportScript : ScriptObject
@@ -561,7 +561,7 @@ namespace Game.Scripting
         // Called when a transport moves.
         public virtual void OnRelocate(Transport transport, int mapId, float x, float y, float z) { }
 
-        public virtual void OnUpdate(Transport obj, uint diff) { }
+        public virtual void OnUpdate(Transport obj, TimeSpan diff) { }
     }
 
     public class AchievementScript : ScriptObject
@@ -816,7 +816,7 @@ namespace Game.Scripting
         public virtual void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender) { }
 
         // Called for each update tick
-        public virtual void OnConversationUpdate(Conversation conversation, uint diff) { }
+        public virtual void OnConversationUpdate(Conversation conversation, TimeSpan diff) { }
     }
 
     public class SceneScript : ScriptObject

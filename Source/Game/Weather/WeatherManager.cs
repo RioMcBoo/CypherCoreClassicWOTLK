@@ -4,6 +4,7 @@
 using Framework.Database;
 using Game.Entities;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game
@@ -14,7 +15,7 @@ namespace Game
 
         public void LoadWeatherData()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             uint count = 0;
 
@@ -69,7 +70,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} weather definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} weather definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public WeatherData GetWeatherData(int zone_id)
@@ -86,7 +87,7 @@ namespace Game
         {
             m_zone = zoneId;
             m_weatherChances = weatherChances;
-            m_timer.SetInterval(10 * Time.Minute * Time.InMilliseconds);
+            m_timer.SetInterval((Minutes)10);
             m_type = WeatherType.Fine;
             m_intensity = 0;
 
@@ -94,12 +95,12 @@ namespace Game
             //$"WORLD: Starting weather system for zone {m_zone} (change every {(m_timer.GetInterval() / (Time.Minute * Time.InMilliseconds))} minutes).");
         }
 
-        public bool Update(uint diff)
+        public bool Update(TimeSpan diff)
         {
-            if (m_timer.GetCurrent() >= 0)
+            if (m_timer.GetCurrent() >= TimeSpan.Zero)
                 m_timer.Update(diff);
             else
-                m_timer.SetCurrent(0);
+                m_timer.SetCurrent(TimeSpan.Zero);
 
             // If the timer has passed, ReGenerate the weather
             if (m_timer.Passed())
@@ -141,8 +142,7 @@ namespace Game
             WeatherType old_type = m_type;
             float old_intensity = m_intensity;
 
-            long gtime = GameTime.GetGameTime();
-            var ltime = Time.UnixTimeToDateTime(gtime).ToLocalTime();
+            DateTime ltime = LoopTime.RealmTime;
             uint season = (uint)((ltime.DayOfYear - 78 + 365) / 91) % 4;
 
             string[] seasonName = ["spring", "summer", "fall", "winter"];

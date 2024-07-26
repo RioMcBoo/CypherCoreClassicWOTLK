@@ -441,7 +441,7 @@ namespace Game.Chat
         static bool HandleFreezeCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayer(); // Selected player, if any. Might be null.
-            int freezeDuration = 0; // Freeze Duration (in seconds)
+            Seconds freezeDuration = Seconds.Zero;
             bool canApplyFreeze = false; // Determines if every possible argument is set so Freeze can be applied
             bool getDurationFromConfig = false; // If there's no given duration, we'll retrieve the world cfg value later
 
@@ -464,7 +464,7 @@ namespace Game.Chat
                     {
                         // case 2: .freeze duration
                         // We have a selected player. We'll check him later
-                        if (!int.TryParse(arg1, out freezeDuration))
+                        if (!Seconds.TryParse(arg1, null, out freezeDuration))
                             return false;
 
                         canApplyFreeze = true;
@@ -479,7 +479,7 @@ namespace Game.Chat
                         // Check if we have duration set
                         if (!arg2.IsEmpty() && arg2.IsNumber())
                         {
-                            if (!int.TryParse(arg2, out freezeDuration))
+                            if (!Seconds.TryParse(arg2, null, out freezeDuration))
                                 return false;
 
                             canApplyFreeze = true;
@@ -493,7 +493,7 @@ namespace Game.Chat
             // Check if duration needs to be retrieved from config
             if (getDurationFromConfig)
             {
-                freezeDuration = WorldConfig.Values[WorldCfg.GmFreezeDuration].Int32;
+                freezeDuration = WorldConfig.Values[WorldCfg.GmFreezeDuration].Seconds;
                 canApplyFreeze = true;
             }
 
@@ -520,7 +520,8 @@ namespace Game.Chat
                     if (freeze != null)
                     {
                         if (freezeDuration != 0)
-                            freeze.SetDuration(freezeDuration * Time.InMilliseconds);
+                            freeze.SetDuration(freezeDuration);
+
                         handler.SendSysMessage(CypherStrings.CommandFreeze, player.GetName());
                         // save player
                         player.SaveToDB();
@@ -844,7 +845,7 @@ namespace Game.Chat
             do
             {
                 string player = result.Read<string>(0);
-                int remaintime = result.Read<int>(1);
+                Milliseconds remaintime = (Milliseconds)result.Read<int>(1);
                 // Save the frozen player to update remaining time in case of future .listfreeze uses
                 // before the frozen state expires
                 Player frozen = Global.ObjAccessor.FindPlayerByName(player);
@@ -855,7 +856,7 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.CommandPermaFrozenPlayer, player);
                 else
                     // show time left (seconds)
-                    handler.SendSysMessage(CypherStrings.CommandTempFrozenPlayer, player, remaintime / Time.InMilliseconds);
+                    handler.SendSysMessage(CypherStrings.CommandTempFrozenPlayer, player, (Seconds)remaintime);
             }
             while (result.NextRow());
 
@@ -972,8 +973,9 @@ namespace Game.Chat
 
         // mute player for the specified duration
         [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
-        static bool HandleMuteCommand(CommandHandler handler, PlayerIdentifier player, uint muteTime, Tail muteReason)
+        static bool HandleMuteCommand(CommandHandler handler, PlayerIdentifier player, int muteTime, Tail muteReason)
         {
+            TimeSpan muteLength = (Minutes)muteTime;
             string muteReasonStr = muteReason;
             if (muteReason.IsEmpty())
                 muteReasonStr = handler.GetCypherString(CypherStrings.NoReason);
@@ -1012,13 +1014,13 @@ namespace Game.Chat
             if (target != null)
             {
                 // Target is online, mute will be in effect right away.
-                long mutedUntil = GameTime.GetGameTime() + muteTime * Time.Minute;
-                target.GetSession().m_muteTime = mutedUntil;
-                stmt.SetInt64(0, mutedUntil);
+                ServerTime mutedUntil = LoopTime.ServerTime + muteLength;
+                target.GetSession().m_mutedUntilTime = mutedUntil;
+                stmt.SetInt64(0, (UnixTime64)mutedUntil);
             }
             else
             {
-                stmt.SetInt64(0, -(muteTime * Time.Minute));
+                stmt.SetInt64(0, -(Seconds)muteLength);
             }
 
             stmt.SetString(1, muteReasonStr);
@@ -1028,7 +1030,7 @@ namespace Game.Chat
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ACCOUNT_MUTE);
             stmt.SetInt32(0, accountId);
-            stmt.SetUInt32(1, muteTime);
+            stmt.SetInt32(1, muteTime);
             stmt.SetString(2, muteBy);
             stmt.SetString(3, muteReasonStr);
             DB.Login.Execute(stmt);
@@ -1078,10 +1080,10 @@ namespace Game.Chat
             do
             {
                 // we have to manually set the string for mutedate
-                long sqlTime = result.Read<uint>(0);
+                ServerTime sqlTime = (ServerTime)(UnixTime)result.Read<int>(0);
 
                 // set it to string
-                string buffer = Time.UnixTimeToDateTime(sqlTime).ToShortTimeString();
+                string buffer = sqlTime.ToShortTimeString();
 
                 handler.SendSysMessage(
                     CypherStrings.CommandMutehistoryOutput, buffer, result.Read<uint>(1), 
@@ -1210,12 +1212,12 @@ namespace Game.Chat
             string OS = handler.GetCypherString(CypherStrings.Unknown);
 
             // Mute data print variables
-            long muteTime = -1;
+            ServerTime mutedUntilTime = ServerTime.Zero;
             string muteReason = handler.GetCypherString(CypherStrings.NoReason);
             string muteBy = handler.GetCypherString(CypherStrings.Unknown);
 
             // Ban data print variables
-            long banTime = -1;
+            ServerTime bannedUntilTime = ServerTime.Zero;
             string banType = handler.GetCypherString(CypherStrings.Unknown);
             string banReason = handler.GetCypherString(CypherStrings.NoReason);
             string bannedBy = handler.GetCypherString(CypherStrings.Unknown);
@@ -1225,7 +1227,7 @@ namespace Game.Chat
             Class classid;
             Gender gender;
             Locale locale = handler.GetSessionDbcLocale();
-            uint totalPlayerTime;
+            Seconds totalPlayerTime;
             int level;
             string alive;
             long money;
@@ -1261,7 +1263,7 @@ namespace Game.Chat
                 latency = target.GetSession().GetLatency();
                 raceid = target.GetRace();
                 classid = target.GetClass();
-                muteTime = target.GetSession().m_muteTime;
+                mutedUntilTime = target.GetSession().m_mutedUntilTime;
                 mapId = target.GetMapId();
                 areaId = target.GetAreaId();
                 alive = target.IsAlive() ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No);
@@ -1282,7 +1284,7 @@ namespace Game.Chat
                 if (result.IsEmpty())
                     return false;
 
-                totalPlayerTime = result.Read<uint>(0);
+                totalPlayerTime = (Seconds)result.Read<int>(0);
                 level = result.Read<byte>(1);
                 money = result.Read<long>(2);
                 accId = result.Read<int>(3);
@@ -1328,7 +1330,7 @@ namespace Game.Chat
                         lastIp = handler.GetCypherString(CypherStrings.Unauthorized);
                         lastLogin = handler.GetCypherString(CypherStrings.Unauthorized);
                     }
-                    muteTime = (long)result0.Read<ulong>(6);
+                    mutedUntilTime = (ServerTime)(UnixTime64)result0.Read<long>(6); //TODO: change to signed in DB
                     muteReason = result0.Read<string>(7);
                     muteBy = result0.Read<string>(8);
                     failedLogins = result0.Read<uint>(9);
@@ -1340,7 +1342,7 @@ namespace Game.Chat
             // Creates a chat link to the character. Returns nameLink
             string nameLink = handler.PlayerLink(targetName);
 
-            // Returns banType, banTime, bannedBy, banreason
+            // Returns banType, bannedUntilTime, bannedBy, banreason
             PreparedStatement stmt2 = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_PINFO_BANS);
             stmt2.SetInt32(0, accId);
             SQLResult result2 = DB.Login.Query(stmt2);
@@ -1351,7 +1353,7 @@ namespace Game.Chat
                 {
                     banType = handler.GetCypherString(CypherStrings.Account);
                     bool permanent = result2.Read<ulong>(1) != 0;
-                    banTime = !permanent ? result2.Read<uint>(0) : 0;
+                    bannedUntilTime = !permanent ? (ServerTime)(UnixTime)result2.Read<int>(0) : ServerTime.Zero;
                     bannedBy = result2.Read<string>(2);
                     banReason = result2.Read<string>(3);
                 }
@@ -1367,7 +1369,7 @@ namespace Game.Chat
                     {
                         banType = handler.GetCypherString(CypherStrings.Character);
                         bool permanent = result3.Read<ulong>(1) != 0;
-                        banTime = !permanent ? result3.Read<uint>(0) : 0;
+                        bannedUntilTime = !permanent ? (ServerTime)(UnixTime)result2.Read<int>(0) : ServerTime.Zero;
                         bannedBy = result3.Read<string>(2);
                         banReason = result3.Read<string>(3);
                     }
@@ -1420,12 +1422,22 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.PinfoGmActive);
 
             // Output III. LANG_PINFO_BANNED if ban exists and is applied
-            if (banTime >= 0)
-                handler.SendSysMessage(CypherStrings.PinfoBanned, banType, banReason, banTime > 0 ? Time.secsToTimeString((banTime - GameTime.GetGameTime()), TimeFormat.ShortText) : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
-
+            if (bannedUntilTime > Time.Zero)
+            {
+                handler.SendSysMessage(
+                    CypherStrings.PinfoBanned, banType, banReason, 
+                    bannedUntilTime != Time.Infinity ? 
+                    Time.SpanToTimeString(bannedUntilTime - LoopTime.ServerTime, TimeFormat.ShortText) 
+                    : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
+            }
             // Output IV. LANG_PINFO_MUTED if mute is applied
-            if (muteTime > 0)
-                handler.SendSysMessage(CypherStrings.PinfoMuted, muteReason, Time.secsToTimeString((muteTime - GameTime.GetGameTime()), TimeFormat.ShortText), muteBy);
+            if (mutedUntilTime > Time.Zero)
+            {
+                handler.SendSysMessage(
+                    CypherStrings.PinfoMuted, muteReason, 
+                    Time.SpanToTimeString(mutedUntilTime - LoopTime.ServerTime, TimeFormat.ShortText), 
+                    muteBy);
+            }
 
             // Output V. LANG_PINFO_ACC_ACCOUNT
             handler.SendSysMessage(CypherStrings.PinfoAccAccount, userName, accId, security);
@@ -1507,7 +1519,7 @@ namespace Game.Chat
 
             // Output XX. LANG_PINFO_CHR_PLAYEDTIME
             handler.SendSysMessage(CypherStrings.PinfoChrPlayedtime, 
-                Time.secsToTimeString(totalPlayerTime, TimeFormat.ShortText, true));
+                Time.SpanToTimeString(totalPlayerTime, TimeFormat.ShortText, true));
 
             // Mail Data - an own query, because it may or may not be useful.
             // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*)
@@ -1716,8 +1728,8 @@ namespace Game.Chat
             }
 
             // save if the player has last been saved over 20 seconds ago
-            uint saveInterval = (uint)WorldConfig.Values[WorldCfg.IntervalSave].Int32;
-            if (saveInterval == 0 || (saveInterval > 20 * Time.InMilliseconds && player.GetSaveTimer() <= saveInterval - 20 * Time.InMilliseconds))
+            Milliseconds saveInterval = WorldConfig.Values[WorldCfg.IntervalSave].Milliseconds;
+            if (saveInterval == 0 || (saveInterval > (Seconds)20 && player.GetSaveTimer() <= saveInterval - (Seconds)20))
                 player.SaveToDB();
 
             return true;
@@ -1979,7 +1991,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                target.GetSession().m_muteTime = 0;
+                target.GetSession().m_mutedUntilTime = ServerTime.Zero;
             }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);

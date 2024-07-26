@@ -15,7 +15,7 @@ namespace Game.Spells
     {
         public static void LoadSkillDiscoveryTable()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             SkillDiscoveryStorage.Clear();                            // need for reload
 
@@ -141,7 +141,7 @@ namespace Game.Spells
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill discovery definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} skill discovery definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public static int GetExplicitDiscoverySpell(int spellId, Player player)
@@ -216,7 +216,7 @@ namespace Game.Spells
             return GetSkillDiscoverySpell((int)skillId, spellId, player);
         }
 
-            public static int GetSkillDiscoverySpell(int skillId, int spellId, Player player)
+        public static int GetSkillDiscoverySpell(int skillId, int spellId, Player player)
         {
             int skillvalue = skillId != 0 ? player.GetSkillValue(skillId) : 0;
 

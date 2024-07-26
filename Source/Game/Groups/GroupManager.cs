@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Groups
@@ -75,7 +76,7 @@ namespace Game.Groups
             return GroupStore.LookupByKey(groupId.GetCounter());
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             foreach (var group in GroupStore.Values)
                     group.Update(diff);
@@ -103,7 +104,7 @@ namespace Game.Groups
             DB.Characters.DirectExecute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM `groups`)");
 
             uint count = 0;
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             {
                 //                                                    0              1           2             3                 4      5          6      7         8       9
                 SQLResult result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
@@ -135,14 +136,14 @@ namespace Game.Groups
                 }
                 while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} group definitions in {Time.Diff(oldMSTime)} ms.");
 
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Group members...");
             {
                 count = 0;
-                oldMSTime = Time.GetMSTime();
+                oldMSTime = Time.NowRelative;
 
                 //                                              0        1           2            3       4
                 SQLResult result = DB.Characters.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");
@@ -170,7 +171,7 @@ namespace Game.Groups
                 }
                 while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group members in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} group members in {Time.Diff(oldMSTime)} ms.");
             }
         }
 

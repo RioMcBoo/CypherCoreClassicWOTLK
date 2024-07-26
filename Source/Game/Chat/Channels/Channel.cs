@@ -88,7 +88,7 @@ namespace Game.Chat
 
         public void UpdateChannelInDB()
         {
-            long now = GameTime.GetGameTime();
+            ServerTime now = LoopTime.ServerTime;
             if (_isDirty)
             {
                 string banlist = "";
@@ -117,8 +117,8 @@ namespace Game.Chat
             else
                 return;
 
-            _isDirty = false;
-            _nextActivityUpdateTime = now + RandomHelper.URand(1 * Time.Minute, 6 * Time.Minute) * Math.Max(1u, (uint)WorldConfig.Values[WorldCfg.PreserveCustomChannelInterval].Int32);
+            _isDirty = false;            
+            _nextActivityUpdateTime = now + RandomHelper.IRand(1, 6) * Time.Max((Minutes)1, WorldConfig.Values[WorldCfg.PreserveCustomChannelInterval].TimeSpan);
         }
 
         public void JoinChannel(Player player, string pass = "")
@@ -168,7 +168,7 @@ namespace Game.Chat
 
             bool newChannel = _playersStore.Empty();
             if (newChannel)
-                _nextActivityUpdateTime = 0; // force activity update on next channel tick
+                _nextActivityUpdateTime = ServerTime.Zero; // force activity update on next channel tick
 
             PlayerInfo playerInfo = new();
             playerInfo.SetInvisible(!player.IsGMVisible());
@@ -876,7 +876,7 @@ namespace Game.Chat
         }
 
         bool _isDirty; // whether the channel needs to be saved to DB
-        long _nextActivityUpdateTime;
+        ServerTime _nextActivityUpdateTime;
 
         bool _announceEnabled;
         bool _ownershipEnabled;

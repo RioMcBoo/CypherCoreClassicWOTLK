@@ -1105,7 +1105,7 @@ namespace Scripts.Spells.Generic
     class spell_gen_decay_over_time_fungal_decay : AuraScript
     {
         // found in sniffs, there is no duration entry we can possibly use
-        const int AuraDuration = 12600;
+        static readonly Milliseconds AuraDuration = (Milliseconds)12600;
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
@@ -1325,8 +1325,8 @@ namespace Scripts.Spells.Generic
                 Player player = GetCaster().ToPlayer();
                 if (player != null)
                 {
-                    float horizontalSpeed = 20.0f + (40.0f - GetCaster().GetDistance(target));
-                    float verticalSpeed = 8.0f;
+                    Speed horizontalSpeed = new(20.0f + (40.0f - GetCaster().GetDistance(target)));
+                    Speed verticalSpeed = new(8.0f);
                     // This method relies on the Dalaran Sewer map disposition and Water Spout position
                     // What we do is knock the player from a position exactly behind him and at the end of the pipe
                     player.KnockbackFrom(target.GetPosition(), horizontalSpeed, verticalSpeed);
@@ -3278,12 +3278,12 @@ namespace Scripts.Spells.Generic
     {
         const int SpellTurkeyVengeance = 25285;
 
-        List<uint> _applyTimes = new();
+        List<ServerTime> _applyTimes = new();
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // store stack apply times, so we can pop them while they expire
-            _applyTimes.Add(GameTime.GetGameTimeMS());
+            _applyTimes.Add(LoopTime.ServerTime);
             Unit target = GetTarget();
 
             // on stack 15 cast the achievement crediting spell
@@ -3291,7 +3291,7 @@ namespace Scripts.Spells.Generic
             {
                 target.CastSpell(target, SpellTurkeyVengeance, new CastSpellExtraArgs(aurEff)
                     .SetOriginalCaster(GetCasterGUID()));
-        }
+            }
         }
 
         void OnPeriodic(AuraEffect aurEff)
@@ -3299,7 +3299,7 @@ namespace Scripts.Spells.Generic
             int RemoveCount = 0;
 
             // pop expired times off of the stack
-            while (!_applyTimes.Empty() && _applyTimes.First() + GetMaxDuration() < GameTime.GetGameTimeMS())
+            while (!_applyTimes.Empty() && _applyTimes.First() + GetMaxDuration() < LoopTime.ServerTime)
             {
                 _applyTimes.RemoveAt(0);
                 RemoveCount++;
@@ -4369,7 +4369,7 @@ namespace Scripts.Spells.Generic
             {
                 target.CastSpell(target, SpellMarkOfKazrogalDamageHellfire, aurEff);
                 // Remove aura
-                SetDuration(0);
+                SetDuration(Milliseconds.Zero);
             }
         }
 
@@ -4593,7 +4593,7 @@ namespace Scripts.Spells.Generic
 
                 Unit caster = GetCaster();
                 var properties = CliDB.SummonPropertiesStorage.LookupByKey(GetEffectInfo().MiscValueB);
-                TimeSpan duration = TimeSpan.FromMilliseconds(GetSpellInfo().CalcDuration(caster));
+                TimeSpan duration = Time.SpanFromMilliseconds(GetSpellInfo().CalcDuration(caster));
                 Position pos = GetHitDest().GetPosition();
 
                 Creature summon = caster.GetMap().SummonCreature(creatureId, pos, properties, duration, caster, GetSpellInfo().Id);
@@ -4628,7 +4628,7 @@ namespace Scripts.Spells.Generic
 
             if (target.GetSession().GetBattlePetMgr().IsBattlePetSystemEnabled())
             {
-                TimeSpan expectedCooldown = TimeSpan.FromMilliseconds(GetAura().GetMaxDuration());
+                Milliseconds expectedCooldown = GetAura().GetMaxDuration();
                 var remainingCooldown = target.GetSpellHistory().GetRemainingCategoryCooldown(reviveBattlePetSpellInfo);
                 if (remainingCooldown > TimeSpan.Zero)
                 {
@@ -4985,7 +4985,7 @@ namespace Scripts.Spells.Generic
             _caster = caster;
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
             if (_caster.GetChannelSpellId() == 0)
                 _caster.CastSpell(null, BattlegroundConst.SpellSpiritHealChannelAoE, false);
@@ -5003,7 +5003,7 @@ namespace Scripts.Spells.Generic
                 return;
 
             Unit target = GetTarget();
-            target.m_Events.AddEventAtOffset(new RecastSpiritHealChannelEvent(target), TimeSpan.FromSeconds(1));
+            target.m_Events.AddEventAtOffset(new RecastSpiritHealChannelEvent(target), Time.SpanFromSeconds(1));
         }
 
         public override void Register()

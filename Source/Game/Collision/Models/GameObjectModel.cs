@@ -188,7 +188,7 @@ namespace Game.Collision
         
         public static bool LoadGameObjectModelList()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             var filename = Global.WorldMgr.GetDataPath() + "/vmaps/GameObjectModels.dtree";
             if (!File.Exists(filename))
             {
@@ -227,7 +227,8 @@ namespace Game.Collision
                 Log.outException(ex);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObject models in {1} ms", StaticModelList.models.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {StaticModelList.models.Count} GameObject models in {Time.Diff(oldMSTime)} ms.");
             return true;
         }
 

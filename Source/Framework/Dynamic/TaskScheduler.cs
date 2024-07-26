@@ -59,25 +59,13 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        /// Update the scheduler with a difftime in ms.
-        /// Calls the optional callback on successfully finish.
-        /// </summary>
-        /// <param name="milliseconds"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        public TaskScheduler Update(uint milliseconds, success_t callback = null)
-        {
-            return Update(TimeSpan.FromMilliseconds(milliseconds), callback);
-        }
-
-        /// <summary>
         /// Update the scheduler with a difftime.
         /// Calls the optional callback on successfully finish.
         /// </summary>
         /// <param name="difftime"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        TaskScheduler Update(TimeSpan difftime, success_t callback = null)
+        public TaskScheduler Update(TimeSpan difftime, success_t callback = null)
         {
             _now += difftime;
             Dispatch(callback);

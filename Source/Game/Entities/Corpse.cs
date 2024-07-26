@@ -9,6 +9,7 @@ using Game.Loots;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -26,7 +27,7 @@ namespace Game.Entities
 
             m_corpseData = new();
 
-            m_time = GameTime.GetGameTime();
+            m_time = LoopTime.ServerTime;
         }
 
         public override void AddToWorld()
@@ -79,7 +80,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
 
@@ -104,15 +105,15 @@ namespace Game.Entities
             stmt.SetFloat(index++, GetPositionZ());                                         // posZ
             stmt.SetFloat(index++, GetOrientation());                                       // orientation
             stmt.SetInt32(index++, GetMapId());                                             // mapId
-            stmt.SetInt32(index++, m_corpseData.DisplayID);                           // displayId
-            stmt.SetString(index++, items.ToString());                                       // itemCache
+            stmt.SetInt32(index++, m_corpseData.DisplayID);                                 // displayId
+            stmt.SetString(index++, items.ToString());                                      // itemCache
             stmt.SetUInt8(index++, (byte)m_corpseData.RaceID);                              // race
-            stmt.SetUInt8(index++, (byte)m_corpseData.Class);                             // class
+            stmt.SetUInt8(index++, (byte)m_corpseData.Class);                               // class
             stmt.SetUInt8(index++, (byte)m_corpseData.Sex);                                 // gender
-            stmt.SetUInt32(index++, (uint)m_corpseData.Flags);                               // flags
-            stmt.SetUInt32(index++, (uint)m_corpseData.DynamicFlags);                        // dynFlags
-            stmt.SetUInt32(index++, (uint)m_time);                                           // time
-            stmt.SetUInt32(index++, (uint)GetCorpseType());                                  // corpseType
+            stmt.SetUInt32(index++, (uint)m_corpseData.Flags);                              // flags
+            stmt.SetUInt32(index++, (uint)m_corpseData.DynamicFlags);                       // dynFlags
+            stmt.SetInt32(index++, (UnixTime)m_time);                                       // time
+            stmt.SetUInt32(index++, (uint)GetCorpseType());                                 // corpseType
             stmt.SetInt32(index++, GetInstanceId());                                        // instanceId
             trans.Append(stmt);
 
@@ -186,7 +187,7 @@ namespace Game.Entities
             SetOwnerGUID(ObjectGuid.Create(HighGuid.Player, field.Read<long>(15)));
             SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(m_corpseData.RaceID).FactionID);
 
-            m_time = field.Read<uint>(12);
+            m_time = (ServerTime)(UnixTime)field.Read<int>(12);
 
             int instanceId = field.Read<int>(14);
 
@@ -207,16 +208,16 @@ namespace Game.Entities
             return true;
         }
 
-        public bool IsExpired(long t)
+        public bool IsExpired(ServerTime currentTime)
         {
             // Deleted character
             if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(GetOwnerGUID()))
                 return true;
 
             if (m_type == CorpseType.Bones)
-                return m_time < t - 60 * Time.Minute;
+                return m_time < currentTime - (Hours)1;
             else
-                return m_time < t - 3 * Time.Day;
+                return m_time < currentTime - (Days)3;
         }
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
@@ -313,8 +314,8 @@ namespace Game.Entities
             }
         }
 
-        public long GetGhostTime() { return m_time; }
-        public void ResetGhostTime() { m_time = GameTime.GetGameTime(); }
+        public ServerTime GetGhostTime() { return m_time; }
+        public void ResetGhostTime() { m_time = LoopTime.ServerTime; }
         public CorpseType GetCorpseType() { return m_type; }
 
         public CellCoord GetCellCoord() { return _cellCoord; }
@@ -328,7 +329,7 @@ namespace Game.Entities
         public Player lootRecipient;
 
         CorpseType m_type;
-        long m_time;
+        ServerTime m_time;
         CellCoord _cellCoord;                                    // gride for corpse position for fast search
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>

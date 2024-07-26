@@ -521,7 +521,7 @@ namespace Game
 
             auctionHouse.BuildReplicate(response, GetPlayer(), replicateItems.ChangeNumberGlobal, replicateItems.ChangeNumberCursor, replicateItems.ChangeNumberTombstone, replicateItems.Count);
 
-            response.DesiredDelay = WorldConfig.Values[WorldCfg.AuctionSearchDelay].Int32 * 5;
+            response.DesiredDelay = WorldConfig.Values[WorldCfg.AuctionSearchDelay].TimeSpan * 5;
             response.Result = 0;
 
             SendPacket(response);
@@ -590,15 +590,12 @@ namespace Game
                 return;
             }
 
-            switch (sellCommodity.RunTime)
+            if (sellCommodity.RunTime.Ticks != 1 * SharedConst.MinAuctionTime.Ticks &&
+                sellCommodity.RunTime.Ticks != 2 * SharedConst.MinAuctionTime.Ticks &&
+                sellCommodity.RunTime.Ticks != 4 * SharedConst.MinAuctionTime.Ticks)
             {
-                case 1 * SharedConst.MinAuctionTime / Time.Minute:
-                case 2 * SharedConst.MinAuctionTime / Time.Minute:
-                case 4 * SharedConst.MinAuctionTime / Time.Minute:
-                    break;
-                default:
-                    SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.AuctionHouseBusy, throttle.DelayUntilNext);
-                    return;
+                SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.AuctionHouseBusy, throttle.DelayUntilNext);
+                return;
             }
 
             if (GetPlayer().HasUnitState(UnitState.Died))
@@ -632,7 +629,7 @@ namespace Game
                 }
 
                 if (Global.AuctionHouseMgr.GetAItem(item.GetGUID()) != null || !item.CanBeTraded() || item.IsNotEmptyBag() ||
-                    item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0 ||
+                    item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != Seconds.Zero ||
                     item.GetCount() < itemForSale.UseCount)
                 {
                     SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.DatabaseError, throttle.DelayUntilNext);
@@ -659,10 +656,10 @@ namespace Game
                 return;
             }
 
-            TimeSpan auctionTime = TimeSpan.FromSeconds((long)TimeSpan.FromMinutes(sellCommodity.RunTime).TotalSeconds * WorldConfig.Values[WorldCfg.RateAuctionTime].Float);
+            TimeSpan auctionTime = sellCommodity.RunTime * WorldConfig.Values[WorldCfg.RateAuctionTime].Float;
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
-            long deposit = Global.AuctionHouseMgr.GetCommodityAuctionDeposit(items2.FirstOrDefault().Value.Item.GetTemplate(), TimeSpan.FromMinutes(sellCommodity.RunTime), totalCount);
+            long deposit = Global.AuctionHouseMgr.GetCommodityAuctionDeposit(items2.FirstOrDefault().Value.Item.GetTemplate(), sellCommodity.RunTime, totalCount);
             if (!_player.HasEnoughMoney(deposit))
             {
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.NotEnoughMoney, throttle.DelayUntilNext);
@@ -676,7 +673,7 @@ namespace Game
             auction.OwnerAccount = GetAccountGUID();
             auction.BuyoutOrUnitPrice = sellCommodity.UnitPrice;
             auction.Deposit = deposit;
-            auction.StartTime = GameTime.GetSystemTime();
+            auction.StartTime = LoopTime.ServerTime;
             auction.EndTime = auction.StartTime + auctionTime;
 
             // keep track of what was cloned to undo/modify counts later
@@ -827,15 +824,12 @@ namespace Game
                 return;
             }
 
-            switch (sellItem.RunTime)
+            if (sellItem.RunTime.Ticks != 1 * SharedConst.MinAuctionTime.Ticks &&
+                sellItem.RunTime.Ticks != 2 * SharedConst.MinAuctionTime.Ticks &&
+                sellItem.RunTime.Ticks != 4 * SharedConst.MinAuctionTime.Ticks)
             {
-                case 1 * SharedConst.MinAuctionTime / Time.Minute:
-                case 2 * SharedConst.MinAuctionTime / Time.Minute:
-                case 4 * SharedConst.MinAuctionTime / Time.Minute:
-                    break;
-                default:
-                    SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.AuctionHouseBusy, throttle.DelayUntilNext);
-                    return;
+                SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.AuctionHouseBusy, throttle.DelayUntilNext);
+                return;
             }
 
             if (GetPlayer().HasUnitState(UnitState.Died))
@@ -856,17 +850,17 @@ namespace Game
             }
 
             if (Global.AuctionHouseMgr.GetAItem(item.GetGUID()) != null || !item.CanBeTraded() || item.IsNotEmptyBag() ||
-                item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0 ||
+                item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != Seconds.Zero ||
                 item.GetCount() != 1)
             {
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.DatabaseError, throttle.DelayUntilNext);
                 return;
             }
 
-            TimeSpan auctionTime = TimeSpan.FromSeconds((long)(TimeSpan.FromMinutes(sellItem.RunTime).TotalSeconds * WorldConfig.Values[WorldCfg.RateAuctionTime].Float));
+            TimeSpan auctionTime = sellItem.RunTime * WorldConfig.Values[WorldCfg.RateAuctionTime].Float;
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
-            long deposit = Global.AuctionHouseMgr.GetItemAuctionDeposit(_player, item, TimeSpan.FromMinutes(sellItem.RunTime));
+            long deposit = Global.AuctionHouseMgr.GetItemAuctionDeposit(_player, item, sellItem.RunTime);
             if (!_player.HasEnoughMoney(deposit))
             {
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.NotEnoughMoney, throttle.DelayUntilNext);
@@ -883,7 +877,7 @@ namespace Game
             auction.BuyoutOrUnitPrice = sellItem.BuyoutPrice;
             auction.Deposit = deposit;
             auction.BidAmount = sellItem.MinBid;
-            auction.StartTime = GameTime.GetSystemTime();
+            auction.StartTime = LoopTime.ServerTime;
             auction.EndTime = auction.StartTime + auctionTime;
 
             if (HasPermission(RBACPermissions.LogGmTrade))
@@ -899,7 +893,7 @@ namespace Game
                 $"is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
                 $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} " +
                 $"with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} " +
-                $"and with time {auctionTime.TotalSeconds} (in sec) " +
+                $"and with time {(Seconds)auctionTime} (in sec) " +
                 $"in auctionhouse {auctionHouse.GetAuctionHouseId()}");
 
             // Add to pending auctions, or fail with insufficient funds error
@@ -992,11 +986,11 @@ namespace Game
             {
                 commodityQuoteResult.TotalPrice = quote.TotalPrice;
                 commodityQuoteResult.Quantity = quote.Quantity;
-                commodityQuoteResult.QuoteDuration = (int)(quote.ValidTo - GameTime.Now()).TotalMilliseconds;
+                commodityQuoteResult.QuoteDuration = quote.ValidTo - LoopTime.ServerTime;
             }
 
             commodityQuoteResult.ItemID = getCommodityQuote.ItemID;
-            commodityQuoteResult.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;
+            commodityQuoteResult.DesiredDelay = throttle.DelayUntilNext;
 
             SendPacket(commodityQuoteResult);
         }
@@ -1026,11 +1020,11 @@ namespace Game
             auctionCommandResult.Command = (int)command;
             auctionCommandResult.ErrorCode = errorCode;
             auctionCommandResult.BagResult = bagError;
-            auctionCommandResult.DesiredDelay = (uint)delayForNextAction.TotalSeconds;
+            auctionCommandResult.DesiredDelay = delayForNextAction;
             SendPacket(auctionCommandResult);
         }
 
-        public void SendAuctionClosedNotification(AuctionPosting auction, float mailDelay, bool sold)
+        public void SendAuctionClosedNotification(AuctionPosting auction, TimeSpan mailDelay, bool sold)
         {
             AuctionClosedNotification packet = new();
             packet.Info.Initialize(auction);

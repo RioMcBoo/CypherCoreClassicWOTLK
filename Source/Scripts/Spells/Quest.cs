@@ -99,7 +99,7 @@ namespace Scripts.Spells.Azerite
         const int NpcSicklyDeer = 12298;
         const int NpcCuredDeer = 12299;
 
-        TimeSpan Quest6124_6129_DESPAWN_TIME = TimeSpan.FromSeconds(30);
+        TimeSpan Quest6124_6129_DESPAWN_TIME = Time.SpanFromSeconds(30);
 
         public override bool Load()
         {
@@ -446,7 +446,7 @@ namespace Scripts.Spells.Azerite
             {
                 caster.KilledMonsterCredit(NpcShardKillCredit);
                 target.CastSpell(target, GetEffectValue(), true);
-                target.DespawnOrUnsummon(TimeSpan.FromSeconds(2));
+                target.DespawnOrUnsummon(Time.SpanFromSeconds(2));
             }
         }
 
@@ -1060,7 +1060,7 @@ namespace Scripts.Spells.Azerite
 
         void HandleScript(int effIndex)
         {
-            GetCaster().ToCreature().DespawnOrUnsummon(TimeSpan.FromSeconds(2));
+            GetCaster().ToCreature().DespawnOrUnsummon(Time.SpanFromSeconds(2));
         }
 
         public override void Register()
@@ -1736,15 +1736,15 @@ namespace Scripts.Spells.Azerite
         void HandleEffect(int eff)
         {
             Unit caster = GetCaster();
-            caster.SummonCreature(NpcAttackMastiff, -1944.573f, 2657.402f, 0.994939f, 1.691919f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -2005.65f, 2663.526f, -2.086935f, 0.5942355f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -1996.506f, 2651.347f, -1.011707f, 0.8185352f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -1972.352f, 2640.07f, 1.080288f, 1.217854f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -1949.322f, 2642.76f, 1.242482f, 1.58074f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -1993.94f, 2672.535f, -2.322549f, 0.5766209f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -1982.724f, 2662.8f, -1.773986f, 0.8628055f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -1973.301f, 2655.475f, -0.7831049f, 1.098415f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-            caster.SummonCreature(NpcAttackMastiff, -1956.509f, 2650.655f, 1.350571f, 1.441473f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
+            caster.SummonCreature(NpcAttackMastiff, -1944.573f, 2657.402f, 0.994939f, 1.691919f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -2005.65f, 2663.526f, -2.086935f, 0.5942355f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -1996.506f, 2651.347f, -1.011707f, 0.8185352f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -1972.352f, 2640.07f, 1.080288f, 1.217854f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -1949.322f, 2642.76f, 1.242482f, 1.58074f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -1993.94f, 2672.535f, -2.322549f, 0.5766209f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -1982.724f, 2662.8f, -1.773986f, 0.8628055f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -1973.301f, 2655.475f, -0.7831049f, 1.098415f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
+            caster.SummonCreature(NpcAttackMastiff, -1956.509f, 2650.655f, 1.350571f, 1.441473f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)1);
         }
 
         public override void Register()

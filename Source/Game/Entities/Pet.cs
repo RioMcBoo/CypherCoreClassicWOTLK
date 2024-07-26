@@ -16,7 +16,7 @@ namespace Game.Entities
 {
     public class Pet : Guardian
     {
-        const int PetFocusRegenInterval = 4 * Time.InMilliseconds;
+        static readonly TimeSpan PetFocusRegenInterval = (Seconds)4;
         const int HappinessLevelSize = 333000;
         const float PetXPFactor = 0.05f;
 
@@ -183,7 +183,7 @@ namespace Game.Entities
                     || !creatureInfo.IsTameable(owner.CanTameExoticPets(), creatureDifficulty))
                 {
                     return false;
-            }
+                }
             }
 
             if (current && owner.IsPetNeedBeTemporaryUnsummoned())
@@ -261,7 +261,7 @@ namespace Game.Entities
                     break;
             }
 
-            SetPetNameTimestamp((uint)GameTime.GetGameTime()); // cast can't be helped here
+            SetPetNameTimestamp(LoopTime.ServerTime); // cast can't be helped here
             SetCreatorGUID(owner.GetGUID());
 
             InitStatsForLevel(petlevel);
@@ -354,7 +354,7 @@ namespace Game.Entities
                     if (m_removed)
                         return;
 
-                    uint timediff = (uint)(GameTime.GetGameTime() - lastSaveTime);
+                    TimeSpan timediff = LoopTime.ServerTime - lastSaveTime;
                     _LoadAuras(holder.GetResult(PetLoginQueryLoad.Auras), holder.GetResult(PetLoginQueryLoad.AuraEffects), timediff);
 
                     // load action bar, if data broken will fill later by default spells.
@@ -494,7 +494,7 @@ namespace Game.Entities
                 stmt.SetUInt32(10, curhealth);
                 stmt.SetInt32(11, curmana);
                 stmt.SetString(12, actionBar);
-                stmt.SetInt64(13, GameTime.GetGameTime());
+                stmt.SetInt64(13, LoopTime.UnixServerTime);
                 stmt.SetInt32(14, m_unitData.CreatedBySpell);
                 stmt.SetUInt8(15, (byte)GetPetType());
                 stmt.SetUInt16(16, (ushort)GetSpecialization());
@@ -523,7 +523,7 @@ namespace Game.Entities
             petInfo.Health = (int)GetHealth();
             petInfo.Mana = GetPower(PowerType.Mana);
             petInfo.ActionBar = GenerateActionBarData();
-            petInfo.LastSaveTime = (uint)GameTime.GetGameTime();
+            petInfo.LastSaveTime = LoopTime.ServerTime;
             petInfo.CreatedBySpellId = m_unitData.CreatedBySpell;
             petInfo.Type = GetPetType();
             petInfo.SpecializationId = GetSpecialization();
@@ -582,7 +582,7 @@ namespace Game.Entities
             }
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             if (m_removed)                                           // pet already removed, just wait in remove queue, no updates
                 return;
@@ -594,7 +594,7 @@ namespace Game.Entities
             {
                 case DeathState.Corpse:
                 {
-                    if (GetPetType() != PetType.Hunter || m_corpseRemoveTime <= GameTime.GetGameTime())
+                    if (GetPetType() != PetType.Hunter || m_corpseRemoveTime <= LoopTime.ServerTime)
                     {
                         Remove(PetSaveMode.NotInSlot);               //hunters' pets never get removed because of death, NEVER!
                         return;
@@ -626,10 +626,10 @@ namespace Game.Entities
                         }
                     }
 
-                    if (m_duration > 0)
+                    if (m_duration > TimeSpan.Zero)
                     {
                         if (m_duration > diff)
-                            m_duration -= (int)diff;
+                            m_duration -= diff;
                         else
                         {
                             Remove(GetPetType() != PetType.Summon ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
@@ -638,7 +638,7 @@ namespace Game.Entities
                     }
 
                     //regenerate focus for hunter pets or energy for deathknight's ghoul
-                    if (m_focusRegenTimer != 0)
+                    if (m_focusRegenTimer != TimeSpan.Zero)
                     {
                         if (m_focusRegenTimer > diff)
                             m_focusRegenTimer -= diff;
@@ -649,15 +649,15 @@ namespace Game.Entities
                                 case PowerType.Focus:
                                     Regenerate(PowerType.Focus);
                                     m_focusRegenTimer += PetFocusRegenInterval - diff;
-                                    if (m_focusRegenTimer == 0)
-                                        ++m_focusRegenTimer;
+                                    if (m_focusRegenTimer == TimeSpan.Zero)
+                                        m_focusRegenTimer += (Milliseconds)1;
 
                                     // Reset if large diff (lag) causes focus to get 'stuck'
                                     if (m_focusRegenTimer > PetFocusRegenInterval)
                                         m_focusRegenTimer = PetFocusRegenInterval;
                                     break;
                                 default:
-                                    m_focusRegenTimer = 0;
+                                    m_focusRegenTimer = TimeSpan.Zero;
                                     break;
                             }
                         }
@@ -780,7 +780,7 @@ namespace Game.Entities
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry, Global.ObjectMgr.GeneratePetNumber()))
                 return false;
 
-            SetPetNameTimestamp(0);
+            SetPetNameTimestamp(ServerTime.Zero);
             SetPetExperience(0);
             SetPetNextLevelExperience((int)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
             ReplaceAllNpcFlags(NPCFlags1.None);
@@ -874,7 +874,7 @@ namespace Game.Entities
             }
         }
 
-        void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
+        void _LoadAuras(SQLResult auraResult, SQLResult effectResult, TimeSpan timediff)
         {
             Log.outDebug(LogFilter.Pet, $"Loading auras for {GetGUID()}");
 
@@ -917,8 +917,8 @@ namespace Game.Entities
                     uint recalculateMask = auraResult.Read<uint>(3);
                     Difficulty difficulty = (Difficulty)auraResult.Read<byte>(4);
                     byte stackCount = auraResult.Read<byte>(5);
-                    int maxDuration = auraResult.Read<int>(6);
-                    int remainTime = auraResult.Read<int>(7);
+                    Milliseconds maxDuration = (Milliseconds)auraResult.Read<int>(6);
+                    Milliseconds remainTime = (Milliseconds)auraResult.Read<int>(7);
                     byte remainCharges = auraResult.Read<byte>(8);
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
@@ -942,10 +942,10 @@ namespace Game.Entities
                     if (remainTime != -1 && (!spellInfo.IsPositive() 
                         || spellInfo.HasAttribute(SpellAttr4.AuraExpiresOffline)))
                     {
-                        if (remainTime / Time.InMilliseconds <= timediff)
+                        if (remainTime <= timediff)
                             continue;
 
-                        remainTime -= (int)timediff * Time.InMilliseconds;
+                        remainTime -= timediff;
                     }
 
                     // prevent wrong values of remaincharges
@@ -1052,7 +1052,7 @@ namespace Game.Entities
                 // do pet spell book cleanup
                 if (state == PetSpellState.Unchanged)                    // spell load case
                 {
-                    Log.outError(LogFilter.Pet, 
+                    Log.outError(LogFilter.Pet,
                         $"addSpell: Non-existed in SpellStore spell #{spellId} request, " +
                         $"deleting for all pets in `pet_spell`.");
 
@@ -1556,7 +1556,7 @@ namespace Game.Entities
         public PetType GetPetType() { return m_petType; }
         public void SetPetType(PetType type) { m_petType = type; }
         public bool IsControlled() { return GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter; }
-        public bool IsTemporarySummoned() { return m_duration > 0; }
+        public bool IsTemporarySummoned() { return m_duration > TimeSpan.Zero; }
 
         public override bool IsLoading() { return m_loading; }
 
@@ -1569,8 +1569,8 @@ namespace Game.Entities
                 return m_autospells[pos];
         }
 
-        public void SetDuration(uint dur) { m_duration = (int)dur; }
-        public int GetDuration() { return m_duration; }
+        public void SetDuration(TimeSpan dur) { m_duration = dur; }
+        public TimeSpan GetDuration() { return m_duration; }
 
         public void SetPetExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
         public void SetPetNextLevelExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
@@ -1706,9 +1706,9 @@ namespace Game.Entities
         public bool m_removed;
 
         PetType m_petType;
-        int m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
+        TimeSpan m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         bool m_loading;
-        uint m_focusRegenTimer;
+        TimeSpan m_focusRegenTimer;
         GroupUpdatePetFlags m_groupUpdateMask;
 
         DeclinedName _declinedname;
@@ -1736,7 +1736,7 @@ namespace Game.Entities
             public int Experience;
             public int Health;
             public int Mana;
-            public uint LastSaveTime;
+            public ServerTime LastSaveTime;
             public int CreatedBySpellId;
             public ChrSpecialization SpecializationId;
             public byte Level = 0;

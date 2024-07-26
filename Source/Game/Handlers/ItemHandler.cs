@@ -603,11 +603,11 @@ namespace Game
             GetPlayer().SendMessageToSet(packet, true);
         }
 
-        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, EnchantmentSlot slot, uint Duration)
+        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, EnchantmentSlot slot, Milliseconds Duration)
         {
             ItemEnchantTimeUpdate data = new();
             data.ItemGuid = Itemguid;
-            data.DurationLeft = Duration;
+            data.DurationLeft = (Seconds)Duration;
             data.Slot = slot;
             data.OwnerGuid = Playerguid;
             SendPacket(data);
@@ -914,7 +914,7 @@ namespace Game
                     itemTarget.SetGem(i, gemData[i]);
 
                     if (gemProperties[i] != null && gemProperties[i].EnchantId != 0)
-                        itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocket + i, gemProperties[i].EnchantId, 0, 0, GetPlayer().GetGUID());
+                        itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocket + i, gemProperties[i].EnchantId, Milliseconds.Zero, 0, GetPlayer().GetGUID());
 
                     var gemCount = 1;
                     GetPlayer().DestroyItemCount(gems[i], ref gemCount, true);
@@ -925,14 +925,16 @@ namespace Game
                 enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets);
                 ++enchanmentSlot)
             {
-                _player.ApplyEnchantment(itemTarget, enchanmentSlot, true);           
+                _player.ApplyEnchantment(itemTarget, enchanmentSlot, true);
             }
 
             bool SocketBonusToBeActivated = itemTarget.HasAllSocketsFilledWithMatchingColors();//current socketbonus state
             if (hadSocketBonusActive ^ SocketBonusToBeActivated)     //if there was a change...
             {
                 GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketBonus, false);
-                itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocketBonus, SocketBonusToBeActivated ? itemTarget.GetTemplate().GetSocketBonus() : 0, 0, 0, GetPlayer().GetGUID());
+                itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocketBonus, 
+                    SocketBonusToBeActivated ? itemTarget.GetTemplate().GetSocketBonus() : 0, 
+                    Milliseconds.Zero, 0, GetPlayer().GetGUID());
                 GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketBonus, true);
                 //it is not displayed, client has an inbuilt system to determine if the bonus is activated
             }

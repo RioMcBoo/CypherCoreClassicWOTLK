@@ -12,7 +12,7 @@ namespace Game.Arenas
     {
         public BladesEdgeArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -34,14 +34,14 @@ namespace Game.Arenas
             for (int i = BladeEdgeObjectTypes.Door1; i <= BladeEdgeObjectTypes.Door4; ++i)
                 DoorOpen(i);
 
-            taskScheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            taskScheduler.Schedule((Seconds)5, task =>
             {
                 for (int i = BladeEdgeObjectTypes.Door1; i <= BladeEdgeObjectTypes.Door2; ++i)
                     DelObject(i);
             });
 
             for (int i = BladeEdgeObjectTypes.Buff1; i <= BladeEdgeObjectTypes.Buff2; ++i)
-                SpawnBGObject(i, 60);
+                SpawnBGObject(i, (Seconds)60);
         }
 
         public override bool SetupBattleground()
@@ -57,8 +57,8 @@ namespace Game.Arenas
                 return false;
             }
 
-            result &= AddObject(BladeEdgeObjectTypes.Buff1, BladeEfgeGameObjects.Buff1, 6249.042f, 275.3239f, 11.22033f, -1.448624f, 0, 0, 0.6626201f, -0.7489557f, 120);
-            result &= AddObject(BladeEdgeObjectTypes.Buff2, BladeEfgeGameObjects.Buff2, 6228.26f, 249.566f, 11.21812f, -0.06981307f, 0, 0, 0.03489945f, -0.9993908f, 120);
+            result &= AddObject(BladeEdgeObjectTypes.Buff1, BladeEfgeGameObjects.Buff1, 6249.042f, 275.3239f, 11.22033f, -1.448624f, 0, 0, 0.6626201f, -0.7489557f, (Seconds)120);
+            result &= AddObject(BladeEdgeObjectTypes.Buff2, BladeEfgeGameObjects.Buff2, 6228.26f, 249.566f, 11.21812f, -0.06981307f, 0, 0, 0.03489945f, -0.9993908f, (Seconds)120);
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "BladesEdgeArena: Failed to spawn buff object!");

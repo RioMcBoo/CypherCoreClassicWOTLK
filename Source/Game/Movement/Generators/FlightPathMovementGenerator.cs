@@ -63,11 +63,11 @@ namespace Game.Movement
             init.SetSmooth();
             init.SetUncompressed();
             init.SetWalk(true);
-            init.SetVelocity(30.0f);
+            init.SetVelocity((Speed)30.0f);
             init.Launch();
         }
 
-        public override bool DoUpdate(Player owner, uint diff)
+        public override bool DoUpdate(Player owner, TimeSpan diff)
         {
             if (owner == null)
                 return false;
@@ -281,7 +281,7 @@ namespace Game.Movement
             // Load the grid
             if (endMap != null)
             {
-                Log.outDebug(LogFilter.Server, 
+                Log.outDebug(LogFilter.Server,
                     $"FlightPathMovementGenerator::PreloadEndGrid: " +
                     $"Preloading grid ({_endGridX}, {_endGridY}) for map {_endMapId} " +
                     $"at node index {_preloadTargetNode}/{_path.Count - 1}");

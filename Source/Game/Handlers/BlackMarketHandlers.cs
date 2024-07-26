@@ -7,6 +7,7 @@ using Game.BlackMarket;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 
 namespace Game
 {
@@ -113,7 +114,7 @@ namespace Game
                 return;
             }
 
-            if (entry.GetSecondsRemaining() <= 0)
+            if (entry.GetSecondsRemaining() <= TimeSpan.Zero)
             {
                 Log.outDebug(LogFilter.Network, 
                     $"WORLD: HandleBlackMarketBidOnItem - {player.GetGUID()} (name: {player.GetName()}) " +

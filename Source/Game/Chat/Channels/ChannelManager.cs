@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Chat
@@ -32,12 +33,12 @@ namespace Game.Chat
             }
 
             uint count = 0;
-            uint oldMSTime = Time.GetMSTime();
-            uint days = (uint)WorldConfig.Values[WorldCfg.PreserveCustomChannelDuration].Int32;
-            if (days != 0)
+            RelativeTime oldMSTime = Time.NowRelative;
+            TimeSpan cleanBefore = WorldConfig.Values[WorldCfg.PreserveCustomChannelDuration].TimeSpan;
+            if (cleanBefore > TimeSpan.Zero)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_OLD_CHANNELS);
-                stmt.SetUInt32(0, days * Time.Day);
+                stmt.SetInt32(0, (Seconds)cleanBefore);
                 DB.Characters.Execute(stmt);
             }
 
@@ -88,7 +89,7 @@ namespace Game.Chat
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom chat channels in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom chat channels in {Time.Diff(oldMSTime)} ms.");
         }
 
         public static ChannelManager ForTeam(Team team)

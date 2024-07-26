@@ -27,7 +27,7 @@ namespace Game.Movement
             owner.StopMoving();
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             return true;
         }
@@ -54,7 +54,7 @@ namespace Game.Movement
         TimeTracker _duration;
         float? _turnSpeed;         ///< radians per sec
         float? _totalTurnAngle;
-        uint _diffSinceLastUpdate;
+        TimeSpan _diffSinceLastUpdate;
 
         public RotateMovementGenerator(int id, RotateDirection direction, TimeSpan? duration, float? turnSpeed, float? totalTurnAngle)
         {
@@ -95,12 +95,12 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             _diffSinceLastUpdate += diff;
 
             float currentAngle = owner.GetOrientation();
-            float angleDelta = _turnSpeed.GetValueOrDefault(owner.GetSpeed(UnitMoveType.TurnRate)) * ((float)_diffSinceLastUpdate / (float)Time.InMilliseconds);
+            float angleDelta = _turnSpeed.GetValueOrDefault(owner.GetSpeed(UnitMoveType.TurnRate)) * (float)_diffSinceLastUpdate.TotalSeconds;
 
             if (_duration != null)
                 _duration.Update(diff);
@@ -122,7 +122,7 @@ namespace Game.Movement
                 init.SetFacing(newAngle);
                 init.Launch();
 
-                _diffSinceLastUpdate = 0;
+                _diffSinceLastUpdate = TimeSpan.Zero;
             }
 
             if (expired)
@@ -152,7 +152,7 @@ namespace Game.Movement
 
     public class DistractMovementGenerator : MovementGenerator
     {
-        public DistractMovementGenerator(uint timer, float orientation)
+        public DistractMovementGenerator(TimeSpan timer, float orientation)
         {
             _timer = timer;
             _orientation = orientation;
@@ -187,7 +187,7 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             if (owner == null)
                 return false;
@@ -222,13 +222,13 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Distract; }
 
-        uint _timer;
+        TimeSpan _timer;
         float _orientation;
     }
 
     public class AssistanceDistractMovementGenerator : DistractMovementGenerator
     {
-        public AssistanceDistractMovementGenerator(uint timer, float orientation) : base(timer, orientation)
+        public AssistanceDistractMovementGenerator(TimeSpan timer, float orientation) : base(timer, orientation)
         {
             Priority = MovementGeneratorPriority.Normal;
         }

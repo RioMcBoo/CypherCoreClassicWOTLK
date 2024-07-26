@@ -11,7 +11,7 @@ namespace Game.Arenas
 {
     class DalaranSewersArena : Arena
     {
-        uint _pipeKnockBackTimer;
+        TimeSpan _pipeKnockBackTimer;
         int _pipeKnockBackCount;
 
         public DalaranSewersArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
@@ -31,7 +31,7 @@ namespace Game.Arenas
                 DoorOpen(i);
 
             for (int i = DalaranSewersObjectTypes.Buff1; i <= DalaranSewersObjectTypes.Buff2; ++i)
-                SpawnBGObject(i, 60);
+                SpawnBGObject(i, (Seconds)60);
 
             _events.ScheduleEvent(DalaranSewersEvents.WaterfallWarning, DalaranSewersData.WaterfallTimerMin, DalaranSewersData.WaterfallTimerMax);
             //_events.ScheduleEvent(DalaranSewersEvents.PipeKnockback, DalaranSewersData.PipeKnockbackFirstDelay);
@@ -65,16 +65,16 @@ namespace Game.Arenas
             }
 
             // buffs
-            result &= AddObject(DalaranSewersObjectTypes.Buff1, DalaranSewersGameObjects.Buff1, 1291.7f, 813.424f, 7.11472f, 4.64562f, 0, 0, 0.730314f, -0.683111f, 120);
-            result &= AddObject(DalaranSewersObjectTypes.Buff2, DalaranSewersGameObjects.Buff2, 1291.7f, 768.911f, 7.11472f, 1.55194f, 0, 0, 0.700409f, 0.713742f, 120);
+            result &= AddObject(DalaranSewersObjectTypes.Buff1, DalaranSewersGameObjects.Buff1, 1291.7f, 813.424f, 7.11472f, 4.64562f, 0, 0, 0.730314f, -0.683111f, (Seconds)120);
+            result &= AddObject(DalaranSewersObjectTypes.Buff2, DalaranSewersGameObjects.Buff2, 1291.7f, 768.911f, 7.11472f, 1.55194f, 0, 0, 0.700409f, 0.713742f, (Seconds)120);
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "DalaranSewersArena: Failed to spawn buff object!");
                 return false;
             }
 
-            result &= AddObject(DalaranSewersObjectTypes.Water1, DalaranSewersGameObjects.Water1, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, 120);
-            result &= AddObject(DalaranSewersObjectTypes.Water2, DalaranSewersGameObjects.Water2, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, 120);
+            result &= AddObject(DalaranSewersObjectTypes.Water1, DalaranSewersGameObjects.Water1, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, (Seconds)120);
+            result &= AddObject(DalaranSewersObjectTypes.Water2, DalaranSewersGameObjects.Water2, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, (Seconds)120);
             result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.WaterfallKnockback, 1292.587f, 790.2205f, 7.19796f, 3.054326f, BattleGroundTeamId.Neutral, BattlegroundConst.RespawnImmediately) != null;
             result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.PipeKnockback1, 1369.977f, 817.2882f, 16.08718f, 3.106686f, BattleGroundTeamId.Neutral, BattlegroundConst.RespawnImmediately) != null;
             result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.PipeKnockback2, 1212.833f, 765.3871f, 16.09484f, 0.0f, BattleGroundTeamId.Neutral, BattlegroundConst.RespawnImmediately) != null;
@@ -87,7 +87,7 @@ namespace Game.Arenas
             return true;
         }
 
-        public override void PostUpdateImpl(uint diff)
+        public override void PostUpdateImpl(TimeSpan diff)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -213,15 +213,15 @@ namespace Game.Arenas
     struct DalaranSewersData
     {
         // These values are NOT blizzlike... need the correct data!
-        public static TimeSpan WaterfallTimerMin = TimeSpan.FromSeconds(30);
-        public static TimeSpan WaterfallTimerMax = TimeSpan.FromSeconds(60);
-        public static TimeSpan WaterWarningDuration = TimeSpan.FromSeconds(5);
-        public static TimeSpan WaterfallDuration = TimeSpan.FromSeconds(30);
-        public static TimeSpan WaterfallKnockbackTimer = TimeSpan.FromSeconds(1.5);
+        public static TimeSpan WaterfallTimerMin = (Seconds)30;
+        public static TimeSpan WaterfallTimerMax = (Seconds)60;
+        public static TimeSpan WaterWarningDuration = (Seconds)5;
+        public static TimeSpan WaterfallDuration = (Seconds)30;
+        public static TimeSpan WaterfallKnockbackTimer = (Milliseconds)1500;
 
-        public static uint PipeKnockbackFirstDelay = 5000;
-        public static uint PipeKnockbackDelay = 3000;
-        public const uint PipeKnockbackTotalCount = 2;
+        public static TimeSpan PipeKnockbackFirstDelay = (Seconds)5;
+        public static TimeSpan PipeKnockbackDelay = (Seconds)3;
+        public const int PipeKnockbackTotalCount = 2;
         public const int PipeKnockbackCount = 1;
 
         public const int NpcWaterSpout = 28567;

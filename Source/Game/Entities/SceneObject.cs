@@ -6,6 +6,7 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Entities
@@ -47,7 +48,7 @@ namespace Game.Entities
             }
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             base.Update(diff);
 
@@ -116,7 +117,7 @@ namespace Game.Entities
             SetObjectScale(1.0f);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.ScriptPackageID), scriptPackageId);
-            SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.RndSeedVal), GameTime.GetGameTimeMS());
+            SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.RndSeedVal), LoopTime.RelativeTime);
             SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.CreatedBy), creator.GetGUID());
             SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.SceneType), (uint)type);
 

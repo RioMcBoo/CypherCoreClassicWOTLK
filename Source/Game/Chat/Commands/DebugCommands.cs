@@ -64,7 +64,7 @@ namespace Game.Chat
         }
 
         [Command("boundary", RBACPermissions.CommandDebug)]
-        static bool HandleDebugBoundaryCommand(CommandHandler handler, string fill, uint durationArg)
+        static bool HandleDebugBoundaryCommand(CommandHandler handler, string fill, int durationArg)
         {
             Player player = handler.GetPlayer();
             if (player == null)
@@ -74,9 +74,9 @@ namespace Game.Chat
             if (target == null || !target.IsAIEnabled())
                 return false;
 
-            TimeSpan duration = durationArg != 0 ? TimeSpan.FromSeconds(durationArg) : TimeSpan.Zero;
-            if (duration <= TimeSpan.Zero || duration >= TimeSpan.FromMinutes(30)) // arbitrary upper limit
-                duration = TimeSpan.FromMinutes(3);
+            TimeSpan duration = durationArg != 0 ? (Seconds)durationArg : TimeSpan.Zero;
+            if (duration <= TimeSpan.Zero || duration >= (Minutes)30) // arbitrary upper limit
+                duration = (Minutes)3;
 
             CypherStrings errMsg = target.GetAI().VisualizeBoundary(duration, player, fill == "fill");
             if (errMsg > 0)
@@ -221,9 +221,9 @@ namespace Game.Chat
                                 $"bag: 255 slot: {item.InventorySlot} " +
                                 $"guid: {item.GetGUID()} " +
                                 $"owner: {item.GetOwnerGUID()}");
+                        }
                     }
                 }
-            }
             }
 
             if (listQueue)
@@ -625,7 +625,7 @@ namespace Game.Chat
                                     handler.SendSysMessage(
                                         $" | |-- '{groupData.name}' is allowed to spawn because boss state {bossStateId} " +
                                         $"is {(EncounterState)bossStateId}.");
-                            }
+                                }
                             }
                             else
                             {
@@ -641,7 +641,7 @@ namespace Game.Chat
                                 $" | |-- '{groupData.name}' could've been {(isSpawn ? "allowed to spawn" : "blocked from spawning")} " +
                                 $"if boss state {bossStateId} matched mask 0x{tuple.Item3:X2}; but it is {actualState} . " +
                                 $"0x{(1 << (int)actualState):X2}, which does not match.");
-                    }
+                        }
                     }
 
                     if (isBlocked)
@@ -976,21 +976,26 @@ namespace Game.Chat
             else
                 return false;
 
-            long now = GameTime.GetGameTime();
             if (daily)
             {
                 Global.WorldMgr.DailyReset();
-                handler.SendSysMessage($"Daily quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextDailyQuestResetTimeVarId)).ToShortTimeString()}");
+                handler.SendSysMessage(
+                    $"Daily quests have been reset. Next scheduled reset: " +
+                    $"{((RealmTime)(UnixTime)Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextDailyQuestResetTimeVarId)).ToShortTimeString()}");
             }
             if (weekly)
             {
                 Global.WorldMgr.ResetWeeklyQuests();
-                handler.SendSysMessage($"Weekly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextWeeklyQuestResetTimeVarId)).ToShortTimeString()}");
+                handler.SendSysMessage(
+                    $"Weekly quests have been reset. Next scheduled reset: " +
+                    $"{((RealmTime)(UnixTime)Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextWeeklyQuestResetTimeVarId)).ToShortTimeString()}");
             }
             if (monthly)
             {
                 Global.WorldMgr.ResetMonthlyQuests();
-                handler.SendSysMessage($"Monthly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextMonthlyQuestResetTimeVarId)).ToShortTimeString()}");
+                handler.SendSysMessage(
+                    $"Monthly quests have been reset. Next scheduled reset: " +
+                    $"{((RealmTime)(UnixTime)Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextMonthlyQuestResetTimeVarId)).ToShortTimeString()}");
             }
 
             return true;

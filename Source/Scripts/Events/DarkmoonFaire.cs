@@ -93,11 +93,11 @@ namespace Scripts.Events.DarkmoonFaire
                 return;
 
             _talkCooldown = true;
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), _ => _talkCooldown = false);
+            _scheduler.Schedule(Time.SpanFromSeconds(30), _ => _talkCooldown = false);
             Talk(SayWelcome, talkTarget);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }

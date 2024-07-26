@@ -110,7 +110,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(NumAccounts);
-            CreateDate.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)CreateDate);
             _worldPacket.WriteInt32(GuildFlags);
             _worldPacket.WriteInt32(MemberData.Count);
             _worldPacket.WriteBits(WelcomeText.GetByteCount(), 11);
@@ -126,7 +126,7 @@ namespace Game.Networking.Packets
         public List<GuildRosterMemberData> MemberData;
         public string WelcomeText;
         public string InfoText;
-        public WowTime CreateDate;
+        public RealmTime CreateDate;
         public int NumAccounts;
         public int GuildFlags;
     }
@@ -403,7 +403,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WritePackedGuid(entry.OtherGUID);
                 _worldPacket.WriteUInt8(entry.TransactionType);
                 _worldPacket.WriteUInt8(entry.RankID);
-                _worldPacket.WriteUInt32(entry.TransactionDate);
+                _worldPacket.WriteInt32(entry.TransactionDate);
             }
         }
 
@@ -886,7 +886,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt64(Version);
+            _worldPacket.WriteInt64((UnixTime64)Version);
             _worldPacket.WriteInt32(RewardItems.Count);
 
             foreach (var item in RewardItems)
@@ -894,7 +894,7 @@ namespace Game.Networking.Packets
         }
 
         public List<GuildRewardItem> RewardItems;
-        public long Version;
+        public ServerTime Version;
     }
 
     public class GuildBankActivate : ClientPacket
@@ -1222,7 +1222,7 @@ namespace Game.Networking.Packets
             foreach (GuildBankLogEntry logEntry in Entry)
             {
                 _worldPacket.WritePackedGuid(logEntry.PlayerGUID);
-                _worldPacket.WriteUInt32(logEntry.TimeOffset);
+                _worldPacket.WriteInt32(logEntry.TimeOffset);
                 _worldPacket.WriteInt8(logEntry.EntryType);
 
                 _worldPacket.WriteBit(logEntry.Money.HasValue);
@@ -1481,7 +1481,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(AreaID);
             data.WriteInt32(PersonalAchievementPoints);
             data.WriteInt32(GuildReputation);
-            data.WriteFloat(LastSave);
+            data.WriteFloat(InactiveDays);
 
             for (byte i = 0; i < 2; i++)
                 Profession[i].Write(data);
@@ -1514,7 +1514,7 @@ namespace Game.Networking.Packets
         public int PersonalAchievementPoints;
         public int GuildReputation;
         public int GuildRepToCap;
-        public float LastSave;
+        public float InactiveDays;
         public string Name;
         public uint VirtualRealmAddress;
         public string Note;
@@ -1537,7 +1537,7 @@ namespace Game.Networking.Packets
         public ObjectGuid OtherGUID;
         public byte TransactionType;
         public byte RankID;
-        public uint TransactionDate;
+        public Seconds TransactionDate;
     }
 
     public class GuildRankData
@@ -1726,7 +1726,7 @@ namespace Game.Networking.Packets
     public class GuildBankLogEntry
     {
         public ObjectGuid PlayerGUID;
-        public uint TimeOffset;
+        public Seconds TimeOffset;
         public sbyte EntryType;
         public long? Money;
         public int? ItemID;
@@ -1739,7 +1739,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Id);
-            CompletedDate.Write(data);
+            data.WriteInt32((WowTime)CompletedDate);
             data.WriteInt32(Type);
             data.WriteInt32(Flags);
 
@@ -1760,7 +1760,7 @@ namespace Game.Networking.Packets
         }
 
         public int Id;
-        public WowTime CompletedDate;
+        public RealmTime CompletedDate;
         public int Type;
         public int Flags;
         public int[] Data = new int[2];

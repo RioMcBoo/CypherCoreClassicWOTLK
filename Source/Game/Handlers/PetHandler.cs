@@ -299,7 +299,7 @@ namespace Game
                             || spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
                         {
                             return;
-                    }
+                        }
                     }
 
                     // do not cast not learned spells
@@ -429,7 +429,7 @@ namespace Game
             if (unit != null)
             {
                 response.Allow = true;
-                response.Timestamp = unit.m_unitData.PetNameTimestamp;
+                response.Timestamp = unit.m_unitData.PetNameTimestamp.GetValue();
                 response.Name = unit.GetName();
 
                 Pet pet = unit.ToPet();
@@ -614,7 +614,7 @@ namespace Game
 
             DB.Characters.CommitTransaction(trans);
 
-            pet.SetPetNameTimestamp((uint)GameTime.GetGameTime()); // cast can't be helped
+            pet.SetPetNameTimestamp(LoopTime.ServerTime); // cast can't be helped
         }
 
         [WorldPacketHandler(ClientOpcodes.PetAbandon)]

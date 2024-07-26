@@ -56,7 +56,7 @@ namespace Game.Maps
                     int lockId = lockResult.Read<int>(2);
                     int instanceId = lockResult.Read<int>(3);
                     Difficulty difficulty = (Difficulty)lockResult.Read<byte>(4);
-                    DateTime expiryTime = Time.UnixTimeToDateTime(lockResult.Read<long>(7));
+                    ServerTime expiryTime = (ServerTime)(UnixTime64)lockResult.Read<long>(7);
 
                     // Mark instance id as being used
                     Global.MapMgr.RegisterInstanceId(instanceId);
@@ -305,7 +305,7 @@ namespace Game.Maps
             stmt.SetString(5, instanceLock.GetData().Data);
             stmt.SetUInt32(6, instanceLock.GetData().CompletedEncountersMask);
             stmt.SetInt32(7, instanceLock.GetData().EntranceWorldSafeLocId);
-            stmt.SetUInt64(8, (ulong)Time.DateTimeToUnixTime(instanceLock.GetExpiryTime()));
+            stmt.SetInt64(8, (UnixTime64)instanceLock.GetExpiryTime());
             stmt.SetInt32(9, instanceLock.IsExtended() ? 1 : 0);
             trans.Append(stmt);
 
@@ -359,12 +359,12 @@ namespace Game.Maps
                 $"Deleting instance {instanceId} as it is no longer referenced by any player");
         }
 
-        public (DateTime, DateTime) UpdateInstanceLockExtensionForPlayer(ObjectGuid playerGuid, MapDb2Entries entries, bool extended)
+        public (ServerTime, ServerTime) UpdateInstanceLockExtensionForPlayer(ObjectGuid playerGuid, MapDb2Entries entries, bool extended)
         {
             InstanceLock instanceLock = FindActiveInstanceLock(playerGuid, entries, true, false);
             if (instanceLock != null)
             {
-                DateTime oldExpiryTime = instanceLock.GetEffectiveExpiryTime();
+                ServerTime oldExpiryTime = instanceLock.GetEffectiveExpiryTime();
                 instanceLock.SetExtended(extended);
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_EXTENSION);
                 stmt.SetInt32(0, extended ? 1 : 0);
@@ -381,7 +381,7 @@ namespace Game.Maps
                 return (oldExpiryTime, instanceLock.GetEffectiveExpiryTime());
             }
 
-            return (DateTime.MinValue, DateTime.MinValue);
+            return (ServerTime.Zero, ServerTime.Zero);
         }
 
         /// <summary>
@@ -424,13 +424,13 @@ namespace Game.Maps
                 foreach (InstanceLock instanceLock in locksReset)
                 {
                     MapDb2Entries entries = new(instanceLock.GetMapId(), instanceLock.GetDifficultyId());
-                    DateTime newExpiryTime = GetNextResetTime(entries) - TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration);
+                    ServerTime newExpiryTime = GetNextResetTime(entries) - entries.MapDifficulty.RaidDuration;
                     // set reset time to last reset time
                     instanceLock.SetExpiryTime(newExpiryTime);
                     instanceLock.SetExtended(false);
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE);
-                    stmt.SetInt64(0, Time.DateTimeToUnixTime(newExpiryTime));
+                    stmt.SetInt64(0, (UnixTime64)newExpiryTime);
                     stmt.SetInt64(1, playerGuid.GetCounter());
                     stmt.SetInt32(2, entries.MapDifficulty.MapID);
                     stmt.SetUInt8(3, entries.MapDifficulty.LockID);
@@ -452,9 +452,9 @@ namespace Game.Maps
             return statistics;
         }
         
-        public DateTime GetNextResetTime(MapDb2Entries entries)
+        public ServerTime GetNextResetTime(MapDb2Entries entries)
         {
-            DateTime dateTime = GameTime.GetDateAndTime();
+            ServerTime dateTime = LoopTime.ServerTime;
             int resetHour = WorldConfig.Values[WorldCfg.ResetScheduleHour].Int32;
 
             int hour = 0;
@@ -484,7 +484,7 @@ namespace Game.Maps
                     break;
             }
 
-            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day + day, hour, 0, 0);
+            return dateTime.Date + (Days)day + (Hours)hour;
         }
     }
 
@@ -500,13 +500,13 @@ namespace Game.Maps
         int _mapId;
         Difficulty _difficultyId;
         int _instanceId;
-        DateTime _expiryTime;
+        ServerTime _expiryTime;
         bool _extended;
         InstanceLockData _data = new();
         bool _isInUse;
         bool _isNew;
 
-        public InstanceLock(int mapId, Difficulty difficultyId, DateTime expiryTime, int instanceId)
+        public InstanceLock(int mapId, Difficulty difficultyId, ServerTime expiryTime, int instanceId)
         {
             _mapId = mapId;
             _difficultyId = difficultyId;
@@ -517,10 +517,10 @@ namespace Game.Maps
 
         public bool IsExpired()
         {
-            return _expiryTime < GameTime.GetSystemTime();
+            return _expiryTime < LoopTime.ServerTime;
         }
 
-        public DateTime GetEffectiveExpiryTime()
+        public ServerTime GetEffectiveExpiryTime()
         {
             if (!IsExtended())
                 return GetExpiryTime();
@@ -532,7 +532,7 @@ namespace Game.Maps
                 return Global.InstanceLockMgr.GetNextResetTime(entries);
 
             // if not expired, return expiration time + 1 reset period
-            return GetExpiryTime() + TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration);
+            return GetExpiryTime() + entries.MapDifficulty.RaidDuration;
         }
 
         public int GetMapId() { return _mapId; }
@@ -543,9 +543,9 @@ namespace Game.Maps
 
         public void SetInstanceId(int instanceId) { _instanceId = instanceId; }
 
-        public DateTime GetExpiryTime() { return _expiryTime; }
+        public ServerTime GetExpiryTime() { return _expiryTime; }
 
-        public void SetExpiryTime(DateTime expiryTime) { _expiryTime = expiryTime; }
+        public void SetExpiryTime(ServerTime expiryTime) { _expiryTime = expiryTime; }
 
         public bool IsExtended() { return _extended; }
 
@@ -585,7 +585,7 @@ namespace Game.Maps
         /// </summary>
         SharedInstanceLockData _sharedData;
 
-        public SharedInstanceLock(int mapId, Difficulty difficultyId, DateTime expiryTime, int instanceId, SharedInstanceLockData sharedData) : base(mapId, difficultyId, expiryTime, instanceId)
+        public SharedInstanceLock(int mapId, Difficulty difficultyId, ServerTime expiryTime, int instanceId, SharedInstanceLockData sharedData) : base(mapId, difficultyId, expiryTime, instanceId)
         {
             _sharedData = sharedData;            
         }

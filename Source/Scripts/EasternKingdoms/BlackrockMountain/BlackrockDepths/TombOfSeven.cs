@@ -86,7 +86,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
                 case eTradeskill.GossipActionInfoDef + 22:
                     player.CloseGossipMenu();
                     //are 5 minutes expected? go template may have data to despawn when used at quest
-                    instance.DoRespawnGameObject(instance.GetGuidData(DataTypes.DataGoChalice), TimeSpan.FromMinutes(5));
+                    instance.DoRespawnGameObject(instance.GetGuidData(DataTypes.DataGoChalice), (Minutes)5);
                     break;
             }
             return true;
@@ -139,27 +139,27 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
 
         public override void JustEngagedWith(Unit who)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule((Seconds)10, task =>
             {
                 DoCastVictim(SpellIds.Shadowboltvolley);
-                task.Repeat(TimeSpan.FromSeconds(12));
+                task.Repeat((Seconds)12);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(18), task =>
+            _scheduler.Schedule((Seconds)18, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.Immolate);
-                task.Repeat(TimeSpan.FromSeconds(25));
+                task.Repeat((Seconds)25);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule((Seconds)5, task =>
             {
                 DoCastVictim(SpellIds.Curseofweakness);
-                task.Repeat(TimeSpan.FromSeconds(45));
+                task.Repeat((Seconds)45);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(16), task =>
+            _scheduler.Schedule((Seconds)16, task =>
             {
                 DoCast(me, SpellIds.Demonarmor);
-                task.Repeat(TimeSpan.FromMinutes(5));
+                task.Repeat((Minutes)5);
             });
         }
 
@@ -184,7 +184,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             _instance.SetData(DataTypes.DataGhostkill, 1);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

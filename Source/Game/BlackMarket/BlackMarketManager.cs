@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.Entities;
 using Game.Mails;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game.BlackMarket
@@ -16,7 +17,7 @@ namespace Game.BlackMarket
 
         public void LoadTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Clear in case we are reloading
             _templates.Clear();
@@ -39,12 +40,12 @@ namespace Game.BlackMarket
                 AddTemplate(templ);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_templates.Count} black market templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_templates.Count} black market templates in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void LoadAuctions()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             // Clear in case we are reloading
             _auctions.Clear();
@@ -58,7 +59,7 @@ namespace Game.BlackMarket
                 return;
             }
 
-            _lastUpdate = GameTime.GetGameTime(); //Set update time before loading
+            _lastUpdate = LoopTime.ServerTime; //Set update time before loading
 
             SQLTransaction trans = new();
             do
@@ -82,13 +83,13 @@ namespace Game.BlackMarket
 
             DB.Characters.CommitTransaction(trans);
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_auctions.Count} black market auctions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_auctions.Count} black market auctions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void Update(bool updateTime = false)
         {
             SQLTransaction trans = new();
-            long now = GameTime.GetGameTime();
+            ServerTime now = LoopTime.ServerTime;
             foreach (var entry in _auctions.Values)
             {
                 if (entry.IsCompleted() && entry.GetBidder() != 0)
@@ -153,7 +154,7 @@ namespace Game.BlackMarket
 
         public void BuildItemsResponse(BlackMarketRequestItemsResult packet, Player player)
         {
-            packet.LastUpdateID = (int)_lastUpdate;
+            packet.LastUpdateID = (UnixTime64)_lastUpdate;
             foreach (var pair in _auctions)
             {
                 BlackMarketTemplate templ = pair.Value.GetTemplate();
@@ -178,7 +179,7 @@ namespace Game.BlackMarket
 
                 item.CurrentBid = pair.Value.GetCurrentBid();
                 item.SecondsRemaining = pair.Value.GetSecondsRemaining();
-                item.HighBid = (pair.Value.GetBidder() == player.GetGUID().GetCounter());
+                item.HighBid = pair.Value.GetBidder() == player.GetGUID().GetCounter();
                 item.NumBids = pair.Value.GetNumBids();
 
                 packet.Items.Add(item);
@@ -239,7 +240,7 @@ namespace Game.BlackMarket
             // Log trade
             if (logGmTrade)
             {
-                Log.outCommand(bidderAccId, 
+                Log.outCommand(bidderAccId,
                     $"GM {bidderName} (Account: {bidderAccId}) won item in blackmarket auction: {item.GetTemplate().GetName()} " +
                     $"(Entry: {item.GetEntry()} Count: {item.GetCount()}) and payed gold : {entry.GetCurrentBid() / MoneyConstants.Gold}.");
             }
@@ -285,10 +286,10 @@ namespace Game.BlackMarket
             return _templates.LookupByKey(marketId);
         }
 
-        public long GetLastUpdate() { return _lastUpdate; }
+        public ServerTime GetLastUpdate() { return _lastUpdate; }
 
         Dictionary<int, BlackMarketEntry> _auctions = new();
         Dictionary<int, BlackMarketTemplate> _templates = new();
-        long _lastUpdate;
+        ServerTime _lastUpdate;
     }
 }

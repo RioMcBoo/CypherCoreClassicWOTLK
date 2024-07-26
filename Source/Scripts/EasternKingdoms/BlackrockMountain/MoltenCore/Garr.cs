@@ -32,19 +32,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
         {
             base.JustEngagedWith(victim);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(25), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(25), task =>
             {
                 DoCast(me, SpellIds.AntimagicPulse);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(10), Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 DoCast(me, SpellIds.MagmaShackles);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12));
+                task.Repeat(Time.SpanFromSeconds(8), Time.SpanFromSeconds(12));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -61,18 +61,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
         void ScheduleTasks()
         {
             // Timers for this are probably wrong
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(4), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
                 if (target != null)
                     DoCast(target, SpellIds.Immolate);
 
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10));
+                task.Repeat(Time.SpanFromSeconds(5), Time.SpanFromSeconds(10));
             });
 
             // Separation Anxiety - Periodically check if Garr is nearby
             // ...and enrage if he is not.
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(3), task =>
             {
                 if (me.FindNearestCreature(MCCreatureIds.Garr, 20.0f) == null)
                     DoCastSelf(SpellIds.SeparationAnxiety);
@@ -105,7 +105,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

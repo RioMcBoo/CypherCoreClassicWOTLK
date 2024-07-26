@@ -27,7 +27,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint autoCloseTime = obj.GetGoInfo().GetAutoCloseTime() != 0 ? 10000u : 0u;
+            Milliseconds autoCloseTime = obj.GetGoInfo().GetAutoCloseTime() != 0 ? (Milliseconds)10000 : Milliseconds.Zero;
 
             // Activate
             obj.SetLootState(LootState.Ready);
@@ -440,12 +440,12 @@ namespace Game.Chat
 
             if (target != null)
             {
-                int curRespawnDelay = (int)(target.GetRespawnTimeEx() - GameTime.GetGameTime());
-                if (curRespawnDelay < 0)
-                    curRespawnDelay = 0;
+                TimeSpan curRespawnDelay = target.GetRespawnTimeEx() - LoopTime.ServerTime;
+                if (curRespawnDelay < TimeSpan.Zero)
+                    curRespawnDelay = TimeSpan.Zero;
 
-                string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, TimeFormat.ShortText);
-                string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
+                string curRespawnDelayStr = Time.SpanToTimeString(curRespawnDelay, TimeFormat.ShortText);
+                string defRespawnDelayStr = Time.SpanToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
 
                 handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
             }
@@ -523,7 +523,7 @@ namespace Game.Chat
                 PhasingHandler.InheritPhaseShift(obj, player);
 
                 if (spawnTimeSecs.HasValue)
-                    obj.SetRespawnTime(spawnTimeSecs.Value);
+                    obj.SetRespawnTime((Seconds)spawnTimeSecs.Value);
 
                 // fill the gameobject data and save to the db
                 obj.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
@@ -544,7 +544,7 @@ namespace Game.Chat
             static bool HandleGameObjectAddTempCommand(CommandHandler handler, int objectId, long? spawntime)
             {
                 Player player = handler.GetPlayer();
-                TimeSpan spawntm = TimeSpan.FromSeconds(spawntime.GetValueOrDefault(300));
+                TimeSpan spawntm = (Seconds)spawntime.GetValueOrDefault(300);
 
                 Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
                 if (Global.ObjectMgr.GetGameObjectTemplate(objectId) == null)

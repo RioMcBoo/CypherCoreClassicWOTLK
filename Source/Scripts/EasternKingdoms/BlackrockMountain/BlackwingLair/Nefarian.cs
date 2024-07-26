@@ -193,10 +193,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             me.SetStandState(UnitStandStateType.Stand);
             me.SetImmuneToPC(false);
             AttackStart(target);
-            _events.ScheduleEvent(EventIds.ShadowBolt, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(10));
-            _events.ScheduleEvent(EventIds.Fear, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
-            //_events.ScheduleEvent(EventIds.MindControl, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
-            _events.ScheduleEvent(EventIds.SpawnAdd, TimeSpan.FromSeconds(10));
+            _events.ScheduleEvent(EventIds.ShadowBolt, Time.SpanFromSeconds(3), Time.SpanFromSeconds(10));
+            _events.ScheduleEvent(EventIds.Fear, Time.SpanFromSeconds(10), Time.SpanFromSeconds(20));
+            //_events.ScheduleEvent(EventIds.MindControl, Time.SpanFromSeconds(30), Time.SpanFromSeconds(35));
+            _events.ScheduleEvent(EventIds.SpawnAdd, Time.SpanFromSeconds(10));
         }
 
         public override void SummonedCreatureDies(Creature summon, Unit killer)
@@ -217,14 +217,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             if (type == 1 && data == 1)
             {
                 me.StopMoving();
-                _events.ScheduleEvent(EventIds.Path2, TimeSpan.FromSeconds(9));
+                _events.ScheduleEvent(EventIds.Path2, (Seconds)9);
             }
 
             if (type == 1 && data == 2)
-                _events.ScheduleEvent(EventIds.Success1, TimeSpan.FromSeconds(5));
+                _events.ScheduleEvent(EventIds.Success1, (Seconds)5);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
             {
@@ -236,7 +236,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                     {
                         case EventIds.Path2:
                             me.GetMotionMaster().MovePath(MiscConst.NefariusPath2, false);
-                            _events.ScheduleEvent(EventIds.Chaos1, TimeSpan.FromSeconds(7));
+                            _events.ScheduleEvent(EventIds.Chaos1, (Seconds)7);
                             break;
                         case EventIds.Chaos1:
                             Creature gyth = me.FindNearestCreature(CreatureIds.Gyth, 75.0f, true);
@@ -245,7 +245,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                 me.SetFacingToObject(gyth);
                                 Talk(TextIds.SayChaosSpell);
                             }
-                            _events.ScheduleEvent(EventIds.Chaos2, TimeSpan.FromSeconds(2));
+                            _events.ScheduleEvent(EventIds.Chaos2, (Seconds)2);
                             break;
                         case EventIds.Chaos2:
                             DoCast(SpellIds.ChromaticChaos);
@@ -264,11 +264,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                 if (portcullis2 != null)
                                     portcullis2.SetGoState(GameObjectState.Active);
                             }
-                            _events.ScheduleEvent(EventIds.Success2, TimeSpan.FromSeconds(4));
+                            _events.ScheduleEvent(EventIds.Success2, (Seconds)4);
                             break;
                         case EventIds.Success2:
                             DoCast(me, SpellIds.VaelastraszzSpawn);
-                            me.DespawnOrUnsummon(TimeSpan.FromSeconds(1));
+                            me.DespawnOrUnsummon((Seconds)1);
                             break;
                         case EventIds.Path3:
                             me.GetMotionMaster().MovePath(MiscConst.NefariusPath3, false);
@@ -293,7 +293,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                     switch (eventId)
                     {
                         case EventIds.ShadowBolt:
-                            switch (RandomHelper.URand(0, 1))
+                            switch (RandomHelper.IRand(0, 1))
                             {
                                 case 0:
                                     DoCastVictim(SpellIds.ShadowboltVolley);
@@ -305,14 +305,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                     break;
                             }
                             ResetThreatList();
-                            _events.ScheduleEvent(EventIds.ShadowBolt, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(10));
+                            _events.ScheduleEvent(EventIds.ShadowBolt, Time.SpanFromSeconds(3), Time.SpanFromSeconds(10));
                             break;
                         case EventIds.Fear:
                         {
                             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
                             if (target != null)
                                 DoCast(target, SpellIds.Fear);
-                            _events.ScheduleEvent(EventIds.Fear, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
+                            _events.ScheduleEvent(EventIds.Fear, Time.SpanFromSeconds(10), Time.SpanFromSeconds(20));
                             break;
                         }
                         case EventIds.MindControl:
@@ -320,7 +320,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
                             if (target != null)
                                 DoCast(target, SpellIds.ShadowCommand);
-                            _events.ScheduleEvent(EventIds.MindControl, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+                            _events.ScheduleEvent(EventIds.MindControl, Time.SpanFromSeconds(30), Time.SpanFromSeconds(35));
                             break;
                         }
                         case EventIds.SpawnAdd:
@@ -357,7 +357,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                     return;
                                 }
                             }
-                            _events.ScheduleEvent(EventIds.SpawnAdd, TimeSpan.FromSeconds(4));
+                            _events.ScheduleEvent(EventIds.SpawnAdd, (Seconds)4);
                             break;
                     }
 
@@ -383,7 +383,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
     class boss_nefarian : BossAI
     {
         bool canDespawn;
-        uint DespawnTimer;
+        TimeSpan DespawnTimer;
         bool Phase3;
 
         public boss_nefarian(Creature creature) : base(creature, DataTypes.Nefarian)
@@ -395,7 +395,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
         {
             Phase3 = false;
             canDespawn = false;
-            DespawnTimer = 30000;
+            DespawnTimer = (Seconds)30;
         }
 
         public override void Reset()
@@ -410,12 +410,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
 
         public override void JustEngagedWith(Unit who)
         {
-            _events.ScheduleEvent(EventIds.Shadowflame, TimeSpan.FromSeconds(12));
-            _events.ScheduleEvent(EventIds.Fear, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
-            _events.ScheduleEvent(EventIds.Veilofshadow, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
-            _events.ScheduleEvent(EventIds.Cleave, TimeSpan.FromSeconds(7));
-            //_events.ScheduleEvent(EventIds.Taillash, TimeSpan.FromSeconds(10));
-            _events.ScheduleEvent(EventIds.Classcall, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+            _events.ScheduleEvent(EventIds.Shadowflame, Time.SpanFromSeconds(12));
+            _events.ScheduleEvent(EventIds.Fear, Time.SpanFromSeconds(25), Time.SpanFromSeconds(35));
+            _events.ScheduleEvent(EventIds.Veilofshadow, Time.SpanFromSeconds(25), Time.SpanFromSeconds(35));
+            _events.ScheduleEvent(EventIds.Cleave, Time.SpanFromSeconds(7));
+            //_events.ScheduleEvent(EventIds.Taillash, Time.SpanFromSeconds(10));
+            _events.ScheduleEvent(EventIds.Classcall, Time.SpanFromSeconds(30), Time.SpanFromSeconds(35));
             Talk(TextIds.SayRandom);
         }
 
@@ -446,7 +446,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (canDespawn && DespawnTimer <= diff)
             {
@@ -477,28 +477,28 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                     case EventIds.Shadowflame:
                         DoCastVictim(SpellIds.Shadowflame);
                         _events.ScheduleEvent(
-                            EventIds.Shadowflame, TimeSpan.FromSeconds(12));
+                            EventIds.Shadowflame, Time.SpanFromSeconds(12));
                         break;
                     case EventIds.Fear:
                         DoCastVictim(SpellIds.Bellowingroar);
                         _events.ScheduleEvent(
-                            EventIds.Fear, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                            EventIds.Fear, Time.SpanFromSeconds(25), Time.SpanFromSeconds(35));
                         break;
                     case EventIds.Veilofshadow:
                         DoCastVictim(SpellIds.Veilofshadow);
                         _events.ScheduleEvent(
-                            EventIds.Veilofshadow, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                            EventIds.Veilofshadow, Time.SpanFromSeconds(25), Time.SpanFromSeconds(35));
                         break;
                     case EventIds.Cleave:
                         DoCastVictim(SpellIds.Cleave);
                         _events.ScheduleEvent(
-                            EventIds.Cleave, TimeSpan.FromSeconds(7));
+                            EventIds.Cleave, Time.SpanFromSeconds(7));
                         break;
                     case EventIds.Taillash:
                         // Cast Nyi since we need a better check for behind target
                         DoCastVictim(SpellIds.Taillash);
                         _events.ScheduleEvent(
-                            EventIds.Taillash, TimeSpan.FromSeconds(10));
+                            EventIds.Taillash, Time.SpanFromSeconds(10));
                         break;
                     case EventIds.Classcall:
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
@@ -550,7 +550,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                             }
 
                         _events.ScheduleEvent(
-                            EventIds.Classcall, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+                            EventIds.Classcall, Time.SpanFromSeconds(30), Time.SpanFromSeconds(35));
 
                         break;
                 }

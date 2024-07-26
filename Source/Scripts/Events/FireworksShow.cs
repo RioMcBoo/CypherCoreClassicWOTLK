@@ -767,24 +767,24 @@ namespace Scripts.Events.FireworksShow
             );
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _events.Update(diff);
 
-            var localTm = GameTime.GetDateAndTime();
+            var localTm = LoopTime.ServerTime;
 
             // Start
             if ((localTm.Minute == 0 && localTm.Second == 0) && !_started && (GameEventMgr.IsHolidayActive(HolidayIds.FireworksSpectacular) || GameEventMgr.IsEventActive(MiscConst.GameEventNewYear)))
             {
-                _events.ScheduleEvent(MiscConst.EventCheer, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventCheer, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
                 _started = true;
             }
 
             // Event is active
             if ((localTm.Minute >= 0 && localTm.Second >= 1 && localTm.Minute <= 9 && localTm.Second <= 59 && !_started) && (GameEventMgr.IsHolidayActive(HolidayIds.FireworksSpectacular) || GameEventMgr.IsEventActive(MiscConst.GameEventNewYear)))
             {
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
                 _started = true;
             }
 
@@ -792,7 +792,7 @@ namespace Scripts.Events.FireworksShow
             if ((localTm.Minute == 10 && localTm.Second == 0) && _started == true)
             {
                 _started = false;
-                _events.ScheduleEvent(MiscConst.EventCheer, TimeSpan.FromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventCheer, Time.SpanFromSeconds(1));
                 _events.CancelEvent(MiscConst.EventFire);
             }
 
@@ -800,17 +800,17 @@ namespace Scripts.Events.FireworksShow
             if ((localTm.Minute == 10 && localTm.Second == 30 && localTm.Hour == 0) && GameEventMgr.IsEventActive(MiscConst.GameEventNewYear) && _big == true)
             {
                 _big = false;
-                _events.ScheduleEvent(MiscConst.EventCheer, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventCheer, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
+                _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1));
             }
 
             _events.ExecuteEvents(eventId =>
@@ -833,26 +833,26 @@ namespace Scripts.Events.FireworksShow
 
                             if (_big)
                             {
-                                GameObject firework = me.SummonGameObject(FireworksBIGOnlyPicker(), rndpos, new Quaternion(0.0f, 0.0f, rndrot, rndrot2), TimeSpan.FromMinutes(5));
+                                GameObject firework = me.SummonGameObject(FireworksBIGOnlyPicker(), rndpos, new Quaternion(0.0f, 0.0f, rndrot, rndrot2), (Minutes)5);
                                 if (firework != null)
                                 {
-                                    firework.SetRespawnTime(0);
+                                    firework.SetRespawnTime(TimeSpan.Zero);
                                     firework.Delete();
                                 }
                             }
                             else
                             {
-                                GameObject firework = me.SummonGameObject(FireworksPicker(), rndpos, new Quaternion(0.0f, 0.0f, rndrot, rndrot2), TimeSpan.FromMinutes(5));
+                                GameObject firework = me.SummonGameObject(FireworksPicker(), rndpos, new Quaternion(0.0f, 0.0f, rndrot, rndrot2), (Minutes)5);
                                 if (firework != null)
                                 {
-                                    firework.SetRespawnTime(0);
+                                    firework.SetRespawnTime(TimeSpan.Zero);
                                     firework.Delete();
                                 }
                             }
                         }
 
                         if (_started == true)
-                            _events.ScheduleEvent(MiscConst.EventFire, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2));
+                            _events.ScheduleEvent(MiscConst.EventFire, Time.SpanFromSeconds(1), Time.SpanFromSeconds(2));
 
                         break;
                     }

@@ -240,7 +240,7 @@ namespace Game.Spells
                             for (uint j = 0; j < spell.StackAmount; ++j)
                                 m_caster.CastSpell(unitTarget, spell.Id, new CastSpellExtraArgs(this));
                             
-                            return;
+                        return;
                         }
                 }
             }
@@ -298,7 +298,7 @@ namespace Game.Spells
 
             TimeSpan delay = TimeSpan.Zero;
             if (effectInfo.Effect == SpellEffectName.TriggerSpell)
-                delay = TimeSpan.FromMilliseconds(effectInfo.MiscValue);
+                delay = (Milliseconds)effectInfo.MiscValue;
 
             var caster = m_caster;
             var originalCaster = m_originalCasterGUID;
@@ -518,7 +518,7 @@ namespace Game.Spells
             m_caster.CastSpell(null, spellInfo.Id, new CastSpellExtraArgs().SetTriggeringSpell(this));
         }
 
-        void CalculateJumpSpeeds(SpellEffectInfo effInfo, float dist, out float speedXY, out float speedZ)
+        void CalculateJumpSpeeds(SpellEffectInfo effInfo, float dist, out Speed speedXY, out Speed speedZ)
         {
             Unit unitCaster = GetUnitCasterForEffectHandlers();
 
@@ -548,7 +548,7 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            float speedXY, speedZ;
+            Speed speedXY, speedZ;
             CalculateJumpSpeeds(effectInfo, unitCaster.GetExactDist2d(unitTarget), out speedXY, out speedZ);
             JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
@@ -572,7 +572,7 @@ namespace Game.Spells
             if (!m_targets.HasDst())
                 return;
 
-            float speedXY, speedZ;
+            Speed speedXY, speedZ;
             CalculateJumpSpeeds(effectInfo, unitCaster.GetExactDist2d(destTarget), out speedXY, out speedZ);
             JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
@@ -638,10 +638,10 @@ namespace Game.Spells
                 unitTarget.NearTeleportTo(targetDest, unitTarget == m_caster);
             else
             {
-                Log.outError(LogFilter.Spells, 
+                Log.outError(LogFilter.Spells,
                     $"Spell.EffectTeleportUnits - " +
                     $"spellId {m_spellInfo.Id} attempted to teleport creature to a different map.");
-        }
+            }
         }
 
         [SpellEffectHandler(SpellEffectName.RitualActivatePortal)]
@@ -681,7 +681,7 @@ namespace Game.Spells
 
             unitTarget.m_Events.AddEventAtOffset(
                 new DelayedSpellTeleportEvent(unitTarget, targetDest, options, m_spellInfo.Id),
-                TimeSpan.FromMilliseconds(effectInfo.MiscValue));
+                (Milliseconds)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.ApplyAura)]
@@ -1210,15 +1210,15 @@ namespace Game.Spells
                     damage -= 4 * Math.Max(0, Math.Min(15, unitCaster.GetLevel() - 60));
                     break;
                 case 67490:                                         // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
-                    {
+                {
                         Player player = unitCaster.ToPlayer();
-                        if (player != null)
+                    if (player != null)
                     {
-                            if (player.HasSkill(SkillType.Engineering))
-                                MathFunctions.AddPct(ref damage, 25);
+                        if (player.HasSkill(SkillType.Engineering))
+                            MathFunctions.AddPct(ref damage, 25);
                     }
-                        break;
-                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -1543,7 +1543,7 @@ namespace Game.Spells
                 if (caster.IsPlayer() && m_originalCaster.ToPlayer().GetGroup() != null)
                     privateObjectOwner = caster.ToPlayer().GetGroup().GetGUID();
 
-            TimeSpan duration = TimeSpan.FromMilliseconds(m_spellInfo.CalcDuration(caster));
+            Milliseconds duration = m_spellInfo.CalcDuration(caster);
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
 
@@ -1630,9 +1630,9 @@ namespace Game.Spells
                                 if (unitCaster == null)
                                     return;
 
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
-                            if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
-                                return;
+                                summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                                if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
+                                    return;
 
                                 summon.SetImmuneToAll(true);
 
@@ -1643,9 +1643,9 @@ namespace Game.Spells
                                 float radius = effectInfo.CalcRadius();
 
                             TempSummonType summonType = TempSummonType.TimedDespawn;
-                            if (duration == TimeSpan.Zero)
+                            if (duration == 0)
                                 summonType = TempSummonType.DeadDespawn;
-                            else if (duration == TimeSpan.FromMilliseconds(-1))
+                            else if (duration == -1)
                                 summonType = TempSummonType.ManualDespawn;
 
                                 for (int count = 0; count < numSummons; ++count)
@@ -1907,7 +1907,7 @@ namespace Game.Spells
             if (unitTarget.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing))
                 return;
 
-            unitTarget.GetMotionMaster().MoveDistract((uint)(damage * Time.InMilliseconds), unitTarget.GetAbsoluteAngle(destTarget));
+            unitTarget.GetMotionMaster().MoveDistract((Seconds)damage, unitTarget.GetAbsoluteAngle(destTarget));
         }
 
         [SpellEffectHandler(SpellEffectName.Pickpocket)]
@@ -1960,7 +1960,7 @@ namespace Game.Spells
                 return;
 
             float radius = effectInfo.CalcRadius();
-            int duration = m_spellInfo.CalcDuration(m_caster);
+            Milliseconds duration = m_spellInfo.CalcDuration(m_caster);
             // Caster not in world, might be spell triggered from aura removal
             if (!player.IsInWorld)
                 return;
@@ -2122,7 +2122,7 @@ namespace Game.Spells
                 // remove old enchanting before applying new if equipped
                 item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementPermanent, false);
 
-                itemTarget.SetEnchantment(EnchantmentSlot.EnhancementPermanent, enchant_id, 0, 0, m_caster.GetGUID());
+                itemTarget.SetEnchantment(EnchantmentSlot.EnhancementPermanent, enchant_id, Milliseconds.Zero, 0, m_caster.GetGUID());
 
                 // add new enchanting if equipped
                 item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementPermanent, true);
@@ -2191,7 +2191,7 @@ namespace Game.Spells
             // remove old enchanting before applying new if equipped
             item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketPrismatic, false);
 
-            itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocketPrismatic, enchantId, 0, 0, m_caster.GetGUID());
+            itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocketPrismatic, enchantId, Milliseconds.Zero, 0, m_caster.GetGUID());
 
             // add new enchanting if equipped
             item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketPrismatic, true);
@@ -2232,7 +2232,7 @@ namespace Game.Spells
             }
 
             // select enchantment duration
-            int duration = m_damage;
+            Seconds duration = (Seconds)m_damage;
 
             // item can be in trade slot and have owner diff. from caster
             Player item_owner = itemTarget.GetOwner();
@@ -2250,7 +2250,7 @@ namespace Game.Spells
             // remove old enchanting before applying new if equipped
             item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementTemporary, false);
 
-            itemTarget.SetEnchantment(EnchantmentSlot.EnhancementTemporary, enchant_id, (uint)duration * 1000, 0, m_caster.GetGUID());
+            itemTarget.SetEnchantment(EnchantmentSlot.EnhancementTemporary, enchant_id, duration, 0, m_caster.GetGUID());
 
             // add new enchanting if equipped
             item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementTemporary, true);
@@ -2377,7 +2377,7 @@ namespace Game.Spells
 
             float x, y, z;
             owner.GetClosePoint(out x, out y, out z, owner.GetCombatReach());
-            Pet pet = owner.SummonPet(petentry, petSlot, x, y, z, owner.Orientation, 0, out bool isNew);
+            Pet pet = owner.SummonPet(petentry, petSlot, x, y, z, owner.Orientation, TimeSpan.Zero, out bool isNew);
             if (pet == null)
                 return;
 
@@ -2677,9 +2677,9 @@ namespace Game.Spells
                         || (spell.GetState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
                         && curSpellInfo.CanBeInterrupted(m_caster, unitTarget))
                     {
-                        int duration = m_spellInfo.GetDuration();
+                        Milliseconds duration = m_spellInfo.GetDuration();
                         duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << effectInfo.EffectIndex);
-                        unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
+                        unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), duration);
                         m_hitMask |= ProcFlagsHit.Interrupt;
                         SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);
@@ -2717,9 +2717,9 @@ namespace Game.Spells
 
             PhasingHandler.InheritPhaseShift(go, m_caster);
 
-            int duration = m_spellInfo.CalcDuration(m_caster);
+            TimeSpan duration = m_spellInfo.CalcDuration(m_caster);
 
-            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            go.SetRespawnTime(duration > TimeSpan.Zero ? duration : TimeSpan.Zero);
             go.SetSpellId(m_spellInfo.Id);
 
             ExecuteLogEffectSummonObject(effectInfo.Effect, go);
@@ -2742,7 +2742,7 @@ namespace Game.Spells
             if (linkedTrap != null)
             {
                 PhasingHandler.InheritPhaseShift(linkedTrap, m_caster);
-                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetRespawnTime(duration > TimeSpan.Zero ? duration : TimeSpan.Zero);
                 linkedTrap.SetSpellId(m_spellInfo.Id);
 
                 ExecuteLogEffectSummonObject(effectInfo.Effect, linkedTrap);
@@ -2798,32 +2798,32 @@ namespace Game.Spells
 
                                 #region TODO: to refactoring!
                                 // Mug Transformation
-                                case 41931:
+                            case 41931:
+                            {
+                            if (!m_caster.IsTypeId(TypeId.Player))
+                                return;
+
+                            ItemPos pos = new(0, 19);
+                            byte bag = 19;
+                            byte slot = 0;
+                            Item item;
+
+                            while (bag != 0) // 256 = 0 due to var Type
+                            {
+                                item = m_caster.ToPlayer().GetItemByPos(new(slot, bag));
+                                if (item != null && item.GetEntry() == 38587)
+                                    break;
+
+                                ++slot;
+                                if (slot == 39)
                                 {
-                                    if (!m_caster.IsTypeId(TypeId.Player))
-                                        return;
+                                    slot = 0;
+                                    ++bag;
+                                }
+                            }
 
-                                    ItemPos pos = new(0, 19);
-                                    byte bag = 19;
-                                    byte slot = 0;
-                                    Item item;
-                            
-                                    while (bag != 0) // 256 = 0 due to var Type
-                                    {
-                                        item = m_caster.ToPlayer().GetItemByPos(new(slot, bag));
-                                        if (item != null && item.GetEntry() == 38587)
-                                            break;
-
-                                        ++slot;
-                                        if (slot == 39)
-                                        {
-                                            slot = 0;
-                                            ++bag;
-                                        }
-                                    }
-
-                                    if (bag != 0)
-                                    {
+                            if (bag != 0)
+                            {
                                 if (m_caster.ToPlayer().GetItemByPos(new(slot, bag)).GetCount() == 1)
                                     m_caster.ToPlayer().RemoveItem(new(slot, bag), true);
                                 else
@@ -2831,12 +2831,12 @@ namespace Game.Spells
                                     m_caster.ToPlayer().GetItemByPos(new(slot, bag))
                                         .SetCount(m_caster.ToPlayer().GetItemByPos(new(slot, bag)).GetCount() - 1);
                                 }
-                                        // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
-                                        m_caster.CastSpell(m_caster, 42518, new CastSpellExtraArgs(this));
-                                        return;
-                                    }
-                                    break;
-                                }
+                                // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
+                                m_caster.CastSpell(m_caster, 42518, new CastSpellExtraArgs(this));
+                                return;
+                            }
+                            break;
+                        }
                         #endregion
                         // Brutallus - Burn
                         case 45141:
@@ -2874,7 +2874,7 @@ namespace Game.Spells
                                         m_caster.CastSpell(m_caster.GetRandomPoint(destTarget, radius), 54522, 
                                             new CastSpellExtraArgs(this));
                                     }
-                                    break;
+                            break;
                                 }
                             case 52173: // Coyote Spirit Despawn
                             case 60243: // Blood Parrot Despawn
@@ -2983,7 +2983,7 @@ namespace Game.Spells
             }
 
             // makes spells cast before this time fizzle
-            unitTarget.LastSanctuaryTime = GameTime.GetGameTimeMS();
+            unitTarget.LastSanctuaryTime = LoopTime.ServerTime;
         }
 
         [SpellEffectHandler(SpellEffectName.AddComboPoints)]
@@ -3056,8 +3056,8 @@ namespace Game.Spells
 
             go.SetFaction(caster.GetFaction());
             go.SetLevel(caster.GetLevel() + 1);
-            int duration = m_spellInfo.CalcDuration(caster);
-            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            TimeSpan duration = m_spellInfo.CalcDuration(caster);
+            go.SetRespawnTime(duration > TimeSpan.Zero ? duration : TimeSpan.Zero);
             go.SetSpellId(m_spellInfo.Id);
 
             ExecuteLogEffectSummonObject(effectInfo.Effect, go);
@@ -3252,14 +3252,14 @@ namespace Game.Spells
             if (effectInfo.MiscValue != 0)
             {
                 int enchant_id = effectInfo.MiscValue;
-                int duration = m_spellInfo.GetDuration();          //Try duration index first ..
+                Milliseconds duration = m_spellInfo.GetDuration();          //Try duration index first ..
                 if (duration == 0)
-                    duration = damage;//+1;            //Base points after ..
+                    duration = new(damage/* + 1*/);            //Base points after ..
                 if (duration == 0)
-                    duration = 10 * Time.InMilliseconds;                                  //10 seconds for enchants which don't have listed duration
+                    duration = (Seconds)10;    //10 seconds for enchants which don't have listed duration
 
                 if (m_spellInfo.Id == 14792) // Venomhide Poison
-                    duration = 5 * Time.Minute * Time.InMilliseconds;
+                    duration = (Minutes)5;
 
                 SpellItemEnchantmentRecord pEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
                 if (pEnchant == null)
@@ -3273,7 +3273,7 @@ namespace Game.Spells
                     return;
 
                 // Apply the temporary enchantment
-                item.SetEnchantment(slot, enchant_id, (uint)duration, 0, m_caster.GetGUID());
+                item.SetEnchantment(slot, enchant_id, duration, 0, m_caster.GetGUID());
                 item_owner.ApplyEnchantment(item, slot, true);
             }
         }
@@ -3424,8 +3424,8 @@ namespace Game.Spells
 
             go.SetFaction(unitCaster.GetFaction());
             go.SetLevel(unitCaster.GetLevel());
-            int duration = m_spellInfo.CalcDuration(m_caster);
-            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            TimeSpan duration = m_spellInfo.CalcDuration(m_caster);
+            go.SetRespawnTime(duration > TimeSpan.Zero ? duration : TimeSpan.Zero);
             go.SetSpellId(m_spellInfo.Id);
             unitCaster.AddGameObject(go);
 
@@ -3734,7 +3734,7 @@ namespace Game.Spells
                 if (unitCaster.IsPlayer())
                     unitCaster.ToPlayer().SetFallInformation(0, m_caster.GetPositionZ());
 
-                float speed = MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) ? m_spellInfo.Speed : MotionMaster.SPEED_CHARGE;
+                Speed speed = MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) ? m_spellInfo.Speed : MotionMaster.SPEED_CHARGE;
                 SpellEffectExtraData spellEffectExtraData = null;
                 if (effectInfo.MiscValueB != 0)
                 {
@@ -3751,12 +3751,12 @@ namespace Game.Spells
                 }
 
                 if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
-                    speed = m_preGeneratedPath.GetPathLength() / speed;
+                    speed = (Speed)(m_preGeneratedPath.GetPathLength() / speed);
 
                 unitCaster.GetMotionMaster().MoveCharge(m_preGeneratedPath, speed, unitTarget, spellEffectExtraData);
 
                 // abuse implementation detail of MoveCharge accepting PathGenerator argument (instantly started spline)
-                UpdateDelayMomentForUnitTarget(unitTarget, (uint)unitCaster.MoveSpline.Duration());
+                UpdateDelayMomentForUnitTarget(unitTarget, unitCaster.MoveSpline.Duration());
             }
 
             if (effectHandleMode == SpellEffectHandleMode.HitTarget)
@@ -3770,8 +3770,8 @@ namespace Game.Spells
                     m_caster.CastSpell(unitTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                         .SetOriginalCaster(m_originalCasterGUID)
                         .SetTriggeringSpell(this));
+                }
             }
-        }
         }
 
         [SpellEffectHandler(SpellEffectName.ChargeDest)]
@@ -3797,15 +3797,15 @@ namespace Game.Spells
                 PathGenerator path = new(unitCaster);
                 path.CalculatePath(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
 
-                float speed = MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) ? m_spellInfo.Speed : MotionMaster.SPEED_CHARGE;
+                Speed speed = MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) ? m_spellInfo.Speed : MotionMaster.SPEED_CHARGE;
 
                 if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
-                    speed = path.GetPathLength() / speed;
+                    speed = new(path.GetPathLength() / speed);
 
                 unitCaster.GetMotionMaster().MoveCharge(path, speed);
 
                 // abuse implementation detail of MoveCharge accepting PathGenerator argument (instantly started spline)
-                UpdateDelayMomentForDst((uint)unitCaster.MoveSpline.Duration());
+                UpdateDelayMomentForDst(unitCaster.MoveSpline.Duration());
             }
             else if (effectHandleMode == SpellEffectHandleMode.Hit)
             {
@@ -3814,8 +3814,8 @@ namespace Game.Spells
                     m_caster.CastSpell(destTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                         .SetOriginalCaster(m_originalCasterGUID)
                         .SetTriggeringSpell(this));
+                }
             }
-        }
         }
 
         [SpellEffectHandler(SpellEffectName.KnockBack)]
@@ -3835,7 +3835,7 @@ namespace Game.Spells
                 {
                     if (creatureTarget.IsWorldBoss() || creatureTarget.IsDungeonBoss())
                         return;
-            }
+                }
             }
 
             // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
@@ -3847,8 +3847,8 @@ namespace Game.Spells
                 unitTarget.InterruptNonMeleeSpells(true);
 
             float ratio = 0.1f;
-            float speedxy = effectInfo.MiscValue * ratio;
-            float speedz = damage * ratio;
+            Speed speedxy = new(effectInfo.MiscValue * ratio);
+            Speed speedz = new(damage * ratio);
             if (speedxy < 0.01f && speedz < 0.01f)
                 return;
 
@@ -3880,8 +3880,8 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            float speedxy = effectInfo.MiscValue / 10.0f;
-            float speedz = damage / 10.0f;
+            Speed speedxy = new(effectInfo.MiscValue / 10.0f);
+            Speed speedz = new(damage / 10.0f);
             // Disengage
             unitTarget.JumpTo(speedxy, speedz, effectInfo.PositionFacing);
 
@@ -3972,8 +3972,8 @@ namespace Game.Spells
                 return;
 
             float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
-            float speedXY = effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f;
-            float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
+            Speed speedXY = new(effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f);
+            Speed speedZ = new((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
 
             if (!float.IsFinite(speedZ))
             {
@@ -4012,8 +4012,8 @@ namespace Game.Spells
 
             float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
 
-            float speedXY = effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f;
-            float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
+            Speed speedXY = new(effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f);
+            Speed speedZ = new((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
 
             if (!float.IsFinite(speedZ))
             {
@@ -4037,8 +4037,8 @@ namespace Game.Spells
                 return;
 
             Group group = player.GetGroup();
-            if (group == null || (group.IsRaidGroup() 
-                && !group.IsLeader(player.GetGUID()) 
+            if (group == null || (group.IsRaidGroup()
+                && !group.IsLeader(player.GetGUID())
                 && !group.IsAssistant(player.GetGUID())))
             {
                 return;
@@ -4074,7 +4074,7 @@ namespace Game.Spells
                 {
                     if ((aura.GetSpellInfo().GetAllEffectsMechanicMask() & (1ul << mechanic)) != 0)
                         dispel_list.Add(new(aura.GetId(), aura.GetCasterGUID()));
-            }
+                }
             }
 
             if (dispel_list.Empty())
@@ -4112,7 +4112,7 @@ namespace Game.Spells
 
                 PetSaveMode slot = (PetSaveMode)deadPetIndex;
 
-                player.SummonPet(0, slot, 0f, 0f, 0f, 0f, 0);
+                player.SummonPet(0, slot, 0f, 0f, 0f, 0f, TimeSpan.Zero);
                 hadPet = false;
             }
 
@@ -4341,7 +4341,7 @@ namespace Game.Spells
 
             PhasingHandler.InheritPhaseShift(go, m_caster);
 
-            int duration = m_spellInfo.CalcDuration(m_caster);
+            Milliseconds duration = m_spellInfo.CalcDuration(m_caster);
 
             switch (goinfo.type)
             {
@@ -4355,16 +4355,16 @@ namespace Game.Spells
 
                         // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
                         // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
-                        int lastSec = 0;
+                        Seconds lastSec = Seconds.Zero;
                         switch (RandomHelper.IRand(0, 2))
                         {
-                            case 0: lastSec = 3; break;
-                            case 1: lastSec = 7; break;
-                            case 2: lastSec = 13; break;
+                            case 0: lastSec = (Seconds)3; break;
+                            case 1: lastSec = (Seconds)7; break;
+                            case 2: lastSec = (Seconds)13; break;
                         }
 
                         // Duration of the fishing bobber can't be higher than the Fishing channeling duration
-                        duration = Math.Min(duration, duration - lastSec * Time.InMilliseconds + 5 * Time.InMilliseconds);
+                        duration = Time.Min(duration, duration - lastSec + (Seconds)5);
                         break;
                     }
                 case GameObjectTypes.Ritual:
@@ -4385,7 +4385,7 @@ namespace Game.Spells
                     break;
             }
 
-            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            go.SetRespawnTime(duration > 0 ? duration : TimeSpan.Zero);
             go.SetOwnerGUID(unitCaster.GetGUID());
             go.SetSpellId(m_spellInfo.Id);
 
@@ -4398,7 +4398,7 @@ namespace Game.Spells
             if (linkedTrap != null)
             {
                 PhasingHandler.InheritPhaseShift(linkedTrap, m_caster);
-                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetRespawnTime(duration > 0 ? duration : TimeSpan.Zero);
                 linkedTrap.SetSpellId(m_spellInfo.Id);
                 linkedTrap.SetOwnerGUID(unitCaster.GetGUID());
 
@@ -4889,7 +4889,7 @@ namespace Game.Spells
 
             // in another case summon new
             float radius = 5.0f;
-            TimeSpan duration = TimeSpan.FromMilliseconds(m_spellInfo.CalcDuration(m_originalCaster));
+            TimeSpan duration = m_spellInfo.CalcDuration(m_originalCaster);
 
             //TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
             Map map = unitCaster.GetMap();
@@ -5202,8 +5202,8 @@ namespace Game.Spells
                         ? TeleportToOptions.Spell | TeleportToOptions.NotLeaveCombat 
                         : 0
                     );
+                }
             }
-        }
         }
 
         [SpellEffectHandler(SpellEffectName.SummonRafFriend)]
@@ -5265,9 +5265,9 @@ namespace Game.Spells
 
             PhasingHandler.InheritPhaseShift(go, m_caster);
 
-            int duration = m_spellInfo.CalcDuration(m_caster);
+            TimeSpan duration = m_spellInfo.CalcDuration(m_caster);
 
-            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            go.SetRespawnTime(duration > TimeSpan.Zero ? duration : TimeSpan.Zero);
             go.SetSpellId(m_spellInfo.Id);
             go.SetPrivateObjectOwner(m_caster.GetGUID());
 
@@ -5280,7 +5280,7 @@ namespace Game.Spells
             {
                 PhasingHandler.InheritPhaseShift(linkedTrap, m_caster);
 
-                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetRespawnTime(duration > TimeSpan.Zero ? duration : TimeSpan.Zero);
                 linkedTrap.SetSpellId(m_spellInfo.Id);
 
                 ExecuteLogEffectSummonObject(effectInfo.Effect, linkedTrap);
@@ -5331,7 +5331,7 @@ namespace Game.Spells
                 return;
 
             AreaTriggerId createPropertiesId = new(effectInfo.MiscValue, false);
-            int duration = GetSpellInfo().CalcDuration(GetCaster());
+            Milliseconds duration = GetSpellInfo().CalcDuration(GetCaster());
             AreaTrigger.CreateAreaTrigger(createPropertiesId, destTarget.GetPosition(), duration, unitCaster, null, m_SpellVisual, GetSpellInfo(), this);
         }
 
@@ -5741,9 +5741,9 @@ namespace Game.Spells
             if (jumpParams == null)
                 return;
 
-            float speed = jumpParams.Speed;
+            Speed speed = jumpParams.Speed;
             if (jumpParams.TreatSpeedAsMoveTimeSeconds)
-                speed = unitCaster.GetExactDist(destTarget) / jumpParams.Speed;
+                speed = (Speed)(unitCaster.GetExactDist(destTarget) / jumpParams.Speed);
 
             JumpArrivalCastArgs arrivalCast = null;
             if (effectInfo.TriggerSpell != 0)
@@ -5859,7 +5859,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            unitTarget.GetSpellHistory().ModifyCooldown(effectInfo.TriggerSpell, TimeSpan.FromMilliseconds(damage));
+            unitTarget.GetSpellHistory().ModifyCooldown(effectInfo.TriggerSpell, (Milliseconds)damage);
         }
 
         [SpellEffectHandler(SpellEffectName.ModifyCooldowns)]
@@ -5881,7 +5881,7 @@ namespace Game.Spells
                 FlagArray128 reqFlag = new();
                 reqFlag[bitIndex / 32] = 1u << (bitIndex % 32);
                 return (spellOnCooldown.SpellFamilyFlags & reqFlag);
-            }, TimeSpan.FromMilliseconds(damage));
+            }, (Milliseconds)damage);
         }
 
         [SpellEffectHandler(SpellEffectName.ModifyCooldownsByCategory)]
@@ -5891,8 +5891,7 @@ namespace Game.Spells
                 return;
 
             unitTarget.GetSpellHistory().ModifyCoooldowns(itr => 
-            Global.SpellMgr.GetSpellInfo(itr.SpellId, Difficulty.None).CategoryId == (SpellCategories)effectInfo.MiscValue, TimeSpan.FromMilliseconds(damage)
-            );
+            Global.SpellMgr.GetSpellInfo(itr.SpellId, Difficulty.None).CategoryId == (SpellCategories)effectInfo.MiscValue, (Milliseconds)damage);
         }
 
         [SpellEffectHandler(SpellEffectName.ModifyCharges)]
@@ -6015,7 +6014,7 @@ namespace Game.Spells
             _spellId = spellId;
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
 
             Player player = _target.ToPlayer();

@@ -262,7 +262,7 @@ namespace Scripts.Events.Brewfest
             Aura aura = GetHitUnit().GetAura(SpellIds.SwiftWorkRam);
             if (aura != null)
             {
-                aura.SetDuration(aura.GetDuration() + 30 * Time.InMilliseconds);
+                aura.SetDuration(aura.GetDuration() + (Seconds)30);
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.RelayRaceTurnIn, TriggerCastFlags.FullMask);
             }
         }

@@ -56,7 +56,7 @@ namespace Game.Maps
             _terrainMaps.Clear();
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             // global garbage collection
             foreach (var (mapId, terrain) in _terrainMaps)
@@ -139,7 +139,7 @@ namespace Game.Maps
         BitSet _loadedGrids = new(MapConst.MaxGrids * MapConst.MaxGrids);
         BitSet _gridFileExists = new(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
 
-        static TimeSpan CleanupInterval = TimeSpan.FromMinutes(1);
+        static TimeSpan CleanupInterval = (Minutes)1;
 
         // global garbage collection timer
         TimeTracker _cleanupTimer;
@@ -189,7 +189,7 @@ namespace Game.Maps
             {
                 for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
                     _gridFileExists[GetBitsetIndex(gx, gy)] = ExistMap(GetId(), gx, gy, false);
-        }
+            }
         }
 
         public static bool ExistMap(int mapid, int gx, int gy, bool log = true)
@@ -424,7 +424,7 @@ namespace Game.Maps
             return grid;
         }
 
-        public void CleanUpGrids(uint diff)
+        public void CleanUpGrids(TimeSpan diff)
         {
             _cleanupTimer.Update(diff);
             if (!_cleanupTimer.Passed())
@@ -830,7 +830,7 @@ namespace Game.Maps
             {
                 if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     zoneid = area.ParentAreaID;
-        }
+            }
         }
 
         public float GetMinHeight(PhaseShift phaseShift, int mapId, float x, float y)

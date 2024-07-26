@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 
 namespace Game.BattleFields
@@ -28,12 +29,12 @@ namespace Game.BattleFields
             m_IsEnabled = WorldConfig.Values[WorldCfg.WintergraspEnable].Bool;
             m_MinPlayer = WorldConfig.Values[WorldCfg.WintergraspPlrMin].Int32;
             m_MinLevel = WorldConfig.Values[WorldCfg.WintergraspPlrMinLvl].Int32;
-            m_BattleTime = (uint)WorldConfig.Values[WorldCfg.WintergraspBattletime].Int32 * Time.Minute * Time.InMilliseconds;
-            m_NoWarBattleTime = (uint)WorldConfig.Values[WorldCfg.WintergraspNobattletime].Int32 * Time.Minute * Time.InMilliseconds;
-            m_RestartAfterCrash = (uint)WorldConfig.Values[WorldCfg.WintergraspRestartAfterCrash].Int32 * Time.Minute * Time.InMilliseconds;
+            m_BattleTime = WorldConfig.Values[WorldCfg.WintergraspBattletime].TimeSpan;
+            m_NoWarBattleTime = WorldConfig.Values[WorldCfg.WintergraspNobattletime].TimeSpan;
+            m_RestartAfterCrash = WorldConfig.Values[WorldCfg.WintergraspRestartAfterCrash].TimeSpan;
 
-            m_TimeForAcceptInvite = 20;
-            m_StartGroupingTimer = 15 * Time.Minute * Time.InMilliseconds;
+            m_TimeForAcceptInvite = (Seconds)20;
+            m_StartGroupingTimer = (Minutes)15;
             m_tenacityTeam = BattleGroundTeamId.Neutral;
 
             KickPosition = new WorldLocation(m_MapId, 5728.117f, 2714.346f, 697.733f, 0);
@@ -52,13 +53,13 @@ namespace Game.BattleFields
             {
                 Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 0, false, m_Map);
                 Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, RandomHelper.IRand(0, 1), false, m_Map);
-                Global.WorldStateMgr.SetValueAndSaveInDb(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_NoWarBattleTime / Time.InMilliseconds), false, m_Map);
+                Global.WorldStateMgr.SetValueAndSaveInDb(WGConst.ClockWorldState[0], LoopTime.UnixServerTime + (Seconds)m_NoWarBattleTime, false, m_Map);
             }
 
             m_isActive = Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgShowTimeNextBattle, m_Map) == 0;
             m_DefenderTeam = Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgDefender, m_Map);
 
-            m_Timer = (uint)(Global.WorldStateMgr.GetValue(WGConst.ClockWorldState[0], m_Map) - GameTime.GetGameTime());
+            m_Timer = (UnixTime)Global.WorldStateMgr.GetValue(WGConst.ClockWorldState[0], m_Map) - LoopTime.UnixServerTime;
             if (m_isActive)
             {
                 m_isActive = false;
@@ -66,7 +67,7 @@ namespace Game.BattleFields
             }
 
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, GetAttackerTeam(), false, m_Map);
-            Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
+            Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], LoopTime.UnixServerTime + (Seconds)m_Timer, false, m_Map);
 
             foreach (var gy in WGConst.WGGraveYard)
             {
@@ -130,20 +131,20 @@ namespace Game.BattleFields
                 {
                     DefenderPortalList[BattleGroundTeamId.Alliance].Add(go.GetGUID());
 
-                    go.SetRespawnTime((int)
-                        (GetDefenderTeam() == BattleGroundTeamId.Alliance 
+                    go.SetRespawnTime(
+                        GetDefenderTeam() == BattleGroundTeamId.Alliance 
                         ? BattlegroundConst.RespawnImmediately 
-                        : BattlegroundConst.RespawnOneDay));
+                        : BattlegroundConst.RespawnOneDay);
                 }
                 go = SpawnGameObject(teleporter.HordeEntry, teleporter.Pos, teleporter.Rot);
                 if (go != null)
                 {
                     DefenderPortalList[BattleGroundTeamId.Horde].Add(go.GetGUID());
 
-                    go.SetRespawnTime((int)
-                        (GetDefenderTeam() == BattleGroundTeamId.Horde 
+                    go.SetRespawnTime(
+                        GetDefenderTeam() == BattleGroundTeamId.Horde 
                         ? BattlegroundConst.RespawnImmediately 
-                        : BattlegroundConst.RespawnOneDay));
+                        : BattlegroundConst.RespawnOneDay);
                 }
             }
 
@@ -170,7 +171,7 @@ namespace Game.BattleFields
             Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, GetDefenderTeam(), false, m_Map);
             Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 0, false, m_Map);
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeBattleEnd, 1, false, m_Map);
-            Global.WorldStateMgr.SetValueAndSaveInDb(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WGConst.ClockWorldState[0], LoopTime.UnixServerTime + (Seconds)m_Timer, false, m_Map);
 
             // Update tower visibility and update faction
             foreach (var guid in CanonList)
@@ -278,7 +279,7 @@ namespace Game.BattleFields
             Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, GetDefenderTeam(), false, m_Map);
             Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 1, false, m_Map);
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeBattleEnd, 0, false, m_Map);
-            Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
+            Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], LoopTime.UnixServerTime + (Seconds)m_Timer, false, m_Map);
 
             // Remove turret
             foreach (var guid in CanonList)
@@ -305,14 +306,14 @@ namespace Game.BattleFields
             {
                 GameObject portal = GetGameObject(guid);
                 if (portal != null)
-                    portal.SetRespawnTime((int)BattlegroundConst.RespawnImmediately);
+                    portal.SetRespawnTime(BattlegroundConst.RespawnImmediately);
             }
 
             foreach (var guid in DefenderPortalList[GetAttackerTeam()])
             {
                 GameObject portal = GetGameObject(guid);
                 if (portal != null)
-                    portal.SetRespawnTime((int)BattlegroundConst.RespawnOneDay);
+                    portal.SetRespawnTime(BattlegroundConst.RespawnOneDay);
             }
 
             foreach (var guid in m_PlayersInWar[GetDefenderTeam()])
@@ -328,7 +329,7 @@ namespace Game.BattleFields
                     // Send Wintergrasp victory achievement
                     DoCompleteOrIncrementAchievement(WGAchievements.WinWg, player);
                     // Award achievement for succeeding in Wintergrasp in 10 minutes or less
-                    if (!endByTimer && GetTimer() <= 10000)
+                    if (!endByTimer && GetTimer() <= (Minutes)10)
                         DoCompleteOrIncrementAchievement(WGAchievements.WinWgTimer10, player);
                 }
             }
@@ -812,12 +813,12 @@ namespace Game.BattleFields
                 // If all three south towers are destroyed (ie. all attack towers), remove ten minutes from battle time
                 if (GetData(WGData.BrokenTowerAtt) == 3)
                 {
-                    if ((int)(m_Timer - 600000) < 0)
-                        m_Timer = 0;
+                    if (m_Timer - (Minutes)10 < TimeSpan.Zero)
+                        m_Timer = TimeSpan.Zero;
                     else
-                        m_Timer -= 600000;
+                        m_Timer -= (Minutes)10;
 
-                    Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
+                    Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[0], LoopTime.UnixServerTime + (Seconds)m_Timer, false, m_Map);
                 }
             }
             else // Keep tower
@@ -846,7 +847,7 @@ namespace Game.BattleFields
                 if (CanInteractWithRelic())
                     EndBattle(false);
                 else if (relic != null)
-                    relic.SetRespawnTime(0);
+                    relic.SetRespawnTime(TimeSpan.Zero);
             }
 
             // if destroy or damage event, search the wall/tower and update worldstate/send warning message
@@ -1360,7 +1361,7 @@ namespace Game.BattleFields
             {
                 GameObject obj = _wg.GetGameObject(guid);
                 if (obj != null)
-                    obj.SetRespawnTime(0);
+                    obj.SetRespawnTime(TimeSpan.Zero);
             }
         }
 

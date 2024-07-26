@@ -22,9 +22,9 @@ public class RealmManager : Singleton<RealmManager>
 
     RealmManager() { }
 
-    public void Initialize(int updateInterval)
+    public void Initialize(Milliseconds updateInterval)
     {
-        _updateTimer = new Timer(TimeSpan.FromSeconds(updateInterval).TotalMilliseconds);
+        _updateTimer = new Timer(updateInterval.Ticks);
         _updateTimer.Elapsed += UpdateRealms;
 
         LoadBuildInfo();

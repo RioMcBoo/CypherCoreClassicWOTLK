@@ -39,15 +39,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.GizrulTheSlav
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(17), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)17, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.FatalBite);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)8, (Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)10, (Seconds)12, task =>
             {
                 DoCast(me, SpellIds.InfectedBite);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)8, (Seconds)10);
             });
         }
 
@@ -56,7 +56,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.GizrulTheSlav
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

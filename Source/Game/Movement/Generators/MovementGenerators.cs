@@ -21,7 +21,7 @@ namespace Game.Movement
         public virtual void Reset(Unit owner) { }
 
         // on top on MotionMaster::Update
-        public abstract bool Update(Unit owner, uint diff);
+        public abstract bool Update(Unit owner, TimeSpan diff);
 
         // on current top if another movement replaces
         public virtual void Deactivate(Unit owner) { }
@@ -33,11 +33,9 @@ namespace Game.Movement
 
         public virtual void UnitSpeedChanged() { }
 
-        // timer in ms
-        public virtual void Pause(uint timer) { }
+        public virtual void Pause(TimeSpan timer) { }
 
-        // timer in ms
-        public virtual void Resume(uint overrideTimer) { }
+        public virtual void Resume(TimeSpan overrideTimer) { }
 
         // used by Evade code for select point to evade with expected restart default movement
         public virtual bool GetResetPosition(Unit u, out float x, out float y, out float z)
@@ -84,7 +82,7 @@ namespace Game.Movement
             DoReset((T)owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             return DoUpdate((T)owner, diff);
         }
@@ -104,7 +102,7 @@ namespace Game.Movement
         public abstract void DoInitialize(T owner);
         public abstract void DoFinalize(T owner, bool active, bool movementInform);
         public abstract void DoReset(T owner);
-        public abstract bool DoUpdate(T owner, uint diff);
+        public abstract bool DoUpdate(T owner, TimeSpan diff);
         public abstract void DoDeactivate(T owner);
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Max; }

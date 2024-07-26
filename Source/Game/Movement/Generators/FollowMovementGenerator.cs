@@ -10,7 +10,7 @@ namespace Game.Movement
 {
     public class FollowMovementGenerator : MovementGenerator
     {
-        static uint CHECK_INTERVAL = 100;
+        static readonly Milliseconds CHECK_INTERVAL = (Milliseconds)100;
         static float FOLLOW_RANGE_TOLERANCE = 1.0f;
 
         float _range;
@@ -57,7 +57,7 @@ namespace Game.Movement
             Initialize(owner);
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, TimeSpan diff)
         {
             // owner might be dead or gone
             if (owner == null || !owner.IsAlive())

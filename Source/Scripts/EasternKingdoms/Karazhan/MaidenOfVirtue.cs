@@ -50,33 +50,33 @@ namespace Scripts.EasternKingdoms.Karazhan.MaidenOfVirtue
             Talk(TextIds.SayAggro);
 
             DoCastSelf(SpellIds.Holyground, new CastSpellExtraArgs(true));
-            _scheduler.Schedule(TimeSpan.FromSeconds(33), TimeSpan.FromSeconds(45), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(33), Time.SpanFromSeconds(45), task =>
             {
                 DoCastVictim(SpellIds.Repentance);
                 Talk(TextIds.SayRepentance);
-                task.Repeat(TimeSpan.FromSeconds(35));
+                task.Repeat(Time.SpanFromSeconds(35));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 50, true);
                 if (target != null)
                     DoCast(target, SpellIds.Holyfire);
-                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(19));
+                task.Repeat(Time.SpanFromSeconds(8), Time.SpanFromSeconds(19));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 80, true);
                 if (target != null)
                     DoCast(target, SpellIds.Holywrath);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25));
             });
-            _scheduler.Schedule(TimeSpan.FromMinutes(10), task =>
+            _scheduler.Schedule((Minutes)10, task =>
             {
                 DoCastSelf(SpellIds.Berserk, new CastSpellExtraArgs(true));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

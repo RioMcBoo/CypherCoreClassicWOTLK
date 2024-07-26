@@ -47,7 +47,7 @@ namespace BNetServer
             }
 
             // Get the list of realms for the server
-            Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
+            Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", (Seconds)10));
 
             Global.LoginServiceMgr.Initialize();
 

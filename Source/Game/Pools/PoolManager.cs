@@ -25,7 +25,7 @@ namespace Game
         {
             // Pool templates
             {
-                uint oldMSTime = Time.GetMSTime();
+                RelativeTime oldMSTime = Time.NowRelative;
 
                 SQLResult result = DB.World.Query("SELECT entry, max_limit FROM pool_template");
                 if (result.IsEmpty())
@@ -49,14 +49,14 @@ namespace Game
                 }
                 while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} objects pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} objects pools in {Time.Diff(oldMSTime)} ms.");
             }
 
             // Creatures
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Creatures Pooling Data...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                RelativeTime oldMSTime = Time.NowRelative;
 
                 //                                         1        2            3
                 SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 0");
@@ -125,7 +125,8 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        $"Loaded {count} creatures in pools in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -133,7 +134,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Gameobject Pooling Data...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                RelativeTime oldMSTime = Time.NowRelative;
 
                 //                                         1        2            3
                 SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 1");
@@ -205,7 +206,8 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject in pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        $"Loaded {count} gameobject in pools in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -213,7 +215,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Mother Pooling Data...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                RelativeTime oldMSTime = Time.NowRelative;
 
                 //                                         1        2            3
                 SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 2");
@@ -324,7 +326,8 @@ namespace Game
                         }
                     }
 
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pools in mother pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, 
+                        $"Loaded {count} pools in mother pools in {Time.Diff(oldMSTime)} ms.");
                 }
             }
 
@@ -344,7 +347,7 @@ namespace Game
             // The initialize method will spawn all pools not in an event and not in another pool, this is why there is 2 left joins with 2 null checks
             Log.outInfo(LogFilter.ServerLoading, "Starting objects pooling system...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                RelativeTime oldMSTime = Time.NowRelative;
 
                 SQLResult result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_members.spawnId, pool_members.poolSpawnId FROM pool_template" +
                     " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
@@ -375,7 +378,7 @@ namespace Game
                                     $"Pool Id {pool_entry} has no equal Chance pooled entites defined " +
                                     $"and explicit Chance sum is not 100. " +
                                     $"This broken pool is a child pool of Id {result.Read<uint>(2)} " +
-                                    $"and cannot be safely removed.");                                
+                                    $"and cannot be safely removed.");
                             }
                             else
                             {
@@ -396,7 +399,9 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, "Pool handling system initialized, {0} pools will be spawned by default in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading,
+                        $"Pool handling system initialized, {count} pools " +
+                        $"will be spawned by default in {Time.Diff(oldMSTime)} ms.");
 
                 }
             }

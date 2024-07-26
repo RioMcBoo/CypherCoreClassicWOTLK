@@ -188,12 +188,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     case CreaturesIds.PyrogaurdEmberseer:
                         PyroguardEmberseer = creature.GetGUID();
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
-                            creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromDays(7));
+                            creature.DespawnOrUnsummon((Seconds)0, (Weeks)1);
                         break;
                     case CreaturesIds.WarchiefRendBlackhand:
                         WarchiefRendBlackhand = creature.GetGUID();
                         if (GetBossState(DataTypes.Gyth) == EncounterState.Done)
-                            creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromDays(7));
+                            creature.DespawnOrUnsummon((Seconds)0, (Weeks)1);
                         break;
                     case CreaturesIds.Gyth:
                         Gyth = creature.GetGUID();
@@ -207,7 +207,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     case CreaturesIds.LordVictorNefarius:
                         LordVictorNefarius = creature.GetGUID();
                         if (GetBossState(DataTypes.Gyth) == EncounterState.Done)
-                            creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromDays(7));
+                            creature.DespawnOrUnsummon((Seconds)0, (Weeks)1);
                         break;
                     case CreaturesIds.ScarshieldInfiltrator:
                         ScarshieldInfiltrator = creature.GetGUID();
@@ -388,7 +388,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                         if (data == BRSMiscConst.AreatriggerDragonspireHall)
                         {
                             if (GetBossState(DataTypes.DragonspireRoom) != EncounterState.Done)
-                                _events.ScheduleEvent(EventIds.DargonspireRoomStore, TimeSpan.FromSeconds(1));
+                                _events.ScheduleEvent(EventIds.DargonspireRoomStore, (Seconds)1);
                         }
                         break;
                     case DataTypes.BlackhandIncarcerator:
@@ -482,7 +482,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 return ObjectGuid.Empty;
             }
 
-            public override void Update(uint diff)
+            public override void Update(TimeSpan diff)
             {
                 _events.Update(diff);
 
@@ -492,12 +492,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     {
                         case EventIds.DargonspireRoomStore:
                             Dragonspireroomstore();
-                            _events.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
+                            _events.ScheduleEvent(EventIds.DargonspireRoomCheck, (Seconds)3);
                             break;
                         case EventIds.DargonspireRoomCheck:
                             Dragonspireroomcheck();
                             if (GetBossState(DataTypes.DragonspireRoom) != EncounterState.Done)
-                                _events.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
+                                _events.ScheduleEvent(EventIds.DargonspireRoomCheck, (Seconds)3);
                             break;
                         default:
                             break;
@@ -522,10 +522,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                             {
                                 if (creature != null)
                                     runecreaturelist[i].Add(creature.GetGUID());
+                            }
                         }
                     }
                 }
-            }
             }
 
             void Dragonspireroomcheck()

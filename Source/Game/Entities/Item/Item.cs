@@ -28,7 +28,7 @@ namespace Game.Entities
 
             uState = ItemUpdateState.New;
             uQueuePos = -1;
-            m_lastPlayedTimeUpdate = GameTime.GetGameTime();
+            m_lastPlayedTimeUpdate = LoopTime.ServerTime;
         }
 
         public virtual bool Create(long guidlow, int itemId, ItemContext context, Player owner)
@@ -58,7 +58,7 @@ namespace Game.Entities
                     SetSpellCharges(itemProto.Effects[i].LegacySlotIndex, itemProto.Effects[i].Charges);
 
             SetExpiration(itemProto.GetDuration());
-            SetCreatePlayedTime(0);
+            SetCreatePlayedTime(Seconds.Zero);
             SetContext(context);
             
             return true;
@@ -83,9 +83,9 @@ namespace Game.Entities
             return false;
         }
 
-        public void UpdateDuration(Player owner, uint diff)
+        public void UpdateDuration(Player owner, Seconds diff)
         {
-            uint duration = m_itemData.Expiration;
+            Seconds duration = m_itemData.Expiration;
             if (duration == 0)
                 return;
 
@@ -122,7 +122,7 @@ namespace Game.Entities
                     stmt.SetInt64(++index, GetCreator().GetCounter());
                     stmt.SetInt64(++index, GetGiftCreator().GetCounter());
                     stmt.SetInt32(++index, GetCount());
-                    stmt.SetUInt32(++index, (uint)m_itemData.Expiration);
+                    stmt.SetInt32(++index, m_itemData.Expiration.GetValue());
 
                     StringBuilder ss = new();
                     for (int i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
@@ -144,7 +144,7 @@ namespace Game.Entities
                     stmt.SetString(++index, ss.ToString());
 
                     stmt.SetUInt16(++index, (ushort)m_itemData.Durability);
-                    stmt.SetUInt32(++index, m_itemData.CreatePlayedTime);
+                    stmt.SetInt32(++index, m_itemData.CreatePlayedTime.GetValue());
                     stmt.SetString(++index, m_text);
                     stmt.SetInt32(++index, GetModifier(ItemModifier.BattlePetSpeciesId));
                     stmt.SetInt32(++index, GetModifier(ItemModifier.BattlePetBreedData));
@@ -343,7 +343,7 @@ namespace Game.Entities
 
             SetCount(fields.Read<int>(4));
 
-            uint duration = fields.Read<uint>(5);
+            Seconds duration = (Seconds)fields.Read<int>(5);
             SetExpiration(duration);
             // update duration if need, and remove if not need
             if ((proto.GetDuration() == 0) != (duration == 0))
@@ -366,7 +366,7 @@ namespace Game.Entities
                 need_save = true;
             }
 
-            SetCreatePlayedTime(fields.Read<uint>(10));
+            SetCreatePlayedTime((Seconds)fields.Read<int>(10));
             SetText(fields.Read<string>(11));
 
             SetModifier(ItemModifier.BattlePetSpeciesId, fields.Read<int>(12));
@@ -436,7 +436,7 @@ namespace Game.Entities
                 {
                     ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, i);
                     SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), int.Parse(enchantmentTokens[i * 3 + 0]));
-                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), uint.Parse(enchantmentTokens[i * 3 + 1]));
+                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), Milliseconds.Parse(enchantmentTokens[i * 3 + 1]));
                     SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), short.Parse(enchantmentTokens[i * 3 + 2]));
                 }
             }
@@ -452,7 +452,7 @@ namespace Game.Entities
             {
                 byte index = 0;
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_ON_LOAD);
-                stmt.SetUInt32(index++, (uint)m_itemData.Expiration);
+                stmt.SetInt32(index++, m_itemData.Expiration.GetValue());
                 stmt.SetUInt32(index++, (uint)m_itemData.DynamicFlags);
                 stmt.SetInt32(index++, m_itemData.Durability);
                 stmt.SetInt64(index++, guid);
@@ -533,7 +533,7 @@ namespace Game.Entities
                         SetState(ItemUpdateState.Changed, GetOwner());
                     }
                     for (EnchantmentSlot i = EnchantmentSlot.Property2; i < EnchantmentSlot.Property2 + 3; ++i)
-                        SetEnchantment(i, randomPropertiesEntry.Enchantment[i - EnchantmentSlot.Property2], 0, 0);
+                        SetEnchantment(i, randomPropertiesEntry.Enchantment[i - EnchantmentSlot.Property2], Milliseconds.Zero, 0);
                 }
             }
             else
@@ -549,7 +549,7 @@ namespace Game.Entities
                     }
 
                     for (EnchantmentSlot i = EnchantmentSlot.Property0; i < EnchantmentSlot.Property0 + 3; ++i)
-                        SetEnchantment(i, randomSuffixEntry.Enchantment[i - EnchantmentSlot.Property0], 0, 0);
+                        SetEnchantment(i, randomSuffixEntry.Enchantment[i - EnchantmentSlot.Property0], Milliseconds.Zero, 0);
                 }
             }
         }
@@ -727,8 +727,8 @@ namespace Game.Entities
                     {
                         if (enchantEntry.RequiredSkillID != 0 && player.GetSkillValue(enchantEntry.RequiredSkillID) < enchantEntry.RequiredSkillRank)
                             return false;
+                    }
                 }
-            }
             }
 
             return true;
@@ -749,8 +749,8 @@ namespace Game.Entities
                     {
                         if (enchantEntry.MinLevel > level)
                             level = enchantEntry.MinLevel;
+                    }
                 }
-            }
             }
 
             return level;
@@ -769,8 +769,8 @@ namespace Game.Entities
                     {
                         if (enchantEntry.HasFlag(SpellItemEnchantmentFlags.Soulbound))
                             return true;
+                    }
                 }
-            }
             }
 
             return false;
@@ -827,7 +827,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void SetEnchantment(EnchantmentSlot slot, int id, uint duration, int charges, ObjectGuid caster = default)
+        public void SetEnchantment(EnchantmentSlot slot, int id, Milliseconds duration, int charges, ObjectGuid caster = default)
         {
             // Better lost small time at check in comparison lost time at item save to DB.
             if ((GetEnchantmentId(slot) == id) && (GetEnchantmentDuration(slot) == duration) && (GetEnchantmentCharges(slot) == charges))
@@ -852,7 +852,7 @@ namespace Game.Entities
             SetState(ItemUpdateState.Changed, owner);
         }
 
-        public void SetEnchantmentDuration(EnchantmentSlot slot, uint duration, Player owner)
+        public void SetEnchantmentDuration(EnchantmentSlot slot, Milliseconds duration, Player owner)
         {
             if (GetEnchantmentDuration(slot) == duration)
                 return;
@@ -880,7 +880,7 @@ namespace Game.Entities
 
             ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, (int)slot);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), 0);
-            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), 0u);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), Milliseconds.Zero);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)0);
             SetState(ItemUpdateState.Changed, GetOwner());
         }
@@ -977,7 +977,7 @@ namespace Game.Entities
 
         public void SendTimeUpdate(Player owner)
         {
-            uint duration = m_itemData.Expiration;
+            Seconds duration = m_itemData.Expiration;
             if (duration == 0)
                 return;
 
@@ -1207,38 +1207,38 @@ namespace Game.Entities
 
         public void UpdatePlayedTime(Player owner)
         {
-            // Get current played time
-            uint current_playtime = m_itemData.CreatePlayedTime;
-            // Calculate time elapsed since last played time update
-            long curtime = GameTime.GetGameTime();
-            uint elapsed = (uint)(curtime - m_lastPlayedTimeUpdate);
-            uint new_playtime = current_playtime + elapsed;
+            Seconds playedTime = GetPlayedTime();
             // Check if the refund timer has expired yet
-            if (new_playtime <= 2 * Time.Hour)
+            if (IsRefundExpired(playedTime))
             {
                 // No? Proceed.
                 // Update the data field
-                SetCreatePlayedTime(new_playtime);
+                SetCreatePlayedTime(playedTime);
                 // Flag as changed to get saved to DB
                 SetState(ItemUpdateState.Changed, owner);
                 // Speaks for itself
-                m_lastPlayedTimeUpdate = curtime;
+                m_lastPlayedTimeUpdate = LoopTime.ServerTime;
                 return;
             }
             // Yes
             SetNotRefundable(owner);
         }
 
-        public uint GetPlayedTime()
+        public Seconds GetPlayedTime()
         {
-            long curtime = GameTime.GetGameTime();
-            uint elapsed = (uint)(curtime - m_lastPlayedTimeUpdate);
-            return m_itemData.CreatePlayedTime + elapsed;
+            ServerTime curtime = LoopTime.ServerTime;
+            TimeSpan elapsed = curtime - m_lastPlayedTimeUpdate;
+            return m_itemData.CreatePlayedTime.GetValue() + (Seconds)elapsed;
+        }
+
+        private static bool IsRefundExpired(TimeSpan playedTime)
+        {
+            return playedTime > (Hours)2;
         }
 
         public bool IsRefundExpired()
         {
-            return (GetPlayedTime() > 2 * Time.Hour);
+            return IsRefundExpired(GetPlayedTime());
         }
 
         public void SetSoulboundTradeable(List<ObjectGuid> allowedLooters)
@@ -1264,7 +1264,7 @@ namespace Game.Entities
         public bool CheckSoulboundTradeExpire()
         {
             // called from owner's update - GetOwner() MUST be valid
-            if (m_itemData.CreatePlayedTime + 2 * Time.Hour < GetOwner().GetTotalPlayedTime())
+            if (m_itemData.CreatePlayedTime.GetValue() + (Hours)2 < GetOwner().GetTotalPlayedTime())
             {
                 ClearSoulboundTradeable(GetOwner());
                 return true; // remove from tradeable list
@@ -1844,7 +1844,7 @@ namespace Game.Entities
         public void SetPetitionNumSignatures(int signatures)
         {
             ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, 0);
-            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), (uint)signatures);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), (Milliseconds)signatures);
         }
 
         public void SetFixedLevel(int level)
@@ -2038,7 +2038,7 @@ namespace Game.Entities
         public ObjectGuid GetGiftCreator() { return m_itemData.GiftCreator; }
         public void SetGiftCreator(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.GiftCreator), guid); }
 
-        void SetExpiration(uint expiration) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Expiration), expiration); }
+        void SetExpiration(Seconds expiration) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Expiration), expiration); }
 
         public ItemBondingType GetBonding() { return _bonusData.Bonding; }
         public void SetBinding(bool val)
@@ -2095,10 +2095,10 @@ namespace Game.Entities
         public int GetItemSuffixFactor() { return m_itemData.PropertySeed; }
 
         public int GetEnchantmentId(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].ID.GetValue(); }
-        public uint GetEnchantmentDuration(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Duration; }
+        public Milliseconds GetEnchantmentDuration(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Duration; }
         public int GetEnchantmentCharges(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Charges; }
 
-        public void SetCreatePlayedTime(uint createPlayedTime) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.CreatePlayedTime), createPlayedTime); }
+        public void SetCreatePlayedTime(Seconds createPlayedTime) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.CreatePlayedTime), createPlayedTime); }
 
         public string GetText() { return m_text; }
         public void SetText(string text) { m_text = text; }
@@ -2252,7 +2252,7 @@ namespace Game.Entities
         string m_text;
         /// <summary>[-1] - in trade non-holded<br/>[1] - in trade holded<br/>[0] - not in trade</summary>
         int mb_in_trade;
-        long m_lastPlayedTimeUpdate;
+        ServerTime m_lastPlayedTimeUpdate;
         List<ObjectGuid> allowedGUIDs = new();
         #endregion
 

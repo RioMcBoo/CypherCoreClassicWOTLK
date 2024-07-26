@@ -136,7 +136,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             if (instance.GetData(DataTypes.OperaOzDeathcount) == 4)
             {
-                Creature pCrone = creature.SummonCreature(CreatureIds.Crone, -10891.96f, -1755.95f, creature.GetPositionZ(), 4.64f, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
+                Creature pCrone = creature.SummonCreature(CreatureIds.Crone, -10891.96f, -1755.95f, creature.GetPositionZ(), 4.64f, TempSummonType.TimedOrDeadDespawn, (Hours)2);
                 if (pCrone != null)
                 {
                     if (creature.GetVictim() != null)
@@ -184,11 +184,11 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         InstanceScript instance;
 
-        uint AggroTimer;
+        TimeSpan AggroTimer;
 
-        uint WaterBoltTimer;
-        uint FearTimer;
-        uint SummonTitoTimer;
+        TimeSpan WaterBoltTimer;
+        TimeSpan FearTimer;
+        TimeSpan SummonTitoTimer;
 
         public bool SummonedTito;
         public bool TitoDied;
@@ -201,11 +201,11 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         void Initialize()
         {
-            AggroTimer = 500;
+            AggroTimer = Time.SpanFromMilliseconds(500);
 
-            WaterBoltTimer = 5000;
-            FearTimer = 15000;
-            SummonTitoTimer = 47500;
+            WaterBoltTimer = Time.SpanFromMilliseconds(5000);
+            FearTimer = Time.SpanFromMilliseconds(15000);
+            SummonTitoTimer = Time.SpanFromMilliseconds(47500);
 
             SummonedTito = false;
             TitoDied = false;
@@ -249,14 +249,14 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             base.MoveInLineOfSight(who);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
-            if (AggroTimer != 0)
+            if (AggroTimer != TimeSpan.Zero)
             {
                 if (AggroTimer <= diff)
                 {
                     me.RemoveUnitFlag(UnitFlags.NonAttackable);
-                    AggroTimer = 0;
+                    AggroTimer = TimeSpan.Zero;
                 }
                 else AggroTimer -= diff;
             }
@@ -267,14 +267,14 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (WaterBoltTimer <= diff)
             {
                 DoCast(SelectTarget(SelectTargetMethod.Random, 0), SpellIds.Waterbolt);
-                WaterBoltTimer = TitoDied ? 1500 : 5000u;
+                WaterBoltTimer = TitoDied ? Time.SpanFromMilliseconds(1500) : Time.SpanFromMilliseconds(5000);
             }
             else WaterBoltTimer -= diff;
 
             if (FearTimer <= diff)
             {
                 DoCastVictim(SpellIds.Scream);
-                FearTimer = 30000;
+                FearTimer = Time.SpanFromMilliseconds(30000);
             }
             else FearTimer -= diff;
 
@@ -288,7 +288,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         void SummonTito()
         {
-            Creature pTito = me.SummonCreature(CreatureIds.Tito, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
+            Creature pTito = me.SummonCreature(CreatureIds.Tito, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, (Seconds)30);
             if (pTito != null)
             {
                 Talk(TextIds.SayDorotheeSummon);
@@ -304,7 +304,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     class npc_tito : ScriptedAI
     {
         public ObjectGuid DorotheeGUID;
-        uint YipTimer;
+        TimeSpan YipTimer;
 
         public npc_tito(Creature creature) : base(creature)
         {
@@ -314,7 +314,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         void Initialize()
         {
             DorotheeGUID.Clear();
-            YipTimer = 10000;
+            YipTimer = Time.SpanFromMilliseconds(10000);
         }
 
         public override void Reset()
@@ -337,7 +337,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -345,7 +345,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (YipTimer <= diff)
             {
                 DoCastVictim(SpellIds.Yipping);
-                YipTimer = 10000;
+                YipTimer = Time.SpanFromMilliseconds(10000);
             }
             else YipTimer -= diff;
         }
@@ -356,9 +356,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         InstanceScript instance;
 
-        uint AggroTimer;
-        uint BrainBashTimer;
-        uint BrainWipeTimer;
+        TimeSpan AggroTimer;
+        TimeSpan BrainBashTimer;
+        TimeSpan BrainWipeTimer;
 
         public boss_strawman(Creature creature) : base(creature)
         {
@@ -368,9 +368,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         void Initialize()
         {
-            AggroTimer = 13000;
-            BrainBashTimer = 5000;
-            BrainWipeTimer = 7000;
+            AggroTimer = Time.SpanFromMilliseconds(13000);
+            BrainBashTimer = Time.SpanFromMilliseconds(5000);
+            BrainWipeTimer = Time.SpanFromMilliseconds(7000);
         }
 
         public override void Reset()
@@ -422,14 +422,14 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             Talk(TextIds.SayStrawmanSlay);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
-            if (AggroTimer != 0)
+            if (AggroTimer != TimeSpan.Zero)
             {
                 if (AggroTimer <= diff)
                 {
                     me.RemoveUnitFlag(UnitFlags.NonAttackable);
-                    AggroTimer = 0;
+                    AggroTimer = TimeSpan.Zero;
                 }
                 else AggroTimer -= diff;
             }
@@ -440,7 +440,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (BrainBashTimer <= diff)
             {
                 DoCastVictim(SpellIds.BrainBash);
-                BrainBashTimer = 15000;
+                BrainBashTimer = Time.SpanFromMilliseconds(15000);
             }
             else BrainBashTimer -= diff;
 
@@ -449,7 +449,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                     DoCast(target, SpellIds.BrainWipe);
-                BrainWipeTimer = 20000;
+                BrainWipeTimer = Time.SpanFromMilliseconds(20000);
             }
             else BrainWipeTimer -= diff;
         }
@@ -460,9 +460,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         InstanceScript instance;
 
-        uint AggroTimer;
-        uint CleaveTimer;
-        uint RustTimer;
+        TimeSpan AggroTimer;
+        TimeSpan CleaveTimer;
+        TimeSpan RustTimer;
 
         byte RustCount;
 
@@ -474,9 +474,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         void Initialize()
         {
-            AggroTimer = 15000;
-            CleaveTimer = 5000;
-            RustTimer = 30000;
+            AggroTimer = Time.SpanFromMilliseconds(15000);
+            CleaveTimer = Time.SpanFromMilliseconds(5000);
+            RustTimer = Time.SpanFromMilliseconds(30000);
 
             RustCount = 0;
         }
@@ -524,14 +524,14 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             Talk(TextIds.SayTinheadSlay);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
-            if (AggroTimer != 0)
+            if (AggroTimer != TimeSpan.Zero)
             {
                 if (AggroTimer <= diff)
                 {
                     me.RemoveUnitFlag(UnitFlags.NonAttackable);
-                    AggroTimer = 0;
+                    AggroTimer = TimeSpan.Zero;
                 }
                 else AggroTimer -= diff;
             }
@@ -542,7 +542,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (CleaveTimer <= diff)
             {
                 DoCastVictim(SpellIds.Cleave);
-                CleaveTimer = 5000;
+                CleaveTimer = Time.SpanFromMilliseconds(5000);
             }
             else CleaveTimer -= diff;
 
@@ -553,7 +553,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     ++RustCount;
                     Talk(TextIds.EmoteRust);
                     DoCast(me, SpellIds.Rust);
-                    RustTimer = 6000;
+                    RustTimer = Time.SpanFromMilliseconds(6000);
                 }
                 else RustTimer -= diff;
             }
@@ -565,10 +565,10 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         InstanceScript instance;
 
-        uint AggroTimer;
-        uint MangleTimer;
-        uint ShredTimer;
-        uint ScreamTimer;
+        TimeSpan AggroTimer;
+        TimeSpan MangleTimer;
+        TimeSpan ShredTimer;
+        TimeSpan ScreamTimer;
 
         public boss_roar(Creature creature) : base(creature)
         {
@@ -578,10 +578,10 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         void Initialize()
         {
-            AggroTimer = 20000;
-            MangleTimer = 5000;
-            ShredTimer = 10000;
-            ScreamTimer = 15000;
+            AggroTimer = Time.SpanFromMilliseconds(20000);
+            MangleTimer = Time.SpanFromMilliseconds(5000);
+            ShredTimer = Time.SpanFromMilliseconds(10000);
+            ScreamTimer = Time.SpanFromMilliseconds(15000);
         }
 
         public override void Reset()
@@ -628,14 +628,14 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             Talk(TextIds.SayRoarSlay);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
-            if (AggroTimer != 0)
+            if (AggroTimer != TimeSpan.Zero)
             {
                 if (AggroTimer <= diff)
                 {
                     me.RemoveUnitFlag(UnitFlags.NonAttackable);
-                    AggroTimer = 0;
+                    AggroTimer = TimeSpan.Zero;
                 }
                 else AggroTimer -= diff;
             }
@@ -646,21 +646,21 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (MangleTimer <= diff)
             {
                 DoCastVictim(SpellIds.Mangle);
-                MangleTimer = RandomHelper.URand(5000, 8000);
+                MangleTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(5000, 8000));
             }
             else MangleTimer -= diff;
 
             if (ShredTimer <= diff)
             {
                 DoCastVictim(SpellIds.Shred);
-                ShredTimer = RandomHelper.URand(10000, 15000);
+                ShredTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(10000, 15000));
             }
             else ShredTimer -= diff;
 
             if (ScreamTimer <= diff)
             {
                 DoCastVictim(SpellIds.FrightenedScream);
-                ScreamTimer = RandomHelper.URand(20000, 30000);
+                ScreamTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(20000, 30000));
             }
             else ScreamTimer -= diff;
         }
@@ -671,8 +671,8 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         InstanceScript instance;
 
-        uint CycloneTimer;
-        uint ChainLightningTimer;
+        TimeSpan CycloneTimer;
+        TimeSpan ChainLightningTimer;
 
         public boss_crone(Creature creature) : base(creature)
         {
@@ -689,8 +689,8 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             // It needs a rewrite. Badly. Please, take good care of it.
             me.RemoveUnitFlag(UnitFlags.NonAttackable);
             me.SetImmuneToPC(false);
-            CycloneTimer = 30000;
-            ChainLightningTimer = 10000;
+            CycloneTimer = Time.SpanFromMilliseconds(30000);
+            ChainLightningTimer = Time.SpanFromMilliseconds(10000);
         }
 
         public override void Reset()
@@ -719,24 +719,24 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             instance.SetBossState(DataTypes.OperaPerformance, EncounterState.Done);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
 
             if (CycloneTimer <= diff)
             {
-                Creature Cyclone = DoSpawnCreature(CreatureIds.Cyclone, RandomHelper.URand(0, 9), RandomHelper.URand(0, 9), 0, 0, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(15));
+                Creature Cyclone = DoSpawnCreature(CreatureIds.Cyclone, RandomHelper.URand(0, 9), RandomHelper.URand(0, 9), 0, 0, TempSummonType.TimedDespawn, Time.SpanFromSeconds(15));
                 if (Cyclone != null)
                     Cyclone.CastSpell(Cyclone, SpellIds.CycloneVisual, true);
-                CycloneTimer = 30000;
+                CycloneTimer = Time.SpanFromMilliseconds(30000);
             }
             else CycloneTimer -= diff;
 
             if (ChainLightningTimer <= diff)
             {
                 DoCastVictim(SpellIds.ChainLightning);
-                ChainLightningTimer = 15000;
+                ChainLightningTimer = Time.SpanFromMilliseconds(15000);
             }
             else ChainLightningTimer -= diff;
         }
@@ -745,7 +745,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     [Script]
     class npc_cyclone : ScriptedAI
     {
-        uint MoveTimer;
+        TimeSpan MoveTimer;
 
         public npc_cyclone(Creature creature) : base(creature)
         {
@@ -754,7 +754,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         void Initialize()
         {
-            MoveTimer = 1000;
+            MoveTimer = Time.SpanFromMilliseconds(1000);
         }
 
         public override void Reset()
@@ -769,7 +769,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         {
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!me.HasAura(SpellIds.Knockback))
                 DoCast(me, SpellIds.Knockback, new CastSpellExtraArgs(true));
@@ -778,7 +778,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             {
                 Position pos = me.GetRandomNearPosition(10);
                 me.GetMotionMaster().MovePoint(0, pos);
-                MoveTimer = RandomHelper.URand(5000, 8000);
+                MoveTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(5000, 8000));
             }
             else MoveTimer -= diff;
         }
@@ -797,7 +797,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
                 Creature pBigBadWolf = me.SummonCreature(
                     CreatureIds.BigBadWolf, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetOrientation(), 
-                    TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
+                    TempSummonType.TimedOrDeadDespawn, (Hours)2);
 
                 if (pBigBadWolf != null)
                     pBigBadWolf.GetAI().AttackStart(player);
@@ -813,9 +813,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         InstanceScript instance;
 
-        uint ChaseTimer;
-        uint FearTimer;
-        uint SwipeTimer;
+        TimeSpan ChaseTimer;
+        TimeSpan FearTimer;
+        TimeSpan SwipeTimer;
 
         ObjectGuid HoodGUID;
         float TempThreat;
@@ -830,9 +830,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         void Initialize()
         {
-            ChaseTimer = 30000;
-            FearTimer = RandomHelper.URand(25000, 35000);
-            SwipeTimer = 5000;
+            ChaseTimer = Time.SpanFromMilliseconds(30000);
+            FearTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(25000, 35000));
+            SwipeTimer = Time.SpanFromMilliseconds(5000);
 
             HoodGUID.Clear();
             TempThreat = 0;
@@ -866,7 +866,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             instance.SetBossState(DataTypes.OperaPerformance, EncounterState.Done);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -885,7 +885,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                             ModifyThreatByPercent(target, -100);
                         HoodGUID = target.GetGUID();
                         AddThreat(target, 1000000.0f);
-                        ChaseTimer = 20000;
+                        ChaseTimer = Time.SpanFromMilliseconds(20000);
                         IsChasing = true;
                     }
                 }
@@ -903,7 +903,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                         TempThreat = 0;
                     }
 
-                    ChaseTimer = 40000;
+                    ChaseTimer = Time.SpanFromMilliseconds(40000);
                 }
             }
             else ChaseTimer -= diff;
@@ -914,14 +914,14 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (FearTimer <= diff)
             {
                 DoCastVictim(SpellIds.TerrifyingHowl);
-                FearTimer = RandomHelper.URand(25000, 35000);
+                FearTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(25000, 35000));
             }
             else FearTimer -= diff;
 
             if (SwipeTimer <= diff)
             {
                 DoCastVictim(SpellIds.WideSwipe);
-                SwipeTimer = RandomHelper.URand(25000, 30000);
+                SwipeTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(25000, 30000));
             }
             else SwipeTimer -= diff;
         }
@@ -932,21 +932,21 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         InstanceScript instance;
 
-        uint EntryYellTimer;
-        uint AggroYellTimer;
+        TimeSpan EntryYellTimer;
+        TimeSpan AggroYellTimer;
 
         ObjectGuid RomuloGUID;
 
         RAJPhase Phase;
 
-        uint BlindingPassionTimer;
-        uint DevotionTimer;
-        uint EternalAffectionTimer;
-        uint PowerfulAttractionTimer;
-        uint SummonRomuloTimer;
-        public uint ResurrectTimer;
-        uint DrinkPoisonTimer;
-        public uint ResurrectSelfTimer;
+        TimeSpan BlindingPassionTimer;
+        TimeSpan DevotionTimer;
+        TimeSpan EternalAffectionTimer;
+        TimeSpan PowerfulAttractionTimer;
+        TimeSpan SummonRomuloTimer;
+        public TimeSpan ResurrectTimer;
+        TimeSpan DrinkPoisonTimer;
+        public TimeSpan ResurrectSelfTimer;
 
         public bool IsFakingDeath;
         bool SummonedRomulo;
@@ -956,10 +956,10 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         {
             Initialize();
             instance = creature.GetInstanceScript();
-            EntryYellTimer = 1000;
-            AggroYellTimer = 10000;
+            EntryYellTimer = Time.SpanFromMilliseconds(1000);
+            AggroYellTimer = Time.SpanFromMilliseconds(10000);
             IsFakingDeath = false;
-            ResurrectTimer = 0;
+            ResurrectTimer = TimeSpan.Zero;
         }
 
         void Initialize()
@@ -967,13 +967,13 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             RomuloGUID.Clear();
             Phase = RAJPhase.Julianne;
 
-            BlindingPassionTimer = 30000;
-            DevotionTimer = 15000;
-            EternalAffectionTimer = 25000;
-            PowerfulAttractionTimer = 5000;
-            SummonRomuloTimer = 10000;
-            DrinkPoisonTimer = 0;
-            ResurrectSelfTimer = 0;
+            BlindingPassionTimer = Time.SpanFromMilliseconds(30000);
+            DevotionTimer = Time.SpanFromMilliseconds(15000);
+            EternalAffectionTimer = Time.SpanFromMilliseconds(25000);
+            PowerfulAttractionTimer = Time.SpanFromMilliseconds(5000);
+            SummonRomuloTimer = Time.SpanFromMilliseconds(10000);
+            DrinkPoisonTimer = TimeSpan.Zero;
+            ResurrectSelfTimer = TimeSpan.Zero;
 
             SummonedRomulo = false;
             RomuloDead = false;
@@ -1017,7 +1017,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (spellInfo.Id == SpellIds.DrinkPoison)
             {
                 Talk(TextIds.SayJulianneDeath01);
-                DrinkPoisonTimer = 2500;
+                DrinkPoisonTimer = Time.SpanFromMilliseconds(2500);
             }
         }
 
@@ -1077,7 +1077,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 {
                     MiscConst.PretendToDie(me);
                     IsFakingDeath = true;
-                    Romulo1.GetAI<boss_romulo>().ResurrectTimer = 10000;
+                    Romulo1.GetAI<boss_romulo>().ResurrectTimer = Time.SpanFromMilliseconds(10000);
                     Romulo1.GetAI<boss_romulo>().JulianneDead = true;
                     damage = 0;
                     return;
@@ -1099,39 +1099,39 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             Talk(TextIds.SayJulianneSlay);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
-            if (EntryYellTimer != 0)
+            if (EntryYellTimer != TimeSpan.Zero)
             {
                 if (EntryYellTimer <= diff)
                 {
                     Talk(TextIds.SayJulianneEnter);
-                    EntryYellTimer = 0;
+                    EntryYellTimer = TimeSpan.Zero;
                 }
                 else EntryYellTimer -= diff;
             }
 
-            if (AggroYellTimer != 0)
+            if (AggroYellTimer != TimeSpan.Zero)
             {
                 if (AggroYellTimer <= diff)
                 {
                     Talk(TextIds.SayJulianneAggro);
                     me.RemoveUnitFlag(UnitFlags.NonAttackable);
                     me.SetFaction(FactionTemplates.Monster2);
-                    AggroYellTimer = 0;
+                    AggroYellTimer = TimeSpan.Zero;
                 }
                 else AggroYellTimer -= diff;
             }
 
-            if (DrinkPoisonTimer != 0)
+            if (DrinkPoisonTimer != TimeSpan.Zero)
             {
-                //will do this TimeSpan.FromSeconds(2s)ecs after spell hit. this is time to display visual as expected
+                //will do this Time.SpanFromSeconds(2s)ecs after spell hit. this is time to display visual as expected
                 if (DrinkPoisonTimer <= diff)
                 {
                     MiscConst.PretendToDie(me);
                     Phase = RAJPhase.Romulo;
-                    SummonRomuloTimer = 10000;
-                    DrinkPoisonTimer = 0;
+                    SummonRomuloTimer = Time.SpanFromMilliseconds(10000);
+                    DrinkPoisonTimer = TimeSpan.Zero;
                 }
                 else DrinkPoisonTimer -= diff;
             }
@@ -1142,7 +1142,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 {
                     Creature pRomulo = me.SummonCreature(
                         CreatureIds.Romulo, MiscConst.RomuloX, MiscConst.RomuloY, me.GetPositionZ(), 0, 
-                        TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
+                        TempSummonType.TimedOrDeadDespawn, (Hours)2);
 
                     if (pRomulo != null)
                     {
@@ -1158,7 +1158,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 else SummonRomuloTimer -= diff;
             }
 
-            if (ResurrectSelfTimer != 0)
+            if (ResurrectSelfTimer != TimeSpan.Zero)
             {
                 if (ResurrectSelfTimer <= diff)
                 {
@@ -1169,8 +1169,8 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     if (me.GetVictim() != null)
                         AttackStart(me.GetVictim());
 
-                    ResurrectSelfTimer = 0;
-                    ResurrectTimer = 1000;
+                    ResurrectSelfTimer = TimeSpan.Zero;
+                    ResurrectTimer = Time.SpanFromMilliseconds(1000);
                 }
                 else ResurrectSelfTimer -= diff;
             }
@@ -1189,7 +1189,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                         MiscConst.Resurrect(Romulo);
                         Romulo.GetAI<boss_romulo>().IsFakingDeath = false;
                         RomuloDead = false;
-                        ResurrectTimer = 10000;
+                        ResurrectTimer = Time.SpanFromMilliseconds(10000);
                     }
                 }
                 else ResurrectTimer -= diff;
@@ -1200,21 +1200,21 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                     DoCast(target, SpellIds.BlindingPassion);
-                BlindingPassionTimer = RandomHelper.URand(30000, 45000);
+                BlindingPassionTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(30000, 45000));
             }
             else BlindingPassionTimer -= diff;
 
             if (DevotionTimer <= diff)
             {
                 DoCast(me, SpellIds.Devotion);
-                DevotionTimer = RandomHelper.URand(15000, 45000);
+                DevotionTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(15000, 45000));
             }
             else DevotionTimer -= diff;
 
             if (PowerfulAttractionTimer <= diff)
             {
                 DoCast(SelectTarget(SelectTargetMethod.Random, 0), SpellIds.PowerfulAttraction);
-                PowerfulAttractionTimer = RandomHelper.URand(5000, 30000);
+                PowerfulAttractionTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(5000, 30000));
             }
             else PowerfulAttractionTimer -= diff;
 
@@ -1228,7 +1228,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 }
                 else DoCast(me, SpellIds.EternalAffection);
 
-                EternalAffectionTimer = RandomHelper.URand(45000, 60000);
+                EternalAffectionTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(45000, 60000));
             }
             else EternalAffectionTimer -= diff;
         }
@@ -1242,11 +1242,11 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         public ObjectGuid JulianneGUID;
         public RAJPhase Phase;
 
-        uint BackwardLungeTimer;
-        uint DaringTimer;
-        uint DeadlySwatheTimer;
-        uint PoisonThrustTimer;
-        public uint ResurrectTimer;
+        TimeSpan BackwardLungeTimer;
+        TimeSpan DaringTimer;
+        TimeSpan DeadlySwatheTimer;
+        TimeSpan PoisonThrustTimer;
+        public TimeSpan ResurrectTimer;
 
         public bool IsFakingDeath;
         public bool JulianneDead;
@@ -1262,11 +1262,11 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             JulianneGUID.Clear();
             Phase = RAJPhase.Romulo;
 
-            BackwardLungeTimer = 15000;
-            DaringTimer = 20000;
-            DeadlySwatheTimer = 25000;
-            PoisonThrustTimer = 10000;
-            ResurrectTimer = 10000;
+            BackwardLungeTimer = Time.SpanFromMilliseconds(15000);
+            DaringTimer = Time.SpanFromMilliseconds(20000);
+            DeadlySwatheTimer = Time.SpanFromMilliseconds(25000);
+            PoisonThrustTimer = Time.SpanFromMilliseconds(10000);
+            ResurrectTimer = Time.SpanFromMilliseconds(10000);
 
             IsFakingDeath = false;
             JulianneDead = false;
@@ -1300,7 +1300,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (Julianne != null)
                 {
                     Julianne.GetAI<boss_julianne>().RomuloDead = true;
-                    Julianne.GetAI<boss_julianne>().ResurrectSelfTimer = 10000;
+                    Julianne.GetAI<boss_julianne>().ResurrectSelfTimer = Time.SpanFromMilliseconds(10000);
                 }
 
                 damage = 0;
@@ -1328,7 +1328,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 {
                     MiscConst.PretendToDie(me);
                     IsFakingDeath = true;
-                    Julianne1.GetAI<boss_julianne>().ResurrectTimer = 10000;
+                    Julianne1.GetAI<boss_julianne>().ResurrectTimer = Time.SpanFromMilliseconds(10000);
                     Julianne1.GetAI<boss_julianne>().RomuloDead = true;
                     damage = 0;
                     return;
@@ -1372,7 +1372,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             Talk(TextIds.SayRomuloSlay);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() || IsFakingDeath)
                 return;
@@ -1388,7 +1388,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                         MiscConst.Resurrect(Julianne);
                         Julianne.GetAI<boss_julianne>().IsFakingDeath = false;
                         JulianneDead = false;
-                        ResurrectTimer = 10000;
+                        ResurrectTimer = Time.SpanFromMilliseconds(10000);
                     }
                 }
                 else ResurrectTimer -= diff;
@@ -1400,7 +1400,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (target != null && !me.HasInArc(MathF.PI, target))
                 {
                     DoCast(target, SpellIds.BackwardLunge);
-                    BackwardLungeTimer = RandomHelper.URand(15000, 30000);
+                    BackwardLungeTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(15000, 30000));
                 }
             }
             else BackwardLungeTimer -= diff;
@@ -1408,7 +1408,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (DaringTimer <= diff)
             {
                 DoCast(me, SpellIds.Daring);
-                DaringTimer = RandomHelper.URand(20000, 40000);
+                DaringTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(20000, 40000));
             }
             else DaringTimer -= diff;
 
@@ -1417,14 +1417,14 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                     DoCast(target, SpellIds.DeadlySwathe);
-                DeadlySwatheTimer = RandomHelper.URand(15000, 25000);
+                DeadlySwatheTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(15000, 25000));
             }
             else DeadlySwatheTimer -= diff;
 
             if (PoisonThrustTimer <= diff)
             {
                 DoCastVictim(SpellIds.PoisonThrust);
-                PoisonThrustTimer = RandomHelper.URand(10000, 20000);
+                PoisonThrustTimer = Time.SpanFromMilliseconds(RandomHelper.IRand(10000, 20000));
             }
             else PoisonThrustTimer -= diff;
         }

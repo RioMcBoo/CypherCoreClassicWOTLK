@@ -105,7 +105,7 @@ namespace Game.Entities
                 {
                     if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                         RemoveSpell(spellEffectInfo.TriggerSpell, true);
-            }
+                }
             }
 
             if (talent.OverridesSpellID != default)
@@ -217,9 +217,9 @@ namespace Game.Entities
 
         void SetTalentResetCost(uint cost) { _specializationInfo.ResetTalentsCost = cost; }
 
-        long GetTalentResetTime() { return _specializationInfo.ResetTalentsTime; }
+        ServerTime GetTalentResetTime() { return _specializationInfo.ResetTalentsTime; }
 
-        void SetTalentResetTime(long time_) { _specializationInfo.ResetTalentsTime = time_; }
+        void SetTalentResetTime(ServerTime time_) { _specializationInfo.ResetTalentsTime = time_; }
 
         public ChrSpecialization GetPrimarySpecialization() { return (ChrSpecialization)m_playerData.CurrentSpecID.GetValue(); }
 
@@ -326,7 +326,7 @@ namespace Game.Entities
                     {
                         if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                             RemoveSpell(spellEffectInfo.TriggerSpell, true);
-                }
+                    }
                 }
 
                 if (talentEntry.OverridesSpellID != 0)
@@ -464,7 +464,7 @@ namespace Game.Entities
                 return 10 * MoneyConstants.Gold;
             else
             {
-                ulong months = (ulong)(GameTime.GetGameTime() - GetTalentResetTime()) / Time.Month;
+                long months = (long)((LoopTime.ServerTime - GetTalentResetTime()) / Time.SpanFromDays(30));
                 if (months > 0)
                 {
                     // This cost will be reduced by a rate of 5 gold per month
@@ -541,7 +541,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaType.TotalRespecs, 1);
 
                 SetTalentResetCost(cost);
-                SetTalentResetTime(GameTime.GetGameTime());
+                SetTalentResetTime(LoopTime.ServerTime);
             }
 
             /* when prev line will dropped use next line

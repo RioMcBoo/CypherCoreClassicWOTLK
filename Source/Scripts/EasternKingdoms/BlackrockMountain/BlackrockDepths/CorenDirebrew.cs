@@ -124,7 +124,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         {
             _EnterEvadeMode();
             summons.DespawnAll();
-            _DespawnAtEvade(TimeSpan.FromSeconds(10));
+            _DespawnAtEvade((Seconds)10);
         }
 
         public override void MoveInLineOfSight(Unit who)
@@ -133,14 +133,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                 return;
 
             phase = DirebrewPhases.Intro;
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), introTask1 =>
+            _scheduler.Schedule((Seconds)6, introTask1 =>
             {
                 Talk(TextIds.SayIntro1);
-                introTask1.Schedule(TimeSpan.FromSeconds(4), introTask2 =>
+                introTask1.Schedule((Seconds)4, introTask2 =>
                 {
                     EntryCheckPredicate pred = new(CreatureIds.Antagonist);
                     summons.DoAction(ActionIds.AntagonistSay1, pred);
-                    introTask2.Schedule(TimeSpan.FromSeconds(3), introlTask3 =>
+                    introTask2.Schedule((Seconds)3, introlTask3 =>
                     {
                         Talk(TextIds.SayIntro2);
                         EntryCheckPredicate pred = new(CreatureIds.Antagonist);
@@ -164,14 +164,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                 EntryCheckPredicate pred = new(CreatureIds.Antagonist);
                 summons.DoAction(ActionIds.AntagonistHostile, pred);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+                _scheduler.Schedule((Seconds)15, task =>
                 {
                     CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
                     args.AddSpellMod(SpellValueMod.MaxTargets, 1);
                     me.CastSpell((WorldObject)null, SpellIds.MoleMachineTargetPicker, args);
                     task.Repeat();
                 });
-                _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+                _scheduler.Schedule((Seconds)20, task =>
                 {
                     DoCastSelf(SpellIds.DirebrewDisarmPreCast, new CastSpellExtraArgs(true));
                     task.Repeat();
@@ -197,14 +197,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         {
             if (summon.GetEntry() == CreatureIds.IlsaDirebrew)
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                _scheduler.Schedule((Seconds)1, task =>
                 {
                     SummonSister(CreatureIds.IlsaDirebrew);
                 });
             }
             else if (summon.GetEntry() == CreatureIds.UrsulaDirebrew)
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                _scheduler.Schedule((Seconds)1, task =>
                 {
                     SummonSister(CreatureIds.UrsulaDirebrew);
                 });
@@ -232,7 +232,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                 DoZoneInCombat(sister);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim() && phase != DirebrewPhases.Intro)
                 return;
@@ -272,16 +272,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
             _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), mugChuck =>
+            _scheduler.Schedule((Seconds)2, mugChuck =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, false, true, -SpellIds.HasDarkBrewmaidensBrew);
                 if (target != null)
                     DoCast(target, SpellIds.ChuckMug);
-                mugChuck.Repeat(TimeSpan.FromSeconds(4));
+                mugChuck.Repeat((Seconds)4);
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -348,12 +348,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         public override void Reset()
         {
             me.SetLootState(LootState.Ready);
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), context =>
+            _scheduler.Schedule((Seconds)1, context =>
             {
-                me.UseDoorOrButton(10000);
+                me.UseDoorOrButton((Seconds)10);
                 me.CastSpell(null, SpellIds.MoleMachineEmerge, true);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), context =>
+            _scheduler.Schedule((Seconds)4, context =>
             {
                 GameObject trap = me.GetLinkedTrap();
                 if (trap != null)
@@ -364,7 +364,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -497,7 +497,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             if (aura != null)
             {
                 aura.SetStackAmount((byte)(aura.GetStackAmount() + 1));
-                aura.SetDuration(aura.GetDuration() - 1500);
+                aura.SetDuration(aura.GetDuration() - (Milliseconds)1500);
             }
         }
 

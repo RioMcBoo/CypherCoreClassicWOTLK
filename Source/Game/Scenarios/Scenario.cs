@@ -34,11 +34,11 @@ namespace Game.Scenarios
                 SetStep(firstStep);
             else
             {
-                Log.outError(LogFilter.Scenario, 
+                Log.outError(LogFilter.Scenario,
                     $"Scenario.Scenario: " +
                     $"Could not launch Scenario (id: {_data.Entry.Id}), " +
                     $"found no valid scenario step");
-        }
+            }
         }
 
         ~Scenario()
@@ -97,7 +97,7 @@ namespace Game.Scenarios
                     $"Scenario.CompleteStep: " +
                     $"Scenario (id: {step.ScenarioID}, step: {step.Id}) was completed, " +
                     $"but could not determine new step, or validate scenario completion.");
-        }
+            }
         }
 
         public virtual void CompleteScenario()
@@ -174,10 +174,10 @@ namespace Game.Scenarios
                 progressUpdate.CriteriaProgress.Id = criteria.Id;
                 progressUpdate.CriteriaProgress.Quantity = progress.Counter;
                 progressUpdate.CriteriaProgress.Player = progress.PlayerGUID;
-                progressUpdate.CriteriaProgress.Date.SetUtcTimeFromUnixTime(progress.Date);
-                progressUpdate.CriteriaProgress.Date += receiver.GetSession().GetTimezoneOffset();
-                if (criteria.Entry.StartTimer != 0)
-                    progressUpdate.CriteriaProgress.Flags = timedCompleted ? 1 : 0u;
+                progressUpdate.CriteriaProgress.Date = (RealmTime)progress.Date;
+                //progressUpdate.CriteriaProgress.Date += receiver.GetSession().GetTimezoneOffset();
+                if (criteria.Entry.StartTimer != TimeSpan.Zero)
+                    progressUpdate.CriteriaProgress.Flags = timedCompleted ? 1u : 0u;
 
                 progressUpdate.CriteriaProgress.TimeFromStart = (uint)timeElapsed.TotalSeconds;
                 progressUpdate.CriteriaProgress.TimeFromCreate = 0;
@@ -361,8 +361,8 @@ namespace Game.Scenarios
                 CriteriaProgressPkt criteriaProgress = new();
                 criteriaProgress.Id = criteriaId;
                 criteriaProgress.Quantity = progress.Counter;
-                criteriaProgress.Date.SetUtcTimeFromUnixTime(progress.Date);
-                criteriaProgress.Date += player.GetSession().GetTimezoneOffset();
+                criteriaProgress.Date = (RealmTime)progress.Date;
+                //criteriaProgress.Date += player.GetSession().GetTimezoneOffset();
                 criteriaProgress.Player = progress.PlayerGUID;
                 criteriasProgress.Add(criteriaProgress);
             }
@@ -383,7 +383,7 @@ namespace Game.Scenarios
             player.SendPacket(scenarioBoot);
         }
 
-        public virtual void Update(uint diff) { }
+        public virtual void Update(TimeSpan diff) { }
 
         public void SetStepState(ScenarioStepRecord step, ScenarioStepState state) { _stepStates[step] = state; }
         

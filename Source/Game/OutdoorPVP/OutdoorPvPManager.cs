@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using System;
 using System.Collections.Generic;
 
 namespace Game.PvP
@@ -16,7 +17,7 @@ namespace Game.PvP
 
         public void InitOutdoorPvP()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
 
             //                                             0       1
             SQLResult result = DB.World.Query("SELECT TypeId, ScriptName FROM outdoorpvp_template");
@@ -50,7 +51,8 @@ namespace Game.PvP
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} outdoor PvP definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, 
+                $"Loaded {count} outdoor PvP definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
         public void CreateOutdoorPvPForMap(Map map)
@@ -133,14 +135,15 @@ namespace Game.PvP
             return m_OutdoorPvPMap.LookupByKey((map, zoneid));
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             m_UpdateTimer += diff;
-            if (m_UpdateTimer > 1000)
+            if (m_UpdateTimer > (Seconds)1)
             {
                 foreach (var (_, outdoor) in m_OutdoorPvPByMap)
                     outdoor.Update(m_UpdateTimer);
-                m_UpdateTimer = 0;
+
+                m_UpdateTimer = TimeSpan.Zero;
             }
         }
 
@@ -201,6 +204,6 @@ namespace Game.PvP
         Dictionary<OutdoorPvPTypes, int> m_OutdoorPvPDatas = new();
 
         // update interval
-        uint m_UpdateTimer;
+        TimeSpan m_UpdateTimer;
     }
 }

@@ -149,7 +149,7 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString(m_muteTime - GameTime.GetGameTime());
+                string timeStr = Time.SpanToTimeString(m_mutedUntilTime - LoopTime.ServerTime);
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
                 return;
             }
@@ -558,7 +558,7 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString(m_muteTime - GameTime.GetGameTime());
+                string timeStr = Time.SpanToTimeString(m_mutedUntilTime - LoopTime.ServerTime);
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
                 return;
             }

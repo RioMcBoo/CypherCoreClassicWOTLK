@@ -3,6 +3,7 @@
 
 using Bgs.Protocol.Account.V1;
 using Framework.Constants;
+using System;
 using System.Collections.Generic;
 
 namespace BNetServer.Networking
@@ -63,7 +64,7 @@ namespace BNetServer.Networking
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;
                     response.State.GameStatus.IsBanned = gameAccountInfo.IsPermanentlyBanned;
-                    response.State.GameStatus.SuspensionExpires = (gameAccountInfo.UnbanDate * 1000000);
+                    response.State.GameStatus.SuspensionExpires = (ulong)((UnixTime64)gameAccountInfo.UnbanDate * 1000000);
                 }
 
                 response.State.GameStatus.Program = 5730135; // WoW

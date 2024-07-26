@@ -56,7 +56,7 @@ namespace Game.Entities
                             Log.outError(LogFilter.Misc,
                                 $"Attempt to assign charm AI to player {GetGUID()} " +
                                 $"who is charmed by non-creature {GetCharmerGUID()}.");
-                    }
+                        }
                     }
                     if (newAI == null) // otherwise, we default to the generic one
                         newAI = new SimpleCharmedPlayerAI(ToPlayer());
@@ -162,7 +162,7 @@ namespace Game.Entities
                             if (pet != null)
                             {
                                 minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
-                                minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
+                                minion.SetBattlePetCompanionNameTimestamp(pet.NameTimestamp);
                                 minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
 
                                 int display = pet.PacketInfo.DisplayID;
@@ -348,7 +348,7 @@ namespace Game.Entities
             SetFaction(charmer.GetFaction());
 
             // Pause any Idle movement
-            PauseMovement(0, 0, false);
+            PauseMovement(TimeSpan.Zero, 0, false);
 
             // Remove any active voluntary movement
             GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
@@ -425,7 +425,7 @@ namespace Game.Entities
                                     GetCharmInfo().SetPetNumber(Global.ObjectMgr.GeneratePetNumber(), true);
 
                                 // if charmed two demons the same session, the 2nd gets the 1st one's name
-                                SetPetNameTimestamp((uint)GameTime.GetGameTime()); // cast can't be helped
+                                SetPetNameTimestamp(LoopTime.ServerTime); // cast can't be helped
                             }
                         }
                         playerCharmer.CharmSpellInitialize();
@@ -529,8 +529,8 @@ namespace Game.Entities
                                     Log.outError(LogFilter.Unit,
                                         $"Aura:HandleModCharm: target={GetGUID()} " +
                                         $"with typeid={GetTypeId()} has a charm aura but no charm info!");
+                                }
                             }
-                        }
                         }
                         break;
                     case CharmType.Convert:
@@ -716,7 +716,7 @@ namespace Game.Entities
                     Log.outError(LogFilter.Unit,
                         $"Unit {GetEntry()} is trying to release unit {target.GetEntry()} " +
                         $"which is neither charmed nor owned by it");
-            }
+                }
             }
 
             if (!GetPetGUID().IsEmpty())
@@ -778,7 +778,7 @@ namespace Game.Entities
             owner.ToPlayer().SendPacket(packet);
         }
 
-        public void SetLastManaUse(uint spellCastTime) { m_lastManaUseTime = spellCastTime; }        
+        public void SetLastManaUse(ServerTime spellCastTime) { m_lastManaUseTime = spellCastTime; }        
 
         public Pet CreateTamedPetFrom(Creature creatureTarget, int spell_id = 0)
         {

@@ -205,7 +205,7 @@ namespace Framework.Database
                     }
                 }
 
-                uint speed = 0;
+                TimeSpan speed = TimeSpan.Zero;
                 AppliedFileEntry file = new(availableQuery.GetFileName(), hash, availableQuery.state, 0);
 
                 switch (mode)
@@ -266,16 +266,16 @@ namespace Framework.Database
             return ConfigMgr.GetDefaultValue("Updates.SourcePath", "../../../");
         }
 
-        uint ApplyTimedFile(string path)
+        TimeSpan ApplyTimedFile(string path)
         {
             // Benchmark query speed
-            uint oldMSTime = Time.GetMSTime();
+            DateTime oldTime = Time.Now;
 
             // Update database
             ApplyFile(path);
 
             // Return time the query took to apply
-            return Time.GetMSTimeDiffToNow(oldMSTime);
+            return Time.Diff(oldTime);
         }
 
         void ApplyFile(string path)
@@ -288,9 +288,11 @@ namespace Framework.Database
             _database.Execute(query);
         }
 
-        void UpdateEntry(AppliedFileEntry entry, uint speed)
+        void UpdateEntry(AppliedFileEntry entry, TimeSpan speed)
         {
-            string update = $"REPLACE INTO `updates` (`name`, `hash`, `state`, `speed`) VALUES (\"{entry.Name}\", \"{entry.Hash}\", \'{entry.State}\', {speed})";
+            string update = 
+                $"REPLACE INTO `updates` (`name`, `hash`, `state`, `speed`) " +
+                $"VALUES (\"{entry.Name}\", \"{entry.Hash}\", \'{entry.State}\', {(Milliseconds)speed})";
 
             // Update database
             Apply(update);

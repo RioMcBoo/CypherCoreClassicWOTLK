@@ -154,7 +154,7 @@ namespace Game.Networking.Packets
         public int ActiveSeason; // Currently active Classic season
         public short MaxPlayerNameQueriesPerPacket = 50;
         public short PlayerNameQueryTelemetryInterval = 600;
-        public TimeSpan PlayerNameQueryInterval = TimeSpan.FromSeconds(10);
+        public TimeSpan PlayerNameQueryInterval = (Seconds)10;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
@@ -364,7 +364,7 @@ namespace Game.Networking.Packets
         public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket = 50;
         public short PlayerNameQueryTelemetryInterval = 600;
-        public TimeSpan PlayerNameQueryInterval = TimeSpan.FromSeconds(10);
+        public TimeSpan PlayerNameQueryInterval = (Seconds)10;
         public int? LaunchETA;
         public List<DebugTimeEventInfo> DebugTimeEvents = new();
         public int Unused1007;

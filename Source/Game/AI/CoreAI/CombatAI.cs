@@ -53,7 +53,7 @@ namespace Game.AI
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -73,9 +73,9 @@ namespace Game.AI
             }
         }
 
-        public override void SpellInterrupted(int spellId, uint unTimeMs)
+        public override void SpellInterrupted(int spellId, TimeSpan unTimeMs)
         {
-            _events.RescheduleEvent(spellId, TimeSpan.FromMilliseconds(unTimeMs));
+            _events.RescheduleEvent(spellId, unTimeMs);
         }
     }
 
@@ -83,7 +83,7 @@ namespace Game.AI
     {
         public AggressorAI(Creature c) : base(c) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             UpdateVictim();
         }
@@ -139,7 +139,7 @@ namespace Game.AI
                         if (count == spell)
                         {
                             DoCast(_spells[spell]);
-                            cooldown += TimeSpan.FromMilliseconds(me.GetCurrentSpellCastTime(id));
+                            cooldown += me.GetCurrentSpellCastTime(id);
                         }
                         _events.ScheduleEvent(id, cooldown);
                     }
@@ -147,7 +147,7 @@ namespace Game.AI
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -167,10 +167,10 @@ namespace Game.AI
             if (spellId != 0)
             {
                 DoCast(spellId);
-                uint casttime = (uint)me.GetCurrentSpellCastTime(spellId);
+                TimeSpan casttime = me.GetCurrentSpellCastTime(spellId);
                 AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
                 if (info != null)
-                    _events.ScheduleEvent(spellId, TimeSpan.FromMilliseconds(casttime != 0 ? casttime : 500) + info.realCooldown);
+                    _events.ScheduleEvent(spellId, casttime != TimeSpan.Zero ? casttime : (Milliseconds)500 + info.realCooldown);
             }
         }
     }
@@ -183,7 +183,7 @@ namespace Game.AI
         {
             if (creature.m_spells[0] == 0)
             {
-                Log.outError(LogFilter.Server, 
+                Log.outError(LogFilter.Server,
                     $"TurretAI set for creature with spell1=0. AI will do nothing ({creature.GetGUID()})");
             }
 
@@ -208,7 +208,7 @@ namespace Game.AI
                 me.Attack(victim, false);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -219,13 +219,13 @@ namespace Game.AI
 
     public class VehicleAI : CreatureAI
     {
-        const int VEHICLE_CONDITION_CHECK_TIME = 1000;
-        const int VEHICLE_DISMISS_TIME = 5000;
+        static TimeSpan VEHICLE_CONDITION_CHECK_TIME = (Seconds)1;
+        static TimeSpan VEHICLE_DISMISS_TIME = (Seconds)5;
 
         bool _hasConditions;
-        uint _conditionsTimer;
+        TimeSpan _conditionsTimer;
         bool _doDismiss;
-        uint _dismissTimer;
+        TimeSpan _dismissTimer;
 
         public VehicleAI(Creature creature) : base(creature)
         {
@@ -236,7 +236,7 @@ namespace Game.AI
             me.SetCanMelee(false);
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             CheckConditions(diff);
 
@@ -272,7 +272,7 @@ namespace Game.AI
             _hasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry());
         }
 
-        void CheckConditions(uint diff)
+        void CheckConditions(TimeSpan diff)
         {
             if (!_hasConditions)
                 return;
@@ -313,7 +313,7 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit who) { }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             UpdateVictim();
         }

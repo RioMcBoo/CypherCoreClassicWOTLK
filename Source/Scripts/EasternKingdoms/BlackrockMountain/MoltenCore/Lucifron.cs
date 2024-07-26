@@ -24,24 +24,24 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Lucifron
         {
             base.JustEngagedWith(victim);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCastVictim(SpellIds.ImpendingDoom);
-                task.Repeat(TimeSpan.FromSeconds(20));
+                task.Repeat(Time.SpanFromSeconds(20));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(20), task =>
             {
                 DoCastVictim(SpellIds.LucifronCurse);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 DoCastVictim(SpellIds.ShadowShock);
-                task.Repeat(TimeSpan.FromSeconds(6));
+                task.Repeat(Time.SpanFromSeconds(6));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

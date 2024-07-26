@@ -113,7 +113,7 @@ namespace Game.Entities
             base.Dispose();
         }
 
-        public override void Update(uint diff)
+        public override void Update(TimeSpan diff)
         {
             // WARNING! Order of execution here is important, do not change.
             // Spells must be processed with event system BEFORE they go to _UpdateSpells.
@@ -122,7 +122,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            _UpdateSpells(diff);
+            _UpdateSpells((Milliseconds)diff);
 
             // If this is set during update SetCantProc(false) call is missing somewhere in the code
             // Having this would prevent spells from being proced, so let's crash
@@ -152,21 +152,21 @@ namespace Game.Entities
 
             if (!spellPausesCombatTimer(CurrentSpellTypes.Generic) && !spellPausesCombatTimer(CurrentSpellTypes.Channeled))
             {
-                uint base_att = GetAttackTimer(WeaponAttackType.BaseAttack);
+                Milliseconds base_att = GetAttackTimer(WeaponAttackType.BaseAttack);
                 if (base_att != 0)
-                    SetAttackTimer(WeaponAttackType.BaseAttack, (diff >= base_att ? 0 : base_att - diff));
+                    SetAttackTimer(WeaponAttackType.BaseAttack, diff >= base_att ? Milliseconds.Zero : base_att - diff);
 
-                uint ranged_att = GetAttackTimer(WeaponAttackType.RangedAttack);
+                Milliseconds ranged_att = GetAttackTimer(WeaponAttackType.RangedAttack);
                 if (ranged_att != 0)
-                    SetAttackTimer(WeaponAttackType.RangedAttack, (diff >= ranged_att ? 0 : ranged_att - diff));
+                    SetAttackTimer(WeaponAttackType.RangedAttack, diff >= ranged_att ? Milliseconds.Zero : ranged_att - diff);
 
-                uint off_att = GetAttackTimer(WeaponAttackType.OffAttack);
+                Milliseconds off_att = GetAttackTimer(WeaponAttackType.OffAttack);
                 if (off_att != 0)
-                    SetAttackTimer(WeaponAttackType.OffAttack, (diff >= off_att ? 0 : off_att - diff));
+                    SetAttackTimer(WeaponAttackType.OffAttack, diff >= off_att ? Milliseconds.Zero : off_att - diff);
             }
 
             // update abilities available only for fraction of time
-            UpdateReactives(diff);
+            UpdateReactives((Milliseconds)diff);
 
             if (IsAlive())
             {
@@ -196,7 +196,7 @@ namespace Game.Entities
             RefreshAI();
         }
 
-        void _UpdateSpells(uint diff)
+        void _UpdateSpells(Milliseconds diff)
         {
             if (!_spellHistory.IsPaused())
                 _spellHistory.Update();
@@ -246,7 +246,7 @@ namespace Game.Entities
                     if (!go.IsSpawned())
                     {
                         go.SetOwnerGUID(ObjectGuid.Empty);
-                        go.SetRespawnTime(0);
+                        go.SetRespawnTime(TimeSpan.Zero);
                         go.Delete();
                         m_gameObj.Remove(go);
                     }
@@ -464,7 +464,7 @@ namespace Game.Entities
             {
                 if (!zoneId.HasValue || Global.DB2Mgr.IsInArea(player.GetAreaId(), zoneId.Value))
                     player.SendPacket(clearBossEmotes);
-        }
+            }
         }
 
         public override void UpdateObjectVisibility(bool forced = true)
@@ -650,7 +650,7 @@ namespace Game.Entities
                     new ProcFlagsInit(),
                     ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None,
                     null, null, null);
-        }
+            }
         }
 
         public void AtEndOfEncounter(EncounterType type)
@@ -754,7 +754,7 @@ namespace Game.Entities
                     // note: item based cooldowns and cooldown spell mods
                     // with charges ignored (unknown existing cases)
                     GetSpellHistory().StartCooldown(createBySpell, 0, null, true);
-            }
+                }
             }
 
             if (IsTypeId(TypeId.Unit) && ToCreature().IsAIEnabled())
@@ -790,7 +790,7 @@ namespace Game.Entities
                     // note: item based cooldowns and cooldown spell mods
                     // with charges ignored (unknown existing cases)
                     GetSpellHistory().SendCooldownEvent(createBySpell);
-            }
+                }
             }
 
             m_gameObj.Remove(gameObj);
@@ -800,7 +800,7 @@ namespace Game.Entities
 
             if (del)
             {
-                gameObj.SetRespawnTime(0);
+                gameObj.SetRespawnTime(TimeSpan.Zero);
                 gameObj.Delete();
             }
         }
@@ -818,7 +818,7 @@ namespace Game.Entities
                     obj.SetOwnerGUID(ObjectGuid.Empty);
                     if (del)
                     {
-                        obj.SetRespawnTime(0);
+                        obj.SetRespawnTime(TimeSpan.Zero);
                         obj.Delete();
                     }
 
@@ -834,7 +834,7 @@ namespace Game.Entities
             {
                 var obj = m_gameObj.First();
                 obj.SetOwnerGUID(ObjectGuid.Empty);
-                obj.SetRespawnTime(0);
+                obj.SetRespawnTime(TimeSpan.Zero);
                 obj.Delete();
                 m_gameObj.Remove(obj);
             }
@@ -1207,8 +1207,8 @@ namespace Game.Entities
                         pos.Relocate(
                             new Position(seatAddon.ExitParameterX, seatAddon.ExitParameterY, seatAddon.ExitParameterZ, 
                             seatAddon.ExitParameterO));
+                    }
                 }
-            }
             }
 
             var initializer = (MoveSplineInit init) =>
@@ -1240,7 +1240,7 @@ namespace Game.Entities
                     SetDeathState(DeathState.JustDied);
                 // If for other reason we as minion are exiting the vehicle (ejected, master dismounted) - unsummon
                 else
-                    ToTempSummon().UnSummon(2000); // Approximation
+                    ToTempSummon().UnSummon((Seconds)2); // Approximation
             }
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.AbandonVehicle);
@@ -1359,7 +1359,7 @@ namespace Game.Entities
 
         public UnitAI GetTopAI() { return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
 
-        public void AIUpdateTick(uint diff)
+        public void AIUpdateTick(TimeSpan diff)
         {
             UnitAI ai = GetAI();
             if (ai != null)
@@ -1421,7 +1421,7 @@ namespace Game.Entities
             {
                 if (GetTopAI() != null && GetTopAI() is not ScheduledChangeAI)
                     return;
-        }
+            }
         }
 
         UnitAI GetScheduledChangeAI()
@@ -2088,8 +2088,8 @@ namespace Game.Entities
                                         ObjectManager.ChooseDisplayId(ci).CreatureDisplayID))
                                     {
                                         handledAura = eff;
-                            }
-                        }
+                                    }
+                                }
                             }
                         }
 
@@ -2248,10 +2248,10 @@ namespace Game.Entities
             return IsCharmed() ? GetCharmer() : GetOwner();
         }
 
-        public uint GetBattlePetCompanionNameTimestamp() { return m_unitData.BattlePetCompanionNameTimestamp; }
-        public void SetBattlePetCompanionNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionNameTimestamp), timestamp); }
+        public ServerTime GetBattlePetCompanionNameTimestamp() { return (ServerTime)m_unitData.BattlePetCompanionNameTimestamp.GetValue(); }
+        public void SetBattlePetCompanionNameTimestamp(ServerTime timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionNameTimestamp), (UnixTime)timestamp); }
         public uint GetWildBattlePetLevel() { return (uint)m_unitData.WildBattlePetLevel.GetValue(); }
-        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), (int)wildBattlePetLevel); }
+        public void SetWildBattlePetLevel(int wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
 
         public bool HasUnitFlag(UnitFlags flags) { return (m_unitData.Flags & (uint)flags) != 0; }
         public void SetUnitFlag(UnitFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags), (uint)flags); }
@@ -2298,7 +2298,7 @@ namespace Game.Entities
         public void ReplaceAllPetFlags(UnitPetFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetFlags), (byte)flags); }
 
         public void SetPetNumberForClient(int petNumber) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNumber), petNumber); }
-        public void SetPetNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNameTimestamp), timestamp); }
+        public void SetPetNameTimestamp(ServerTime timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNameTimestamp), (UnixTime)timestamp); }
 
         public ShapeShiftForm GetShapeshiftForm() { return (ShapeShiftForm)(byte)m_unitData.ShapeshiftForm; }
         public CreatureType GetCreatureType()
@@ -2378,8 +2378,8 @@ namespace Game.Entities
                     {
                         if (ownerPlayer.IsGroupVisibleFor(seerPlayer))
                             return true;
+                    }
                 }
-            }
             }
 
             return false;
@@ -2477,7 +2477,7 @@ namespace Game.Entities
 
         public bool IsPowerRegenInterruptedByMP5Rule()
         {
-            return Time.GetMSTimeDiff(m_lastManaUseTime, GameTime.GetGameTimeMS()) < 5000;
+            return Time.Diff(m_lastManaUseTime, LoopTime.ServerTime) < (Seconds)5;
         }
 
         public void SetStandState(UnitStandStateType state, int animKitId = 0)
@@ -2670,7 +2670,7 @@ namespace Game.Entities
                 return m_canDualWield;
         }
 
-        void StartReactiveTimer(ReactiveType reactive) { m_reactiveTimer[reactive] = 4000; }
+        void StartReactiveTimer(ReactiveType reactive) { m_reactiveTimer[reactive] = (Milliseconds)4000; }
 
         public static void DealDamageMods(Unit attacker, Unit victim, ref int damage)
         {
@@ -2771,8 +2771,8 @@ namespace Game.Entities
                                 && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageAbsorb))
                             {
                                 victim.InterruptNonMeleeSpells(false);
-                    }
-                }
+                            }
+                        }
                     }
                 }
 
@@ -2985,11 +2985,11 @@ namespace Game.Entities
                 if (!victim.IsTypeId(TypeId.Player))
                 {
                     // Part of Evade mechanics. DoT's and Thorns / Retribution Aura do not contribute to this
-                    if (damagetype != DamageEffectType.DOT && damageTaken > 0 
-                        && !victim.GetOwnerGUID().IsPlayer() 
+                    if (damagetype != DamageEffectType.DOT && damageTaken > 0
+                        && !victim.GetOwnerGUID().IsPlayer()
                         && (spellProto == null || !spellProto.HasAura(AuraType.DamageShield)))
                     {
-                        victim.ToCreature().SetLastDamagedTime(GameTime.GetGameTime() + SharedConst.MaxAggroResetTime);                        
+                        victim.ToCreature().SetLastDamagedTime(LoopTime.ServerTime + SharedConst.MaxAggroResetTime);
                     }
 
                     if (attacker != null && (spellProto == null || !spellProto.HasAttribute(SpellAttr4.NoHarmfulThreat)))
@@ -3075,8 +3075,8 @@ namespace Game.Entities
                                 && spell1.m_spellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration))
                             {
                                 spell1.DelayedChannel();
-                    }
-                }
+                            }
+                        }
                     }
                 }
 
@@ -3119,31 +3119,32 @@ namespace Game.Entities
                 (!victim.IsCreature() || victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParryHasten)))
             {
                 // Get attack timers
-                float offtime = victim.GetAttackTimer(WeaponAttackType.OffAttack);
-                float basetime = victim.GetAttackTimer(WeaponAttackType.BaseAttack);
+                Milliseconds offtime = victim.GetAttackTimer(WeaponAttackType.OffAttack);
+                Milliseconds basetime = victim.GetAttackTimer(WeaponAttackType.BaseAttack);
+
                 // Reduce attack time
                 if (victim.HaveOffhandWeapon() && offtime < basetime)
                 {
-                    float percent20 = victim.GetBaseAttackTime(WeaponAttackType.OffAttack) * 0.20f;
-                    float percent60 = 3.0f * percent20;
+                    Milliseconds percent20 = (Milliseconds)(victim.GetBaseAttackTime(WeaponAttackType.OffAttack) * 20 / 100);
+                    Milliseconds percent60 = (Milliseconds)(3 * percent20);
                     if (offtime > percent20 && offtime <= percent60)
-                        victim.SetAttackTimer(WeaponAttackType.OffAttack, (uint)percent20);
+                        victim.SetAttackTimer(WeaponAttackType.OffAttack, percent20);
                     else if (offtime > percent60)
                     {
-                        offtime -= 2.0f * percent20;
-                        victim.SetAttackTimer(WeaponAttackType.OffAttack, (uint)offtime);
+                        offtime -= (Milliseconds)(2 * percent20);
+                        victim.SetAttackTimer(WeaponAttackType.OffAttack, offtime);
                     }
                 }
                 else
                 {
-                    float percent20 = victim.GetBaseAttackTime(WeaponAttackType.BaseAttack) * 0.20f;
-                    float percent60 = 3.0f * percent20;
+                    Milliseconds percent20 = (Milliseconds)(victim.GetBaseAttackTime(WeaponAttackType.BaseAttack) * 20 / 100);
+                    Milliseconds percent60 = (Milliseconds)(3 * percent20);
                     if (basetime > percent20 && basetime <= percent60)
-                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, (uint)percent20);
+                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, percent20);
                     else if (basetime > percent60)
                     {
-                        basetime -= 2.0f * percent20;
-                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, (uint)basetime);
+                        basetime -= (Milliseconds)(2 * percent20);
+                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, basetime);
                     }
                 }
             }
@@ -3433,7 +3434,7 @@ namespace Game.Entities
 
         public virtual float GetBlockPercent(int attackerLevel) { return 30.0f; }
 
-        void UpdateReactives(uint p_time)
+        void UpdateReactives(Milliseconds p_time)
         {
             for (ReactiveType reactive = 0; reactive < ReactiveType.Max; ++reactive)
             {
@@ -3442,7 +3443,7 @@ namespace Game.Entities
 
                 if (m_reactiveTimer[reactive] <= p_time)
                 {
-                    m_reactiveTimer[reactive] = 0;
+                    m_reactiveTimer[reactive] = Milliseconds.Zero;
 
                     switch (reactive)
                     {
@@ -3475,7 +3476,7 @@ namespace Game.Entities
             ModifyPower(PowerType.Rage, (int)(addRage * 10));
         }
 
-        public float GetPPMProcChance(uint WeaponSpeed, float PPM, SpellInfo spellProto)
+        public float GetPPMProcChance(Milliseconds WeaponSpeed, float PPM, SpellInfo spellProto)
         {
             // proc per minute Chance calculation
             if (PPM <= 0)
@@ -3489,7 +3490,7 @@ namespace Game.Entities
                     modOwner.ApplySpellMod(spellProto, SpellModOp.ProcFrequency, ref PPM);
             }
 
-            return (float)Math.Floor((WeaponSpeed * PPM) / 600.0f);   // result is Chance in percents (probability = Speed_in_sec * (PPM / 60))
+            return (float)Math.Floor(WeaponSpeed * PPM / 600.0f);   // result is Chance in percents (probability = Speed_in_sec * (PPM / 60))
         }
 
         public Unit GetNextRandomRaidMemberOrPet(float radius)
@@ -3536,8 +3537,8 @@ namespace Game.Entities
                     {
                         if (pet != this && IsWithinDistInMap(pet, radius) && pet.IsAlive() && !IsHostileTo(pet))
                             nearMembers.Add(pet);
+                    }
                 }
-            }
             }
 
             if (nearMembers.Empty())
@@ -3550,7 +3551,7 @@ namespace Game.Entities
         public void ClearAllReactives()
         {
             for (ReactiveType i = 0; i < ReactiveType.Max; ++i)
-                m_reactiveTimer[i] = 0;
+                m_reactiveTimer[i] = Milliseconds.Zero;
 
             if (HasAuraState(AuraStateType.Defensive))
                 ModifyAuraState(AuraStateType.Defensive, false);

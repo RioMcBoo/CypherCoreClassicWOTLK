@@ -46,10 +46,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
                 instance.SetData(DataTypes.TypeIronHall, (int)EncounterState.InProgress);
 
             phase = Phases.One;
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule((Seconds)5, task =>
             {
                 DoCastVictim(SpellIds.Fieryburst);
-                task.Repeat(TimeSpan.FromSeconds(6));
+                task.Repeat((Seconds)6);
             });
         }
 
@@ -58,15 +58,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
             if (me.HealthBelowPctDamaged(50, damage) && phase == Phases.One)
             {
                 phase = Phases.Two;
-                _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+                _scheduler.Schedule((Seconds)0, task =>
                 {
                     DoCastVictim(SpellIds.Warstomp);
-                    task.Repeat(TimeSpan.FromSeconds(8));
+                    task.Repeat((Seconds)8);
                 });
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -102,17 +102,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
             _scheduler.CancelAll();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!_active)
             {
                 if (_instance.GetData(DataTypes.TypeIronHall) == (int)EncounterState.NotStarted)
                     return;
                 // Once the boss is engaged, the guardians will stay activated until the next instance reset
-                _scheduler.Schedule(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(10), task =>
+                _scheduler.Schedule((Seconds)0, (Seconds)10, task =>
                 {
                     DoCastAOE(SpellIds.Goutofflame);
-                    task.Repeat(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(21));
+                    task.Repeat((Seconds)16, (Seconds)21);
                 });
                 _active = true;
             }

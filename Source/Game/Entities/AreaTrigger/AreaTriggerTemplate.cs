@@ -99,7 +99,7 @@ namespace Game.Entities
 
     public class AreaTriggerScaleCurveTemplate
     {
-        public uint StartTimeOffset;
+        public RelativeTime StartTimeOffset;
         public float Curve = 1.0f;
         public AreaTriggerScaleCurvePointsTemplate CurveTemplate;
     }
@@ -211,7 +211,7 @@ namespace Game.Entities
             data.WriteBit(CounterClockwise);
             data.WriteBit(CanLoop);
 
-            data.WriteUInt32(TimeToTarget);
+            data.WriteInt32(TimeToTarget);
             data.WriteInt32(ElapsedTimeForMovement);
             data.WriteUInt32(StartDelay);
             data.WriteFloat(Radius);
@@ -230,9 +230,9 @@ namespace Game.Entities
         public Vector3? Center;
         public bool CounterClockwise;
         public bool CanLoop;
-        public uint TimeToTarget;
-        public int ElapsedTimeForMovement;
-        public uint StartDelay;
+        public Milliseconds TimeToTarget;
+        public Milliseconds ElapsedTimeForMovement;
+        public RelativeTime StartDelay;
         public float Radius;
         public float BlendFromRadius;
         public float InitialAngle;
@@ -262,8 +262,8 @@ namespace Game.Entities
 
         public int DecalPropertiesId;
 
-        public uint TimeToTarget;
-        public uint TimeToTargetScale;
+        public Milliseconds TimeToTarget;
+        public Milliseconds TimeToTargetScale;
 
         public AreaTriggerScaleCurveTemplate OverrideScale;
         public AreaTriggerScaleCurveTemplate ExtraScale;

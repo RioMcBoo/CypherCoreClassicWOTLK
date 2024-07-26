@@ -89,8 +89,8 @@ namespace Framework.Configuration
         public static IEnumerable<string> GetKeysByString(string name)
         {
             return _configList.Where(p => p.Key.Contains(name)).Select(p => p.Key);
-        }
+        } 
 
         private static Dictionary<string, string> _configList = new();        
-    }
+    }    
 }

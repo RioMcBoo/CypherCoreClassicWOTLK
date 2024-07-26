@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Networking.Packets
@@ -354,7 +355,7 @@ namespace Game.Networking.Packets
     {
         public ObjectGuid Auctioneer;
         public long UnitPrice;
-        public uint RunTime;
+        public TimeSpan RunTime;
         public AddOnInfo? TaintedBy;
         public Array<AuctionItemForSale> Items = new(64);
 
@@ -364,7 +365,7 @@ namespace Game.Networking.Packets
         {
             Auctioneer = _worldPacket.ReadPackedGuid();
             UnitPrice = _worldPacket.ReadInt64();
-            RunTime = _worldPacket.ReadUInt32();
+            RunTime = (Minutes)_worldPacket.ReadInt32();
             if (_worldPacket.HasBit())
                 TaintedBy = new();
 
@@ -383,7 +384,7 @@ namespace Game.Networking.Packets
         public long BuyoutPrice;
         public ObjectGuid Auctioneer;
         public long MinBid;
-        public uint RunTime;
+        public TimeSpan RunTime;
         public AddOnInfo? TaintedBy;
         public Array<AuctionItemForSale> Items = new(1);
 
@@ -394,7 +395,7 @@ namespace Game.Networking.Packets
             Auctioneer = _worldPacket.ReadPackedGuid();
             MinBid = _worldPacket.ReadInt64();
             BuyoutPrice = _worldPacket.ReadInt64();
-            RunTime = _worldPacket.ReadUInt32();
+            RunTime = (Minutes)_worldPacket.ReadInt32();
 
             if (_worldPacket.HasBit())
                 TaintedBy = new();
@@ -449,7 +450,7 @@ namespace Game.Networking.Packets
     class AuctionClosedNotification : ServerPacket
     { 
         public AuctionOwnerNotification Info;
-        public float ProceedsMailDelay;
+        public TimeSpan ProceedsMailDelay;
         public bool Sold = true;
 
         public AuctionClosedNotification() : base(ServerOpcodes.AuctionClosedNotification) { }
@@ -457,7 +458,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             Info.Write(_worldPacket);
-            _worldPacket.WriteFloat(ProceedsMailDelay);
+            _worldPacket.WriteFloat((float)ProceedsMailDelay.TotalSeconds);
             _worldPacket.WriteBit(Sold);
             _worldPacket.FlushBits();
         }
@@ -479,7 +480,7 @@ namespace Game.Networking.Packets
         public long MinIncrement;
         ///<summary> the amount of money that the player bid in copper</summary>
         public long Money; 
-        public uint DesiredDelay;
+        public TimeSpan DesiredDelay;
 
         public AuctionCommandResult() : base(ServerOpcodes.AuctionCommandResult) { }
 
@@ -492,7 +493,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteInt64(MinIncrement);
             _worldPacket.WriteInt64(Money);
-            _worldPacket.WriteUInt32(DesiredDelay);
+            _worldPacket.WriteInt32((Seconds)DesiredDelay);
         }
     }
 
@@ -506,7 +507,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Quantity.HasValue);
             _worldPacket.WriteBit(QuoteDuration.HasValue);
             _worldPacket.WriteInt32(ItemID);
-            _worldPacket.WriteUInt32(DesiredDelay);
+            _worldPacket.WriteInt32((Seconds)DesiredDelay);
 
             if (TotalPrice.HasValue)
                 _worldPacket.WriteInt64(TotalPrice.Value);
@@ -515,14 +516,14 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Quantity.Value);
 
             if (QuoteDuration.HasValue)
-                _worldPacket.WriteInt64(QuoteDuration.Value);
+                _worldPacket.WriteInt64(QuoteDuration.Value.ToMilliseconds());
         }
 
         public long? TotalPrice;
         public int? Quantity;
-        public long? QuoteDuration;
+        public TimeSpan? QuoteDuration;
         public int ItemID;
-        public uint DesiredDelay;
+        public TimeSpan DesiredDelay;
     }
 
     class AuctionHelloResponse : ServerPacket
@@ -698,7 +699,7 @@ namespace Game.Networking.Packets
     { 
         public int ChangeNumberCursor;
         public int ChangeNumberGlobal;
-        public int DesiredDelay;
+        public TimeSpan DesiredDelay;
         public int ChangeNumberTombstone;
         public int Result;
         public List<AuctionItem> Items = new();
@@ -708,7 +709,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Result);
-            _worldPacket.WriteInt32(DesiredDelay);
+            _worldPacket.WriteInt32((Milliseconds)DesiredDelay);
             _worldPacket.WriteInt32(ChangeNumberGlobal);
             _worldPacket.WriteInt32(ChangeNumberCursor);
             _worldPacket.WriteInt32(ChangeNumberTombstone);
@@ -952,13 +953,13 @@ namespace Game.Networking.Packets
         public long? MinIncrement;
         public long? BuyoutPrice;
         public long? UnitPrice;
-        public int DurationLeft;
+        public TimeSpan DurationLeft;
         public byte DeleteReason;
         public bool CensorServerSideInfo;
         public bool CensorBidInfo;
         public ObjectGuid ItemGuid;
         public ObjectGuid OwnerAccountID;
-        public uint EndTime;
+        public ServerTime EndTime;
         public ObjectGuid? Bidder;
         public long? BidAmount;
         public List<ItemGemData> Gems = new();
@@ -994,7 +995,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Flags);
             data.WriteInt32(AuctionID);
             data.WritePackedGuid(Owner);
-            data.WriteInt32(DurationLeft);
+            data.WriteInt32((Milliseconds)DurationLeft);
             data.WriteUInt8(DeleteReason);
 
             foreach (ItemEnchantData enchant in Enchantments)
@@ -1016,7 +1017,7 @@ namespace Game.Networking.Packets
             {
                 data.WritePackedGuid(ItemGuid);
                 data.WritePackedGuid(OwnerAccountID);
-                data.WriteUInt32(EndTime);
+                data.WriteInt32((UnixTime)EndTime);
             }
 
             if (Creator.HasValue)

@@ -24,26 +24,26 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Firemaw
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)10, (Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Shadowflame);
-                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
+                task.Repeat((Seconds)10, (Seconds)20);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule((Seconds)30, task =>
             {
                 DoCastVictim(SpellIds.Wingbuffet);
                 if (GetThreat(me.GetVictim()) != 0)
                     ModifyThreatByPercent(me.GetVictim(), -75);
-                task.Repeat(TimeSpan.FromSeconds(30));
+                task.Repeat((Seconds)30);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule((Seconds)5, task =>
             {
                 DoCastVictim(SpellIds.Flamebuffet);
-                task.Repeat(TimeSpan.FromSeconds(5));
+                task.Repeat((Seconds)5);
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

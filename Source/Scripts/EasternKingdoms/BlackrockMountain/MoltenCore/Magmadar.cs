@@ -38,27 +38,27 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Magmadar
         {
             base.JustEngagedWith(victim);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(30), task =>
             {
                 Talk(TextIds.EmoteFrenzy);
                 DoCast(me, SpellIds.Frenzy);
-                task.Repeat(TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(20), task =>
             {
                 DoCastVictim(SpellIds.Panic);
-                task.Repeat(TimeSpan.FromSeconds(35));
+                task.Repeat(Time.SpanFromSeconds(35));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(12), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.LavaBomb);
                 if (target != null)
                     DoCast(target, SpellIds.LavaBomb);
-                task.Repeat(TimeSpan.FromSeconds(12));
+                task.Repeat(Time.SpanFromSeconds(12));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

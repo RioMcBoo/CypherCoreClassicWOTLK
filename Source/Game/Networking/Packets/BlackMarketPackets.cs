@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Networking.Packets
@@ -46,7 +47,7 @@ namespace Game.Networking.Packets
                 item.Write(_worldPacket);
         }
 
-        public long LastUpdateID;
+        public UnixTime64 LastUpdateID;
         public List<BlackMarketItem> Items = new();
     }
 
@@ -127,7 +128,7 @@ namespace Game.Networking.Packets
             MinBid = data.ReadInt64();
             MinIncrement = data.ReadInt64();
             CurrentBid = data.ReadInt64();
-            SecondsRemaining = data.ReadInt32();
+            SecondsRemaining = (Seconds)data.ReadInt32();
             NumBids = data.ReadInt32();
             HighBid = data.HasBit();
         }
@@ -140,7 +141,7 @@ namespace Game.Networking.Packets
             data.WriteInt64(MinBid);
             data.WriteInt64(MinIncrement);
             data.WriteInt64(CurrentBid);
-            data.WriteInt32(SecondsRemaining);
+            data.WriteInt32((Seconds)SecondsRemaining);
             data.WriteInt32(NumBids);
             Item.Write(data);
             data.WriteBit(HighBid);
@@ -154,7 +155,7 @@ namespace Game.Networking.Packets
         public long MinBid;
         public long MinIncrement;
         public long CurrentBid;
-        public int SecondsRemaining;
+        public TimeSpan SecondsRemaining;
         public int NumBids;
         public bool HighBid;
     }

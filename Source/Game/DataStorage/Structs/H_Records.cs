@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System;
 
 namespace Game.DataStorage
 {
@@ -23,19 +24,25 @@ namespace Game.DataStorage
     {
         public int Id;
         public ushort Region;
-        public byte Looping;
+        private byte _looping;
         public uint HolidayNameID;
         public uint HolidayDescriptionID;
         public byte Priority;
-        public sbyte CalendarFilterType;
+        private sbyte _calendarFilterType;
         public byte Flags;
         public uint WorldStateExpressionID;
-        public ushort[] Duration = new ushort[SharedConst.MaxHolidayDurations];
-        /// <summary>
-        /// dates in unix time starting at January, 1, 2000
-        /// </summary>
-        public uint[] Date = new uint[SharedConst.MaxHolidayDates];
+        private ushort[] _duration = new ushort[SharedConst.MaxHolidayDurations];
+        /// <summary>Wow packed time</summary>
+        private int[] _date = new int[SharedConst.MaxHolidayDates];
         public byte[] CalendarFlags = new byte[SharedConst.MaxHolidayFlags];
         public int[] TextureFileDataID = new int[3];
+
+        #region Properties
+        public EventPeriodType CalendarFilterType => (EventPeriodType)_calendarFilterType;
+        public TimeSpan Duration(int index) => Time.SpanFromHours(_duration[index]);
+        /// <summary>Local realm Date time</summary>
+        public HolidayTime Date(int index) => (HolidayTime)_date[index];
+        public bool IsLooping => _looping != 0 ? true : false;
+        #endregion
     }
 }

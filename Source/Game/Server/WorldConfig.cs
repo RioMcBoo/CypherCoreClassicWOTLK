@@ -12,7 +12,8 @@ namespace Game
 {
     public class WorldConfig : ConfigMgr
     {
-        private WorldConfig() { }
+        private WorldConfig() { }        
+
         public static WorldConfig Values = new();
 
         public static void Load(bool reload = false)
@@ -21,7 +22,7 @@ namespace Game
                 Load("WorldServer.conf");
 
             // We cleanse all data to catch access errors on data that is not yet initialized.
-            //Values._values.Clear();
+            //Values._values.Clear(); // TODO: WorldCfg.ClientCacheVersion Already Pre-Loaded in WorldServer.Server.StartDB();
 
             // Read support system setting from the config file
             Values[WorldCfg.SupportEnabled] = GetDefaultValue("Support.Enabled", true);
@@ -237,26 +238,26 @@ namespace Game
             Values[WorldCfg.AddonChannel] = GetDefaultValue("AddonChannel", true);
             Values[WorldCfg.CleanCharacterDb] = GetDefaultValue("CleanCharacterDB", false);
             Values[WorldCfg.PersistentCharacterCleanFlags] = GetDefaultValue("PersistentCharacterCleanFlags", 0);
-            Values[WorldCfg.AuctionReplicateDelay] = GetDefaultValue("Auction.ReplicateItemsCooldown", 900);
+            Values[WorldCfg.AuctionReplicateDelay] = (TimeSpan)GetDefaultValue("Auction.ReplicateItemsCooldown", (Seconds)900);
 
-            Values[WorldCfg.AuctionSearchDelay] = GetDefaultValue("Auction.SearchDelay", 300);
-            if (Values[WorldCfg.AuctionSearchDelay].Int32 < 100 || Values[WorldCfg.AuctionSearchDelay].Int32 > 10000)
+            Values[WorldCfg.AuctionSearchDelay] = (TimeSpan)GetDefaultValue("Auction.SearchDelay", (Milliseconds)300);
+            if (Values[WorldCfg.AuctionSearchDelay].TimeSpan < (Milliseconds)100 || Values[WorldCfg.AuctionSearchDelay].TimeSpan > (Milliseconds)10000)
             {
                 Log.outError(LogFilter.ServerLoading,
                     $"Auction.SearchDelay ({Values[WorldCfg.AuctionSearchDelay]}) " +
-                    $"must be between 100 and 10000. Using default of 300ms");
+                    $"must be between {100} and {10000}. Using default of {300}ms.");
 
-                Values[WorldCfg.AuctionSearchDelay] = 300;
+                Values[WorldCfg.AuctionSearchDelay] = (TimeSpan)(Milliseconds)300;
             }
 
-            Values[WorldCfg.AuctionTaintedSearchDelay] = GetDefaultValue("Auction.TaintedSearchDelay", 3000);
-            if (Values[WorldCfg.AuctionTaintedSearchDelay].Int32 < 100 || Values[WorldCfg.AuctionTaintedSearchDelay].Int32 > 10000)
+            Values[WorldCfg.AuctionTaintedSearchDelay] = (TimeSpan)GetDefaultValue("Auction.TaintedSearchDelay", (Milliseconds)3000);
+            if (Values[WorldCfg.AuctionTaintedSearchDelay].TimeSpan < (Milliseconds)100 || Values[WorldCfg.AuctionTaintedSearchDelay].TimeSpan > (Milliseconds)10000)
             {
                 Log.outError(LogFilter.ServerLoading,
                     $"Auction.TaintedSearchDelay ({Values[WorldCfg.AuctionTaintedSearchDelay]}) " +
                     $"must be between 100 and 10000. Using default of 3s");
 
-                Values[WorldCfg.AuctionTaintedSearchDelay] = 3000;
+                Values[WorldCfg.AuctionTaintedSearchDelay] = (TimeSpan)(Milliseconds)3000;
             }
 
             Values[WorldCfg.ChatChannelLevelReq] = GetDefaultValue("ChatLevelReq.Channel", 1);
@@ -269,8 +270,8 @@ namespace Game
             Values[WorldCfg.AuctionLevelReq] = GetDefaultValue("LevelReq.Auction", 1);
             Values[WorldCfg.MailLevelReq] = GetDefaultValue("LevelReq.Mail", 1);
             Values[WorldCfg.PreserveCustomChannels] = GetDefaultValue("PreserveCustomChannels", false);
-            Values[WorldCfg.PreserveCustomChannelDuration] = GetDefaultValue("PreserveCustomChannelDuration", 14);
-            Values[WorldCfg.PreserveCustomChannelInterval] = GetDefaultValue("PreserveCustomChannelInterval", 5);
+            Values[WorldCfg.PreserveCustomChannelDuration] = (TimeSpan)GetDefaultValue("PreserveCustomChannelDuration", (Days)14);
+            Values[WorldCfg.PreserveCustomChannelInterval] = (TimeSpan)GetDefaultValue("PreserveCustomChannelInterval", (Minutes)5);
 
             {
                 Values[WorldCfg.GridUnload] = GetDefaultValue("GridUnload", true);
@@ -297,42 +298,42 @@ namespace Game
                 }
 
                 Values[WorldCfg.BattlegroundMapLoadGrids] = GetDefaultValue("BattlegroundMapLoadAllGrids", true);
-                Values[WorldCfg.IntervalSave] = GetDefaultValue("PlayerSaveInterval", 15 * Time.Minute * Time.InMilliseconds);
-                Values[WorldCfg.IntervalDisconnectTolerance] = GetDefaultValue("DisconnectToleranceInterval", 0);
+                Values[WorldCfg.IntervalSave] = GetDefaultValue<Milliseconds>("PlayerSaveInterval", (Minutes)15);
+                Values[WorldCfg.IntervalDisconnectTolerance] = GetDefaultValue("DisconnectToleranceInterval", (Seconds)0);
                 Values[WorldCfg.StatsSaveOnlyOnLogout] = GetDefaultValue("PlayerSave.Stats.SaveOnlyOnLogout", true);
 
                 Values[WorldCfg.MinLevelStatSave] = GetDefaultValue("PlayerSave.Stats.MinLevel", 0);
                 if (Values[WorldCfg.MinLevelStatSave].Int32 > SharedConst.MaxLevel)
                 {
                     Log.outError(LogFilter.ServerLoading,
-                        $"PlayerSave.Stats.MinLevel ({Values[WorldCfg.MinLevelStatSave]}) must be in range 0..80. " +
+                        $"PlayerSave.Stats.MinLevel ({Values[WorldCfg.MinLevelStatSave]}) must be in range 0..{SharedConst.MaxLevel}. " +
                         $"Using default, do not save character stats (0).");
 
                     Values[WorldCfg.MinLevelStatSave] = 0;
                 }
 
-                Values[WorldCfg.IntervalGridClean] = GetDefaultValue("GridCleanUpDelay", 5 * Time.Minute * Time.InMilliseconds);
-                if (Values[WorldCfg.IntervalGridClean].Int32 < MapConst.MinGridDelay)
+                Values[WorldCfg.IntervalGridClean] = (TimeSpan)GetDefaultValue<Milliseconds>("GridCleanUpDelay", (Minutes)5);
+                if (Values[WorldCfg.IntervalGridClean].TimeSpan < MapConst.MinGridDelay)
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"GridCleanUpDelay ({Values[WorldCfg.IntervalGridClean]}) " +
-                        $"must be greater {MapConst.MinGridDelay} Use this minimal value.");
+                        $"must be greater {(Milliseconds)MapConst.MinGridDelay} Use this minimal value.");
 
                     Values[WorldCfg.IntervalGridClean] = MapConst.MinGridDelay;
                 }
             }
 
-            Values[WorldCfg.IntervalMapUpdate] = GetDefaultValue("MapUpdateInterval", 10);
-            if (Values[WorldCfg.IntervalMapUpdate].Int32 < MapConst.MinMapUpdateDelay)
+            Values[WorldCfg.IntervalMapUpdate] = (TimeSpan)GetDefaultValue("MapUpdateInterval", (Milliseconds)10);
+            if (Values[WorldCfg.IntervalMapUpdate].TimeSpan < MapConst.MinMapUpdateDelay)
             {
                 Log.outError(LogFilter.ServerLoading,
                     $"MapUpdateInterval ({Values[WorldCfg.IntervalMapUpdate]}) " +
-                    $"must be greater {MapConst.MinMapUpdateDelay}. Use this minimal value.");
+                    $"must be greater {(Milliseconds)MapConst.MinMapUpdateDelay}. Use this minimal value.");
 
                 Values[WorldCfg.IntervalMapUpdate] = MapConst.MinMapUpdateDelay;
             }
 
-            Values[WorldCfg.IntervalChangeweather] = GetDefaultValue("ChangeWeatherInterval", 10 * Time.Minute * Time.InMilliseconds);
+            Values[WorldCfg.IntervalChangeweather] = (TimeSpan)GetDefaultValue<Milliseconds>("ChangeWeatherInterval", (Minutes)10);
 
             if (reload)
             {
@@ -358,10 +359,9 @@ namespace Game
                 Values[WorldCfg.PortInstance] = GetDefaultValue("InstanceServerPort", 8086);
             }
 
-            // Config values are in "milliseconds" but we handle SocketTimeOut only as "seconds" so divide by 1000
-            Values[WorldCfg.SocketTimeoutTime] = GetDefaultValue("SocketTimeOutTime", 900000) / 1000;
-            Values[WorldCfg.SocketTimeoutTimeActive] = GetDefaultValue("SocketTimeOutTimeActive", 60000) / 1000;
-            Values[WorldCfg.SessionAddDelay] = GetDefaultValue("SessionAddDelay", 10000);
+            Values[WorldCfg.SocketTimeoutTime] = (TimeSpan)GetDefaultValue<Milliseconds>("SocketTimeOutTime", (Minutes)15);
+            Values[WorldCfg.SocketTimeoutTimeActive] = (TimeSpan)GetDefaultValue<Milliseconds>("SocketTimeOutTimeActive", (Minutes)1);
+            Values[WorldCfg.SessionAddDelay] = TimeSpan.FromMicroseconds(GetDefaultValue("SessionAddDelay", 10000));
 
             Values[WorldCfg.GroupXpDistance] = GetDefaultValue("MaxGroupXPDistance", 74.0f);
             Values[WorldCfg.MaxRecruitAFriendDistance] = GetDefaultValue("MaxRecruitAFriendBonusDistance", 100.0f);
@@ -423,6 +423,24 @@ namespace Game
             }
             else
                 Values[WorldCfg.RealmZone] = GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
+
+            { //TimeZoneOffset
+                TimeSpan val = GetDefaultValue("TimeZoneOffset", (Minutes)(-1500));
+
+                if (reload)
+                {
+                    if (val != Values[WorldCfg.TimeZoneOffset].TimeSpan)
+                    {
+                        string sign = Values[WorldCfg.TimeZoneOffset].Int32 > 0 ? "+" : "";
+
+                        Log.outError(LogFilter.ServerLoading,
+                            $"TimeZoneOffset option can't be changed at worldserver.conf reload, " +
+                            $"using current value ({sign}{(Minutes)Values[WorldCfg.TimeZoneOffset].TimeSpan}).");
+                    }
+                }
+                else
+                    Values[WorldCfg.TimeZoneOffset] = val;
+            }
 
             Values[WorldCfg.AllowTwoSideInteractionCalendar] = GetDefaultValue("AllowTwoSide.Interaction.Calendar", false);
             Values[WorldCfg.AllowTwoSideInteractionChannel] = GetDefaultValue("AllowTwoSide.Interaction.Channel", false);
@@ -681,15 +699,15 @@ namespace Game
                 Values[WorldCfg.CurrencyResetDay] = 3;
             }
 
-            Values[WorldCfg.CurrencyResetInterval] = GetDefaultValue("Currency.ResetInterval", 7);
-            if (Values[WorldCfg.CurrencyResetInterval].Int32 <= 0)
+            Values[WorldCfg.CurrencyResetInterval] = (TimeSpan)GetDefaultValue("Currency.ResetInterval", (Days)7);
+            if (Values[WorldCfg.CurrencyResetInterval].TimeSpan <= (Days)0)
             {
                 Log.outError(LogFilter.ServerLoading,
-                    $"Currency.ResetInterval ({Values[WorldCfg.CurrencyResetInterval]}) " +
+                    $"Currency.ResetInterval ({(Days)Values[WorldCfg.CurrencyResetInterval].TimeSpan}) " +
                     $"must be > 0, " +
                     $"set to default {7}.");
 
-                Values[WorldCfg.CurrencyResetInterval] = 7;
+                Values[WorldCfg.CurrencyResetInterval] = (TimeSpan)(Days)7;
             }
 
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 60);
@@ -713,7 +731,7 @@ namespace Game
             Values[WorldCfg.CastUnstuck] = GetDefaultValue("CastUnstuck", true);
             Values[WorldCfg.ResetScheduleWeekDay] = GetDefaultValue("ResetSchedule.WeekDay", 2);
             Values[WorldCfg.ResetScheduleHour] = GetDefaultValue("ResetSchedule.Hour", 8);
-            Values[WorldCfg.InstanceUnloadDelay] = GetDefaultValue("Instance.UnloadDelay", 30 * Time.Minute * Time.InMilliseconds);
+            Values[WorldCfg.InstanceUnloadDelay] = (TimeSpan)GetDefaultValue<Milliseconds>("Instance.UnloadDelay", (Minutes)30);
 
             Values[WorldCfg.DailyQuestResetTimeHour] = GetDefaultValue("Quests.DailyResetTime", 3);
             if ((uint)Values[WorldCfg.DailyQuestResetTimeHour].Int32 > 23)
@@ -754,7 +772,7 @@ namespace Game
             Values[WorldCfg.GmVisibleState] = GetDefaultValue("GM.Visible", 2);
             Values[WorldCfg.GmChat] = GetDefaultValue("GM.Chat", 2);
             Values[WorldCfg.GmWhisperingTo] = GetDefaultValue("GM.WhisperingTo", 2);
-            Values[WorldCfg.GmFreezeDuration] = GetDefaultValue("GM.FreezeAuraDuration", 0);
+            Values[WorldCfg.GmFreezeDuration] = GetDefaultValue("GM.FreezeAuraDuration", (Seconds)0);
 
             Values[WorldCfg.GmLevelInGmList] = GetDefaultValue("GM.InGMList.Level", (int)AccountTypes.Administrator);
             Values[WorldCfg.GmLevelInWhoList] = GetDefaultValue("GM.InWhoList.Level", (int)AccountTypes.Administrator);
@@ -780,25 +798,25 @@ namespace Game
             }
             Values[WorldCfg.AllowGmGroup] = GetDefaultValue("GM.AllowInvite", false);
             Values[WorldCfg.GmLowerSecurity] = GetDefaultValue("GM.LowerSecurity", false);
-            Values[WorldCfg.ForceShutdownThreshold] = GetDefaultValue("GM.ForceShutdownThreshold", 30);
+            Values[WorldCfg.ForceShutdownThreshold] = GetDefaultValue("GM.ForceShutdownThreshold", (Seconds)30);
 
             Values[WorldCfg.GroupVisibility] = GetDefaultValue("Visibility.GroupMode", 1);
 
-            Values[WorldCfg.MailDeliveryDelay] = GetDefaultValue("MailDeliveryDelay", Time.Hour);
+            Values[WorldCfg.MailDeliveryDelay] = (TimeSpan)GetDefaultValue<Seconds>("MailDeliveryDelay", (Hours)1);
 
             {
                 int defaultValue = GetDefaultValue("CleanOldMailTime", 4);
                 if ((uint)defaultValue > 23)
                 {
                     Log.outError(LogFilter.ServerLoading,
-                            $"CleanOldMailTime ({defaultValue}) " +
-                            $"must be an hour, between {0} and {23}. " +
+                        $"CleanOldMailTime ({defaultValue}) " +
+                        $"must be an hour, between {0} and {23}. " +
                         $"Set to {4}.");
 
                     defaultValue = 4;
                 }
 
-                Values[WorldCfg.CleanOldMailTime] = defaultValue;
+                Values[WorldCfg.CleanOldMailTime] = Time.SpanFromHours(defaultValue);
             }
 
             {
@@ -806,14 +824,14 @@ namespace Game
                 if (defaultValue <= 0)
                 {
                     Log.outError(LogFilter.ServerLoading,
-                            $"UpdateUptimeInterval ({defaultValue}) " +
+                        $"UpdateUptimeInterval ({defaultValue}) " +
                         $"must be > {0}, " +
                         $"set to default {10}.");
 
                     defaultValue = 10;
                 }
 
-                Values[WorldCfg.UptimeUpdate] = defaultValue;
+                Values[WorldCfg.UptimeUpdate] = Time.SpanFromMinutes(defaultValue);
             }
 
             // log db cleanup interval
@@ -822,20 +840,20 @@ namespace Game
                 if (defaultValue <= 0)
                 {
                     Log.outError(LogFilter.ServerLoading,
-                            $"LogDB.Opt.ClearInterval ({defaultValue}) " +
+                        $"LogDB.Opt.ClearInterval ({defaultValue}) " +
                         $"must be > {0}, " +
                         $"set to default {10}.");
 
                     defaultValue = 10;
                 }
 
-                Values[WorldCfg.LogdbClearinterval] = defaultValue;
+                Values[WorldCfg.LogdbClearinterval] = Time.SpanFromMinutes(defaultValue);
 
-                Values[WorldCfg.LogdbCleartime] = GetDefaultValue("LogDB.Opt.ClearTime", 1209600);
+                Values[WorldCfg.LogdbCleartime] = GetDefaultValue<Seconds>("LogDB.Opt.ClearTime", (Days)14);
 
                 Log.outInfo(LogFilter.ServerLoading,
                     $"Will clear `logs` table of entries older than {Values[WorldCfg.LogdbCleartime]} seconds " +
-                    $"every {Values[WorldCfg.LogdbClearinterval]} minutes.");
+                    $"every {(Minutes)Values[WorldCfg.LogdbClearinterval].TimeSpan} minutes.");
             }
 
             Values[WorldCfg.SkillChanceOrange] = GetDefaultValue("SkillChance.Orange", 100);
@@ -883,15 +901,15 @@ namespace Game
                 Values[WorldCfg.Expansion] = GetDefaultValue("Expansion", (int)Expansion.WrathOfTheLichKing);
 
             Values[WorldCfg.ChatFloodMessageCount] = GetDefaultValue("ChatFlood.MessageCount", 10);
-            Values[WorldCfg.ChatFloodMessageDelay] = GetDefaultValue("ChatFlood.MessageDelay", 1);
-            Values[WorldCfg.ChatFloodMuteTime] = GetDefaultValue("ChatFlood.MuteTime", 10);
+            Values[WorldCfg.ChatFloodMessageDelay] = (TimeSpan)GetDefaultValue("ChatFlood.MessageDelay", (Seconds)1);
+            Values[WorldCfg.ChatFloodMuteTime] = (TimeSpan)GetDefaultValue("ChatFlood.MuteTime", (Seconds)10);
 
             Values[WorldCfg.EventAnnounce] = GetDefaultValue("Event.Announce", false);
 
             Values[WorldCfg.CreatureFamilyFleeAssistanceRadius] = GetDefaultValue("CreatureFamilyFleeAssistanceRadius", 30.0f);
             Values[WorldCfg.CreatureFamilyAssistanceRadius] = GetDefaultValue("CreatureFamilyAssistanceRadius", 10.0f);
-            Values[WorldCfg.CreatureFamilyAssistanceDelay] = GetDefaultValue("CreatureFamilyAssistanceDelay", 1500);
-            Values[WorldCfg.CreatureFamilyFleeDelay] = GetDefaultValue("CreatureFamilyFleeDelay", 7000);
+            Values[WorldCfg.CreatureFamilyAssistanceDelay] = (TimeSpan)GetDefaultValue("CreatureFamilyAssistanceDelay", (Milliseconds)1500);
+            Values[WorldCfg.CreatureFamilyFleeDelay] = (TimeSpan)GetDefaultValue("CreatureFamilyFleeDelay", (Milliseconds)7000);
 
             Values[WorldCfg.WorldBossLevelDiff] = GetDefaultValue("WorldBossLevelDiff", 3);
 
@@ -960,13 +978,13 @@ namespace Game
             Values[WorldCfg.ChatStrictLinkCheckingSeverity] = GetDefaultValue("ChatStrictLinkChecking.Severity", 0);
             Values[WorldCfg.ChatStrictLinkCheckingKick] = GetDefaultValue("ChatStrictLinkChecking.Kick", 0);
 
-            Values[WorldCfg.CorpseDecayNormal] = GetDefaultValue("Corpse.Decay.Normal", 60);
-            Values[WorldCfg.CorpseDecayElite] = GetDefaultValue("Corpse.Decay.Elite", 300);
-            Values[WorldCfg.CorpseDecayRareelite] = GetDefaultValue("Corpse.Decay.RareElite", 300);
-            Values[WorldCfg.CorpseDecayObsolete] = GetDefaultValue("Corpse.Decay.Obsolete", 3600);
-            Values[WorldCfg.CorpseDecayRare] = GetDefaultValue("Corpse.Decay.Rare", 300);
-            Values[WorldCfg.CorpseDecayTrivial] = GetDefaultValue("Corpse.Decay.Trivial", 300);
-            Values[WorldCfg.CorpseDecayMinusMob] = GetDefaultValue("Corpse.Decay.MinusMob", 150);
+            Values[WorldCfg.CorpseDecayNormal] = GetDefaultValue("Corpse.Decay.Normal", (Seconds)300);
+            Values[WorldCfg.CorpseDecayElite] = GetDefaultValue("Corpse.Decay.Elite", (Seconds)300);
+            Values[WorldCfg.CorpseDecayRareelite] = GetDefaultValue("Corpse.Decay.RareElite", (Seconds)300);
+            Values[WorldCfg.CorpseDecayObsolete] = GetDefaultValue("Corpse.Decay.Obsolete", (Seconds)3600);
+            Values[WorldCfg.CorpseDecayRare] = GetDefaultValue("Corpse.Decay.Rare", (Seconds)300);
+            Values[WorldCfg.CorpseDecayTrivial] = GetDefaultValue("Corpse.Decay.Trivial", (Seconds)300);
+            Values[WorldCfg.CorpseDecayMinusMob] = GetDefaultValue("Corpse.Decay.MinusMob", (Seconds)150);
 
             Values[WorldCfg.DeathSicknessLevel] = GetDefaultValue("Death.SicknessLevel", 11);
             Values[WorldCfg.DeathCorpseReclaimDelayPvp] = GetDefaultValue("Death.CorpseReclaimDelay.PvP", true);
@@ -1012,16 +1030,16 @@ namespace Game
             }
 
             Values[WorldCfg.BattlegroundInvitationType] = GetDefaultValue("Battleground.InvitationType", 0);
-            Values[WorldCfg.BattlegroundPrematureFinishTimer] = GetDefaultValue("Battleground.PrematureFinishTimer", 5 * Time.Minute * Time.InMilliseconds);
-            Values[WorldCfg.BattlegroundPremadeGroupWaitForMatch] = GetDefaultValue("Battleground.PremadeGroupWaitForMatch", 30 * Time.Minute * Time.InMilliseconds);
+            Values[WorldCfg.BattlegroundPrematureFinishTimer] = (TimeSpan)GetDefaultValue<Milliseconds>("Battleground.PrematureFinishTimer", (Minutes)5);
+            Values[WorldCfg.BattlegroundPremadeGroupWaitForMatch] = (TimeSpan)GetDefaultValue<Milliseconds>("Battleground.PremadeGroupWaitForMatch", (Minutes)30);
             Values[WorldCfg.BgXpForKill] = GetDefaultValue("Battleground.GiveXPForKills", false);
             Values[WorldCfg.ArenaMaxRatingDifference] = GetDefaultValue("Arena.MaxRatingDifference", 150);
-            Values[WorldCfg.ArenaRatingDiscardTimer] = GetDefaultValue("Arena.RatingDiscardTimer", 10 * Time.Minute * Time.InMilliseconds);
-            Values[WorldCfg.ArenaRatedUpdateTimer] = GetDefaultValue("Arena.RatedUpdateTimer", 5 * Time.InMilliseconds);
+            Values[WorldCfg.ArenaRatingDiscardTimer] = (TimeSpan)GetDefaultValue<Milliseconds>("Arena.RatingDiscardTimer", (Minutes)10);
+            Values[WorldCfg.ArenaRatedUpdateTimer] = (TimeSpan)GetDefaultValue<Milliseconds>("Arena.RatedUpdateTimer", (Seconds)5);
             Values[WorldCfg.ArenaQueueAnnouncerEnable] = GetDefaultValue("Arena.QueueAnnouncer.Enable", false);
-            Values[WorldCfg.ArenaSeasonId] = GetDefaultValue("Arena.ArenaSeason.ID", 32);
+            Values[WorldCfg.ArenaSeasonId] = GetDefaultValue("Arena.ArenaSeason.ID", 8);
             Values[WorldCfg.ArenaStartRating] = GetDefaultValue("Arena.ArenaStartRating", 0);
-            Values[WorldCfg.ArenaStartPersonalRating] = GetDefaultValue("Arena.ArenaStartPersonalRating", 1000);
+            Values[WorldCfg.ArenaStartPersonalRating] = GetDefaultValue("Arena.ArenaStartPersonalRating", 0);
             Values[WorldCfg.ArenaStartMatchmakerRating] = GetDefaultValue("Arena.ArenaStartMatchmakerRating", 1500);
             Values[WorldCfg.ArenaSeasonInProgress] = GetDefaultValue("Arena.ArenaSeason.InProgress", true);
             Values[WorldCfg.ArenaLogExtendedInfo] = GetDefaultValue("ArenaLog.ExtendedInfo", false);
@@ -1041,8 +1059,8 @@ namespace Game
 
             Values[WorldCfg.OffhandCheckAtSpellUnlearn] = GetDefaultValue("OffhandCheckAtSpellUnlearn", true);
 
-            Values[WorldCfg.CreaturePickpocketRefill] = GetDefaultValue("Creature.PickPocketRefillDelay", 10 * Time.Minute);
-            Values[WorldCfg.CreatureStopForPlayer] = GetDefaultValue("Creature.MovingStopTimeForPlayer", 3 * Time.Minute * Time.InMilliseconds);
+            Values[WorldCfg.CreaturePickpocketRefill] = (TimeSpan)GetDefaultValue<Seconds>("Creature.PickPocketRefillDelay", (Minutes)10);
+            Values[WorldCfg.CreatureStopForPlayer] = GetDefaultValue<Milliseconds>("Creature.MovingStopTimeForPlayer", (Minutes)3);
 
             {
                 uint defaultChacheId = 0u;
@@ -1054,7 +1072,7 @@ namespace Game
                 {
                     Values[WorldCfg.ClientCacheVersion] = clientCacheId;
                     Log.outInfo(LogFilter.ServerLoading, $"Client cache version set to: {clientCacheId}");
-                }              
+                }
             }
 
             Values[WorldCfg.GuildNewsLogCount] = GetDefaultValue("Guild.NewsLogRecordsCount", GuildConst.NewsLogMaxRecords);
@@ -1074,7 +1092,7 @@ namespace Game
             Values[WorldCfg.ChardeleteMinLevel] = GetDefaultValue("CharDelete.MinLevel", 0);
             Values[WorldCfg.ChardeleteDeathKnightMinLevel] = GetDefaultValue("CharDelete.DeathKnight.MinLevel", 0);
             Values[WorldCfg.ChardeleteDemonHunterMinLevel] = GetDefaultValue("CharDelete.DemonHunter.MinLevel", 0);
-            Values[WorldCfg.ChardeleteKeepDays] = GetDefaultValue("CharDelete.KeepDays", 30);
+            Values[WorldCfg.ChardeleteKeepDays] = (TimeSpan)GetDefaultValue("CharDelete.KeepDays", (Days)30);
 
             // No aggro from gray mobs
             {
@@ -1084,7 +1102,7 @@ namespace Game
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"NoGrayAggro.Above ({Values[WorldCfg.NoGrayAggroAbove]}) " +
-                            $"must be in range {0}..{Values[WorldCfg.MaxPlayerLevel]}. " +
+                        $"must be in range {0}..{Values[WorldCfg.MaxPlayerLevel]}. " +
                         $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
                     Values[WorldCfg.NoGrayAggroAbove] = Values[WorldCfg.MaxPlayerLevel];
@@ -1094,7 +1112,7 @@ namespace Game
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"NoGrayAggro.Below ({Values[WorldCfg.NoGrayAggroBelow]}) " +
-                            $"must be in range {0}..{Values[WorldCfg.MaxPlayerLevel]}. " +
+                        $"must be in range {0}..{Values[WorldCfg.MaxPlayerLevel]}. " +
                         $"Set to {Values[WorldCfg.MaxPlayerLevel]}.");
 
                     Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.MaxPlayerLevel];
@@ -1114,7 +1132,7 @@ namespace Game
 
             // Respawn Settings
             {
-                Values[WorldCfg.RespawnMinCheckIntervalMs] = GetDefaultValue("Respawn.MinCheckIntervalMS", 5000);
+                Values[WorldCfg.RespawnMinCheckIntervalMs] = (TimeSpan)GetDefaultValue("Respawn.MinCheckIntervalMS", (Milliseconds)5000);
 
                 Values[WorldCfg.RespawnDynamicMode] = GetDefaultValue("Respawn.DynamicMode", 0);
                 if ((uint)Values[WorldCfg.RespawnDynamicMode].Int32 > 1)
@@ -1156,7 +1174,7 @@ namespace Game
                 {
                     Log.outError(LogFilter.ServerLoading,
                         $"Respawn.RestartQuietTime ({Values[WorldCfg.RespawnRestartQuietTime]}) " +
-                            $"must be an hour, between {0} and {23}. " +
+                        $"must be an hour, between {0} and {23}. " +
                         $"Set to {3}.");
 
                     Values[WorldCfg.RespawnRestartQuietTime] = 3;
@@ -1173,7 +1191,7 @@ namespace Game
                     Values[WorldCfg.RespawnDynamicRateCreature] = 10.0f;
                 }
 
-                Values[WorldCfg.RespawnDynamicMinimumCreature] = GetDefaultValue("Respawn.DynamicMinimumCreature", 10);
+                Values[WorldCfg.RespawnDynamicMinimumCreature] = GetDefaultValue("Respawn.DynamicMinimumCreature", (Seconds)10);
 
                 Values[WorldCfg.RespawnDynamicRateGameobject] = GetDefaultValue("Respawn.DynamicRateGameObject", 10.0f);
                 if (Values[WorldCfg.RespawnDynamicRateGameobject].Float < 0.0f)
@@ -1186,8 +1204,8 @@ namespace Game
                     Values[WorldCfg.RespawnDynamicRateGameobject] = 10.0f;
                 }
 
-                Values[WorldCfg.RespawnDynamicMinimumGameObject] = GetDefaultValue("Respawn.DynamicMinimumGameObject", 10);
-                Values[WorldCfg.RespawnGuidWarningFrequency] = GetDefaultValue("Respawn.WarningFrequency", 1800);
+                Values[WorldCfg.RespawnDynamicMinimumGameObject] = GetDefaultValue("Respawn.DynamicMinimumGameObject", (Seconds)10);
+                Values[WorldCfg.RespawnGuidWarningFrequency] = (TimeSpan)GetDefaultValue<Seconds>("Respawn.WarningFrequency", (Minutes)30);
             }
 
             Values[WorldCfg.EnableMmaps] = GetDefaultValue("mmap.EnablePathFinding", true);
@@ -1226,15 +1244,15 @@ namespace Game
             Values[WorldCfg.WardenNumInjectChecks] = GetDefaultValue("Warden.NumInjectionChecks", 9);
             Values[WorldCfg.WardenNumLuaChecks] = GetDefaultValue("Warden.NumLuaSandboxChecks", 1);
             Values[WorldCfg.WardenNumClientModChecks] = GetDefaultValue("Warden.NumClientModChecks", 1);
-            Values[WorldCfg.WardenClientBanDuration] = GetDefaultValue("Warden.BanDuration", 86400);
-            Values[WorldCfg.WardenClientCheckHoldoff] = GetDefaultValue("Warden.ClientCheckHoldOff", 30);
+            Values[WorldCfg.WardenClientBanDuration] = GetDefaultValue<Seconds>("Warden.BanDuration", (Hours)24);
+            Values[WorldCfg.WardenClientCheckHoldoff] = (TimeSpan)GetDefaultValue("Warden.ClientCheckHoldOff", (Seconds)30);
             Values[WorldCfg.WardenClientFailAction] = GetDefaultValue("Warden.ClientCheckFailAction", 0);
-            Values[WorldCfg.WardenClientResponseDelay] = GetDefaultValue("Warden.ClientResponseDelay", 600);
+            Values[WorldCfg.WardenClientResponseDelay] = (TimeSpan)GetDefaultValue<Seconds>("Warden.ClientResponseDelay", (Minutes)10);
 
             // Feature System
             Values[WorldCfg.FeatureSystemBpayStoreEnabled] = GetDefaultValue("FeatureSystem.BpayStore.Enabled", false);
             Values[WorldCfg.FeatureSystemCharacterUndeleteEnabled] = GetDefaultValue("FeatureSystem.CharacterUndelete.Enabled", false);
-            Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown] = GetDefaultValue("FeatureSystem.CharacterUndelete.Cooldown", 2592000);
+            Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown] = GetDefaultValue<Seconds>("FeatureSystem.CharacterUndelete.Cooldown", (Days)30);
             Values[WorldCfg.FeatureSystemWarModeEnabled] = GetDefaultValue("FeatureSystem.WarMode.Enabled", false);
 
             // Dungeon finder
@@ -1264,10 +1282,10 @@ namespace Game
             //AutoBroadcast.On
             Values[WorldCfg.AutoBroadcast] = GetDefaultValue("AutoBroadcast.On", false);
             Values[WorldCfg.AutoBroadcastCenter] = GetDefaultValue("AutoBroadcast.Center", 0);
-            Values[WorldCfg.AutoBroadcastInterval] = GetDefaultValue("AutoBroadcast.Timer", 60000);
+            Values[WorldCfg.AutoBroadcastInterval] = (TimeSpan)GetDefaultValue<Milliseconds>("AutoBroadcast.Timer", (Minutes)10);
 
             // Guild save interval
-            Values[WorldCfg.GuildSaveInterval] = GetDefaultValue("Guild.SaveInterval", 15);
+            Values[WorldCfg.GuildSaveInterval] = (TimeSpan)GetDefaultValue("Guild.SaveInterval", (Minutes)15);
 
             // misc
             Values[WorldCfg.PdumpNoPaths] = GetDefaultValue("PlayerDump.DisallowPaths", true);          //Todo: NIY
@@ -1278,10 +1296,9 @@ namespace Game
             Values[WorldCfg.WintergraspPlrMax] = GetDefaultValue("Wintergrasp.PlayerMax", 100);
             Values[WorldCfg.WintergraspPlrMin] = GetDefaultValue("Wintergrasp.PlayerMin", 0);
             Values[WorldCfg.WintergraspPlrMinLvl] = GetDefaultValue("Wintergrasp.PlayerMinLvl", 77);
-            Values[WorldCfg.WintergraspBattletime] = GetDefaultValue("Wintergrasp.BattleTimer", 30);
-            Values[WorldCfg.WintergraspNobattletime] = GetDefaultValue("Wintergrasp.NoBattleTimer", 150);
-            Values[WorldCfg.WintergraspRestartAfterCrash] = GetDefaultValue("Wintergrasp.CrashRestartTimer", 10);
-
+            Values[WorldCfg.WintergraspBattletime] = (TimeSpan)GetDefaultValue("Wintergrasp.BattleTimer", (Minutes)30);
+            Values[WorldCfg.WintergraspNobattletime] = (TimeSpan)GetDefaultValue("Wintergrasp.NoBattleTimer", (Minutes)150);
+            Values[WorldCfg.WintergraspRestartAfterCrash] = (TimeSpan)GetDefaultValue("Wintergrasp.CrashRestartTimer", (Minutes)10);
 
             // Stats limits
             Values[WorldCfg.StatsLimitsEnable] = GetDefaultValue("Stats.Limits.Enable", false);
@@ -1296,12 +1313,12 @@ namespace Game
             if (Values[WorldCfg.PacketSpoofBanmode].Int32 == (int)BanMode.Character || Values[WorldCfg.PacketSpoofBanmode].Int32 > (int)BanMode.IP)
                 Values[WorldCfg.PacketSpoofBanmode] = (int)BanMode.Account;
 
-            Values[WorldCfg.PacketSpoofBanduration] = GetDefaultValue("PacketSpoof.BanDuration", 86400);
+            Values[WorldCfg.PacketSpoofBanduration] = GetDefaultValue<Seconds>("PacketSpoof.BanDuration", (Days)1);
 
             Values[WorldCfg.IpBasedActionLogging] = GetDefaultValue("Allow.IP.Based.Action.Logging", false); //Todo: NIY
 
             // AHBot
-            Values[WorldCfg.AhbotUpdateInterval] = GetDefaultValue("AuctionHouseBot.Update.Interval", 20);
+            Values[WorldCfg.AhbotUpdateInterval] = (TimeSpan)GetDefaultValue("AuctionHouseBot.Update.Interval", (Seconds)20);
 
             Values[WorldCfg.CalculateCreatureZoneAreaData] = GetDefaultValue("Calculate.Creature.Zone.Area.Data", false);
             Values[WorldCfg.CalculateGameobjectZoneAreaData] = GetDefaultValue("Calculate.Gameoject.Zone.Area.Data", false);
@@ -1309,7 +1326,7 @@ namespace Game
             // Black Market
             Values[WorldCfg.BlackmarketEnabled] = GetDefaultValue("BlackMarket.Enabled", true);
             Values[WorldCfg.BlackmarketMaxAuctions] = GetDefaultValue("BlackMarket.MaxAuctions", 12);
-            Values[WorldCfg.BlackmarketUpdatePeriod] = GetDefaultValue("BlackMarket.UpdatePeriod", 24);
+            Values[WorldCfg.BlackmarketUpdatePeriod] = (TimeSpan)GetDefaultValue("BlackMarket.UpdatePeriod", (Hours)24);
 
             // prevent character rename on character customization
             Values[WorldCfg.PreventRenameCustomization] = GetDefaultValue("PreventRenameCharacterOnCustomization", false);
@@ -1408,6 +1425,13 @@ namespace Game
         Float,
         Double,
         Bool,
+        Milliseconds,
+        Seconds,
+        Minutes,
+        Hours,
+        Days,
+        Weeks,
+        TimeSpan
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 9)]
@@ -1431,6 +1455,20 @@ namespace Game
         private readonly double _Double;
         [FieldOffset(1)]
         private readonly bool _Bool;
+        [FieldOffset(1)]
+        private readonly Milliseconds _Milliseconds;
+        [FieldOffset(1)]
+        private readonly Seconds _Seconds;
+        [FieldOffset(1)]
+        private readonly Minutes _Minutes;
+        [FieldOffset(1)]
+        private readonly Hours _Hours;
+        [FieldOffset(1)]
+        private readonly Days _Days;
+        [FieldOffset(1)]
+        private readonly Weeks _Weeks;
+        [FieldOffset(1)]
+        private readonly TimeSpan _TimeSpan;
 
         public WorldConfigValue(int value) { _Int32 = value; Type = WorldCfgType.Int32; }
         public WorldConfigValue(uint value) { _UInt32 = value; Type = WorldCfgType.UInt32; }
@@ -1439,6 +1477,13 @@ namespace Game
         public WorldConfigValue(float value) { _Float = value; Type = WorldCfgType.Float; }
         //public WorldConfigValue(double value) { _Double = value; Type = WorldCfgType.Double; }
         public WorldConfigValue(bool value) { _Bool = value; Type = WorldCfgType.Bool; }
+        public WorldConfigValue(Milliseconds value) { _Milliseconds = value; Type = WorldCfgType.Milliseconds; }
+        public WorldConfigValue(Seconds value) { _Seconds = value; Type = WorldCfgType.Seconds; }
+        public WorldConfigValue(Minutes value) { _Minutes = value; Type = WorldCfgType.Minutes; }
+        public WorldConfigValue(Hours value) { _Hours = value; Type = WorldCfgType.Hours; }
+        public WorldConfigValue(Days value) { _Days = value; Type = WorldCfgType.Days; }
+        public WorldConfigValue(Weeks value) { _Weeks = value; Type = WorldCfgType.Weeks; }
+        public WorldConfigValue(TimeSpan value) { _TimeSpan = value; Type = WorldCfgType.TimeSpan; }
 
         public static implicit operator WorldConfigValue(int value) => new(value);
         public static implicit operator WorldConfigValue(uint value) => new(value);
@@ -1447,6 +1492,13 @@ namespace Game
         public static implicit operator WorldConfigValue(float value) => new(value);
         //public static implicit operator WorldConfigValue(double value) => new(value);
         public static implicit operator WorldConfigValue(bool value) => new(value);
+        public static implicit operator WorldConfigValue(Milliseconds value) => new(value);
+        public static implicit operator WorldConfigValue(Seconds value) => new(value);
+        public static implicit operator WorldConfigValue(Minutes value) => new(value);
+        public static implicit operator WorldConfigValue(Hours value) => new(value);
+        public static implicit operator WorldConfigValue(Days value) => new(value);
+        public static implicit operator WorldConfigValue(Weeks value) => new(value);
+        public static implicit operator WorldConfigValue(TimeSpan value) => new(value);
         /*
                 public static implicit operator int(WorldConfigValue value) => value.Int32;
                 public static implicit operator uint(WorldConfigValue value) => value.UInt32;
@@ -1455,6 +1507,13 @@ namespace Game
                 public static implicit operator float(WorldConfigValue value) => value.Float;
                 //public static implicit operator double(WorldConfigValue value) => value.Double;
                 public static implicit operator bool(WorldConfigValue value) => value.Bool;
+                public static implicit operator Milliseconds(WorldConfigValue value) => value.Milliseconds;
+                public static implicit operator Seconds(WorldConfigValue value) => value.Seconds;
+                public static implicit operator Minutes(WorldConfigValue value) => value.Minutes;
+                public static implicit operator Hours(WorldConfigValue value) => value.Hours;
+                public static implicit operator Days(WorldConfigValue value) => value.Days;
+                public static implicit operator Weeks(WorldConfigValue value) => value.Weeks;
+                public static implicit operator TimeSpan(WorldConfigValue value) => value.TimeSpan;
         */
 
         public override string ToString()
@@ -1468,6 +1527,13 @@ namespace Game
                 case WorldCfgType.Float: return _Float.ToString();
                 //case WorldCfgType.Double: return _Double.ToString();
                 case WorldCfgType.Bool: return _Bool.ToString();
+                case WorldCfgType.Milliseconds: return _Milliseconds.ToString();
+                case WorldCfgType.Seconds: return _Seconds.ToString();
+                case WorldCfgType.Minutes: return _Minutes.ToString();
+                case WorldCfgType.Hours: return _Hours.ToString();
+                case WorldCfgType.Days: return _Days.ToString();
+                case WorldCfgType.Weeks: return _Weeks.ToString();
+                case WorldCfgType.TimeSpan: return _TimeSpan.ToString();
             }
 
             return base.ToString();
@@ -1548,6 +1614,83 @@ namespace Game
             {
                 if (Type == WorldCfgType.Bool)
                     return _Bool;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public Milliseconds Milliseconds
+        {
+            get
+            {
+                if (Type == WorldCfgType.Milliseconds)
+                    return _Milliseconds;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public Seconds Seconds
+        {
+            get
+            {
+                if (Type == WorldCfgType.Seconds)
+                    return _Seconds;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public Minutes Minutes
+        {
+            get
+            {
+                if (Type == WorldCfgType.Minutes)
+                    return _Minutes;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public Hours Hours
+        {
+            get
+            {
+                if (Type == WorldCfgType.Hours)
+                    return _Hours;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public Days Days
+        {
+            get
+            {
+                if (Type == WorldCfgType.Days)
+                    return _Days;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public Weeks Weeks
+        {
+            get
+            {
+                if (Type == WorldCfgType.Weeks)
+                    return _Weeks;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public TimeSpan TimeSpan
+        {
+            get
+            {
+                if (Type == WorldCfgType.TimeSpan)
+                    return _TimeSpan;
                 else
                     throw new InvalidOperationException();
             }

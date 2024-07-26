@@ -202,7 +202,7 @@ namespace Scripts.Spells.Priest
                 var areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
 
                 if (areaTriggers.Count >= 3)
-                    areaTriggers.FirstOrDefault().SetDuration(0);
+                    areaTriggers.FirstOrDefault().SetDuration(default);
             }
         }
 
@@ -215,7 +215,7 @@ namespace Scripts.Spells.Priest
                 {
                     // If target already has aura, increase duration to max 130% of initial duration
                     caster.CastSpell(unit, SpellIds.AngelicFeatherAura, true);
-                    at.SetDuration(0);
+                    at.SetDuration(default);
                 }
             }
         }
@@ -517,7 +517,7 @@ namespace Scripts.Spells.Priest
                 {
                     GetCaster().CastSpell(GetHitUnit(), SpellIds.Renew, 
                         TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
-        }
+                }
             }
         }
 
@@ -714,7 +714,7 @@ namespace Scripts.Spells.Priest
         {
             var spellId = GetId();
             var owner = GetUnitOwner();
-            GetUnitOwner().m_Events.AddEventAtOffset(() => owner.RemoveAuraFromStack(spellId), TimeSpan.FromMilliseconds(GetMaxDuration()));
+            GetUnitOwner().m_Events.AddEventAtOffset(() => owner.RemoveAuraFromStack(spellId), Time.SpanFromMilliseconds(GetMaxDuration()));
         }
 
         public override void Register()
@@ -803,11 +803,11 @@ namespace Scripts.Spells.Priest
 
             Vector3 endPoint = firstPath.GetPath().Last();
 
-            // Note: it takes TimeSpan.FromMilliseconds(1000) to reach 1's BasePoints yards, so it takes (1000 / 1's BasePoints)ms to run 1 yard.
-            at.InitSplines(firstPath.GetPath(), (uint)(at.GetDistance(endPoint.X, endPoint.Y, endPoint.Z) * (float)(1000 / _maxTravelDistance)));
+            // Note: it takes Time.SpanFromMilliseconds(1000) to reach 1's BasePoints yards, so it takes (1000 / 1's BasePoints)ms to run 1 yard.
+            at.InitSplines(firstPath.GetPath(), (Milliseconds)(at.GetDistance(endPoint.X, endPoint.Y, endPoint.Z) * (float)1000 / _maxTravelDistance));
         }
 
-        public override void OnUpdate(uint diff)
+        public override void OnUpdate(TimeSpan diff)
         {
             _scheduler.Update(diff);
         }
@@ -837,9 +837,9 @@ namespace Scripts.Spells.Priest
 
             if (caster.IsValidAttackTarget(unit))
             {
-                caster.CastSpell(unit, 
-                    at.GetSpellId() == SpellIds.DivineStarShadow 
-                    ? SpellIds.DivineStarShadowDamage 
+                caster.CastSpell(unit,
+                    at.GetSpellId() == SpellIds.DivineStarShadow
+                    ? SpellIds.DivineStarShadowDamage
                     : SpellIds.DivineStarHolyDamage,
                     TriggerFlags);
             }
@@ -873,7 +873,7 @@ namespace Scripts.Spells.Priest
 
         void ReturnToCaster()
         {
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(0), task =>
+            _scheduler.Schedule(Time.SpanFromMilliseconds(0), task =>
             {
                 Unit caster = at.GetCaster();
                 if (caster == null)
@@ -888,9 +888,9 @@ namespace Scripts.Spells.Priest
                     caster.GetPosition(),
                     caster.GetPosition(),
                 ];
-                at.InitSplines(returnSplinePoints, (uint)(at.GetDistance(caster) / _maxTravelDistance * 1000));
+                at.InitSplines(returnSplinePoints, (Milliseconds)(at.GetDistance(caster) / _maxTravelDistance * 1000));
 
-                task.Repeat(TimeSpan.FromMilliseconds(250));
+                task.Repeat((Milliseconds)250);
             });
         }
     }
@@ -991,10 +991,11 @@ namespace Scripts.Spells.Priest
             if (atonementAura == null)
                 return;
 
-            TimeSpan extraDuration = TimeSpan.FromSeconds(GetEffectValue());
+            Seconds extraDuration = (Seconds)GetEffectValue();
 
-            atonementAura.SetDuration((int)(atonementAura.GetDuration() + extraDuration.TotalMilliseconds));
-            atonementAura.SetMaxDuration((int)(atonementAura.GetDuration() + extraDuration.TotalMilliseconds));
+            Milliseconds totalDuration = atonementAura.GetDuration() + extraDuration;
+            atonementAura.SetDuration(totalDuration);
+            atonementAura.SetMaxDuration(totalDuration);
         }
 
         public override void Register()
@@ -1116,9 +1117,9 @@ namespace Scripts.Spells.Priest
                         ? SpellIds.HaloShadowHeal 
                         : SpellIds.HaloHolyHeal,
                         TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress);
+                }
             }
         }
-    }
     }
 
     [Script] // 391154 - Holy Mending
@@ -1192,7 +1193,7 @@ namespace Scripts.Spells.Priest
 
             SpellInfo targetSpellInfo = SpellMgr.GetSpellInfo(targetSpellId, GetCastDifficulty());
             int cdReduction = targetSpellInfo.GetEffect(cdReductionEffIndex).CalcValue(GetTarget());
-            GetTarget().GetSpellHistory().ModifyCooldown(targetSpellInfo, TimeSpan.FromSeconds(-cdReduction), true);
+            GetTarget().GetSpellHistory().ModifyCooldown(targetSpellInfo, Time.SpanFromSeconds(-cdReduction), true);
         }
 
         public override void Register()
@@ -1272,7 +1273,7 @@ namespace Scripts.Spells.Priest
                     SpellIds.HolyWordSalvation, GetCastDifficulty()).GetEffect(2).CalcValue(GetCaster());
 
             GetCaster().GetSpellHistory().ModifyCooldown(
-                SpellIds.HolyWordSalvation, TimeSpan.FromSeconds(-cooldownReduction), true);
+                SpellIds.HolyWordSalvation, Time.SpanFromSeconds(-cooldownReduction), true);
         }
 
         public override void Register()
@@ -1436,7 +1437,7 @@ namespace Scripts.Spells.Priest
             if (caster == null || target == null)
                 return;
 
-            int additionalDuration = aurEff.GetAmount();
+            Seconds additionalDuration = (Seconds)aurEff.GetAmount();
 
             Aura shadowWordPain = target.GetOwnedAura(SpellIds.ShadowWordPain, caster.GetGUID());
             if (shadowWordPain != null)
@@ -1509,8 +1510,8 @@ namespace Scripts.Spells.Priest
                     caster.CastSpell(target, _damageSpellId, 
                         new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD)
                         .SetTriggeringSpell(GetSpell()));
+                }
             }
-        }
         }
 
         public override void Register()
@@ -2312,7 +2313,7 @@ namespace Scripts.Spells.Priest
                 if (auraB == null)
                     return -1;
 
-                return auraA.GetDuration().CompareTo(auraB.GetDuration());
+                return auraA.GetDuration().Ticks.CompareTo(auraB.GetDuration().Ticks);
             });
 
             // Note: Revel in Purity talent.

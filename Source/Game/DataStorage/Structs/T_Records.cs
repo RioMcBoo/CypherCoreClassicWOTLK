@@ -136,11 +136,12 @@ namespace Game.DataStorage
         public int NodeIndex;
         public ushort ContinentID;
         private int _flags;
-        public uint Delay;
+        private int _delay;
         public int ArrivalEventID;
         public int DepartureEventID;
 
         #region Properties
+        public Seconds Delay => (Seconds)_delay;
         public TaxiPathNodeFlags Flags => (TaxiPathNodeFlags)_flags;
         #endregion
 
@@ -459,15 +460,23 @@ namespace Game.DataStorage
         public int Id;
         public Vector3 Pos;
         public byte SequenceID;
-        public uint TimeIndex;
+        private uint _timeIndex;
         public int TransportID;
+
+        #region Properties
+        public RelativeTime TimeIndex => (RelativeTime)_timeIndex;
+        #endregion
     }
 
     public sealed class TransportRotationRecord
     {
         public int Id;
         public float[] Rot = new float[4];
-        public uint TimeIndex;
+        private uint _timeIndex;
         public int GameObjectsID;
+
+        #region Properties
+        public RelativeTime TimeIndex => (RelativeTime)_timeIndex;
+        #endregion
     }
 }

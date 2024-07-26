@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.GameMath;
+using System;
 using System.Numerics;
 
 namespace Game.Collision
@@ -33,7 +34,7 @@ namespace Game.Collision
             impl.Balance();
         }
 
-        public void Update(uint diff)
+        public void Update(TimeSpan diff)
         {
             impl.Update(diff);
         }
@@ -145,7 +146,7 @@ namespace Game.Collision
     {
         public DynTreeImpl()
         {
-            rebalance_timer = new TimeTracker(200);
+            rebalance_timer = new TimeTracker((Milliseconds)200);
             unbalanced_times = 0;
         }
 
@@ -167,7 +168,7 @@ namespace Game.Collision
             unbalanced_times = 0;
         }
 
-        public void Update(uint difftime)
+        public void Update(TimeSpan difftime)
         {
             if (Empty())
                 return;
@@ -175,7 +176,7 @@ namespace Game.Collision
             rebalance_timer.Update(difftime);
             if (rebalance_timer.Passed())
             {
-                rebalance_timer.Reset(200);
+                rebalance_timer.Reset((Milliseconds)200);
                 if (unbalanced_times > 0)
                     Balance();
             }

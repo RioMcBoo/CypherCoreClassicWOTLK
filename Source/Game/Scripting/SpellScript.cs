@@ -439,7 +439,7 @@ namespace Game.Scripting
             {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                 {
-                    Log.outError(LogFilter.Scripts, 
+                    Log.outError(LogFilter.Scripts,
                         $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
                         $"handler bound to hook `OnEffectLaunch` of SpellScript won't be executed");
                 }
@@ -449,7 +449,7 @@ namespace Game.Scripting
             {
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                 {
-                    Log.outError(LogFilter.Scripts, 
+                    Log.outError(LogFilter.Scripts,
                         $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - " +
                         $"handler bound to hook `OnEffectLaunchTarget` of SpellScript won't be executed");
                 }
@@ -518,7 +518,7 @@ namespace Game.Scripting
                     Log.outError(LogFilter.Scripts,
                         $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - " +
                         $"handler bound to hook `CalcDamage` of SpellScript won't be executed");
-            }
+                }
             }
 
             if (!CalcHealing.Empty())
@@ -531,7 +531,7 @@ namespace Game.Scripting
                     Log.outError(LogFilter.Scripts,
                         $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - " +
                         $"handler bound to hook `CalcHealing` of SpellScript won't be executed");
-            }
+                }
             }
 
             return base._Validate(entry);
@@ -638,7 +638,7 @@ namespace Game.Scripting
         public List<CheckCastHandler> OnCheckCast = new();
 
         // example: int32 CalcCastTime(int32 castTime) override { return 1500; }
-        public virtual int CalcCastTime(int castTime) { return castTime; }
+        public virtual Milliseconds CalcCastTime(Milliseconds castTime) { return castTime; }
 
         // where function is void function(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
         public List<OnCalculateResistAbsorbHandler> OnCalculateResistAbsorb = new();
@@ -1364,9 +1364,9 @@ namespace Game.Scripting
                 _callImpl = callImpl;
             }
 
-            public void Call(AuraEffect aurEff, ref bool isPeriodic, ref int periodicTimer)
+            public void Call(AuraEffect aurEff, ref bool isPeriodic, ref Milliseconds periodicTimer)
             {
-                _callImpl(aurEff, ref isPeriodic, ref periodicTimer);
+                _callImpl(aurEff, ref isPeriodic, ref periodicTimer.Ticks);
             }
         }
 
@@ -2126,15 +2126,16 @@ namespace Game.Scripting
         public AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
 
         // aura duration manipulation - when duration goes to 0 aura is removed
-        public int GetDuration() { return m_aura.GetDuration(); }
-        public void SetDuration(int duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
+        public Milliseconds GetDuration() { return m_aura.GetDuration(); }
+        public void SetDuration(Milliseconds duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
         
         // sets duration to maxduration
         public void RefreshDuration() { m_aura.RefreshDuration(); }
-        public long GetApplyTime() { return m_aura.GetApplyTime(); }
-        public int GetMaxDuration() { return m_aura.GetMaxDuration(); }
-        public void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
-        public int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
+        public ServerTime GetApplyTime() { return m_aura.GetApplyTime(); }
+        public Milliseconds GetMaxDuration() { return m_aura.GetMaxDuration(); }
+        public void SetMaxDuration(Milliseconds duration) { m_aura.SetMaxDuration(duration); }
+        public Milliseconds CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
+        
         // expired - duration just went to 0
         public bool IsExpired() { return m_aura.IsExpired(); }
         

@@ -13,7 +13,7 @@ namespace Game.DataStorage
 
         public void LoadCharacterTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            RelativeTime oldMSTime = Time.NowRelative;
             _characterTemplateStore.Clear();
 
             MultiMap<int, CharacterTemplateClass> characterTemplateClasses = new();
@@ -85,7 +85,7 @@ namespace Game.DataStorage
                 while (templates.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_characterTemplateStore.Count} character templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_characterTemplateStore.Count} character templates in {Time.Diff(oldMSTime)} ms.");
         }
 
         public Dictionary<int, CharacterTemplate> GetCharacterTemplates()

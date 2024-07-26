@@ -3,6 +3,7 @@
 
 using Game.Entities;
 using Game.Spells;
+using System;
 
 namespace Game.AI
 {
@@ -22,7 +23,7 @@ namespace Game.AI
         public virtual void OnCreate(Spell creatingSpell) { }
 
         // Called on each AreaTrigger update
-        public virtual void OnUpdate(uint diff) { }
+        public virtual void OnUpdate(TimeSpan diff) { }
 
         // Called when the AreaTrigger reach splineIndex
         public virtual void OnSplineIndexReached(int splineIndex) { }

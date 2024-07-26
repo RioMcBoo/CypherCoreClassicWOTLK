@@ -349,7 +349,7 @@ namespace Game.Spells
 
     public class Aura
     {
-        const int UPDATE_TARGET_MAP_INTERVAL = 500;
+        static readonly Milliseconds UPDATE_TARGET_MAP_INTERVAL = new(500);
 
         public Aura(AuraCreateInfo createInfo)
         {
@@ -361,18 +361,18 @@ namespace Game.Spells
             m_castItemId = createInfo.CastItemId;
             m_castItemLevel = createInfo.CastItemLevel;
             m_spellVisual = new SpellCastVisual(createInfo.Caster != null ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId());
-            m_applyTime = GameTime.GetGameTime();
+            m_applyTime = LoopTime.ServerTime;
             m_owner = createInfo._owner;
-            m_timeCla = 0;
-            m_updateTargetMapInterval = 0;
+            m_timeCla = Milliseconds.Zero;
+            m_updateTargetMapInterval = Milliseconds.Zero;
             m_casterLevel = createInfo.Caster != null ? createInfo.Caster.GetLevel() : m_spellInfo.SpellLevel;
             m_procCharges = 0;
             m_stackAmount = 1;
             m_isRemoved = false;
             m_isSingleTarget = false;
             m_isUsingCharges = false;
-            m_lastProcAttemptTime = (DateTime.Now - TimeSpan.FromSeconds(10));
-            m_lastProcSuccessTime = (DateTime.Now - TimeSpan.FromSeconds(120));
+            m_lastProcAttemptTime = LoopTime.ServerTime - (Seconds)10;
+            m_lastProcSuccessTime = LoopTime.ServerTime - (Seconds)120;
 
             foreach (SpellPowerRecord power in m_spellInfo.PowerCosts)
             {
@@ -381,7 +381,7 @@ namespace Game.Spells
             }
 
             if (!m_periodicCosts.Empty())
-                m_timeCla = 1 * Time.InMilliseconds;
+                m_timeCla = (Seconds)1;
 
             m_maxDuration = CalcMaxDuration(createInfo.Caster);
             m_duration = m_maxDuration;
@@ -682,7 +682,7 @@ namespace Game.Spells
             }
         }
 
-        public void UpdateOwner(uint diff, WorldObject owner)
+        public void UpdateOwner(Milliseconds diff, WorldObject owner)
         {
             Cypher.Assert(owner == m_owner);
 
@@ -707,7 +707,7 @@ namespace Game.Spells
             if (m_updateTargetMapInterval <= diff)
                 UpdateTargetMap(caster);
             else
-                m_updateTargetMapInterval -= (int)diff;
+                m_updateTargetMapInterval -= diff;
 
             // update aura effects
             foreach (AuraEffect effect in GetAuraEffects())
@@ -721,24 +721,25 @@ namespace Game.Spells
             _DeleteRemovedApplications();
         }
 
-        void Update(uint diff, Unit caster)
+        void Update(Milliseconds diff, Unit caster)
         {
             if (m_duration > 0)
             {
-                m_duration -= (int)diff;
+                m_duration -= diff;
+
                 if (m_duration < 0)
-                    m_duration = 0;
+                    m_duration = Milliseconds.Zero;                
 
                 // handle manaPerSecond/manaPerSecondPerLevel
                 if (m_timeCla != 0)
                 {
                     if (m_timeCla > diff)
-                        m_timeCla -= (int)diff;
+                        m_timeCla -= diff;
                     else if (caster != null && (caster == GetOwner() || !GetSpellInfo().HasAttribute(SpellAttr2.NoTargetPerSecondCosts)))
                     {
                         if (!m_periodicCosts.Empty())
                         {
-                            m_timeCla += (int)(1000 - diff);
+                            m_timeCla += (Milliseconds)1000 - diff;
 
                             foreach (SpellPowerRecord power in m_periodicCosts)
                             {
@@ -772,15 +773,15 @@ namespace Game.Spells
             }
         }
 
-        public int CalcMaxDuration(Unit caster)
+        public Milliseconds CalcMaxDuration(Unit caster)
         {
             return CalcMaxDuration(GetSpellInfo(), caster, null);
         }
 
-        public static int CalcMaxDuration(SpellInfo spellInfo, WorldObject caster, List<SpellPowerCost> powerCosts)
+        public static Milliseconds CalcMaxDuration(SpellInfo spellInfo, WorldObject caster, List<SpellPowerCost> powerCosts)
         {
             Player modOwner = null;
-            int maxDuration;
+            Milliseconds maxDuration;
 
             if (caster != null)
             {
@@ -791,9 +792,9 @@ namespace Game.Spells
                 maxDuration = spellInfo.GetDuration();
 
             if (spellInfo.IsPassive() && spellInfo.DurationEntry == null)
-                maxDuration = -1;
+                maxDuration = new(-1);
 
-            // IsPermanent() checks max duration (which we are supposed to calculate here)
+            // IsPermanent() checks max duration (which we are supposed to calculate here)            
             if (maxDuration != -1 && modOwner != null)
             {
                 modOwner.ApplySpellMod(spellInfo, SpellModOp.Duration, ref maxDuration);
@@ -802,7 +803,7 @@ namespace Game.Spells
             return maxDuration;
         }
 
-        public void SetDuration(int duration, bool withMods = false)
+        public void SetDuration(Milliseconds duration, bool withMods = false)
         {
             if (withMods)
             {
@@ -824,10 +825,10 @@ namespace Game.Spells
             Unit caster = GetCaster();
             if (withMods && caster != null)
             {
-                int duration = m_spellInfo.GetMaxDuration();
+                Milliseconds duration = m_spellInfo.GetMaxDuration();
                 // Calculate duration of periodics affected by haste.
                 if (m_spellInfo.HasAttribute(SpellAttr8.HasteAffectsDuration))
-                    duration = (int)(duration * caster.m_unitData.ModCastingSpeed);
+                    duration = (Milliseconds)(duration * caster.m_unitData.ModCastingSpeed);
 
                 SetMaxDuration(duration);
                 SetDuration(duration);
@@ -836,7 +837,7 @@ namespace Game.Spells
                 SetDuration(GetMaxDuration());
 
             if (!m_periodicCosts.Empty())
-                m_timeCla = 1 * Time.InMilliseconds;
+                m_timeCla = (Seconds)1;
 
             // also reset periodic counters
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
@@ -857,8 +858,8 @@ namespace Game.Spells
                 // Pandemic doesn't reset periodic timer
                 resetPeriodicTimer = false;
 
-                int pandemicDuration = MathFunctions.CalculatePct(m_maxDuration, 30.0f);
-                m_maxDuration = Math.Max(GetDuration(), Math.Min(pandemicDuration, GetDuration()) + m_maxDuration);
+                Milliseconds pandemicDuration = (Milliseconds)MathFunctions.CalculatePct(m_maxDuration, 30.0f);
+                m_maxDuration = Time.Max(GetDuration(), Time.Min(pandemicDuration, GetDuration()) + m_maxDuration);
             }
 
             RefreshDuration();
@@ -910,7 +911,7 @@ namespace Game.Spells
             ModCharges(num, removeMode);
         }
 
-        public void DropChargeDelayed(uint delay, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public void DropChargeDelayed(TimeSpan delay, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             // aura is already during delayed charge drop
             if (m_dropEvent != null)
@@ -922,7 +923,7 @@ namespace Game.Spells
                 return;
 
             m_dropEvent = new ChargeDropEvent(this, removeMode);
-            owner.m_Events.AddEvent(m_dropEvent, owner.m_Events.CalculateTime(TimeSpan.FromMilliseconds(delay)));
+            owner.m_Events.AddEvent(m_dropEvent, owner.m_Events.CalculateTime(delay));
         }
 
         public void SetStackAmount(byte stackAmount)
@@ -1157,7 +1158,7 @@ namespace Game.Spells
             return key;
         }
 
-        public void SetLoadedState(int maxduration, int duration, int charges, byte stackamount, uint recalculateMask, int[] amount)
+        public void SetLoadedState(Milliseconds maxduration, Milliseconds duration, int charges, byte stackamount, uint recalculateMask, int[] amount)
         {
             m_maxDuration = maxduration;
             m_duration = duration;
@@ -1215,7 +1216,7 @@ namespace Game.Spells
             {
                 if (effect != null && !IsRemoved())
                     effect.RecalculateAmount(caster);
-        }
+            }
         }
 
         public void HandleAllEffects(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
@@ -1225,7 +1226,7 @@ namespace Game.Spells
             {
                 if (effect != null && !IsRemoved())
                     effect.HandleEffect(aurApp, mode, apply);
-        }
+            }
         }
 
         public List<AuraApplication> GetApplicationList()
@@ -1305,8 +1306,8 @@ namespace Game.Spells
                                 target.CastSpell(target, spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                                     .SetOriginalCaster(GetCasterGUID())
                                     .SetOriginalCastId(GetCastId()));
+                            }
                         }
-                    }
                     }
 
                     spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Aura, GetId());
@@ -1413,11 +1414,11 @@ namespace Game.Spells
                                     {
                                         // This additional check is needed to add a minimal delay before cooldown in in effect
                                         // to allow all bubbles broken by a single damage source proc mana return
-                                        if (caster.GetSpellHistory().GetRemainingCooldown(aura.GetSpellInfo()) <= TimeSpan.FromSeconds(11))
+                                        if (caster.GetSpellHistory().GetRemainingCooldown(aura.GetSpellInfo()) <= (Seconds)11)
                                             break;
                                     }
                                     else    // and add if needed
-                                        caster.GetSpellHistory().AddCooldown(aura.GetId(), 0, TimeSpan.FromSeconds(12));
+                                        caster.GetSpellHistory().AddCooldown(aura.GetId(), 0, (Seconds)12);
                                 }
 
                                 // effect on caster
@@ -1692,10 +1693,10 @@ namespace Game.Spells
             return m_procCooldown > now;
         }
 
-        public void AddProcCooldown(SpellProcEntry procEntry, DateTime now)
+        public void AddProcCooldown(SpellProcEntry procEntry, ServerTime now)
         {
             // cooldowns should be added to the whole aura (see 51698 area aura)
-            int procCooldown = (int)procEntry.Cooldown;
+            Milliseconds procCooldown = procEntry.Cooldown;
             Unit caster = GetCaster();
             if (caster != null)
             {
@@ -1704,15 +1705,15 @@ namespace Game.Spells
                     modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcCooldown, ref procCooldown);
             }
 
-            m_procCooldown = now + TimeSpan.FromMilliseconds(procCooldown);
+            m_procCooldown = now + procCooldown;
         }
 
         public void ResetProcCooldown()
         {
-            m_procCooldown = DateTime.Now;
+            m_procCooldown = LoopTime.ServerTime;
         }
 
-        public void PrepareProcToTrigger(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
+        public void PrepareProcToTrigger(AuraApplication aurApp, ProcEventInfo eventInfo, ServerTime now)
         {
             bool prepare = CallScriptPrepareProcHandlers(aurApp, eventInfo);
             if (!prepare)
@@ -1753,7 +1754,7 @@ namespace Game.Spells
             }
         }
 
-        public uint GetProcEffectMask(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
+        public uint GetProcEffectMask(AuraApplication aurApp, ProcEventInfo eventInfo, ServerTime now)
         {
             SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
             // only auras with spell proc entry can trigger proc
@@ -1805,7 +1806,7 @@ namespace Game.Spells
                 {
                     if (eventSpellInfo.HasAttribute(SpellCustomAttributes.DontBreakStealth))
                         return 0;
-            }
+                }
             }
 
             // check if we have charges to proc with
@@ -1821,8 +1822,8 @@ namespace Game.Spells
                     {
                         if (!eventSpell.m_appliedMods.Contains(this))
                             return 0;
+                    }
                 }
-            }
             }
 
             // check proc cooldown
@@ -1935,7 +1936,7 @@ namespace Game.Spells
                 // calculate ppm Chance if present and we're using weapon
                 if (eventInfo.GetDamageInfo() != null && procEntry.ProcsPerMinute != 0)
                 {
-                    uint WeaponSpeed = caster.GetBaseAttackTime(eventInfo.GetDamageInfo().GetAttackType());
+                    Milliseconds WeaponSpeed = caster.GetBaseAttackTime(eventInfo.GetDamageInfo().GetAttackType());
                     chance = caster.GetPPMProcChance(WeaponSpeed, procEntry.ProcsPerMinute, GetSpellInfo());
                 }
 
@@ -1985,7 +1986,7 @@ namespace Game.Spells
             float ppm = m_spellInfo.CalcProcPPM(actor, GetCastItemLevel());
             float averageProcInterval = 60.0f / ppm;
 
-            var currentTime = GameTime.Now();
+            ServerTime currentTime = LoopTime.ServerTime;
             float secondsSinceLastAttempt = Math.Min((float)(currentTime - m_lastProcAttemptTime).TotalSeconds, 10.0f);
             float secondsSinceLastProc = Math.Min((float)(currentTime - m_lastProcSuccessTime).TotalSeconds, 1000.0f);
 
@@ -2186,7 +2187,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectCalcPeriodicHandlers(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
+        public void CallScriptEffectCalcPeriodicHandlers(AuraEffect aurEff, ref bool isPeriodic, ref Milliseconds amplitude)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2554,11 +2555,11 @@ namespace Game.Spells
             UpdateTargetMap(caster, true);
         }
 
-        public long GetApplyTime() { return m_applyTime; }
-        public int GetMaxDuration() { return m_maxDuration; }
-        public void SetMaxDuration(int duration) { m_maxDuration = duration; }
-        public int CalcMaxDuration() { return CalcMaxDuration(GetCaster()); }
-        public int GetDuration() { return m_duration; }
+        public ServerTime GetApplyTime() { return m_applyTime; }
+        public Milliseconds GetMaxDuration() { return m_maxDuration; }
+        public void SetMaxDuration(Milliseconds duration) { m_maxDuration = duration; }
+        public Milliseconds CalcMaxDuration() { return CalcMaxDuration(GetCaster()); }
+        public Milliseconds GetDuration() { return m_duration; }
         public bool IsExpired() { return GetDuration() == 0 && m_dropEvent == null; }
         public bool IsPermanent() { return m_maxDuration == -1; }
 
@@ -2628,8 +2629,8 @@ namespace Game.Spells
 
         public AuraEffect[] GetAuraEffects() { return _effects; }
 
-        public void SetLastProcAttemptTime(DateTime lastProcAttemptTime) { m_lastProcAttemptTime = lastProcAttemptTime; }
-        public void SetLastProcSuccessTime(DateTime lastProcSuccessTime) { m_lastProcSuccessTime = lastProcSuccessTime; }
+        public void SetLastProcAttemptTime(ServerTime lastProcAttemptTime) { m_lastProcAttemptTime = lastProcAttemptTime; }
+        public void SetLastProcSuccessTime(ServerTime lastProcSuccessTime) { m_lastProcSuccessTime = lastProcSuccessTime; }
 
         public UnitAura ToUnitAura() { if (GetAuraType() == AuraObjectType.Unit) return (UnitAura)this; else return null; }
 
@@ -2798,18 +2799,18 @@ namespace Game.Spells
         int m_castItemId;
         int m_castItemLevel;
         SpellCastVisual m_spellVisual;
-        long m_applyTime;
+        ServerTime m_applyTime;
         WorldObject m_owner;
 
-        int m_maxDuration;                                // Max aura duration
-        int m_duration;                                   // Current time
-        int m_timeCla;                                    // Timer for power per sec calcultion
-        List<SpellPowerRecord> m_periodicCosts = new();// Periodic costs
-        int m_updateTargetMapInterval;                    // Timer for UpdateTargetMapOfEffect
+        Milliseconds m_maxDuration;                             // Max aura duration
+        Milliseconds m_duration;                                // Current time
+        Milliseconds m_timeCla;                                 // Timer for power per sec calcultion
+        List<SpellPowerRecord> m_periodicCosts = new();         // Periodic costs
+        Milliseconds m_updateTargetMapInterval;                 // Timer for UpdateTargetMapOfEffect
 
-        int m_casterLevel;                          // Aura level (store caster level for correct show level dep amount)
-        byte m_procCharges;                                // Aura charges (0 for infinite)
-        byte m_stackAmount;                                // Aura stack amount
+        int m_casterLevel;                                      // Aura level (store caster level for correct show level dep amount)
+        byte m_procCharges;                                     // Aura charges (0 for infinite)
+        byte m_stackAmount;                                     // Aura stack amount
 
         //might need to be arrays still
         AuraEffect[] _effects;
@@ -2821,9 +2822,9 @@ namespace Game.Spells
 
         ChargeDropEvent m_dropEvent;
 
-        DateTime m_procCooldown;
-        DateTime m_lastProcAttemptTime;
-        DateTime m_lastProcSuccessTime;
+        ServerTime m_procCooldown;
+        ServerTime m_lastProcAttemptTime;
+        ServerTime m_lastProcSuccessTime;
 
         List<AuraApplication> _removedApplications = new();
         #endregion
@@ -2928,7 +2929,7 @@ namespace Game.Spells
                     case SpellEffectName.ApplyAreaAuraPet:
                         if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
                         { 
-                            units.Add(GetUnitOwner());
+                            units.Add(GetUnitOwner()); 
                         }
 
                         goto case SpellEffectName.ApplyAreaAuraOwner;
@@ -3080,7 +3081,7 @@ namespace Game.Spells
             _mode = mode;
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
             // _base is always valid (look in Aura._Remove())
             _base.ModChargesDelayed(-1, _mode);

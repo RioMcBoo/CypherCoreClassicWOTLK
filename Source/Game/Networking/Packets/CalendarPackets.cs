@@ -100,14 +100,13 @@ namespace Game.Networking.Packets
             EventID = _worldPacket.ReadInt64();
             ModeratorID = _worldPacket.ReadInt64();
             EventClubID = _worldPacket.ReadInt64();
-            Date = new();
-            Date.Read(_worldPacket);
+            Date = (RealmTime)(WowTime)_worldPacket.ReadInt32();
         }
 
         public long ModeratorID;
         public long EventID;
         public long EventClubID;
-        public WowTime Date;
+        public RealmTime Date;
     }
 
     class CalendarInviteAdded : ServerPacket
@@ -122,14 +121,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(Level);
             _worldPacket.WriteUInt8((byte)Status);
             _worldPacket.WriteUInt8(Type);
-            ResponseTime.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)ResponseTime);
 
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
 
         public long InviteID;
-        public WowTime ResponseTime;
+        public RealmTime ResponseTime;
         public byte Level = 100;
         public ObjectGuid InviteGuid;
         public long EventID;
@@ -144,24 +143,29 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            ServerTime.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)RealmTime);
             _worldPacket.WriteInt32(Invites.Count);
             _worldPacket.WriteInt32(Events.Count);
             _worldPacket.WriteInt32(RaidLockouts.Count);
+            _worldPacket.WriteInt32(RaidResets.Count);
+
+            foreach (var invite in Invites)
+                invite.Write(_worldPacket);
 
             foreach (var lockout in RaidLockouts)
                 lockout.Write(_worldPacket);
 
-            foreach (var invite in Invites)
-                invite.Write(_worldPacket);            
+            foreach (var reset in RaidResets)
+                reset.Write(_worldPacket);
 
             foreach (var Event in Events)
                 Event.Write(_worldPacket);
         }
 
-        public WowTime ServerTime;
+        public RealmTime RealmTime;
         public List<CalendarSendCalendarInviteInfo> Invites = new();
         public List<CalendarSendCalendarRaidLockoutInfo> RaidLockouts = new();
+        public List<CalendarSendCalendarRaidResetInfo> RaidResets = new();
         public List<CalendarSendCalendarEventInfo> Events = new();
     }
 
@@ -177,8 +181,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)GetEventType);
             _worldPacket.WriteInt32(TextureID);
             _worldPacket.WriteUInt32((uint)Flags);
-            Date.Write(_worldPacket);
-            LockDate.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)Date);
+            _worldPacket.WriteInt32((WowTime)LockDate);
             _worldPacket.WriteInt64(EventGuildID);
             _worldPacket.WriteInt32(Invites.Count);
 
@@ -196,8 +200,8 @@ namespace Game.Networking.Packets
         public ObjectGuid OwnerGuid;
         public long EventGuildID;
         public long EventID;
-        public WowTime Date;
-        public WowTime LockDate;
+        public RealmTime Date;
+        public RealmTime LockDate;
         public CalendarFlags Flags;
         public int TextureID;
         public CalendarEventType GetEventType;
@@ -214,7 +218,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt64(EventID);
-            Date.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)Date);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)EventType);
             _worldPacket.WriteInt32(TextureID);
@@ -238,7 +242,7 @@ namespace Game.Networking.Packets
         public long InviteID;
         public long EventID;
         public CalendarFlags Flags;
-        public WowTime Date;
+        public RealmTime Date;
         public int TextureID;
         public CalendarInviteStatus Status;
         public CalendarEventType EventType;
@@ -295,10 +299,10 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(InviteGuid);
             _worldPacket.WriteInt64(EventID);
-            Date.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)Date);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)Status);
-            ResponseTime.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)ResponseTime);
 
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
@@ -308,8 +312,8 @@ namespace Game.Networking.Packets
         public long EventID;
         public CalendarInviteStatus Status;
         public bool ClearPending;
-        public WowTime ResponseTime;
-        public WowTime Date;
+        public RealmTime ResponseTime;
+        public RealmTime Date;
         public ObjectGuid InviteGuid;
     }
 
@@ -360,13 +364,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt64(EventID);
-            Date.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)Date);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)Status);
         }
 
         public long EventID;
-        public WowTime Date;
+        public RealmTime Date;
         public CalendarFlags Flags;
         public CalendarInviteStatus Status;
     }
@@ -387,28 +391,29 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt64(EventClubID);
             _worldPacket.WriteInt64(EventID);
 
-            OriginalDate.Write(_worldPacket);
-            Date.Write(_worldPacket);
-            LockDate.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)OriginalDate);
+            _worldPacket.WriteInt32((WowTime)Date);            
+            _worldPacket.WriteInt32((WowTime)LockDate);
+
             _worldPacket.WriteUInt32((uint)Flags);
-            _worldPacket.WriteInt32(TextureID);
+            _worldPacket.WriteInt32(TextureID);            
             _worldPacket.WriteUInt8((byte)EventType);
 
             _worldPacket.WriteBits(EventName.GetByteCount(), 8);
             _worldPacket.WriteBits(Description.GetByteCount(), 11);
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
-
+            
             _worldPacket.WriteString(EventName);
-            _worldPacket.WriteString(Description);
+            _worldPacket.WriteString(Description);            
         }
 
         public long EventClubID;
         public long EventID;
-        public WowTime Date;
+        public RealmTime Date;
         public CalendarFlags Flags;
-        public WowTime LockDate;
-        public WowTime OriginalDate;
+        public RealmTime LockDate;
+        public RealmTime OriginalDate;
         public int TextureID;
         public CalendarEventType EventType;
         public bool ClearPending;
@@ -423,14 +428,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt64(EventID);
-            Date.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)Date);
 
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
 
         public long EventID;
-        public WowTime Date;
+        public RealmTime Date;
         public bool ClearPending;
     }
 
@@ -578,16 +583,16 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt64(InstanceID);
-            ServerTime.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)RealmTime);
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32((uint)DifficultyID);
-            _worldPacket.WriteInt32(TimeRemaining);
+            _worldPacket.WriteInt32((Seconds)TimeRemaining);
         }
 
         public long InstanceID;
         public Difficulty DifficultyID;
-        public int TimeRemaining;
-        public WowTime ServerTime;
+        public TimeSpan TimeRemaining;
+        public RealmTime RealmTime;
         public int MapID;
     }
 
@@ -613,18 +618,18 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            ServerTime.Write(_worldPacket);
+            _worldPacket.WriteInt32((WowTime)RealmTime);
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32((uint)DifficultyID);
-            _worldPacket.WriteInt32(OldTimeRemaining);
-            _worldPacket.WriteInt32(NewTimeRemaining);
+            _worldPacket.WriteInt32((Seconds)OldTimeRemaining);
+            _worldPacket.WriteInt32((Seconds)NewTimeRemaining);
         }
 
-        public WowTime ServerTime;
+        public RealmTime RealmTime;
         public int MapID;
         public Difficulty DifficultyID;
-        public int NewTimeRemaining;
-        public int OldTimeRemaining;
+        public TimeSpan NewTimeRemaining;
+        public TimeSpan OldTimeRemaining;
     }
 
     class CalendarCommunityInvite : ServerPacket
@@ -651,14 +656,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt64(EventID);
-            _worldPacket.WritePackedTime32(Date);
+            _worldPacket.WriteInt32((WowTime)Date);
             _worldPacket.WriteUInt32(Flags);
             _worldPacket.WriteUInt8(Status);
         }
 
         public long EventID;
         public uint Flags;
-        public long Date;
+        public RealmTime Date;
         public byte Status;
     }
 
@@ -754,11 +759,13 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             ClubId = data.ReadUInt64();
-            EventType = data.ReadUInt8();
+            EventType = (CalendarEventType)data.ReadUInt8();
             TextureID = data.ReadInt32();
-            Time.Read(data);
-            Flags = (CalendarFlags)data.ReadInt32();
+            GameTime = (RealmTime)(WowTime)data.ReadInt32();
+            Flags = (CalendarFlags)data.ReadUInt32();
+
             var InviteCount = data.ReadUInt32();
+            Cypher.Assert(InviteCount <= SharedConst.CalendarMaxInvites);
 
             byte titleLength = data.ReadBits<byte>(8);
             ushort descriptionLength = data.ReadBits<ushort>(11);
@@ -767,7 +774,7 @@ namespace Game.Networking.Packets
             {
                 CalendarAddEventInviteInfo invite = new();
                 invite.Read(data);
-                Invites[i] = invite;
+                Invites.Add(invite);
             }
 
             Title = data.ReadString(titleLength);
@@ -777,11 +784,11 @@ namespace Game.Networking.Packets
         public ulong ClubId;
         public string Title;
         public string Description;
-        public byte EventType;
+        public CalendarEventType EventType;
         public int TextureID;
-        public WowTime Time;
+        public RealmTime GameTime;
         public CalendarFlags Flags;
-        public CalendarAddEventInviteInfo[] Invites = new CalendarAddEventInviteInfo[(int)SharedConst.CalendarMaxInvites];
+        public List<CalendarAddEventInviteInfo> Invites = new();
     }
 
     struct CalendarUpdateEventInfo
@@ -791,11 +798,10 @@ namespace Game.Networking.Packets
             ClubID = data.ReadInt64();
             EventID = data.ReadInt64();
             ModeratorID = data.ReadInt64();
-            EventType = data.ReadUInt8();
-            TextureID = data.ReadUInt32();
-            Time = new();
-            Time.Read(data);
-            Flags = data.ReadUInt32();
+            EventType = (CalendarEventType)data.ReadUInt8();
+            TextureID = data.ReadInt32();
+            Time = (RealmTime)(WowTime)data.ReadInt32();
+            Flags = (CalendarFlags)data.ReadUInt32();
 
             byte titleLen = data.ReadBits<byte>(8);
             ushort descLen = data.ReadBits<ushort>(11);
@@ -809,10 +815,10 @@ namespace Game.Networking.Packets
         public long ModeratorID;
         public string Title;
         public string Description;
-        public byte EventType;
-        public uint TextureID;
-        public WowTime Time;
-        public uint Flags;
+        public CalendarEventType EventType;
+        public int TextureID;
+        public RealmTime Time;
+        public CalendarFlags Flags;
     }
 
     struct CalendarSendCalendarInviteInfo
@@ -824,7 +830,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)Status);
             data.WriteUInt8((byte)Moderator);
             data.WriteUInt8(InviteType);
-            data.WritePackedGuid(InviterGuid);
+            data.WritePackedGuid(InviterGuid);            
             data.WriteBit(IgnoreFriendAndGuildRestriction);
             data.FlushBits();
         }
@@ -844,14 +850,32 @@ namespace Game.Networking.Packets
         {
             data.WriteInt64(InstanceID);
             data.WriteInt32(MapID);
-            data.WriteUInt32(DifficultyID);
-            data.WriteInt32(ExpireTime);
+            data.WriteUInt32((uint)DifficultyID);
+            data.WriteInt32((Seconds)ExpireTime);
         }
 
         public long InstanceID;
         public int MapID;
-        public uint DifficultyID;
-        public int ExpireTime;
+        public Difficulty DifficultyID;
+        public TimeSpan ExpireTime;
+    }
+
+    struct CalendarSendCalendarRaidResetInfo
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(MapID);
+            data.WriteInt32(Unk340_1);
+            data.WriteInt32(Interval);
+            data.WriteInt32(Offset);
+            data.WriteUInt32((uint)DifficultyID);
+        }
+
+        public int MapID;
+        public int Unk340_1;
+        public Seconds Interval;
+        public Seconds Offset;
+        public Difficulty DifficultyID;
     }
 
     struct CalendarSendCalendarEventInfo
@@ -860,7 +884,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt64(EventID);
             data.WriteUInt8((byte)EventType);
-            Date.Write(data);
+            data.WriteInt32((WowTime)Date);
             data.WriteUInt32((uint)Flags);
             data.WriteInt32(TextureID);
             data.WriteInt64(EventClubID);
@@ -874,7 +898,7 @@ namespace Game.Networking.Packets
         public long EventID;
         public string EventName;
         public CalendarEventType EventType;
-        public WowTime Date;
+        public RealmTime Date;
         public CalendarFlags Flags;
         public int TextureID;
         public long EventClubID;
@@ -893,7 +917,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)Moderator);
             data.WriteUInt8(InviteType);
 
-            data.WritePackedTime32(ResponseTime);
+            data.WriteInt32((WowTime)ResponseTime);
 
             data.WriteBits(Notes.GetByteCount(), 8);
             data.FlushBits();
@@ -902,7 +926,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Guid;
         public long InviteID;
-        public long ResponseTime;
+        public RealmTime ResponseTime;
         public byte Level = 1;
         public CalendarInviteStatus Status;
         public CalendarModerationRank Moderator;

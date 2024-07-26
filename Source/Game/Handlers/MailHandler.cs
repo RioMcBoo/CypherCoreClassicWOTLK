@@ -217,7 +217,7 @@ namespace Game
                         }
                     }
 
-                    if (item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0)
+                    if (item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != Seconds.Zero)
                     {
                         player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.MailBoundItem);
                         return;
@@ -276,22 +276,22 @@ namespace Game
 
                     if (log && sendMail.Info.SendMoney > 0)
                     {
-                        Log.outCommand(GetAccountId(), 
+                        Log.outCommand(GetAccountId(),
                             $"GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) " +
                             $"mail money: {sendMail.Info.SendMoney} " +
                             $"to: {sendMail.Info.Target} ({receiverGuid}) (Account: {receiverAccountId})");
-                }
+                    }
                 }
 
                 // If theres is an item, there is a one hour delivery delay if sent to another account's character.
-                uint deliver_delay = needItemDelay ? (uint)WorldConfig.Values[WorldCfg.MailDeliveryDelay].Int32 : 0;
+                TimeSpan deliver_delay = needItemDelay ? WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan : TimeSpan.Zero;
 
                 // Mail sent between guild members arrives instantly
                 Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
                 if (guild != null)
                 {
                     if (guild.IsMember(receiverGuid))
-                        deliver_delay = 0;
+                        deliver_delay = TimeSpan.Zero;
                 }
 
                 // don't ask for COD if there are no items
@@ -381,7 +381,7 @@ namespace Game
 
             Player player = GetPlayer();
             Mail m = player.GetMail(returnToSender.MailID);
-            if (m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime() || m.sender != returnToSender.SenderGUID.GetCounter())
+            if (m == null || m.state == MailState.Deleted || m.deliver_time > LoopTime.ServerTime || m.sender != returnToSender.SenderGUID.GetCounter())
             {
                 player.SendMailResult(returnToSender.MailID, MailResponseType.ReturnedToSender, MailResponseResult.InternalError);
                 return;
@@ -437,7 +437,7 @@ namespace Game
             Player player = GetPlayer();
 
             Mail m = player.GetMail(takeItem.MailID);
-            if (m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime())
+            if (m == null || m.state == MailState.Deleted || m.deliver_time > LoopTime.ServerTime)
             {
                 player.SendMailResult(takeItem.MailID, MailResponseType.ItemTaken, MailResponseResult.InternalError);
                 return;
@@ -538,7 +538,7 @@ namespace Game
             Player player = GetPlayer();
 
             Mail m = player.GetMail(takeMoney.MailID);
-            if ((m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime()) ||
+            if (m == null || m.state == MailState.Deleted || m.deliver_time > LoopTime.ServerTime ||
                 (takeMoney.Money > 0 && m.money != takeMoney.Money))
             {
                 player.SendMailResult(takeMoney.MailID, MailResponseType.MoneyTaken, MailResponseResult.InternalError);
@@ -576,12 +576,11 @@ namespace Game
             var mails = player.GetMails();
 
             MailListResult response = new();
-            long curTime = GameTime.GetGameTime();
 
             foreach (Mail m in mails)
             {
                 // skip deleted or not delivered (deliver delay not expired) mails
-                if (m.state == MailState.Deleted || curTime < m.deliver_time)
+                if (m.state == MailState.Deleted || LoopTime.ServerTime < m.deliver_time)
                     continue;
 
                 // max. 100 mails can be sent
@@ -607,7 +606,7 @@ namespace Game
             Player player = GetPlayer();
 
             Mail m = player.GetMail(createTextItem.MailID);
-            if (m == null || (string.IsNullOrEmpty(m.body) && m.mailTemplateId == 0) || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime())
+            if (m == null || (string.IsNullOrEmpty(m.body) && m.mailTemplateId == 0) || m.state == MailState.Deleted || m.deliver_time > LoopTime.ServerTime)
             {
                 player.SendMailResult(createTextItem.MailID, MailResponseType.MadePermanent, MailResponseResult.InternalError);
                 return;
@@ -663,7 +662,6 @@ namespace Game
             {
                 result.NextMailTime = 0.0f;
 
-                long now = GameTime.GetGameTime();
                 List<long> sentSenders = new();
 
                 foreach (Mail mail in GetPlayer().GetMails())
@@ -672,7 +670,7 @@ namespace Game
                         continue;
 
                     // and already delivered
-                    if (now < mail.deliver_time)
+                    if (LoopTime.ServerTime < mail.deliver_time)
                         continue;
 
                     // only send each mail sender once

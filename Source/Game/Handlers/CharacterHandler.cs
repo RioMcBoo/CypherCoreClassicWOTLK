@@ -372,7 +372,7 @@ namespace Game
                 {
                     if (classExpansionRequirement.MinActiveExpansionLevel > GetExpansion() || classExpansionRequirement.AccountExpansionLevel > GetAccountExpansion())
                     {
-                        Log.outError(LogFilter.Cheat, 
+                        Log.outError(LogFilter.Cheat,
                             $"Account:[{GetAccountId()}] tried to create character " +
                             $"with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
                             $"(had {GetExpansion()}/{GetAccountExpansion()}, " +
@@ -383,7 +383,7 @@ namespace Game
                 }
                 else
                 {
-                    Log.outError(LogFilter.Cheat, 
+                    Log.outError(LogFilter.Cheat,
                         $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination " +
                         $"that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
                 }
@@ -951,7 +951,7 @@ namespace Game
             stmt.SetInt32(0, GetAccountId());
             DB.Login.Execute(stmt);
 
-            pCurrChar.SetInGameTime(GameTime.GetGameTimeMS());
+            pCurrChar.SetInGameTime(LoopTime.RelativeTime);
 
             // announce group about member online (must be after add to player list to receive announce to self)
             Group group = pCurrChar.GetGroup();
@@ -1103,7 +1103,7 @@ namespace Game
             }
 
             // show time before shutdown if shutdown planned.
-            if (Global.WorldMgr.IsShuttingDown())
+            if (Global.WorldMgr.IsShuttingDown)
                 Global.WorldMgr.ShutdownMsg(true, pCurrChar);
 
             if (WorldConfig.Values[WorldCfg.AllTaxiPaths].Bool)
@@ -2341,14 +2341,14 @@ namespace Game
 
         void HandleUndeleteCooldownStatusCallback(SQLResult result)
         {
-            uint cooldown = 0;
-            uint maxCooldown = (uint)WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown].Int32;
+            Seconds cooldown = Seconds.Zero;
+            Seconds maxCooldown = WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown].Seconds;
             if (!result.IsEmpty())
             {
-                uint lastUndelete = result.Read<uint>(0);
-                uint now = (uint)GameTime.GetGameTime();
+                UnixTime lastUndelete = (UnixTime)result.Read<int>(0);
+                UnixTime now = LoopTime.UnixServerTime;
                 if (lastUndelete + maxCooldown > now)
-                    cooldown = Math.Max(0, lastUndelete + maxCooldown - now);
+                    cooldown = Time.Max(Seconds.Zero, lastUndelete + maxCooldown - now);
             }
 
             SendUndeleteCooldownStatusResponse(cooldown, maxCooldown);
@@ -2371,9 +2371,9 @@ namespace Game
             {
                 if (!result.IsEmpty())
                 {
-                    uint lastUndelete = result.Read<uint>(0);
-                    uint maxCooldown = (uint)WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown].Int32;
-                    if (lastUndelete != 0 && (lastUndelete + maxCooldown > GameTime.GetGameTime()))
+                    Seconds lastUndelete = (Seconds)result.Read<int>(0);
+                    Seconds maxCooldown = WorldConfig.Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown].Seconds;
+                    if (lastUndelete != 0 && (lastUndelete + maxCooldown > LoopTime.UnixServerTime))
                     {
                         SendUndeleteCharacterResponse(CharacterUndeleteResult.Cooldown, undeleteInfo);
                         return;
@@ -2540,7 +2540,7 @@ namespace Game
                 return;
 
             // prevent resurrect before 30-sec delay after body release not finished
-            if ((corpse.GetGhostTime() + GetPlayer().GetCorpseReclaimDelay(corpse.GetCorpseType() == CorpseType.ResurrectablePVP)) > GameTime.GetGameTime())
+            if ((corpse.GetGhostTime() + GetPlayer().GetCorpseReclaimDelay(corpse.GetCorpseType() == CorpseType.ResurrectablePVP)) > LoopTime.ServerTime)
                 return;
 
             if (!corpse.IsWithinDistInMap(GetPlayer(), 39, true))
@@ -2694,10 +2694,10 @@ namespace Game
             SendPacket(packet);
         }
 
-        void SendUndeleteCooldownStatusResponse(uint currentCooldown, uint maxCooldown)
+        void SendUndeleteCooldownStatusResponse(Seconds currentCooldown, Seconds maxCooldown)
         {
             UndeleteCooldownStatusResponse response = new();
-            response.OnCooldown = (currentCooldown > 0);
+            response.OnCooldown = currentCooldown > 0;
             response.MaxCooldown = maxCooldown;
             response.CurrentCooldown = currentCooldown;
 

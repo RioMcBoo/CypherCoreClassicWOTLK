@@ -76,7 +76,7 @@ namespace Game.Entities
             {
                 if (!evading || acc.IsMinion)  // only install minions on evade mode
                     InstallAccessory(acc.AccessoryEntry, acc.SeatId, acc.IsMinion, acc.SummonedType, acc.SummonTime);
-        }
+            }
         }
 
         public void Uninstall()
@@ -280,7 +280,7 @@ namespace Game.Entities
             return null;
         }
         
-        void InstallAccessory(int entry, sbyte seatId, bool minion, byte type, uint summonTime)
+        void InstallAccessory(int entry, sbyte seatId, bool minion, byte type, TimeSpan summonTime)
         {
             // @Prevent adding accessories when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
             
@@ -297,7 +297,7 @@ namespace Game.Entities
                 $"Vehicle ({_me.GetGUID()}, Entry {GetCreatureEntry()}): " +
                 $"installing accessory (Entry: {entry}) on seat: {seatId}");
 
-            TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, TimeSpan.FromMilliseconds(summonTime));
+            TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, summonTime);
             Cypher.Assert(accessory != null);
 
             if (minion)
@@ -343,7 +343,7 @@ namespace Game.Entities
                         && (_seat.Value.SeatInfo.CanEnterOrExit || _seat.Value.SeatInfo.IsUsableByOverride))
                     {
                         break;
-                }
+                    }
                 }
 
                 if (seat.Value == null) // no available seat
@@ -455,7 +455,7 @@ namespace Game.Entities
                 ITransport.UpdatePassengerPosition(this, _me.GetMap(), passenger,
                     position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(), position.GetOrientation(),
                     false);
-        }
+            }
         }
 
         public bool IsVehicleInUse()
@@ -615,7 +615,7 @@ namespace Game.Entities
             if (vehicleTemplate != null)
                 return vehicleTemplate.DespawnDelay;
 
-            return TimeSpan.FromMilliseconds(1);
+            return (Milliseconds)1;
         }
 
         public string GetDebugInfo()
@@ -669,7 +669,7 @@ namespace Game.Entities
             Seat = Target.Seats.Last();
         }
 
-        public override bool Execute(long e_time, uint p_time)
+        public override bool Execute(TimeSpan e_time, TimeSpan p_time)
         {
             Cypher.Assert(Passenger.IsInWorld);
             Cypher.Assert(Target != null && Target.GetBase().IsInWorld);
@@ -687,7 +687,7 @@ namespace Game.Entities
             // Passenger might've died in the meantime - abort if this is the case
             if (!Passenger.IsAlive())
             {
-                Abort(0);
+                Abort(default);
                 return true;
             }
 
@@ -756,7 +756,7 @@ namespace Game.Entities
                 if (!Target.GetBase().SetCharmedBy(Passenger, CharmType.Vehicle, aurApp))
                 {
                     // charming failed, probably aura was removed by relocation/scripts/whatever
-                    Abort(0);
+                    Abort(default);
                     return true;
                 }
             }
@@ -794,12 +794,12 @@ namespace Game.Entities
             return true;
         }
 
-        public override void Abort(long e_time)
+        public override void Abort(TimeSpan e_time)
         {
             // Check if the Vehicle was already uninstalled, in which case all auras were removed already
             if (Target != null)
             {
-                Log.outDebug(LogFilter.Vehicle, 
+                Log.outDebug(LogFilter.Vehicle,
                     $"Passenger GuidLow: {Passenger.GetGUID()}, Entry: {Passenger.GetEntry()}, board on vehicle " +
                     $"GuidLow: {Target.GetBase().GetGUID()}, Entry: {Target.GetBase().GetEntry()} SeatId: {Seat.Key} cancelled");
 
@@ -859,7 +859,7 @@ namespace Game.Entities
 
     public struct VehicleAccessory
     {
-        public VehicleAccessory(int entry, sbyte seatId, bool isMinion, byte summonType, uint summonTime)
+        public VehicleAccessory(int entry, sbyte seatId, bool isMinion, byte summonType, Milliseconds summonTime)
         {
             AccessoryEntry = entry;
             IsMinion = isMinion;
@@ -869,7 +869,7 @@ namespace Game.Entities
         }
         public int AccessoryEntry;
         public bool IsMinion;
-        public uint SummonTime;
+        public Milliseconds SummonTime;
         public sbyte SeatId;
         public byte SummonedType;
     }

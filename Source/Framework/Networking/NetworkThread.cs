@@ -77,12 +77,14 @@ namespace Framework.Networking
         {
             Log.outDebug(LogFilter.Network, "Network Thread Starting");
 
-            int sleepTime = 1;
+            Milliseconds systemLimitSleepTime = (Milliseconds)1; // Thread.Sleep()'s limit
+            Milliseconds sleepTime = systemLimitSleepTime;
+
             while (!_stopped)
             {
-                Thread.Sleep(sleepTime);
+                Thread.Sleep(sleepTime.Ticks);
 
-                uint tickStart = Time.GetMSTime();
+                RelativeTime tickStart = Time.NowRelative;
 
                 AddNewSockets();
 
@@ -101,8 +103,9 @@ namespace Framework.Networking
                     }
                 }
 
-                uint diff = Time.GetMSTimeDiffToNow(tickStart);
-                sleepTime = (int)(diff > 1 ? 0 : 1 - diff);
+                Milliseconds diff = Time.Diff(tickStart);
+
+                sleepTime = (diff > systemLimitSleepTime) ? Milliseconds.Zero : systemLimitSleepTime - diff;
             }
 
             Log.outDebug(LogFilter.Misc, "Network Thread exits");

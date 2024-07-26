@@ -34,40 +34,40 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
         {
             base.JustEngagedWith(victim);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(10), task =>
             {
                 DoCast(me, SpellIds.DarkStrike);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(18));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(18));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), task =>
             {
                 DoCastVictim(SpellIds.DemoralizingShout);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(20));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(13), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(13), task =>
             {
                 List<Creature> healers = DoFindFriendlyMissingBuff(45.0f, SpellIds.Inspire);
                 if (!healers.Empty())
                     DoCast(healers.SelectRandom(), SpellIds.Inspire);
 
                 DoCast(me, SpellIds.Inspire);
-                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(26));
+                task.Repeat(Time.SpanFromSeconds(20), Time.SpanFromSeconds(26));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(6), task =>
             {
                 DoCastVictim(SpellIds.Knockdown);
-                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(15));
+                task.Repeat(Time.SpanFromSeconds(12), Time.SpanFromSeconds(15));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target != null)
                     DoCast(target, SpellIds.Flamespear);
-                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
+                task.Repeat(Time.SpanFromSeconds(12), Time.SpanFromSeconds(16));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;
@@ -97,30 +97,30 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
         {
             base.JustEngagedWith(victim);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(15), Time.SpanFromSeconds(30), task =>
             {
                 Unit target = DoSelectLowestHpFriendly(60.0f, 1);
                 if (target != null)
                     DoCast(target, SpellIds.Heal);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(20));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(2), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.Shadowwordpain);
                 if (target != null)
                     DoCast(target, SpellIds.Shadowwordpain);
-                task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(26));
+                task.Repeat(Time.SpanFromSeconds(18), Time.SpanFromSeconds(26));
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule(Time.SpanFromSeconds(8), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.Immolate);
                 if (target != null)
                     DoCast(target, SpellIds.Immolate);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+                task.Repeat(Time.SpanFromSeconds(15), Time.SpanFromSeconds(25));
             });
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

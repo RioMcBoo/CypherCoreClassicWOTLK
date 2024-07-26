@@ -32,35 +32,35 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.WarmasterVoon
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            _scheduler.Schedule((Seconds)8, task =>
             {
                 DoCastVictim(SpellIds.Snapkick);
-                task.Repeat(TimeSpan.FromSeconds(6));
+                task.Repeat((Seconds)6);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
+            _scheduler.Schedule((Seconds)14, task =>
             {
                 DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(12));
+                task.Repeat((Seconds)12);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            _scheduler.Schedule((Seconds)20, task =>
             {
                 DoCastVictim(SpellIds.Uppercut);
-                task.Repeat(TimeSpan.FromSeconds(14));
+                task.Repeat((Seconds)14);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule((Seconds)12, task =>
             {
                 DoCastVictim(SpellIds.Mortalstrike);
-                task.Repeat(TimeSpan.FromSeconds(10));
+                task.Repeat((Seconds)10);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(32), task =>
+            _scheduler.Schedule((Seconds)32, task =>
             {
                 DoCastVictim(SpellIds.Pummel);
-                task.Repeat(TimeSpan.FromSeconds(16));
+                task.Repeat((Seconds)16);
             });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule((Seconds)1, task =>
             {
                 DoCastVictim(SpellIds.Throwaxe);
-                task.Repeat(TimeSpan.FromSeconds(8));
+                task.Repeat((Seconds)8);
             });
         }
 
@@ -69,7 +69,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.WarmasterVoon
             _JustDied();
         }
 
-        public override void UpdateAI(uint diff)
+        public override void UpdateAI(TimeSpan diff)
         {
             if (!UpdateVictim())
                 return;

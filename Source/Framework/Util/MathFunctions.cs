@@ -273,7 +273,7 @@ public static class MathFunctions
         return (ushort)((byte)l | (ushort)h << 8);
     }
 
-    public static double Variance(this IEnumerable<uint> source)
+    public static double Variance(this IEnumerable<Milliseconds> source)
     {
         int n = 0;
         double mean = 0;

@@ -665,13 +665,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(OnCooldown);
-            _worldPacket.WriteUInt32(MaxCooldown);
-            _worldPacket.WriteUInt32(CurrentCooldown);
+            _worldPacket.WriteInt32(MaxCooldown);
+            _worldPacket.WriteInt32(CurrentCooldown);
         }
 
         public bool OnCooldown; //
-        public uint MaxCooldown; // Max. cooldown until next free character restoration. Displayed in undelete confirm message. (in sec)
-        public uint CurrentCooldown; // Current cooldown until next free character restoration. (in sec)
+        public Seconds MaxCooldown; // Max. cooldown until next free character restoration. Displayed in undelete confirm message. (in sec)
+        public Seconds CurrentCooldown; // Current cooldown until next free character restoration. (in sec)
     }
 
     public class PlayerLogin : ClientPacket
@@ -787,12 +787,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(ServerExpansionLevel);
+            _worldPacket.WriteUInt8((byte)ServerExpansionLevel);
             _worldPacket.WriteUInt8(ServerExpansionTier);
         }
 
         public byte ServerExpansionTier;
-        public byte ServerExpansionLevel;
+        public Expansion ServerExpansionLevel;
     }
 
     public class SetActionBarToggles : ClientPacket
@@ -825,14 +825,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(TotalTime);
-            _worldPacket.WriteUInt32(LevelTime);
+            _worldPacket.WriteInt32(TotalTime);
+            _worldPacket.WriteInt32(LevelTime);
             _worldPacket.WriteBit(TriggerEvent);
             _worldPacket.FlushBits();
         }
 
-        public uint TotalTime;
-        public uint LevelTime;
+        public Seconds TotalTime;
+        public Seconds LevelTime;
         public bool TriggerEvent;
     }
 

@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Movement;
+using System;
 
 namespace Game.AI
 {
@@ -33,7 +34,7 @@ namespace Game.AI
             DoInitialize(owner);
         }
 
-        public override bool DoUpdate(T owner, uint diff)
+        public override bool DoUpdate(T owner, TimeSpan diff)
         {
             if (HasFlag(MovementGeneratorFlags.Interrupted) || owner.MoveSpline.Finalized())
             {

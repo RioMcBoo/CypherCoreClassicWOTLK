@@ -13,10 +13,10 @@ namespace Game.Movement
         public MoveSpline()
         {
             m_Id = 0;
-            time_passed = 0;
+            time_passed = Milliseconds.Zero;
             vertical_acceleration = 0.0f;
             initialOrientation = 0.0f;
-            effect_start_time = 0;
+            effect_start_time = Milliseconds.Zero;
             point_Idx = 0;
             point_Idx_offset = 0;
             onTransport = false;
@@ -32,9 +32,9 @@ namespace Game.Movement
             point_Idx_offset = args.path_Idx_offset;
             initialOrientation = args.initialOrientation;
 
-            time_passed = 0;
+            time_passed = Milliseconds.Zero;
             vertical_acceleration = 0.0f;
-            effect_start_time = 0;
+            effect_start_time = Milliseconds.Zero;
             spell_effect_extra = args.spellEffectExtra;
             anim_tier = args.animTier;
             splineIsFacingOnly = args.path.Count == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).Length() < 0.1f);
@@ -54,8 +54,8 @@ namespace Game.Movement
             // spline initialized, duration known and i able to compute parabolic acceleration
             if (args.flags.HasFlag(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.FadeObject))
             {
-                int spline_duration = Duration();
-                effect_start_time = (int)(spline_duration * args.effect_start_time_percent + args.effect_start_time.TotalMilliseconds);
+                Milliseconds spline_duration = Duration();
+                effect_start_time = (Milliseconds)(spline_duration.Ticks * args.effect_start_time_percent + args.effect_start_time.TotalMilliseconds);
                 if (effect_start_time > spline_duration)
                     effect_start_time = spline_duration;
 
@@ -63,7 +63,7 @@ namespace Game.Movement
                 {
                     if (args.parabolic_amplitude != 0.0f)
                     {
-                        float f_duration = MSToSec((uint)(spline_duration - effect_start_time));
+                        float f_duration = MSToSecPrecise(spline_duration - effect_start_time);
                         vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
                     }
                     else if (args.vertical_acceleration != 0.0f)
@@ -107,7 +107,7 @@ namespace Game.Movement
                 Log.outError(LogFilter.Unit, 
                     "MoveSpline.init_spline: zero length spline, wrong input data?");
                 
-                spline.Set_length(spline.Last(), spline.IsCyclic() ? 1000 : 1);
+                spline.Set_length(spline.Last(), (Milliseconds)(spline.IsCyclic() ? 1000 : 1));
             }
             point_Idx = spline.First();
         }
@@ -121,9 +121,9 @@ namespace Game.Movement
         }
 
         public Vector3[] GetPath() { return spline.GetPoints(); }
-        public int TimePassed() { return time_passed; }
+        public Milliseconds TimePassed() { return time_passed; }
 
-        public int Duration() { return spline.Length(); }
+        public Milliseconds Duration() { return spline.Length(); }
         public int CurrentSplineIdx() { return point_Idx; }
         public int GetId() { return m_Id; }
         public bool Finalized() { return splineflags.HasFlag(SplineFlag.Done); }
@@ -135,7 +135,7 @@ namespace Game.Movement
             time_passed = Duration();
         }
 
-        public Vector4 ComputePosition(int time_point, int point_index)
+        public Vector4 ComputePosition(Milliseconds time_point, int point_index)
         {
             float u = 1.0f;
             int seg_time = spline.Length(point_index, point_index + 1);
@@ -181,13 +181,14 @@ namespace Game.Movement
             return ComputePosition(time_passed, point_Idx);
         }
 
-        public Vector4 ComputePosition(int time_offset)
+        public Vector4 ComputePosition(Milliseconds time_offset)
         {
-            int time_point = time_passed + time_offset;
+            Milliseconds time_point = time_passed + time_offset;
             if (time_point >= Duration())
                 return ComputePosition(Duration(), spline.Last() - 1);
-            if (time_point <= 0)
-                return ComputePosition(0, spline.First());
+            
+            if (time_point <= Milliseconds.Zero)
+                return ComputePosition(Milliseconds.Zero, spline.First());
 
             // find point_index where spline.length(point_index) < time_point < spline.length(point_index + 1)
             int point_index = point_Idx;
@@ -200,22 +201,22 @@ namespace Game.Movement
             return ComputePosition(time_point, point_index);
         }
 
-        public void ComputeParabolicElevation(int time_point, ref float el)
+        public void ComputeParabolicElevation(Milliseconds time_point, ref float el)
         {
             if (time_point > effect_start_time)
             {
-                float t_passedf = MSToSec((uint)(time_point - effect_start_time));
-                float t_durationf = MSToSec((uint)(Duration() - effect_start_time)); //client use not modified duration here
+                float t_passedf = MSToSecPrecise(time_point - effect_start_time);
+                float t_durationf = MSToSecPrecise(Duration() - effect_start_time); //client use not modified duration here
                 if (spell_effect_extra != null && spell_effect_extra.ParabolicCurveId != 0)
-                    t_passedf *= Global.DB2Mgr.GetCurveValueAt(spell_effect_extra.ParabolicCurveId, (float)time_point / Duration());
+                    t_passedf *= Global.DB2Mgr.GetCurveValueAt(spell_effect_extra.ParabolicCurveId, (float)time_point / (float)Duration());
 
                 el += (t_durationf - t_passedf) * 0.5f * vertical_acceleration * t_passedf;
             }
         }
 
-        public void ComputeFallElevation(int time_point, ref float el)
+        public void ComputeFallElevation(Milliseconds time_point, ref float el)
         {
-            float z_now = spline.GetPoint(spline.First()).Z - ComputeFallElevation(MSToSec((uint)time_point), false);
+            float z_now = spline.GetPoint(spline.First()).Z - ComputeFallElevation(MSToSecPrecise(time_point), false);
             float final_z = FinalDestination().Z;
             el = Math.Max(z_now, final_z);
         }
@@ -247,36 +248,36 @@ namespace Game.Movement
             return result;
         }
 
-        float MSToSec(uint ms)
+        float MSToSecPrecise(Milliseconds ms)
         {
-            return ms / 1000.0f;
+            return ms.Ticks / (float)Time.MillisecondsInSecond;
         }
 
         public bool HasStarted()
         {
-            return time_passed > 0;
+            return time_passed > Milliseconds.Zero;
         }
 
         public void Interrupt() { splineflags.SetUnsetFlag(SplineFlag.Done); }
         
-        public void UpdateState(int difftime)
+        public void UpdateState(Milliseconds difftime)
         {
             do
             {
                 UpdateState(ref difftime);
-            } while (difftime > 0);
+            } while (difftime > Milliseconds.Zero);
         }
 
-        UpdateResult UpdateState(ref int ms_time_diff)
+        UpdateResult UpdateState(ref Milliseconds ms_time_diff)
         {
             if (Finalized())
             {
-                ms_time_diff = 0;
+                ms_time_diff = Milliseconds.Zero;
                 return UpdateResult.Arrived;
             }
 
             UpdateResult result = UpdateResult.None;
-            int minimal_diff = Math.Min(ms_time_diff, SegmentTimeElapsed());
+            Milliseconds minimal_diff = Time.Min(ms_time_diff, SegmentTimeElapsed());
             time_passed += minimal_diff;
             ms_time_diff -= minimal_diff;
 
@@ -310,7 +311,7 @@ namespace Game.Movement
                             //args.time_perc = ?;
                             args.splineId = m_Id;
                             args.initialOrientation = initialOrientation;
-                            args.velocity = 1.0f; // Calculated below
+                            args.velocity = (Speed)1.0f; // Calculated below
                             args.HasVelocity = true;
                             args.TransformForTransport = onTransport;
                             if (args.Validate(null))
@@ -322,7 +323,7 @@ namespace Game.Movement
                                 // desired duration, thus finding out how much the velocity has to be increased for them to match.
                                 MoveSpline tempSpline = new();
                                 tempSpline.Initialize(args);
-                                args.velocity = (float)tempSpline.Duration() / Duration();
+                                args.velocity = (Speed)((float)tempSpline.Duration() / Duration());
 
                                 if (args.Validate(null))
                                     InitSpline(args);
@@ -332,7 +333,7 @@ namespace Game.Movement
                     else
                     {
                         _Finalize();
-                        ms_time_diff = 0;
+                        ms_time_diff = Milliseconds.Zero;
                         result = UpdateResult.Arrived;
                     }
                 }
@@ -341,8 +342,8 @@ namespace Game.Movement
             return result;
         }
 
-        int NextTimestamp() { return spline.Length(point_Idx + 1); }
-        int SegmentTimeElapsed() { return NextTimestamp() - time_passed; }
+        Milliseconds NextTimestamp() { return spline.Length(point_Idx + 1); }
+        Milliseconds SegmentTimeElapsed() { return NextTimestamp() - time_passed; }
         public bool IsCyclic() { return splineflags.HasFlag(SplineFlag.Cyclic); }
         public bool IsFalling() { return splineflags.HasFlag(SplineFlag.Falling); }
         public bool Initialized() { return !spline.Empty(); }
@@ -353,42 +354,42 @@ namespace Game.Movement
         
         #region Fields
         public MoveSplineInitArgs InitArgs;
-        public Spline<int> spline = new();
+        public Spline<Milliseconds> spline = new();
         public FacingInfo facing;
         public MoveSplineFlag splineflags = new();
         public bool onTransport;
         public bool splineIsFacingOnly;
         public int m_Id;
-        public int time_passed;
+        public Milliseconds time_passed;
         public float vertical_acceleration;
         public float initialOrientation;
-        public int effect_start_time;
+        public Milliseconds effect_start_time;
         public int point_Idx;
         public int point_Idx_offset;
-        public float velocity;
+        public Speed velocity;
         public SpellEffectExtraData spell_effect_extra;
         public AnimTierTransition anim_tier;
         #endregion
 
-        public class CommonInitializer : IInitializer<int>
+        public class CommonInitializer : IInitializer<Milliseconds>
         {
-            public CommonInitializer(float _velocity)
+            public CommonInitializer(Speed _velocity)
             {
-                velocityInv = 1000f / _velocity;
-                time = 1;
+                velocity = _velocity;
+                time = (Milliseconds)1;
             }
 
-            public float velocityInv;
-            public int time;
+            public Speed velocity;
+            public Milliseconds time;
 
-            public int Invoke(Spline<int> s, int i)
+            public Milliseconds Invoke(Spline<Milliseconds> s, int i)
             {
-                time += (int)(s.SegLength(i) * velocityInv);
+                time += (Milliseconds)(s.SegLength(i) / velocity.PerMS);
                 return time;
             }
         }
 
-        public class FallInitializer : IInitializer<int>
+        public class FallInitializer : IInitializer<Milliseconds>
         {
             public FallInitializer(float startelevation)
             {
@@ -396,9 +397,9 @@ namespace Game.Movement
             }
             float startElevation;
 
-            public int Invoke(Spline<int> s, int i)
+            public Milliseconds Invoke(Spline<Milliseconds> s, int i)
             {
-                return (int)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
+                return (Milliseconds)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
             }
 
             float ComputeFallTime(float path_length, bool isSafeFall)
@@ -436,25 +437,25 @@ namespace Game.Movement
 
     public interface IInitializer<T>
     {
-        int Invoke(Spline<T> s, int i);
+        Milliseconds Invoke(Spline<T> s, int i);
     }
 
     public class SplineChainLink
     {
         public List<Vector3> Points = new();
-        public uint ExpectedDuration;
-        public uint TimeToNext;
-        public float Velocity;
+        public TimeSpan ExpectedDuration;
+        public TimeSpan TimeToNext;
+        public Speed Velocity;
 
-        public SplineChainLink(Vector3[] points, uint expectedDuration, uint msToNext, float velocity)
+        public SplineChainLink(Vector3[] points, TimeSpan expectedDuration, TimeSpan timeToNext, Speed velocity)
         {
             Points.AddRange(points);
             ExpectedDuration = expectedDuration;
-            TimeToNext = msToNext;
+            TimeToNext = timeToNext;
             Velocity = velocity;
         }
 
-        public SplineChainLink(uint expectedDuration, uint msToNext, float velocity)
+        public SplineChainLink(TimeSpan expectedDuration, TimeSpan msToNext, Speed velocity)
         {
             ExpectedDuration = expectedDuration;
             TimeToNext = msToNext;
@@ -465,14 +466,14 @@ namespace Game.Movement
     public class SplineChainResumeInfo
     {
         public SplineChainResumeInfo() { }
-        public SplineChainResumeInfo(int id, List<SplineChainLink> chain, bool walk, byte splineIndex, byte wpIndex, uint msToNext)
+        public SplineChainResumeInfo(int id, List<SplineChainLink> chain, bool walk, byte splineIndex, byte wpIndex, TimeSpan timeToNext)
         {
             PointID = id;
             Chain = chain;
             IsWalkMode = walk;
             SplineIndex = splineIndex;
             PointIndex = wpIndex;
-            TimeToNext = msToNext;
+            TimeToNext = timeToNext;
         }
 
         public bool Empty() { return Chain.Empty(); }
@@ -483,6 +484,6 @@ namespace Game.Movement
         public bool IsWalkMode;
         public byte SplineIndex;
         public byte PointIndex;
-        public uint TimeToNext;
+        public TimeSpan TimeToNext;
     }
 }

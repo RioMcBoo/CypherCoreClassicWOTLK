@@ -125,7 +125,7 @@ public static class PacketHandlerExtensions
         movementInfo.SetMovementFlags((MovementFlag)data.ReadUInt32());
         movementInfo.SetMovementFlags2((MovementFlag2)data.ReadUInt32());
         movementInfo.SetExtraMovementFlags2((MovementFlags3)data.ReadUInt32());
-        movementInfo.Time = data.ReadUInt32();
+        movementInfo.Time = (RelativeTime)data.ReadUInt32();
         float x = data.ReadFloat();
         float y = data.ReadFloat();
         float z = data.ReadFloat();

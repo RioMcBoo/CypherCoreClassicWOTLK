@@ -124,7 +124,7 @@ namespace Framework.Networking.Http
 
         public void Start()
         {
-            _inactiveSessionsKillTimer = new System.Timers.Timer(TimeSpan.FromMinutes(1));
+            _inactiveSessionsKillTimer = new System.Timers.Timer(Time.SpanFromMinutes(1));
             _inactiveSessionsKillTimer.Elapsed += (_, _) => KillInactiveSessions();
             _inactiveSessionsKillTimer.Start();
         }
@@ -184,7 +184,7 @@ namespace Framework.Networking.Http
                     var itr = _sessions.LookupByKey(id);
                     if (itr != null)
                     {
-                        itr.InactiveTimestamp = DateTime.Now + TimeSpan.FromMinutes(5);
+                        itr.InactiveTimestamp = DateTime.Now + (Minutes)5;
                         Log.outTrace(_logger, $"Session {id} marked as inactive");
                     }
                 }
