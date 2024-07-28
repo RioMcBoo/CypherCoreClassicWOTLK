@@ -353,10 +353,18 @@ namespace Game
         public void DeleteOldEvents()
         {
             RealmTime oldEventsTime = LoopTime.RealmTime - SharedConst.CalendarOldEventsDeletionTime;
+            List<CalendarEvent> toDelete = new();
 
             foreach (var calendarEvent in _events)
             {
                 if (calendarEvent.Date < oldEventsTime)
+                {
+                    toDelete.Add(calendarEvent);
+                }
+            }
+
+            foreach (var calendarEvent in toDelete)
+            {
                     RemoveEvent(calendarEvent, ObjectGuid.Empty);
             }
         }

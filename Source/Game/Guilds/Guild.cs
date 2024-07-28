@@ -2640,7 +2640,7 @@ namespace Game.Guilds
                 m_level = 0;
                 m_class = 0;
                 m_flags = GuildMemberFlags.None;
-                m_logoutTime = LoopTime.ServerTime;
+                m_logoutTime = ServerTime.Zero;
                 m_accountId = 0;
                 m_rankId = rankId;
                 m_achievementPoints = 0;
