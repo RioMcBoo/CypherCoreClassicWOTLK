@@ -758,7 +758,7 @@ namespace Game
                 return;
 
             //this slot is excepted when applying / removing meta gem bonus
-            var slot = itemTarget.IsEquipped() ? itemTarget.InventorySlot : ItemSlot.Null;
+            var slot = itemTarget.IsEquipped() ? itemTarget.InventorySlot : ItemSlot.NullSlot;
 
             var gems = new Item[ItemConst.MaxGemSockets];
             var gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];

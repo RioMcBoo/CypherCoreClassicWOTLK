@@ -5914,7 +5914,7 @@ namespace Game.Entities
             ForEachItem(ItemSearchLocation.Everywhere, item =>
             {
                 ItemTemplate itemTemplate = item.GetTemplate();
-                if (itemTemplate != null && itemTemplate.GetInventoryType() < InventoryType.ProfessionTool)
+                if (itemTemplate != null && itemTemplate.GetInventoryType() < InventoryType.ProfessionTool && itemTemplate.GetInventoryType() > InventoryType.NonEquip)
                 {
                     if (item.IsEquipped())
                     {

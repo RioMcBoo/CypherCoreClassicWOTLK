@@ -10,6 +10,7 @@ namespace Game.Entities
         /// <summary>ItemSlot Hash size is byte.</summary>
         public const int HashBitSize = 8;
         public const byte Null = byte.MaxValue;           
+        public static readonly ItemSlot NullSlot = new(Null);           
         
         public ItemSlot(byte slot) { Value = slot; }
         public override int GetHashCode() => Value;

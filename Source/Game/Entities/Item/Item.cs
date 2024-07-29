@@ -628,8 +628,7 @@ namespace Game.Entities
             item.uQueuePos = -1;
         }
 
-        public bool IsEquipped() { return !IsInBag() && m_slot < EquipmentSlot.End
-                || (m_slot >= ProfessionSlots.Start && m_slot < ProfessionSlots.End); }
+        public bool IsEquipped() { return !IsInBag() && InventorySlot.IsEquipSlot; }
 
         public bool CanBeTraded(bool mail = false, bool trade = false)
         {
@@ -2081,8 +2080,8 @@ namespace Game.Entities
         public int GetCount() { return m_itemData.StackCount; }
         public int GetMaxStackCount() { return GetTemplate().GetMaxStackSize(); }
 
-        public byte InventorySlot { get => m_slot; set => m_slot = value; }
-        public byte InventoryBagSlot { get => m_container != null ? m_container.InventorySlot : ItemSlot.Null; }
+        public ItemSlot InventorySlot { get => m_slot; set => m_slot = value; }
+        public ItemSlot InventoryBagSlot { get => m_container != null ? m_container.InventorySlot : ItemSlot.Null; }
         public ItemPos InventoryPosition { get => new(InventorySlot, InventoryBagSlot); }
         public Bag GetContainer() { return m_container; }
         
