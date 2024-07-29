@@ -40,7 +40,8 @@ namespace Game.Entities
                     Item item = _LoadItem(trans, zoneId, timeDiff, result.GetFields());
                     if (item != null)
                     {
-                        ObjectGuid bagGuid = result.Read<long>(46) != 0 ? ObjectGuid.Create(HighGuid.Item, result.Read<long>(44)) : ObjectGuid.Empty;
+                        long bagLowGuid = result.Read<long>(46);
+                        ObjectGuid bagGuid = bagLowGuid != 0 ? ObjectGuid.Create(HighGuid.Item, bagLowGuid) : ObjectGuid.Empty;
                         byte slot = result.Read<byte>(47);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);

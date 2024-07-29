@@ -9,6 +9,8 @@ using System;
 /// </summary>
 public static class LoopTime
 {
+    public static bool Initialized { get; private set; }
+
     private static ServerTime _serverTime;
     private static RealmTime _realmTime;
 
@@ -100,5 +102,7 @@ public static class LoopTime
         UpTime = newUtcTime - Time.ApplicationStartTime;
         UptimeMS = (Milliseconds)UpTime;
         RelativeTime = (RelativeTime)UptimeMS;
+
+        Initialized = true;
     }
 }

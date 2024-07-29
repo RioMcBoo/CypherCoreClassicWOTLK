@@ -28,7 +28,15 @@ namespace Game.Entities
 
             uState = ItemUpdateState.New;
             uQueuePos = -1;
-            m_lastPlayedTimeUpdate = LoopTime.ServerTime;
+
+            if (LoopTime.Initialized)
+            {
+                m_lastPlayedTimeUpdate = LoopTime.ServerTime;
+            }
+            else
+            {
+                m_lastPlayedTimeUpdate = Time.Now.ToServerTime();
+            }
         }
 
         public virtual bool Create(long guidlow, int itemId, ItemContext context, Player owner)
