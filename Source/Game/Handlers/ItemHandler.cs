@@ -571,7 +571,23 @@ namespace Game
                 }
             }
 
-            msg = GetPlayer().CanStoreItem(destBagSlot, out List<(ItemPos item, int count)> dest, item);
+            List<(ItemPos item, int count)> dest;
+
+            if (destBagSlot.IsBankPos)
+            {
+                if (!CanUseBank())
+                {
+                    Log.outDebug(LogFilter.Network, $"WORLD: HandleAutoStoreBagItem - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
+                    return;
+                }
+
+                msg = GetPlayer().CanBankItem(destBagSlot, out dest, item);
+            }
+            else
+            {
+                msg = GetPlayer().CanStoreItem(destBagSlot, out dest, item);
+            }
+
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);
