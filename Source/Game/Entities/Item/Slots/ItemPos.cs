@@ -167,9 +167,9 @@ namespace Game.Entities
                 if (Slot.IsEquipSlot)
                     return true;
 
-                // profession equipment
+                // profession equipment 
                 if (Slot.IsProfessionSlot)
-                    return true;
+                    return false;
 
                 // bag equip slots
                 if (Slot.IsBagSlot)
@@ -177,7 +177,7 @@ namespace Game.Entities
 
                 // reagent bag equip slots
                 if (Slot.IsReagentBagSlot)
-                    return true;
+                    return false;
 
                 // backpack slots
                 if (Slot.IsItemSlotExactly(backPackCapacity))
