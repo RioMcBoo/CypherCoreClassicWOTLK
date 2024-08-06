@@ -56,7 +56,7 @@ namespace Game.Entities
                             item.InventorySlot = slot;
 
                             ItemPos itemPos = new(slot);
-                            List<(ItemPos Item, int Count)> dest;
+                            List<ItemPosCount> dest;
 
                             if (itemPos.IsInventoryPos)
                             {
@@ -100,7 +100,7 @@ namespace Game.Entities
                             var bag = bagMap.LookupByKey(bagGuid);
                             if (bag != null)
                             {
-                                err = CanStoreItem(new(slot, bag.InventorySlot), out List<(ItemPos Item, int Count)> dest, item);
+                                err = CanStoreItem(new(slot, bag.InventorySlot), out var dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }

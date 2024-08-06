@@ -1738,7 +1738,7 @@ namespace Game
                     if (uItem == null)
                         continue;
                                         
-                    InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> itemPosCount, uItem);
+                    InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemPos.Undefined, out var itemPosCount, uItem);
                     if (inventoryResult == InventoryResult.Ok)
                     {
                         if (_player.CanUnequipItem(dstPos, true) != InventoryResult.Ok)

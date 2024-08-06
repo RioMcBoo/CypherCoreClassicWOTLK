@@ -91,7 +91,7 @@ namespace Game
             SendPacket(tradeUpdated);
         }
 
-        void MoveTradeItems(Item[] myItems, Item[] hisItems, List<(ItemPos item, int count)>[] myDest, List<(ItemPos item, int count)>[] hisDest)
+        void MoveTradeItems(Item[] myItems, Item[] hisItems, List<ItemPosCount>[] myDest, List<ItemPosCount>[] hisDest)
         {
             Player trader = GetPlayer().GetTrader();
             if (trader == null)
@@ -160,11 +160,13 @@ namespace Game
                     Log.outDebug(LogFilter.Network, 
                         $"player trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
 
-                    //Can return null
+                    // Can return null
                     myItems[i] = item;
                     myItems[i].SetInTrade();
                 }
+
                 item = hisTrade.GetItem((TradeSlots)i);
+
                 if (item != null)
                 {
                     Log.outDebug(LogFilter.Network, 
@@ -391,10 +393,10 @@ namespace Game
                 TradeStatusPkt myCanCompleteInfo = new();
                 TradeStatusPkt hisCanCompleteInfo = new();
                 hisCanCompleteInfo.BagResult =
-                    trader.CanStoreTradeItems(myItems, ref hisCanCompleteInfo.ItemID, out var hisDest, hisItems);
+                    trader.CanStoreTradeItems(myItems, out hisCanCompleteInfo.ItemID, out var hisDest, hisItems);
 
                 myCanCompleteInfo.BagResult = 
-                    GetPlayer().CanStoreTradeItems(hisItems, ref myCanCompleteInfo.ItemID, out var myDest, myItems);
+                    GetPlayer().CanStoreTradeItems(hisItems, out myCanCompleteInfo.ItemID, out var myDest, myItems);
 
                 ClearAcceptTradeMode(myItems, hisItems);
 

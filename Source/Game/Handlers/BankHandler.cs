@@ -26,14 +26,14 @@ namespace Game
             if (item == null)
                 return;
 
-            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos Pos, int Count)> dest, item, false);
+            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out var dest, item);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);
                 return;
             }
 
-            if (dest.Count == 1 && dest[0].Pos == item.InventoryPosition)
+            if (dest.Count == 1 && dest[0].Position == item.InventoryPosition)
             {
                 GetPlayer().SendEquipError(InventoryResult.CantSwap, item);
                 return;
@@ -71,12 +71,13 @@ namespace Game
 
             ItemPos itemPos = new(packet.Slot, packet.Bag);
             Item item = GetPlayer().GetItemByPos(itemPos);
+
             if (item == null)
                 return;
 
             if (itemPos.IsBankPos)                 // moving from bank to inventory
             {
-                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item);
+                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out var dest, item);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);
@@ -90,7 +91,7 @@ namespace Game
             }
             else                                                    // moving from inventory to bank
             {
-                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item, false);
+                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out var dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);

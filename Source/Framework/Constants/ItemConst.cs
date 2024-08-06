@@ -1301,7 +1301,7 @@ namespace Framework.Constants
         ItemCooldown = 111,// Item is not ready yet.
         NotInRatedBattleground = 112,// You can't do that in a rated battleground.
         EquipableSpellsSlotsFull = 113,
-        CantBeRecrafted = 114,// You can't recraft that itemv
+        CantBeRecrafted = 114,// You can't recraft that item
         ReagentBagWrongSlot = 115,// Reagent Bags can only be placed in the reagent bag slot.
         SlotOnlyReagentBag = 116,// Only Reagent Bags can be placed in the reagent bag slot.
         ReagentBagItemType = 117,// Only Reagents can be placed in Reagent Bags.

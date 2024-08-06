@@ -2235,7 +2235,7 @@ namespace Game.Chat
             var noSpaceForCount = 0;
 
             // check space and find places
-            List<(ItemPos Item, int Count)> dest;
+            List<ItemPosCount> dest;
             InventoryResult msg = playerTarget.CanStoreNewItem(
                 ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
 
@@ -2255,7 +2255,7 @@ namespace Game.Chat
             {
                 foreach (var posCount in dest)
                 {
-                    var item1 = player.GetItemByPos(posCount.Item);
+                    var item1 = player.GetItemByPos(posCount.Position);
                     if (item1 != null)
                         item1.SetBinding(false);
                 }
@@ -2449,7 +2449,7 @@ namespace Game.Chat
             var noSpaceForCount = 0;
 
             // check space and find places
-            List<(ItemPos Item, int Count)> dest;
+            List<ItemPosCount> dest;
             InventoryResult msg = playerTarget.CanStoreNewItem(
                 ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
 
@@ -2471,7 +2471,7 @@ namespace Game.Chat
             {
                 foreach (var itemPosCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(itemPosCount.Item);
+                    Item item1 = player.GetItemByPos(itemPosCount.Position);
                     if (item1 != null)
                         item1.SetBinding(false);
                 }

@@ -304,7 +304,7 @@ namespace Game.Entities
                 Item pItem = GetItemByPos(i);
                 if (pItem != null)
                 {
-                    List<(ItemPos item, int count)> destList;
+                    List<ItemPosCount> destList;
                     // equip offhand weapon/shield if it attempt equipped before main-hand weapon
                     InventoryResult msg = CanEquipItem(ItemSlot.Null, out destList, pItem, false);
                     if (msg == InventoryResult.Ok)
@@ -4777,7 +4777,7 @@ namespace Game.Entities
                         if (spellInfo.Reagent[i] > 0)
                         {
                             //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
+                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out var dest, spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = StoreNewItem(dest, spellInfo.Reagent[i], true);
@@ -7646,7 +7646,7 @@ namespace Game.Entities
             if (!force && (CanTitanGrip() || (offtemplate.GetInventoryType() != InventoryType.Weapon2Hand && !IsTwoHandUsed())))
                 return;
 
-            List<(ItemPos item, int count)> off_dest;
+            List<ItemPosCount> off_dest;
             InventoryResult off_msg = CanStoreItem(ItemPos.Undefined, out off_dest, offItem);
             if (off_msg == InventoryResult.Ok)
             {

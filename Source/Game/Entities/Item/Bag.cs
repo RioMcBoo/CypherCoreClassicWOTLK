@@ -124,8 +124,10 @@ namespace Game.Entities
         {
             var slots = 0;
             for (int i = 0; i < GetBagSize(); ++i)
+            {
                 if (m_bagslot[i] == null)
                     ++slots;
+            }
 
             return slots;
         }
@@ -238,8 +240,10 @@ namespace Game.Entities
         public bool IsEmpty()
         {
             for (var i = 0; i < GetBagSize(); ++i)
+            {
                 if (m_bagslot[i] != null)
                     return false;
+            }
 
             return true;
         }
@@ -267,7 +271,7 @@ namespace Game.Entities
         void SetBagSize(int numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
 
         void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
-
+        
         ContainerData m_containerData;
         Item[] m_bagslot = new Item[ItemConst.MaxBagSize];
 

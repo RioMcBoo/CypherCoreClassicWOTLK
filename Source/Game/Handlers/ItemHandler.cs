@@ -196,7 +196,7 @@ namespace Game
                 if (!dstItem.HasItemFlag(ItemFieldFlags.Child))
                 {
                     // check dest->src move possibility
-                    List<(ItemPos item, int count)> sSrc = new();                    
+                    List<ItemPosCount> sSrc = new();                    
                     if (src.IsInventoryPos)
                     {
                         msg = player.CanStoreItem(src, out sSrc, dstItem, forSwap: true);
@@ -571,7 +571,7 @@ namespace Game
                 }
             }
 
-            List<(ItemPos item, int count)> dest;
+            List<ItemPosCount> dest;
 
             if (destBagSlot.IsBankPos)
             {
@@ -595,7 +595,7 @@ namespace Game
             }
 
             // no-op: placed in same slot
-            if (dest.Count == 1 && dest[0].item == src)
+            if (dest.Count == 1 && dest[0].Position == src)
             {
                 // just remove grey item state
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, item);

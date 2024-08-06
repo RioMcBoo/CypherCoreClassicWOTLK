@@ -3723,7 +3723,7 @@ namespace Game.Guilds
             public void CopySlots(List<ItemSlot> ids)
             {
                 foreach (var item in m_vec)
-                    ids.Add(item.Item1.Slot);
+                    ids.Add(item.Position.Slot);
             }
 
             public void SendEquipError(InventoryResult result, Item item)
@@ -3758,7 +3758,7 @@ namespace Game.Guilds
             protected ItemPos m_itemPos;
             protected Item m_pItem;
             protected Item m_pClonedItem;
-            protected List<(ItemPos, int)> m_vec = new();
+            protected List<ItemPosCount> m_vec = new();
         }
 
         public class PlayerMoveItemData : MoveItemData
@@ -3931,9 +3931,9 @@ namespace Game.Guilds
                 }
             }
 
-            Item _StoreItem(SQLTransaction trans, BankTab pTab, Item pItem, (ItemPos Pos, int Count) pos, bool clone)
+            Item _StoreItem(SQLTransaction trans, BankTab pTab, Item pItem, ItemPosCount pos, bool clone)
             {
-                byte slotId = pos.Pos.Slot;
+                byte slotId = pos.Position.Slot;
                 int count = pos.Count;
                 Item pItemDest = pTab.GetItem(slotId);
                 if (pItemDest != null)
@@ -3974,7 +3974,7 @@ namespace Game.Guilds
                 requiredSpace = Math.Min(requiredSpace, count);
 
                 // Reserve space
-                (ItemPos Pos, int Count) pos = (slotId, requiredSpace);
+                ItemPosCount pos = new(slotId, requiredSpace);
                 if (!m_vec.Contains(pos))
                 {
                     m_vec.Add(pos);
