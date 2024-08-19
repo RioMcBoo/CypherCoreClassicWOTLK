@@ -8,7 +8,7 @@ The current support game version is: 3.4.3.54261
 * Optional: Visual Studio 2022, Visual Studio Code or Jetbrains Rider
 
 ### Server Setup
-* ~~Download and Complie the Extractor [Download](https://github.com/CypherCore/Tools)~~ Use TrinityCore extractors for now: [Download](https://github.com/TrinityCore/TrinityCore/tree/wotlk_classic)
+* ~~Download and Complie the Extractor [Download](https://github.com/CypherCore/Tools)~~ Use TrinityCore extractors for now: [Download]((https://github.com/RioMcBoo/TrinityCore/tree/wotlk_classic))
 * Run all extractors in the wow directory
 * Copy all created folders into server directory (ex: C:\CypherCore\Data)
 * Make sure Conf files are updated and point the the correct folders and sql user and databases
