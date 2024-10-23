@@ -2213,7 +2213,7 @@ namespace Game.Entities
                         default:
                             return false;
                     }
-                //can remove?
+
                 case ItemClass.Quiver:
                     switch (pBagProto.GetSubClass().Quiver)
                     {
@@ -2229,6 +2229,7 @@ namespace Game.Entities
                             return false;
                     }
             }
+
             return false;
         }
 

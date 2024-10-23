@@ -637,6 +637,7 @@ namespace Game.Entities
                             return TakeMoreSimilarRes;
                     }
 
+                    // This only happens if no items have been stored.
                     if (beginCount == count && dest.Empty())
                     {
                         no_space_count += count;
@@ -1158,8 +1159,10 @@ namespace Game.Entities
             if (proto.Effects.Count >= 2)
             {
                 if (proto.Effects[0].SpellID == 483 || proto.Effects[0].SpellID == 55884)
+                {
                     if (HasSpell(proto.Effects[1].SpellID))
                         return InventoryResult.InternalBagError;
+            }
             }
 
             ArtifactRecord artifact = CliDB.ArtifactStorage.LookupByKey(proto.GetArtifactID());
@@ -1509,6 +1512,7 @@ namespace Game.Entities
                             CheckTitanGripPenalty();
                     }
                 }
+
                 Bag pBag = GetBagByPos(pos.Container);
                 if (pBag != null)
                     pBag.RemoveItem(pos.Slot, update);
@@ -4083,6 +4087,7 @@ namespace Game.Entities
                             return TakeMoreSimilarRes;
                     }
 
+                    // This only happens if no items have been stored.
                     if (beginCount == count && dest.Empty())
                     {
                         no_space_count += count;
@@ -4164,20 +4169,26 @@ namespace Game.Entities
             if (location.HasFlag(ItemSearchLocation.Equipment))
             {
                 for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+                {
                     if (GetItemByPos(i) == null)
                         ++freeSlotCount;
+                }
 
                 for (byte i = ProfessionSlots.Start; i < ProfessionSlots.End; ++i)
+                {
                     if (GetItemByPos(i) == null)
                         ++freeSlotCount;
+            }
             }
 
             if (location.HasFlag(ItemSearchLocation.Inventory))
             {
                 int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
                 for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
+                {
                     if (GetItemByPos(i) == null)
                         ++freeSlotCount;
+                }
 
                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
                 {
@@ -4185,17 +4196,21 @@ namespace Game.Entities
                     if (bag != null)
                     {
                         for (byte j = 0; j < bag.GetBagSize(); ++j)
+                        {
                             if (bag.GetItemByPos(j) == null)
                                 ++freeSlotCount;
                     }
                 }
             }
+            }
 
             if (location.HasFlag(ItemSearchLocation.Bank))
             {
                 for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; ++i)
+                {
                     if (GetItemByPos(i) == null)
                         ++freeSlotCount;
+                }
 
                 for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
                 {
@@ -4203,10 +4218,12 @@ namespace Game.Entities
                     if (bag != null)
                     {
                         for (byte j = 0; j < bag.GetBagSize(); ++j)
+                        {
                             if (bag.GetItemByPos(j) == null)
                                 ++freeSlotCount;
                     }
                 }
+            }
             }
 
             if (location.HasFlag(ItemSearchLocation.ReagentBank))

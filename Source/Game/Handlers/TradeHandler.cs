@@ -434,6 +434,7 @@ namespace Game
                         myItems[i].SetGiftCreator(GetPlayer().GetGUID());
                         GetPlayer().MoveItemFromInventory(myItems[i].InventoryPosition, true);
                     }
+
                     if (hisItems[i] != null)
                     {
                         hisItems[i].SetGiftCreator(trader.GetGUID());

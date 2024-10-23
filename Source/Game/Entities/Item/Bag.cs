@@ -159,8 +159,10 @@ namespace Game.Entities
             base.BuildCreateUpdateBlockForPlayer(data, target);
 
             for (int i = 0; i < GetBagSize(); ++i)
+            {
                 if (m_bagslot[i] != null)
                     m_bagslot[i].BuildCreateUpdateBlockForPlayer(data, target);
+        }
         }
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
