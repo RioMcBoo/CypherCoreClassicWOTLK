@@ -162,7 +162,7 @@ namespace Game.Entities
             {
                 if (m_bagslot[i] != null)
                     m_bagslot[i].BuildCreateUpdateBlockForPlayer(data, target);
-        }
+            }
         }
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
@@ -266,6 +266,19 @@ namespace Game.Entities
                 return m_bagslot[slot];
 
             return null;
+        }
+
+        public List<Item> GetItems()
+        {
+            List<Item> items = new(GetBagSize());
+
+            for (byte i = 0 ; i < GetBagSize(); i++)
+            {
+                if (m_bagslot[i] != null)
+                    items.Add(m_bagslot[i]);
+            }
+
+            return items;
         }
 
         public byte GetBagSize() { return (byte)m_containerData.NumSlots; }

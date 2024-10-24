@@ -10,6 +10,8 @@ namespace Game.Entities
         /// <summary>ItemPos Hash size is 2 bytes.</summary>
         public const int HashBitSize = 16;
         public static readonly ItemPos Undefined = new(ItemSlot.Null, ItemSlot.Null);
+        public static ItemPos UndefinedBag(ItemSlot container) => new(ItemSlot.Null, container);
+        public static ItemPos UndefinedBag(ItemPos bagPosition) => new(ItemSlot.Null, bagPosition.Slot);
 
         public ItemPos(byte slot, byte container = ItemSlot.Null)
         {

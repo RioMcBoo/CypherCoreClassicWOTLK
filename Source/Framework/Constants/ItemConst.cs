@@ -588,7 +588,9 @@ namespace Framework.Constants
         CurrencyTokens = 0x2000,
         QuestItems = 0x4000,
         FishingSupp = 0x8000,
-        CookingSupp = 0x10000
+        CookingSupp = 0x10000,
+
+        Max = CookingSupp,
     }
 
     public enum InventoryType : sbyte

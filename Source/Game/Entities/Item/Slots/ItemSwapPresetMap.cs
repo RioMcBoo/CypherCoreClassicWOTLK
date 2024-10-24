@@ -14,44 +14,55 @@ namespace Game.Entities
     /// </summary>
     public class ItemSwapPresetMap
     {
-        private Dictionary<ItemPos, ItemPreset> map;
+        private static int sizePerItem = 6; // Just an approximate value
+        private Dictionary<ItemPos, ItemPreset?> map;
 
         public ItemSwapPresetMap() { }
 
         public ItemSwapPresetMap(IEnumerable<Item> itemsToSwap)
         {
-            map = new(itemsToSwap.Count());
+            map = new(itemsToSwap.Count() * sizePerItem);
 
             foreach (var item in itemsToSwap)
             {
                 if (item != null)
                 {
-                    map.Add(item.InventoryPosition, ItemPreset.EmptyValue);
+                    map.Add(item.InventoryPosition, ItemPreset.FreeSlot);
                 }
+            }
+        }
+
+        public ItemSwapPresetMap(SortedList<Item,ItemPos> itemsToSwap)
+        {
+            map = new(itemsToSwap.Count() * sizePerItem);
+
+            foreach (var item in itemsToSwap)
+            {
+                map.Add(item.Value, ItemPreset.FreeSlot);
             }
         }
 
         public ItemSwapPresetMap(Item itemToSwap)
         {
-            map = new(1);
+            map = new(sizePerItem);
 
             if (itemToSwap != null)
             {
-                map.Add(itemToSwap.InventoryPosition, ItemPreset.EmptyValue);
+                map.Add(itemToSwap.InventoryPosition, ItemPreset.FreeSlot);
             }
         }
 
         public ItemSwapPresetMap(ItemPos positionToSwap)
         {
-            map = new(1);
+            map = new(sizePerItem);
 
             if (positionToSwap.IsExplicitPos)
             {
-                map.Add(positionToSwap, ItemPreset.EmptyValue);
+                map.Add(positionToSwap, ItemPreset.FreeSlot);
             }
         }
 
-        public ItemPreset this[ItemPos key]
+        public ItemPreset? this[ItemPos key]
         {
             get => map[key];
             set => map[key] = value;
@@ -62,7 +73,7 @@ namespace Game.Entities
             return map.TryAdd(key, val);
         }
 
-        public bool TryGetValue(ItemPos key, out ItemPreset val)
+        public bool TryGetValue(ItemPos key, out ItemPreset? val)
         {
             return map.TryGetValue(key, out val);
         }

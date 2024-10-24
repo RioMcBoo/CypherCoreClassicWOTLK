@@ -172,6 +172,18 @@ namespace System
             return SpellSchools.Normal;
         }
 
+        public static int GetBagFamilyRating(this BagFamilyMask mask)
+        {
+            int rating = 0;
+            for (int i = 1; i <= (int)BagFamilyMask.Max; i = i << 1)
+            {
+                if (((int)mask & i) != 0)
+                    rating++;
+            }
+
+            return rating;
+        }
+
         public static bool HasState(this EncounterStateMask mask, EncounterState _state)
         {
             return (mask & (EncounterStateMask)(1 << (int)_state)) != 0;

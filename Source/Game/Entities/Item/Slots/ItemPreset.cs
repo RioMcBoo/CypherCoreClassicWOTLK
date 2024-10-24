@@ -7,7 +7,7 @@ namespace Game.Entities
 {
     public record struct ItemPreset
     {
-        public static readonly ItemPreset EmptyValue = new();
+        public static readonly ItemPreset FreeSlot = new();
 
         public ItemPreset(Item item = null, int count = 0)
         {

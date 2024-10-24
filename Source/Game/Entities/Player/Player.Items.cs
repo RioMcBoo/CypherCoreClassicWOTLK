@@ -529,7 +529,7 @@ namespace Game.Entities
             return CanStoreItem(pos, out dest, pItem, forSwap ? pos : ItemPos.Undefined);
         }
 
-        public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap)
+        public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap, int? count = null)
         {
             dest = null;
 
@@ -552,7 +552,7 @@ namespace Game.Entities
                 return InventoryResult.NotOwner;
             }
 
-            return CanStoreItem(pos, out dest, itemTemplate, pItem.GetCount(), pItem, out _, presetMap);
+            return CanStoreItem(pos, out dest, itemTemplate, count.HasValue ? count.Value: pItem.GetCount(), pItem, out _, presetMap);
         }
 
         enum CheckBagSpecilization
@@ -1162,7 +1162,7 @@ namespace Game.Entities
                 {
                     if (HasSpell(proto.Effects[1].SpellID))
                         return InventoryResult.InternalBagError;
-            }
+                }
             }
 
             ArtifactRecord artifact = CliDB.ArtifactStorage.LookupByKey(proto.GetArtifactID());
@@ -1522,7 +1522,7 @@ namespace Game.Entities
                 if (IsInWorld && update)
                     pItem.SendUpdateToPlayer(this);
 
-                if (!pos.IsContainerPos)
+                if (pos.IsEquipmentPos && !pos.IsBagSlotPos)
                     UpdateAverageItemLevelEquipped();
             }
         }
@@ -1668,7 +1668,7 @@ namespace Game.Entities
             // prevent put equipped/bank bag in self
             if (src.IsBagSlotPos && src.Slot == dst.Container)
             {
-                SendEquipError(InventoryResult.InternalBagError, pSrcItem, pDstItem);
+                SendEquipError(InventoryResult.WrongSlot, pSrcItem, pDstItem);
                 return;
             }
 
@@ -1707,7 +1707,7 @@ namespace Game.Entities
                     InventoryResult msg = CanStoreItem(dst, out var dest, pSrcItem);
                     if (msg != InventoryResult.Ok)
                     {
-                        SendEquipError(msg, pSrcItem, pDstItem);
+                        SendEquipError(msg, pSrcItem);
                         return;
                     }
 
@@ -1719,7 +1719,7 @@ namespace Game.Entities
                     InventoryResult msg = CanBankItem(dst, out var dest, pSrcItem, false);
                     if (msg != InventoryResult.Ok)
                     {
-                        SendEquipError(msg, pSrcItem, pDstItem);
+                        SendEquipError(msg, pSrcItem);
                         return;
                     }
 
@@ -1731,7 +1731,7 @@ namespace Game.Entities
                     InventoryResult msg = CanEquipItem(dst.Slot, out List<ItemPosCount> dest, pSrcItem, false);
                     if (msg != InventoryResult.Ok)
                     {
-                        SendEquipError(msg, pSrcItem, pDstItem);
+                        SendEquipError(msg, pSrcItem);
                         return;
                     }
 
@@ -1750,52 +1750,58 @@ namespace Game.Entities
             }
             #endregion
 
-            //#region Try to move empty bag to the bag instead swap (don't supported by client)
-            //if (dst.IsBagSlotPos && !src.IsBagSlotPos)
-            //{
-            //    if (pDstItem.ToBag() is Bag dstBag && pSrcItem.IsBag())
-            //    {
-            //        ItemPos newDestination = new(ItemSlot.Null, dst.Slot);
+            #region Try to move empty bag to the bag instead swap
+            if (dst.IsBagSlotPos && !src.IsBagSlotPos)
+            {
+                if (pDstItem.ToBag() is Bag dstBag && pSrcItem.IsBag())
+                {
+                    ItemPos newDestination = new(ItemSlot.Null, dst.Slot);
 
-            //        if (dst.IsBankPos)
-            //        {
-            //            InventoryResult msg = CanBankItem(newDestination, out var result, pSrcItem, false);
-            //            if (msg != InventoryResult.Ok)
-            //            {
-            //                SendEquipError(msg, pSrcItem, pDstItem);
-            //                return;
-            //            }
+                    if (dst.IsBankPos)
+                    {
+                        InventoryResult msg = CanBankItem(newDestination, out var result, pSrcItem, false);
+                        if (msg != InventoryResult.Ok)
+                        {
+                            SendEquipError(msg, pSrcItem, pDstItem);
+                            return;
+                        }
 
-            //            RemoveItem(dst, false);
-            //            RemoveItem(src, false);
-            //            BankItem(new() { new (dst, 1)}, pDstItem, true);                        
-            //            BankItem(result, pSrcItem, true);
-            //        }
-            //        else
-            //        {
-            //            InventoryResult msg = CanStoreItem(newDestination, out var result, pSrcItem);
-            //            if (msg != InventoryResult.Ok)
-            //            {
-            //                SendEquipError(msg, pSrcItem, pDstItem);
-            //                return;
-            //            }
+                        // just remove grey item state
+                        SendEquipError(InventoryResult.EquipNone3, pSrcItem, pDstItem);
 
-            //            RemoveItem(dst, false);
-            //            RemoveItem(src, false);
-            //            StoreItem(new() { new(dst, 1) }, pDstItem, true);
-            //            StoreItem(result, pSrcItem, true);
-            //        }
+                        RemoveItem(dst, false);
+                        RemoveItem(src, false);
+                        BankItem(new() { new(dst, 1) }, pDstItem, true);
+                        BankItem(result, pSrcItem, true);
+                    }
+                    else
+                    {
+                        InventoryResult msg = CanStoreItem(newDestination, out var result, pSrcItem);
+                        if (msg != InventoryResult.Ok)
+                        {
+                            SendEquipError(msg, pSrcItem, pDstItem);
+                            return;
+                        }
 
-            //        if (src.IsBankPos && !dst.IsBankPos)
-            //            ItemAddedQuestCheck(pSrcItem.GetEntry(), pSrcItem.GetCount());
+                        // just remove grey item state
+                        SendEquipError(InventoryResult.EquipNone3, pSrcItem, pDstItem);
 
-            //        if (!src.IsBankPos && dst.IsBankPos)
-            //            ItemRemovedQuestCheck(pSrcItem.GetEntry(), pSrcItem.GetCount());
+                        RemoveItem(dst, false);
+                        RemoveItem(src, false);
+                        StoreItem(new() { new(dst, 1) }, pDstItem, true);
+                        StoreItem(result, pSrcItem, true);
+                    }
 
-            //        return;
-            //    }
-            //}
-            //#endregion
+                    if (src.IsBankPos && !dst.IsBankPos)
+                        ItemAddedQuestCheck(pSrcItem.GetEntry(), pSrcItem.GetCount());
+
+                    if (!src.IsBankPos && dst.IsBankPos)
+                        ItemRemovedQuestCheck(pSrcItem.GetEntry(), pSrcItem.GetCount());
+
+                    return;
+                }
+            }
+            #endregion
 
             #region attempt merge to / fill target item
             if (!pSrcItem.IsBag() && !pDstItem.IsBag())
@@ -1847,88 +1853,138 @@ namespace Game.Entities
             }
             #endregion
 
-            #region impossible merge/fill, do real swap
-            // check src->dest move possibility
-            InventoryResult _msg = CheckMovePossibility(pSrcItem, dst, out var sDest1);
-            if (_msg != InventoryResult.Ok)
+            #region Check bag swap with item exchange
+            // Only if source is equipped bag, and destination is unequipped empty bag
+            bool canSwapWithItemExchange = src.IsBagSlotPos && !dst.IsBagSlotPos;            
+            List<Item> exchangeItems = null;
+            Dictionary <Item, List<ItemPosCount>> exchangeResult = null;
+            if (canSwapWithItemExchange)
             {
-                SendEquipError(_msg, pSrcItem, pDstItem);
+                if (pSrcItem.ToBag() is Bag srcBag && pDstItem.ToBag() is Bag dstBag)
+                {
+                    InventoryResult result = InventoryResult.Ok;
+
+                    // Save Items for exchange
+                    exchangeItems = srcBag.GetItems();
+
+                    // Use the sorted collection for the best match when searching for storage space
+                    exchangeItems.Sort(new BagSwapComparer<Item>());
+
+                    exchangeResult = new(exchangeItems.Count);
+
+                    // Try to store in the same source bag with preset
+                    ItemSwapPresetMap exchangePresetMap = new(exchangeItems);
+                    exchangePresetMap[src] = new(pDstItem, pDstItem.GetCount());
+                    exchangePresetMap[dst] = new(pSrcItem, pSrcItem.GetCount());
+
+                    foreach (var row in exchangeItems)
+                    {
+                        Item bagItem = row;
+                        if (!Item.ItemCanGoIntoBag(bagItem.GetTemplate(), dstBag.GetTemplate()))
+                        {
+                            // Try to store problematic items
+                            if (src.IsBankPos)
+                            {
+                                result = CanBankItem(ItemPos.Undefined, out var dest, bagItem, exchangePresetMap);
+                                exchangeResult[row] = dest;
+                            }
+                            else
+                            {
+                                result = CanStoreItem(ItemPos.Undefined, out var dest, bagItem, exchangePresetMap);
+                                exchangeResult[row] = dest;
+                            }
+                        }
+                        else
+                        {
+                            if (src.IsBankPos)
+                            {
+                                result = CanBankItem(ItemPos.UndefinedBag(src), out var dest, bagItem, exchangePresetMap);
+                                exchangeResult[row] = dest;
+                                // This only happens if no items have been stored.
+                                if (result == InventoryResult.BagFull)
+                                {
+                                    result = CanBankItem(ItemPos.Undefined, out var dest2, bagItem, exchangePresetMap);
+                                    exchangeResult[row] = dest2;
+                                }
+                            }
+                            else
+                            {
+                                result = CanStoreItem(ItemPos.UndefinedBag(src), out var dest, bagItem, exchangePresetMap);
+                                exchangeResult[row] = dest;
+                                // This only happens if no items have been stored.
+                                if (result == InventoryResult.BagFull)
+                                {
+                                    result = CanStoreItem(ItemPos.Undefined, out var dest2, bagItem, exchangePresetMap);
+                                    exchangeResult[row] = dest2;
+                                }
+                            }
+                        }
+
+                        if (result != InventoryResult.Ok)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (result != InventoryResult.Ok)
+                    {
+                        // Try to store at any cost
+                        exchangeItems.Sort(new UndefinedPositionComparer<Item>());
+                        exchangeResult = new(exchangeItems.Count);
+                        exchangePresetMap = new(exchangeItems);
+                        exchangePresetMap[src] = new(pDstItem, pDstItem.GetCount());
+                        exchangePresetMap[dst] = new(pSrcItem, pSrcItem.GetCount());
+
+                        foreach (var row in exchangeItems)
+                        {
+                            Item bagItem = row;
+
+                            if (src.IsBankPos)
+                            {
+                                result = CanBankItem(ItemPos.Undefined, out var dest, bagItem, exchangePresetMap);
+                                exchangeResult[row] = dest;
+                            }
+                            else
+                            {
+                                result = CanStoreItem(ItemPos.Undefined, out var dest, bagItem, exchangePresetMap);
+                                exchangeResult[row] = dest;
+                            }
+
+                            if (result != InventoryResult.Ok)
+                            {
+                                SendEquipError(InventoryResult.CantSwap, pSrcItem, pDstItem);
+                                return;
+                            }
+                        }
+                    }                    
+
+                    // We will save/restore these items below
+                    foreach (var i in exchangeItems)
+                    {
+                        srcBag.RemoveItem(i.InventorySlot, false);
+                    }
+                }                
+            }
+            #endregion
+
+            #region impossible merge/fill, do real swap (also with item exchange if it needs)
+            // check src->dest move possibility
+            InventoryResult _msgSrc = CheckMovePossibility(pSrcItem, dst, out var sDest1);
+            if (_msgSrc != InventoryResult.Ok)
+            {
+                SendEquipError(_msgSrc, pSrcItem, pDstItem);
+                RestoreExchangeItems(exchangeItems, pSrcItem);
                 return;
             }
 
             // check dest->src move possibility
-            _msg = CheckMovePossibility(pDstItem, src, out var sDest2);
-            if (_msg != InventoryResult.Ok)
+            InventoryResult _msgDst = CheckMovePossibility(pDstItem, src, out var sDest2);
+            if (_msgDst != InventoryResult.Ok)
             {
-                SendEquipError(_msg, pDstItem, pSrcItem);
+                SendEquipError(_msgDst, pDstItem, pSrcItem);
+                RestoreExchangeItems(exchangeItems, pSrcItem);
                 return;
-            }
-
-            // Check bag swap with item exchange (one from empty in not bag possition (equipped (not possible in fact) or store) - this code is unreachable!!!
-            if ((src.IsBagSlotPos && !dst.IsBagSlotPos) || (dst.IsBagSlotPos && !src.IsBagSlotPos))
-            {
-                if (pSrcItem.ToBag() is Bag srcBag && pDstItem.ToBag() is Bag dstBag)
-                {
-                    Bag emptyBag = null;
-                    Bag fullBag = null;
-                    if (srcBag.IsEmpty() && !src.IsBagSlotPos)
-                    {
-                        emptyBag = srcBag;
-                        fullBag = dstBag;
-                    }
-                    else if (dstBag.IsEmpty() && !dst.IsBagSlotPos)
-                    {
-                        emptyBag = dstBag;
-                        fullBag = srcBag;
-                    }
-
-                    // bag swap (with items exchange) case
-                    if (emptyBag != null && fullBag != null)
-                    {
-                        ItemTemplate emptyProto = emptyBag.GetTemplate();
-                        byte count = 0;
-
-                        for (byte i = 0; i < fullBag.GetBagSize(); ++i)
-                        {
-                            Item bagItem = fullBag.GetItemByPos(i);
-                            if (bagItem == null)
-                                continue;
-
-                            ItemTemplate bagItemProto = bagItem.GetTemplate();
-                            if (bagItemProto == null || !Item.ItemCanGoIntoBag(bagItemProto, emptyProto))
-                            {
-                                // one from items not go to empty target bag
-                                SendEquipError(InventoryResult.BagInBag, pSrcItem, pDstItem);
-                                return;
-                            }
-
-                            ++count;
-                        }
-
-                        if (count > emptyBag.GetBagSize())
-                        {
-                            // too small targeted bag
-                            SendEquipError(InventoryResult.CantSwap, pSrcItem, pDstItem);
-                            return;
-                        }
-
-                        // Items swap
-                        count = 0;                                      // will pos in new bag
-                        for (byte i = 0; i < fullBag.GetBagSize(); ++i)
-                        {
-                            Item bagItem = fullBag.GetItemByPos(i);
-                            if (bagItem == null)
-                                continue;
-
-                            fullBag.RemoveItem(i, true);
-                            emptyBag.StoreItem(count, bagItem, true);
-                            bagItem.SetState(ItemUpdateState.Changed, this);
-
-                            ++count;
-                        }
-                    }
-                }
-            }
+            }     
                 
             // now do moves, remove...
             RemoveItem(dst, false);
@@ -1960,6 +2016,15 @@ namespace Game.Entities
 
             if (!src.IsBankPos && dst.IsBankPos)
                 ItemRemovedQuestCheck(pSrcItem.GetEntry(), pSrcItem.GetCount());
+
+            // Move bag Exchanged items
+            if (canSwapWithItemExchange && exchangeItems != null && exchangeResult != null)
+            {
+                foreach (var i in exchangeResult)
+                {
+                    StoreItem(exchangeResult[i.Key], i.Key, true);
+                }  
+            }
 
             // if player is moving bags and is looting an item inside this bag
             // release the loot
@@ -2005,10 +2070,25 @@ namespace Game.Entities
             #endregion
 
             #region Helpers
+
+            void RestoreExchangeItems(List<Item> items, Item pSrcItem)
+            {
+                if (items == null)
+                    return;
+
+                if (pSrcItem is Bag itemBag)
+                {
+                    foreach(var i in items)
+                    {
+                        Item item = i;
+                        itemBag.StoreItem(i.InventorySlot, item, true);
+                        item.SetState(ItemUpdateState.Changed, this);
+                    }
+                }
+            }
+
             InventoryResult CheckMovePossibility(Item thisItem, ItemPos inPosition, out List<ItemPosCount> moveResult)
             {
-                // check src.dest move possibility
-
                 InventoryResult answer = InventoryResult.Ok;
 
                 if (inPosition.IsInventoryPos)
@@ -2310,12 +2390,12 @@ namespace Game.Entities
             return item;
         }
 
-        public Item GetItemByPos(ItemPos pos)
+        public Item GetItemByPos(ItemPos pos, ItemSwapPresetMap presetMap = null)
         {
             if (!pos.IsContainerPos && pos.Slot <= m_items.Length)
                 return m_items[pos.Slot];
 
-            Bag pBag = GetBagByPos(pos.Container);
+            Bag pBag = GetBagByPos(pos.Container, presetMap);
             if (pBag != null)
                 return pBag.GetItemByPos(pos.Slot);
 
@@ -3742,17 +3822,27 @@ namespace Game.Entities
         /// </summary>
         InventoryResult CanStoreItem_InSlot(StoreItemPredicate predicate, ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, int merge, ItemSwapPresetMap presetMap)
         {
-            Item pItem2 = GetItemByPos(pos);
+            Item pItem2 = GetItemByPos(pos, presetMap);
 
-            // consider history items
+            // consider history of preset items
             ItemPreset preset;
 
             if (presetMap != null && presetMap.ContainsKey(pos))
-                preset = presetMap[pos];
+            {
+                // Skip engaged slot
+                if (!presetMap[pos].HasValue)
+                    return InventoryResult.WrongSlot;
+
+                preset = presetMap[pos].Value;
+            }
             else if (pItem2 != null)
+            {
                 preset = new(pItem2, pItem2.GetCount());
+            }
             else
+            {
                 preset = new(null, 0);
+            }
 
             InventoryResult res = predicate?.Invoke(pos, pSrcItem, preset.Item, pProto) ?? InventoryResult.Ok;
             if (res != InventoryResult.Ok)
@@ -3840,7 +3930,7 @@ namespace Game.Entities
                     }
                     else
                     {
-                        Bag pBag = GetBagByPos(pos.Container);
+                        Bag pBag = GetBagByPos(pos.Container, presetMap);
                         if (pBag == null)
                             return InventoryResult.WrongBagType;
 
@@ -3908,7 +3998,7 @@ namespace Game.Entities
                     }
                     else
                     {
-                        Bag pBag = GetBagByPos(pos.Container);
+                        Bag pBag = GetBagByPos(pos.Container, presetMap);
                         if (pBag == null)
                             return InventoryResult.WrongBagType;
 
@@ -3988,7 +4078,7 @@ namespace Game.Entities
             return CanBankItem(pos, out dest, pItem, forSwap ? pos : ItemPos.Undefined, not_loading);
         }
 
-        public InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap = null, bool not_loading = true)
+        public InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap = null, bool not_loading = true, int? count = null)
         {
             dest = null;
 
@@ -4011,7 +4101,7 @@ namespace Game.Entities
                 return InventoryResult.NotOwner;
             }
 
-            return CanBankItem(pos, out dest, itemTemplate, pItem.GetCount(), pItem, out _, presetMap, not_loading);
+            return CanBankItem(pos, out dest, itemTemplate, count.HasValue ? count.Value : pItem.GetCount(), pItem, out _, presetMap, not_loading);
         }
 
         InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, ItemTemplate pProto, int count, Item pItem, out int no_space_count, ItemSwapPresetMap presetMap = null, bool not_loading = true)
@@ -4178,7 +4268,7 @@ namespace Game.Entities
                 {
                     if (GetItemByPos(i) == null)
                         ++freeSlotCount;
-            }
+                }
             }
 
             if (location.HasFlag(ItemSearchLocation.Inventory))
@@ -4199,9 +4289,9 @@ namespace Game.Entities
                         {
                             if (bag.GetItemByPos(j) == null)
                                 ++freeSlotCount;
+                        }
                     }
                 }
-            }
             }
 
             if (location.HasFlag(ItemSearchLocation.Bank))
@@ -4221,9 +4311,9 @@ namespace Game.Entities
                         {
                             if (bag.GetItemByPos(j) == null)
                                 ++freeSlotCount;
+                        }
                     }
                 }
-            }
             }
 
             if (location.HasFlag(ItemSearchLocation.ReagentBank))
@@ -4262,11 +4352,25 @@ namespace Game.Entities
         }
 
         //Bags
-        public Bag GetBagByPos(ItemSlot bag)
+        public Bag GetBagByPos(ItemSlot bag, ItemSwapPresetMap presetMap = null)
         {
+            Item item = null;
+
             if (bag.IsBagSlot || bag.IsBankBagSlot || bag.IsReagentBagSlot)
             {
-                Item item = GetItemByPos(bag);
+                item = GetItemByPos(bag);
+
+                if (presetMap != null)
+                {
+                    if (presetMap.TryGetValue(bag, out var preset))
+                    {
+                        if (preset.HasValue)
+                        {
+                            item = preset.Value.Item;
+                        }
+                    }                   
+                }
+
                 if (item != null)
                     return item.ToBag();
             }
@@ -4285,7 +4389,7 @@ namespace Game.Entities
                 return InventoryResult.WrongBagType;
 
             // skip not existed bag or self targeted bag
-            Bag pBag = GetBagByPos(bag);
+            Bag pBag = GetBagByPos(bag, presetMap);
             if (pBag == null || pBag == pSrcItem)
                 return InventoryResult.WrongBagType;
 
@@ -4318,11 +4422,11 @@ namespace Game.Entities
                 if (j == skip.Slot)
                     continue;
 
-                InventoryResult res = CanStoreItem_InSlot(null, new(j, bag), dest, pProto, ref count, pSrcItem, merge, presetMap);
+                InventoryResult res = InventoryResult.Ok;
 
-                if (res == InventoryResult.WrongSlot)
-                    continue;
-
+                ItemPos currentPos = new(j, bag);
+                res = CanStoreItem_InSlot(null, currentPos, dest, pProto, ref count, pSrcItem, merge, presetMap);
+                
                 if (res == InventoryResult.Ok)
                     return res;
             }

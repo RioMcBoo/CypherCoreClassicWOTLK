@@ -320,6 +320,7 @@ namespace Game.Entities
         }
 
         public int MaxDurability;
+        public bool IsMergeable => GetMaxStackSize() > 1;
         public List<ItemEffectRecord> Effects = new();
 
         // extra fields, not part of db2 files
