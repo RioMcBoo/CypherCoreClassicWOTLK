@@ -786,7 +786,7 @@ namespace Game.Entities
         public InventoryResult CanBeMergedWith(ItemTemplate proto)
         {
             // not allow merge trading currently items
-            if (IsInTrade())
+            if (IsInTradeHolded())
                 return InventoryResult.TradeBoundItem;
 
             // not allow merge looting currently items

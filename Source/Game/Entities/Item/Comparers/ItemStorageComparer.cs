@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class UndefinedPositionComparer<T> : IComparer<Item> where T : Item
+    public class ItemStorageComparer<T> : IComparer<Item> where T : Item
     {
         // Summary:
         //     Compares two objects and returns a value indicating whether one is less than,
@@ -51,8 +51,8 @@ namespace Game.Entities
             if (CompareByBagFamily(x, y) is CompareResult BagFamilyResult && BagFamilyResult != CompareResult.Equal)
                 return (int)BagFamilyResult;
 
-            if (CompareByMergeability(x, y) is CompareResult MergeabilityResult1 && MergeabilityResult1 != CompareResult.Equal)
-                return (int)MergeabilityResult1;
+            if (CompareByMergeability(x, y) is CompareResult MergeabilityResult && MergeabilityResult != CompareResult.Equal)
+                return (int)MergeabilityResult;
 
             if (CompareByAmount(x, y) is CompareResult StackSizeResult && StackSizeResult != CompareResult.Equal)
                 return (int)StackSizeResult;
@@ -66,10 +66,10 @@ namespace Game.Entities
             int y_rating = y.GetTemplate().GetBagFamily().GetBagFamilyRating();
 
             if (x_rating < y_rating)
-                return CompareResult.X_down;
+                return CompareResult.X_up;
 
             if (y_rating < x_rating)
-                return CompareResult.Y_down;
+                return CompareResult.Y_up;
 
             return CompareResult.Equal;
         }
@@ -102,7 +102,7 @@ namespace Game.Entities
         private CompareResult CompareByAmount(Item x, Item y)
         {
             int x_amount = x.GetCount();
-            int y_amount = x.GetCount();
+            int y_amount = y.GetCount();
 
             if (x_amount > y_amount)
                 return CompareResult.X_up;

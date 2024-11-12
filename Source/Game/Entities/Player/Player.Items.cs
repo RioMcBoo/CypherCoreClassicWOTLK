@@ -704,7 +704,7 @@ namespace Game.Entities
                                 return TakeMoreSimilarRes;
                         }
 
-                        ///Try Store in any free slot into Bag
+                        ///Try Store in any free slot into a Bag
                         {
                             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
                             {
@@ -1868,7 +1868,7 @@ namespace Game.Entities
                     exchangeItems = srcBag.GetItems();
 
                     // Use the sorted collection for the best match when searching for storage space
-                    exchangeItems.Sort(new BagSwapComparer<Item>());
+                    exchangeItems.Sort(new ItemStorageComparer<Item>());
 
                     exchangeResult = new(exchangeItems.Count);
 
