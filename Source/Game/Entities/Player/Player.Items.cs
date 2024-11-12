@@ -563,6 +563,13 @@ namespace Game.Entities
 
         };
 
+        enum MergeOption
+        {
+            FirstAvaible = -1,
+            TryToMerge = 1,
+            DontMerge = 0,
+        }
+
         InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, ItemTemplate pProto, int count, Item pItem, out int no_space_count, ItemSwapPresetMap presetMap = null /*bool forSwap = false*/)
         {
             dest = new();
@@ -594,7 +601,7 @@ namespace Game.Entities
             byte stage = pos.IsExplicitPos ? TryInSpecificSlot : (pos.IsContainerPos ? TryInSpecificContainer : TryAuto);
 
             //needs for not specific Positions
-            int needMerge;
+            MergeOption mergeOption;
 
             switch (stage)
             {
@@ -622,11 +629,12 @@ namespace Game.Entities
                 case TryInSpecificContainer:
 
                     var beginCount = count;
-                    needMerge = pProto.GetMaxStackSize() > 1 ? 1 : 0;
-                    for (; needMerge >= 0; needMerge--)
+                    mergeOption = pProto.IsMergeable ? MergeOption.TryToMerge : MergeOption.DontMerge;
+
+                    for (; mergeOption >= MergeOption.DontMerge; mergeOption--)
                     {
-                        // we need check 2 time (ignore specialized/non_specialized)                             [-1]
-                        res = CanStoreItem_InBagSlot(pos.Container, dest, pProto, ref count, CheckBagSpecilization.Ignore, pItem, pos.Slot, needMerge, presetMap);
+                        // we need check 2 time (ignore specialized/non_specialized)
+                        res = CanStoreItem_InBagSlot(pos.Container, dest, pProto, ref count, CheckBagSpecilization.Ignore, pItem, pos.Slot, mergeOption, presetMap);
                         if (res != InventoryResult.Ok)
                         {
                             no_space_count += count;
@@ -648,8 +656,9 @@ namespace Game.Entities
 
                 case TryAuto:
 
-                    needMerge = pProto.GetMaxStackSize() > 1 ? 1 : 0;
-                    for (; needMerge >= 0; needMerge--)
+                    mergeOption = pProto.IsMergeable ? MergeOption.TryToMerge : MergeOption.DontMerge;
+
+                    for (; mergeOption >= MergeOption.DontMerge; mergeOption--)
                     {
                         ///Try Store into suitable slot in Inventory
                         {
@@ -657,7 +666,7 @@ namespace Game.Entities
                             if (pItem == null && pProto.GetClass() == ItemClass.Container && pProto.GetSubClass().Container == ItemSubClassContainer.Container &&
                                 (pProto.GetBonding() == ItemBondingType.None || pProto.GetBonding() == ItemBondingType.OnAcquire))
                             {
-                                CanStoreItem_InInventorySlots(InventorySlots.BagStart, InventorySlots.BagEnd, dest, pProto, ref count, pItem, pos, needMerge, presetMap);
+                                CanStoreItem_InInventorySlots(InventorySlots.BagStart, InventorySlots.BagEnd, dest, pProto, ref count, pItem, pos, mergeOption, presetMap);
                                 if (count == 0)
                                     return TakeMoreSimilarRes;
                             }
@@ -669,7 +678,7 @@ namespace Game.Entities
                             // search free slot - keyring case
                             if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0)
                             {
-                                CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, pItem, pos, needMerge, presetMap);
+                                CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, pItem, pos, mergeOption, presetMap);
                                 if (count == 0)
                                     return TakeMoreSimilarRes;
                             }
@@ -677,7 +686,7 @@ namespace Game.Entities
                             // search free slot - ChildEquipment case
                             if (pItem != null && pItem.HasItemFlag(ItemFieldFlags.Child))
                             {
-                                CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, pItem, pos, needMerge, presetMap);
+                                CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, pItem, pos, mergeOption, presetMap);
                                 if (count == 0)
                                     return TakeMoreSimilarRes;
                             }
@@ -687,8 +696,8 @@ namespace Game.Entities
                             {
                                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
                                 {
-                                    // we need checkonly specialized                                         [1]
-                                    CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.Specialized, pItem, pos, needMerge, presetMap);
+                                    // we need checkonly specialized
+                                    CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.Specialized, pItem, pos, mergeOption, presetMap);
                                     if (count == 0)
                                         return TakeMoreSimilarRes;
                                 }
@@ -699,7 +708,7 @@ namespace Game.Entities
                         {
                             //Determining the maximum capacity of a backpack
                             byte inventoryEnd = (byte)(InventorySlots.ItemStart + GetInventorySlotCount());
-                            CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, pItem, pos, needMerge, presetMap);
+                            CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, pItem, pos, mergeOption, presetMap);
                             if (count == 0)
                                 return TakeMoreSimilarRes;
                         }
@@ -708,8 +717,8 @@ namespace Game.Entities
                         {
                             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
                             {
-                                // we need checkonly non-specialized (Specialized already checked above)    [0] 
-                                CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.NonSpecialized, pItem, pos, needMerge, presetMap);
+                                // we need checkonly non-specialized (Specialized already checked above)
+                                CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.NonSpecialized, pItem, pos, mergeOption, presetMap);
                                 if (count == 0)
                                     return TakeMoreSimilarRes;
                             }
@@ -1643,7 +1652,7 @@ namespace Game.Entities
             // prevent put equipped/bank bag in self
             if (src.IsBagSlotPos && src.Slot == dst.Container)
             {
-                SendEquipError(InventoryResult.WrongSlot, pSrcItem, pDstItem);
+                SendEquipError(InventoryResult.ObjectIsBusy, pSrcItem, pDstItem);
                 return;
             }
 
@@ -3792,7 +3801,7 @@ namespace Game.Entities
         }
 
         //Inventory       
-        InventoryResult CanStoreItem_InInventorySlots(byte slot_begin, byte slot_end, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemPos skip, int merge, ItemSwapPresetMap presetMap)
+        InventoryResult CanStoreItem_InInventorySlots(byte slot_begin, byte slot_end, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemPos skip, MergeOption mergeOption, ItemSwapPresetMap presetMap)
         {
             //this is never called for non-bag slots so we can do this
             if (pSrcItem != null && pSrcItem.IsNotEmptyBag())
@@ -3810,7 +3819,7 @@ namespace Game.Entities
                 if (new ItemSlot(j).IsReagentBagSlot)
                     continue;
 
-                InventoryResult res = CanStoreItem_InSlot(null, current, dest, pProto, ref count, pSrcItem, merge, presetMap);
+                InventoryResult res = CanStoreItem_InSlot(null, current, dest, pProto, ref count, pSrcItem, mergeOption, presetMap);
 
                 if (res == InventoryResult.WrongSlot)
                     continue;
@@ -3823,11 +3832,8 @@ namespace Game.Entities
         }
 
         delegate InventoryResult StoreItemPredicate(ItemPos pos, Item sourceItem, Item destItem, ItemTemplate proto);
-
-        /// <summary>
-        /// <param name="merge">int merge:<br/>[1] - need merge<br/>[0] - not need merge<br/>[-1] - ignore</param>
-        /// </summary>
-        InventoryResult CanStoreItem_InSlot(StoreItemPredicate predicate, ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, int merge, ItemSwapPresetMap presetMap)
+                
+        InventoryResult CanStoreItem_InSlot(StoreItemPredicate predicate, ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, MergeOption mergeOption, ItemSwapPresetMap presetMap)
         {            
             var itemPreset = GetItemPresetByPos(pos, presetMap);
 
@@ -3847,9 +3853,9 @@ namespace Game.Entities
                 preset.Item = null;
 
             // if merge skip empty, if !merge skip non-empty
-            if (merge >= 0)
+            if (mergeOption != MergeOption.FirstAvaible)
             {
-                if ((preset.Item != null) != (merge > 0))
+                if ((preset.Item != null) != (mergeOption == MergeOption.TryToMerge))
                     return InventoryResult.WrongSlot;
             }
 
@@ -3943,7 +3949,7 @@ namespace Game.Entities
                 return InventoryResult.Ok;
             };
 
-            InventoryResult res = CanStoreItem_InSlot(predicate, pos, dest, pProto, ref count, pSrcItem, -1, presetMap);
+            InventoryResult res = CanStoreItem_InSlot(predicate, pos, dest, pProto, ref count, pSrcItem, MergeOption.FirstAvaible, presetMap);
 
             if (res == InventoryResult.WrongSlot)
                 res = InventoryResult.Ok;
@@ -4011,7 +4017,7 @@ namespace Game.Entities
                 return InventoryResult.Ok;
             };
 
-            InventoryResult res = CanStoreItem_InSlot(predicate, pos, dest, pProto, ref count, pSrcItem, -1, presetMap);
+            InventoryResult res = CanStoreItem_InSlot(predicate, pos, dest, pProto, ref count, pSrcItem, MergeOption.FirstAvaible, presetMap);
 
             if (res == InventoryResult.WrongSlot)
                 res = InventoryResult.Ok;
@@ -4128,7 +4134,7 @@ namespace Game.Entities
             const byte TryInSpecificContainer = 2;
             byte stage = pos.IsExplicitPos ? TryInSpecificSlot : (pos.IsContainerPos ? TryInSpecificContainer : TryAuto);
 
-            int needMerge; // needs for not specific Positions
+            MergeOption mergeOption; // needs for not specific Positions
 
             switch (stage)
             {
@@ -4156,11 +4162,13 @@ namespace Game.Entities
                 case TryInSpecificContainer:
 
                     var beginCount = count;
-                    needMerge = pProto.GetMaxStackSize() > 1 ? 1 : 0;
-                    for (; needMerge >= 0; needMerge--)
+
+                    mergeOption = pProto.IsMergeable ? MergeOption.TryToMerge : MergeOption.DontMerge;
+
+                    for (; mergeOption >= MergeOption.DontMerge; mergeOption--)
                     {
-                        // we need check 2 time (ignore specialized/non_specialized)                             [-1]
-                        res = CanStoreItem_InBagSlot(pos.Container, dest, pProto, ref count, CheckBagSpecilization.Ignore, pItem, pos.Slot, needMerge, presetMap);
+                        // we need check 2 time (ignore specialized/non_specialized)
+                        res = CanStoreItem_InBagSlot(pos.Container, dest, pProto, ref count, CheckBagSpecilization.Ignore, pItem, pos.Slot, mergeOption, presetMap);
                         if (res != InventoryResult.Ok)
                         {
                             no_space_count += count;
@@ -4182,8 +4190,9 @@ namespace Game.Entities
 
                 case TryAuto:
 
-                    needMerge = pProto.GetMaxStackSize() > 1 ? 1 : 0;
-                    for (; needMerge >= 0; needMerge--)
+                    mergeOption = pProto.IsMergeable ? MergeOption.TryToMerge : MergeOption.DontMerge;
+
+                    for (; mergeOption >= MergeOption.DontMerge; mergeOption--)
                     {
                         ///Try Store into suitable slot in Inventory
                         {
@@ -4191,7 +4200,7 @@ namespace Game.Entities
                             if (pItem == null && pProto.GetClass() == ItemClass.Container && pProto.GetSubClass().Container == ItemSubClassContainer.Container &&
                                 (pProto.GetBonding() == ItemBondingType.None || pProto.GetBonding() == ItemBondingType.OnAcquire))
                             {
-                                CanStoreItem_InInventorySlots(InventorySlots.BankBagStart, InventorySlots.BankBagEnd, dest, pProto, ref count, pItem, pos, needMerge, presetMap);
+                                CanStoreItem_InInventorySlots(InventorySlots.BankBagStart, InventorySlots.BankBagEnd, dest, pProto, ref count, pItem, pos, mergeOption, presetMap);
                                 if (count == 0)
                                     return TakeMoreSimilarRes;
                             }
@@ -4205,8 +4214,8 @@ namespace Game.Entities
                             {
                                 for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
                                 {
-                                    // we need checkonly specialized                                         [1]
-                                    CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.Specialized, pItem, pos, needMerge, presetMap);
+                                    // we need checkonly specialized
+                                    CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.Specialized, pItem, pos, mergeOption, presetMap);
                                     if (count == 0)
                                         return TakeMoreSimilarRes;
                                 }
@@ -4216,17 +4225,17 @@ namespace Game.Entities
                         ///Try Store in any free slot in Bank
                         {
                             //Determining the maximum capacity of a backpack
-                            CanStoreItem_InInventorySlots(InventorySlots.BankItemStart, InventorySlots.BankItemEnd, dest, pProto, ref count, pItem, pos, needMerge, presetMap);
+                            CanStoreItem_InInventorySlots(InventorySlots.BankItemStart, InventorySlots.BankItemEnd, dest, pProto, ref count, pItem, pos, mergeOption, presetMap);
                             if (count == 0)
                                 return TakeMoreSimilarRes;
                         }
 
-                        ///Try Store in any free slot into Bank Bag
+                        ///Try Store in any free slot into a Bank Bag
                         {
                             for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
                             {
-                                // we need checkonly non-specialized (Specialized already checked above)    [0] 
-                                CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.NonSpecialized, pItem, pos, needMerge, presetMap);
+                                // we need checkonly non-specialized (Specialized already checked above)
+                                CanStoreItem_InBagSlot(i, dest, pProto, ref count, CheckBagSpecilization.NonSpecialized, pItem, pos, mergeOption, presetMap);
                                 if (count == 0)
                                     return TakeMoreSimilarRes;
                             }
@@ -4371,12 +4380,8 @@ namespace Game.Entities
 
             return null;
         }
-
-
-        /// <summary>
-        /// <param name="check">is_specialized:<br/>[1]  - specialized bags only<br/>[0]  - nonspecialized bags only<br/>[-1] - ignore specialize</param>
-        /// </summary>
-        InventoryResult CanStoreItem_InBagSlot(ItemSlot bag, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, CheckBagSpecilization check, Item pSrcItem, ItemPos skip, int merge, ItemSwapPresetMap presetMap)
+        
+        InventoryResult CanStoreItem_InBagSlot(ItemSlot bag, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, CheckBagSpecilization check, Item pSrcItem, ItemPos skip, MergeOption mergeOption, ItemSwapPresetMap presetMap)
         {
             // skip specific bag already processed in first called CanStoreItem_InBag
             if (bag == skip.Container)
@@ -4419,7 +4424,7 @@ namespace Game.Entities
                 InventoryResult res = InventoryResult.Ok;
 
                 ItemPos currentPos = new(j, bag);
-                res = CanStoreItem_InSlot(null, currentPos, dest, pProto, ref count, pSrcItem, merge, presetMap);
+                res = CanStoreItem_InSlot(null, currentPos, dest, pProto, ref count, pSrcItem, mergeOption, presetMap);
                 
                 if (res == InventoryResult.Ok)
                     return res;
