@@ -526,7 +526,7 @@ namespace Game.Entities
 
         public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool forSwap = false)
         {
-            return CanStoreItem(pos, out dest, pItem, forSwap ? pos : ItemPos.Undefined);
+            return CanStoreItem(pos, out dest, pItem, forSwap ? pos : null);
         }
 
         public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap, int? count = null)
@@ -724,21 +724,16 @@ namespace Game.Entities
             return InventoryResult.InternalBagError;
         }
 
-        public InventoryResult CanStoreTradeItems(Item[] itemsForStore, out int offendingItemId, out List<ItemPosCount>[] dest, Item[] ignoreSwapItems)
+        public InventoryResult CanStoreTradeItems(List<Item> itemsForStore, out int offendingItemId, out List<List<ItemPosCount>> dest, List<Item> ignoreSwapItems)
         {
             offendingItemId = 0;
 
-            dest = new List<ItemPosCount>[itemsForStore.Length];
-            Dictionary<ItemTemplate, List<(int Count, int Slot)>> itemsForStorePresetMap = new(itemsForStore.Length);
+            dest = new(itemsForStore.Count);
 
-            for (int i = 0; i < itemsForStore.Length; i++)
+            for (int i = 0; i < itemsForStore.Count; i++)
             {
-                // no item
-                if (itemsForStore[i] == null)
-                    continue;
-
                 Log.outDebug(LogFilter.Player,
-                    $"STORAGE: CanStoreTradeItems {i + 1}. item = {itemsForStore[i].GetEntry()}, count = {itemsForStore[i].GetCount()}");
+                    $"STORAGE: CanStoreTradeItems {i + 1} (empty slots is avoided). item = {itemsForStore[i].GetEntry()}, count = {itemsForStore[i].GetCount()}");
 
                 ItemTemplate pProto = itemsForStore[i].GetTemplate();
 
@@ -753,41 +748,21 @@ namespace Game.Entities
                 // item it 'bind'
                 if (itemsForStore[i].IsBindedNotWith(this))
                     return InventoryResult.NotOwner;
-
-                // Create new preset
-                if (!itemsForStorePresetMap.TryGetValue(pProto, out var preset))
-                {
-                    preset = new();
-                    itemsForStorePresetMap[pProto] = preset;
-                }
-
-                // combine elements that can be merged (for the sake of productivity)
-                if (preset.Empty() || pProto.GetMaxStackSize() == 1)
-                {
-                    preset.Add(new(itemsForStore[i].GetCount(), i));
-                }
-                else
-                {
-                    var existedPreset = preset[0];
-                    existedPreset.Count += itemsForStore[i].GetCount();
-                    preset[0] = existedPreset;
-                }
             }
 
             // Using presetMap to have correct free space diagnostics for several different items
             // We ignore items that will be swapped during the exchange.
             ItemSwapPresetMap swapPreset = new(ignoreSwapItems);
 
-            foreach (var preset in itemsForStorePresetMap)
+            foreach (var item in itemsForStore)
             {
-                foreach (var presetRow in preset.Value)
+                InventoryResult res = CanStoreItem(ItemPos.Undefined, out var destination, item.GetTemplate(), item.GetCount(), item, out _, swapPreset);
+                dest.Add(destination);
+
+                if (res != InventoryResult.Ok)
                 {
-                    InventoryResult res = CanStoreItem(ItemPos.Undefined, out dest[presetRow.Slot], preset.Key, presetRow.Count, itemsForStore[presetRow.Slot], out _, swapPreset);
-                    if (res != InventoryResult.Ok)
-                    {
-                        offendingItemId = preset.Key.GetId();
-                        return res;
-                    }
+                    offendingItemId = item.GetTemplate().GetId();
+                    return res;
                 }
             }
 
@@ -1929,7 +1904,6 @@ namespace Game.Entities
                     if (result != InventoryResult.Ok)
                     {
                         // Try to store at any cost
-                        exchangeItems.Sort(new UndefinedPositionComparer<Item>());
                         exchangeResult = new(exchangeItems.Count);
                         exchangePresetMap = new(exchangeItems);
                         exchangePresetMap[src] = new(pDstItem, pDstItem.GetCount());
@@ -2390,16 +2364,49 @@ namespace Game.Entities
             return item;
         }
 
-        public Item GetItemByPos(ItemPos pos, ItemSwapPresetMap presetMap = null)
+        public Item GetItemByPos(ItemPos pos)
         {
+            return GetItemPresetByPos(pos, null).Value.Item;            
+        }
+
+        public ItemPreset? GetItemPresetByPos(ItemPos pos, ItemSwapPresetMap presetMap)
+        {
+            ItemPreset preset = ItemPreset.FreeSlot;
+
             if (!pos.IsContainerPos && pos.Slot <= m_items.Length)
-                return m_items[pos.Slot];
+            {
+                if (presetMap != null)
+                {
+                    if (presetMap.TryGetValue(pos, out var foundPreset))
+                    {
+                        return foundPreset;
+                    }
+                }
 
-            Bag pBag = GetBagByPos(pos.Container, presetMap);
-            if (pBag != null)
-                return pBag.GetItemByPos(pos.Slot);
+                preset = MakeNewPreset(m_items[pos.Slot]);                             
+            }
+            else
+            {
+                Bag pBag = GetBagByPos(pos.Container, presetMap);
+                if (pBag != null)
+                {
+                    preset = MakeNewPreset(pBag.GetItemByPos(pos.Slot));
+                }
+            }
 
-            return null;
+            return preset;
+
+            ItemPreset MakeNewPreset(Item item)
+            {
+                ItemPreset newPreset = ItemPreset.FreeSlot;
+
+                newPreset.Item = item;
+
+                if (item != null)
+                    newPreset.Count = item.GetCount();
+
+                return newPreset;
+            }
         }
 
         public Item GetItemByEntry(int entry, ItemSearchLocation where = ItemSearchLocation.Default)
@@ -3821,28 +3828,15 @@ namespace Game.Entities
         /// <param name="merge">int merge:<br/>[1] - need merge<br/>[0] - not need merge<br/>[-1] - ignore</param>
         /// </summary>
         InventoryResult CanStoreItem_InSlot(StoreItemPredicate predicate, ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, int merge, ItemSwapPresetMap presetMap)
-        {
-            Item pItem2 = GetItemByPos(pos, presetMap);
+        {            
+            var itemPreset = GetItemPresetByPos(pos, presetMap);
+
+            // Skip engaged slot
+            if (!itemPreset.HasValue)
+                return InventoryResult.WrongSlot;
 
             // consider history of preset items
-            ItemPreset preset;
-
-            if (presetMap != null && presetMap.ContainsKey(pos))
-            {
-                // Skip engaged slot
-                if (!presetMap[pos].HasValue)
-                    return InventoryResult.WrongSlot;
-
-                preset = presetMap[pos].Value;
-            }
-            else if (pItem2 != null)
-            {
-                preset = new(pItem2, pItem2.GetCount());
-            }
-            else
-            {
-                preset = new(null, 0);
-            }
+            ItemPreset preset = itemPreset.Value;
 
             InventoryResult res = predicate?.Invoke(pos, pSrcItem, preset.Item, pProto) ?? InventoryResult.Ok;
             if (res != InventoryResult.Ok)
@@ -4075,7 +4069,7 @@ namespace Game.Entities
         //Bank
         public InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool forSwap, bool not_loading = true)
         {
-            return CanBankItem(pos, out dest, pItem, forSwap ? pos : ItemPos.Undefined, not_loading);
+            return CanBankItem(pos, out dest, pItem, forSwap ? pos : null, not_loading);
         }
 
         public InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap = null, bool not_loading = true, int? count = null)
