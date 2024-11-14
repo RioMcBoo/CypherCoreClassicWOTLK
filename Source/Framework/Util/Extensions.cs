@@ -174,6 +174,10 @@ namespace System
 
         public static int GetBagFamilyRating(this BagFamilyMask mask)
         {
+            // Skip work at easy cases
+            if ((uint)mask == 1 || (uint)mask == 0)
+                return (int)mask;
+
             int rating = 0;
             for (int i = 1; i <= (int)BagFamilyMask.Max; i = i << 1)
             {

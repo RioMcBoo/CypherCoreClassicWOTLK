@@ -26,7 +26,7 @@ namespace Game
             if (item == null)
                 return;
 
-            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out var dest, item);
+            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out var dest, out _, item);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);

@@ -5,11 +5,13 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class Bag : Item
+    public class Bag : Item, IEnumerable<(ItemPos,Item)>
     {
         public Bag()
         {
@@ -281,12 +283,22 @@ namespace Game.Entities
             return items;
         }
 
+        public IEnumerator<(ItemPos, Item)> GetEnumerator()
+        {
+            return new BagEnumerator(m_bagslot, InventorySlot, GetBagSize());
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new BagEnumerator(m_bagslot, InventorySlot, GetBagSize());
+        }
+
         public byte GetBagSize() { return (byte)m_containerData.NumSlots; }
         public bool IsValidSlot(ItemSlot slotInThisBag) => slotInThisBag < GetBagSize();
         void SetBagSize(int numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
 
         void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
-        
+            
         ContainerData m_containerData;
         Item[] m_bagslot = new Item[ItemConst.MaxBagSize];
 
@@ -310,6 +322,60 @@ namespace Game.Entities
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
+            }
+        }
+
+        public class BagEnumerator : IEnumerator<(ItemPos, Item)>
+        {
+            private Item[] _items;
+            private ItemSlot _bagSlot;
+            private byte _bagSize;
+
+            // Enumerators are positioned before the first element
+            // until the first MoveNext() call.
+            int position = -1;
+
+            public BagEnumerator(Item[] items, ItemSlot bagSlot, byte bagSize)
+            {
+                _items = items;
+                _bagSlot = bagSlot;
+                _bagSize = bagSize;
+            }
+
+            public bool MoveNext()
+            {
+                position++;
+                return position < _bagSize;
+            }
+
+            public void Reset()
+            {
+                position = -1;
+            }
+
+            public void Dispose() { }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return Current;
+                }
+            }
+
+            public (ItemPos, Item) Current
+            {
+                get
+                {
+                    try
+                    {
+                        return (new((byte)position, _bagSlot), _items[position]);
+                    }
+                    catch (IndexOutOfRangeException)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                }
             }
         }
     }

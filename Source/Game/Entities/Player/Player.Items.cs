@@ -526,12 +526,13 @@ namespace Game.Entities
 
         public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool forSwap = false)
         {
-            return CanStoreItem(pos, out dest, pItem, forSwap ? pos : null);
+            return CanStoreItem(pos, out dest, out _, pItem, forSwap ? pos : null);
         }
 
-        public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap, int? count = null)
+        public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, out int no_space_count, Item pItem, ItemPresetMap presetMap, int? count = null)
         {
             dest = null;
+            no_space_count = count.HasValue ? count.Value : pItem.GetCount();
 
             if (pItem == null)
                 return InventoryResult.ItemNotFound;
@@ -552,7 +553,7 @@ namespace Game.Entities
                 return InventoryResult.NotOwner;
             }
 
-            return CanStoreItem(pos, out dest, itemTemplate, count.HasValue ? count.Value: pItem.GetCount(), pItem, out _, presetMap);
+            return CanStoreItem(pos, out dest, itemTemplate, no_space_count, pItem, out no_space_count, presetMap);
         }
 
         enum CheckBagSpecilization
@@ -570,7 +571,7 @@ namespace Game.Entities
             DontMerge = 0,
         }
 
-        InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, ItemTemplate pProto, int count, Item pItem, out int no_space_count, ItemSwapPresetMap presetMap = null /*bool forSwap = false*/)
+        InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, ItemTemplate pProto, int count, Item pItem, out int no_space_count, ItemPresetMap presetMap = null /*bool forSwap = false*/)
         {
             dest = new();
             InventoryResult res;
@@ -580,7 +581,7 @@ namespace Game.Entities
 
             #region Check for similar items 
             // can't store this amount similar items
-            // The search for similar items occurs in all character slots, including the bank. Therefore, there is no need to use the 'ItemSwapPresetMap' here. We have only these possible options:
+            // The search for similar items occurs in all character slots, including the bank. Therefore, there is no need to use the 'ItemPresetMap' here. We have only these possible options:
             //      1) Moving or swapping an item within the character's inventory(also in the bank) - then this does not matter, because if this one is found, it will be skipped.
             //      2) Receiving an item from outside(by trading or other methods) - this item will not be found anyway)
             //      3) Exchanging similar items when trading, which have a quantity limit (this case is quite rare if there are no custom items, if possible at all)
@@ -761,7 +762,7 @@ namespace Game.Entities
 
             // Using presetMap to have correct free space diagnostics for several different items
             // We ignore items that will be swapped during the exchange.
-            ItemSwapPresetMap swapPreset = new(ignoreSwapItems);
+            ItemPresetMap swapPreset = new(ignoreSwapItems);
 
             foreach (var item in itemsForStore)
             {
@@ -2378,7 +2379,7 @@ namespace Game.Entities
             return GetItemPresetByPos(pos, null).Value.Item;            
         }
 
-        public ItemPreset? GetItemPresetByPos(ItemPos pos, ItemSwapPresetMap presetMap)
+        public ItemPreset? GetItemPresetByPos(ItemPos pos, ItemPresetMap presetMap)
         {
             ItemPreset preset = ItemPreset.FreeSlot;
 
@@ -3801,7 +3802,7 @@ namespace Game.Entities
         }
 
         //Inventory       
-        InventoryResult CanStoreItem_InInventorySlots(byte slot_begin, byte slot_end, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemPos skip, MergeOption mergeOption, ItemSwapPresetMap presetMap)
+        InventoryResult CanStoreItem_InInventorySlots(byte slot_begin, byte slot_end, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemPos skip, MergeOption mergeOption, ItemPresetMap presetMap)
         {
             //this is never called for non-bag slots so we can do this
             if (pSrcItem != null && pSrcItem.IsNotEmptyBag())
@@ -3833,7 +3834,7 @@ namespace Game.Entities
 
         delegate InventoryResult StoreItemPredicate(ItemPos pos, Item sourceItem, Item destItem, ItemTemplate proto);
                 
-        InventoryResult CanStoreItem_InSlot(StoreItemPredicate predicate, ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, MergeOption mergeOption, ItemSwapPresetMap presetMap)
+        InventoryResult CanStoreItem_InSlot(StoreItemPredicate predicate, ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, MergeOption mergeOption, ItemPresetMap presetMap)
         {            
             var itemPreset = GetItemPresetByPos(pos, presetMap);
 
@@ -3895,7 +3896,7 @@ namespace Game.Entities
             return InventoryResult.WrongSlot;
         }
 
-        InventoryResult CanStoreItem_InSpecificSlot(ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemSwapPresetMap presetMap)
+        InventoryResult CanStoreItem_InSpecificSlot(ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemPresetMap presetMap)
         {
             if (pSrcItem != null)
             {
@@ -3957,7 +3958,7 @@ namespace Game.Entities
             return res;
         }
 
-        InventoryResult CanBankItem_InSpecificSlot(ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemSwapPresetMap presetMap, bool not_loading)
+        InventoryResult CanBankItem_InSpecificSlot(ItemPos pos, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, Item pSrcItem, ItemPresetMap presetMap, bool not_loading)
         {
             if (pSrcItem != null)
             {
@@ -4075,12 +4076,13 @@ namespace Game.Entities
         //Bank
         public InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool forSwap, bool not_loading = true)
         {
-            return CanBankItem(pos, out dest, pItem, forSwap ? pos : null, not_loading);
+            return CanBankItem(pos, out dest, out _, pItem, forSwap ? pos : null, not_loading);
         }
 
-        public InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, ItemSwapPresetMap presetMap = null, bool not_loading = true, int? count = null)
+        public InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, out int no_space_count, Item pItem, ItemPresetMap presetMap = null, bool not_loading = true, int? count = null)
         {
             dest = null;
+            no_space_count = count.HasValue ? count.Value : pItem.GetCount();
 
             if (pItem == null)
                 return InventoryResult.ItemNotFound;
@@ -4101,10 +4103,10 @@ namespace Game.Entities
                 return InventoryResult.NotOwner;
             }
 
-            return CanBankItem(pos, out dest, itemTemplate, count.HasValue ? count.Value : pItem.GetCount(), pItem, out _, presetMap, not_loading);
+            return CanBankItem(pos, out dest, itemTemplate, no_space_count, pItem, out no_space_count, presetMap, not_loading);
         }
 
-        InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, ItemTemplate pProto, int count, Item pItem, out int no_space_count, ItemSwapPresetMap presetMap = null, bool not_loading = true)
+        InventoryResult CanBankItem(ItemPos pos, out List<ItemPosCount> dest, ItemTemplate pProto, int count, Item pItem, out int no_space_count, ItemPresetMap presetMap = null, bool not_loading = true)
         {
             dest = new();
             InventoryResult res;
@@ -4114,7 +4116,7 @@ namespace Game.Entities
 
             #region Check for similar items 
             // can't store this amount similar items
-            // The search for similar items occurs in all character slots, including the bank. Therefore, there is no need to use the 'ItemSwapPresetMap' here. We have only these possible options:
+            // The search for similar items occurs in all character slots, including the bank. Therefore, there is no need to use the 'ItemPresetMap' here. We have only these possible options:
             //      1) Moving or swapping an item within the character's inventory(also in the bank) - then this does not matter, because if this one is found, it will be skipped.
             //      2) Receiving an item from outside(by trading or other methods) - this item will not be found anyway)
             //      3) Exchanging similar items when trading, which have a quantity limit (this case is quite rare if there are no custom items, if possible at all)
@@ -4355,7 +4357,7 @@ namespace Game.Entities
         }
 
         //Bags
-        public Bag GetBagByPos(ItemSlot bag, ItemSwapPresetMap presetMap = null)
+        public Bag GetBagByPos(ItemSlot bag, ItemPresetMap presetMap = null)
         {
             Item item = null;
 
@@ -4381,7 +4383,7 @@ namespace Game.Entities
             return null;
         }
         
-        InventoryResult CanStoreItem_InBagSlot(ItemSlot bag, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, CheckBagSpecilization check, Item pSrcItem, ItemPos skip, MergeOption mergeOption, ItemSwapPresetMap presetMap)
+        InventoryResult CanStoreItem_InBagSlot(ItemSlot bag, List<ItemPosCount> dest, ItemTemplate pProto, ref int count, CheckBagSpecilization check, Item pSrcItem, ItemPos skip, MergeOption mergeOption, ItemPresetMap presetMap)
         {
             // skip specific bag already processed in first called CanStoreItem_InBag
             if (bag == skip.Container)
@@ -4909,25 +4911,32 @@ namespace Game.Entities
 
         public InventoryResult CanUnequipItem(ItemPos pos, bool swap)
         {
-            // Applied only to equipped items and bank bags
-            if (!pos.IsEquipmentPos && !pos.IsBagSlotPos)
+            Item item = GetItemByPos(pos);
+
+            return CanUnequipItem(item, swap);
+        }
+
+        public InventoryResult CanUnequipItem(Item item, bool swap)
+        {
+            // Applied only to existed equipped item
+            if (item == null)
                 return InventoryResult.Ok;
 
-            Item pItem = GetItemByPos(pos);
+            ItemPos position = item.InventoryPosition;
 
-            // Applied only to existed equipped item
-            if (pItem == null)
+            // Applied only to equipped items and bank bags
+            if (!position.IsEquipmentPos && !position.IsBagSlotPos)
                 return InventoryResult.Ok;
 
             Log.outDebug(LogFilter.Player,
-                $"STORAGE: CanUnequipItem slot = {pos}, item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
+                $"STORAGE: CanUnequipItem slot = {position}, item = {item.GetEntry()}, count = {item.GetCount()}");
 
-            ItemTemplate pProto = pItem.GetTemplate();
+            ItemTemplate pProto = item.GetTemplate();
             if (pProto == null)
                 return InventoryResult.ItemNotFound;
 
             // item used
-            if (pItem.m_lootGenerated)
+            if (item.m_lootGenerated)
                 return InventoryResult.LootGone;
 
             if (IsCharmed())
@@ -4940,13 +4949,16 @@ namespace Game.Entities
             {
                 if (IsInCombat())
                     return InventoryResult.NotInCombat;
+
                 Battleground bg = GetBattleground();
                 if (bg != null)
+                {
                     if (bg.IsArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
                         return InventoryResult.NotDuringArenaMatch;
             }
+            }
 
-            if (!swap && pItem.IsNotEmptyBag())
+            if (!swap && item.IsNotEmptyBag())
                 return InventoryResult.DestroyNonemptyBag;
 
             return InventoryResult.Ok;

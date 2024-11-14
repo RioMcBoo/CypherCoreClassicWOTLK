@@ -8,18 +8,21 @@ using System.Linq;
 namespace Game.Entities
 {
     /// <summary>
-    /// 'ItemSwapPresetMap' is typically used to optimize calculations <br/>
+    /// 'ItemPresetMap' is typically used to optimize calculations <br/>
     /// of available inventory space when swapping multiple items in the inventory at once <br/>
     /// (for example when trading, empting the bag or swapping bags)
     /// </summary>
-    public class ItemSwapPresetMap
+    public class ItemPresetMap
     {
         private static int sizePerItem = 6; // Just an approximate value
         private Dictionary<ItemPos, ItemPreset?> map;
 
-        public ItemSwapPresetMap() { }
+        public ItemPresetMap(int capacity)
+        {
+            map = new(capacity * sizePerItem);
+        }
 
-        public ItemSwapPresetMap(List<Item> itemsToSwap)
+        public ItemPresetMap(List<Item> itemsToSwap)
         {
             map = new(itemsToSwap.Count() * sizePerItem);
 
@@ -29,13 +32,13 @@ namespace Game.Entities
             }
         }
 
-        public ItemSwapPresetMap(Item itemToSwap)
+        public ItemPresetMap(Item itemToSwap)
         {
             map = new(sizePerItem);
             map.Add(itemToSwap.InventoryPosition, ItemPreset.FreeSlot);            
         }
 
-        public ItemSwapPresetMap(ItemPos positionToSwap)
+        public ItemPresetMap(ItemPos positionToSwap)
         {
             map = new(sizePerItem);
 
@@ -61,12 +64,12 @@ namespace Game.Entities
             return map.TryGetValue(key, out val);
         }
 
-        public static implicit operator ItemSwapPresetMap(Item itemToSwap)
+        public static implicit operator ItemPresetMap(Item itemToSwap)
         {
             return new(itemToSwap);
         }
 
-        public static implicit operator ItemSwapPresetMap(ItemPos positionToSwap)
+        public static implicit operator ItemPresetMap(ItemPos positionToSwap)
         {
             return new(positionToSwap);
         }

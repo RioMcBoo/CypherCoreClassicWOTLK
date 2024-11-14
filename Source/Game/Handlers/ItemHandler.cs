@@ -581,7 +581,7 @@ namespace Game
                     return;
                 }
 
-                msg = GetPlayer().CanBankItem(destBagSlot, out dest, item);
+                msg = GetPlayer().CanBankItem(destBagSlot, out dest, out _, item);
             }
             else
             {
