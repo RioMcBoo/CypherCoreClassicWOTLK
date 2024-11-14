@@ -2381,30 +2381,30 @@ namespace Game.Entities
 
         public ItemPreset? GetItemPresetByPos(ItemPos pos, ItemPresetMap presetMap)
         {
-            ItemPreset preset = ItemPreset.FreeSlot;
+            Item item = null;
 
             if (!pos.IsContainerPos && pos.Slot <= m_items.Length)
             {
-                if (presetMap != null)
+                item = m_items[pos.Slot];                 
+            }
+            else
                 {
-                    if (presetMap.TryGetValue(pos, out var foundPreset))
+                Bag pBag = GetBagByPos(pos.Container, presetMap);
+                if (pBag != null)
                     {
-                        return foundPreset;
+                    item = pBag.GetItemByPos(pos.Slot);
                     }
                 }
 
-                preset = MakeNewPreset(m_items[pos.Slot]);                             
-            }
-            else
+            if (presetMap != null)
             {
-                Bag pBag = GetBagByPos(pos.Container, presetMap);
-                if (pBag != null)
+                if (presetMap.TryGetValue(pos, out var foundPreset))
                 {
-                    preset = MakeNewPreset(pBag.GetItemByPos(pos.Slot));
+                    return foundPreset;
                 }
             }
 
-            return preset;
+            return MakeNewPreset(item);
 
             ItemPreset MakeNewPreset(Item item)
             {
@@ -4245,7 +4245,7 @@ namespace Game.Entities
                     }
 
                     no_space_count += count;
-                    return InventoryResult.InvFull;
+                    return InventoryResult.BankFull;
             }
 
             no_space_count += count;
