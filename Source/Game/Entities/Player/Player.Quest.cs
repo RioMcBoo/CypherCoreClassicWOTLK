@@ -2444,19 +2444,19 @@ namespace Game.Entities
         Func<QuestObjective, bool> QuestBoundItemFunc = objective => { return objective.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem); };
         Func<QuestObjective, bool> NotQuestBoundItemFunc = objective => { return !objective.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem); };
 
-        public void ItemAddedQuestCheck(int entry, int count, bool? boundItemFlagRequirement = null)
+        public void ItemAddedQuestCheck(int entry, int count, bool boundItemFlagRequirement = false)
         {
             ItemAddedQuestCheck(entry, count, boundItemFlagRequirement, out _);
         }
 
-        public void ItemAddedQuestCheck(int entry, int count, bool? boundItemFlagRequirement, out bool hadBoundItemObjective)
+        public void ItemAddedQuestCheck(int entry, int count, bool boundItemFlagRequirement, out bool hadBoundItemObjective)
         {
             hadBoundItemObjective = false;
 
             List<QuestObjective> updatedObjectives = new();
             Func<QuestObjective, bool> objectiveFilter = null;
-            if (boundItemFlagRequirement.HasValue)
-                objectiveFilter = boundItemFlagRequirement.Value ? QuestBoundItemFunc : NotQuestBoundItemFunc;
+            
+            objectiveFilter = boundItemFlagRequirement ? QuestBoundItemFunc : NotQuestBoundItemFunc;
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(entry);
             UpdateQuestObjectiveProgress(QuestObjectiveType.Item, itemTemplate.GetId(), count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
@@ -2483,12 +2483,14 @@ namespace Game.Entities
                 if (quest == null || objective == null || !IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
 
-                int newItemCount = GetItemCount(entry, false);  // we may have more than what the status shows, so we have to iterate inventory
-                if (newItemCount < objective.Amount)
+                int currentAmount = GetQuestObjectiveData(questId, objectiveStatusData.ObjectiveId);
+                if (currentAmount < count)
                 {
-                    SetQuestObjectiveData(objective, newItemCount);
-                    IncompleteQuest(questId);
+                    currentAmount = count;
                 }
+                                
+                SetQuestObjectiveData(objective, currentAmount - count);
+                IncompleteQuest(questId);
             }
 
             UpdateVisibleObjectInteractions(true, false, false, true);
@@ -2591,8 +2593,10 @@ namespace Game.Entities
                     continue;
 
                 if (quest.HasAnyFlag(QuestFlagsEx.NoCreditForProxy))
+                {
                     if (objective.Type == QuestObjectiveType.Monster && victimGuid.IsEmpty())
                         continue;
+                }
 
                 bool objectiveWasComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
                 if (objectiveWasComplete && addCount >= 0)

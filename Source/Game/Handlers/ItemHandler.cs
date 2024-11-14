@@ -162,6 +162,9 @@ namespace Game
             var player = GetPlayer();
             var src = new ItemPos(autoEquipItem.Slot, autoEquipItem.PackSlot);
 
+            if (!src.IsInventoryPos) // Only items from inventory can be auto-equipped
+                return;
+
             var srcItem = player.GetItemByPos(src);
             if (srcItem == null)
                 return;                                             // only at cheat
