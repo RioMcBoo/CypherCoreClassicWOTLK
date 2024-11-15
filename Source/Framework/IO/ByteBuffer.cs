@@ -15,9 +15,12 @@ namespace Framework.IO
             writeStream = new BinaryWriter(new MemoryStream());
         }
 
-        public ByteBuffer(byte[] data)
+        public ByteBuffer(byte[] data, bool writable = false)
         {
-            readStream = new BinaryReader(new MemoryStream(data));
+            if (writable)
+                writeStream = new BinaryWriter(new MemoryStream(data));
+            else
+                readStream = new BinaryReader(new MemoryStream(data));
         }
 
         public void Dispose()
@@ -428,6 +431,19 @@ namespace Framework.IO
             _bitPosition = 8;
             BitValue = 0;
             writeStream = new BinaryWriter(new MemoryStream());
+        }
+
+        public long Position
+        {
+            get
+            {
+                return GetCurrentStream().Position;
+            }
+
+            set
+            {
+                GetCurrentStream().Position = value;
+            }
         }
 
         byte _bitPosition = 8;

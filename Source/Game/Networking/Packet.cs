@@ -47,6 +47,12 @@ namespace Game.Networking
             _worldPacket = new WorldPacket(opcode);
         }
 
+        protected void TakeBufferAndDestroy(WorldPacket packet)
+        {
+            buffer = packet.GetData();
+            packet.Dispose();
+        }
+
         public void Clear()
         {
             _worldPacket.Clear();
@@ -92,6 +98,11 @@ namespace Game.Networking
     public class WorldPacket : ByteBuffer
     {
         public WorldPacket(ServerOpcodes opcode = ServerOpcodes.None)
+        {
+            this.opcode = (uint)opcode;
+        }
+
+        public WorldPacket(ServerOpcodes opcode, byte[] data) : base(data, true)
         {
             this.opcode = (uint)opcode;
         }
