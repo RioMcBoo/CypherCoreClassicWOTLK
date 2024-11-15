@@ -33,14 +33,17 @@ namespace Game.Chat
 
                 ChatCommandResult result1 = TryConsume(out tuple[offset], myArg, handler, args);
                 if (result1.IsSuccessful())
+                {
                     if ((result1 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, result1)).IsSuccessful())
                         return result1;
+                }
 
                 // try again omitting the argument
                 tuple[offset] = default;
                 ChatCommandResult result2 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, args);
                 if (result2.IsSuccessful())
                     return result2;
+
                 if (result1.HasErrorMessage() && result2.HasErrorMessage())
                 {
                     return ChatCommandResult.FromErrorMessage($"{handler.GetCypherString(CypherStrings.CmdparserEither)} \"{result2.GetErrorMessage()}\"\n{handler.GetCypherString(CypherStrings.CmdparserOr)} \"{result1.GetErrorMessage()}\"");
@@ -280,7 +283,7 @@ namespace Game.Chat
                         }
                         case nameof(Quest):
                         {
-                            ChatCommandResult result =  TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            ChatCommandResult result =  TryConsume(out dynamic tempVal, typeof(int), handler, args);
                             if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetQuestTemplate(tempVal)) != null)
                                 return result;
                             

@@ -26,6 +26,9 @@ namespace Game.Chat
                 case "mount":
                     data = new MountLinkData(info.Data).SpellId;
                     break;
+                case "quest":
+                    data = new QuestLinkData(info.Data).QuestId;
+                    break;
                 default:
                     data = info.Data;
                     break;
@@ -267,6 +270,42 @@ namespace Game.Chat
             get
             {
                 Cypher.Assert(false, "MountLinkData.Data property is not implement yet!");
+                return string.Empty;
+            }
+        }
+    }
+
+    readonly struct QuestLinkData
+    {
+        public readonly string QuestId;
+        public readonly string QuestLevel;
+
+        public QuestLinkData(string data)
+        {
+            var args = data.Split(':');
+            if (args.Length == 2)
+            {
+                QuestId = args[0];
+                QuestLevel = args[1];
+            }
+            else
+            {
+                QuestId = string.Empty;
+                QuestLevel = string.Empty;
+            }
+        }
+
+        public QuestLinkData(string questId, string questLevel)
+        {
+            QuestId = questId;
+            QuestLevel = questLevel;
+        }
+
+        public string GeneratedData
+        {
+            get
+            {
+                Cypher.Assert(false, "QuestLinkData.Data property is not implement yet!");
                 return string.Empty;
             }
         }
