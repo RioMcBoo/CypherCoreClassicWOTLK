@@ -2333,7 +2333,7 @@ namespace Game.Guilds
                     Player player = member.FindPlayer();
                     if (player == null)
                         continue;
-
+                                        
                     packet.WithdrawalsRemaining = _GetMemberRemainingSlots(member, tabId);
                     player.SendPacket(packet);
                 }

@@ -1024,7 +1024,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt64(Money);
             _worldPacket.WriteInt32(Tab);
+
+            // Save position for changing the buffer
+            _withdrawalsRemainingPosition = _worldPacket.Position;
             _worldPacket.WriteInt32(WithdrawalsRemaining);
+            _nextPosition = _worldPacket.Position;
+
             _worldPacket.WriteInt32(TabInfo.Count);
             _worldPacket.WriteInt32(ItemInfo.Count);
             _worldPacket.WriteBit(FullUpdate);
@@ -1039,10 +1044,39 @@ namespace Game.Networking.Packets
 
         public List<GuildBankItemInfo> ItemInfo;
         public List<GuildBankTabInfo> TabInfo;
-        public int WithdrawalsRemaining;
+        
         public int Tab;
         public long Money;
         public bool FullUpdate;
+
+        public int WithdrawalsRemaining
+        {
+            get => _withdrawalsRemaining;
+
+            set
+            {
+                _withdrawalsRemaining = value;
+                var buffer = GetData();
+                if (buffer != null)
+                {
+                    if (buffer.LongLength >= _nextPosition)
+                    {
+                        WorldPacket myOldCopy = new(GetOpcode(), buffer);
+                        myOldCopy.Position = _withdrawalsRemainingPosition;
+                        myOldCopy.WriteInt32(_withdrawalsRemaining);
+                        TakeBufferAndDestroy(myOldCopy);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException();
+                    }
+                }
+            }
+        }
+
+        private long _withdrawalsRemainingPosition;
+        private long _nextPosition;
+        private int _withdrawalsRemaining;
     }
 
     class AutoGuildBankItem : ClientPacket
