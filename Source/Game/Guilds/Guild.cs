@@ -3811,7 +3811,7 @@ namespace Game.Guilds
 
             public override bool InitItem()
             {
-                m_pItem = m_pPlayer.GetItemByPos(Slot);
+                m_pItem = m_pPlayer.GetItemByPos(Position);
                 if (m_pItem != null)
                 {
                     // Anti-WPE protection. Do not move non-empty bags to bank.
