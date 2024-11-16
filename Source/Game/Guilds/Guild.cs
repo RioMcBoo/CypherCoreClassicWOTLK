@@ -2146,76 +2146,117 @@ namespace Game.Guilds
 
         void _MoveItems(MoveItemData pSrc, MoveItemData pDest, int splitedAmount)
         {
-            // 1. Initialize source item
+            // Initialize source item
             if (!pSrc.InitItem())
                 return; // No source item
 
-            // 2. Check source item
+            // Check source item
             if (!pSrc.CheckItem(ref splitedAmount))
                 return; // Source item or splited amount is invalid
 
-            // 3. Check destination rights
-            if (!pDest.HasStoreRights(pSrc))
-                return; // Player has no rights to store item in destination
+            if (pSrc.Container == pDest.Container)
+            {
+                // All operations with items are prohibited, since their count in the slot and position
+                // can be predetermined by the player in charge.
+                if (!pSrc.HasModifyRights)
+                {
+                    SendEquipError(InventoryResult.ItemLocked);
+                    return;
+                }
+            }
+            else
+            {
+                if (!pSrc.HasWithdrawRights || !pDest.HasDepositRights)
+                {
+                    SendEquipError(InventoryResult.ItemLocked);
+                    return;
+                }
+            }
 
-            // 4. Check source withdraw rights
-            if (!pSrc.HasWithdrawRights(pDest))
-                return; // Player has no rights to withdraw items from source
-
-            // 5. Check split
+            // Check split
             if (splitedAmount != 0)
             {
-                // 5.1. Clone source item
+                // 3.1. Clone source item
                 if (!pSrc.CloneItem(splitedAmount))
-                    return; // Item could not be cloned
+                {
+                    SendEquipError(InventoryResult.ItemNotFound);
+                    return;
+                }
 
-                // 5.2. Move splited item to destination
-                _DoItemsMove(pSrc, pDest, true, splitedAmount);
+                // 3.2. Move splited item to destination
+                InventoryResult splitAttemptResult = _DoItemsMove(pSrc, pDest, splitedAmount);
+                if (splitAttemptResult != InventoryResult.Ok)
+                {
+                    SendEquipError(splitAttemptResult);
+                    return;
+                }
             }
-            else // 6. No split
+            else // No split
             {
-                // 6.1. Try to merge items in destination (pDest.GetItem() == NULL)
-                InventoryResult mergeAttemptResult = _DoItemsMove(pSrc, pDest, false);
+                // Try to merge items in destination (pDest.GetItem() == NULL)
+                InventoryResult mergeAttemptResult = _DoItemsMove(pSrc, pDest);
+                
+                if (mergeAttemptResult == InventoryResult.ItemLocked) // You do not have permission to merge
+                {
+                    SendEquipError(mergeAttemptResult);
+                    return;
+                }
+
                 if (mergeAttemptResult != InventoryResult.Ok) // Item could not be merged
                 {
-                    // 6.2. Try to swap items
-                    // 6.2.1. Initialize destination item
+                    // Try to swap items
+                    // Initialize destination item
                     if (!pDest.InitItem())
                     {
-                        pSrc.SendEquipError(mergeAttemptResult, pSrc.GetItem(false));
+                        SendEquipError(mergeAttemptResult);
                         return;
                     }
 
-                    // 6.2.2. Check rights to store item in source (opposite direction)
-                    if (!pSrc.HasStoreRights(pDest))
-                        return; // Player has no rights to store item in source (opposite direction)
+                    // Check rights to store item in source(opposite direction)
+                    if (pSrc.Container != pDest.Container)
+                    {
+                        if (!pSrc.HasDepositRights || !pDest.HasWithdrawRights)
+                        {
+                            SendEquipError(InventoryResult.ItemLocked);
+                            return;
+                        }
+                    }
 
-                    if (!pDest.HasWithdrawRights(pSrc))
-                        return; // Player has no rights to withdraw item from destination (opposite direction)
-
-                    // 6.2.3. Swap items (pDest.GetItem() != NULL)
-                    _DoItemsMove(pSrc, pDest, true);
+                    // Swap items (pDest.GetItem() != NULL)
+                    InventoryResult swapAttemptResult = _DoItemsMove(pSrc, pDest);
+                    if (swapAttemptResult != InventoryResult.Ok)
+                    {
+                        SendEquipError(swapAttemptResult);
+                        return;
+                    }
                 }
             }
-            // 7. Send changes
+            // Send changes
             _SendBankContentUpdate(pSrc, pDest);
+
+            #region Helpers
+            void SendEquipError(InventoryResult msg)
+            {
+                pSrc.SendEquipError(msg, pSrc.GetItem(false));
+            }
+            #endregion
         }
 
-        InventoryResult _DoItemsMove(MoveItemData pSrc, MoveItemData pDest, bool sendError, int splitedAmount = 0)
+        InventoryResult _DoItemsMove(MoveItemData pSrc, MoveItemData pDest, int splitedAmount = 0)
         {
             Item pDestItem = pDest.GetItem();
             bool swap = (pDestItem != null);
 
             Item pSrcItem = pSrc.GetItem(splitedAmount != 0);
             // 1. Can store source item in destination
-            InventoryResult destResult = pDest.CanStore(pSrcItem, swap, sendError);
+            InventoryResult destResult = pDest.CanStore(pSrcItem, swap);
             if (destResult != InventoryResult.Ok)
                 return destResult;
 
             // 2. Can store destination item in source
             if (swap)
             {
-                InventoryResult srcResult = pSrc.CanStore(pDestItem, true, true);
+                InventoryResult srcResult = pSrc.CanStore(pDestItem, true);
                 if (srcResult != InventoryResult.Ok)
                     return srcResult;
             }
@@ -2251,15 +2292,15 @@ namespace Game.Guilds
 
         void _SendBankContentUpdate(MoveItemData pSrc, MoveItemData pDest)
         {
-            Cypher.Assert(pSrc.IsBank() || pDest.IsBank());
+            Cypher.Assert(pSrc.IsBank || pDest.IsBank);
 
             ItemSlot tabId = 0;
             List<ItemSlot> slots = new();
-            if (pSrc.IsBank()) // B .
+            if (pSrc.IsBank) // B .
             {
                 tabId = pSrc.Container;
                 slots.Insert(0, pSrc.Slot);
-                if (pDest.IsBank()) // B . B
+                if (pDest.IsBank) // B . B
                 {
                     // Same tab - add destination slots to collection
                     if (pDest.Container == pSrc.Container)
@@ -2270,10 +2311,10 @@ namespace Game.Guilds
                         pDest.CopySlots(destSlots);
                         _SendBankContentUpdate(pDest.Container, destSlots);
                         return;
-                    }
+                    }                    
                 }
             }
-            else if (pDest.IsBank()) // C . B
+            else if (pDest.IsBank) // C . B
             {
                 tabId = pDest.Container;
                 pDest.CopySlots(slots);
@@ -3691,13 +3732,11 @@ namespace Game.Guilds
                 return true;
             }
 
-            public InventoryResult CanStore(Item pItem, bool swap, bool sendError)
+            public InventoryResult CanStore(Item pItem, bool swap)
             {
                 m_vec.Clear();
-                InventoryResult msg = CanStore(pItem, swap);
-                if (sendError && msg != InventoryResult.Ok)
-                    SendEquipError(msg, pItem);
-                return msg;
+                
+                return _CanStore(pItem, swap);
             }
 
             public bool CloneItem(int count)
@@ -3706,7 +3745,6 @@ namespace Game.Guilds
                 m_pClonedItem = m_pItem.CloneItem(count);
                 if (m_pClonedItem == null)
                 {
-                    SendEquipError(InventoryResult.ItemNotFound, m_pItem);
                     return false;
                 }
                 return true;
@@ -3717,8 +3755,8 @@ namespace Game.Guilds
                 Cypher.Assert(pFrom.GetItem() != null);
 
                 Global.ScriptMgr.OnGuildItemMove(m_pGuild, m_pPlayer, pFrom.GetItem(),
-                     pFrom.IsBank(), pFrom.Position,
-                     IsBank(), Position);
+                     pFrom.IsBank, pFrom.Position,
+                     IsBank, Position);
             }
 
             public void CopySlots(List<ItemSlot> ids)
@@ -3732,14 +3770,16 @@ namespace Game.Guilds
                 m_pPlayer.SendEquipError(result, item);
             }
 
-            public abstract bool IsBank();
+            public abstract bool IsBank { get; }
             // Initializes item. Returns true, if item exists, false otherwise.
             public abstract bool InitItem();
             // Checks splited amount against item. Splited amount cannot be more that number of items in stack.
-            // Defines if player has rights to save item in container
-            public virtual bool HasStoreRights(MoveItemData pOther) { return true; }
+            // Defines if player has rights to save item in container (into free slot only)
+            public virtual bool HasDepositRights => true;
             // Defines if player has rights to withdraw item from container
-            public virtual bool HasWithdrawRights(MoveItemData pOther) { return true; }
+            public virtual bool HasWithdrawRights => true;
+            // Defines if player has rights to split/merge/move the item from container
+            public virtual bool HasModifyRights => true;
             // Remove item from container (if splited update items fields)
             public abstract void RemoveItem(SQLTransaction trans, MoveItemData pOther, int splitedAmount = 0);
             // Saves item to container
@@ -3747,7 +3787,7 @@ namespace Game.Guilds
             // Log bank event
             public abstract void LogBankEvent(SQLTransaction trans, MoveItemData pFrom, int count);
 
-            protected abstract InventoryResult CanStore(Item pItem, bool swap);
+            protected abstract InventoryResult _CanStore(Item pItem, bool swap);
 
             public Item GetItem(bool isCloned = false) { return isCloned ? m_pClonedItem : m_pItem; }
             public ItemSlot Container => m_itemPos.Container; 
@@ -3767,7 +3807,7 @@ namespace Game.Guilds
             public PlayerMoveItemData(Guild guild, Player player, ItemPos itemPos)
                 : base(guild, player, itemPos) { }
 
-            public override bool IsBank() { return false; }
+            public override bool IsBank => false;
 
             public override bool InitItem()
             {
@@ -3822,7 +3862,7 @@ namespace Game.Guilds
                     pFrom.GetItem().GetEntry(), (ushort)count);
             }
 
-            protected override InventoryResult CanStore(Item pItem, bool swap)
+            protected override InventoryResult _CanStore(Item pItem, bool swap)
             {
                 return m_pPlayer.CanStoreItem(Position, out m_vec, pItem, forSwap: swap);
             }
@@ -3833,7 +3873,7 @@ namespace Game.Guilds
             public BankMoveItemData(Guild guild, Player player, ItemPos itemPos)
                 : base(guild, player, itemPos) { }
 
-            public override bool IsBank() { return true; }
+            public override bool IsBank => true;
 
             public override bool InitItem()
             {
@@ -3841,29 +3881,27 @@ namespace Game.Guilds
                 return (m_pItem != null);
             }
 
-            public override bool HasStoreRights(MoveItemData pOther)
+            public override bool HasDepositRights
             {
-                Cypher.Assert(pOther != null);
-                // Do not check rights if item is being swapped within the same bank tab
-                if (pOther.IsBank() && pOther.Container == Container)
-                    return true;
-
-                return m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.DepositItem);
+                get => m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.DepositItem);
             }
 
-            public override bool HasWithdrawRights(MoveItemData pOther)
+            public override bool HasWithdrawRights
             {
-                Cypher.Assert(pOther != null);
-                // Do not check rights if item is being swapped within the same bank tab
-                if (pOther.IsBank() && pOther.Container == Container)
-                    return true;
+                get
+                {
+                    int slots = 0;
+                    Member member = m_pGuild.GetMember(m_pPlayer.GetGUID());
+                    if (member != null)
+                        slots = m_pGuild._GetMemberRemainingSlots(member, Container);
 
-                int slots = 0;
-                Member member = m_pGuild.GetMember(m_pPlayer.GetGUID());
-                if (member != null)
-                    slots = m_pGuild._GetMemberRemainingSlots(member, Container);
+                    return slots != 0;
+                }
+            }
 
-                return slots != 0;
+            public override bool HasModifyRights
+            {
+                get => m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.ModifyItem);
             }
 
             public override void RemoveItem(SQLTransaction trans, MoveItemData pOther, int splitedAmount = 0)
@@ -3881,7 +3919,7 @@ namespace Game.Guilds
                     m_pItem = null;
                 }
                 // Decrease amount of player's remaining items (if item is moved to different tab or to player)
-                if (!pOther.IsBank() || pOther.Container != Container)
+                if (!pOther.IsBank || pOther.Container != Container)
                     m_pGuild._UpdateMemberWithdrawSlots(trans, m_pPlayer.GetGUID(), Container);
             }
 
@@ -3909,7 +3947,7 @@ namespace Game.Guilds
             public override void LogBankEvent(SQLTransaction trans, MoveItemData pFrom, int count)
             {
                 Cypher.Assert(pFrom.GetItem() != null);
-                if (pFrom.IsBank())
+                if (pFrom.IsBank)
                     // Bank . Bank
                     m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.MoveItem, pFrom.Container, m_pPlayer.GetGUID().GetCounter(),
                         pFrom.GetItem().GetEntry(), (ushort)count, Container);
@@ -3922,7 +3960,7 @@ namespace Game.Guilds
             public override void LogAction(MoveItemData pFrom)
             {
                 base.LogAction(pFrom);
-                if (!pFrom.IsBank() && m_pPlayer.GetSession().HasPermission(RBACPermissions.LogGmTrade)) // @todo Move this to scripts
+                if (!pFrom.IsBank && m_pPlayer.GetSession().HasPermission(RBACPermissions.LogGmTrade)) // @todo Move this to scripts
                 {
                     Log.outCommand(m_pPlayer.GetSession().GetAccountId(), 
                         $"GM {m_pPlayer.GetName()} ({m_pPlayer.GetGUID()}) (Account: {m_pPlayer.GetSession().GetAccountId()}) " +
@@ -4004,7 +4042,7 @@ namespace Game.Guilds
                 }
             }
 
-            protected override InventoryResult CanStore(Item pItem, bool swap)
+            protected override InventoryResult _CanStore(Item pItem, bool swap)
             {
                 Log.outDebug(LogFilter.Guild, 
                     $"GUILD STORAGE: CanStore() tab = {Container}, slot = {Slot}, " +
@@ -4026,6 +4064,11 @@ namespace Game.Guilds
                     // Ignore swapped item (this slot will be empty after move)
                     if ((pItemDest == pItem) || swap)
                         pItemDest = null;
+
+                    // Just always store item in a free slot, as the count of items in a slot
+                    // can be predetermined by the person in charge.
+                    if (pItemDest != null && !HasModifyRights)
+                        return InventoryResult.ItemLocked;
 
                     if (!_ReserveSpace(Slot, pItem, pItemDest, ref count))
                         return InventoryResult.CantStack;

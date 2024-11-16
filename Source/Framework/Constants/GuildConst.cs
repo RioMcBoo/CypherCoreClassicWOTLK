@@ -190,9 +190,11 @@ namespace Framework.Constants
     {
         ViewTab = 0x01,
         PutItem = 0x02,
-        UpdateText = 0x04,
+        ModifyTabInfo = 0x04,
 
         DepositItem = ViewTab | PutItem,
+        ModifyItem = ViewTab | ModifyTabInfo,
+
         Full = -1
     }
 
