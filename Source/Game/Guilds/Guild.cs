@@ -2269,6 +2269,7 @@ namespace Game.Guilds
                         List<ItemSlot> destSlots = new();
                         pDest.CopySlots(destSlots);
                         _SendBankContentUpdate(pDest.Container, destSlots);
+                        return;
                     }
                 }
             }
