@@ -12,6 +12,8 @@ namespace Framework.Constants
         public const int BankMoneyLogsTab = 100;
 
         public const long MoneyLimit = 100000000000;
+        public const int WithdrawGoldPerDayLimit = 1000000;
+        public const int WithdrawItemsLimit = 100000;
         public const int WithdrawMoneyUnlimited = -1;
         public const int WithdrawSlotUnlimited = -1;
         public const int EventLogGuidUndefined = -1;

@@ -347,10 +347,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(RankID);
+            _worldPacket.WriteInt32((int)RankID);
         }
 
-        public uint RankID;
+        public GuildRankId RankID;
     }
 
     public class GuildEventRanksUpdated : ServerPacket
@@ -532,28 +532,28 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(RankID);
-            _worldPacket.WriteInt32(Flags);
+            _worldPacket.WriteInt32((int)RankID);
+            _worldPacket.WriteInt32((int)Flags);
             _worldPacket.WriteInt32(WithdrawGoldLimit);
             _worldPacket.WriteInt32(NumTabs);
             _worldPacket.WriteInt32(Tab.Count);
 
             foreach (GuildRankTabPermissions tab in Tab)
             {
-                _worldPacket.WriteInt32(tab.Flags);
+                _worldPacket.WriteInt32((int)tab.Flags);
                 _worldPacket.WriteInt32(tab.WithdrawItemLimit);
             }
         }
 
         public int NumTabs;
         public int WithdrawGoldLimit;
-        public int Flags;
-        public uint RankID;
+        public GuildRankRights Flags;
+        public GuildRankId RankID;
         public List<GuildRankTabPermissions> Tab;
 
         public struct GuildRankTabPermissions
         {
-            public int Flags;
+            public GuildBankRights Flags;
             public int WithdrawItemLimit;
         }
     }

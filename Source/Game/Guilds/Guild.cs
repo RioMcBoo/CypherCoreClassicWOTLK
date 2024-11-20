@@ -279,7 +279,7 @@ namespace Game.Guilds
                 rankData.RankID = (byte)rankInfo.GetId();
                 rankData.RankOrder = (byte)rankInfo.GetOrder();
                 rankData.Flags = (uint)rankInfo.GetRights();
-                rankData.WithdrawGoldLimit = rankInfo.GetId() == GuildRankId.GuildMaster ? -1 : (rankInfo.GetBankMoneyPerDay() / MoneyConstants.Gold);
+                rankData.WithdrawGoldLimit = _GetRankBankGoldPerDay(rankInfo.GetId());
                 rankData.RankName = rankInfo.GetName();
 
                 for (byte j = 0; j < GuildConst.MaxBankTabs; ++j)
@@ -460,7 +460,11 @@ namespace Game.Guilds
         {
             // Player must have rights to set public/officer note
             if (!_HasRankRight(session.GetPlayer(), isPublic ? GuildRankRights.EditPublicNote : GuildRankRights.EditOffNote))
+            {
                 SendCommandResult(session, GuildCommandType.EditPublicNote, GuildCommandError.Permissions);
+                return;
+            }
+
             Member member = GetMember(guid);
             if (member != null)
             {
@@ -477,24 +481,27 @@ namespace Game.Guilds
             }
         }
 
-        public void HandleSetRankInfo(WorldSession session, GuildRankId rankId, string name, GuildRankRights rights, int moneyPerDay, GuildBankRightsAndSlots[] rightsAndSlots)
+        public void HandleSetRankInfo(WorldSession session, GuildRankId rankId, string name, GuildRankRights rights, int goldPerDay, GuildBankRightsAndSlots[] rightsAndSlots)
         {
             // Only leader can modify ranks
             if (!_IsLeader(session.GetPlayer()))
+            {
                 SendCommandResult(session, GuildCommandType.ChangeRank, GuildCommandError.Permissions);
+                return;
+            }
 
             RankInfo rankInfo = GetRankInfo(rankId);
             if (rankInfo != null)
             {
                 rankInfo.SetName(name);
                 rankInfo.SetRights(rights);
-                _SetRankBankMoneyPerDay(rankId, moneyPerDay * MoneyConstants.Gold);
+                _SetRankBankGoldPerDay(rankId, goldPerDay);
 
                 foreach (var rightsAndSlot in rightsAndSlots)
                     _SetRankBankTabRightsAndSlots(rankId, rightsAndSlot);
 
                 GuildEventRankChanged packet = new();
-                packet.RankID = (byte)rankId;
+                packet.RankID = rankId;
                 BroadcastPacket(packet);
             }
         }
@@ -517,7 +524,6 @@ namespace Game.Guilds
 
             if (tabId >= GuildConst.MaxBankTabs)
                 return;
-
 
             long tabCost = GetGuildBankTabPrice(tabId) * MoneyConstants.Gold;
             if (!player.HasEnoughMoney(tabCost))                   // Should not happen, this is checked by client
@@ -612,7 +618,9 @@ namespace Game.Guilds
             Player player = session.GetPlayer();
             if (!WorldConfig.Values[WorldCfg.AllowTwoSideInteractionGuild].Bool &&
                 player.GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(GetLeaderGUID()))
+            {
                 return;
+            }
 
             AddMember(null, player.GetGUID());
         }
@@ -625,8 +633,11 @@ namespace Game.Guilds
             if (_IsLeader(player))
             {
                 if (m_members.Count > 1)
+                {
                     // Leader cannot leave if he is not the last member
                     SendCommandResult(session, GuildCommandType.LeaveGuild, GuildCommandError.LeaderLeave);
+                    return;
+                }
                 else
                 {
                     // Guild is disbanded if leader leaves.
@@ -652,51 +663,70 @@ namespace Game.Guilds
 
             // Player must have rights to remove members
             if (!_HasRankRight(player, GuildRankRights.Remove))
+            {
                 SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.Permissions);
+                return;
+            }
 
             Member member = GetMember(guid);
-            if (member != null)
+            if (member == null)
             {
-                string name = member.GetName();
-
-                // Guild masters cannot be removed
-                if (member.IsRank(GuildRankId.GuildMaster))
-                    SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.LeaderLeave);
-                // Do not allow to remove player with the same rank or higher
-                else
-                {
-                    Member memberMe = GetMember(player.GetGUID());
-                    RankInfo myRank = GetRankInfo(memberMe.GetRankId());
-                    RankInfo targetRank = GetRankInfo(member.GetRankId());
-
-                    if (memberMe == null || targetRank.GetOrder() <= myRank.GetOrder())
-                        SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.RankTooHigh_S, name);
-                    else
-                    {                        
-                        _LogEvent(GuildEventLogTypes.UninvitePlayer, player.GetGUID().GetCounter(), guid.GetCounter());
-
-                        Player pMember = Global.ObjAccessor.FindConnectedPlayer(guid);
-                        SendEventPlayerLeft(pMember, player, true);
-
-                        // After call to DeleteMember pointer to member becomes invalid
-                        DeleteMember(null, guid, false, true);
-
-                        SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.Success, name);
-                    }
-                }
+                SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.PlayerNotFound_S);
+                return;
             }
+
+            string name = member.GetName();
+
+            // Guild masters cannot be removed
+            if (member.IsRank(GuildRankId.GuildMaster))
+            {
+                SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.LeaderLeave);
+                return;
+            }
+
+            // Do not allow to remove player with the same rank or higher
+            Member memberMe = GetMember(player.GetGUID());
+            RankInfo myRank = GetRankInfo(memberMe.GetRankId());
+            RankInfo targetRank = GetRankInfo(member.GetRankId());
+
+            if (memberMe == member)
+            {
+                SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.NameInvalid);
+                return;
+            }
+
+            if (memberMe == null || targetRank.GetOrder() <= myRank.GetOrder())
+            {
+                SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.RankTooHigh_S, name);
+                return;
+            }
+
+            _LogEvent(GuildEventLogTypes.UninvitePlayer, player.GetGUID().GetCounter(), guid.GetCounter());
+
+            Player pMember = Global.ObjAccessor.FindConnectedPlayer(guid);
+            SendEventPlayerLeft(pMember, player, true);
+
+            // After call to DeleteMember pointer to member becomes invalid
+            DeleteMember(null, guid, false, true);
+
+            SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.Success, name);
         }
 
         public void HandleUpdateMemberRank(WorldSession session, ObjectGuid guid, bool demote)
         {
             Player player = session.GetPlayer();
             GuildCommandType type = demote ? GuildCommandType.DemotePlayer : GuildCommandType.PromotePlayer;
+
             // Player must have rights to promote
             Member member;
             if (!_HasRankRight(player, demote ? GuildRankRights.Demote : GuildRankRights.Promote))
+            {
                 SendCommandResult(session, type, GuildCommandError.LeaderLeave);
+                return;
+            }
+
             // Promoted player must be a member of guild
-            else if ((member = GetMember(guid)) != null)
+            if ((member = GetMember(guid)) != null)
             {
                 string name = member.GetName();
                 // Player cannot promote himself
@@ -710,6 +740,7 @@ namespace Game.Guilds
                 RankInfo myRank = GetRankInfo(memberMe.GetRankId());
                 RankInfo oldRank = GetRankInfo(member.GetRankId());
                 GuildRankId newRankId;
+
                 if (demote)
                 {
                     // Player can demote only lower rank members
@@ -718,6 +749,7 @@ namespace Game.Guilds
                         SendCommandResult(session, type, GuildCommandError.RankTooHigh_S, name);
                         return;
                     }
+
                     // Lowest rank cannot be demoted
                     RankInfo newRank = GetRankInfo(oldRank.GetOrder() + 1);
                     if (newRank == null)
@@ -743,7 +775,7 @@ namespace Game.Guilds
 
                 member.ChangeRank(null, newRankId);
 
-                _LogEvent(demote ? GuildEventLogTypes.DemotePlayer : GuildEventLogTypes.PromotePlayer, 
+                _LogEvent(demote ? GuildEventLogTypes.DemotePlayer : GuildEventLogTypes.PromotePlayer,
                     player.GetGUID().GetCounter(), member.GetGUID().GetCounter(), (byte)newRankId);
 
                 SendGuildRanksUpdate(player.GetGUID(), guid, oldRank.GetId(), newRankId);
@@ -795,8 +827,10 @@ namespace Game.Guilds
 
             // Only leader can add new rank
             if (_IsLeader(session.GetPlayer()))
+            {
                 if (_CreateRank(null, name, GuildRankRights.GChatListen | GuildRankRights.GChatSpeak))
                     BroadcastPacket(new GuildEventRanksUpdated());
+            }
         }
 
         public void HandleRemoveRank(WorldSession session, GuildRankOrder rankOrder)
@@ -929,22 +963,31 @@ namespace Game.Guilds
         public bool HandleMemberWithdrawMoney(WorldSession session, long amount, bool repair = false)
         {
             // clamp amount to MAX_MONEY_AMOUNT, Players can't hold more than that anyway
-            amount = Math.Min(amount, PlayerConst.MaxMoneyAmount);
-
-            if (m_bankMoney < amount)                               // Not enough money in bank
-                return false;
+            amount = Math.Min(amount, PlayerConst.MaxMoneyAmount);            
 
             Player player = session.GetPlayer();
-
             Member member = GetMember(player.GetGUID());
+
             if (member == null)
                 return false;
 
             if (!_HasRankRight(player, repair ? GuildRankRights.WithdrawRepair : GuildRankRights.WithdrawGold))
+            {
+                SendCommandResult(session, GuildCommandType.Repair, GuildCommandError.Permissions);
                 return false;
+            }
 
             if (_GetMemberRemainingMoney(member) < amount)   // Check if we have enough slot/money today
+            {
+                SendCommandResult(session, GuildCommandType.Repair, GuildCommandError.WithdrawLimit);
                 return false;
+            }
+
+            if (m_bankMoney < amount)                               // Not enough goldPerDay in bank
+            {
+                SendCommandResult(session, GuildCommandType.Repair, GuildCommandError.NotEnoughMoney);
+                return false;
+            }
 
             // Call script after validation and before money transfer.
             Global.ScriptMgr.OnGuildMemberWitdrawMoney(this, player, amount, repair);
@@ -995,7 +1038,12 @@ namespace Game.Guilds
             if (_IsLeader(session.GetPlayer()))
             {
                 Disband();
-                Log.outDebug(LogFilter.Guild, "Guild Successfully Disbanded");
+                Log.outDebug(LogFilter.Guild, $"Guild {GetName()}[{GetId()}] successfully Disbanded");
+            }
+            else
+            {
+                SendCommandResult(session, GuildCommandType.CreateGuild, GuildCommandError.Permissions);
+                return;
             }
         }
 
@@ -1096,16 +1144,16 @@ namespace Game.Guilds
             GuildRankId rankId = member.GetRankId();
 
             GuildPermissionsQueryResults queryResult = new();
-            queryResult.RankID = (byte)rankId;
-            queryResult.WithdrawGoldLimit = (int)_GetMemberRemainingMoney(member);
-            queryResult.Flags = (int)_GetRankRights(rankId);
+            queryResult.RankID = rankId;
+            queryResult.WithdrawGoldLimit = _GetRankBankGoldPerDay(rankId);
+            queryResult.Flags = _GetRankRights(rankId);
             queryResult.NumTabs = _GetPurchasedTabsSize();
 
             for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
             {
                 GuildPermissionsQueryResults.GuildRankTabPermissions tabPerm;
-                tabPerm.Flags = (int)_GetRankBankTabRights(rankId, tabId);
-                tabPerm.WithdrawItemLimit = _GetMemberRemainingSlots(member, tabId);
+                tabPerm.Flags = _GetRankBankTabRights(rankId, tabId);
+                tabPerm.WithdrawItemLimit = _GetRankBankTabSlotsPerDay(rankId, tabId);
                 queryResult.Tab.Add(tabPerm);
             }
 
@@ -1986,11 +2034,11 @@ namespace Game.Guilds
                 DB.Characters.CommitTransaction(trans);
         }
 
-        void _SetRankBankMoneyPerDay(GuildRankId rankId, int moneyPerDay)
+        void _SetRankBankGoldPerDay(GuildRankId rankId, int goldPerDay)
         {
             RankInfo rankInfo = GetRankInfo(rankId);
             if (rankInfo != null)
-                rankInfo.SetBankMoneyPerDay(moneyPerDay);
+                rankInfo.SetBankGoldPerDay(goldPerDay);
         }
 
         void _SetRankBankTabRightsAndSlots(GuildRankId rankId, GuildBankRightsAndSlots rightsAndSlots, bool saveToDB = true)
@@ -2019,11 +2067,11 @@ namespace Game.Guilds
             return 0;
         }
 
-        int _GetRankBankMoneyPerDay(GuildRankId rankId)
+        int _GetRankBankGoldPerDay(GuildRankId rankId)
         {
             RankInfo rankInfo = GetRankInfo(rankId);
             if (rankInfo != null)
-                return rankInfo.GetBankMoneyPerDay();
+                return rankInfo.GetBankGoldPerDay();
             return 0;
         }
 
@@ -2070,7 +2118,7 @@ namespace Game.Guilds
 
             if ((_GetRankRights(rankId) & (GuildRankRights.WithdrawRepair | GuildRankRights.WithdrawGold)) != 0)
             {
-                long remaining = (_GetRankBankMoneyPerDay(rankId) * MoneyConstants.Gold) - member.GetBankMoneyWithdrawValue();
+                long remaining = (_GetRankBankGoldPerDay(rankId) * MoneyConstants.Gold) - member.GetBankMoneyWithdrawValue();
                 if (remaining > 0)
                     return remaining;
             }
@@ -2146,44 +2194,65 @@ namespace Game.Guilds
 
         void _MoveItems(MoveItemData pSrc, MoveItemData pDest, int splitedAmount)
         {
-            // Initialize source item
+            // 1. Initialize source item
             if (!pSrc.InitItem())
-                return; // No source item
+            {
+                SendEquipError(InventoryResult.ItemNotFound);
+                return;
+            }
 
-            // Check source item
+            // 2. Check source item
             if (!pSrc.CheckItem(ref splitedAmount))
-                return; // Source item or splited amount is invalid
+            {
+                SendEquipError(InventoryResult.TooFewToSplit);
+                return;
+            }
 
+            WorldSession session = pSrc.Session;
+
+            // 3. Common permission checks
             if (pSrc.Container == pDest.Container)
             {
                 // All operations with items are prohibited, since their count in the slot and position
                 // can be predetermined by the player in charge.
                 if (!pSrc.HasModifyRights)
                 {
-                    SendEquipError(InventoryResult.ItemLocked);
+                    SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.Permissions);
                     return;
                 }
             }
             else
             {
-                if (!pSrc.HasWithdrawRights || !pDest.HasDepositRights)
+                if (!pSrc.HasWithdrawRights)
                 {
-                    SendEquipError(InventoryResult.ItemLocked);
+                    SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.Permissions);
+                    return;
+                }
+
+                if (!pSrc.HasWithdrawAmount)
+                {
+                    SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.WithdrawLimit);
+                    return;
+                }
+
+                if (!pDest.HasDepositRights)
+                {
+                    SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.Permissions);
                     return;
                 }
             }
 
-            // Check split
+            // 4. Check split
             if (splitedAmount != 0)
             {
-                // 3.1. Clone source item
+                // 4.1. Clone source item
                 if (!pSrc.CloneItem(splitedAmount))
                 {
                     SendEquipError(InventoryResult.ItemNotFound);
                     return;
                 }
 
-                // 3.2. Move splited item to destination
+                // 4.2. Move splited item to destination
                 InventoryResult splitAttemptResult = _DoItemsMove(pSrc, pDest, splitedAmount);
                 if (splitAttemptResult != InventoryResult.Ok)
                 {
@@ -2191,38 +2260,57 @@ namespace Game.Guilds
                     return;
                 }
             }
-            else // No split
+            else // 5.No split
             {
-                // Try to merge items in destination (pDest.GetItem() == NULL)
+                // 5.1 Try to merge items in destination (pDest.GetItem() == NULL)
                 InventoryResult mergeAttemptResult = _DoItemsMove(pSrc, pDest);
                 
                 if (mergeAttemptResult == InventoryResult.ItemLocked) // You do not have permission to merge
                 {
-                    SendEquipError(mergeAttemptResult);
+                    SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.Permissions);
+                    return;
+                }
+
+                if (mergeAttemptResult == InventoryResult.BankFull)
+                {
+                    SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.BankFull);
                     return;
                 }
 
                 if (mergeAttemptResult != InventoryResult.Ok) // Item could not be merged
                 {
-                    // Try to swap items
-                    // Initialize destination item
+                    // 5.2 Try to swap items
+                    // 5.2.1 Initialize destination item
                     if (!pDest.InitItem())
                     {
                         SendEquipError(mergeAttemptResult);
                         return;
                     }
 
+                    // 5.2.2 Swap items (pDest.GetItem() != NULL)
+
                     // Check rights to store item in source(opposite direction)
                     if (pSrc.Container != pDest.Container)
                     {
-                        if (!pSrc.HasDepositRights || !pDest.HasWithdrawRights)
+                        if (!pSrc.HasDepositRights)
                         {
-                            SendEquipError(InventoryResult.ItemLocked);
+                            SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.Permissions);
+                            return;
+                        }
+
+                        if (!pDest.HasWithdrawRights)
+                        {
+                            SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.Permissions);
+                            return;
+                        }
+
+                        if (!pDest.HasWithdrawAmount)
+                        {
+                            SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.WithdrawLimit);
                             return;
                         }
                     }
-
-                    // Swap items (pDest.GetItem() != NULL)
+                    
                     InventoryResult swapAttemptResult = _DoItemsMove(pSrc, pDest);
                     if (swapAttemptResult != InventoryResult.Ok)
                     {
@@ -3276,7 +3364,7 @@ namespace Game.Guilds
                 m_rankId = (GuildRankId)0xFF;
                 m_rankOrder = 0;
                 m_rights = GuildRankRights.None;
-                m_bankMoneyPerDay = 0;
+                m_bankGoldPerDay = 0;
 
                 for (var i = 0; i < GuildConst.MaxBankTabs; ++i)
                     m_bankTabRightsAndSlots[i] = new GuildBankRightsAndSlots();
@@ -3289,7 +3377,7 @@ namespace Game.Guilds
                 m_rankOrder = rankOrder;
                 m_name = name;
                 m_rights = rights;
-                m_bankMoneyPerDay = money;
+                m_bankGoldPerDay = money;
 
                 for (var i = 0; i < GuildConst.MaxBankTabs; ++i)
                     m_bankTabRightsAndSlots[i] = new GuildBankRightsAndSlots();
@@ -3301,7 +3389,7 @@ namespace Game.Guilds
                 m_rankOrder = (GuildRankOrder)field.Read<byte>(2);
                 m_name = field.Read<string>(3);
                 m_rights = (GuildRankRights)field.Read<uint>(4);
-                m_bankMoneyPerDay = (int)field.Read<uint>(5); //TODO: Change to singed in DB
+                m_bankGoldPerDay = (int)field.Read<uint>(5); //TODO: Change to singed in DB
                 if (m_rankId == GuildRankId.GuildMaster)                     // Prevent loss of leader rights
                     m_rights |= GuildRankRights.All;
             }
@@ -3314,7 +3402,7 @@ namespace Game.Guilds
                 stmt.SetUInt8(2, (byte)m_rankOrder);
                 stmt.SetString(3, m_name);
                 stmt.SetUInt32(4, (uint)m_rights);
-                stmt.SetInt32(5, m_bankMoneyPerDay);
+                stmt.SetInt32(5, m_bankGoldPerDay);
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
@@ -3377,15 +3465,21 @@ namespace Game.Guilds
                 DB.Characters.Execute(stmt);
             }
 
-            public void SetBankMoneyPerDay(int money)
+            public void SetBankGoldPerDay(int goldPerDay)
             {
-                if (m_bankMoneyPerDay == money)
+                if (m_bankGoldPerDay == goldPerDay)
                     return;
 
-                m_bankMoneyPerDay = money;
+                if (goldPerDay > GuildConst.WithdrawGoldPerDayLimit)
+                    goldPerDay = GuildConst.WithdrawGoldPerDayLimit;
+
+                if (goldPerDay < 0)
+                    goldPerDay = 0;
+
+                m_bankGoldPerDay = goldPerDay;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_BANK_MONEY);
-                stmt.SetInt32(0, money);
+                stmt.SetInt32(0, goldPerDay);
                 stmt.SetUInt8(1, (byte)m_rankId);
                 stmt.SetInt64(2, m_guildId);
                 DB.Characters.Execute(stmt);
@@ -3395,6 +3489,12 @@ namespace Game.Guilds
             {
                 if (m_rankId == GuildRankId.GuildMaster)                     // Prevent loss of leader rights
                     rightsAndSlots.SetGuildMasterValues();
+
+                if (rightsAndSlots.GetSlots() > GuildConst.WithdrawItemsLimit)
+                    rightsAndSlots.SetSlots(GuildConst.WithdrawItemsLimit);
+
+                if (rightsAndSlots.GetSlots() < 0)
+                    rightsAndSlots.SetSlots(0);
 
                 m_bankTabRightsAndSlots[rightsAndSlots.GetTabId()] = rightsAndSlots;
 
@@ -3420,9 +3520,9 @@ namespace Game.Guilds
 
             public GuildRankRights GetRights() { return m_rights; }
 
-            public int GetBankMoneyPerDay()
+            public int GetBankGoldPerDay()
             {
-                return m_rankId != GuildRankId.GuildMaster ? m_bankMoneyPerDay : GuildConst.WithdrawMoneyUnlimited;
+                return m_rankId != GuildRankId.GuildMaster ? m_bankGoldPerDay : GuildConst.WithdrawMoneyUnlimited;
             }
 
             public GuildBankRights GetBankTabRights(byte tabId)
@@ -3440,7 +3540,7 @@ namespace Game.Guilds
             GuildRankOrder m_rankOrder;
             string m_name;
             GuildRankRights m_rights;
-            int m_bankMoneyPerDay;
+            int m_bankGoldPerDay;
             GuildBankRightsAndSlots[] m_bankTabRightsAndSlots = new GuildBankRightsAndSlots[GuildConst.MaxBankTabs];
         }
 
@@ -3778,6 +3878,8 @@ namespace Game.Guilds
             public virtual bool HasDepositRights => true;
             // Defines if player has rights to withdraw item from container
             public virtual bool HasWithdrawRights => true;
+            // Defines if player has amount to withdraw item from container
+            public virtual bool HasWithdrawAmount => true;
             // Defines if player has rights to split/merge/move the item from container
             public virtual bool HasModifyRights => true;
             // Remove item from container (if splited update items fields)
@@ -3793,6 +3895,7 @@ namespace Game.Guilds
             public ItemSlot Container => m_itemPos.Container; 
             public ItemSlot Slot => m_itemPos.Slot;
             public ItemPos Position => m_itemPos;
+            public WorldSession Session => m_pPlayer.GetSession();
 
             protected Guild m_pGuild;
             protected Player m_pPlayer;
@@ -3893,7 +3996,10 @@ namespace Game.Guilds
                     int slots = 0;
                     Member member = m_pGuild.GetMember(m_pPlayer.GetGUID());
                     if (member != null)
-                        slots = m_pGuild._GetMemberRemainingSlots(member, Container);
+                    {
+                        GuildRankId rankId = member.GetRankId();
+                        slots = m_pGuild._GetRankBankTabSlotsPerDay(rankId, Container);
+                    }
 
                     return slots != 0;
                 }
@@ -3902,6 +4008,19 @@ namespace Game.Guilds
             public override bool HasModifyRights
             {
                 get => m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.ModifyItem);
+            }
+
+            public override bool HasWithdrawAmount
+            {
+                get
+                {
+                    int slots = 0;
+                    Member member = m_pGuild.GetMember(m_pPlayer.GetGUID());
+                    if (member != null)
+                        slots = m_pGuild._GetMemberRemainingSlots(member, Container);
+
+                    return slots != 0;
+                }
             }
 
             public override void RemoveItem(SQLTransaction trans, MoveItemData pOther, int splitedAmount = 0)
@@ -4063,15 +4182,15 @@ namespace Game.Guilds
                     Item pItemDest = m_pGuild._GetItem(Position);
                     // Ignore swapped item (this slot will be empty after move)
                     if ((pItemDest == pItem) || swap)
-                        pItemDest = null;
+                        pItemDest = null;                    
+
+                    if (!_ReserveSpace(Slot, pItem, pItemDest, ref count))
+                        return InventoryResult.CantStack;
 
                     // Just always store item in a free slot, as the count of items in a slot
                     // can be predetermined by the person in charge.
                     if (pItemDest != null && !HasModifyRights)
                         return InventoryResult.ItemLocked;
-
-                    if (!_ReserveSpace(Slot, pItem, pItemDest, ref count))
-                        return InventoryResult.CantStack;
 
                     if (count == 0)
                         return InventoryResult.Ok;
