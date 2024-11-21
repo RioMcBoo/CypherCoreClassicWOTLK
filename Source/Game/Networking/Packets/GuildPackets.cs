@@ -1578,9 +1578,9 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt8(RankID);
-            data.WriteInt32(RankOrder);
-            data.WriteUInt32(Flags);
+            data.WriteUInt8((byte)RankID);
+            data.WriteInt32((int)RankOrder);
+            data.WriteInt32((int)Flags);
             data.WriteInt32(WithdrawGoldLimit);
 
             for (byte i = 0; i < GuildConst.MaxBankTabs; i++)
@@ -1595,9 +1595,9 @@ namespace Game.Networking.Packets
             data.WriteString(RankName);
         }
 
-        public byte RankID;
-        public int RankOrder;
-        public uint Flags;
+        public GuildRankId RankID;
+        public GuildRankOrder RankOrder;
+        public GuildRankRights Flags;
         public int WithdrawGoldLimit;
         public string RankName;
         public GuildBankRights[] TabFlags = new GuildBankRights[GuildConst.MaxBankTabs];

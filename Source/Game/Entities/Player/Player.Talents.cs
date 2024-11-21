@@ -215,7 +215,13 @@ namespace Game.Entities
 
         uint GetTalentResetCost() { return _specializationInfo.ResetTalentsCost; }
 
-        void SetTalentResetCost(uint cost) { _specializationInfo.ResetTalentsCost = cost; }
+        void SetTalentResetCost(long cost) 
+        {
+            if (cost > uint.MaxValue)
+                throw new ArgumentOutOfRangeException();
+
+            _specializationInfo.ResetTalentsCost = (uint)cost; 
+        }
 
         ServerTime GetTalentResetTime() { return _specializationInfo.ResetTalentsTime; }
 
@@ -451,7 +457,7 @@ namespace Game.Entities
         public Dictionary<int, PlayerTalent> GetPlayerTalents(int talentGroupId) => _specializationInfo.Talents[talentGroupId];
         public int[] GetGlyphs(int spec) { return _specializationInfo.Glyphs[spec]; }
 
-        public uint GetNextResetTalentsCost()
+        public long GetNextResetTalentsCost()
         {
             // The first time reset costs 1 gold
             if (GetTalentResetCost() < 1 * MoneyConstants.Gold)
@@ -470,12 +476,12 @@ namespace Game.Entities
                     // This cost will be reduced by a rate of 5 gold per month
                     var new_cost = GetTalentResetCost() - 5 * MoneyConstants.Gold * months;
                     // to a minimum of 10 gold.
-                    return (uint)(new_cost < 10u * MoneyConstants.Gold ? 10u * MoneyConstants.Gold : new_cost);
+                    return new_cost < 10 * MoneyConstants.Gold ? 10 * MoneyConstants.Gold : new_cost;
                 }
                 else
                 {
                     // After that it increases in increments of 5 gold
-                    uint new_cost = GetTalentResetCost() + 5 * MoneyConstants.Gold;
+                    long new_cost = GetTalentResetCost() + 5 * MoneyConstants.Gold;
                     // until it hits a cap of 50 gold.
                     if (new_cost > 50 * MoneyConstants.Gold)
                         new_cost = 50 * MoneyConstants.Gold;
@@ -492,7 +498,7 @@ namespace Game.Entities
             if (HasAtLoginFlag(AtLoginFlags.ResetTalents))
                 RemoveAtLoginFlag(AtLoginFlags.ResetTalents, true);
 
-            var cost = 0u;
+            long cost = 0;
 
             if (!noCost && !WorldConfig.Values[WorldCfg.NoResetTalentCost].Bool)
             {
@@ -604,11 +610,14 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void SendRespecWipeConfirm(ObjectGuid guid, uint cost, SpecResetType respecType)
+        public void SendRespecWipeConfirm(ObjectGuid guid, long cost, SpecResetType respecType)
         {
+            if (cost > uint.MaxValue)
+                throw new ArgumentOutOfRangeException();
+
             RespecWipeConfirm respecWipeConfirm = new();
             respecWipeConfirm.RespecMaster = guid;
-            respecWipeConfirm.Cost = cost;
+            respecWipeConfirm.Cost = (uint)cost;
             respecWipeConfirm.RespecType = respecType;
             SendPacket(respecWipeConfirm);
         }

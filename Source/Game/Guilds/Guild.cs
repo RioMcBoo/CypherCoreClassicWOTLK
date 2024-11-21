@@ -276,13 +276,13 @@ namespace Game.Guilds
             {
                 GuildRankData rankData = new();
 
-                rankData.RankID = (byte)rankInfo.GetId();
-                rankData.RankOrder = (byte)rankInfo.GetOrder();
-                rankData.Flags = (uint)rankInfo.GetRights();
+                rankData.RankID = rankInfo.GetId();
+                rankData.RankOrder = rankInfo.GetOrder();
+                rankData.Flags = rankInfo.GetRights();
                 rankData.WithdrawGoldLimit = _GetRankBankGoldPerDay(rankInfo.GetId());
                 rankData.RankName = rankInfo.GetName();
 
-                for (byte j = 0; j < GuildConst.MaxBankTabs; ++j)
+                for (byte j = 0; j < _GetPurchasedTabsSize(); ++j)
                 {
                     rankData.TabFlags[j] = rankInfo.GetBankTabRights(j);
                     rankData.TabWithdrawItemLimit[j] = rankInfo.GetBankTabSlotsPerDay(j);
@@ -336,9 +336,11 @@ namespace Game.Guilds
 
             // Player must have rights to set MOTD
             if (!_HasRankRight(session.GetPlayer(), GuildRankRights.SetMotd))
-                SendCommandResult(session, GuildCommandType.EditMOTD, GuildCommandError.Permissions);
-            else
             {
+                SendCommandResult(session, GuildCommandType.EditMOTD, GuildCommandError.Permissions);
+                return;
+            }
+
                 m_motd = motd;
 
                 Global.ScriptMgr.OnGuildMOTDChanged(this, motd);
@@ -350,7 +352,6 @@ namespace Game.Guilds
 
                 SendEventMOTD(session, true);
             }
-        }
 
         public void HandleSetInfo(WorldSession session, string info)
         {
@@ -498,7 +499,10 @@ namespace Game.Guilds
                 _SetRankBankGoldPerDay(rankId, goldPerDay);
 
                 foreach (var rightsAndSlot in rightsAndSlots)
+                {
+                    if (rightsAndSlot.GetTabId() < _GetPurchasedTabsSize())                       
                     _SetRankBankTabRightsAndSlots(rankId, rightsAndSlot);
+                }
 
                 GuildEventRankChanged packet = new();
                 packet.RankID = rankId;
@@ -1149,7 +1153,7 @@ namespace Game.Guilds
             queryResult.Flags = _GetRankRights(rankId);
             queryResult.NumTabs = _GetPurchasedTabsSize();
 
-            for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
+            for (byte tabId = 0; tabId < queryResult.NumTabs; ++tabId)
             {
                 GuildPermissionsQueryResults.GuildRankTabPermissions tabPerm;
                 tabPerm.Flags = _GetRankBankTabRights(rankId, tabId);
@@ -1372,9 +1376,9 @@ namespace Game.Guilds
 
         public void LoadBankRightFromDB(SQLFields field)
         {
-            // tabId              rights                slots
+            //                                                          tabId              rights                slots
             GuildBankRightsAndSlots rightsAndSlots = new(field.Read<byte>(1), field.Read<sbyte>(3), field.Read<int>(4));
-            // rankId
+            //                                                   rankId
             _SetRankBankTabRightsAndSlots((GuildRankId)field.Read<byte>(2), rightsAndSlots, false);
         }
 
@@ -1462,12 +1466,16 @@ namespace Game.Guilds
         {
             byte tabId = field.Read<byte>(1);
             if (tabId >= _GetPurchasedTabsSize())
+            {
                 Log.outError(LogFilter.Guild, $"Invalid tab (tabId: {tabId}) in guild bank, skipped.");
+            }
             else
+            {
                 m_bankTabs[tabId].LoadFromDB(field);
         }
+            }
 
-        public bool LoadBankItemFromDB(SQLFields field)
+        public void LoadBankItemFromDB(SQLFields field)
         {
             var tabId = field.Read<byte>(47);
             if (tabId >= _GetPurchasedTabsSize())
@@ -1475,9 +1483,11 @@ namespace Game.Guilds
                 Log.outError(LogFilter.Guild, 
                     $"Invalid tab for item (GUID: {field.Read<long>(0)}, " +
                     $"id: {field.Read<int>(1)}) in guild bank, skipped.");
-                return false;
             }
-            return m_bankTabs[tabId].LoadItemFromDB(field);
+            else
+            {
+                m_bankTabs[tabId].LoadItemFromDB(field);
+        }
         }
 
         public bool Validate()
@@ -1933,24 +1943,30 @@ namespace Game.Guilds
             stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
-            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMaster, loc), GuildRankRights.All);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMaster, loc));
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildOfficer, loc), GuildRankRights.All);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildVeteran, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMember, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildInitiate, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
         }
 
-        bool _CreateRank(SQLTransaction trans, string name, GuildRankRights rights)
+        bool _CreateRank(SQLTransaction trans, string name, GuildRankRights rights = GuildRankRights.None)
         {
             if (m_ranks.Count >= GuildConst.MaxRanks)
                 return false;
 
-            byte newRankId = 0;
-            while (GetRankInfo((GuildRankId)newRankId) != null)
+            // Ranks represent sequence 0, 1, 2, ... where 0 means guildmaster
+            GuildRankId newRankId = GuildRankId.GuildMaster;
+            while (GetRankInfo(newRankId) != null)
                 ++newRankId;
 
-            // Ranks represent sequence 0, 1, 2, ... where 0 means guildmaster
-            RankInfo info = new(m_id, (GuildRankId)newRankId, (GuildRankOrder)m_ranks.Count, name, rights, 0);
+            RankInfo info;
+
+            if (newRankId == GuildRankId.GuildMaster)
+                info = new(m_id, newRankId, (GuildRankOrder)m_ranks.Count, name, GuildRankRights.AllPermanent, GuildConst.WithdrawMoneyUnlimited);
+            else
+                info = new(m_id, newRankId, (GuildRankOrder)m_ranks.Count, name, rights, 0);
+
             m_ranks.Add(info);
 
             bool isInTransaction = trans != null;
@@ -1984,6 +2000,7 @@ namespace Game.Guilds
             Member member = GetMember(player.GetGUID());
             if (member != null)
                 return member.IsRank(GuildRankId.GuildMaster);
+
             return false;
         }
 
@@ -2006,6 +2023,7 @@ namespace Game.Guilds
                 // Check if there is enough money in bank.
                 if (m_bankMoney < amount)
                     return false;
+
                 m_bankMoney -= amount;
             }
 
@@ -2036,72 +2054,49 @@ namespace Game.Guilds
 
         void _SetRankBankGoldPerDay(GuildRankId rankId, int goldPerDay)
         {
-            RankInfo rankInfo = GetRankInfo(rankId);
-            if (rankInfo != null)
-                rankInfo.SetBankGoldPerDay(goldPerDay);
+            GetRankInfo(rankId).SetBankGoldPerDay(goldPerDay);
         }
 
         void _SetRankBankTabRightsAndSlots(GuildRankId rankId, GuildBankRightsAndSlots rightsAndSlots, bool saveToDB = true)
         {
-            if (rightsAndSlots.GetTabId() >= _GetPurchasedTabsSize())
-                return;
-
-            RankInfo rankInfo = GetRankInfo(rankId);
-            if (rankInfo != null)
-                rankInfo.SetBankTabSlotsAndRights(rightsAndSlots, saveToDB);
+            GetRankInfo(rankId).SetBankTabSlotsAndRights(rightsAndSlots, saveToDB);
         }
 
         string _GetRankName(GuildRankId rankId)
         {
-            RankInfo rankInfo = GetRankInfo(rankId);
-            if (rankInfo != null)
-                return rankInfo.GetName();
-            return "<unknown>";
+            return GetRankInfo(rankId).GetName();
         }
 
         GuildRankRights _GetRankRights(GuildRankId rankId)
         {
-            RankInfo rankInfo = GetRankInfo(rankId);
-            if (rankInfo != null)
-                return rankInfo.GetRights();
-            return 0;
+            return GetRankInfo(rankId).GetRights();
         }
 
         int _GetRankBankGoldPerDay(GuildRankId rankId)
         {
-            RankInfo rankInfo = GetRankInfo(rankId);
-            if (rankInfo != null)
-                return rankInfo.GetBankGoldPerDay();
-            return 0;
+            return GetRankInfo(rankId).GetBankGoldPerDay();
         }
 
         int _GetRankBankTabSlotsPerDay(GuildRankId rankId, byte tabId)
         {
-            if (tabId < _GetPurchasedTabsSize())
-            {
-                RankInfo rankInfo = GetRankInfo(rankId);
-                if (rankInfo != null)
-                    return rankInfo.GetBankTabSlotsPerDay(tabId);
+            return GetRankInfo(rankId).GetBankTabSlotsPerDay(tabId);
             }
-            return 0;
-        }
 
         GuildBankRights _GetRankBankTabRights(GuildRankId rankId, byte tabId)
         {
-            RankInfo rankInfo = GetRankInfo(rankId);
-            if (rankInfo != null)
-                return rankInfo.GetBankTabRights(tabId);
-            return 0;
+            return GetRankInfo(rankId).GetBankTabRights(tabId);
         }
 
         int _GetMemberRemainingSlots(Member member, byte tabId)
         {
             GuildRankId rankId = member.GetRankId();
-            if (rankId == GuildRankId.GuildMaster)
-                return GuildConst.WithdrawSlotUnlimited;
 
             if ((_GetRankBankTabRights(rankId, tabId) & GuildBankRights.ViewTab) != 0)
             {
+                int slotsPerDay = _GetRankBankTabSlotsPerDay(rankId, tabId);
+                if (slotsPerDay <= GuildConst.WithdrawSlotUnlimited)
+                    return GuildConst.WithdrawSlotUnlimited;
+
                 int remaining = _GetRankBankTabSlotsPerDay(rankId, tabId) - member.GetBankTabWithdrawValue(tabId);
                 if (remaining > 0)
                     return remaining;
@@ -2113,12 +2108,14 @@ namespace Game.Guilds
         long _GetMemberRemainingMoney(Member member)
         {
             GuildRankId rankId = member.GetRankId();
-            if (rankId == GuildRankId.GuildMaster)
-                return long.MaxValue;
 
             if ((_GetRankRights(rankId) & (GuildRankRights.WithdrawRepair | GuildRankRights.WithdrawGold)) != 0)
             {
-                long remaining = (_GetRankBankGoldPerDay(rankId) * MoneyConstants.Gold) - member.GetBankMoneyWithdrawValue();
+                int goldPerDay = _GetRankBankGoldPerDay(rankId);
+                if (goldPerDay <= GuildConst.WithdrawMoneyUnlimited)
+                    return m_bankMoney;
+
+                long remaining = (goldPerDay * MoneyConstants.Gold) - member.GetBankMoneyWithdrawValue();
                 if (remaining > 0)
                     return remaining;
             }
@@ -2129,6 +2126,7 @@ namespace Game.Guilds
         void _UpdateMemberWithdrawSlots(SQLTransaction trans, ObjectGuid guid, byte tabId)
         {
             Member member = GetMember(guid);
+
             if (member != null)
                 member.UpdateBankTabWithdrawValue(trans, tabId, 1);
         }
@@ -2136,13 +2134,22 @@ namespace Game.Guilds
         bool _MemberHasTabRights(ObjectGuid guid, byte tabId, GuildBankRights rights)
         {
             Member member = GetMember(guid);
+
             if (member != null)
             {
-                // Leader always has full rights
-                if (member.IsRank(GuildRankId.GuildMaster) || m_leaderGuid == guid)
-                    return true;
-                return (_GetRankBankTabRights(member.GetRankId(), tabId) & rights) == rights;
+                return _MemberHasTabRights(member, tabId, rights);
             }
+
+            return false;
+        }
+
+        bool _MemberHasTabRights(Member member, byte tabId, GuildBankRights rights)
+        {
+            if (member != null)
+            {
+                return _GetRankBankTabRights(member.GetRankId(), tabId).HasFlag(rights);
+            }
+
             return false;
         }
 
@@ -2170,7 +2177,9 @@ namespace Game.Guilds
                 tabId = GuildConst.MaxBankTabs;
                 dbTabId = GuildConst.BankMoneyLogsTab;
             }
+
             var pLog = m_bankEventLog[tabId];
+
             pLog.AddEvent(trans, 
                 new BankEventLogEntry(m_id, pLog.GetNextGUID(), eventType, dbTabId, lowguid, itemOrMoney, itemStackCount, destTabId));
 
@@ -2319,6 +2328,7 @@ namespace Game.Guilds
                     }
                 }
             }
+
             // Send changes
             _SendBankContentUpdate(pSrc, pDest);
 
@@ -2637,9 +2647,11 @@ namespace Game.Guilds
             {
                 Player player = member.FindPlayer();
                 if (player != null)
+                {
                     if (player != except)
                         _do.Invoke(player);
             }
+        }
         }
 
         public void BroadcastWorker(Action<Player> _do, Player except = null)
@@ -2648,9 +2660,11 @@ namespace Game.Guilds
             {
                 Player player = member.FindPlayer();
                 if (player != null)
+                {
                     if (player != except)
                         _do.Invoke(player);
             }
+        }
         }
 
         public int GetMembersCount() { return m_members.Count; }
@@ -2671,10 +2685,13 @@ namespace Game.Guilds
             if (player != null)
             {
                 Member member = GetMember(player.GetGUID());
+
                 if (member != null)
-                    return (_GetRankRights(member.GetRankId()) & right) != GuildRankRights.None;
+                    return _GetRankRights(member.GetRankId()).HasFlag(right);
+
                 return false;
             }
+
             return false;
         }
 
@@ -2692,9 +2709,10 @@ namespace Game.Guilds
         public Member GetMember(string name)
         {
             foreach (var member in m_members.Values)
+            {
                 if (member.GetName() == name)
                     return member;
-
+            }
             return null;
         }
 
@@ -3388,10 +3406,8 @@ namespace Game.Guilds
                 m_rankId = (GuildRankId)field.Read<byte>(1);
                 m_rankOrder = (GuildRankOrder)field.Read<byte>(2);
                 m_name = field.Read<string>(3);
-                m_rights = (GuildRankRights)field.Read<uint>(4);
+                m_rights = (GuildRankRights)field.Read<uint>(4);//TODO: Change to singed in DB
                 m_bankGoldPerDay = (int)field.Read<uint>(5); //TODO: Change to singed in DB
-                if (m_rankId == GuildRankId.GuildMaster)                     // Prevent loss of leader rights
-                    m_rights |= GuildRankRights.All;
             }
 
             public void SaveToDB(SQLTransaction trans)
@@ -3402,7 +3418,7 @@ namespace Game.Guilds
                 stmt.SetUInt8(2, (byte)m_rankOrder);
                 stmt.SetString(3, m_name);
                 stmt.SetUInt32(4, (uint)m_rights);
-                stmt.SetInt32(5, m_bankGoldPerDay);
+                stmt.SetUInt32(5, (uint)m_bankGoldPerDay);
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
@@ -3451,7 +3467,7 @@ namespace Game.Guilds
             public void SetRights(GuildRankRights rights)
             {
                 if (m_rankId == GuildRankId.GuildMaster)                     // Prevent loss of leader rights
-                    rights = GuildRankRights.All;
+                    rights = GuildRankRights.AllPermanent;
 
                 if (m_rights == rights)
                     return;
@@ -3479,7 +3495,7 @@ namespace Game.Guilds
                 m_bankGoldPerDay = goldPerDay;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_BANK_MONEY);
-                stmt.SetInt32(0, goldPerDay);
+                stmt.SetUInt32(0, (uint)goldPerDay);
                 stmt.SetUInt8(1, (byte)m_rankId);
                 stmt.SetInt64(2, m_guildId);
                 DB.Characters.Execute(stmt);
@@ -3488,13 +3504,17 @@ namespace Game.Guilds
             public void SetBankTabSlotsAndRights(GuildBankRightsAndSlots rightsAndSlots, bool saveToDB)
             {
                 if (m_rankId == GuildRankId.GuildMaster)                     // Prevent loss of leader rights
+                {
                     rightsAndSlots.SetGuildMasterValues();
-
-                if (rightsAndSlots.GetSlots() > GuildConst.WithdrawItemsLimit)
-                    rightsAndSlots.SetSlots(GuildConst.WithdrawItemsLimit);
+                }
+                else
+                {
+                    if (rightsAndSlots.GetSlots() > GuildConst.WithdrawSlotsLimit)
+                        rightsAndSlots.SetSlots(GuildConst.WithdrawSlotsLimit);
 
                 if (rightsAndSlots.GetSlots() < 0)
                     rightsAndSlots.SetSlots(0);
+                }                
 
                 m_bankTabRightsAndSlots[rightsAndSlots.GetTabId()] = rightsAndSlots;
 
@@ -3522,17 +3542,17 @@ namespace Game.Guilds
 
             public int GetBankGoldPerDay()
             {
-                return m_rankId != GuildRankId.GuildMaster ? m_bankGoldPerDay : GuildConst.WithdrawMoneyUnlimited;
+                return m_bankGoldPerDay;
             }
 
             public GuildBankRights GetBankTabRights(byte tabId)
             {
-                return tabId < GuildConst.MaxBankTabs ? m_bankTabRightsAndSlots[tabId].GetRights() : 0;
+                return m_bankTabRightsAndSlots[tabId].GetRights();
             }
 
             public int GetBankTabSlotsPerDay(byte tabId)
             {
-                return tabId < GuildConst.MaxBankTabs ? m_bankTabRightsAndSlots[tabId].GetSlots() : 0;
+                return m_bankTabRightsAndSlots[tabId].GetSlots();
             }
 
             long m_guildId;
@@ -3550,6 +3570,7 @@ namespace Game.Guilds
             {
                 m_guildId = guildId;
                 m_tabId = tabId;
+                m_items = new Item[GuildConst.MaxBankSlots];
             }
 
             public void LoadFromDB(SQLFields field)
@@ -3704,7 +3725,7 @@ namespace Game.Guilds
 
             long m_guildId;
             byte m_tabId;
-            Item[] m_items = new Item[GuildConst.MaxBankSlots];
+            Item[] m_items;
             string m_name;
             string m_icon;
             string m_text;
@@ -3721,8 +3742,8 @@ namespace Game.Guilds
 
             public void SetGuildMasterValues()
             {
-                rights = GuildBankRights.Full;
-                slots = Convert.ToInt32(GuildConst.WithdrawSlotUnlimited);
+                rights = GuildBankRights.AllPermanent;
+                slots = GuildConst.WithdrawSlotUnlimited;
             }
 
             public void SetTabId(byte _tabId) { tabId = _tabId; }
@@ -4099,11 +4120,13 @@ namespace Game.Guilds
                     pItemDest.SetCount(pItemDest.GetCount() + count);
                     pItemDest.FSetState(ItemUpdateState.Changed);
                     pItemDest.SaveToDB(trans);
+
                     if (!clone)
                     {
                         pItem.RemoveFromWorld();
                         pItem.DeleteFromDB(trans);
                     }
+
                     return pItemDest;
                 }
 

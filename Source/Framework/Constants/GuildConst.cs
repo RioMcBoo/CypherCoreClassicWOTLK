@@ -13,7 +13,7 @@ namespace Framework.Constants
 
         public const long MoneyLimit = 100000000000;
         public const int WithdrawGoldPerDayLimit = 1000000;
-        public const int WithdrawItemsLimit = 100000;
+        public const int WithdrawSlotsLimit = 100000;
         public const int WithdrawMoneyUnlimited = -1;
         public const int WithdrawSlotUnlimited = -1;
         public const int EventLogGuidUndefined = -1;
@@ -68,7 +68,8 @@ namespace Framework.Constants
         InAuthenticatedRank = 0x200000,
         EditGuildBankTabInfo = 0x400000,
         Officer = 0x800000,
-        All = 0x00DDFFBF
+        All = 0x00DDFFBF,
+        AllPermanent = -1
     }
 
     public enum GuildRankId
@@ -197,7 +198,7 @@ namespace Framework.Constants
         DepositItem = ViewTab | PutItem,
         ModifyItem = ViewTab | ModifyTabInfo,
 
-        Full = -1
+        AllPermanent = -1
     }
 
     public enum GuildNews

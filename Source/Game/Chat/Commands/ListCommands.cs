@@ -323,8 +323,8 @@ namespace Game.Chat.Commands
                                 long money = result1.Read<long>(8);
                                 byte hasItem = result1.Read<byte>(9);
                                 int gold = (int)(money / MoneyConstants.Gold);
-                                int silv = (int)(money % MoneyConstants.Gold) / MoneyConstants.Silver;
-                                int copp = (int)(money % MoneyConstants.Gold) % MoneyConstants.Silver;
+                                int silv = (int)((money % MoneyConstants.Gold) / MoneyConstants.Silver);
+                                int copp = (int)((money % MoneyConstants.Gold) % MoneyConstants.Silver);
                                 string receiverStr = handler.PlayerLink(receiver);
                                 string senderStr = handler.PlayerLink(sender);
                                 handler.SendSysMessage(CypherStrings.ListMailInfo1, messageId, subject, gold, silv, copp);

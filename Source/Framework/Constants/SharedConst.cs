@@ -125,8 +125,8 @@ namespace Framework.Constants
         /// <summary>
         /// Void Storage Const
         /// </summary>
-        public const uint VoidStorageUnlockCost = 100 * MoneyConstants.Gold;
-        public const uint VoidStorageStoreItemCost = 10 * MoneyConstants.Gold;
+        public const long VoidStorageUnlockCost = 100 * MoneyConstants.Gold;
+        public const long VoidStorageStoreItemCost = 10 * MoneyConstants.Gold;
         public const uint VoidStorageMaxDeposit = 9;
         public const uint VoidStorageMaxWithdraw = 9;
         public const byte VoidStorageMaxSlot = 160;
