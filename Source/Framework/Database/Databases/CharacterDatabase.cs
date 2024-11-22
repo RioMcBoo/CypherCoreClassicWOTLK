@@ -252,8 +252,8 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_GUILD_BANK_TAB_TEXT, "UPDATE guild_bank_tab SET TabText = ? WHERE guildid = ? AND TabId = ?"); // 0: string, 1: uint32, 2: uint8
 
             PrepareStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_TABS,
-                             "INSERT INTO guild_member_withdraw (guid, tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +       
-                             "ON DUPLICATE KEY UPDATE tab0 = VALUES (tab0), tab1 = VALUES (tab1), tab2 = VALUES (tab2), tab3 = VALUES (tab3), tab4 = VALUES (tab4), tab5 = VALUES (tab5), tab6 = VALUES (tab6), tab7 = VALUES (tab7)");
+                             "INSERT INTO guild_member_withdraw (guid, tab0, tab1, tab2, tab3, tab4, tab5) VALUES (?, ?, ?, ?, ?, ?, ?) " +       
+                             "ON DUPLICATE KEY UPDATE tab0 = VALUES (tab0), tab1 = VALUES (tab1), tab2 = VALUES (tab2), tab3 = VALUES (tab3), tab4 = VALUES (tab4), tab5 = VALUES (tab5)");
             PrepareStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_MONEY, "INSERT INTO guild_member_withdraw (guid, money) VALUES (?, ?) ON DUPLICATE KEY UPDATE money = VALUES (money)");
             PrepareStatement(CharStatements.DEL_GUILD_MEMBER_WITHDRAW, "DELETE FROM guild_member_withdraw");
 
