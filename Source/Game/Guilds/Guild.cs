@@ -542,11 +542,13 @@ namespace Game.Guilds
 
             player.ModifyMoney(-tabCost);
 
-            _CreateNewBankTab();
+            var newTabInfo = _CreateNewBankTab();
+            UpdateBankQueryResult(newTabInfo.newId, newTabInfo.newTab);
 
-            BroadcastPacket(new GuildEventTabAdded());
+            SendPermissions(session); // Hack to force guildmaster-client to update permissions            
 
-            SendPermissions(session); //Hack to force client to update permissions
+            // BroadcastPacket(new GuildEventTabAdded()); // WOTLK_CLASSIC client does not respond to this packet
+            BroadcastPacket(new GuildEventBankContentsChanged()); // Hack to force all clients to update TabInfo            
         }
 
         public void HandleInviteMember(WorldSession session, string name)
@@ -1917,28 +1919,30 @@ namespace Game.Guilds
         }
 
         // Private methods
-        void _CreateNewBankTab()
+        (int newId, BankTab newTab) _CreateNewBankTab()
         {
-            byte tabId = _GetPurchasedTabsSize();                      // Next free id
-            m_bankTabs.Add(new BankTab(this, tabId));
+            byte newtabId = _GetPurchasedTabsSize();                      // Next free id
+            BankTab newTab = new BankTab(this, newtabId);
+            m_bankTabs.Add(newTab);
 
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_TAB);
             stmt.SetInt64(0, m_id);
-            stmt.SetUInt8(1, tabId);
+            stmt.SetUInt8(1, newtabId);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_BANK_TAB);
             stmt.SetInt64(0, m_id);
-            stmt.SetUInt8(1, tabId);
+            stmt.SetUInt8(1, newtabId);
             trans.Append(stmt);
 
-            ++tabId;
             foreach (var rank in m_ranks)
-                rank.CreateMissingTabsIfNeeded(tabId, trans, false);
+                rank.CreateMissingTabsIfNeeded(_GetPurchasedTabsSize(), trans, false);
 
             DB.Characters.CommitTransaction(trans);
+
+            return (newtabId, newTab);
         }
 
         void _CreateDefaultGuildRanks(SQLTransaction trans, Locale loc = Locale.enUS)
