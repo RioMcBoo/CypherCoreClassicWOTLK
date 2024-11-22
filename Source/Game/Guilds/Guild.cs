@@ -439,7 +439,7 @@ namespace Game.Guilds
         public void UpdateBankQueryResult(int tabId, BankTab tabInfo)
         {
             for (byte i = 0; i < _GetPurchasedTabsSize(); i++)
-                m_bankTabs[tabId].UpdateTabInfoInBankQueryResult(tabId, tabInfo);
+                m_bankTabs[i].UpdateTabInfoInBankQueryResult(tabId, tabInfo);
         }
 
         public void HandleSetBankTabInfo(WorldSession session, byte tabId, string name, string icon)
