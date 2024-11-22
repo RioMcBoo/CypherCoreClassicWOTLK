@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
+using static Game.Guilds.Guild;
 
 namespace Game.Networking.Packets
 {
@@ -1014,69 +1015,90 @@ namespace Game.Networking.Packets
 
     public class GuildBankQueryResults : ServerPacket
     {
-        public GuildBankQueryResults() : base(ServerOpcodes.GuildBankQueryResults)
+        public GuildBankQueryResults(int tabId) : base(ServerOpcodes.GuildBankQueryResults)
         {
-            ItemInfo = new List<GuildBankItemInfo>();
-            TabInfo = new List<GuildBankTabInfo>();
+            ItemInfo = new(GuildConst.MaxBankSlots);
+            TabInfo = new(GuildConst.MaxBankTabs);
+            FullUpdate = true;
+            Tab = tabId;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteInt64(Money);
+            // Reuse packet           
+            if (GetData() != null)
+                Clear();
+
+            // Save position for changing the buffer
+            _moneyPositionStart = _worldPacket.Position;
+            WriteMoney(_worldPacket);
+            _moneyPositionEnd = _worldPacket.Position;
+
             _worldPacket.WriteInt32(Tab);
 
             // Save position for changing the buffer
-            _withdrawalsRemainingPosition = _worldPacket.Position;
-            _worldPacket.WriteInt32(WithdrawalsRemaining);
-            _nextPosition = _worldPacket.Position;
+            _withdrawalsPositionStart = _worldPacket.Position;
+            WriteWithdrawalsRemaining(_worldPacket);
+            _withdrawalsPositionEnd = _worldPacket.Position;
 
             _worldPacket.WriteInt32(TabInfo.Count);
             _worldPacket.WriteInt32(ItemInfo.Count);
             _worldPacket.WriteBit(FullUpdate);
             _worldPacket.FlushBits();
 
-            foreach (GuildBankTabInfo tab in TabInfo)
+            foreach (GuildBankTabInfo tab in TabInfo.Values)
                 tab.Write(_worldPacket);
 
-            foreach (GuildBankItemInfo item in ItemInfo)
+            foreach (GuildBankItemInfo item in ItemInfo.Values)
                 item.Write(_worldPacket);
+
+            // Create new buffer immediately
+            UpdateData();
         }
 
-        public List<GuildBankItemInfo> ItemInfo;
-        public List<GuildBankTabInfo> TabInfo;
+        private void WriteMoney(WorldPacket worldPacket)
+        {
+            worldPacket.WriteInt64(Money);
+        }
+
+        private void WriteWithdrawalsRemaining(WorldPacket worldPacket)
+        {
+            worldPacket.WriteInt32(WithdrawalsRemaining);
+        }
+
+        public Dictionary<int, GuildBankItemInfo> ItemInfo;
+        public Dictionary<int, GuildBankTabInfo> TabInfo;
         
         public int Tab;
         public long Money;
         public bool FullUpdate;
+        public int WithdrawalsRemaining;
 
-        public int WithdrawalsRemaining
+        public void UpdateMoneyAndWithdrawalsInBuffer()
         {
-            get => _withdrawalsRemaining;
-
-            set
+            var buffer = GetData();
+            if (buffer != null)
             {
-                _withdrawalsRemaining = value;
-                var buffer = GetData();
-                if (buffer != null)
+                if (buffer.LongLength >= _moneyPositionEnd || buffer.LongLength >= _withdrawalsPositionEnd)
                 {
-                    if (buffer.LongLength >= _nextPosition)
-                    {
-                        WorldPacket myOldCopy = new(GetOpcode(), buffer);
-                        myOldCopy.Position = _withdrawalsRemainingPosition;
-                        myOldCopy.WriteInt32(_withdrawalsRemaining);
-                        TakeBufferAndDestroy(myOldCopy);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException();
-                    }
+                    WorldPacket myOldCopy = new(GetOpcode(), buffer);
+                    myOldCopy.Position = _moneyPositionStart;
+                    WriteMoney(myOldCopy);
+                    myOldCopy.Position = _withdrawalsPositionStart;
+                    WriteWithdrawalsRemaining(myOldCopy);
+                    TakeBufferAndDestroy(myOldCopy);
+                }
+                else
+                {
+                    throw new InvalidOperationException();
                 }
             }
         }
 
-        private long _withdrawalsRemainingPosition;
-        private long _nextPosition;
-        private int _withdrawalsRemaining;
+        private long _moneyPositionStart;
+        private long _moneyPositionEnd;
+        private long _withdrawalsPositionStart;
+        private long _withdrawalsPositionEnd;
     }
 
     class AutoGuildBankItem : ClientPacket
@@ -1631,6 +1653,35 @@ namespace Game.Networking.Packets
 
     public class GuildBankItemInfo
     {
+        public GuildBankItemInfo(int slot, Item item)
+        {
+            Slot = slot;
+            Locked = false;
+
+            if (item != null)
+            {
+                Item = new ItemInstance(item);
+                Count = item.GetCount();
+                Charges = Math.Abs(item.GetSpellCharges());
+                EnchantmentID = item.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent);
+                OnUseEnchantmentID = item.GetEnchantmentId(EnchantmentSlot.EnhancementUse);
+                Flags = item.m_itemData.DynamicFlags;
+
+                byte i = 0;
+                foreach (SocketedGem gemData in item.m_itemData.Gems)
+                {
+                    if (gemData.ItemId != 0)
+                    {
+                        ItemGemData gem = new();
+                        gem.Slot = i;
+                        gem.Item = new ItemInstance(gemData);
+                        SocketEnchant.Add(gem);
+                    }
+                    ++i;
+                }
+            }
+        }
+
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Slot);
@@ -1662,6 +1713,13 @@ namespace Game.Networking.Packets
 
     public struct GuildBankTabInfo
     {
+        public GuildBankTabInfo(int tabId, BankTab bankTab)
+        {
+            TabIndex = tabId;
+            Name = bankTab.GetName();
+            Icon = bankTab.GetIcon();
+        }
+
         public void Write(WorldPacket data)
         {
             data.WriteInt32(TabIndex);
@@ -1672,9 +1730,9 @@ namespace Game.Networking.Packets
             data.WriteString(Icon);
         }
 
-        public int TabIndex;
-        public string Name;
-        public string Icon;
+        public int TabIndex { get; }
+        public string Name { get; }
+        public string Icon { get; }
     }
 
     public struct GBank_X_Inventory_ItemStackInfo

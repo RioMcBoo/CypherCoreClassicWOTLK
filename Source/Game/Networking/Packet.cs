@@ -69,6 +69,11 @@ namespace Game.Networking
             return buffer;
         }
 
+        public void UpdateData()
+        {
+            buffer = _worldPacket.GetData();
+        }
+
         public void LogPacket(WorldSession session)
         {
             string receiver = session != null ? session.GetPlayerInfo() : string.Empty;

@@ -848,13 +848,13 @@ namespace Game.Networking.Packets
 
         public ItemInstance(Item item)
         {
-            ItemID = item.GetEntry();
+            if (item != null)
+            {
+                ItemID = item.GetEntry();
 
-            RandomPropertiesSeed = item.GetItemSuffixFactor();
-            RandomPropertiesID = item.GetItemRandomPropertyId();
-
-            foreach (var mod in item.m_itemData.Modifiers.GetValue().Values)
-                Modifications.Values.Add(new ItemMod(mod.Value, (ItemModifier)mod.Type));
+                RandomPropertiesSeed = item.GetItemSuffixFactor();
+                RandomPropertiesID = item.GetItemRandomPropertyId();
+            }
         }
 
         public ItemInstance(SocketedGem gem)

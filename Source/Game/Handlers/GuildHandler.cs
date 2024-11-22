@@ -254,6 +254,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankActivate)]
         void HandleGuildBankActivate(GuildBankActivate packet)
         {
+            // WOTLK_CLASSIC client doesn't send this packet for some reasons
             GameObject go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank);
             if (go == null)
                 return;
@@ -276,9 +277,10 @@ namespace Game
                 Guild guild = GetPlayer().GetGuild();
                 if (guild != null)
                     guild.SendBankList(this, packet.Tab, true/*packet.FullUpdate*/);
-                // HACK: client doesn't query entire tab content if it had received SMSG_GUILD_BANK_LIST in this session
-                // but we broadcast bank updates to entire guild when *ANYONE* changes anything, incorrectly initializing clients
-                // tab content with only data for that change
+                // HACK: client doesn't query entire tab content (it send always FullUpdate == false)
+                // if it had received SMSG_GUILD_BANK_CONTENTS_CHANGED in this session (what is the reason?)
+                // but we broadcast bank updates to entire guild when *ANYONE* changes anything
+                // and send SMSG_GUILD_BANK_QUERY_RESULTS as response
             }
         }
 

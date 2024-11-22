@@ -43,7 +43,7 @@ namespace Game.Guilds
             m_bankMoney = 0;
             m_createdDate = LoopTime.ServerTime;
 
-            Log.outDebug(LogFilter.Guild, 
+            Log.outDebug(LogFilter.Guild,
                 $"GUILD: creating guild [{name}] for leader {pLeader.GetName()} ({m_leaderGuid})");
 
             SQLTransaction trans = new();
@@ -159,7 +159,7 @@ namespace Game.Guilds
                         member.SetLevel(value);
                         break;
                     default:
-                        Log.outError(LogFilter.Guild, 
+                        Log.outError(LogFilter.Guild,
                             $"Guild.UpdateMemberData: Called with incorrect DATAID {dataid} (value {value})");
                         return;
                 }
@@ -341,17 +341,17 @@ namespace Game.Guilds
                 return;
             }
 
-                m_motd = motd;
+            m_motd = motd;
 
-                Global.ScriptMgr.OnGuildMOTDChanged(this, motd);
+            Global.ScriptMgr.OnGuildMOTDChanged(this, motd);
 
-                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_MOTD);
-                stmt.SetString(0, motd);
-                stmt.SetInt64(1, m_id);
-                DB.Characters.Execute(stmt);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_MOTD);
+            stmt.SetString(0, motd);
+            stmt.SetInt64(1, m_id);
+            DB.Characters.Execute(stmt);
 
-                SendEventMOTD(session, true);
-            }
+            SendEventMOTD(session, true);
+        }
 
         public void HandleSetInfo(WorldSession session, string info)
         {
@@ -436,12 +436,18 @@ namespace Game.Guilds
             DB.Characters.CommitTransaction(trans);
         }
 
+        public void UpdateBankQueryResult(int tabId, BankTab tabInfo)
+        {
+            for (byte i = 0; i < _GetPurchasedTabsSize(); i++)
+                m_bankTabs[tabId].UpdateTabInfoInBankQueryResult(tabId, tabInfo);
+        }
+
         public void HandleSetBankTabInfo(WorldSession session, byte tabId, string name, string icon)
         {
             BankTab tab = GetBankTab(tabId);
             if (tab == null)
             {
-                Log.outError(LogFilter.Guild, 
+                Log.outError(LogFilter.Guild,
                     $"Guild.HandleSetBankTabInfo: " +
                     $"Player {session.GetPlayer().GetName()} trying to change bank tab info " +
                     $"from unexisting tab {tabId}.");
@@ -454,6 +460,7 @@ namespace Game.Guilds
             packet.Tab = tabId;
             packet.Name = name;
             packet.Icon = icon;
+            UpdateBankQueryResult(tabId, tab);
             BroadcastPacket(packet);
         }
 
@@ -501,7 +508,7 @@ namespace Game.Guilds
                 foreach (var rightsAndSlot in rightsAndSlots)
                 {
                     if (rightsAndSlot.GetTabId() < _GetPurchasedTabsSize())                       
-                    _SetRankBankTabRightsAndSlots(rankId, rightsAndSlot);
+                        _SetRankBankTabRightsAndSlots(rankId, rightsAndSlot);
                 }
 
                 GuildEventRankChanged packet = new();
@@ -584,7 +591,7 @@ namespace Game.Guilds
 
             SendCommandResult(session, GuildCommandType.InvitePlayer, GuildCommandError.Success, name);
 
-            Log.outDebug(LogFilter.Guild, 
+            Log.outDebug(LogFilter.Guild,
                 $"Player {player.GetName()} invited {name} to join his Guild");
 
             pInvitee.SetGuildIdInvited(m_id);
@@ -958,7 +965,7 @@ namespace Game.Guilds
 
             if (player.GetSession().HasPermission(RBACPermissions.LogGmTrade))
             {
-                Log.outCommand(player.GetSession().GetAccountId(), 
+                Log.outCommand(player.GetSession().GetAccountId(),
                     $"GM {player.GetName()} (Account: {player.GetSession().GetAccountId()}) " +
                     $"deposit money (Amount: {amount}) to guild bank (Guild ID {m_id})");
             }
@@ -967,7 +974,7 @@ namespace Game.Guilds
         public bool HandleMemberWithdrawMoney(WorldSession session, long amount, bool repair = false)
         {
             // clamp amount to MAX_MONEY_AMOUNT, Players can't hold more than that anyway
-            amount = Math.Min(amount, PlayerConst.MaxMoneyAmount);            
+            amount = Math.Min(amount, PlayerConst.MaxMoneyAmount);
 
             Player player = session.GetPlayer();
             Member member = GetMember(player.GetGUID());
@@ -1012,7 +1019,7 @@ namespace Game.Guilds
             _ModifyBankMoney(trans, amount, false);
 
             // Log guild bank event
-            _LogBankEvent(trans, repair ? GuildBankEventLogTypes.RepairMoney : GuildBankEventLogTypes.WithdrawMoney, 
+            _LogBankEvent(trans, repair ? GuildBankEventLogTypes.RepairMoney : GuildBankEventLogTypes.WithdrawMoney,
                 0, player.GetGUID().GetCounter(), (int)amount);
 
             DB.Characters.CommitTransaction(trans);
@@ -1318,7 +1325,7 @@ namespace Game.Guilds
 
             if (!m_emblemInfo.LoadFromDB(fields))
             {
-                Log.outError(LogFilter.Guild, 
+                Log.outError(LogFilter.Guild,
                     $"Guild {m_id} has invalid emblem colors (Background: {m_emblemInfo.GetBackgroundColor()}, " +
                     $"Border: {m_emblemInfo.GetBorderColor()}, Emblem: {m_emblemInfo.GetColor()}), skipped.");
                 return false;
@@ -1335,7 +1342,7 @@ namespace Game.Guilds
 
             m_bankTabs.Clear();
             for (byte i = 0; i < purchasedTabs; ++i)
-                m_bankTabs.Add(new BankTab(m_id, i));
+                m_bankTabs.Add(new BankTab(this, i));
 
             return true;
         }
@@ -1358,7 +1365,7 @@ namespace Game.Guilds
             bool isNew = m_members.TryAdd(playerGuid, member);
             if (!isNew)
             {
-                Log.outError(LogFilter.Guild, 
+                Log.outError(LogFilter.Guild,
                     $"Tried to add {playerGuid} to guild '{m_name}'. Member already exists.");
                 return false;
             }
@@ -1415,7 +1422,7 @@ namespace Game.Guilds
                     {
                         if (!isMoneyTab)
                         {
-                            Log.outError(LogFilter.Guild, 
+                            Log.outError(LogFilter.Guild,
                                 $"GuildBankEventLog ERROR: MoneyEvent(LogGuid: {guid}, Guild: {m_id}) " +
                                 $"does not belong to money tab ({dbTabId}), ignoring...");
                             return false;
@@ -1423,7 +1430,7 @@ namespace Game.Guilds
                     }
                     else if (isMoneyTab)
                     {
-                        Log.outError(LogFilter.Guild, 
+                        Log.outError(LogFilter.Guild,
                             $"GuildBankEventLog ERROR: non-money event (LogGuid: {guid}, Guild: {m_id}) " +
                             $"belongs to money tab, ignoring...");
                         return false;
@@ -1472,22 +1479,22 @@ namespace Game.Guilds
             else
             {
                 m_bankTabs[tabId].LoadFromDB(field);
-        }
             }
+        }
 
         public void LoadBankItemFromDB(SQLFields field)
         {
             var tabId = field.Read<byte>(47);
             if (tabId >= _GetPurchasedTabsSize())
             {
-                Log.outError(LogFilter.Guild, 
+                Log.outError(LogFilter.Guild,
                     $"Invalid tab for item (GUID: {field.Read<long>(0)}, " +
                     $"id: {field.Read<int>(1)}) in guild bank, skipped.");
             }
             else
             {
                 m_bankTabs[tabId].LoadItemFromDB(field);
-        }
+            }
         }
 
         public bool Validate()
@@ -1503,7 +1510,7 @@ namespace Game.Guilds
             SQLTransaction trans = new();
             if (ranks < GuildConst.MinRanks || ranks > GuildConst.MaxRanks)
             {
-                Log.outError(LogFilter.Guild, 
+                Log.outError(LogFilter.Guild,
                     $"Guild {m_id} has invalid number of ranks, creating new...");
                 broken_ranks = true;
             }
@@ -1514,7 +1521,7 @@ namespace Game.Guilds
                     RankInfo rankInfo = GetRankInfo((GuildRankId)rankId);
                     if (rankInfo.GetId() != (GuildRankId)rankId)
                     {
-                        Log.outError(LogFilter.Guild, 
+                        Log.outError(LogFilter.Guild,
                             $"Guild {m_id} has broken rank id {rankId}, creating default set of ranks...");
                         broken_ranks = true;
                     }
@@ -1565,7 +1572,7 @@ namespace Game.Guilds
 
         public void BroadcastToGuild(WorldSession session, bool officerOnly, string msg, Language language)
         {
-            if (session != null && session.GetPlayer() != null 
+            if (session != null && session.GetPlayer() != null
                 && _HasRankRight(session.GetPlayer(), officerOnly ? GuildRankRights.OffChatSpeak : GuildRankRights.GChatSpeak))
             {
                 ChatPkt data = new();
@@ -1588,7 +1595,7 @@ namespace Game.Guilds
 
         public void BroadcastAddonToGuild(WorldSession session, bool officerOnly, string msg, string prefix, bool isLogged)
         {
-            if (session != null && session.GetPlayer() != null 
+            if (session != null && session.GetPlayer() != null
                 && _HasRankRight(session.GetPlayer(), officerOnly ? GuildRankRights.OffChatSpeak : GuildRankRights.GChatSpeak))
             {
                 ChatPkt data = new();
@@ -1707,7 +1714,7 @@ namespace Game.Guilds
             bool isNew = m_members.TryAdd(guid, member);
             if (!isNew)
             {
-                Log.outError(LogFilter.Guild, 
+                Log.outError(LogFilter.Guild,
                     $"Tried to add {guid} to guild '{m_name}'. Member already exists.");
                 return false;
             }
@@ -1856,7 +1863,7 @@ namespace Game.Guilds
 
             return Math.Min(m_bankMoney, _GetMemberRemainingMoney(member));
         }
-        
+
         public void SwapItems(Player player, ItemPos src, ItemPos dest, int splitedAmount)
         {
             if (src.Container >= _GetPurchasedTabsSize() || src.Slot >= GuildConst.MaxBankSlots ||
@@ -1894,6 +1901,7 @@ namespace Game.Guilds
 
                 GuildEventTabTextChanged eventPacket = new();
                 eventPacket.Tab = tabId;
+                UpdateBankQueryResult(tabId, pTab);
                 BroadcastPacket(eventPacket);
             }
         }
@@ -1912,7 +1920,7 @@ namespace Game.Guilds
         void _CreateNewBankTab()
         {
             byte tabId = _GetPurchasedTabsSize();                      // Next free id
-            m_bankTabs.Add(new BankTab(m_id, tabId));
+            m_bankTabs.Add(new BankTab(this, tabId));
 
             SQLTransaction trans = new();
 
@@ -2080,7 +2088,7 @@ namespace Game.Guilds
         int _GetRankBankTabSlotsPerDay(GuildRankId rankId, byte tabId)
         {
             return GetRankInfo(rankId).GetBankTabSlotsPerDay(tabId);
-            }
+        }
 
         GuildBankRights _GetRankBankTabRights(GuildRankId rankId, byte tabId)
         {
@@ -2180,7 +2188,7 @@ namespace Game.Guilds
 
             var pLog = m_bankEventLog[tabId];
 
-            pLog.AddEvent(trans, 
+            pLog.AddEvent(trans,
                 new BankEventLogEntry(m_id, pLog.GetNextGUID(), eventType, dbTabId, lowguid, itemOrMoney, itemStackCount, destTabId));
 
             Global.ScriptMgr.OnGuildBankEvent(this, (byte)eventType, tabId, lowguid, itemOrMoney, itemStackCount, destTabId);
@@ -2273,7 +2281,7 @@ namespace Game.Guilds
             {
                 // 5.1 Try to merge items in destination (pDest.GetItem() == NULL)
                 InventoryResult mergeAttemptResult = _DoItemsMove(pSrc, pDest);
-                
+
                 if (mergeAttemptResult == InventoryResult.ItemLocked) // You do not have permission to merge
                 {
                     SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.Permissions);
@@ -2319,7 +2327,7 @@ namespace Game.Guilds
                             return;
                         }
                     }
-                    
+
                     InventoryResult swapAttemptResult = _DoItemsMove(pSrc, pDest);
                     if (swapAttemptResult != InventoryResult.Ok)
                     {
@@ -2328,9 +2336,9 @@ namespace Game.Guilds
                     }
                 }
             }
-
-            // Send changes
-            _SendBankContentUpdate(pSrc, pDest);
+                        
+            UpdateBankQueryResult(pSrc, pDest);
+            BroadcastPacket(new GuildEventBankContentsChanged());
 
             #region Helpers
             void SendEquipError(InventoryResult msg)
@@ -2388,96 +2396,46 @@ namespace Game.Guilds
             return InventoryResult.Ok;
         }
 
-        void _SendBankContentUpdate(MoveItemData pSrc, MoveItemData pDest)
+        void UpdateBankQueryResult(MoveItemData pSrc, MoveItemData pDest)
         {
             Cypher.Assert(pSrc.IsBank || pDest.IsBank);
 
             ItemSlot tabId = 0;
-            List<ItemSlot> slots = new();
-            if (pSrc.IsBank) // B .
+            List<ItemSlot> slotsForUpdate = new();
+
+            if (pSrc.IsBank) // Bank |
             {
                 tabId = pSrc.Container;
-                slots.Insert(0, pSrc.Slot);
-                if (pDest.IsBank) // B . B
-                {
-                    // Same tab - add destination slots to collection
+                slotsForUpdate.Insert(0, pSrc.Slot);
+
+                if (pDest.IsBank) // Bank | Bank
+                {                    
                     if (pDest.Container == pSrc.Container)
-                        pDest.CopySlots(slots);
-                    else // Different tabs - send second message
                     {
+                        // Same tab - add destination slots to collection
+                        pDest.CopyDestinationSlotsTo(slotsForUpdate);
+                    }
+                    else
+                    {
+                        // Different tabs - send second message
                         List<ItemSlot> destSlots = new();
-                        pDest.CopySlots(destSlots);
-                        _SendBankContentUpdate(pDest.Container, destSlots);
-                        return;
-                    }                    
+                        pDest.CopyDestinationSlotsTo(destSlots);
+                        UpdateBankQueryResult(pDest.Container, destSlots);
+                    }
                 }
             }
-            else if (pDest.IsBank) // C . B
+            else if (pDest.IsBank) // Character | Bank
             {
                 tabId = pDest.Container;
-                pDest.CopySlots(slots);
+                pDest.CopyDestinationSlotsTo(slotsForUpdate);
             }
 
-            _SendBankContentUpdate(tabId, slots);
+            UpdateBankQueryResult(tabId, slotsForUpdate);
         }
 
-        void _SendBankContentUpdate(ItemSlot tabId, List<ItemSlot> slots)
+        void UpdateBankQueryResult(byte tabId, List<ItemSlot> slotsForUpdate)
         {
-            BankTab tab = GetBankTab(tabId);
-            if (tab != null)
-            {
-                GuildBankQueryResults packet = new();
-                packet.FullUpdate = true;          // @todo
-                packet.Tab = tabId;
-                packet.Money = m_bankMoney;
-
-                foreach (var slot in slots)
-                {
-                    Item tabItem = tab.GetItem(slot);
-
-                    GuildBankItemInfo itemInfo = new();
-
-                    itemInfo.Slot = slot;
-                    itemInfo.Item.ItemID = tabItem != null ? tabItem.GetEntry() : 0;
-                    itemInfo.Count = (tabItem != null ? tabItem.GetCount() : 0);
-                    itemInfo.EnchantmentID = (tabItem != null ? tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent) : 0);
-                    itemInfo.Charges = tabItem != null ? Math.Abs(tabItem.GetSpellCharges()) : 0;
-                    itemInfo.OnUseEnchantmentID = (tabItem != null ? tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementUse) : 0);
-                    itemInfo.Flags = 0;
-                    itemInfo.Locked = false;
-
-                    if (tabItem != null)
-                    {
-                        byte i = 0;
-                        foreach (SocketedGem gemData in tabItem.m_itemData.Gems)
-                        {
-                            if (gemData.ItemId != 0)
-                            {
-                                ItemGemData gem = new();
-                                gem.Slot = i;
-                                gem.Item = new ItemInstance(gemData);
-                                itemInfo.SocketEnchant.Add(gem);
-                            }
-                            ++i;
-                        }
-                    }
-
-                    packet.ItemInfo.Add(itemInfo);
-                }
-
-                foreach (var (guid, member) in m_members)
-                {
-                    if (!_MemberHasTabRights(guid, tabId, GuildBankRights.ViewTab))
-                        continue;
-
-                    Player player = member.FindPlayer();
-                    if (player == null)
-                        continue;
-                                        
-                    packet.WithdrawalsRemaining = _GetMemberRemainingSlots(member, tabId);
-                    player.SendPacket(packet);
-                }
-            }
+            GetBankTab(tabId).UpdateItemInBankQueryResult(slotsForUpdate);
         }
 
         public void SendBankList(WorldSession session, byte tabId, bool fullUpdate)
@@ -2489,67 +2447,11 @@ namespace Game.Guilds
             if (tabId >= _GetPurchasedTabsSize())
                 return;
 
-            GuildBankQueryResults packet = new();
+            GuildBankQueryResults packet = m_bankTabs[tabId].GetPreparedBankQueryResultPacket();
 
             packet.Money = m_bankMoney;
             packet.WithdrawalsRemaining = _GetMemberRemainingSlots(member, tabId);
-            packet.Tab = tabId;
-            packet.FullUpdate = fullUpdate;
-
-            // TabInfo
-            if (fullUpdate)
-            {
-                for (byte i = 0; i < _GetPurchasedTabsSize(); ++i)
-                {
-                    GuildBankTabInfo tabInfo;
-                    tabInfo.TabIndex = i;
-                    tabInfo.Name = m_bankTabs[i].GetName();
-                    tabInfo.Icon = m_bankTabs[i].GetIcon();
-                    packet.TabInfo.Add(tabInfo);
-                }
-
-            }
-
-            if (fullUpdate && _MemberHasTabRights(session.GetPlayer().GetGUID(), tabId, GuildBankRights.ViewTab))
-            {
-                BankTab tab = GetBankTab(tabId);
-                if (tab != null)
-                {
-                    for (byte slotId = 0; slotId < GuildConst.MaxBankSlots; ++slotId)
-                    {
-                        Item tabItem = tab.GetItem(slotId);
-                        if (tabItem != null)
-                        {
-                            GuildBankItemInfo itemInfo = new();
-
-                            itemInfo.Slot = slotId;
-                            itemInfo.Item.ItemID = tabItem.GetEntry();
-                            itemInfo.Count = tabItem.GetCount();
-                            itemInfo.Charges = Math.Abs(tabItem.GetSpellCharges());
-                            itemInfo.EnchantmentID = tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent);
-                            itemInfo.OnUseEnchantmentID = tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementUse);
-                            itemInfo.Flags = tabItem.m_itemData.DynamicFlags;
-
-                            byte i = 0;
-                            foreach (SocketedGem gemData in tabItem.m_itemData.Gems)
-                            {
-                                if (gemData.ItemId != 0)
-                                {
-                                    ItemGemData gem = new();
-                                    gem.Slot = i;
-                                    gem.Item = new ItemInstance(gemData);
-                                    itemInfo.SocketEnchant.Add(gem);
-                                }
-                                ++i;
-                            }
-
-                            itemInfo.Locked = false;
-
-                            packet.ItemInfo.Add(itemInfo);
-                        }
-                    }
-                }
-            }
+            packet.UpdateMoneyAndWithdrawalsInBuffer();
 
             session.SendPacket(packet);
         }
@@ -2564,9 +2466,9 @@ namespace Game.Guilds
             rankChange.Other = targetGuid;
             rankChange.RankID = (byte)newRank;
             rankChange.Promote = newRank < oldRank;
-            BroadcastPacket(rankChange);            
+            BroadcastPacket(rankChange);
 
-            Log.outDebug(LogFilter.Network, 
+            Log.outDebug(LogFilter.Network,
                 $"SMSG_GUILD_RANKS_UPDATE [Broadcast] Target: {targetGuid}, " +
                 $"Issuer: {setterGuid}, RankId: {newRank}");
         }
@@ -2596,7 +2498,7 @@ namespace Game.Guilds
                 GuildNewsPkt newsPacket = new();
                 news.WritePacket(newsPacket);
                 //newsPacket.NewsEvents.Last().CompletedDate += receiver.GetSession().GetTimezoneOffset();
-                
+
                 receiver.SendPacket(newsPacket);
             };
 
@@ -2618,7 +2520,7 @@ namespace Game.Guilds
             var newsLog = m_newsLog.GetGuildLog().Find(p => p.GetGUID() == newsId);
             if (newsLog == null)
             {
-                Log.outDebug(LogFilter.Guild, 
+                Log.outDebug(LogFilter.Guild,
                     $"HandleNewsSetSticky: [{session.GetPlayerInfo()}] " +
                     $"requested unknown newsId {newsId} - Sticky: {sticky}");
                 return;
@@ -2650,8 +2552,8 @@ namespace Game.Guilds
                 {
                     if (player != except)
                         _do.Invoke(player);
+                }
             }
-        }
         }
 
         public void BroadcastWorker(Action<Player> _do, Player except = null)
@@ -2663,8 +2565,8 @@ namespace Game.Guilds
                 {
                     if (player != except)
                         _do.Invoke(player);
+                }
             }
-        }
         }
 
         public int GetMembersCount() { return m_members.Count; }
@@ -3512,8 +3414,8 @@ namespace Game.Guilds
                     if (rightsAndSlots.GetSlots() > GuildConst.WithdrawSlotsLimit)
                         rightsAndSlots.SetSlots(GuildConst.WithdrawSlotsLimit);
 
-                if (rightsAndSlots.GetSlots() < 0)
-                    rightsAndSlots.SetSlots(0);
+                    if (rightsAndSlots.GetSlots() < 0)
+                        rightsAndSlots.SetSlots(0);
                 }                
 
                 m_bankTabRightsAndSlots[rightsAndSlots.GetTabId()] = rightsAndSlots;
@@ -3566,9 +3468,9 @@ namespace Game.Guilds
 
         public class BankTab
         {
-            public BankTab(long guildId, byte tabId)
+            public BankTab(Guild guild, byte tabId)
             {
-                m_guildId = guildId;
+                m_guild = guild;
                 m_tabId = tabId;
                 m_items = new Item[GuildConst.MaxBankSlots];
             }
@@ -3608,7 +3510,7 @@ namespace Game.Guilds
                         $"not found in item_instance, deleting from guild bank!");
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_NONEXISTENT_GUILD_BANK_ITEM);
-                    stmt.SetInt64(0, m_guildId);
+                    stmt.SetInt64(0, m_guild.GetId());
                     stmt.SetUInt8(1, m_tabId);
                     stmt.SetUInt8(2, slotId);
                     DB.Characters.Execute(stmt);
@@ -3645,7 +3547,7 @@ namespace Game.Guilds
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_BANK_TAB_INFO);
                 stmt.SetString(0, m_name);
                 stmt.SetString(1, m_icon);
-                stmt.SetInt64(2, m_guildId);
+                stmt.SetInt64(2, m_guild.GetId());
                 stmt.SetUInt8(3, m_tabId);
                 DB.Characters.Execute(stmt);
             }
@@ -3659,7 +3561,7 @@ namespace Game.Guilds
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_BANK_TAB_TEXT);
                 stmt.SetString(0, m_text);
-                stmt.SetInt64(1, m_guildId);
+                stmt.SetInt64(1, m_guild.GetId());
                 stmt.SetUInt8(2, m_tabId);
                 DB.Characters.Execute(stmt);
             }
@@ -3700,7 +3602,7 @@ namespace Game.Guilds
                 m_items[slotId] = item;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_ITEM);
-                stmt.SetInt64(0, m_guildId);
+                stmt.SetInt64(0, m_guild.GetId());
                 stmt.SetUInt8(1, m_tabId);
                 stmt.SetUInt8(2, slotId);
                 trans.Append(stmt);
@@ -3708,7 +3610,7 @@ namespace Game.Guilds
                 if (item != null)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_BANK_ITEM);
-                    stmt.SetInt64(0, m_guildId);
+                    stmt.SetInt64(0, m_guild.GetId());
                     stmt.SetUInt8(1, m_tabId);
                     stmt.SetUInt8(2, slotId);
                     stmt.SetInt64(3, item.GetGUID().GetCounter());
@@ -3721,14 +3623,83 @@ namespace Game.Guilds
                 }
 
                 return true;
+            }        
+
+            private void InitializeBankQueryResult(Guild guild)
+            {
+                if (IsBankQueryResultInitialized)
+                    return;
+
+                m_preparedBankQueryResult = new(m_tabId);
+
+                // TabInfo
+                for (byte tabId = 0; tabId < guild._GetPurchasedTabsSize(); ++tabId)
+                {
+                    GuildBankTabInfo tabInfo = new(tabId, guild.GetBankTab(tabId));
+                    m_preparedBankQueryResult.TabInfo[tabId] = tabInfo;
+                }
+
+                // ItemInfo
+                for (byte slotId = 0; slotId < m_items.Length; ++slotId)
+                {
+                    Item tabItem = m_items[slotId];
+                    if (tabItem != null)
+                    {
+                        GuildBankItemInfo itemInfo = new(slotId, tabItem);
+                        m_preparedBankQueryResult.ItemInfo[slotId] = itemInfo;
+                    }
+                }
             }
 
-            long m_guildId;
+            private void PrepareBankQueryResultPacket()
+            {
+                m_preparedBankQueryResult.Write();
+            }
+
+            public GuildBankQueryResults GetPreparedBankQueryResultPacket()
+            {
+                if (!IsBankQueryResultInitialized)
+                    InitializeBankQueryResult(m_guild);
+
+                if (IsBankQueryResultUpdated)
+                    PrepareBankQueryResultPacket();
+
+                IsBankQueryResultUpdated = false;
+
+                return m_preparedBankQueryResult;
+            }
+
+            public void UpdateItemInBankQueryResult(List<ItemSlot> slotsForUpdate)
+            {
+                if (!IsBankQueryResultInitialized)
+                    return;
+
+                foreach (var slot in slotsForUpdate)
+                {
+                    m_preparedBankQueryResult.ItemInfo[slot] = new(slot, m_items[slot]);
+                }
+
+                IsBankQueryResultUpdated = true;
+            }
+
+            public void UpdateTabInfoInBankQueryResult(int tabId, BankTab tabInfo)
+            {
+                if (!IsBankQueryResultInitialized)
+                    return;
+
+                m_preparedBankQueryResult.TabInfo[tabId] = new(tabId, tabInfo);
+                IsBankQueryResultUpdated = true;
+            }
+
+            Guild m_guild;
             byte m_tabId;
             Item[] m_items;
             string m_name;
             string m_icon;
             string m_text;
+            GuildBankQueryResults m_preparedBankQueryResult;
+            bool IsBankQueryResultUpdated;
+            bool IsBankQueryResultInitialized => m_preparedBankQueryResult != null;
         }
 
         public class GuildBankRightsAndSlots
@@ -3880,10 +3851,10 @@ namespace Game.Guilds
                      IsBank, Position);
             }
 
-            public void CopySlots(List<ItemSlot> ids)
+            public void CopyDestinationSlotsTo(List<ItemSlot> myList)
             {
                 foreach (var item in m_vec)
-                    ids.Add(item.Position.Slot);
+                    myList.Add(item.Position.Slot);
             }
 
             public void SendEquipError(InventoryResult result, Item item)
