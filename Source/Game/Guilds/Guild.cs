@@ -4003,7 +4003,8 @@ namespace Game.Guilds
 
             public override bool HasModifyRights
             {
-                get => m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.ModifyItem);
+                get => m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.ModifyItem) &&
+                    (HasDepositRights || HasWithdrawRights); // WOTLK_CLASSIC client requirements
             }
 
             public override bool HasWithdrawAmount
