@@ -26,7 +26,7 @@ namespace Game
 
             if (itemPos.IsInventoryPos) // move only from inventory (not equippable slots)
             {
-                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out var dest, out _, item);
+                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out var dest, item);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);

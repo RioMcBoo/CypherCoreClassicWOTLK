@@ -584,11 +584,11 @@ namespace Game
                     return;
                 }
 
-                msg = GetPlayer().CanBankItem(destBagSlot, out dest, out _, item);
+                msg = GetPlayer().CanBankItem(destBagSlot, out dest, item, item.InventoryPosition);
             }
             else
             {
-                msg = GetPlayer().CanStoreItem(destBagSlot, out dest, item);
+                msg = GetPlayer().CanStoreItem(destBagSlot, out dest, item, item.InventoryPosition);
             }
 
             if (msg != InventoryResult.Ok)
@@ -601,7 +601,7 @@ namespace Game
             if (dest.Count == 1 && dest[0].Position == src)
             {
                 // just remove grey item state
-                GetPlayer().SendEquipError(InventoryResult.InternalBagError, item);
+                GetPlayer().SendEquipError(InventoryResult.EquipNone3, item);
                 return;
             }
 
