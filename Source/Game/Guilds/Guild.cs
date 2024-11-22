@@ -1143,6 +1143,12 @@ namespace Game.Guilds
 
         public void SendBankTabText(WorldSession session, byte tabId)
         {
+            Player player = session.GetPlayer();
+            Member member = GetMember(player.GetGUID());
+
+            if (member == null)
+                return;
+
             BankTab tab = GetBankTab(tabId);
             if (tab != null)
                 tab.SendText(this, session);
@@ -1893,18 +1899,32 @@ namespace Game.Guilds
                 _MoveItems(charData, bankData, splitedAmount);
         }
 
-        public void SetBankTabText(byte tabId, string text)
+        public void SetBankTabText(WorldSession session, byte tabId, string text)
         {
+            Player player = session.GetPlayer();
+            Member member = GetMember(player.GetGUID());
+
+            if (member == null)
+                return;
+
             BankTab pTab = GetBankTab(tabId);
             if (pTab != null)
             {
-                pTab.SetText(text);
-                pTab.SendText(this);
-
                 GuildEventTabTextChanged eventPacket = new();
                 eventPacket.Tab = tabId;
-                UpdateBankQueryResult(tabId, pTab);
+
+                if (_MemberHasTabRights(member, tabId, GuildBankRights.ModifyTabText))
+                {
+                    pTab.SetText(text);                    
                 BroadcastPacket(eventPacket);
+            }
+                else
+                {
+                    // The WOTLK_CLASSIC client allows you to always change the text of the tab (bug or feature)
+                    // and constantly sends a request to save the text if the text in the tab-window has been changed, regardless of permissions.
+                    // Therefore, we force update the text to the original for this player.
+                    player.SendPacket(eventPacket);
+                }                
             }
         }
 
@@ -4003,7 +4023,7 @@ namespace Game.Guilds
 
             public override bool HasModifyRights
             {
-                get => m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.ModifyItem) &&
+                get => m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.ModifyItemOrder) &&
                     (HasDepositRights || HasWithdrawRights); // WOTLK_CLASSIC client requirements
             }
 

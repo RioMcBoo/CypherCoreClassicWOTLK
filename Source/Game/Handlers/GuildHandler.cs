@@ -579,7 +579,7 @@ namespace Game
 
             Guild guild = GetPlayer().GetGuild();
             if (guild != null)
-                guild.SetBankTabText((byte)packet.Tab, packet.TabText);
+                guild.SetBankTabText(this, (byte)packet.Tab, packet.TabText);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildSetRankPermissions)]
