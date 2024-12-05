@@ -349,12 +349,22 @@ namespace Game.Entities
             get
             {
                 if (_values.Count <= index)
-                    _values.Add(new T());
+                    Resize(index + 1);
 
-                return _values[index];
+                T value = _values[index];
+
+                if (value is null)
+                {
+                    _values[index] = value = new();
+                }
+
+                return value;
             }
             set
             {
+                if (_values.Count <= index)
+                    Resize(index + 1);
+
                 _values[index] = value;
             }
         }
@@ -368,6 +378,13 @@ namespace Game.Entities
         {
             foreach (var obj in _values)
                 yield return obj;
+        }
+
+        private void Resize(int count)
+        {
+            // fill with zeros until reaching desired slot
+            _values.Resize(count + 1);
+            _updateMask.Resize((_values.Count + 31) / 32);
         }
     }
 
