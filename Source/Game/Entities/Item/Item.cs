@@ -901,8 +901,9 @@ namespace Game.Entities
         public void SetGem(int slot, ItemDynamicFieldGems gem)
         {
             Cypher.Assert(slot < ItemConst.MaxGemSockets);
-            var gemField = (SocketedGem)m_values.ModifyValue(m_itemData.ModifyValue(m_itemData.Gems, slot));
             
+            SocketedGem gemField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Gems, slot);
+
             SetUpdateFieldValue(gemField.ModifyValue(gemField.ItemId), gem.ItemId);
             SetUpdateFieldValue(gemField.ModifyValue(gemField.Context), gem.Context);
 
