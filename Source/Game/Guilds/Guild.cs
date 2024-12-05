@@ -4075,7 +4075,7 @@ namespace Game.Guilds
                         $"GUILD STORAGE: StoreItem tab = {Container}, slot = {Slot}, " +
                         $"item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
 
-                    pLastItem = _StoreItem(trans, pTab, pItem, pos, pos.Equals(m_vec.Last()));
+                    pLastItem = _StoreItem(trans, pTab, pItem, pos, pos != m_vec.Last());
                 }
                 return pLastItem;
             }
