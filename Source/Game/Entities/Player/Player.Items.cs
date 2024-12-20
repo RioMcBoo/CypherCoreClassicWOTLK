@@ -5133,7 +5133,7 @@ namespace Game.Entities
                             ItemPos offHandPos = new(EquipmentSlot.OffHand);
                             Item offItem = GetItemByPos(offHandPos);
                             if (offItem != null && (!not_loading || CanUnequipItem(offHandPos, false) != InventoryResult.Ok ||
-                                CanStoreItem(ItemPos.Undefined, out _, offItem, forSwap: swap) != InventoryResult.Ok))
+                                CanStoreItem(ItemPos.Undefined, out _, offItem) != InventoryResult.Ok))
                             {
                                 return swap ? InventoryResult.CantSwap : InventoryResult.InvFull;
                             }
