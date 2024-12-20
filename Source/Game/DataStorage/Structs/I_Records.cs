@@ -472,9 +472,9 @@ namespace Game.DataStorage
         private short _allowableClass;
         public ushort ItemRandomSuffixGroupID;
         public ushort RandomSelect;
-        public ushort[] MinDamage = new ushort[5];
-        public ushort[] MaxDamage = new ushort[5];
-        public short[] Resistances = new short[7];
+        public ushort[] MinDamage = new ushort[ItemConst.MaxDamages];
+        public ushort[] MaxDamage = new ushort[ItemConst.MaxDamages];
+        public short[] Resistances = new short[ItemConst.MaxResistances];
         public ushort ScalingStatDistributionID;
         public short[] StatModifierBonusAmount = new short[ItemConst.MaxStats];
         private byte _expansionID;

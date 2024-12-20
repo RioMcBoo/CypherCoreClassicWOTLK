@@ -17,7 +17,8 @@ namespace Framework.Constants
         public const int MaxTalentTiers = 11;
         public const int TalentPointsPerTalentTier = 5;
         public const int MaxTalentColumns = 4;
-        public const int MaxTalentRank = 9;
+        public const int MaxDB2TalentRank = 9;
+        public const int MaxTalentRank = 5;
         public const int MaxPetTalentRank = 3;
         public const int MinSpecializationLevel = 10;
         public const int MaxSpecializations = 2;

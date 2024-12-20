@@ -29,7 +29,7 @@ namespace Game.DataStorage
         public int OverridesSpellID;
         public int RequiredSpellID;
         public int[] CategoryMask = new int[2];
-        public int[] SpellRank = new int[9];
+        public int[] SpellRank = new int[PlayerConst.MaxDB2TalentRank];
         public int[] PrereqTalent = new int[3];
         public int[] PrereqRank = new int[3];
 

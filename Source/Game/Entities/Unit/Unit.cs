@@ -1851,6 +1851,7 @@ namespace Game.Entities
                 || form == ShapeShiftForm.DireBearForm 
                 || form == ShapeShiftForm.GhostWolf;
         }
+
         public bool IsControlledByPlayer() { return m_ControlledByPlayer; }
 
         public bool IsCharmedOwnedByPlayerOrPlayer() { return GetCharmerOrOwnerOrOwnGUID().IsPlayer(); }

@@ -3530,8 +3530,7 @@ namespace Game.Entities
     }
 
     public class ActivePlayerData : HasChangesMask
-    {
-        
+    {        
         public UpdateField<bool> SortBagsRightToLeft = new(0, 1);
         public UpdateField<bool> InsertItemsLeftToRight = new(0, 2);
         public UpdateFieldArray<DynamicUpdateField<ushort>> ResearchSites = new(1, 20, 21);

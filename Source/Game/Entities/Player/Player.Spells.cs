@@ -523,9 +523,11 @@ namespace Game.Entities
                 {
                     ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate(gem.ItemId);
                     if (gemTemplate != null)
+                    {
                         if (gemTemplate.GetRequiredSkill() != 0 && GetSkillValue(gemTemplate.GetRequiredSkill()) < gemTemplate.GetRequiredSkillRank())
                             return;
                 }
+            }
             }
 
             if (!item.IsBroken())

@@ -148,12 +148,12 @@ public static class MathFunctions
 
     public static int CalculatePct(int value, float pct)
     {
-        return (int)(value * Convert.ToSingle(pct) / 100.0f);
+        return (int)(value * pct / 100.0f);
     }
 
     public static uint CalculatePct(uint value, float pct)
     {
-        return (uint)(value * Convert.ToSingle(pct) / 100.0f);
+        return (uint)(value * pct / 100.0f);
     }
 
     public static float CalculatePct(float value, float pct)

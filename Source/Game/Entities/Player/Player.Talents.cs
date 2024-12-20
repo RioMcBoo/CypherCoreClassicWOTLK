@@ -67,9 +67,11 @@ namespace Game.Entities
 
                     // search for spells that the talent teaches and unlearn them
                     foreach (var spellEffectInfo in spellToRemove.GetEffects())
+                    {
                         if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                             RemoveSpell(spellEffectInfo.TriggerSpell, true);
                 }
+            }
             }
 
             talentMap[talent.Id] = new(rank, PlayerSpellState.Unchanged);
@@ -166,7 +168,9 @@ namespace Game.Entities
                 
                 if (!talentMap.TryGetValue(talentInfo.PrereqTalent[i], out itr) 
                     || itr.Rank < talentInfo.PrereqRank[i])
+                {
                     return false;
+            }
             }
 
             // Find out how many points we have in this field
@@ -179,8 +183,10 @@ namespace Game.Entities
                         continue;
 
                     for (int i = 0; i < tmpTalent.Value.SpellRank.Length; ++i)
+                    {
                         if (tmpTalent.Value.SpellRank[i] != 0 && HasSpell(tmpTalent.Value.SpellRank[i]))
                             spentPoints += (i + 1);
+                }
                 }
 
                 // not have required min points spent in talent tree

@@ -145,17 +145,22 @@ namespace System
 
         public static bool HasClass(this ClassMask mask, Class _class)
         {
-            return (mask & (ClassMask)(1 << ((int)_class - 1))) != 0;
+            return (mask & _class.GetClassMask()) != 0;
         }
 
         public static bool HasLocale(this LocaleMask mask, Locale locale)
         {
-            return (mask & (LocaleMask)(1 << (ushort)locale)) != 0;
+            return (mask & locale.GetLocaleMask()) != 0;
+        }
+
+        public static LocaleMask GetLocaleMask(this Locale locale)
+        {
+            return (LocaleMask)(1 << (ushort)locale);
         }
 
         public static bool HasSchool(this SpellSchoolMask mask, SpellSchools _school)
         {
-            return (mask & (SpellSchoolMask)(1 << (int)_school)) != 0;
+            return (mask & _school.GetSpellSchoolMask()) != 0;
         }
 
         public static SpellSchoolMask GetSpellSchoolMask(this SpellSchools school)
@@ -166,8 +171,10 @@ namespace System
         public static SpellSchools GetFirstSchool(this SpellSchoolMask mask)
         {
             for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
+            {
                 if (mask.HasSchool(i))
                     return i;
+            }
 
             return SpellSchools.Normal;
         }
