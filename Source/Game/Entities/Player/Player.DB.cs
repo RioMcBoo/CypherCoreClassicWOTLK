@@ -3812,7 +3812,7 @@ namespace Game.Entities
                 stmt.SetUInt8(index++, (byte)GetClass());
                 stmt.SetUInt8(index++, (byte)GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.SetUInt8(index++, (byte)GetLevel());
-                stmt.SetInt32(index++, GetXP());
+                stmt.SetUInt32(index++, (uint)GetXP()); // TODO: change to signed in DB
                 stmt.SetInt64(index++, GetMoney());
                 stmt.SetUInt8(index++, GetInventorySlotCount());
                 stmt.SetUInt8(index++, GetBankBagSlotCount());
