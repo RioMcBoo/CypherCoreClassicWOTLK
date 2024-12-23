@@ -12,7 +12,6 @@ using Game.Mails;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Spells;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -94,6 +93,7 @@ namespace Game.Entities
 
         //Stats
         int m_baseSpellPower;
+        int m_baseFeralAP;
         int m_baseManaRegen;
         int m_baseHealthRegen;
         int m_spellPenetrationItemMod;
@@ -136,6 +136,7 @@ namespace Game.Entities
         int[] baseRatingValue = new int[(int)CombatRating.Max];
         float[] m_auraBaseFlatMod = new float[(int)BaseModGroup.End];
         float[] m_auraBasePctMod = new float[(int)BaseModGroup.End];
+        public float AmmoDPS { get; set; }
         public DuelInfo duel;
         bool m_canParry;
         bool m_canBlock;

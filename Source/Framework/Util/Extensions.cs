@@ -138,6 +138,49 @@ namespace System
             }
         }
 
+        public static GtClass ToGameTableType(this Class _class)
+        {
+            switch (_class)
+            {
+                case Class.None:
+                    return GtClass.None;
+                case Class.Warrior:
+                    return GtClass.Warrior;
+                case Class.Paladin:
+                    return GtClass.Paladin;
+                case Class.Hunter:
+                    return GtClass.Hunter;
+                case Class.Rogue:
+                    return GtClass.Rogue;
+                case Class.Priest:
+                    return GtClass.Priest;
+                case Class.DeathKnight:
+                    return GtClass.DeathKnight;
+                case Class.Shaman:
+                    return GtClass.Shaman;
+                case Class.Mage:
+                    return GtClass.Mage;
+                case Class.Warlock:
+                    return GtClass.Warlock;
+                case Class.Monk:
+                    return GtClass.Monk;
+                case Class.Druid:
+                    return GtClass.Druid;
+                default:
+                    return GtClass.None;
+            }
+        }
+
+        public static bool HasStat(this StatsMask mask, Stats stat)
+        {
+            return (mask & stat.GetStatsMask()) != 0;
+        }
+
+        public static StatsMask GetStatsMask(this Stats stat)
+        {
+            return (StatsMask)(1 << ((int)stat));
+        }
+
         public static ClassMask GetClassMask(this Class _class)
         {
             return (ClassMask)(1 << ((int)_class - 1));

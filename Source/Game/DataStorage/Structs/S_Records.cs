@@ -161,8 +161,14 @@ namespace Game.DataStorage
             if (mask.HasAnyFlag(0x00008000)) return SpellPower;
             return 0;
         }
-        #endregion
-    }
+
+        public int getFeralBonus(int mask)      // removed in 3.2.x?
+        {
+            //if (mask & 0x00010000) return 0;  // not used?
+            return 0;
+        }
+    #endregion
+}
 
     public sealed class SceneScriptRecord
     {

@@ -1606,18 +1606,20 @@ namespace Game.Entities
                 case ItemSubClassWeapon.Staff:
                 case ItemSubClassWeapon.FishingPole:
                     return 3.3f;
+                case ItemSubClassWeapon.Bow:
+                case ItemSubClassWeapon.Gun:
+                case ItemSubClassWeapon.Crossbow:
+                case ItemSubClassWeapon.Thrown:
+                    return 2.8f;
                 case ItemSubClassWeapon.Axe:
                 case ItemSubClassWeapon.Mace:
                 case ItemSubClassWeapon.Sword:
-                case ItemSubClassWeapon.Warglaives:
                 case ItemSubClassWeapon.Exotic:
                 case ItemSubClassWeapon.Exotic2:
                 case ItemSubClassWeapon.Fist:
                     return 2.4f;
                 case ItemSubClassWeapon.Dagger:
                     return 1.7f;
-                case ItemSubClassWeapon.Thrown:
-                    return 2.0f;
                 default:
                     return weapon.GetTemplate().GetDelay() / 1000.0f;
             }

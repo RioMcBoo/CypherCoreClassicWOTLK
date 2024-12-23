@@ -447,15 +447,23 @@ namespace Game.DataStorage
             BarberShopCostBaseGameTable = ReadGameTable<GtBarberShopCostBaseRecord>("BarberShopCostBase.txt");
             BaseMPGameTable = ReadGameTable<GtBaseMPRecord>("BaseMp.txt");
             BattlePetXPGameTable = ReadGameTable<GtBattlePetXPRecord>("BattlePetXP.txt");
+            ChallengeModeDamageGameTable = ReadGameTable<GtChallengeModeDamageRecord>("ChallengeModeDamage.txt");
+            ChallengeModeHealthGameTable = ReadGameTable<GtChallengeModeHealthRecord>("ChallengeModeHealth.txt");
+            ChanceToMeleeCritGameTable = ReadGameTable<GtChanceToMeleeCritRecord>("ChanceToMeleeCrit.txt");
+            ChanceToMeleeCritBaseGameTable = ReadGameTable<GtChanceToMeleeCritBaseRecord>("ChanceToMeleeCritBase.txt");
+            ChanceToSpellCritGameTable = ReadGameTable<GtChanceToSpellCritRecord>("ChanceToSpellCrit.txt");
+            ChanceToSpellCritBaseGameTable = ReadGameTable<GtChanceToSpellCritBaseRecord>("ChanceToSpellCritBase.txt");
             CombatRatingsGameTable = ReadGameTable<GtCombatRatingsRecord>("CombatRatings.txt");
             CombatRatingsMultByILvlGameTable = ReadGameTable<GtCombatRatingsMultByILvlRecord>("CombatRatingsMultByILvl.txt");
             ItemSocketCostPerLevelGameTable = ReadGameTable<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
+            HonorLevelGameTable = ReadGameTable<GtHonorLevelRecord>("HonorLevel.txt");            
             HpPerStaGameTable = ReadGameTable<GtHpPerStaRecord>("HpPerSta.txt");
             NpcManaCostScalerGameTable = ReadGameTable<GtNpcManaCostScalerRecord>("NPCManaCostScaler.txt");
             OCTRegenHPGameTable = ReadGameTable<GtOCTRegenHPRecord>("OCTRegenHP.txt");
             OCTRegenMPGameTable = ReadGameTable<GtOCTRegenMPRecord>("OCTRegenMP.txt");
             RegenHPPerSptGameTable = ReadGameTable<GtRegenHPPerSptRecord>("RegenHPPerSpt.txt");
             RegenMPPerSptGameTable = ReadGameTable<GtRegenMPPerSptRecord>("RegenMPPerSpt.txt");
+            SandboxScalingGameTable = ReadGameTable<GtSandboxScalingRecord>("SandboxScaling.txt");
             ShieldBlockRegularGameTable = ReadGameTable<GtShieldBlockRegularRecord>("ShieldBlockRegular.txt");
             SpellScalingGameTable = ReadGameTable<GtSpellScalingRecord>("SpellScaling.txt");
 
@@ -796,8 +804,15 @@ namespace Game.DataStorage
         public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable;
         public static GameTable<GtBaseMPRecord> BaseMPGameTable;
         public static GameTable<GtBattlePetXPRecord> BattlePetXPGameTable;
+        public static GameTable<GtChallengeModeDamageRecord> ChallengeModeDamageGameTable;
+        public static GameTable<GtChallengeModeHealthRecord> ChallengeModeHealthGameTable;
+        public static GameTable<GtChanceToMeleeCritRecord> ChanceToMeleeCritGameTable;
+        public static GameTable<GtChanceToMeleeCritBaseRecord> ChanceToMeleeCritBaseGameTable;
+        public static GameTable<GtChanceToSpellCritRecord> ChanceToSpellCritGameTable;
+        public static GameTable<GtChanceToSpellCritBaseRecord> ChanceToSpellCritBaseGameTable;
         public static GameTable<GtCombatRatingsRecord> CombatRatingsGameTable;
         public static GameTable<GtCombatRatingsMultByILvlRecord> CombatRatingsMultByILvlGameTable;
+        public static GameTable<GtHonorLevelRecord> HonorLevelGameTable;
         public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
         public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable;
         public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable;
@@ -805,6 +820,7 @@ namespace Game.DataStorage
         public static GameTable<GtOCTRegenMPRecord> OCTRegenMPGameTable;
         public static GameTable<GtRegenHPPerSptRecord> RegenHPPerSptGameTable;
         public static GameTable<GtRegenMPPerSptRecord> RegenMPPerSptGameTable;
+        public static GameTable<GtSandboxScalingRecord> SandboxScalingGameTable;
         public static GameTable<GtShieldBlockRegularRecord> ShieldBlockRegularGameTable;
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
         #endregion
@@ -829,58 +845,22 @@ namespace Game.DataStorage
         #region Helper Methods
         public static float GetGameTableColumnForClass(dynamic row, Class class_)
         {
-            switch (class_)
-            {
-                case Class.Warrior:
-                    return row.Warrior;
-                case Class.Paladin:
-                    return row.Paladin;
-                case Class.Hunter:
-                    return row.Hunter;
-                case Class.Rogue:
-                    return row.Rogue;
-                case Class.Priest:
-                    return row.Priest;
-                case Class.Deathknight:
-                    return row.DeathKnight;
-                case Class.Shaman:
-                    return row.Shaman;
-                case Class.Mage:
-                    return row.Mage;
-                case Class.Warlock:
-                    return row.Warlock;
-                case Class.Druid:
-                    return row.Druid;
-                default:
-                    break;
-            }
+            if (row.values.Length == (int)Class.Max - 1)
+                return row.values[(int)class_ - 1];
+
+            if (row.values.Length == (int)GtClass.Max - 1)
+                return row.values[(int)class_.ToGameTableType() - 1];
+
             return 0.0f;
         }
 
         public static float GetSpellScalingColumnForClass(GtSpellScalingRecord row, ScalingClass class_)
         {
+            if (class_ > ScalingClass.None)
+                return row.values[(int)((Class)class_).ToGameTableType() - 1];
+
             switch (class_)
             {
-                case ScalingClass.Warrior:
-                    return row.Warrior;
-                case ScalingClass.Paladin:
-                    return row.Paladin;
-                case ScalingClass.Hunter:
-                    return row.Hunter;
-                case ScalingClass.Rogue:
-                    return row.Rogue;
-                case ScalingClass.Priest:
-                    return row.Priest;
-                case ScalingClass.Deathknight:
-                    return row.DeathKnight;
-                case ScalingClass.Shaman:
-                    return row.Shaman;
-                case ScalingClass.Mage:
-                    return row.Mage;
-                case ScalingClass.Warlock:
-                    return row.Warlock;
-                case ScalingClass.Druid:
-                    return row.Druid;
                 case ScalingClass.Item1:
                 case ScalingClass.Item2:
                     return row.Item;
@@ -905,41 +885,15 @@ namespace Game.DataStorage
             return row.Wins * row.Xp;
         }
 
+        /// <summary> 0-32 levels </summary>
+        public static float GetGtHonorLevelPerPrestigeLevel(GtHonorLevelRecord row, int prestigeLevel)
+        {
+            return row.values[prestigeLevel];
+        }
+
         public static int GetShieldBlockRegularColumnForQuality(GtShieldBlockRegularRecord row, ItemQuality quality)
         {
-            int value;
-
-            switch (quality)
-            {
-                case ItemQuality.Poor:
-                    value = (int)row.Poor;
-                    break;
-                case ItemQuality.Normal:
-                    value = (int)row.Standard;
-                    break;
-                case ItemQuality.Uncommon:
-                    value = (int)row.Good;
-                    break;
-                case ItemQuality.Rare:
-                    value = (int)row.Superior;
-                    break;
-                case ItemQuality.Epic:
-                    value = (int)row.Epic;
-                    break;
-                case ItemQuality.Legendary:
-                    value = (int)row.Legendary;
-                    break;
-                case ItemQuality.Artifact:
-                    value = (int)row.Artifact;
-                    break;
-                case ItemQuality.Heirloom:
-                    value = (int)row.ScalingStat;
-                    break;
-                default:
-                    value = 0;
-                    break;
-            }
-            return value;
+            return (int)row.values[(int)quality];
         }
         #endregion
     }

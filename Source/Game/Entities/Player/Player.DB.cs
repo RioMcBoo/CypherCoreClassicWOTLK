@@ -4101,7 +4101,7 @@ namespace Game.Entities
                 // Define the required variables
                 int charDeleteMinLvl;
 
-                if (characterInfo.ClassId == Class.Deathknight)
+                if (characterInfo.ClassId == Class.DeathKnight)
                     charDeleteMinLvl = WorldConfig.Values[WorldCfg.ChardeleteDeathKnightMinLevel].Int32;
                 else if (characterInfo.ClassId == Class.DemonHunter)
                     charDeleteMinLvl = WorldConfig.Values[WorldCfg.ChardeleteDemonHunterMinLevel].Int32;

@@ -680,7 +680,7 @@ namespace Game.Spells
                     }
                     break;
                 }
-                case AuraType.ModSpellCritChance:
+                case AuraType.ModSpellCritSchoolPct:
                     // skip spells that can't crit
                     if (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
                         return false;
@@ -1860,7 +1860,7 @@ namespace Game.Spells
                 Item item = player.GetItemByPos(slot);
                 if (item != null)
                 {
-                    var attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
+                    var attackType = Player.GetAttackBySlot(slot);
 
                     player.ApplyItemDependentAuras(item, !apply);
                     if (attackType.HasValue)
@@ -3034,10 +3034,23 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
+            SpellSchoolMask schoolMask = (SpellSchoolMask)GetMiscValue();
+            int amount = GetAmount();
 
-            for (byte x = (byte)SpellSchools.Normal; x < (byte)SpellSchools.Max; x++)
-                if (Convert.ToBoolean(GetMiscValue() & (1 << x)))
-                    target.HandleStatFlatModifier(UnitMods.ResistanceStart + x, UnitModifierFlatType.Total, GetAmount(), apply);
+            for (SpellSchools school = SpellSchools.Normal; school < SpellSchools.Max; school++)
+            {                
+                if (schoolMask.HasSchool(school))
+                {
+                    if (amount == 0)    // "Magic Absorption" spell case (amount depends on player level)
+                    {
+                        target.StatMods.Update(UnitMods.ResistanceStart + (int)school);
+                    }
+                    else
+                    {
+                        target.StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)school, UnitModType.TotalTemporary, amount, apply);
+                    }
+                }
+            }
         }
 
         [AuraEffectHandler(AuraType.ModBaseResistancePct)]
@@ -3047,36 +3060,45 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
+            SpellSchoolMask schoolMask = (SpellSchoolMask)GetMiscValue();
+            UnitModType unitModType = GetSpellInfo().IsPassive() ? UnitModType.BasePermanent : UnitModType.BaseTemporary;
 
             // only players have base stats
             if (!target.IsTypeId(TypeId.Player))
             {
                 //pets only have base armor
-                if (target.IsPet() && Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
+                if (target.IsPet() && schoolMask.HasSchool(SpellSchools.Normal))
                 {
-                    if (apply)
-                        target.ApplyStatPctModifier(UnitMods.Armor, UnitModifierPctType.Base, GetAmount());
-                    else
-                    {
-                        float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, (uint)SpellSchoolMask.Normal);
-                        target.SetStatPctModifier(UnitMods.Armor, UnitModifierPctType.Base, amount);
-                    }
+                    target.StatMods.ModifyMult(UnitMods.Armor, unitModType, GetAmount(), apply);
                 }
             }
             else
             {
-                for (byte x = (byte)SpellSchools.Normal; x < (byte)SpellSchools.Max; x++)
+                for (SpellSchools school = SpellSchools.Normal; school < SpellSchools.Max; school++)
                 {
-                    if (Convert.ToBoolean(GetMiscValue() & (1 << x)))
+                    if (schoolMask.HasSchool(school))
                     {
-                        if (apply)
-                            target.ApplyStatPctModifier(UnitMods.ResistanceStart + x, UnitModifierPctType.Base, GetAmount());
-                        else
-                        {
-                            float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, 1u << x);
-                            target.SetStatPctModifier(UnitMods.ResistanceStart + x, UnitModifierPctType.Base, amount);
-                        }
+                        target.StatMods.ModifyMult(UnitMods.ResistanceStart + (int)school, unitModType, GetAmount(), apply);
                     }
+                }
+            }
+        }
+
+        [AuraEffectHandler(AuraType.ModResistanceExclusive)]
+        void HandleAuraModResistanceExclusive(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            SpellSchoolMask schoolMask = (SpellSchoolMask)GetMiscValue();
+
+            for (SpellSchools school = SpellSchools.Normal; school < SpellSchools.Max; school++)
+            {
+                if (schoolMask.HasSchool(school))
+                {
+                    int currentMax = target.GetMaxPositiveAuraModifierByMiscMask(AuraType.ModResistanceExclusive, (uint)school.GetSpellSchoolMask(), this);
+                    target.StatMods.ModifyMaxFlatWithExchange(UnitMods.ResistanceStart + (int)school, UnitModType.TotalTemporary, GetAmount(), currentMax, apply);
                 }
             }
         }
@@ -3088,16 +3110,13 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
+            SpellSchoolMask schoolMask = (SpellSchoolMask)GetMiscValue();
 
-            for (byte i = (byte)SpellSchools.Normal; i < (byte)SpellSchools.Max; i++)
+            for (SpellSchools school = SpellSchools.Normal; school < SpellSchools.Max; school++)
             {
-                if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
+                if (schoolMask.HasSchool(school))
                 {
-                    float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModResistancePct, 1u << i);
-                    if (target.GetPctModifierValue(UnitMods.ResistanceStart + i, UnitModifierPctType.Total) == amount)
-                        continue;
-
-                    target.SetStatPctModifier(UnitMods.ResistanceStart + i, UnitModifierPctType.Total, amount);
+                    target.StatMods.ModifyMult(UnitMods.ResistanceStart + (int)school, UnitModType.TotalTemporary, GetAmount(), apply);
                 }
             }
         }
@@ -3109,20 +3128,25 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
+            SpellSchoolMask schoolMask = (SpellSchoolMask)GetMiscValue();
 
             // only players have base stats
             if (!target.IsTypeId(TypeId.Player))
             {
                 //only pets have base stats
-                if (target.IsPet() && Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
-                    target.HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, GetAmount(), apply);
+                if (target.IsPet() && schoolMask.HasSchool(SpellSchools.Normal))
+                {
+                    target.StatMods.ModifyFlat(UnitMods.Armor, UnitModType.BasePermanent, GetAmount(), apply);
+                }
             }
             else
             {
-                for (byte i = (byte)SpellSchools.Normal; i < (byte)SpellSchools.Max; i++)
+                for (SpellSchools school = SpellSchools.Normal; school < SpellSchools.Max; school++)
                 {
-                    if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
-                        target.HandleStatFlatModifier(UnitMods.ResistanceStart + i, UnitModifierFlatType.Total, GetAmount(), apply);
+                    if (schoolMask.HasSchool(school))
+                    {
+                        target.StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)school, UnitModType.BasePermanent, GetAmount(), apply);
+                    }
                 }
             }
         }
@@ -3140,7 +3164,7 @@ namespace Game.Spells
             // applied to damage as HandleNoImmediateEffect in Unit.CalcAbsorbResist and Unit.CalcArmorReducedDamage
 
             // show armor penetration
-            if (target.IsTypeId(TypeId.Player) && Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
+            if (target.IsTypeId(TypeId.Player) && ((SpellSchoolMask)GetMiscValue() & SpellSchoolMask.Normal) != 0)
                 target.ApplyModTargetPhysicalResistance(GetAmount(), apply);
 
             // show as spell penetration only full spell penetration bonuses (all resistances except armor and holy
@@ -3157,12 +3181,12 @@ namespace Game.Spells
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            if (GetMiscValue() < -2 || GetMiscValue() > 4)
+            if (GetMiscValue() < -2 || GetMiscValue() >= (int)Stats.Max)
             {
                 Log.outError(LogFilter.Spells, 
                     $"WARNING: Spell {GetId()} effect {GetEffIndex()} " +
                     $"has an unsupported misc value ({GetMiscValue()}) " +
-                    $"for SPELL_AURA_MOD_STAT ");
+                    $"for AuraType.ModStat ");
                 return;
             }
 
@@ -3178,14 +3202,10 @@ namespace Game.Spells
                 {
                     if (spellGroupVal != 0)
                     {
-                        target.HandleStatFlatModifier((UnitMods.StatStart + (int)i), UnitModifierFlatType.Total, spellGroupVal, !apply);
-                        if (target.IsTypeId(TypeId.Player) || target.IsPet())
-                            target.UpdateStatBuffMod(i);
+                        target.StatMods.ModifyFlat(UnitMods.StatStart + (int)i, UnitModType.TotalTemporary, spellGroupVal, !apply);
                     }
 
-                    target.HandleStatFlatModifier(UnitMods.StatStart + (int)i, UnitModifierFlatType.Total, GetAmount(), apply);
-                    if (target.IsTypeId(TypeId.Player) || target.IsPet())
-                        target.UpdateStatBuffMod(i);
+                    target.StatMods.ModifyFlat(UnitMods.StatStart + (int)i, UnitModType.TotalTemporary, GetAmount(), apply);
                 }
             }
         }
@@ -3196,36 +3216,57 @@ namespace Game.Spells
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            Unit target = aurApp.GetTarget();
-
-            if (GetMiscValue() < -1 || GetMiscValue() > 4)
+            if (GetMiscValue() < -1 || GetMiscValue() >= (int)Stats.Max)
             {
-                Log.outError(LogFilter.Spells, "WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+                Log.outError(LogFilter.Spells, "WARNING: Misc Value for AuraType.ModPercentStat not valid");
                 return;
             }
+
+            Unit target = aurApp.GetTarget();
+            var amount = GetAmount();
 
             // only players have base stats
             if (!target.IsTypeId(TypeId.Player))
                 return;
 
-            for (int i = (int)Stats.Strength; i < (int)Stats.Max; ++i)
+            if (GetMiscValue() == -1)
             {
-                if (GetMiscValue() == i || GetMiscValue() == -1)
+                for (Stats i = Stats.Strength; i < Stats.Max; i++)
                 {
-                    if (apply)
-                        target.ApplyStatPctModifier(UnitMods.StatStart + i, UnitModifierPctType.Base, GetAmount());
-                    else
-                    {
-                        float amount = target.GetTotalAuraMultiplier(AuraType.ModPercentStat, aurEff =>
-                        {
-                            if (aurEff.GetMiscValue() == i || aurEff.GetMiscValue() == -1)
-                                return true;
-
-                            return false;
-                        });
-                        target.SetStatPctModifier(UnitMods.StatStart + i, UnitModifierPctType.Base, amount);
-                    }
+                    target.StatMods.ModifyMult(UnitMods.StatStart + (int)i, UnitModType.BasePermanent, amount, apply);
                 }
+            }
+            else
+            {
+                target.StatMods.ModifyMult(UnitMods.StatStart + GetMiscValue(), UnitModType.BasePermanent, amount, apply);
+            }
+        }
+
+        [AuraEffectHandler(AuraType.ModTotalStatPercentage)]
+        void HandleModTotalPercentStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            if (GetMiscValue() < -1 || GetMiscValue() >= (int)Stats.Max)
+            {
+                Log.outError(LogFilter.Spells, "WARNING: Misc Value for AuraType.ModTotalStatPercentage not valid");
+                return;
+            }
+
+            Unit target = aurApp.GetTarget();
+            var amount = GetAmount();
+
+            if (GetMiscValue() == -1)
+            {
+                for (Stats i = Stats.Strength; i < Stats.Max; i++)
+                {
+                    target.StatMods.ModifyMult(UnitMods.StatStart + (int)i, UnitModType.TotalTemporary, amount, apply);
+                }
+            }
+            else // from talents
+            {
+                target.StatMods.ModifyMult(UnitMods.StatStart + GetMiscValue(), UnitModType.TotalPermanent, amount, apply);
             }
         }
 
@@ -3287,54 +3328,6 @@ namespace Game.Spells
                 player.UpdateHealingDonePercentMod();
         }
 
-        [AuraEffectHandler(AuraType.ModTotalStatPercentage)]
-        void HandleModTotalPercentStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            // save current health state
-            float healthPct = target.GetHealthPct();
-            bool zeroHealth = !target.IsAlive();
-
-            // players in corpse state may mean two different states:
-            /// 1. player just died but did not release (in this case health == 0)
-            /// 2. player is corpse running (ie ghost) (in this case health == 1)
-            if (target.GetDeathState() == DeathState.Corpse)
-                zeroHealth = target.GetHealth() == 0;
-
-            for (int i = (int)Stats.Strength; i < (int)Stats.Max; i++)
-            {
-                if (Convert.ToBoolean(GetMiscValueB() & 1 << i) || GetMiscValueB() == 0) // 0 is also used for all stats
-                {
-                    float amount = target.GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage, aurEff =>
-                    {
-                        if ((aurEff.GetMiscValueB() & 1 << i) != 0 || aurEff.GetMiscValueB() == 0)
-                            return true;
-
-                        return false;
-                    });
-
-                    if (target.GetPctModifierValue(UnitMods.StatStart + i, UnitModifierPctType.Total) == amount)
-                        continue;
-
-                    target.SetStatPctModifier(UnitMods.StatStart + i, UnitModifierPctType.Total, amount);
-                    if (target.IsTypeId(TypeId.Player) || target.IsPet())
-                        target.UpdateStatBuffMod((Stats)i);
-                }
-            }
-
-            // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_ABILITY 0x00000010 flag)
-            // this check is total bullshit i think
-            if ((Convert.ToBoolean(GetMiscValueB() & 1 << (int)Stats.Stamina) || GetMiscValueB() == 0)
-                && m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
-            {
-                target.SetHealth(Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1)));
-            }
-        }
-
         [AuraEffectHandler(AuraType.ModExpertise)]
         void HandleAuraModExpertise(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -3350,64 +3343,31 @@ namespace Game.Spells
             target.ToPlayer().UpdateExpertise(WeaponAttackType.OffAttack);
         }
 
-        // Increase armor by <AuraEffect.BasePoints> % of your <primary stat>
-        [AuraEffectHandler(AuraType.ModArmorPctFromStat)]
-        void HandleModArmorPctFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        [AuraEffectHandler(AuraType.ModRangedAttackPowerOfStatPercent)]
+        void HandleAuraModRangedAttackPowerOfStatPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
-                return;
-
-            // only players have primary stats
-            Player player = aurApp.GetTarget().ToPlayer();
-            if (player == null)
-                return;
-
-            player.UpdateArmor();
-        }
-
-        [AuraEffectHandler(AuraType.ModBonusArmor)]
-        void HandleModBonusArmor(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
-                return;
-
-            aurApp.GetTarget().HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, GetAmount(), apply);
-        }
-
-        [AuraEffectHandler(AuraType.ModBonusArmorPct)]
-        void HandleModBonusArmorPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
-                return;
-
-            aurApp.GetTarget().UpdateArmor();
-        }
-
-        [AuraEffectHandler(AuraType.ModStatBonusPct)]
-        void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            if (GetMiscValue() < -1 || GetMiscValue() > 4)
+            if (target is Player player)
             {
-                Log.outError(LogFilter.Spells, "WARNING: Misc Value for SPELL_AURA_MOD_STAT_BONUS_PCT not valid");
-                return;
+                player.UpdateRangedAttackPowerAndDamage();
             }
+        }
 
-            // only players have base stats
-            if (!target.IsTypeId(TypeId.Player))
+        [AuraEffectHandler(AuraType.ModMeleeAttackPowerOfStatPercent)]
+        void HandleAuraModMeleeAttackPowerOfStatPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            for (Stats stat = Stats.Strength; stat < Stats.Max; ++stat)
+            Unit target = aurApp.GetTarget();
+
+            if (target is Player player)
             {
-                if (GetMiscValue() == (int)stat || GetMiscValue() == -1)
-                {
-                    target.HandleStatFlatModifier(UnitMods.StatStart + (int)stat, UnitModifierFlatType.BasePCTExcludeCreate, GetAmount(), apply);
-                    target.UpdateStatBuffMod(stat);
-                }
+                player.UpdateMeleeAttackPowerAndDamage();
             }
         }
 
@@ -3436,8 +3396,8 @@ namespace Game.Spells
                 return;
 
             target.ApplyModOverrideAPBySpellPowerPercent(GetAmount(), apply);
-            target.UpdateAttackPowerAndDamage();
-            target.UpdateAttackPowerAndDamage(true);
+            target.UpdateMeleeAttackPowerAndDamage();
+            target.UpdateRangedAttackPowerAndDamage();
         }
 
         [AuraEffectHandler(AuraType.ModVersatility)]
@@ -3466,13 +3426,14 @@ namespace Game.Spells
             PowerType power = (PowerType)GetMiscValue();
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            target.HandleStatFlatModifier(unitMod, UnitModifierFlatType.Total, GetAmount(), apply);
+            target.StatMods.ModifyFlat(unitMod, UnitModType.TotalPermanent, GetAmount(), apply);
         }
 
         /********************************/
         /***      HEAL & ENERGIZE     ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModPowerRegen)]
+        [AuraEffectHandler(AuraType.ModPowerRegenPercent)]
         void HandleModPowerRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
@@ -3480,25 +3441,26 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if (!target.IsTypeId(TypeId.Player))
-                return;
+            if (target is Player player)
+            {
+                // Update manaregen value
+                PowerType powerType = (PowerType)GetMiscValue();
 
-            // Update manaregen value
-            if (GetMiscValue() == (int)PowerType.Mana)
-                target.ToPlayer().UpdateManaRegen();
-            //else if (GetMiscValue() == (int)PowerType.Runes)
-            //    target.ToPlayer().UpdateAllRunesRegen();
-            // other powers are not immediate effects - implemented in Player.Regenerate, Creature.Regenerate
-        }
-
-        [AuraEffectHandler(AuraType.ModPowerRegenPercent)]
-        void HandleModPowerRegenPCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            HandleModPowerRegen(aurApp, mode, apply);
+                if (powerType == PowerType.Runes)
+                {
+                    player.UpdateAllRunesRegen();
+                    //player.UpdateRuneRegen((RuneType)GetMiscValueB());
+                }
+                else
+                {
+                    player.UpdatePowerRegen(powerType);
+                }
+            }
         }
 
         [AuraEffectHandler(AuraType.ModManaRegenFromStat)]
         [AuraEffectHandler(AuraType.ModManaRegenPct)]
+        [AuraEffectHandler(AuraType.InterruptRegen)]
         void HandleModManaRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
@@ -3506,15 +3468,14 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if (!target.IsPlayer())
-                return;
-
-            target.ToPlayer().UpdateManaRegen();
+            if (target is Player player)
+            {
+                target.ToPlayer().UpdatePowerRegen(PowerType.Mana);
+            }
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseHealth)]
         [AuraEffectHandler(AuraType.ModIncreaseHealth2)]
-        [AuraEffectHandler(AuraType.ModMaxHealth)]
         void HandleAuraModIncreaseHealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
@@ -3526,29 +3487,20 @@ namespace Game.Spells
             if (amt < 0)
                 target.ModifyHealth(Math.Max((int)(1 - target.GetHealth()), amt));
 
-            target.HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Total, GetAmount(), apply);
+            target.StatMods.ModifyFlat(UnitMods.Health, UnitModType.TotalPermanent, GetAmount(), apply);
 
             if (amt > 0)
                 target.ModifyHealth(amt);
         }
 
+        [AuraEffectHandler(AuraType.ModMaxHealth)]
         void HandleAuraModIncreaseMaxHealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            float percent = target.GetHealthPct();
-
-            target.HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Total, GetAmount(), apply);
-
-            // refresh percentage
-            if (target.GetHealth() > 0)
-            {
-                uint newHealth = (uint)Math.Max(target.CountPctFromMaxHealth((int)percent), 1);
-                target.SetHealth(newHealth);
-            }
+            target.StatMods.ModifyFlat(UnitMods.Health, UnitModType.TotalPermanent, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseEnergy)]
@@ -3559,9 +3511,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
             PowerType powerType = (PowerType)GetMiscValue();
-
-            UnitMods unitMod = (UnitMods.PowerStart + (int)powerType);
-            target.HandleStatFlatModifier(unitMod, UnitModifierFlatType.Total, GetAmount(), apply);
+            target.StatMods.ModifyFlat(UnitMods.PowerStart + (int)powerType, UnitModType.TotalPermanent, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseEnergyPercent)]
@@ -3572,40 +3522,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
             PowerType powerType = (PowerType)GetMiscValue();
-
-            UnitMods unitMod = UnitMods.PowerStart + (int)powerType;
-
-            // Save old powers for further calculation
-            int oldPower = target.GetPower(powerType);
-            int oldMaxPower = target.GetMaxPower(powerType);
-
-            // Handle aura effect for max power
-            if (apply)
-                target.ApplyStatPctModifier(unitMod, UnitModifierPctType.Total, GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent, aurEff =>
-                    {
-                        if (aurEff.GetMiscValue() == (int)powerType)
-                            return true;
-
-                        return false;
-                    });
-
-                amount *= target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct, aurEff =>
-                    {
-                        if (aurEff.GetMiscValue() == (int)powerType)
-                            return true;
-
-                        return false;
-                    });
-
-                target.SetStatPctModifier(unitMod, UnitModifierPctType.Total, amount);
-            }
-
-            // Calculate the current power change
-            int change = target.GetMaxPower(powerType) - oldMaxPower;
-            change = (oldPower + change) - target.GetPower(powerType);
+            target.StatMods.ModifyMult(UnitMods.PowerStart + (int)powerType, UnitModType.TotalPermanent, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseHealthPercent)]
@@ -3615,23 +3532,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            // Unit will keep hp% after MaxHealth being modified if unit is alive.
-            float percent = target.GetHealthPct();
-            if (apply)
-                target.ApplyStatPctModifier(UnitMods.Health, UnitModifierPctType.Total, GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent) 
-                    * target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent2);
-                target.SetStatPctModifier(UnitMods.Health, UnitModifierPctType.Total, amount);
-            }
-
-            if (target.GetHealth() > 0)
-            {
-                uint newHealth = (uint)Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), (int)percent), 1);
-                target.SetHealth(newHealth);
-            }
+            target.StatMods.ModifyMult(UnitMods.Health, UnitModType.TotalPermanent, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModBaseHealthPct)]
@@ -3641,14 +3542,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            if (apply)
-                target.ApplyStatPctModifier(UnitMods.Health, UnitModifierPctType.Base, GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModBaseHealthPct);
-                target.SetStatPctModifier(UnitMods.Health, UnitModifierPctType.Base, amount);
-            }
+            target.StatMods.ModifyMult(UnitMods.Health, UnitModType.BasePermanent, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModBaseManaPct)]
@@ -3658,14 +3552,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            if (apply)
-                target.ApplyStatPctModifier(UnitMods.Mana, UnitModifierPctType.Base, GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModBaseManaPct);
-                target.SetStatPctModifier(UnitMods.Mana, UnitModifierPctType.Base, amount);
-            }
+            target.StatMods.ModifyMult(UnitMods.Mana, UnitModType.BasePermanent, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModPowerDisplay)]
@@ -3717,40 +3604,7 @@ namespace Game.Spells
                 return;
 
             PowerType powerType = (PowerType)GetMiscValue();
-            UnitMods unitMod = UnitMods.PowerStart + (int)powerType;
-
-            // Save old powers for further calculation
-            int oldPower = target.GetPower(powerType);
-            int oldMaxPower = target.GetMaxPower(powerType);
-
-            // Handle aura effect for max power
-            if (apply)
-                target.ApplyStatPctModifier(unitMod, UnitModifierPctType.Total, GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct, aurEff =>
-                {
-                    if (aurEff.GetMiscValue() == (int)powerType)
-                        return true;
-
-                    return false;
-                });
-
-                amount *= target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent, aurEff =>
-                {
-                    if (aurEff.GetMiscValue() == (int)powerType)
-                        return true;
-
-                    return false;
-                });
-
-                target.SetStatPctModifier(unitMod, UnitModifierPctType.Total, amount);
-            }
-
-            // Calculate the current power change
-            int change = target.GetMaxPower(powerType) - oldMaxPower;
-            change = (oldPower + change) - target.GetPower(powerType);
-            target.ModifyPower(powerType, change);
+            target.StatMods.ModifyMult(UnitMods.PowerStart + (int)powerType, UnitModType.TotalPermanent, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.TriggerSpellOnHealthPct)]
@@ -3825,31 +3679,60 @@ namespace Game.Spells
             target.ToPlayer().UpdateBlockPercentage();
         }
 
-        [AuraEffectHandler(AuraType.InterruptRegen)]
-        void HandleAuraModRegenInterrupt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsPlayer())
-                return;
-
-            target.ToPlayer().UpdateManaRegen();
-        }
-
-        [AuraEffectHandler(AuraType.ModWeaponCritPercent)]
-        void HandleAuraModWeaponCritPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        [AuraEffectHandler(AuraType.ModSpellCritSchoolPct)]
+        void HandleModSpellCritSchoolChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            Player target = aurApp.GetTarget().ToPlayer();
-            if (target == null)
+            Unit target = aurApp.GetTarget();
+
+            if (target is Player player)
+            {
+                player.UpdateAllSpellCritChances();
+            }
+            else
+            {
+                // Always (schoolMask == schoolMask.Magic) for creatures?
+                // target.BaseSpellCritChance += apply ? GetAmount() : -GetAmount();
+                Cypher.Assert(false, "Units have only BaseSpellCritChance mod?", "HandleModSpellCritSchoolChance");
+            }
+        }
+
+        [AuraEffectHandler(AuraType.ModSpellCritPct)]
+        void HandleModSpellCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            target.UpdateAllWeaponDependentCritAuras();
+            Unit target = aurApp.GetTarget();
+
+            if (target is Player player)
+            {
+                player.UpdateAllSpellCritChances();
+            }
+            else
+            {
+                target.BaseSpellCritChance += apply ? GetAmount() : -GetAmount();
+            }
+        }
+
+        [AuraEffectHandler(AuraType.ModWeaponCritPct)]
+        void HandleAuraModWeaponCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (target is Player player)
+            {
+                player.UpdateAllWeaponDependentCritAuras();
+            }
+            else
+            {
+                Cypher.Assert(false, "Units have not WeaponCritChance mod.", "HandleAuraModWeaponCritChance");
+            }            
         }
 
         [AuraEffectHandler(AuraType.ModSpellHitChance)]
@@ -3864,40 +3747,6 @@ namespace Game.Spells
                 target.ToPlayer().UpdateSpellHitChances();
             else
                 target.ModSpellHitChance += apply ? GetAmount() : (-GetAmount());
-        }
-
-        [AuraEffectHandler(AuraType.ModSpellCritChance)]
-        void HandleModSpellCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (target.IsTypeId(TypeId.Player))
-                target.ToPlayer().UpdateSpellCritChance();
-            else
-                target.BaseSpellCritChance += apply ? GetAmount() : -GetAmount();
-        }
-
-        [AuraEffectHandler(AuraType.ModCritPct)]
-        void HandleAuraModCritPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsTypeId(TypeId.Player))
-            {
-                target.BaseSpellCritChance += apply ? GetAmount() : -GetAmount();
-                return;
-            }
-
-            target.ToPlayer().UpdateAllWeaponDependentCritAuras();
-
-            // included in Player.UpdateSpellCritChance calculation
-            target.ToPlayer().UpdateSpellCritChance();
         }
 
         /********************************/
@@ -4089,7 +3938,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            target.HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, GetAmount(), apply);
+            target.StatMods.ModifyFlat(UnitMods.AttackPowerMelee, UnitModType.TotalTemporary, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPower)]
@@ -4103,7 +3952,7 @@ namespace Game.Spells
             if (!ClassMask.WandUsers.HasClass(target.GetClass()))
                 return;
 
-            target.HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, GetAmount(), apply);
+            target.StatMods.ModifyFlat(UnitMods.AttackPowerRanged, UnitModType.TotalTemporary, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModAttackPowerPct)]
@@ -4113,15 +3962,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
-            if (apply)
-                target.ApplyStatPctModifier(UnitMods.AttackPower, UnitModifierPctType.Total, GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModAttackPowerPct);
-                target.SetStatPctModifier(UnitMods.AttackPower, UnitModifierPctType.Total, amount);
-            }
+            target.StatMods.ModifyMult(UnitMods.AttackPowerMelee, UnitModType.TotalTemporary, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPowerPct)]
@@ -4135,14 +3976,7 @@ namespace Game.Spells
             if (!ClassMask.WandUsers.HasClass(target.GetClass()))
                 return;
 
-            //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
-            if (apply)
-                target.ApplyStatPctModifier(UnitMods.AttackPowerRanged, UnitModifierPctType.Total, GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModRangedAttackPowerPct);
-                target.SetStatPctModifier(UnitMods.AttackPowerRanged, UnitModifierPctType.Total, amount);
-            }
+            target.StatMods.ModifyMult(UnitMods.AttackPowerRanged, UnitModType.TotalTemporary, GetAmount(), apply);
         }
 
         /********************************/
@@ -4177,7 +4011,7 @@ namespace Game.Spells
 
                 Guardian pet = playerTarget.GetGuardianPet();
                 if (pet != null)
-                    pet.UpdateAttackPowerAndDamage();
+                    pet.UpdateMeleeAttackPowerAndDamage();
             }
         }
 
@@ -4188,20 +4022,21 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
+            SpellSchoolMask schoolMask = (SpellSchoolMask)GetMiscValue();
 
             // also handles spell group stacks
-            if (Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
+            if (schoolMask.HasSchool(SpellSchools.Normal))
                 target.UpdateAllDamagePctDoneMods();
 
             Player thisPlayer = target.ToPlayer();
             if (thisPlayer != null)
             {
-                for (var i = SpellSchools.Normal; i < SpellSchools.Max; ++i)
+                for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
                 {
-                    if (Convert.ToBoolean(GetMiscValue() & (1 << (int)i)))
+                    if (schoolMask.HasSchool(i))
                     {
                         // only aura Type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
-                        float amount = thisPlayer.GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, 1u << (int)i);
+                        float amount = thisPlayer.GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, (uint)i.GetSpellSchoolMask());
                         thisPlayer.SetModDamageDonePercent(i, amount);
                     }
                 }

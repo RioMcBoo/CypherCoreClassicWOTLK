@@ -1327,8 +1327,14 @@ namespace Game.Entities
                 return pItem2;
             }
 
-            if (pos.Slot == EquipmentSlot.MainHand || pos.Slot == EquipmentSlot.OffHand)
-                CheckTitanGripPenalty();
+            var attType = GetAttackBySlot(pos.Slot);
+            if (attType.HasValue)
+            {
+                UpdateCritPercentage(attType.Value);
+
+                if (attType == WeaponAttackType.BaseAttack || attType == WeaponAttackType.OffAttack)
+                    CheckTitanGripPenalty();
+            }
 
             // only for full equip instead adding to stack
             UpdateCriteria(CriteriaType.EquipItem, pItem.GetEntry());
@@ -1460,7 +1466,7 @@ namespace Game.Entities
 
                 if (!pos.IsContainerPos)
                 {
-                    if (pos.IsEquipmentPos)
+                    if (pos.Slot.IsBagSlot || pos.Slot.IsEquipSlot)
                     {
                         // item set bonuses applied only at equip and removed at unequip, and still active for broken items
                         ItemTemplate pProto = pItem.GetTemplate();
@@ -1472,7 +1478,7 @@ namespace Game.Entities
                         pItem.RemoveItemFlag2(ItemFieldFlags2.Equipped);
 
                         // remove item dependent auras and casts (only weapon and armor slots)
-                        if (pos.Slot < EquipmentSlot.End)
+                        if (pos.Slot.IsEquipSlot)
                         {
                             // update expertise
                             if (pos.Slot == EquipmentSlot.MainHand)
@@ -1503,11 +1509,18 @@ namespace Game.Entities
                     m_items[pos.Slot] = null;
                     SetInvSlot(pos.Slot, ObjectGuid.Empty);
 
-                    if (pos.Slot < EquipmentSlot.End)
+                    if (pos.Slot.IsEquipSlot)
                     {
                         SetVisibleItemSlot(pos.Slot, null);
-                        if (pos.Slot == EquipmentSlot.MainHand || pos.Slot == EquipmentSlot.OffHand)
-                            CheckTitanGripPenalty();
+
+                        var attType = GetAttackBySlot(pos.Slot);
+                        if (attType.HasValue)
+                        {
+                            UpdateCritPercentage(attType.Value);
+
+                            if (attType == WeaponAttackType.BaseAttack || attType == WeaponAttackType.OffAttack)
+                                CheckTitanGripPenalty();
+                        }                        
                     }
                 }
 
@@ -2665,7 +2678,7 @@ namespace Game.Entities
             if (item == null)
                 return null;
 
-            if (!CanUseAttackType(GetAttackBySlot(pos.Slot, item.GetTemplate().GetInventoryType())))
+            if (!CanUseAttackType(GetAttackBySlot(pos.Slot)))
                 return null;
 
             return item;
@@ -3530,6 +3543,64 @@ namespace Game.Entities
             return false;
         }
 
+        public bool CheckAmmoCompatibility(ItemTemplate ammo_proto)
+        {
+            if (ammo_proto == null)
+                return false;
+
+            // check ranged weapon
+            Item weapon = GetWeaponForAttack(WeaponAttackType.RangedAttack);
+            if (weapon == null || weapon.IsBroken())
+                return false;
+
+            ItemTemplate weapon_proto = weapon.GetTemplate();
+            if (weapon_proto == null || weapon_proto.GetClass() != ItemClass.Weapon)
+                return false;
+
+            // check ammo ws. weapon compatibility
+            switch (weapon_proto.GetSubClass().Weapon)
+            {
+                case ItemSubClassWeapon.Bow:
+                case ItemSubClassWeapon.Crossbow:
+                    if (ammo_proto.GetSubClass().Projectile != ItemSubClassProjectile.Arrow)
+                        return false;
+                    break;
+                case ItemSubClassWeapon.Gun:
+                    if (ammo_proto.GetSubClass().Projectile != ItemSubClassProjectile.Bullet)
+                        return false;
+                    break;
+                default:
+                    return false;
+            }
+
+            return true;
+        }
+
+        public void _ApplyAmmoBonuses()
+        {
+            // check ammo
+            int ammo_id = GetUsedAmmoId();
+
+            if (ammo_id == 0)
+                return;
+
+            float currentAmmoDPS;
+
+            ItemTemplate ammo_proto = Global.ObjectMgr.GetItemTemplate(ammo_id);
+            if (ammo_proto == null || ammo_proto.GetClass() != ItemClass.Projectile || !CheckAmmoCompatibility(ammo_proto))
+                currentAmmoDPS = 0.0f;
+            else
+                currentAmmoDPS = (ammo_proto.GetMinDamage(0) + ammo_proto.GetMaxDamage(0)) / 2;
+
+            if (currentAmmoDPS == AmmoDPS)
+                return;
+
+            AmmoDPS = currentAmmoDPS;
+
+            if (CanModifyStats())
+                UpdateDamagePhysical(WeaponAttackType.RangedAttack);
+        }
+
         public void _ApplyItemMods(Item item, byte slot, bool apply, bool updateItemAuras = true, bool onlyForScalingItems = false)
         {
             if (slot >= InventorySlots.BagEnd || item == null)
@@ -3556,7 +3627,7 @@ namespace Game.Entities
             if (updateItemAuras)
             {
                 ApplyItemDependentAuras(item, apply);
-                var attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
+                var attackType = GetAttackBySlot(slot);
                 if (attackType.HasValue)
                     UpdateWeaponDependentAuras(attackType.Value);
             }
@@ -3572,8 +3643,8 @@ namespace Game.Entities
             if (slot >= InventorySlots.BagEnd || proto == null)
                 return;
 
-            var ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(proto.GetScalingStatDistributionID());
-            var ssv = (ssd != null && proto.GetScalingStatValue() != 0) ? Global.DB2Mgr.GetScalingStatValuesForLevel(Math.Clamp(GetLevel(), ssd.MinLevel, ssd.MaxLevel)) : null;
+            var ssd = proto.GetScalingStatDistribution();
+            var ssv = proto.GetScalingStatValue(GetLevel());
 
             if (onlyForScalingItems && (ssd == null || ssv == null))
                 return;
@@ -3589,7 +3660,7 @@ namespace Game.Entities
                     if (statType == ItemModType.None)
                         continue;
 
-                    val = (ssv.getSSDMultiplier(proto.GetScalingStatValue()) * ssd.Bonus[i]) / 10000;
+                    val = (ssv.getSSDMultiplier(proto.GetScalingStatValueID()) * ssd.Bonus[i]) / 10000;
                 }
                 else
                 {
@@ -3608,30 +3679,25 @@ namespace Game.Entities
                 switch (statType)
                 {
                     case ItemModType.Mana:
-                        HandleStatFlatModifier(UnitMods.Mana, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.Mana, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.Health:                           // modify HP
-                        HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.Health, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.Agility:                          // modify agility
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Agility);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.Strength:                         //modify strength
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Strength);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.Intellect:                        //modify intellect
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Intellect);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.Spirit:                           //modify spirit
-                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Spirit);
+                        StatMods.ModifyFlat(UnitMods.StatSpirit, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.Stamina:                          //modify stamina
-                        HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Stamina);
+                        StatMods.ModifyFlat(UnitMods.StatStamina, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.DefenseSkillRating:
                         ApplyRatingMod(CombatRating.DefenseSkill, (int)(val * combatRatingMultiplier), apply);
@@ -3722,11 +3788,11 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Expertise, (int)(val * combatRatingMultiplier), apply);
                         break;
                     case ItemModType.AttackPower:
-                        HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, val, apply);
-                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, val, apply);
+                        StatMods.ModifyFlat(UnitMods.AttackPowerMelee, UnitModType.TotalPermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.AttackPowerRanged, UnitModType.TotalPermanent, val, apply);
                         break;
                     case ItemModType.RangedAttackPower:
-                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, val, apply);
+                        StatMods.ModifyFlat(UnitMods.AttackPowerRanged, UnitModType.TotalPermanent, val, apply);
                         break;
                     case ItemModType.ManaRegeneration:
                         ApplyManaRegenBonus(val, apply);
@@ -3750,51 +3816,42 @@ namespace Game.Entities
                     //    ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
                     //    break;
                     case ItemModType.ExtraArmor:
-                        HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, val, apply);
+                        StatMods.ModifyFlat(UnitMods.Armor, UnitModType.TotalPermanent, val, apply);
                         break;
                     case ItemModType.FireResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceFire, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.FrostResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceFrost, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceFrost, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.HolyResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceHoly, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.ShadowResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceShadow, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceShadow, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.NatureResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceNature, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.ArcaneResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceArcane, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.AgiStrInt:
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Agility);
-                        UpdateStatBuffMod(Stats.Strength);
-                        UpdateStatBuffMod(Stats.Intellect);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.AgiStr:
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Agility);
-                        UpdateStatBuffMod(Stats.Strength);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.AgiInt:
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Agility);
-                        UpdateStatBuffMod(Stats.Intellect);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
                         break;
                     case ItemModType.StrInt:
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
-                        UpdateStatBuffMod(Stats.Strength);
-                        UpdateStatBuffMod(Stats.Intellect);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
                         break;
                 }
             }
@@ -3802,7 +3859,7 @@ namespace Game.Entities
             // Apply Spell Power from ScalingStatValue if set
             if (ssv != null)
             {
-                if (ssv.getSpellBonus(proto.GetScalingStatValue()) is int spellbonus && spellbonus != 0)
+                if (ssv.getSpellBonus(proto.GetScalingStatValueID()) is int spellbonus && spellbonus != 0)
                     ApplySpellPowerBonus(spellbonus, apply);
             }
 
@@ -3813,12 +3870,12 @@ namespace Game.Entities
 
                 if (school == SpellSchools.Normal && ssv != null)
                 {
-                    if (ssv.getArmorMod(proto.GetScalingStatValue()) is int ssvarmor && ssvarmor != 0)
+                    if (ssv.getArmorMod(proto.GetScalingStatValueID()) is int ssvarmor && ssvarmor != 0)
                         resistance = ssvarmor;
                 }
 
                 if (resistance != 0)
-                    HandleStatFlatModifier(UnitMods.Armor + (int)i, UnitModifierFlatType.Base, resistance, apply);
+                    StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)i, UnitModType.BasePermanent, resistance, apply);
             }
 
             if (proto.GetShieldBlockValue(proto.GetItemLevel()) is int shieldBlockValue && shieldBlockValue != 0)
@@ -3827,9 +3884,14 @@ namespace Game.Entities
                     SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply ? shieldBlockValue : 0);
             }
 
-            var attType = GetAttackBySlot(slot, proto.GetInventoryType());
-            if (attType != WeaponAttackType.Max)
+            var attType = GetAttackBySlot(slot);
+            if (attType.HasValue)
+            {
                 _ApplyWeaponDamage(slot, item, apply);
+            }
+
+            if (IsInFeralForm())
+                ApplyFeralAPBonus(proto.GetFeralBonus(GetLevel()), apply);                
         }
 
         void ApplyItemEquipSpell(Item item, bool apply, bool formChange = false)
@@ -3992,7 +4054,7 @@ namespace Game.Entities
                     if (proto.GetItemSet() != 0)
                         Item.RemoveItemsSetItem(this, m_items[i]);
 
-                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
                         continue;
 
                     ApplyItemEquipSpell(m_items[i], false);
@@ -4004,7 +4066,7 @@ namespace Game.Entities
             {
                 if (m_items[i] != null)
                 {
-                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
                         continue;
 
                     ApplyItemDependentAuras(m_items[i], false);
@@ -4023,13 +4085,13 @@ namespace Game.Entities
             {
                 if (m_items[i] != null)
                 {
-                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
                         continue;
 
                     ApplyItemDependentAuras(m_items[i], true);
                     _ApplyItemBonuses(m_items[i], i, true);
 
-                    var attackType = Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType());
+                    var attackType = GetAttackBySlot(i);
                     if (attackType.HasValue)
                         UpdateWeaponDependentAuras(attackType.Value);
                 }
@@ -4047,7 +4109,7 @@ namespace Game.Entities
                     if (proto.GetItemSet() != 0)
                         Item.AddItemsSetItem(this, m_items[i]);
 
-                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                    if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
                         continue;
 
                     ApplyItemEquipSpell(m_items[i], true);
@@ -4064,7 +4126,7 @@ namespace Game.Entities
             {
                 if (m_items[i] != null)
                 {
-                    if (!CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                    if (!CanUseAttackType(GetAttackBySlot(i)))
                         continue;
 
                     _ApplyItemMods(m_items[i], i, apply, true);
@@ -4737,11 +4799,85 @@ namespace Game.Entities
             return InventoryResult.Ok;
         }
 
-        //Equipment        
-        byte FindEquipSlot(Item item, byte slot, bool swap)
+        public int GetUsedAmmoId()
         {
+            return m_activePlayerData.AmmoID;
+        }
+
+        public void SetUsedAmmoId(int ammoId)
+        {
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AmmoID), ammoId);   
+        }
+
+        public void SetAmmo(int ammoId)
+        {
+            // already set
+
+            if (GetUsedAmmoId() == ammoId)
+                return;
+
+            // check ammo
+            InventoryResult msg = CanUseAmmo(ammoId);
+            if (msg != InventoryResult.Ok)
+            {
+                SendEquipError(msg, null, null, ammoId);
+                return;
+            }
+
+            SetUsedAmmoId(ammoId);
+
+            _ApplyAmmoBonuses();
+        }
+
+        public void RemoveAmmo()
+        {
+            SetUsedAmmoId(0);
+
+            AmmoDPS = 0.0f;
+
+            if (CanModifyStats())
+                UpdateDamagePhysical(WeaponAttackType.RangedAttack);
+        }
+
+        public InventoryResult CanUseAmmo(int ammoId)
+        {
+            Log.outDebug(LogFilter.PlayerItems, $"STORAGE: CanUseAmmo item = {ammoId}");
+            if (!IsAlive())
+                return InventoryResult.PlayerDead;
+
+            //if (IsStunned())
+            //    return InventoryResult.GenericStunned;
+
+            ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(ammoId);
+            if (pProto != null)
+            {
+                if (pProto.GetInventoryType() != InventoryType.Ammo)
+                    return InventoryResult.AmmoOnly;
+
+                InventoryResult res = CanUseItem(pProto);
+                if (res != InventoryResult.Ok)
+                    return res;
+
+                /*if (GetReputationMgr().GetReputation() < pProto->RequiredReputation)
+                    return InventoryResult.CantEquipReputation;
+                */
+
+                // Requires No Ammo
+                if (HasAura(46699))
+                    return InventoryResult.BagFull6; // CantDoThatRightNow?
+
+                return InventoryResult.Ok;
+            }
+
+            return InventoryResult.ItemNotFound;
+        }
+
+        //Equipment        
+        byte FindEquipSlot(ItemTemplate proto, byte slot, bool swap)
+        {
+            Class playerClass = GetClass();
             byte[] slots = [ItemSlot.Null, ItemSlot.Null, ItemSlot.Null, ItemSlot.Null];
-            switch (item.GetTemplate().GetInventoryType())
+            switch (proto.GetInventoryType())
             {
                 case InventoryType.Head:
                     slots[0] = EquipmentSlot.Head;
@@ -4801,7 +4937,7 @@ namespace Game.Entities
                     slots[0] = EquipmentSlot.OffHand;
                     break;
                 case InventoryType.Ranged:
-                    slots[0] = EquipmentSlot.MainHand;
+                    slots[0] = EquipmentSlot.Ranged;
                     break;
                 case InventoryType.Weapon2Hand:
                     slots[0] = EquipmentSlot.MainHand;
@@ -4820,8 +4956,11 @@ namespace Game.Entities
                 case InventoryType.Holdable:
                     slots[0] = EquipmentSlot.OffHand;
                     break;
+                case InventoryType.Thrown:
+                    slots[0] = EquipmentSlot.Ranged;
+                    break;
                 case InventoryType.RangedRight:
-                    slots[0] = EquipmentSlot.MainHand;
+                    slots[0] = EquipmentSlot.Ranged;
                     break;
                 case InventoryType.Bag:
                     slots[0] = InventorySlots.BagStart + 0;
@@ -4829,62 +4968,30 @@ namespace Game.Entities
                     slots[2] = InventorySlots.BagStart + 2;
                     slots[3] = InventorySlots.BagStart + 3;
                     break;
-                case InventoryType.ProfessionTool:
-                case InventoryType.ProfessionGear:
+                case InventoryType.Relic:
                 {
-                    bool isProfessionTool = item.GetTemplate().GetInventoryType() == InventoryType.ProfessionTool;
-
-                    // Validate item class
-                    if (!(item.GetTemplate().GetClass() == ItemClass.Profession))
-                        return ItemSlot.Null;
-
-                    // Check if player has profession skill
-                    var itemSkill = item.GetTemplate().GetSkill();
-                    if (!HasSkill(itemSkill))
-                        return ItemSlot.Null;
-
-                    switch (item.GetTemplate().GetSubClass().Profession)
+                    switch (proto.GetSubClass().Armor)
                     {
-                        case ItemSubclassProfession.Cooking:
-                            slots[0] = isProfessionTool ? ProfessionSlots.CookingTool : ProfessionSlots.CookingGear1;
+                        case ItemSubClassArmor.Libram:
+                            if (playerClass == Class.Paladin)
+                                slots[0] = EquipmentSlot.Ranged;
                             break;
-                        case ItemSubclassProfession.Fishing:
-                        {
-                            // Fishing doesn't make use of gear slots (clientside)
-                            if (!isProfessionTool)
-                                return ItemSlot.Null;
-
-                            slots[0] = ProfessionSlots.FishingTool;
+                        case ItemSubClassArmor.Idol:
+                            if (playerClass == Class.Druid)
+                                slots[0] = EquipmentSlot.Ranged;
                             break;
-                        }
-                        case ItemSubclassProfession.Blacksmithing:
-                        case ItemSubclassProfession.Leatherworking:
-                        case ItemSubclassProfession.Alchemy:
-                        case ItemSubclassProfession.Herbalism:
-                        case ItemSubclassProfession.Mining:
-                        case ItemSubclassProfession.Tailoring:
-                        case ItemSubclassProfession.Engineering:
-                        case ItemSubclassProfession.Enchanting:
-                        case ItemSubclassProfession.Skinning:
-                        case ItemSubclassProfession.Jewelcrafting:
-                        case ItemSubclassProfession.Inscription:
-                        {
-                            int professionSlot = GetProfessionSlotFor(itemSkill);
-                            if (professionSlot == -1)
-                                return ItemSlot.Null;
-
-                            if (isProfessionTool)
-                                slots[0] = (byte)(ProfessionSlots.Profession1Tool + professionSlot * ProfessionSlots.MaxCount);
-                            else
-                            {
-                                slots[0] = (byte)(ProfessionSlots.Profession1Gear1 + professionSlot * ProfessionSlots.MaxCount);
-                                slots[0] = (byte)(ProfessionSlots.Profession1Gear2 + professionSlot * ProfessionSlots.MaxCount);
-                            }
-
+                        case ItemSubClassArmor.Totem:
+                            if (playerClass == Class.Shaman)
+                                slots[0] = EquipmentSlot.Ranged;
                             break;
-                        }
-                        default:
-                            return ItemSlot.Null;
+                        case ItemSubClassArmor.Miscellaneous:
+                            if (playerClass == Class.Warlock)
+                                slots[0] = EquipmentSlot.Ranged;
+                            break;
+                        case ItemSubClassArmor.Sigil:
+                            if (playerClass == Class.DeathKnight)
+                                slots[0] = EquipmentSlot.Ranged;
+                            break;
                     }
                     break;
                 }
@@ -5048,7 +5155,7 @@ namespace Game.Entities
                         return InventoryResult.NotEquippable;
                     }
 
-                    byte eslot = FindEquipSlot(pItem, slot, swap);
+                    byte eslot = FindEquipSlot(pProto, slot, swap);
                     if (eslot == ItemSlot.Null)
                         return InventoryResult.NotEquippable;
 

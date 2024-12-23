@@ -316,6 +316,18 @@ namespace Game.Networking.Packets
 
     }
 
+    public class SetAmmoPacket : ClientPacket
+    {
+        public SetAmmoPacket(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Ammo = _worldPacket.ReadInt32();
+        }
+
+        public int Ammo;
+    }
+
     public class AutoEquipItem : ClientPacket
     {
         public AutoEquipItem(WorldPacket packet) : base(packet) { }

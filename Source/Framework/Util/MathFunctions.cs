@@ -161,6 +161,11 @@ public static class MathFunctions
         return value * pct / 100.0f;
     }
 
+    public static float CalculateFraction(float value, float pct)
+    {
+        return value * pct;
+    }
+
     public static ulong CalculatePct(ulong value, float pct)
     {
         return (ulong)(value * pct / 100.0f);
@@ -174,6 +179,16 @@ public static class MathFunctions
     public static float GetPctOf(float value, float max)
     {
         return value / max * 100.0f;
+    }
+
+    public static float PercentageToMultiplier(float percentage)
+    {
+        return 1.0f + percentage / 100.0f;
+    }
+
+    public static float MultiplierToPercentage(float multiplier)
+    {
+        return (multiplier - 1.0f) * 100.0f;
     }
 
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)

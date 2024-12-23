@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -275,7 +276,15 @@ namespace Game.Chat
                         }
                         case nameof(SpellInfo):
                         {
-                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(int), handler, args);
+                            if (!result.IsSuccessful() || (val = Global.SpellMgr.GetSpellInfo(tempVal, Difficulty.None)) != null)
+                                return result;
+
+                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserSpellNoExist, tempVal));
+                        }
+                        case nameof(TalentInfo):
+                        {
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(int), handler, args);
                             if (!result.IsSuccessful() || (val = Global.SpellMgr.GetSpellInfo(tempVal, Difficulty.None)) != null)
                                 return result;
 

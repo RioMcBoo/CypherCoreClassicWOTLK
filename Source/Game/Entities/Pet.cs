@@ -14,6 +14,13 @@ using System.Text;
 
 namespace Game.Entities
 {
+    public enum HappinessState
+    {
+        Unhappy = 1,
+        Content = 2,
+        Happy = 3,
+    }
+
     public class Pet : Guardian
     {
         static readonly TimeSpan PetFocusRegenInterval = (Seconds)4;
@@ -1383,7 +1390,7 @@ namespace Game.Entities
                     {
                         case Class.Warlock:
                             return GetCreatureTemplate().CreatureType == CreatureType.Demon;
-                        case Class.Deathknight:
+                        case Class.DeathKnight:
                             return GetCreatureTemplate().CreatureType == CreatureType.Undead;
                         case Class.Mage:
                             return GetCreatureTemplate().CreatureType == CreatureType.Elemental;
@@ -1551,6 +1558,16 @@ namespace Game.Entities
                 return;
 
             SetGroupUpdateFlag(GroupUpdatePetFlags.ModelId);
+        }
+
+        public HappinessState GetHappinessState()
+        {
+            if (GetPower(PowerType.Happinnes) < HappinessLevelSize)
+                return HappinessState.Unhappy;
+            else if (GetPower(PowerType.Happinnes) >= HappinessLevelSize * 2)
+                return HappinessState.Happy;
+            else
+                return HappinessState.Content;
         }
 
         public PetType GetPetType() { return m_petType; }

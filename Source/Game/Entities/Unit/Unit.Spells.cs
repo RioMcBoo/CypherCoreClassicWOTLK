@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.AI;
 using Game.BattleGrounds;
+using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
@@ -23,15 +24,7 @@ namespace Game.Entities
 
         public int SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         {
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
-            {
-                float overrideSP = thisPlayer.m_activePlayerData.OverrideSpellPowerByAPPercent;
-                if (overrideSP > 0.0f)
-                    return (int)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
-            }
-
-            int DoneAdvertisedBenefit = GetTotalAuraModifierByMiscMask(AuraType.ModDamageDone, (uint)schoolMask);
+            float DoneAdvertisedBenefit = GetTotalAuraModifierByMiscMask(AuraType.ModDamageDone, (uint)schoolMask);
 
             if (IsTypeId(TypeId.Player))
             {
@@ -42,15 +35,19 @@ namespace Game.Entities
                 var mDamageDoneOfStatPercent = GetAuraEffectsByType(AuraType.ModSpellDamageOfStatPercent);
                 foreach (var eff in mDamageDoneOfStatPercent)
                 {
-                    if (Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
+                    SpellSchoolMask spellSchoolMask = (SpellSchoolMask)eff.GetMiscValue();
+                    if (spellSchoolMask.HasAnyFlag(schoolMask))
                     {
                         // stat used stored in miscValueB for this aura
                         Stats usedStat = (Stats)eff.GetMiscValueB();
-                        DoneAdvertisedBenefit += (int)MathFunctions.CalculatePct(GetStat(usedStat), eff.GetAmount());
+                        DoneAdvertisedBenefit += MathFunctions.CalculatePct(GetStat(usedStat), eff.GetAmount());
                     }
                 }
+                
+                // ... and attack power
+                DoneAdvertisedBenefit += MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), GetTotalAuraModifierByMiscMask(AuraType.ModSpellDamageOfAttackPower, (uint)schoolMask));
             }
-            return DoneAdvertisedBenefit;
+            return (int)DoneAdvertisedBenefit;
         }
 
         public int SpellDamageBonusDone(Unit victim, SpellInfo spellProto, int pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, int stack = 1, Spell spell = null, AuraEffect aurEff = null)
@@ -337,15 +334,7 @@ namespace Game.Entities
 
         public int SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         {
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
-            {
-                float overrideSP = thisPlayer.m_activePlayerData.OverrideSpellPowerByAPPercent;
-                if (overrideSP > 0.0f)
-                    return (int)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
-            }
-
-            int advertisedBenefit = GetTotalAuraModifier(AuraType.ModHealingDone, aurEff =>
+            float advertisedBenefit = GetTotalAuraModifier(AuraType.ModHealingDone, aurEff =>
             {
                 if (aurEff.GetMiscValue() == 0 || (aurEff.GetMiscValue() & (int)schoolMask) != 0)
                     return true;
@@ -358,10 +347,6 @@ namespace Game.Entities
                 // Base value
                 advertisedBenefit += ToPlayer().GetBaseSpellPowerBonus();
 
-                // Check if we are ever using mana - PaperDollFrame.lua
-                if (GetPowerIndex(PowerType.Mana) != (uint)PowerType.Max)
-                    advertisedBenefit += Math.Max(0, (int)GetStat(Stats.Intellect));  // spellpower from intellect
-
                 // Healing bonus from stats
                 var mHealingDoneOfStatPercent = GetAuraEffectsByType(AuraType.ModSpellHealingOfStatPercent);
                 foreach (var i in mHealingDoneOfStatPercent)
@@ -370,8 +355,17 @@ namespace Game.Entities
                     Stats usedStat = (Stats)(i.GetSpellEffectInfo().MiscValue);
                     advertisedBenefit += (int)MathFunctions.CalculatePct(GetStat(usedStat), i.GetAmount());
                 }
+
+                // ... and attack power SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER
+                var mHealingDonebyAP = GetAuraEffectsByType(AuraType.ModSpellHealingOfAttackPower);
+                foreach (var effect in mHealingDonebyAP)
+                {
+                    SpellSchoolMask spellSchoolMask = (SpellSchoolMask)effect.GetMiscValue();
+                    if (spellSchoolMask.HasAnyFlag(schoolMask))
+                        advertisedBenefit += MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), effect.GetAmount());
+                }
             }
-            return advertisedBenefit;
+            return (int)advertisedBenefit;
         }
 
         public static int SpellCriticalHealingBonus(Unit caster, SpellInfo spellProto, int damage, Unit victim)
@@ -1918,6 +1912,54 @@ namespace Game.Entities
             }
 
             return crit_bonus;
+        }
+
+        public int GetWeaponSkillValue(WeaponAttackType attType, Unit target = null)
+        {
+            int value = 0;
+            if (this is Player player)
+            {
+                Item item = player.GetWeaponForAttack(attType, true);
+
+                if (IsInFeralForm())
+                    return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
+
+                // weapon skill or (unarmed for base attack)
+                SkillType skill = SkillType.Unarmed;
+                if (item != null)
+                    skill = item.GetSkill();
+
+                skill = skill == SkillType.None ? SkillType.Unarmed : skill;
+
+                // in PvP use full skill instead current skill value
+                value = (target != null && target.IsControlledByPlayer())
+                    ? player.GetMaxSkillValue(skill)
+                    : player.GetSkillValue(skill);
+
+                // Modify value from ratings
+                value += (int)player.GetRatingBonusValue(CombatRating.WeaponSkill);
+
+                switch (attType)
+                {
+                    case WeaponAttackType.BaseAttack:
+                        value += (int)player.GetRatingBonusValue(CombatRating.WeaponSkillMainhand);
+                        break;
+                    case WeaponAttackType.OffAttack:
+                        value += (int)player.GetRatingBonusValue(CombatRating.WeaponSkillOffhand);
+                        break;
+                    case WeaponAttackType.RangedAttack:
+                        value += (int)player.GetRatingBonusValue(CombatRating.WeaponSkillRanged);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                value = GetMaxSkillValueForLevel(target);
+            }
+
+            return value;
         }
 
         public void _DeleteRemovedAuras()
@@ -3795,35 +3837,6 @@ namespace Game.Entities
             return (m_unitData.AuraState & (1 << ((int)flag - 1))) != 0;
         }
 
-        SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod)
-        {
-            SpellSchools school = SpellSchools.Normal;
-
-            switch (unitMod)
-            {
-                case UnitMods.ResistanceHoly:
-                    school = SpellSchools.Holy;
-                    break;
-                case UnitMods.ResistanceFire:
-                    school = SpellSchools.Fire;
-                    break;
-                case UnitMods.ResistanceNature:
-                    school = SpellSchools.Nature;
-                    break;
-                case UnitMods.ResistanceFrost:
-                    school = SpellSchools.Frost;
-                    break;
-                case UnitMods.ResistanceShadow:
-                    school = SpellSchools.Shadow;
-                    break;
-                case UnitMods.ResistanceArcane:
-                    school = SpellSchools.Arcane;
-                    break;
-            }
-
-            return school;
-        }
-
         public void _ApplyAllAuraStatMods()
         {
             foreach (var i in GetAppliedAuras())
@@ -3969,6 +3982,32 @@ namespace Game.Entities
                     }
                 }
             }
+            return null;
+        }
+
+        public AuraEffect GetAuraEffectOfTalent(int talentId, int effIndex, ObjectGuid casterGUID = default)
+        {
+            return GetAuraEffectOfTalent(talentId, effIndex, out _, casterGUID);
+        }
+
+        public AuraEffect GetAuraEffectOfTalent(int talentId, int effIndex, out int rank, ObjectGuid casterGUID = default)
+        {
+            rank = 0;
+            TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
+            if (talentInfo == null)
+                return null;
+
+            for (rank = PlayerConst.MaxTalentRank; rank > 0; rank--)
+            {
+                int rankSpell = talentInfo.SpellRank[rank - 1];
+                if (rankSpell != 0)
+                {
+                    AuraEffect aurEff = GetAuraEffect(rankSpell, effIndex, casterGUID);
+                    if (aurEff != null)
+                        return aurEff;
+                }
+            }
+
             return null;
         }
 
@@ -4421,14 +4460,14 @@ namespace Game.Entities
             return GetTotalAuraMultiplier(auraType, aurEff => true);
         }
 
-        public float GetTotalAuraMultiplier(AuraType auraType, Func<AuraEffect, bool> predicate)
+        public MultModifier GetTotalAuraMultiplier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
             var mTotalAuraList = GetAuraEffectsByType(auraType);
             if (mTotalAuraList.Empty())
-                return 1.0f;
+                return new();
 
             Dictionary<SpellGroup, int> sameEffectSpellGroup = new();
-            float multiplier = 1.0f;
+            MultModifier multiplier = new();
 
             foreach (var aurEff in mTotalAuraList)
             {
@@ -4437,13 +4476,13 @@ namespace Game.Entities
                     // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
                     // If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
                     if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auraType, aurEff.GetAmount(), sameEffectSpellGroup))
-                        MathFunctions.AddPct(ref multiplier, aurEff.GetAmount());
+                        multiplier.ModifyPercentage(aurEff.GetAmount(), true);
                 }
             }
 
             // Add the highest of the Same Effect Stack Rule SpellGroups to the multiplier
             foreach (var pair in sameEffectSpellGroup)
-                MathFunctions.AddPct(ref multiplier, pair.Value);
+                multiplier.ModifyPercentage(pair.Value, true);
 
             return multiplier;
         }
@@ -4584,23 +4623,6 @@ namespace Game.Entities
             }
             else
                 m_modAuras.Remove(aurEff.GetAuraType(), aurEff);
-        }
-
-        public float GetTotalAuraModValue(UnitMods unitMod)
-        {
-            if (unitMod >= UnitMods.End)
-            {
-                Log.outError(LogFilter.Unit, 
-                    "attempt to access non-existing UnitMods in GetTotalAuraModValue()!");
-                return 0.0f;
-            }
-
-            float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
-
-            return value;
         }
 
         public void SetVisibleAura(AuraApplication aurApp)

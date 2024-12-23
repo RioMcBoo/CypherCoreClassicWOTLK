@@ -40,10 +40,6 @@ namespace Game.Entities
 
             _session = session;
 
-            ModMeleeHitChance = 7.5f;
-            ModRangedHitChance = 7.5f;
-            ModSpellHitChance = 15.0f;
-
             // players always accept
             if (!GetSession().HasPermission(RBACPermissions.CanFilterWhispers))
                 SetAcceptWhispers(true);
@@ -2034,7 +2030,7 @@ namespace Game.Entities
             }
             else
             {
-                if (GetClass() == Class.Deathknight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
+                if (GetClass() == Class.DeathKnight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
                 {
                     SendTransferAborted(mapid, TransferAbortReason.UniqueMessage, 1);
                     return false;
@@ -2187,12 +2183,12 @@ namespace Game.Entities
             if (CliDB.ChrRacesStorage.LookupByKey((int)race).HasFlag(ChrRacesFlag.IsAlliedRace))
                 startLevel = WorldConfig.Values[WorldCfg.StartAlliedRaceLevel].Int32;
 
-            if (playerClass == Class.Deathknight)
+            if (playerClass == Class.DeathKnight)
             {
                 if (race == Race.PandarenAlliance || race == Race.PandarenHorde)
                     startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartAlliedRaceLevel].Int32, startLevel);
                 else
-                    startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartDeathKnightPlayerLevel].Int32, startLevel);
+                startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartDeathKnightPlayerLevel].Int32, startLevel);
             }
             else if (playerClass == Class.DemonHunter)
                 startLevel = Math.Max(WorldConfig.Values[WorldCfg.StartDemonHunterPlayerLevel].Int32, startLevel);
@@ -5930,9 +5926,7 @@ namespace Game.Entities
             //set create powers
             SetCreateMana(basemana);
 
-            SetArmor((int)(GetCreateStat(Stats.Agility) * 2), 0);
-
-            InitStatBuffMods();
+            SetArmor((int)(GetCreateStat(Stats.Agility) * 2));
 
             //reset rating fields values
             for (int index = 0; index < (int)CombatRating.Max; ++index)
@@ -5991,7 +5985,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DodgePercentage), 0.0f);
 
             // set armor (resistance 0) to original value (create_agility*2)
-            SetArmor((int)(GetCreateStat(Stats.Agility) * 2), 0);
+            SetArmor((int)(GetCreateStat(Stats.Agility) * 2));
             // set other resistance to original value (0)
             for (var spellSchool = SpellSchools.Holy; spellSchool < SpellSchools.Max; ++spellSchool)
             {
@@ -6075,8 +6069,8 @@ namespace Game.Entities
             if (!reapplyMods)
                 UpdateEquipSpellsAtFormChange();
 
-            UpdateAttackPowerAndDamage();
-            UpdateAttackPowerAndDamage(true);
+            UpdateMeleeAttackPowerAndDamage();
+            UpdateRangedAttackPowerAndDamage();
         }
 
         public ReputationRank GetReputationRank(int faction)
@@ -6883,7 +6877,7 @@ namespace Game.Entities
                 }
             }
 
-            HandleStatFlatModifier(unitMod, UnitModifierFlatType.Total, amount, true);
+            StatMods.ModifyFlat(unitMod, UnitModType.TotalPermanent, (int)amount, true);
         }
 
         void UpdateBaseModGroup(BaseModGroup modGroup)
@@ -7129,7 +7123,7 @@ namespace Game.Entities
             if (node.HasFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
-                mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
+                mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.DeathKnight));
 
             // in spell case allow 0 model
             if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
@@ -7593,7 +7587,7 @@ namespace Game.Entities
                     slot = EquipmentSlot.OffHand;
                     break;
                 case WeaponAttackType.RangedAttack:
-                    slot = EquipmentSlot.MainHand;
+                    slot = EquipmentSlot.Ranged;
                     break;
                 default:
                     return null;
@@ -7608,24 +7602,22 @@ namespace Game.Entities
             if (item == null || item.GetTemplate().GetClass() != ItemClass.Weapon)
                 return null;
 
-            if ((attackType == WeaponAttackType.RangedAttack) != item.GetTemplate().IsRangedWeapon())
-                return null;
-
             if (!useable)
                 return item;
 
-            if (item.IsBroken())
+            if (item.IsBroken() || IsInFeralForm())
                 return null;
 
             return item;
         }
 
-        public static WeaponAttackType? GetAttackBySlot(byte slot, InventoryType inventoryType)
+        public static WeaponAttackType? GetAttackBySlot(byte slot)
         {
             return slot switch
             {
-                EquipmentSlot.MainHand => inventoryType != InventoryType.Ranged && inventoryType != InventoryType.RangedRight ? WeaponAttackType.BaseAttack : WeaponAttackType.RangedAttack,
+                EquipmentSlot.MainHand => WeaponAttackType.BaseAttack,
                 EquipmentSlot.OffHand => WeaponAttackType.OffAttack,
+                EquipmentSlot.Ranged => WeaponAttackType.RangedAttack,
                 _ => null,
             };
         }

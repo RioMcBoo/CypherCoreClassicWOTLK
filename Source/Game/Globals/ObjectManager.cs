@@ -7207,7 +7207,7 @@ namespace Game
                                         switch (itemTemplate.Effects[0].SpellCategoryID)
                                         {
                                             case SpellCategories.Food:                                // food
-                                                count = characterLoadout.ChrClassID == Class.Deathknight ? 10 : 4;
+                                                count = characterLoadout.ChrClassID == Class.DeathKnight ? 10 : 4;
                                                 break;
                                             case SpellCategories.Drink:                                // drink
                                                 count = 2;
@@ -7649,7 +7649,7 @@ namespace Game
 
                             // skip expansion classes if not playing with expansion
                             if (configExpansion < Expansion.WrathOfTheLichKing 
-                                && class_ == Class.Deathknight)
+                                && class_ == Class.DeathKnight)
                                 continue;
 
                             if (configExpansion < Expansion.MistsOfPandaria 

@@ -3694,10 +3694,10 @@ namespace Game.Spells
                     case AuraType.ModDamageDoneCreature:
                     case AuraType.ObsModHealth:
                     case AuraType.ObsModPower:
-                    case AuraType.ModCritPct:
+                    case AuraType.ModSpellCritPct:
                     case AuraType.ModHitChance:
                     case AuraType.ModSpellHitChance:
-                    case AuraType.ModSpellCritChance:
+                    case AuraType.ModSpellCritSchoolPct:
                     case AuraType.ModRangedHaste:
                     case AuraType.ModMeleeRangedHaste:
                     case AuraType.ModCastingSpeedNotStack:
@@ -3798,7 +3798,7 @@ namespace Game.Spells
                     case AuraType.Dummy:
                     case AuraType.PeriodicDummy:
                     case AuraType.ModHealing:
-                    case AuraType.ModWeaponCritPercent:
+                    case AuraType.ModWeaponCritPct:
                     case AuraType.PowerBurn:
                     case AuraType.ModCooldown:
                     case AuraType.ModChargeCooldown:

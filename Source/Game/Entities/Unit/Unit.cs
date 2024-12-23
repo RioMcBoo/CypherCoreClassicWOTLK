@@ -39,19 +39,8 @@ namespace Game.Entities
             for (byte i = 0; i < (int)SpellImmunity.Max; ++i)
                 m_spellImmune[i] = new();
 
-            for (byte i = 0; i < (int)UnitMods.End; ++i)
-            {
-                m_auraFlatModifiersGroup[i] = new float[(int)UnitModifierFlatType.End];
-                m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.Base] = 0.0f;
-                m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.BasePCTExcludeCreate] = 100.0f;
-                m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.Total] = 0.0f;
-
-                m_auraPctModifiersGroup[i] = new float[(int)UnitModifierPctType.End];
-                m_auraPctModifiersGroup[i][(int)UnitModifierPctType.Base] = 1.0f;
-                m_auraPctModifiersGroup[i][(int)UnitModifierPctType.Total] = 1.0f;
-            }
-
-            m_auraPctModifiersGroup[(int)UnitMods.DamageOffHand][(int)UnitModifierPctType.Total] = 0.5f;
+            m_unitStatModManager = new(this);
+            m_unitStatModManager.ModifyMult(UnitMods.DamageOffHand, UnitModType.TotalPermanent, 0.5f, true);
 
             foreach (AuraType auraType in Enum.GetValues(typeof(AuraType)))
                 m_modAuras[auraType] = new List<AuraEffect>();
@@ -62,7 +51,7 @@ namespace Game.Entities
             ModMeleeHitChance = 0.0f;
             ModRangedHitChance = 0.0f;
             ModSpellHitChance = 0.0f;
-            BaseSpellCritChance = 5.0f;
+            BaseSpellCritChance = 5; // integer value to avoid imprecision after modification when it is float (just to be sure)
 
             for (byte i = 0; i < (int)UnitMoveType.Max; ++i)
                 m_speed_rate[i] = 1.0f;
@@ -1744,6 +1733,11 @@ namespace Game.Entities
                 return;
             }
 
+            //// apply delay (Auto Shot (spellID 75) not affected)
+            //if (m_AutoRepeatFirstCast && GetAttackTimer(WeaponAttackType.RangedAttack) < (Milliseconds)500 && autoRepeatSpellInfo.Id != 75)
+            //    SetAttackTimer(WeaponAttackType.RangedAttack, (Milliseconds)500);
+            //m_AutoRepeatFirstCast = false;
+
             // castroutine
             if (IsAttackReady(WeaponAttackType.RangedAttack) 
                 && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).GetState() != SpellState.Preparing)
@@ -1770,6 +1764,9 @@ namespace Game.Entities
                 Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.IgnoreGCD);
                 spell.Prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
             }
+
+            // all went good, reset attack
+            ResetAttackTimer(WeaponAttackType.RangedAttack);
         }
 
         public PowerType CalculateDisplayPowerType()
@@ -1818,7 +1815,7 @@ namespace Game.Entities
                             {
                                 if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
                                     displayPower = PowerType.Focus;
-                                else if (pet.IsPetGhoul() || pet.IsPetAbomination()) // DK pets have energy
+                                else if (pet.IsPetGhoul() || pet.IsRisenAlly()) // DK pets have energy
                                     displayPower = PowerType.Energy;
                             }
                         }
@@ -1846,10 +1843,14 @@ namespace Game.Entities
         {
             ShapeShiftForm form = GetShapeshiftForm();
 
-            return form == ShapeShiftForm.CatForm 
-                || form == ShapeShiftForm.BearForm 
-                || form == ShapeShiftForm.DireBearForm 
-                || form == ShapeShiftForm.GhostWolf;
+            return IsFeralForm(form);
+        }
+
+        public bool IsFeralForm(ShapeShiftForm form)
+        {
+            return form == ShapeShiftForm.CatForm
+                || form == ShapeShiftForm.BearForm
+                || form == ShapeShiftForm.DireBearForm;
         }
 
         public bool IsControlledByPlayer() { return m_ControlledByPlayer; }
@@ -4332,7 +4333,7 @@ namespace Game.Entities
                 return CheckAttackFitToAuraRequirement(attackType, aurEff);
             });
 
-            SetStatFlatModifier(unitMod, UnitModifierFlatType.Total, amount);
+            StatMods.SetFlat(unitMod, UnitModType.TotalTemporary, (int)amount);
         }
 
         public void UpdateAllDamageDoneMods()
@@ -4366,7 +4367,7 @@ namespace Game.Entities
                             );
             }
 
-            SetStatPctModifier(unitMod, UnitModifierPctType.Total, factor);
+            StatMods.SetMult(unitMod, UnitModType.TotalTemporary, factor);
         }
 
         public void UpdateAllDamagePctDoneMods()

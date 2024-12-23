@@ -1710,7 +1710,7 @@ namespace Game.Entities
                             procEntry.HitMask = ProcFlagsHit.Reflect;
                             break;
                         // Only drop charge on crit
-                        case AuraType.ModWeaponCritPercent:
+                        case AuraType.ModWeaponCritPct:
                             procEntry.HitMask = ProcFlagsHit.Critical;
                             break;
                         // Only drop charge on block
@@ -4937,7 +4937,7 @@ namespace Game.Entities
                 case AuraType.ModDamagePercentDone:
                 case AuraType.ModAttackPowerPct:
                 case AuraType.ModHitChance:
-                case AuraType.ModWeaponCritPercent:
+                case AuraType.ModWeaponCritPct:
                 case AuraType.ModBlockPercent:
                 case AuraType.ModRoot2:
                 case AuraType.IgnoreSpellCooldown:

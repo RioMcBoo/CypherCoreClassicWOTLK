@@ -173,15 +173,15 @@ namespace Game.Entities
 
         public TotemType GetTotemType() { return m_type; }
 
-        public override bool UpdateStats(Stats stat) { return true; }
+        public override bool UpdateStats(Stats stat, bool skipDependents = false) { return true; }
 
         public override bool UpdateAllStats() { return true; }
 
-        public override void UpdateResistances(SpellSchools school) { }
-        public override void UpdateArmor() { }
+        public override void UpdateResistances(SpellSchools schoolbool, bool skipDependents = false) { }
+        public override void UpdateArmor(bool skipDependents = false) { }
         public override void UpdateMaxHealth() { }
         public override void UpdateMaxPower(PowerType power) { }
-        public override void UpdateAttackPowerAndDamage(bool ranged = false) { }
+        public override void UpdateMeleeAttackPowerAndDamage(bool skipDependents = false) { }
         public override void UpdateDamagePhysical(WeaponAttackType attType) { }
 
         TotemType m_type;

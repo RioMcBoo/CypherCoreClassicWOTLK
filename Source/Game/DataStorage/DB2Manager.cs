@@ -1536,7 +1536,7 @@ namespace Game.DataStorage
             {
                 return playerClass switch
                 {
-                    Class.Deathknight => numTalentsAtLevel.NumTalentsDeathKnight,
+                    Class.DeathKnight => numTalentsAtLevel.NumTalentsDeathKnight,
                     Class.DemonHunter => numTalentsAtLevel.NumTalentsDemonHunter,
                     _ => numTalentsAtLevel.NumTalents,
                 };

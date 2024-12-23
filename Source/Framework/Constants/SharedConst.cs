@@ -647,6 +647,25 @@ namespace Framework.Constants
         None = 2
     }
 
+    /// <summary> Used in GameTable </summary>
+    public enum GtClass : byte
+    {
+        None = 0,
+        Rogue = 1,
+        Druid = 2,
+        Hunter = 3,
+        Mage = 4,
+        Paladin = 5,
+        Priest = 6,
+        Shaman = 7,
+        Warlock = 8,
+        Warrior = 9,
+        DeathKnight = 10,
+        Monk = 11,
+        DemonHunter = 12,
+        Max,
+    }
+
     public enum Class : byte
     {
         None = 0,
@@ -655,16 +674,18 @@ namespace Framework.Constants
         Hunter = 3,
         Rogue = 4,
         Priest = 5,
-        Deathknight = 6,
+        DeathKnight = 6,
         Shaman = 7,
         Mage = 8,
         Warlock = 9,
-        Monk = 10,
         Druid = 11,
+        Max,
+
+        // Unused
+        Monk = 10,
         DemonHunter = 12,
         Evoker = 13,
         Adventurer = 14,
-        Max = 15,
     }
 
     [Flags]
@@ -676,7 +697,7 @@ namespace Framework.Constants
         Hunter = 1 << (Class.Hunter - 1),
         Rogue = 1 << (Class.Rogue - 1),
         Priest = 1 << (Class.Priest - 1),
-        Deathknight = 1 << (Class.Deathknight - 1),
+        DeathKnight = 1 << (Class.DeathKnight - 1),
         Shaman = 1 << (Class.Shaman - 1),
         Mage = 1 << (Class.Mage - 1),
         Warlock = 1 << (Class.Warrior - 1),
@@ -689,8 +710,8 @@ namespace Framework.Constants
         //Helpers
         Creatures = Warrior | Paladin | Rogue | Mage,
         WandUsers = Priest | Mage | Warlock,
-        Playable = Warrior | Paladin | Hunter | Rogue | Priest | Deathknight | Shaman |
-            Mage | Warlock | Monk | Druid | DemonHunter | Evoker | Adventurer,
+        Playable = Warrior | Paladin | Hunter | Rogue | Priest | DeathKnight | Shaman |
+            Mage | Warlock | Druid,
 
         All = -1,
     }
@@ -703,15 +724,12 @@ namespace Framework.Constants
         Hunter = Class.Hunter,
         Rogue = Class.Rogue,
         Priest = Class.Priest,
-        Deathknight = Class.Deathknight,
+        DeathKnight = Class.DeathKnight,
         Shaman = Class.Shaman,
         Mage = Class.Mage,
         Warlock = Class.Warlock,
         Monk = Class.Monk,
         Druid = Class.Druid,
-        DemonHunter = Class.DemonHunter,
-        Evoker = Class.Evoker,
-        Adventurer = Class.Adventurer,
         Item1 = -1,
         Consumable = -2,
         Gem1 = -3,
@@ -858,6 +876,7 @@ namespace Framework.Constants
         Happinnes = 4,
         Runes = 5,
         RunicPower = 6,
+        MaxWotlk = 7,
         ///<summary>(unused 3.4.3)</summary> 
         SoulShards = 7,
         ///<summary>(unused 3.4.3)</summary> 
@@ -903,6 +922,18 @@ namespace Framework.Constants
         Intellect = 3,
         Spirit = 4,
         Max = 5
+    }
+
+    public enum StatsMask
+    {
+        Strength = 1 << Stats.Strength,
+        Agility = 1 << Stats.Agility,
+        Stamina = 1 << Stats.Stamina,
+        Intellect = 1 << Stats.Intellect,
+        Spirit = 1 << Stats.Spirit,
+
+        None = 0,
+        AllPermanent = -1,
     }
 
     public enum TrainerType : byte
@@ -1624,6 +1655,8 @@ namespace Framework.Constants
 
     public enum WorldCfg
     {
+        /// <summary cref="int">int</summary>
+        None,
         /// <summary cref="int">int</summary>
         AccPasschangesec,
         /// <summary cref="bool">bool</summary>

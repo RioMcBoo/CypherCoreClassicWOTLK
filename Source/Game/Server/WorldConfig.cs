@@ -24,6 +24,7 @@ namespace Game
             // We cleanse all data to catch access errors on data that is not yet initialized.
             //Values._values.Clear(); // TODO: WorldCfg.ClientCacheVersion Already Pre-Loaded in WorldServer.Server.StartDB();
 
+            Values[WorldCfg.None] = 0;
             // Read support system setting from the config file
             Values[WorldCfg.SupportEnabled] = GetDefaultValue("Support.Enabled", true);
             Values[WorldCfg.SupportTicketsEnabled] = GetDefaultValue("Support.TicketsEnabled", false);

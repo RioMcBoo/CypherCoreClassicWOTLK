@@ -130,6 +130,46 @@ namespace Game.Entities
             }
         }
 
+        public int GetFeralBonus(int forLevel)
+        {
+            if (BasicData.ClassID != ItemClass.Weapon)
+                return 0;
+
+            int dpsMod = 0;
+            int feral_bonus = 0;
+
+            ScalingStatValuesRecord ssv = GetScalingStatValue(forLevel);
+            if (ssv != null)
+            {
+                dpsMod = ssv.getDPSMod(GetScalingStatValueID());
+                feral_bonus += ssv.getFeralBonus(GetScalingStatValueID());
+            }            
+
+            int totalBonus = BasicData.InventoryType switch
+            {
+                InventoryType.Weapon or InventoryType.Weapon2Hand or InventoryType.WeaponMainhand or InventoryType.WeaponOffhand
+                => (int)((dpsMod + GetDPSOld()) * 14.0f) - 767 + feral_bonus,
+                _ => 0
+            };
+
+            if (totalBonus < 0)
+                return 0;
+            
+            return totalBonus;
+        }
+
+        public float GetDPSOld()
+        {
+            if (ExtendedData.ItemDelay == 0)
+                return 0.0f;
+
+            float temp = 0.0f;
+            for (byte i = 0; i < ItemConst.MaxDamages; ++i)
+                temp += ExtendedData.MinDamage[i] + ExtendedData.MaxDamage[i];
+
+            return temp * 500.0f / ExtendedData.ItemDelay;
+        }
+
         public float GetDPS()
         {
             ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
@@ -258,7 +298,22 @@ namespace Game.Entities
         public float GetStatPercentageOfSocket(int index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
         public int GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
         public ushort GetScalingStatDistributionID() { return ExtendedData.ScalingStatDistributionID; }
-        public int GetScalingStatValue() { return BasicData.ScalingStatValue; }
+        public int GetScalingStatValueID() { return BasicData.ScalingStatValue; }
+
+        public ScalingStatDistributionRecord GetScalingStatDistribution()
+        {
+            return CliDB.ScalingStatDistributionStorage.LookupByKey(GetScalingStatDistributionID());
+        }
+
+        public ScalingStatValuesRecord GetScalingStatValue(int forLevel)
+        {
+            var ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(GetScalingStatDistributionID());
+            if (ssd != null && GetScalingStatValueID() != 0)
+                return Global.DB2Mgr.GetScalingStatValuesForLevel(Math.Clamp(forLevel, ssd.MinLevel, ssd.MaxLevel));
+
+            return null;
+        }
+
         public ushort GetMinDamage(int index) { return BasicData.MinDamage[index]; }
         public ushort GetMaxDamage(int index) { return BasicData.MaxDamage[index]; }
         public int GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
@@ -312,12 +367,6 @@ namespace Game.Entities
         public bool IsWeapon() { return GetClass() == ItemClass.Weapon; }
 
         public bool IsArmor() { return GetClass() == ItemClass.Armor; }
-        
-        public bool IsRangedWeapon()
-        {
-            return IsWeapon() && (GetSubClass().Weapon == ItemSubClassWeapon.Bow ||
-                   GetSubClass().Weapon == ItemSubClassWeapon.Gun || GetSubClass().Weapon == ItemSubClassWeapon.Crossbow);
-        }
 
         public int MaxDurability;
         public bool IsMergeable => GetMaxStackSize() > 1;

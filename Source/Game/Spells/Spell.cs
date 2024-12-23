@@ -4179,7 +4179,7 @@ namespace Game.Spells
                 castFlags |= SpellCastFlags.PowerLeftSelf;
             }
 
-            if (m_caster.IsTypeId(TypeId.Player) && m_caster.ToPlayer().GetClass() == Class.Deathknight &&
+            if (m_caster.IsTypeId(TypeId.Player) && m_caster.ToPlayer().GetClass() == Class.DeathKnight &&
                 //HasPowerTypeCost(PowerType.Runes) && 
                 !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerAndReagentCost))
             {

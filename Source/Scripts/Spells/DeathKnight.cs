@@ -71,7 +71,7 @@ namespace Scripts.Spells.DeathKnight
             if (caster != null)
             {
                 Player player = caster.ToPlayer();
-                if (player == null || caster.GetClass() != Class.Deathknight)
+                if (player == null || caster.GetClass() != Class.DeathKnight)
                     return false;
 
                 /*
@@ -344,7 +344,7 @@ namespace Scripts.Spells.DeathKnight
     {
         SpellCastResult CheckClass()
         {
-            if (GetCaster().GetClass() != Class.Deathknight)
+            if (GetCaster().GetClass() != Class.DeathKnight)
             {
                 SetCustomCastResultMessage(SpellCustomErrors.MustBeDeathKnight);
                 return SpellCastResult.CustomError;

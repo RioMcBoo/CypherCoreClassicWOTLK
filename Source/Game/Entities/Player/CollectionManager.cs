@@ -506,14 +506,14 @@ namespace Game.Entities
             ClassMask.Priest | ClassMask.Mage | ClassMask.Warlock,                             //ITEM_SUBCLASS_ARMOR_CLOTH
             ClassMask.Rogue | ClassMask.Monk | ClassMask.Druid | ClassMask.DemonHunter,        //ITEM_SUBCLASS_ARMOR_LEATHER
             ClassMask.Hunter | ClassMask.Shaman,                                               //ITEM_SUBCLASS_ARMOR_MAIL
-            ClassMask.Warrior | ClassMask.Paladin | ClassMask.Deathknight,                     //ITEM_SUBCLASS_ARMOR_PLATE
+            ClassMask.Warrior | ClassMask.Paladin | ClassMask.DeathKnight,                     //ITEM_SUBCLASS_ARMOR_PLATE
             ClassMask.Playable,                                                                //ITEM_SUBCLASS_ARMOR_BUCKLER
             ClassMask.Warrior | ClassMask.Paladin | ClassMask.Shaman,                          //ITEM_SUBCLASS_ARMOR_SHIELD
             ClassMask.Paladin,                                                                 //ITEM_SUBCLASS_ARMOR_LIBRAM
             ClassMask.Druid,                                                                   //ITEM_SUBCLASS_ARMOR_IDOL
             ClassMask.Shaman,                                                                  //ITEM_SUBCLASS_ARMOR_TOTEM
-            ClassMask.Deathknight,                                                             //ITEM_SUBCLASS_ARMOR_SIGIL
-            ClassMask.Paladin | ClassMask.Deathknight | ClassMask.Shaman | ClassMask.Druid,    //ITEM_SUBCLASS_ARMOR_RELIC
+            ClassMask.DeathKnight,                                                             //ITEM_SUBCLASS_ARMOR_SIGIL
+            ClassMask.Paladin | ClassMask.DeathKnight | ClassMask.Shaman | ClassMask.Druid,    //ITEM_SUBCLASS_ARMOR_RELIC
         ];
 
         public void AddItemAppearance(Item item)

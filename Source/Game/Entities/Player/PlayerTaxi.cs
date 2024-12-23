@@ -25,7 +25,7 @@ namespace Game.Entities
         public void InitTaxiNodesForLevel(Race race, Class chrClass, int level)
         {
             // class specific initial known nodes
-            if (chrClass == Class.Deathknight)
+            if (chrClass == Class.DeathKnight)
             {
                 var factionMask = Player.TeamForRace(race) == Team.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
                 m_taximask = new byte[factionMask.Length];

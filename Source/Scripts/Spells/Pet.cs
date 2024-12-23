@@ -86,9 +86,9 @@ namespace Scripts.Spells.Pets
                 // For others recalculate it from:
                 float critSpell = 5.0f;
                 // Increase crit from AuraType.ModSpellCritChance
-                critSpell += owner.GetTotalAuraModifier(AuraType.ModSpellCritChance);
+                critSpell += owner.GetTotalAuraModifier(AuraType.ModSpellCritSchoolPct);
                 // Increase crit from AuraType.ModCritPct
-                critSpell += owner.GetTotalAuraModifier(AuraType.ModCritPct);
+                critSpell += owner.GetTotalAuraModifier(AuraType.ModSpellCritPct);
                 // Increase crit spell from spell crit ratings
                 critSpell += owner.GetRatingBonusValue(CombatRating.CritSpell);
 
@@ -104,9 +104,9 @@ namespace Scripts.Spells.Pets
                 // For others recalculate it from:
                 float critMelee = 5.0f;
                 // Increase crit from AuraType.ModWeaponCritPercent
-                critMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPercent);
+                critMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPct);
                 // Increase crit from AuraType.ModCritPct
-                critMelee += owner.GetTotalAuraModifier(AuraType.ModCritPct);
+                critMelee += owner.GetTotalAuraModifier(AuraType.ModSpellCritPct);
                 // Increase crit melee from melee crit ratings
                 critMelee += owner.GetRatingBonusValue(CombatRating.CritMelee);
 
@@ -167,12 +167,12 @@ namespace Scripts.Spells.Pets
             switch (m_scriptSpellId)
             {
                 case SpellIds.TamedPetPassive06:
-                    DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 0, AuraType.ModWeaponCritPercent));
-                    DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 1, AuraType.ModSpellCritChance));
+                    DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 0, AuraType.ModWeaponCritPct));
+                    DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 1, AuraType.ModSpellCritSchoolPct));
                     break;
                 case SpellIds.PetPassiveCrit:
-                    DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 0, AuraType.ModSpellCritChance));
-                    DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 1, AuraType.ModWeaponCritPercent));
+                    DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 0, AuraType.ModSpellCritSchoolPct));
+                    DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 1, AuraType.ModWeaponCritPct));
                     break;
                 case SpellIds.WarlockPetScaling05:
                 case SpellIds.HunterPetScaling04:
@@ -290,7 +290,7 @@ namespace Scripts.Spells.Pets
                         AuraEffect aurEffect = owner.GetAuraEffect(56246, 0);
                         if (aurEffect != null)
                         {
-                            float base_attPower = pet.GetFlatModifierValue(UnitMods.AttackPower, UnitModifierFlatType.Base) * pet.GetPctModifierValue(UnitMods.AttackPower, UnitModifierPctType.Base);
+                            float base_attPower = pet.StatMods.GetBase(UnitMods.AttackPowerMelee);
                             amount += (int)MathFunctions.CalculatePct(amount + base_attPower, aurEffect.GetAmount());
                         }
                     }
@@ -618,9 +618,9 @@ namespace Scripts.Spells.Pets
                 // For others recalculate it from:
                 float CritSpell = 5.0f;
                 // Increase crit from AuraType.ModSpellCritChance
-                CritSpell += owner.GetTotalAuraModifier(AuraType.ModSpellCritChance);
+                CritSpell += owner.GetTotalAuraModifier(AuraType.ModSpellCritSchoolPct);
                 // Increase crit from AuraType.ModCritPct
-                CritSpell += owner.GetTotalAuraModifier(AuraType.ModCritPct);
+                CritSpell += owner.GetTotalAuraModifier(AuraType.ModSpellCritPct);
                 // Increase crit spell from spell crit ratings
                 CritSpell += owner.GetRatingBonusValue(CombatRating.CritSpell);
 
@@ -646,9 +646,9 @@ namespace Scripts.Spells.Pets
                 // For others recalculate it from:
                 float CritMelee = 5.0f;
                 // Increase crit from AuraType.ModWeaponCritPercent
-                CritMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPercent);
+                CritMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPct);
                 // Increase crit from AuraType.ModCritPct
-                CritMelee += owner.GetTotalAuraModifier(AuraType.ModCritPct);
+                CritMelee += owner.GetTotalAuraModifier(AuraType.ModSpellCritPct);
                 // Increase crit melee from melee crit ratings
                 CritMelee += owner.GetRatingBonusValue(CombatRating.CritMelee);
 
@@ -668,8 +668,8 @@ namespace Scripts.Spells.Pets
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 0, AuraType.ModSpellCritChance));
-            DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 1, AuraType.ModWeaponCritPercent));
+            DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 0, AuraType.ModSpellCritSchoolPct));
+            DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 1, AuraType.ModWeaponCritPct));
         }
     }
 
@@ -1152,8 +1152,8 @@ namespace Scripts.Spells.Pets
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 1, AuraType.ModSpellCritChance));
-            DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 0, AuraType.ModWeaponCritPercent));
+            DoEffectCalcAmount.Add(new(CalculateAmountCritSpell, 1, AuraType.ModSpellCritSchoolPct));
+            DoEffectCalcAmount.Add(new(CalculateAmountCritMelee, 0, AuraType.ModWeaponCritPct));
         }
     }
 

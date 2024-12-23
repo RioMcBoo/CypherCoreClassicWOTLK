@@ -70,8 +70,8 @@ namespace Game.Entities
                     {
                         if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                             RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                    }
                 }
-            }
             }
 
             talentMap[talent.Id] = new(rank, PlayerSpellState.Unchanged);
@@ -165,12 +165,12 @@ namespace Game.Entities
             {
                 if (talentInfo.PrereqTalent[i] == default)
                     continue;
-                
-                if (!talentMap.TryGetValue(talentInfo.PrereqTalent[i], out itr) 
+
+                if (!talentMap.TryGetValue(talentInfo.PrereqTalent[i], out itr)
                     || itr.Rank < talentInfo.PrereqRank[i])
                 {
                     return false;
-            }
+                }
             }
 
             // Find out how many points we have in this field
@@ -186,7 +186,7 @@ namespace Game.Entities
                     {
                         if (tmpTalent.Value.SpellRank[i] != 0 && HasSpell(tmpTalent.Value.SpellRank[i]))
                             spentPoints += (i + 1);
-                }
+                    }
                 }
 
                 // not have required min points spent in talent tree
@@ -645,6 +645,16 @@ namespace Game.Entities
             return spentCount;
         }
 
+        public void SetWeaponDmgMultiplier(float multiplier, WeaponAttackType attackType)
+        {
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WeaponDmgMultipliers, (int)attackType), multiplier);
+        }
+
+        public void SetWeaponSpeedMultiplier(float multiplier, WeaponAttackType attackType)
+        {
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WeaponAtkSpeedMultipliers, (int)attackType), multiplier);
+        }
+
         public void SetFreeTalentPoints(int freeTalentPoints)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), freeTalentPoints);
@@ -667,7 +677,7 @@ namespace Game.Entities
             {
                 switch (GetClass())
                 {
-                    case Class.Deathknight:
+                    case Class.DeathKnight:
                         return numTalentsAtLevel.NumTalentsDeathKnight;
                     case Class.DemonHunter:
                         return numTalentsAtLevel.NumTalentsDemonHunter;

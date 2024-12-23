@@ -1005,7 +1005,7 @@ namespace Scripts.Spells.Items
                 case Class.Priest:
                     possibleSpells.Add(SpellFlaskOfTheNorthSp);
                     break;
-                case Class.Deathknight:
+                case Class.DeathKnight:
                 case Class.Warrior:
                     possibleSpells.Add(SpellFlaskOfTheNorthStr);
                     break;

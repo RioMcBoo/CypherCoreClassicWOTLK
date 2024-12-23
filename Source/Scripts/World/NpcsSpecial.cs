@@ -1278,19 +1278,19 @@ namespace Scripts.World.NpcsSpecial
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionAlliance)
                         || player.HasAchieved(TournamentPennantIds.AchievementChapionHorde))
                     {
-                        return player.GetClass() == Class.Deathknight
+                        return player.GetClass() == Class.DeathKnight
                             ? TournamentPennantIds.SpellEbonBladeChapion 
                             : TournamentPennantIds.SpellArgentCrusadeChapion;
                     }
                     else if (player.HasAchieved(TournamentPennantIds.AchievementArgentValor))
                     {
-                        return player.GetClass() == Class.Deathknight
+                        return player.GetClass() == Class.DeathKnight
                             ? TournamentPennantIds.SpellEbonBladeValiant
                             : TournamentPennantIds.SpellArgentCrusadeValiant;
                     }
                     else
                     {
-                        return player.GetClass() == Class.Deathknight
+                        return player.GetClass() == Class.DeathKnight
                             ? TournamentPennantIds.SpellEbonBladeAspirant
                             : TournamentPennantIds.SpellArgentCrusadeAspirant;
                     }

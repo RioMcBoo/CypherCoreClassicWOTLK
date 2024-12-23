@@ -53,7 +53,7 @@ namespace Game.Entities
         public float ModRangedHitChance { get; set; }
         public float ModSpellHitChance { get; set; }
         public bool m_canDualWield;
-        public float BaseSpellCritChance { get; set; }
+        public int BaseSpellCritChance { get; set; }
         public Milliseconds RegenTimer { get; set; }
 
         int _lastExtraAttackSpell;
@@ -91,8 +91,7 @@ namespace Game.Entities
         MultiMap<int, AuraApplication> m_appliedAuras = new();
         MultiMap<int, Aura> m_ownedAuras = new();
         List<Aura> m_scAuras = new();
-        protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];
-        protected float[][] m_auraPctModifiersGroup = new float[(int)UnitMods.End][];
+        protected UnitModManager m_unitStatModManager;
         uint m_removedAurasCount;
 
         //General  
@@ -103,8 +102,6 @@ namespace Game.Entities
         List<AreaTrigger> m_areaTrigger = new();
         protected List<DynamicObject> m_dynObj = new();
         protected float[] CreateStats = new float[(int)Stats.Max];
-        float[] m_floatStatPosBuff = new float[(int)Stats.Max];
-        float[] m_floatStatNegBuff = new float[(int)Stats.Max];
         public ObjectGuid[] m_SummonSlot = new ObjectGuid[7];
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
         public UnitTypeMask UnitTypeMask { get; set; }

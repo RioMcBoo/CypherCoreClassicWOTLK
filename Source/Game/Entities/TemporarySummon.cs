@@ -557,7 +557,7 @@ namespace Game.Entities
 
         // Death Knight pets
         public bool IsPetGhoul() { return GetEntry() == (uint)PetEntry.Ghoul; } // Ghoul may be guardian or pet
-        public bool IsPetAbomination() { return GetEntry() == (uint)PetEntry.Abomination; } // Sludge Belcher dk talent
+        public bool IsRisenAlly() { return GetEntry() == (uint)PetEntry.RisenAlly; }
 
         // Shaman pet
         public bool IsSpiritWolf() { return GetEntry() == (uint)PetEntry.SpiritWolf; } // Spirit wolf from feral spirits
@@ -618,7 +618,7 @@ namespace Game.Entities
             {
                 if (GetOwner().GetClass() == Class.Warlock
                         || GetOwner().GetClass() == Class.Shaman        // Fire Elemental
-                        || GetOwner().GetClass() == Class.Deathknight) // Risen Ghoul
+                        || GetOwner().GetClass() == Class.DeathKnight) // Risen Ghoul
                 {
                     petType = PetType.Summon;
                 }
@@ -639,7 +639,7 @@ namespace Game.Entities
 
             SetMeleeDamageSchool(cinfo.DmgSchool);
 
-            SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, (float)petlevel * 50);
+            StatMods.SetFlat(UnitMods.Armor, UnitModType.BasePermanent, petlevel * 50);
 
             SetBaseAttackTime(WeaponAttackType.BaseAttack, SharedConst.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.OffAttack, SharedConst.BaseAttackTime);
@@ -653,7 +653,7 @@ namespace Game.Entities
             if (!IsHunterPet())
             {
                 for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                    SetStatFlatModifier(UnitMods.ResistanceStart + i, UnitModifierFlatType.Base, cinfo.Resistance[i]);
+                    StatMods.SetFlat(UnitMods.ResistanceStart + i, UnitModType.BasePermanent, cinfo.Resistance[i]);
             }
 
             PowerType powerType = CalculateDisplayPowerType();
@@ -665,10 +665,10 @@ namespace Game.Entities
                 SetCreateHealth(pInfo.health);
                 SetCreateMana(pInfo.mana);
 
-                SetStatPctModifier(UnitMods.PowerStart + (int)powerType, UnitModifierPctType.Base, 1.0f);
+                StatMods.SetMult(UnitMods.PowerStart + (int)powerType, UnitModType.BasePermanent, 1.0f);
 
                 if (pInfo.armor > 0)
-                    SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, pInfo.armor);
+                    StatMods.SetFlat(UnitMods.Armor, UnitModType.BasePermanent, pInfo.armor);
 
                 for (byte stat = 0; stat < (int)Stats.Max; ++stat)
                     SetCreateStat((Stats)stat, pInfo.stats[stat]);
@@ -799,10 +799,11 @@ namespace Game.Entities
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel));
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel));
 
-                            SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, GetOwner().GetArmor() * 0.35f);  // Bonus Armor (35% of player armor)
-                            SetStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, GetOwner().GetStat(Stats.Stamina) * 0.3f);  // Bonus Stamina (30% of player stamina)
-                            if (!HasAura(58877))//prevent apply twice for the 2 wolves
-                                AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
+                            StatMods.SetFlat(UnitMods.Armor, UnitModType.BasePermanent, (int)(GetOwner().GetArmor() * 0.35f));  // Bonus Armor (35% of player armor)
+                            StatMods.SetFlat(UnitMods.StatStamina, UnitModType.BasePermanent, (int)(GetOwner().GetStat(Stats.Stamina) * 0.3f));  // Bonus Stamina (30% of player stamina)
+                            
+                            if (!HasAura(58877)) // prevent apply twice for the 2 wolves
+                                AddAura(58877, this); // Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
                             break;
                         }
                         case 31216: // Mirror Image
@@ -875,54 +876,30 @@ namespace Game.Entities
         const int ENTRY_GHOUL = 26125;
         const int ENTRY_BLOODWORM = 28017;
 
-        public override bool UpdateStats(Stats stat)
+        public override bool UpdateStats(Stats stat, bool skipDependents = false)
         {
-            float value = GetTotalStatValue(stat);
-            UpdateStatBuffMod(stat);
-            float ownersBonus = 0.0f;
+            UnitMods unitMod = UnitMods.StatStart + (int)stat;
+            UnitModResult statValue = new(GetCreateStat(stat));
 
-            Unit owner = GetOwner();
-            // Handle Death Knight Glyphs and Talents
-            float mod = 0.75f;
-            if (IsPetGhoul() && (stat == Stats.Stamina || stat == Stats.Strength))
+            UnitMod statsFromOwner = new(UnitModType.TotalPermanent)
             {
-                switch (stat)
-                {
-                    case Stats.Stamina:
-                        mod = 0.3f;
-                        break;                // Default Owner's Stamina scale
-                    case Stats.Strength:
-                        mod = 0.7f;
-                        break;                // Default Owner's Strength scale
-                    default: break;
-                }
+                Flat = new(GetBonusStatFromOwner(stat)),
+            };
 
-                ownersBonus = owner.GetStat(stat) * mod;
-                value += ownersBonus;
-            }
-            else if (stat == Stats.Stamina)
-            {
-                ownersBonus = MathFunctions.CalculatePct(owner.GetStat(Stats.Stamina), 30);
-                value += ownersBonus;
-            }
-            //warlock's and mage's pets gain 30% of owner's intellect
-            else if (stat == Stats.Intellect)
-            {
-                if (owner.GetClass() == Class.Warlock || owner.GetClass() == Class.Mage)
-                {
-                    ownersBonus = MathFunctions.CalculatePct(owner.GetStat(stat), 30);
-                    value += ownersBonus;
-                }
-            }
+            StatMods.ApplyModsTo(statValue, unitMod, myTotalPerm: statsFromOwner);
 
-            SetStat(stat, (int)value);
-            m_statFromOwner[(int)stat] = ownersBonus;
-            UpdateStatBuffMod(stat);
+            SetStat(stat, (int)statValue.TotalValue);
+
+            // Update stat buff mods for the client
+            UpdateStatBuffModForClient(stat, statValue.ModPos, statValue.ModNeg);
+
+            if (skipDependents)
+                return true;            
 
             switch (stat)
             {
                 case Stats.Strength:
-                    UpdateAttackPowerAndDamage();
+                    UpdateMeleeAttackPowerAndDamage();
                     break;
                 case Stats.Agility:
                     UpdateArmor();
@@ -942,54 +919,69 @@ namespace Game.Entities
         }
 
         public override bool UpdateAllStats()
-        {
-            UpdateMaxHealth();
-
+        { 
             for (var i = Stats.Strength; i < Stats.Max; ++i)
-                UpdateStats(i);
+                UpdateStats(i, true);
 
             for (var i = PowerType.Mana; i < PowerType.Max; ++i)
                 UpdateMaxPower(i);
 
+            UpdateMaxHealth();
             UpdateAllResistances();
-
+            UpdateArmor(true);
+            UpdateMeleeAttackPowerAndDamage(true);
+            UpdateDamagePhysical(WeaponAttackType.BaseAttack);
             return true;
         }
 
-        public override void UpdateResistances(SpellSchools school)
+        public override void UpdateResistances(SpellSchools school, bool skipDependents = false)
         {
-            if (school > SpellSchools.Normal)
+            if (school != SpellSchools.Normal)
             {
-                float value = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school);
+                UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
+                UnitModResult resistValue = new();
+                UnitMod? resistFromOwmer = default;
 
                 // hunter and warlock pets gain 40% of owner's resistance
                 if (IsPet())
-                    value += MathFunctions.CalculatePct(m_owner.GetResistance(school), 40);
+                {
+                    resistFromOwmer = new(UnitModType.TotalPermanent)
+                    {
+                        Flat = new(MathFunctions.CalculatePct(GetOwner().GetResistance(school), 40)),
+                    };
+                }
 
-                SetResistance(school, (int)value);
+                StatMods.ApplyModsTo(resistValue, unitMod, myTotalPerm: resistFromOwmer);
+
+                SetResistance(school, (int)resistValue.TotalValue);
+                UpdateResistanceBuffModForClient(SpellSchools.Normal, resistValue.ModPos, resistValue.ModNeg);
             }
-            else
-                UpdateArmor();
         }
 
-        public override void UpdateArmor()
+        public override void UpdateArmor(bool skipDependents = false)
         {
-            float bonus_armor = 0.0f;
             UnitMods unitMod = UnitMods.Armor;
+            UnitModResult armorValue = new();
 
-            // hunter pets gain 35% of owner's armor value, warlock pets gain 100% of owner's armor
-            if (IsHunterPet())
-                bonus_armor = MathFunctions.CalculatePct(GetOwner().GetArmor(), 70);
-            else if (IsPet())
-                bonus_armor = GetOwner().GetArmor();
+            // Add armor from agility
+            UnitMod bonusArmor = new(UnitModType.TotalPermanent)
+            {
+                Flat = new((int)(GetStat(Stats.Agility) * 2.0f)),
+            };
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
-            float baseValue = value;
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + bonus_armor;
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+            // hunter and warlock pets gain 35% of owner's armor value
+            if (IsPet())
+            {
+                bonusArmor.Flat.Modify(MathFunctions.CalculatePct(GetOwner().GetArmor(), 35), true);
+            }
 
-            SetArmor((int)baseValue, (int)(value - baseValue));
+            StatMods.ApplyModsTo(armorValue, unitMod, myTotalPerm: bonusArmor);
+
+            SetArmor((int)armorValue.TotalValue);
+            UpdateResistanceBuffModForClient(SpellSchools.Normal, armorValue.ModPos, armorValue.ModNeg);
+
+            if (skipDependents)
+                return;
         }
 
         public override void UpdateMaxHealth()
@@ -1023,12 +1015,15 @@ namespace Game.Entities
                     break;
             }
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreateHealth();
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + stamina * multiplicator;
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+            UnitModResult healthValue = new(GetCreateHealth());
+            UnitMod healthFromStamina = new(UnitModType.TotalPermanent)
+            {
+                Flat = new((int)(stamina * multiplicator)),
+            };
 
-            SetMaxHealth((uint)value);
+            StatMods.ApplyModsTo(healthValue, unitMod, myTotalPerm: healthFromStamina);
+
+            SetMaxHealth((uint)healthValue.TotalValue);
         }
 
         public override void UpdateMaxPower(PowerType power)
@@ -1038,22 +1033,35 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowerValue(power);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+            float intellect = (power == PowerType.Mana) ? GetStat(Stats.Intellect) - GetCreateStat(Stats.Intellect) : 0.0f;
+            float multiplicator = 15.0f;
 
-            SetMaxPower(power, (int)value);
+            switch (GetEntry())
+            {
+                case ENTRY_IMP: multiplicator = 4.95f; break;
+                case ENTRY_VOIDWALKER:
+                case ENTRY_SUCCUBUS:
+                case ENTRY_FELHUNTER:
+                case ENTRY_FELGUARD: multiplicator = 11.5f; break;
+                default: multiplicator = 15.0f; break;
+            }
+            
+            UnitModResult powerValue = new(GetCreatePowerValue(power));
+            UnitMod powerFromIntellect = new(UnitModType.TotalPermanent)
+            {
+                Flat = new((int)(intellect * multiplicator)),
+            };
+
+            StatMods.ApplyModsTo(powerValue, unitMod, myTotalPerm: powerFromIntellect);
+
+            SetMaxPower(power, (int)powerValue.TotalValue);
         }
 
-        public override void UpdateAttackPowerAndDamage(bool ranged = false)
+        public override void UpdateMeleeAttackPowerAndDamage(bool skipDependents = false)
         {
-            if (ranged)
-                return;
-
             float val;
             float bonusAP = 0.0f;
-            UnitMods unitMod = UnitMods.AttackPower;
+            UnitMods unitMod = UnitMods.AttackPowerMelee;
 
             if (GetEntry() == ENTRY_IMP)                                   // imp's attack power
                 val = GetStat(Stats.Strength) - 10.0f;
@@ -1063,24 +1071,46 @@ namespace Game.Entities
             Player owner = GetOwner() != null ? GetOwner().ToPlayer() : null;
             if (owner != null)
             {
-                if (IsHunterPet())                      //hunter pets benefit from owner's attack power
+                if (IsHunterPet())  // hunter pets benefit from owner's attack power
                 {
-                    float mod = 1.0f;                                                 //Hunter contribution modifier
+                    float mod = 1.0f;   // Hunter contribution modifier
+                    if (IsPet())
+                    {
+                        // Talent: Wild Hunt [2253:1]^1 = 62758
+                        AuraEffect auraEffect = GetAuraEffectOfTalent(2253, 1);
+                        if (auraEffect != null)
+                            MathFunctions.AddPct(ref mod, auraEffect.GetAmount());
+                    }
+
                     bonusAP = owner.GetTotalAttackPowerValue(WeaponAttackType.RangedAttack) * 0.22f * mod;
+
+                    // Talent: Animal Handler [1799:1]^1 = 34453
+                    if (owner.GetAuraEffectOfTalent(1799, 1, owner.GetGUID()) is AuraEffect aurEff) // Animal Handler
+                    {
+                        MathFunctions.AddPct(ref bonusAP, aurEff.GetAmount());
+                        MathFunctions.AddPct(ref val, aurEff.GetAmount());
+                    }
+
                     SetBonusDamage((int)(owner.GetTotalAttackPowerValue(WeaponAttackType.RangedAttack) * 0.1287f * mod));
                 }
-                else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
+                else if (IsPetGhoul() || IsRisenAlly()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
                 {
-                    bonusAP = owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.22f;
-                    SetBonusDamage((int)(owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.1287f));
+                    float ownerAP = owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
+
+                    bonusAP = ownerAP * 0.22f;
+                    SetBonusDamage((int)(ownerAP * 0.1287f));
                 }
-                else if (IsSpiritWolf()) //wolf benefit from shaman's attack power
+                else if (IsSpiritWolf()) // wolf benefit from shaman's attack power
                 {
-                    float dmg_multiplier = 0.31f;
-                    bonusAP = owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * dmg_multiplier;
-                    SetBonusDamage((int)(owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * dmg_multiplier));
+                    float ownerAP = owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
+
+                    float dmg_multiplier = 0.31f; 
+                    if (m_owner.GetAuraEffect(63271, 0) is AuraEffect auraEffect) // Glyph of Feral Spirit
+                        dmg_multiplier = 0.61f;
+                    bonusAP = ownerAP * dmg_multiplier;
+                    SetBonusDamage((int)(ownerAP * dmg_multiplier));
                 }
-                //demons benefit from warlocks shadow or fire damage
+                // demons benefit from warlocks shadow or fire damage
                 else if (IsPet())
                 {
                     int fire = owner.m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - owner.m_activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
@@ -1101,16 +1131,20 @@ namespace Game.Entities
                 }
             }
 
-            SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, val + bonusAP);
+            StatMods.SetFlat(unitMod, UnitModType.BasePermanent, (int)(val + bonusAP));
+            UnitModResult attackPowerValue = new();
 
-            //in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
-            float base_attPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            float attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
+            StatMods.ApplyModsTo(attackPowerValue, unitMod);
 
-            SetAttackPower((int)base_attPower);
-            SetAttackPowerMultiplier(attPowerMultiplier);
+            SetAttackPower((int)attackPowerValue.NakedValue);
+            SetAttackPowerModPos((int)attackPowerValue.ModPos);
+            SetAttackPowerModNeg((int)attackPowerValue.ModNeg);
+            SetAttackPowerMultiplier(1.0f);
 
-            //automatically update weapon damage after attack power modification
+            if (skipDependents)
+                return;
+
+            // automatically update weapon damage after attack power modification
             UpdateDamagePhysical(WeaponAttackType.BaseAttack);
         }
 
@@ -1140,22 +1174,60 @@ namespace Game.Entities
             }
 
             UnitMods unitMod = UnitMods.DamageMainHand;
-
-            float att_speed = GetBaseAttackTime(WeaponAttackType.BaseAttack) / 1000.0f;
-
-            float base_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 14.0f * att_speed + bonusDamage;
-            float base_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            float total_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            float total_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Total);
-
             float weapon_mindamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage);
             float weapon_maxdamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage);
+            float att_speed = GetBaseAttackTime(WeaponAttackType.BaseAttack) / 1000.0f;
 
-            float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
-            float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
+            UnitModResult weaponMinDamage = new(weapon_mindamage);
+            UnitModResult weaponMaxDamage = new(weapon_maxdamage);
 
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinDamage), mindamage);
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), maxdamage);
+            UnitMod initialDamageBonus = new(UnitModType.BasePermanent)
+            {
+                Flat = new((int)(GetTotalAttackPowerValue(attType) / 14.0f * att_speed + bonusDamage))
+            };
+
+            // Talent: Cobra Reflexes [2107:0]^1 = 61682
+            UnitMod? damageModFromCobraReflexes = null;
+            if (GetAuraEffectOfTalent(2107, 0) is AuraEffect auraEffect)
+            {
+                damageModFromCobraReflexes = new(UnitModType.TotalPermanent)
+                {
+                    Mult = new(-auraEffect.GetAmount())
+                };
+            }
+
+            //  Pet's base damage changes depending on happiness
+            UnitMod? damageModFromHapiness = default;
+            if (IsHunterPet())
+            {                
+                switch (ToPet().GetHappinessState())
+                {
+                    case HappinessState.Happy:
+                        // 125% of normal damage
+                        damageModFromHapiness = new(UnitModType.TotalTemporary)
+                        {
+                            Mult = new(1.25f)
+                        };
+                        break;
+                    case HappinessState.Content:
+                        // 100% of normal damage, nothing to modify
+                        break;
+                    case HappinessState.Unhappy:
+                        // 75% of normal damage
+                        damageModFromHapiness = new(UnitModType.TotalTemporary)
+                        {
+                            Mult = new(0.75f)
+                        };
+                        break;
+                }
+            }
+
+            StatMods.ApplyModsTo(weaponMinDamage, unitMod, 
+                myBasePerm: initialDamageBonus, myTotalPerm: damageModFromCobraReflexes, myTotalTemp: damageModFromHapiness)
+                .ReApplyTo(weaponMaxDamage);
+
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinDamage), weaponMinDamage.TotalValue);
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), weaponMaxDamage.TotalValue);
         }
 
         public void SetBonusDamage(int damage)
@@ -1167,10 +1239,74 @@ namespace Game.Entities
         }
 
         public int GetBonusDamage() { return m_bonusSpellDamage; }
-        public float GetBonusStatFromOwner(Stats stat) { return m_statFromOwner[(int)stat]; }
+
+        public int GetBonusStatFromOwner(Stats stat)
+        {
+            float ownersBonus = 0.0f;
+
+            Unit owner = GetOwner();
+            // Handle Death Knight Glyphs and Talents
+            float mod = 0.75f;
+            if (IsPetGhoul() && (stat == Stats.Stamina || stat == Stats.Strength))
+            {
+                switch (stat)
+                {
+                    case Stats.Stamina:
+                        mod = 0.3f;
+                        break;                // Default Owner's Stamina scale
+                    case Stats.Strength:
+                        mod = 0.7f;
+                        break;                // Default Owner's Strength scale
+                    default: break;
+                }
+
+                // Talent: Ravenous Dead [1934:1]^1 = 48965
+                AuraEffect aurEff = owner.GetAuraEffectOfTalent(1934, 1);
+                if (aurEff != null)
+                    MathFunctions.AddPct(ref mod, aurEff.GetAmount());  // Ravenous Dead edits the original scale
+
+                // Glyph of the Ghoul
+                aurEff = owner.GetAuraEffect(58686, 0);
+                if (aurEff != null)
+                    MathFunctions.AddPct(ref mod, aurEff.GetAmount());  // Glyph of the Ghoul adds a flat value to the scale mod
+
+
+                ownersBonus = owner.GetStat(stat) * mod;
+            }
+            else if (stat == Stats.Stamina)
+            {
+                if (owner.GetClass() == Class.Warlock && IsPet())
+                {
+                    ownersBonus = MathFunctions.CalculatePct(owner.GetStat(Stats.Stamina), 75);
+                }
+                else
+                {
+                    mod = 0.45f;
+
+                    if (IsPet())
+                    {
+                        // Talent: Wild Hunt [2253:0]^1 = 62758
+                        AuraEffect auraEffect = GetAuraEffectOfTalent(2253, 0);
+                        if (auraEffect != null)
+                            MathFunctions.AddPct(ref mod, auraEffect.GetAmount());
+                    }
+
+                    ownersBonus = owner.GetStat(stat) * mod;
+                }
+            }
+            //warlock's and mage's pets gain 30% of owner's intellect
+            else if (stat == Stats.Intellect)
+            {
+                if (owner.GetClass() == Class.Warlock || owner.GetClass() == Class.Mage)
+                {
+                    ownersBonus = MathFunctions.CalculatePct(owner.GetStat(stat), 30);
+                }
+            }
+
+            return (int)ownersBonus;
+        }
 
         int m_bonusSpellDamage;
-        float[] m_statFromOwner = new float[(int)Stats.Max];
     }
 
     public class Puppet : Minion
@@ -1248,7 +1384,7 @@ namespace Game.Entities
 
         // Death Knight pets
         Ghoul = 26125,
-        Abomination = 106848,
+        RisenAlly = 30230,
 
         // Shaman pet
         SpiritWolf = 29264

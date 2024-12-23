@@ -90,23 +90,24 @@ namespace Game.Entities
             return m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr);
         }
 
-        void GetDodgeFromAgility(float diminishing, float nondiminishing)
+        void GetDodgeFromAgility(ref float diminishing, ref float nondiminishing)
         {
-            /*// Table for base dodge values
+            // Table for base dodge values
             float[] dodge_base =
             {
-                0.037580f, // Warrior
-                0.036520f, // Paladin
-                -0.054500f, // Hunter
-                -0.005900f, // Rogue
-                0.031830f, // Priest
+                0.036640f, // Warrior
+                0.034943f, // Paladin
+                -0.040873f, // Hunter
+                0.020957f, // Rogue
+                0.034178f, // Priest
                 0.036640f, // DK
-                0.016750f, // Shaman
-                0.034575f, // Mage
-                0.020350f, // Warlock
-                0.0f,      // ??
-                0.049510f  // Druid
+                0.021080f, // Shaman
+                0.036587f, // Mage
+                0.024211f, // Warlock
+                0.0f,      // Monk
+                0.056097f  // Druid
             };
+
             // Crit/agility to dodge/agility coefficient multipliers; 3.2.0 increased required agility by 15%
             float[] crit_to_dodge =
             {
@@ -119,29 +120,29 @@ namespace Game.Entities
                 1.60f/1.15f,    // Shaman
                 1.00f/1.15f,    // Mage
                 0.97f/1.15f,    // Warlock (?)
-                0.0f,           // ??
+                0.0f,           // Monk
                 2.00f/1.15f     // Druid
             };
 
-            uint level = getLevel();
-            uint pclass = (uint)GetClass();
-
-            if (level > CliDB.GtChanceToMeleeCritStorage.GetTableRowCount())
-                level = CliDB.GtChanceToMeleeCritStorage.GetTableRowCount() - 1;
+            int level = GetLevel();
+            Class pclass = GetClass();
 
             // Dodge per agility is proportional to crit per agility, which is available from DBC files
-            var dodgeRatio = CliDB.GtChanceToMeleeCritStorage.EvaluateTable(level - 1, pclass - 1);
-            if (dodgeRatio == null || pclass > (int)Class.Max)
+            GtChanceToMeleeCritRecord dodgeRatio = CliDB.ChanceToMeleeCritGameTable.GetRow(level);
+            if (dodgeRatio == null || pclass > Class.Max)
                 return;
 
             // @todo research if talents/effects that increase total agility by x% should increase non-diminishing part
-            float base_agility = GetCreateStat(Stats.Agility) * GetPctModifierValue(UnitMods(UNIT_MOD_STAT_START + STAT_AGILITY), BASE_PCT);
+            float base_agility = GetCreateStat(Stats.Agility);
+            base_agility *= StatMods.GetOrDefault(UnitMods.StatStart + (int)Stats.Agility, UnitModType.BasePermanent).Mult;
+            base_agility *= StatMods.GetOrDefault(UnitMods.StatStart + (int)Stats.Agility, UnitModType.BaseTemporary).Mult;
+
             float bonus_agility = GetStat(Stats.Agility) - base_agility;
 
             // calculate diminishing (green in char screen) and non-diminishing (white) contribution
-            diminishing = 100.0f * bonus_agility * dodgeRatio.Value * crit_to_dodge[(int)pclass - 1];
-            nondiminishing = 100.0f * (dodge_base[(int)pclass - 1] + base_agility * dodgeRatio.Value * crit_to_dodge[pclass - 1]);
-            */
+            float classRatio = CliDB.GetGameTableColumnForClass(dodgeRatio, pclass);
+            diminishing = 100.0f * bonus_agility * classRatio * crit_to_dodge[(int)pclass - 1];
+            nondiminishing = 100.0f * (dodge_base[(int)pclass - 1] + base_agility * classRatio * crit_to_dodge[(int)pclass - 1]);            
         }       
         
         public float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType)
@@ -219,12 +220,13 @@ namespace Game.Entities
         public void _ApplyWeaponDamage(byte slot, Item item, bool apply)
         {
             ItemTemplate proto = item.GetTemplate();
-            var attType = GetAttackBySlot(slot, proto.GetInventoryType());
+            var attType = GetAttackBySlot(slot);
             if (!IsInFeralForm() && apply && !CanUseAttackType(attType))
                 return;
 
-            var ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(proto.GetScalingStatDistributionID());
-            var ssv = (ssd != null && proto.GetScalingStatValue() != 0) ? Global.DB2Mgr.GetScalingStatValuesForLevel(Math.Clamp(GetLevel(), ssd.MinLevel, ssd.MaxLevel)) : null;
+            ScalingStatValuesRecord ssv = null;
+            if (proto.GetScalingStatDistribution() is ScalingStatDistributionRecord ssd)
+                ssv = proto.GetScalingStatValue(Math.Clamp(GetLevel(), ssd.MinLevel, ssd.MaxLevel));
 
             float damage = 0.0f;
             var itemLevel = item.GetItemLevel(this);
@@ -237,11 +239,11 @@ namespace Game.Entities
                 // If set dpsMod in ScalingStatValue use it for min(70 % from average), max(130 % from average) damage
                 if (ssv != null)
                 {
-                    var extraDPS = ssv.getDPSMod(proto.GetScalingStatValue());
+                    var extraDPS = ssv.getDPSMod(proto.GetScalingStatValueID());
                     if (extraDPS != 0)
                     {
                         float average = extraDPS * proto.GetDelay() / 1000.0f;
-                        float mod = ssv.isTwoHand((uint)proto.GetScalingStatValue()) ? 0.2f : 0.3f;
+                        float mod = ssv.isTwoHand((uint)proto.GetScalingStatValueID()) ? 0.2f : 0.3f;
 
                         minDamage = (1.0f - mod) * average;
                         maxDamage = (1.0f + mod) * average;
@@ -425,7 +427,7 @@ namespace Game.Entities
                     opponent.UpdateCriteria(CriteriaType.WinDuel, 1);
 
                     // Credit for quest Death's Challenge
-                    if (GetClass() == Class.Deathknight && opponent.GetQuestStatus(12733) == QuestStatus.Incomplete)
+                    if (GetClass() == Class.DeathKnight && opponent.GetQuestStatus(12733) == QuestStatus.Incomplete)
                         opponent.CastSpell(duel.Opponent, 52994, true);
 
                     // Honor points after duel (the winner) - ImpConfig
