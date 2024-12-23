@@ -29,6 +29,12 @@ namespace Game.Chat
                 case "quest":
                     data = new QuestLinkData(info.Data).QuestId;
                     break;
+                case "spell":
+                    data = new SpellLinkData(info.Data).SpellId;
+                    break;
+                case "talent":
+                    data = new TalentLinkData(info.Data).TalentId;
+                    break;
                 default:
                     data = info.Data;
                     break;
@@ -306,6 +312,78 @@ namespace Game.Chat
             get
             {
                 Cypher.Assert(false, "QuestLinkData.Data property is not implement yet!");
+                return string.Empty;
+            }
+        }
+    }
+
+    readonly struct SpellLinkData
+    {
+        public readonly string SpellId;
+        public readonly string GlyphId;
+
+        public SpellLinkData(string data)
+        {
+            var args = data.Split(':');
+            if (args.Length == 2)
+            {
+                SpellId = args[0];
+                GlyphId = args[1];
+            }
+            else
+            {
+                SpellId = string.Empty;
+                GlyphId = string.Empty;
+            }
+        }
+
+        public SpellLinkData(string spellId, string glyphId)
+        {
+            SpellId = spellId;
+            GlyphId = glyphId;
+        }
+
+        public string GeneratedData
+        {
+            get
+            {
+                Cypher.Assert(false, "SpellLinkData.Data property is not implement yet!");
+                return string.Empty;
+            }
+        }
+    }
+
+    readonly struct TalentLinkData
+    {
+        public readonly string TalentId;
+        public readonly string Rank;
+
+        public TalentLinkData(string data)
+        {
+            var args = data.Split(':');
+            if (args.Length == 2)
+            {
+                TalentId = args[0];
+                Rank = args[1];
+            }
+            else
+            {
+                TalentId = string.Empty;
+                Rank = string.Empty;
+            }
+        }
+
+        public TalentLinkData(string talentId, string rank)
+        {
+            TalentId = talentId;
+            Rank = rank;
+        }
+
+        public string GeneratedData
+        {
+            get
+            {
+                Cypher.Assert(false, "TalentLinkData.Data property is not implement yet!");
                 return string.Empty;
             }
         }
