@@ -2567,8 +2567,7 @@ namespace Game.Spells
                         break;
                 }
 
-                float weapon_total_pct = unitCaster.StatMods.GetOrDefault(unitMod, UnitModType.TotalPermanent).Mult *
-                                         unitCaster.StatMods.GetOrDefault(unitMod, UnitModType.TotalTemporary).Mult;
+                float weapon_total_pct = unitCaster.StatMods.GetOrDefault(unitMod, UnitModType.TotalPermanent).Mult;
                 if (fixed_bonus != 0)
                     fixed_bonus = (int)(fixed_bonus * weapon_total_pct);
                 if (spell_bonus != 0)

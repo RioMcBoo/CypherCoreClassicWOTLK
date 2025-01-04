@@ -30,6 +30,13 @@ namespace Game.Entities
         ResistanceArcane,
         AttackPowerMelee,
         AttackPowerRanged,
+        DamagePhysical,
+        DamageHoly,
+        DamageFire,
+        DamageNature,
+        DamageFrost,
+        DamageShadow,
+        DamageArcane,
         DamageMainHand,
         DamageOffHand,
         DamageRanged,
@@ -41,7 +48,9 @@ namespace Game.Entities
         ResistanceStart = Armor,
         ResistanceEnd = ResistanceArcane + 1,
         PowerStart = Mana,
-        PowerEnd = RunicPower + 1
+        PowerEnd = RunicPower + 1,
+        SpellDamageStart = DamagePhysical,
+        SpellDamageEnd = DamageArcane + 1,
     }
 
     public enum UnitModType : byte
@@ -50,8 +59,21 @@ namespace Game.Entities
         BasePermanent,
         BaseTemporary,
         TotalPermanent,
-        TotalTemporary,
+        TotalTemporary,        
         Max,
+    }
+
+    public enum UnitModFamily
+    {
+        None,
+        Stat,
+        Power,
+        Resistance,
+        SpellPower,
+        AttackPower,
+        SpellDamage,
+        WeaponDamage,
+        Max
     }
 
     public record struct UnitMod
@@ -261,12 +283,12 @@ namespace Game.Entities
             return totalValue;
         }
 
-        public UnitMod? Get(UnitMods unitModName, UnitModType type)
+        public UnitMod? Get(UnitMods unitModName, UnitModType type = UnitModType.TotalTemporary)
         {
             return SearchModToRead(type, GetFamilyFromUnitModName(unitModName), unitModName)?.Mod;
         }
 
-        public UnitMod GetOrDefault(UnitMods unitModName, UnitModType type)
+        public UnitMod GetOrDefault(UnitMods unitModName, UnitModType type = UnitModType.TotalTemporary)
         {
             var found = Get(unitModName, type);
 
@@ -276,7 +298,7 @@ namespace Game.Entities
             return new(type);
         }
 
-        public void SetMult(UnitMods unitModName, UnitModType type, MultModifier multiplier)
+        public void SetMult(UnitMods unitModName, MultModifier multiplier, UnitModType type = UnitModType.TotalTemporary)
         {
             var newMod = new UnitMod(type);
             newMod.Mult = multiplier;
@@ -289,7 +311,7 @@ namespace Game.Entities
             }
         }
 
-        public void SetFlat(UnitMods unitModName, UnitModType type, FlatModifier modifier)
+        public void SetFlat(UnitMods unitModName, FlatModifier modifier, UnitModType type = UnitModType.TotalTemporary)
         {
             var newMod = new UnitMod(type);
             newMod.Flat = modifier;
@@ -307,7 +329,7 @@ namespace Game.Entities
             UpdateUnitMod(unitModName);
         }
 
-        public void ModifyMaxMultWithExchange(UnitMods unitModName, UnitModType type, MultModifier modForApply, MultModifier modForReplacement, bool apply)
+        public void ModifyMaxMultWithExchange(UnitMods unitModName, MultModifier modForApply, MultModifier modForReplacement, bool apply, UnitModType type = UnitModType.TotalTemporary)
         {
             if (modForApply == modForReplacement)
                 return;
@@ -331,7 +353,7 @@ namespace Game.Entities
             }
         }
 
-        public void ModifyMaxFlatWithExchange(UnitMods unitModName, UnitModType type, FlatModifier modForApply, FlatModifier modForReplacement, bool apply)
+        public void ModifyMaxFlatWithExchange(UnitMods unitModName, FlatModifier modForApply, FlatModifier modForReplacement, bool apply, UnitModType type = UnitModType.TotalTemporary)
         {
             if (modForApply == modForReplacement)
                 return;
@@ -355,7 +377,7 @@ namespace Game.Entities
             }
         }
 
-        public void ModifyMult(UnitMods unitModName, UnitModType type, MultModifier multiplier, bool apply)
+        public void ModifyMult(UnitMods unitModName, MultModifier multiplier, bool apply, UnitModType type = UnitModType.TotalTemporary)
         {
             if (multiplier.IsIdle)
                 return;
@@ -367,7 +389,7 @@ namespace Game.Entities
             UpdateUnitMod(unitModName);
         }
 
-        public void ModifyFlat(UnitMods unitModName, UnitModType type, FlatModifier modifier, bool apply)
+        public void ModifyFlat(UnitMods unitModName, FlatModifier modifier, bool apply, UnitModType type = UnitModType.TotalTemporary)
         {
             if (modifier.IsIdle)
                 return;
@@ -386,21 +408,27 @@ namespace Game.Entities
             switch (unitModName)
             {
                 case UnitMods.ResistanceHoly:
+                case UnitMods.DamageHoly:
                     school = SpellSchools.Holy;
                     break;
                 case UnitMods.ResistanceFire:
+                case UnitMods.DamageFire:
                     school = SpellSchools.Fire;
                     break;
                 case UnitMods.ResistanceNature:
+                case UnitMods.DamageNature:
                     school = SpellSchools.Nature;
                     break;
                 case UnitMods.ResistanceFrost:
+                case UnitMods.DamageFrost:
                     school = SpellSchools.Frost;
                     break;
                 case UnitMods.ResistanceShadow:
+                case UnitMods.DamageShadow:
                     school = SpellSchools.Shadow;
                     break;
                 case UnitMods.ResistanceArcane:
+                case UnitMods.DamageArcane:
                     school = SpellSchools.Arcane;
                     break;
             }
@@ -477,6 +505,19 @@ namespace Game.Entities
                 case UnitMods.AttackPowerRanged:
                     _owner.UpdateRangedAttackPowerAndDamage();
                     break;
+                case UnitMods.DamagePhysical:
+                    _owner.UpdateDamagePhysical(WeaponAttackType.BaseAttack);
+                    _owner.UpdateDamagePhysical(WeaponAttackType.OffAttack);
+                    _owner.UpdateDamagePhysical(WeaponAttackType.RangedAttack);
+                    break;
+                case UnitMods.DamageHoly:
+                case UnitMods.DamageFire:
+                case UnitMods.DamageNature:
+                case UnitMods.DamageFrost:
+                case UnitMods.DamageShadow:
+                case UnitMods.DamageArcane:
+                    _owner.UpdateSpellPower(GetSpellSchoolByAuraGroup(unitModName));
+                    break;
                 case UnitMods.DamageMainHand:
                     _owner.UpdateDamagePhysical(WeaponAttackType.BaseAttack);
                     break;
@@ -538,18 +579,6 @@ namespace Game.Entities
             _unitStatMods = _unitStatMods.Remove(type, family, unitModName);
         }
 
-        private enum UnitModFamily
-        {
-            None,
-            Stat,
-            Power,
-            Resistance,
-            SpellPower,
-            AttackPower,
-            WeaponDamage,
-            Max
-        }
-
         private UnitModFamily GetFamilyFromUnitModName(UnitMods unitModName)
         {
             switch (unitModName)
@@ -580,6 +609,14 @@ namespace Game.Entities
                 case UnitMods.AttackPowerMelee:
                 case UnitMods.AttackPowerRanged:
                     return UnitModFamily.AttackPower;
+                case UnitMods.DamagePhysical:
+                case UnitMods.DamageHoly:
+                case UnitMods.DamageFire:
+                case UnitMods.DamageNature:
+                case UnitMods.DamageFrost:
+                case UnitMods.DamageShadow:
+                case UnitMods.DamageArcane:
+                    return UnitModFamily.SpellDamage;
                 case UnitMods.DamageMainHand:
                 case UnitMods.DamageOffHand:
                 case UnitMods.DamageRanged:

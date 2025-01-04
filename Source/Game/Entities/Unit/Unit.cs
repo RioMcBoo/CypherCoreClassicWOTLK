@@ -40,7 +40,7 @@ namespace Game.Entities
                 m_spellImmune[i] = new();
 
             m_unitStatModManager = new(this);
-            m_unitStatModManager.ModifyMult(UnitMods.DamageOffHand, UnitModType.TotalPermanent, 0.5f, true);
+            m_unitStatModManager.ModifyMult(UnitMods.DamageOffHand, 0.5f, true, UnitModType.TotalPermanent);
 
             foreach (AuraType auraType in Enum.GetValues(typeof(AuraType)))
                 m_modAuras[auraType] = new List<AuraEffect>();
@@ -4135,12 +4135,12 @@ namespace Game.Entities
                     Player thisPlayer = ToPlayer();
                     if (thisPlayer != null)
                     {
-                        for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
+                        for (SpellSchools school = SpellSchools.Holy; school < SpellSchools.Max; school++)
                         {
-                            if (Convert.ToBoolean((int)schoolMask & (1 << (int)i)))
+                            if (schoolMask.HasSchool(school))
                             {
                                 maxModDamagePercentSchool = 
-                                    Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModDamageDonePercent[(int)i]);
+                                    Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModDamageDonePercent[(int)school]);
                             }
                         }
                     }
@@ -4333,7 +4333,7 @@ namespace Game.Entities
                 return CheckAttackFitToAuraRequirement(attackType, aurEff);
             });
 
-            StatMods.SetFlat(unitMod, UnitModType.TotalTemporary, (int)amount);
+            StatMods.SetFlat(unitMod, (int)amount);
         }
 
         public void UpdateAllDamageDoneMods()
@@ -4357,6 +4357,9 @@ namespace Game.Entities
                 if (!aurEff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
                     return false;
 
+                if (CheckAttackFitToAuraRequirement(WeaponAttackType.Any, aurEff))
+                    return false;
+
                 return CheckAttackFitToAuraRequirement(attackType, aurEff);
             });
 
@@ -4367,7 +4370,7 @@ namespace Game.Entities
                             );
             }
 
-            StatMods.SetMult(unitMod, UnitModType.TotalTemporary, factor);
+            StatMods.SetMult(unitMod, factor);
         }
 
         public void UpdateAllDamagePctDoneMods()

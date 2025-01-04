@@ -416,13 +416,16 @@ namespace Game.Entities
                 Flat = new((int)(GetTotalAttackPowerValue(attType) / 14.0f * attackPowerMod))
             };
 
-            StatMods.ApplyModsTo(minDamageValue, unitMod, myBasePerm: baseValue).ReApplyTo(maxDamageValue);
+            UnitMod? totalValue = StatMods.Get(UnitMods.DamagePhysical);
+
+            var cache = StatMods.ApplyModsTo(minDamageValue, unitMod, myBasePerm: baseValue, myTotalTemp: totalValue).ReApplyTo(maxDamageValue);
 
             min_damage = minDamageValue.TotalValue;
             max_damage = maxDamageValue.TotalValue;
 
             // wotlk_classic client doesn't show this multiplier for particular attack type (Are UpdateFields wrong?)
-            SetWeaponDmgMultiplier(maxDamageValue.TotalValue / maxDamageValue.NakedValue, attType);
+            SetWeaponDmgMultiplier(cache.TotalPermanent.HasValue ? cache.TotalPermanent.Value.Mult: 1.0f, attType);
+            SetModDamageDonePercent(SpellSchools.Normal, cache.TotalTemporary.HasValue ? cache.TotalTemporary.Value.Mult : 1.0f);
         }
 
         public float GetMeleeCritFromAgility()
@@ -582,6 +585,11 @@ namespace Game.Entities
             {
                 base.UpdateDamagePhysical(attType);
             }
+        }
+
+        public override void UpdateSpellPower(SpellSchools school)
+        {
+            SetModDamageDonePercent(school, StatMods.GetOrDefault(UnitMods.SpellDamageStart + (int)school).Mult);
         }
 
         public override void UpdateMeleeAttackPowerAndDamage(bool skipDependents = false)

@@ -639,7 +639,7 @@ namespace Game.Entities
 
             SetMeleeDamageSchool(cinfo.DmgSchool);
 
-            StatMods.SetFlat(UnitMods.Armor, UnitModType.BasePermanent, petlevel * 50);
+            StatMods.SetFlat(UnitMods.Armor, petlevel * 50, UnitModType.BasePermanent);
 
             SetBaseAttackTime(WeaponAttackType.BaseAttack, SharedConst.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.OffAttack, SharedConst.BaseAttackTime);
@@ -653,7 +653,7 @@ namespace Game.Entities
             if (!IsHunterPet())
             {
                 for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                    StatMods.SetFlat(UnitMods.ResistanceStart + i, UnitModType.BasePermanent, cinfo.Resistance[i]);
+                    StatMods.SetFlat(UnitMods.ResistanceStart + i, cinfo.Resistance[i], UnitModType.BasePermanent);
             }
 
             PowerType powerType = CalculateDisplayPowerType();
@@ -665,10 +665,10 @@ namespace Game.Entities
                 SetCreateHealth(pInfo.health);
                 SetCreateMana(pInfo.mana);
 
-                StatMods.SetMult(UnitMods.PowerStart + (int)powerType, UnitModType.BasePermanent, 1.0f);
+                StatMods.SetMult(UnitMods.PowerStart + (int)powerType, 1.0f, UnitModType.BasePermanent);
 
                 if (pInfo.armor > 0)
-                    StatMods.SetFlat(UnitMods.Armor, UnitModType.BasePermanent, pInfo.armor);
+                    StatMods.SetFlat(UnitMods.Armor, pInfo.armor, UnitModType.BasePermanent);
 
                 for (byte stat = 0; stat < (int)Stats.Max; ++stat)
                     SetCreateStat((Stats)stat, pInfo.stats[stat]);
@@ -799,8 +799,8 @@ namespace Game.Entities
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel));
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel));
 
-                            StatMods.SetFlat(UnitMods.Armor, UnitModType.BasePermanent, (int)(GetOwner().GetArmor() * 0.35f));  // Bonus Armor (35% of player armor)
-                            StatMods.SetFlat(UnitMods.StatStamina, UnitModType.BasePermanent, (int)(GetOwner().GetStat(Stats.Stamina) * 0.3f));  // Bonus Stamina (30% of player stamina)
+                            StatMods.SetFlat(UnitMods.Armor, (int)(GetOwner().GetArmor() * 0.35f), UnitModType.BasePermanent);  // Bonus Armor (35% of player armor)
+                            StatMods.SetFlat(UnitMods.StatStamina, (int)(GetOwner().GetStat(Stats.Stamina) * 0.3f), UnitModType.BasePermanent);  // Bonus Stamina (30% of player stamina)
                             
                             if (!HasAura(58877)) // prevent apply twice for the 2 wolves
                                 AddAura(58877, this); // Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
@@ -1131,7 +1131,7 @@ namespace Game.Entities
                 }
             }
 
-            StatMods.SetFlat(unitMod, UnitModType.BasePermanent, (int)(val + bonusAP));
+            StatMods.SetFlat(unitMod, (int)(val + bonusAP), UnitModType.BasePermanent);
             UnitModResult attackPowerValue = new();
 
             StatMods.ApplyModsTo(attackPowerValue, unitMod);
@@ -1187,43 +1187,35 @@ namespace Game.Entities
             };
 
             // Talent: Cobra Reflexes [2107:0]^1 = 61682
-            UnitMod? damageModFromCobraReflexes = null;
+            UnitMod damageMod = new(UnitModType.TotalTemporary);
             if (GetAuraEffectOfTalent(2107, 0) is AuraEffect auraEffect)
             {
-                damageModFromCobraReflexes = new(UnitModType.TotalPermanent)
-                {
-                    Mult = new(-auraEffect.GetAmount())
-                };
+                damageMod.Mult.ModifyPercentage(-auraEffect.GetAmount(), true);
             }
 
             //  Pet's base damage changes depending on happiness
-            UnitMod? damageModFromHapiness = default;
             if (IsHunterPet())
             {                
                 switch (ToPet().GetHappinessState())
                 {
                     case HappinessState.Happy:
                         // 125% of normal damage
-                        damageModFromHapiness = new(UnitModType.TotalTemporary)
-                        {
-                            Mult = new(1.25f)
-                        };
+                        damageMod.Mult.Modify(1.25f, true);
                         break;
                     case HappinessState.Content:
                         // 100% of normal damage, nothing to modify
                         break;
                     case HappinessState.Unhappy:
                         // 75% of normal damage
-                        damageModFromHapiness = new(UnitModType.TotalTemporary)
-                        {
-                            Mult = new(0.75f)
-                        };
+                        damageMod.Mult.Modify(0.75f, true);
                         break;
                 }
             }
 
-            StatMods.ApplyModsTo(weaponMinDamage, unitMod, 
-                myBasePerm: initialDamageBonus, myTotalPerm: damageModFromCobraReflexes, myTotalTemp: damageModFromHapiness)
+            // Mods from auras
+            damageMod.Modify(StatMods.Get(UnitMods.DamagePhysical), true);
+
+            StatMods.ApplyModsTo(weaponMinDamage, unitMod, myBasePerm: initialDamageBonus, myTotalTemp: damageMod)
                 .ReApplyTo(weaponMaxDamage);
 
             SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinDamage), weaponMinDamage.TotalValue);

@@ -89,6 +89,7 @@ namespace Game.Entities
 
         public virtual void UpdateMeleeAttackPowerAndDamage(bool skipDependents = false) { }
         public virtual void UpdateRangedAttackPowerAndDamage(bool skipDependents = false) { }
+        public virtual void UpdateSpellPower(SpellSchools school) { }
 
         public virtual void UpdateDamagePhysical(WeaponAttackType attType)
         {

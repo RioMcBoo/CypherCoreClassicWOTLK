@@ -607,7 +607,7 @@ namespace Game.Entities
                             }
 
                             enchant_amount = Math.Max(enchant_amount, 1);
-                            StatMods.ModifyFlat(UnitMods.ResistanceStart + enchant_spell_id, UnitModType.TotalTemporary, enchant_amount, apply);
+                            StatMods.ModifyFlat(UnitMods.ResistanceStart + enchant_spell_id, enchant_amount, apply, UnitModType.TotalTemporary);
                             break;
                         case ItemEnchantmentType.Stat:
                         {
@@ -634,31 +634,31 @@ namespace Game.Entities
                             {
                                 case ItemModType.Mana:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} MANA");
-                                    StatMods.ModifyFlat(UnitMods.Mana, UnitModType.BasePermanent, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.Mana, enchant_amount, apply, UnitModType.BasePermanent);
                                     break;
                                 case ItemModType.Health:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} HEALTH");
-                                    StatMods.ModifyFlat(UnitMods.Health, UnitModType.BasePermanent, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.Health, enchant_amount, apply, UnitModType.BasePermanent);
                                     break;
                                 case ItemModType.Agility:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} AGILITY");
-                                    StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.TotalTemporary, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.StatAgility, enchant_amount, apply, UnitModType.TotalTemporary);
                                     break;
                                 case ItemModType.Strength:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} STRENGTH");
-                                    StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.TotalTemporary, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.StatStrength, enchant_amount, apply, UnitModType.TotalTemporary);
                                     break;
                                 case ItemModType.Intellect:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} INTELLECT");
-                                    StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.TotalTemporary, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.StatIntellect, enchant_amount, apply, UnitModType.TotalTemporary);
                                     break;
                                 case ItemModType.Spirit:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} SPIRIT");
-                                    StatMods.ModifyFlat(UnitMods.StatSpirit, UnitModType.TotalTemporary, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.StatSpirit, enchant_amount, apply, UnitModType.TotalTemporary);
                                     break;
                                 case ItemModType.Stamina:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} STAMINA");
-                                    StatMods.ModifyFlat(UnitMods.StatStamina, UnitModType.TotalTemporary, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.StatStamina, enchant_amount, apply, UnitModType.TotalTemporary);
                                     break;
                                 case ItemModType.DefenseSkillRating:
                                     ApplyRatingMod(CombatRating.DefenseSkill, enchant_amount, apply);
@@ -764,12 +764,12 @@ namespace Game.Entities
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} EXPERTISE");
                                     break;
                                 case ItemModType.AttackPower:
-                                    StatMods.ModifyFlat(UnitMods.AttackPowerMelee, UnitModType.TotalTemporary, enchant_amount, apply);
-                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, UnitModType.TotalTemporary, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.AttackPowerMelee, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, enchant_amount, apply, UnitModType.TotalTemporary);
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} ATTACK_POWER");
                                     break;
                                 case ItemModType.RangedAttackPower:
-                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, UnitModType.TotalTemporary, enchant_amount, apply);
+                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, enchant_amount, apply, UnitModType.TotalTemporary);
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} RANGED_ATTACK_POWER");
                                     break;
                                 case ItemModType.ManaRegeneration:

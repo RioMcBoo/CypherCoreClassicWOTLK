@@ -357,12 +357,12 @@ namespace Game.Entities
                     SetHealth(previousHealth);
             
                 SetMeleeDamageSchool(cInfo.DmgSchool);
-                StatMods.SetFlat(UnitMods.ResistanceHoly, UnitModType.BasePermanent, cInfo.Resistance[(int)SpellSchools.Holy]);
-                StatMods.SetFlat(UnitMods.ResistanceFire, UnitModType.BasePermanent, cInfo.Resistance[(int)SpellSchools.Fire]);
-                StatMods.SetFlat(UnitMods.ResistanceNature, UnitModType.BasePermanent, cInfo.Resistance[(int)SpellSchools.Nature]);
-                StatMods.SetFlat(UnitMods.ResistanceFrost, UnitModType.BasePermanent, cInfo.Resistance[(int)SpellSchools.Frost]);
-                StatMods.SetFlat(UnitMods.ResistanceShadow, UnitModType.BasePermanent, cInfo.Resistance[(int)SpellSchools.Shadow]);
-                StatMods.SetFlat(UnitMods.ResistanceArcane, UnitModType.BasePermanent, cInfo.Resistance[(int)SpellSchools.Arcane]);
+                StatMods.SetFlat(UnitMods.ResistanceHoly, cInfo.Resistance[(int)SpellSchools.Holy], UnitModType.BasePermanent);
+                StatMods.SetFlat(UnitMods.ResistanceFire, cInfo.Resistance[(int)SpellSchools.Fire], UnitModType.BasePermanent);
+                StatMods.SetFlat(UnitMods.ResistanceNature, cInfo.Resistance[(int)SpellSchools.Nature], UnitModType.BasePermanent);
+                StatMods.SetFlat(UnitMods.ResistanceFrost, cInfo.Resistance[(int)SpellSchools.Frost], UnitModType.BasePermanent);
+                StatMods.SetFlat(UnitMods.ResistanceShadow, cInfo.Resistance[(int)SpellSchools.Shadow], UnitModType.BasePermanent);
+                StatMods.SetFlat(UnitMods.ResistanceArcane, cInfo.Resistance[(int)SpellSchools.Arcane], UnitModType.BasePermanent);
 
                 SetCanModifyStats(true);
                 UpdateAllStats();
@@ -1554,12 +1554,12 @@ namespace Game.Entities
             SetHealth(health);
             ResetPlayerDamageReq();
 
-            StatMods.SetFlat(UnitMods.Health, UnitModType.BasePermanent, health);
+            StatMods.SetFlat(UnitMods.Health, health, UnitModType.BasePermanent);
 
             // mana
             PowerType powerType = CalculateDisplayPowerType();
             SetCreateMana(stats.BaseMana);
-            StatMods.SetMult(UnitMods.PowerStart + (int)powerType, UnitModType.BasePermanent, GetCreatureDifficulty().ManaModifier);
+            StatMods.SetMult(UnitMods.PowerStart + (int)powerType, GetCreatureDifficulty().ManaModifier, UnitModType.BasePermanent);
             SetPowerType(powerType);
 
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
@@ -1585,11 +1585,11 @@ namespace Game.Entities
             SetBaseWeaponDamage(WeaponAttackType.RangedAttack, WeaponDamageRange.MinDamage, weaponBaseMinDamage);
             SetBaseWeaponDamage(WeaponAttackType.RangedAttack, WeaponDamageRange.MaxDamage, weaponBaseMaxDamage);
 
-            StatMods.SetFlat(UnitMods.AttackPowerMelee, UnitModType.BasePermanent, stats.AttackPower);
-            StatMods.SetFlat(UnitMods.AttackPowerRanged, UnitModType.BasePermanent, stats.RangedAttackPower);
+            StatMods.SetFlat(UnitMods.AttackPowerMelee, stats.AttackPower, UnitModType.BasePermanent);
+            StatMods.SetFlat(UnitMods.AttackPowerRanged, stats.RangedAttackPower, UnitModType.BasePermanent);
 
             int armor = stats.GenerateArmor(GetCreatureDifficulty());  // @todo Why is this treated as int32 when it's a float?
-            StatMods.SetFlat(UnitMods.Armor, UnitModType.BasePermanent, armor);
+            StatMods.SetFlat(UnitMods.Armor, armor, UnitModType.BasePermanent);
         }
 
         void SelectWildBattlePetLevel()

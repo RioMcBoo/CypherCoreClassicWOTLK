@@ -6877,7 +6877,7 @@ namespace Game.Entities
                 }
             }
 
-            StatMods.ModifyFlat(unitMod, UnitModType.TotalPermanent, (int)amount, true);
+            StatMods.ModifyFlat(unitMod, (int)amount, true);
         }
 
         void UpdateBaseModGroup(BaseModGroup modGroup)
@@ -7589,6 +7589,8 @@ namespace Game.Entities
                 case WeaponAttackType.RangedAttack:
                     slot = EquipmentSlot.Ranged;
                     break;
+                case WeaponAttackType.Any:
+                    return null;
                 default:
                     return null;
             }

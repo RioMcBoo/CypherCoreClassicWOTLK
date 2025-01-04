@@ -3679,25 +3679,25 @@ namespace Game.Entities
                 switch (statType)
                 {
                     case ItemModType.Mana:
-                        StatMods.ModifyFlat(UnitMods.Mana, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.Mana, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.Health:                           // modify HP
-                        StatMods.ModifyFlat(UnitMods.Health, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.Health, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.Agility:                          // modify agility
-                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.Strength:                         //modify strength
-                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.Intellect:                        //modify intellect
-                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.Spirit:                           //modify spirit
-                        StatMods.ModifyFlat(UnitMods.StatSpirit, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatSpirit, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.Stamina:                          //modify stamina
-                        StatMods.ModifyFlat(UnitMods.StatStamina, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatStamina, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.DefenseSkillRating:
                         ApplyRatingMod(CombatRating.DefenseSkill, (int)(val * combatRatingMultiplier), apply);
@@ -3788,11 +3788,11 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Expertise, (int)(val * combatRatingMultiplier), apply);
                         break;
                     case ItemModType.AttackPower:
-                        StatMods.ModifyFlat(UnitMods.AttackPowerMelee, UnitModType.TotalPermanent, val, apply);
-                        StatMods.ModifyFlat(UnitMods.AttackPowerRanged, UnitModType.TotalPermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.AttackPowerMelee, val, apply, UnitModType.TotalPermanent);
+                        StatMods.ModifyFlat(UnitMods.AttackPowerRanged, val, apply, UnitModType.TotalPermanent);
                         break;
                     case ItemModType.RangedAttackPower:
-                        StatMods.ModifyFlat(UnitMods.AttackPowerRanged, UnitModType.TotalPermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.AttackPowerRanged, val, apply, UnitModType.TotalPermanent);
                         break;
                     case ItemModType.ManaRegeneration:
                         ApplyManaRegenBonus(val, apply);
@@ -3816,42 +3816,42 @@ namespace Game.Entities
                     //    ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
                     //    break;
                     case ItemModType.ExtraArmor:
-                        StatMods.ModifyFlat(UnitMods.Armor, UnitModType.TotalPermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.Armor, val, apply, UnitModType.TotalPermanent);
                         break;
                     case ItemModType.FireResistance:
-                        StatMods.ModifyFlat(UnitMods.ResistanceFire, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceFire, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.FrostResistance:
-                        StatMods.ModifyFlat(UnitMods.ResistanceFrost, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceFrost, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.HolyResistance:
-                        StatMods.ModifyFlat(UnitMods.ResistanceHoly, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceHoly, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.ShadowResistance:
-                        StatMods.ModifyFlat(UnitMods.ResistanceShadow, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceShadow, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.NatureResistance:
-                        StatMods.ModifyFlat(UnitMods.ResistanceNature, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceNature, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.ArcaneResistance:
-                        StatMods.ModifyFlat(UnitMods.ResistanceArcane, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.ResistanceArcane, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.AgiStrInt:
-                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
-                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
-                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, val, apply, UnitModType.BasePermanent);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, val, apply, UnitModType.BasePermanent);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.AgiStr:
-                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
-                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, val, apply, UnitModType.BasePermanent);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.AgiInt:
-                        StatMods.ModifyFlat(UnitMods.StatAgility, UnitModType.BasePermanent, val, apply);
-                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatAgility, val, apply, UnitModType.BasePermanent);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, val, apply, UnitModType.BasePermanent);
                         break;
                     case ItemModType.StrInt:
-                        StatMods.ModifyFlat(UnitMods.StatStrength, UnitModType.BasePermanent, val, apply);
-                        StatMods.ModifyFlat(UnitMods.StatIntellect, UnitModType.BasePermanent, val, apply);
+                        StatMods.ModifyFlat(UnitMods.StatStrength, val, apply, UnitModType.BasePermanent);
+                        StatMods.ModifyFlat(UnitMods.StatIntellect, val, apply, UnitModType.BasePermanent);
                         break;
                 }
             }
@@ -3875,7 +3875,7 @@ namespace Game.Entities
                 }
 
                 if (resistance != 0)
-                    StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)i, UnitModType.BasePermanent, resistance, apply);
+                    StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)i, resistance, apply, UnitModType.BasePermanent);
             }
 
             if (proto.GetShieldBlockValue(proto.GetItemLevel()) is int shieldBlockValue && shieldBlockValue != 0)

@@ -1690,7 +1690,14 @@ namespace Game.Entities
             }
         }
 
-        public virtual bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect aurEff) { return true; }
+        public virtual bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect aurEff)
+        {
+            SpellInfo spellInfo = aurEff.GetSpellInfo();
+            if (spellInfo.EquippedItemClass == ItemClass.None)
+                return true;
+
+            return false; 
+        }
 
         public void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
         {

@@ -184,18 +184,25 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Unit) && !IsPet())
                 DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Classification);
 
-            float maxModDamagePercentSchool = 0.0f;
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
+            float maxModDamagePercentSchool = 1.0f;
+            SpellSchoolMask spellSchoolMask = spellProto.GetSchoolMask();
+
+            if (this is Player player)
             {
-                for (int i = 0; i < (int)SpellSchools.Max; ++i)
+                for (SpellSchools school = SpellSchools.Normal; school < SpellSchools.Max; school++)
                 {
-                    if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << i)))
-                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModDamageDonePercent[i]);
+                    if (spellSchoolMask.HasSchool(school))
+                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, player.m_activePlayerData.ModDamageDonePercent[(int)school]);
                 }
             }
             else
-                maxModDamagePercentSchool = GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, (uint)spellProto.GetSchoolMask());
+            {                
+                for (SpellSchools school = SpellSchools.Normal; school < SpellSchools.Max; school++)
+                {
+                    if (spellSchoolMask.HasSchool(school))
+                        maxModDamagePercentSchool *= StatMods.GetOrDefault(UnitMods.SpellDamageStart + (int)school).Mult;
+                }
+            }
 
             DoneTotalMod *= maxModDamagePercentSchool;
 

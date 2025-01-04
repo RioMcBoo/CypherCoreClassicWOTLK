@@ -449,7 +449,9 @@ namespace Framework.Constants
         BaseAttack = 0,
         OffAttack = 1,
         RangedAttack = 2,
-        Max
+        Max,
+
+        Any = Max,
     }
 
     public enum UnitTypeMask
