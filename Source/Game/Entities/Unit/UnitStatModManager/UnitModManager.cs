@@ -516,7 +516,7 @@ namespace Game.Entities
                 case UnitMods.DamageFrost:
                 case UnitMods.DamageShadow:
                 case UnitMods.DamageArcane:
-                    _owner.UpdateSpellPower(GetSpellSchoolByAuraGroup(unitModName));
+                    _owner.UpdateDamageSpell(GetSpellSchoolByAuraGroup(unitModName));
                     break;
                 case UnitMods.DamageMainHand:
                     _owner.UpdateDamagePhysical(WeaponAttackType.BaseAttack);

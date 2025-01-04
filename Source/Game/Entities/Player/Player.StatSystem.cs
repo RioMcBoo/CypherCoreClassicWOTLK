@@ -587,7 +587,7 @@ namespace Game.Entities
             }
         }
 
-        public override void UpdateSpellPower(SpellSchools school)
+        public override void UpdateDamageSpell(SpellSchools school)
         {
             SetModDamageDonePercent(school, StatMods.GetOrDefault(UnitMods.SpellDamageStart + (int)school).Mult);
         }
