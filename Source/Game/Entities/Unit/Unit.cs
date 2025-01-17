@@ -4370,7 +4370,7 @@ namespace Game.Entities
                             );
             }
 
-            StatMods.SetMult(unitMod, factor);
+            StatMods.SetMult(unitMod, factor, UnitModType.TotalPermanent);
         }
 
         public void UpdateAllDamagePctDoneMods()
