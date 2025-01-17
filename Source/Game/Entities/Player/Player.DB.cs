@@ -515,7 +515,8 @@ namespace Game.Entities
                     // negative effects should continue counting down after logout
                     if (remainTime != -1 && (!spellInfo.IsPositive() || spellInfo.HasAttribute(SpellAttr4.AuraExpiresOffline)))
                     {
-                        if (remainTime <= timediff)
+                        /// if (remainTime <= timediff) // Overflow may occur here
+                        if (new Seconds(remainTime / Time.MillisecondsInSecond) <= timediff)
                             continue;
 
                         remainTime -= timediff;
