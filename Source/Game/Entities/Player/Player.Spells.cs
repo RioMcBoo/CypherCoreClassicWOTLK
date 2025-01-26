@@ -479,15 +479,15 @@ namespace Game.Entities
                 ApplyEnchantment(item, slot, apply);
         }
 
-        public void ApplyEnchantment(Item item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false)
+        public void ApplyEnchantment(Item item, EnchantmentSlot enchantmentSlot, bool apply, bool apply_dur = true, bool ignore_condition = false)
         {
             if (item == null || !item.IsEquipped())
                 return;
 
-            if (slot >= EnchantmentSlot.Max)
+            if (enchantmentSlot >= EnchantmentSlot.Max)
                 return;
 
-            var enchant_id = item.GetEnchantmentId(slot);
+            var enchant_id = item.GetEnchantmentId(enchantmentSlot);
             if (enchant_id == 0)
                 return;
 
@@ -506,9 +506,9 @@ namespace Game.Entities
 
             // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
             // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
-            if (slot == EnchantmentSlot.EnhancementSocket || slot == EnchantmentSlot.EnhancementSocket2 || slot == EnchantmentSlot.EnhancementSocket3)
+            if (enchantmentSlot == EnchantmentSlot.EnhancementSocket || enchantmentSlot == EnchantmentSlot.EnhancementSocket2 || enchantmentSlot == EnchantmentSlot.EnhancementSocket3)
             {
-                if (item.GetSocketType(slot - EnchantmentSlot.EnhancementSocket) == 0)
+                if (item.GetSocketType(enchantmentSlot - EnchantmentSlot.EnhancementSocket) == 0)
                 {
                     // Check if the requirements for the prismatic socket are met before applying the gem stats
                     var pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
@@ -517,7 +517,7 @@ namespace Game.Entities
                 }
 
                 // Cogwheel gems dont have requirement data set in SpellItemEnchantment.dbc, but they do have it in Item-sparse.db2
-                var gem = item.GetGem(slot - EnchantmentSlot.EnhancementSocket);
+                var gem = item.GetGem(enchantmentSlot - EnchantmentSlot.EnhancementSocket);
                 if (gem != null)
                 {
                     ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate(gem.ItemId);
@@ -548,7 +548,7 @@ namespace Game.Entities
                         {
                             var attackType = GetAttackBySlot(item.InventorySlot);
                             if (attackType.HasValue)
-                                UpdateDamageDoneMods(attackType.Value, apply ? null : slot);
+                                UpdateDamageDoneMods(attackType.Value, apply ? null : enchantmentSlot);
                         }
                         break;
                         case ItemEnchantmentType.EquipSpell:
@@ -642,23 +642,23 @@ namespace Game.Entities
                                     break;
                                 case ItemModType.Agility:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} AGILITY");
-                                    StatMods.ModifyFlat(UnitMods.StatAgility, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.StatAgility, enchant_amount, apply, enchantmentSlot);
                                     break;
                                 case ItemModType.Strength:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} STRENGTH");
-                                    StatMods.ModifyFlat(UnitMods.StatStrength, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.StatStrength, enchant_amount, apply, enchantmentSlot);
                                     break;
                                 case ItemModType.Intellect:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} INTELLECT");
-                                    StatMods.ModifyFlat(UnitMods.StatIntellect, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.StatIntellect, enchant_amount, apply, enchantmentSlot);
                                     break;
                                 case ItemModType.Spirit:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} SPIRIT");
-                                    StatMods.ModifyFlat(UnitMods.StatSpirit, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.StatSpirit, enchant_amount, apply, enchantmentSlot);
                                     break;
                                 case ItemModType.Stamina:
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} STAMINA");
-                                    StatMods.ModifyFlat(UnitMods.StatStamina, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.StatStamina, enchant_amount, apply, enchantmentSlot);
                                     break;
                                 case ItemModType.DefenseSkillRating:
                                     ApplyRatingMod(CombatRating.DefenseSkill, enchant_amount, apply);
@@ -764,12 +764,12 @@ namespace Game.Entities
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} EXPERTISE");
                                     break;
                                 case ItemModType.AttackPower:
-                                    StatMods.ModifyFlat(UnitMods.AttackPowerMelee, enchant_amount, apply, UnitModType.TotalTemporary);
-                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.AttackPowerMelee, enchant_amount, apply, enchantmentSlot);
+                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, enchant_amount, apply, enchantmentSlot);
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} ATTACK_POWER");
                                     break;
                                 case ItemModType.RangedAttackPower:
-                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, enchant_amount, apply, UnitModType.TotalTemporary);
+                                    StatMods.ModifyFlat(UnitMods.AttackPowerRanged, enchant_amount, apply, enchantmentSlot);
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} RANGED_ATTACK_POWER");
                                     break;
                                 case ItemModType.ManaRegeneration:
@@ -809,7 +809,7 @@ namespace Game.Entities
                         {
                             var attackType = GetAttackBySlot(item.InventorySlot);
                             if (attackType.HasValue)
-                                UpdateDamageDoneMods(attackType.Value, apply ? null : slot);
+                                UpdateDamageDoneMods(attackType.Value, apply ? null : enchantmentSlot);
                             break;
                         }
                         case ItemEnchantmentType.UseSpell:
@@ -834,7 +834,7 @@ namespace Game.Entities
             }
 
             // visualize enchantment at player and equipped items
-            if (slot == EnchantmentSlot.EnhancementPermanent && item.InventorySlot < m_playerData.VisibleItems.GetSize())
+            if (enchantmentSlot == EnchantmentSlot.EnhancementPermanent && item.InventorySlot < m_playerData.VisibleItems.GetSize())
             {
                 VisibleItem visibleItem = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, item.InventorySlot);
                 SetUpdateFieldValue(visibleItem.ModifyValue(visibleItem.ItemVisual), item.GetVisibleItemVisual(this));
@@ -845,14 +845,14 @@ namespace Game.Entities
                 if (apply)
                 {
                     // set duration
-                    Milliseconds duration = item.GetEnchantmentDuration(slot);
+                    Milliseconds duration = item.GetEnchantmentDuration(enchantmentSlot);
                     if (duration > 0)
-                        AddEnchantmentDuration(item, slot, duration);
+                        AddEnchantmentDuration(item, enchantmentSlot, duration);
                 }
                 else
                 {
                     // duration == 0 will remove EnchantDuration
-                    AddEnchantmentDuration(item, slot, Milliseconds.Zero);
+                    AddEnchantmentDuration(item, enchantmentSlot, Milliseconds.Zero);
                 }
             }
         }

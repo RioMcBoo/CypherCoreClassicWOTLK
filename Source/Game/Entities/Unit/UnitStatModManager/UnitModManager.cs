@@ -389,6 +389,12 @@ namespace Game.Entities
             UpdateUnitMod(unitModName);
         }
 
+        public void ModifyMult(UnitMods unitModName, MultModifier multiplier, bool apply, EnchantmentSlot enchantmentSlot)
+        {
+            UnitModType modType = GetUnitModTypeFromEnchantmentSlot(enchantmentSlot);
+            ModifyMult(unitModName, multiplier, apply, modType);
+        }
+
         public void ModifyFlat(UnitMods unitModName, FlatModifier modifier, bool apply, UnitModType type = UnitModType.TotalTemporary)
         {
             if (modifier.IsIdle)
@@ -399,6 +405,27 @@ namespace Game.Entities
             existingMod.Modify(modifier, apply);
             CheckForRemove(existingMod, type, family, unitModName);
             UpdateUnitMod(unitModName);
+        }
+
+        public void ModifyFlat(UnitMods unitModName, FlatModifier modifier, bool apply, EnchantmentSlot enchantmentSlot)
+        {
+            UnitModType modType = GetUnitModTypeFromEnchantmentSlot(enchantmentSlot);
+            ModifyFlat(unitModName, modifier, apply, modType);
+        }
+
+        private UnitModType GetUnitModTypeFromEnchantmentSlot(EnchantmentSlot enchantmentSlot)
+        {
+            switch (enchantmentSlot)
+            {
+                case EnchantmentSlot.Property0:
+                case EnchantmentSlot.Property1:
+                case EnchantmentSlot.Property2:
+                case EnchantmentSlot.Property3:
+                case EnchantmentSlot.Property4:
+                    return UnitModType.BasePermanent;
+            }
+
+            return UnitModType.TotalTemporary;
         }
 
         private SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitModName)
