@@ -205,7 +205,7 @@ namespace Game.Entities
             if (IsInFeralForm())
                 return;                                             // always maximized SKILL_FERAL_COMBAT in fact
 
-            if (GetShapeshiftForm() == ShapeShiftForm.TreeOfLife)
+            if (GetShapeshiftForm() == ShapeShiftForm.TreeForm)
                 return;                                             // use weapon but not skill up
 
             if (victim.GetTypeId() == TypeId.Unit && victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoSkillGains))

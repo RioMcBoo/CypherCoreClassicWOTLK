@@ -243,7 +243,7 @@ namespace Framework.Constants
     {
         None = 0,
         CatForm = 1,
-        TreeOfLife = 2,
+        TreeForm = 2,
         TravelForm = 3,
         AquaticForm = 4,
         BearForm = 5,
@@ -268,7 +268,7 @@ namespace Framework.Constants
         TigerStance = 24,
         Undead = 25,
         Frenzy = 26,
-        FlightFormEpic = 27,
+        FlightEpicForm = 27,
         Shadowform = 28,
         FlightForm = 29,
         Stealth = 30,

@@ -742,7 +742,7 @@ namespace Game.Spells
                     spellId3 = 106840;
                     spellId4 = 113636;
                     break;
-                case ShapeShiftForm.TreeOfLife:
+                case ShapeShiftForm.TreeForm:
                     spellId = 5420;
                     spellId2 = 81097;
                     break;
@@ -762,7 +762,7 @@ namespace Game.Spells
                     spellId = 33948;
                     spellId2 = 34764;
                     break;
-                case ShapeShiftForm.FlightFormEpic:
+                case ShapeShiftForm.FlightEpicForm:
                     spellId = 40122;
                     spellId2 = 40121;
                     break;
@@ -1296,11 +1296,12 @@ namespace Game.Spells
                 switch (form)
                 {
                     case ShapeShiftForm.CatForm:
-                    case ShapeShiftForm.TreeOfLife:
+                    case ShapeShiftForm.TreeForm:
                     case ShapeShiftForm.TravelForm:
                     case ShapeShiftForm.AquaticForm:
                     case ShapeShiftForm.BearForm:
                     case ShapeShiftForm.FlightFormEpic:
+                    case ShapeShiftForm.FlightEpicForm:
                     case ShapeShiftForm.FlightForm:
                     case ShapeShiftForm.MoonkinForm:
                     {

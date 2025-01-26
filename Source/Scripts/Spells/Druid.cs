@@ -731,7 +731,7 @@ namespace Scripts.Spells.Druid
 
             return target.GetShapeshiftForm() switch
             {
-                ShapeShiftForm.BearForm or ShapeShiftForm.DireBearForm or ShapeShiftForm.CatForm or ShapeShiftForm.MoonkinForm or ShapeShiftForm.None or ShapeShiftForm.TreeOfLife => true,
+                ShapeShiftForm.BearForm or ShapeShiftForm.DireBearForm or ShapeShiftForm.CatForm or ShapeShiftForm.MoonkinForm or ShapeShiftForm.None or ShapeShiftForm.TreeForm => true,
                 _ => false
             };
         }
@@ -747,7 +747,7 @@ namespace Scripts.Spells.Druid
                 ShapeShiftForm.CatForm => SpellIds.FormsTrinketCat,
                 ShapeShiftForm.MoonkinForm => SpellIds.FormsTrinketMoonkin,
                 ShapeShiftForm.None => SpellIds.FormsTrinketNone,
-                ShapeShiftForm.TreeOfLife => SpellIds.FormsTrinketTree,
+                ShapeShiftForm.TreeForm => SpellIds.FormsTrinketTree,
                 _ => 0
             };
 

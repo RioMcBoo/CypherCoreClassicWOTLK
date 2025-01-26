@@ -4487,7 +4487,7 @@ namespace Game.Entities
             // Tree of Life (Passive)
             ApplySpellFix([5420], spellInfo =>
             {
-                spellInfo.Stances = 1L << ((int)ShapeShiftForm.TreeOfLife - 1);
+                spellInfo.Stances = 1L << ((int)ShapeShiftForm.TreeForm - 1);
             });
 
             // Gaze of Occu'thar
