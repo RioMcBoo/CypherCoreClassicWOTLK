@@ -14,17 +14,6 @@ namespace Game.Entities
     {
         public UnitModManager StatMods => m_unitStatModManager;
 
-        public static (float Rate, WorldCfg Config)[] powerRegenInfo =
-        {
-            ( 0.0f,     WorldCfg.RatePowerMana),            // POWER_MANA
-            ( -12.5f,   WorldCfg.RatePowerRageLoss),        // POWER_RAGE,           -1.25 rage per second
-            ( 0.0f,     WorldCfg.None),                     // POWER_FOCUS
-            ( 10.0f,    WorldCfg.RatePowerEnergy),          // POWER_ENERGY,         +10 energy per second
-            ( 0.0f,     WorldCfg.None),                     // POWER_HAPPINESS
-            ( 0.0f,     WorldCfg.None),                     // POWER_RUNE
-            ( -12.5f,   WorldCfg.RatePowerRunicPowerLoss)   // POWER_RUNIC_POWER,    -1.25 runic power per second
-        };
-
         int GetMinPower(PowerType power) { return 0; }
 
         // returns negative amount on power reduction

@@ -34,42 +34,8 @@ namespace Game
 
             // Send server info on login?
             Values[WorldCfg.EnableSinfoLogin] = GetDefaultValue("Server.LoginInfo", false);
-
+            
             // Read all rates from the config file
-            static void SetRegenRate(WorldCfg rate, string configKey)
-            {
-                float default_rate = GetDefaultValue(configKey, 1.0f);
-                if (default_rate < 0.0f)
-                {
-                    Log.outError(LogFilter.ServerLoading,
-                        $"{configKey} ({default_rate}) must be > 0. Using 1 instead.");
-
-                    default_rate = 1.0f;
-                }
-
-                Values[rate] = default_rate;
-            }
-
-            SetRegenRate(WorldCfg.RateHealth, "Rate.Health");
-            SetRegenRate(WorldCfg.RatePowerMana, "Rate.Mana");
-            SetRegenRate(WorldCfg.RatePowerRageIncome, "Rate.Rage.Gain");
-            SetRegenRate(WorldCfg.RatePowerRageLoss, "Rate.Rage.Loss");
-            SetRegenRate(WorldCfg.RatePowerFocus, "Rate.Focus");
-            SetRegenRate(WorldCfg.RatePowerEnergy, "Rate.Energy");
-            SetRegenRate(WorldCfg.RatePowerComboPointsLoss, "Rate.ComboPoints.Loss");
-            SetRegenRate(WorldCfg.RatePowerRunicPowerIncome, "Rate.RunicPower.Gain");
-            SetRegenRate(WorldCfg.RatePowerRunicPowerLoss, "Rate.RunicPower.Loss");
-            SetRegenRate(WorldCfg.RatePowerSoulShards, "Rate.SoulShards.Loss");
-            SetRegenRate(WorldCfg.RatePowerLunarPower, "Rate.LunarPower.Loss");
-            SetRegenRate(WorldCfg.RatePowerHolyPower, "Rate.HolyPower.Loss");
-            SetRegenRate(WorldCfg.RatePowerMaelstrom, "Rate.Maelstrom.Loss");
-            SetRegenRate(WorldCfg.RatePowerChi, "Rate.Chi.Loss");
-            SetRegenRate(WorldCfg.RatePowerInsanity, "Rate.Insanity.Loss");
-            SetRegenRate(WorldCfg.RatePowerArcaneCharges, "Rate.ArcaneCharges.Loss");
-            SetRegenRate(WorldCfg.RatePowerFury, "Rate.Fury.Loss");
-            SetRegenRate(WorldCfg.RatePowerPain, "Rate.Pain.Loss");
-            SetRegenRate(WorldCfg.RatePowerEssence, "Rate.Essence.Loss");
-
             Values[WorldCfg.RateSkillDiscovery] = GetDefaultValue("Rate.Skill.Discovery", 1.0f);
             Values[WorldCfg.RateDropItemPoor] = GetDefaultValue("Rate.Drop.Item.Poor", 1.0f);
             Values[WorldCfg.RateDropItemNormal] = GetDefaultValue("Rate.Drop.Item.Normal", 1.0f);

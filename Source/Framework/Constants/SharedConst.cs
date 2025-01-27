@@ -2192,8 +2192,6 @@ namespace Framework.Constants
         /// <summary cref="float">float</summary>
         RateDurabilityLossParry,
         /// <summary cref="float">float</summary>
-        RateHealth,
-        /// <summary cref="float">float</summary>
         RateHonor,
         /// <summary cref="float">float</summary>
         RateInstanceResetTime,
@@ -2203,42 +2201,6 @@ namespace Framework.Constants
         RateMoneyQuest,
         /// <summary cref="float">float</summary>
         RateMovespeed,
-        /// <summary cref="float">float</summary>
-        RatePowerArcaneCharges,
-        /// <summary cref="float">float</summary>
-        RatePowerChi,
-        /// <summary cref="float">float</summary>
-        RatePowerComboPointsLoss,
-        /// <summary cref="float">float</summary>
-        RatePowerEnergy,
-        /// <summary cref="float">float</summary>
-        RatePowerFocus,
-        /// <summary cref="float">float</summary>
-        RatePowerFury,
-        /// <summary cref="float">float</summary>
-        RatePowerHolyPower,
-        /// <summary cref="float">float</summary>
-        RatePowerInsanity,
-        /// <summary cref="float">float</summary>
-        RatePowerLunarPower,
-        /// <summary cref="float">float</summary>
-        RatePowerMaelstrom,
-        /// <summary cref="float">float</summary>
-        RatePowerMana,
-        /// <summary cref="float">float</summary>
-        RatePowerPain,
-        /// <summary cref="float">float</summary>
-        RatePowerEssence,
-        /// <summary cref="float">float</summary>
-        RatePowerRageIncome,
-        /// <summary cref="float">float</summary>
-        RatePowerRageLoss,
-        /// <summary cref="float">float</summary>
-        RatePowerRunicPowerIncome,
-        /// <summary cref="float">float</summary>
-        RatePowerRunicPowerLoss,
-        /// <summary cref="float">float</summary>
-        RatePowerSoulShards,
         /// <summary cref="float">float</summary>
         RateRepaircost,
         /// <summary cref="float">float</summary>

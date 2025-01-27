@@ -3622,39 +3622,6 @@ namespace Game.Entities
             if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + powerType.RegenInterruptTime >= LoopTime.ServerTime)
                 return;
 
-            WorldCfg[] RatesForPower =
-            [
-                WorldCfg.RatePowerMana,
-                WorldCfg.RatePowerRageLoss,
-                WorldCfg.RatePowerFocus,
-                WorldCfg.RatePowerEnergy,
-                0, // happiness
-                0, // runes
-                WorldCfg.RatePowerRunicPowerLoss,
-                WorldCfg.RatePowerSoulShards,
-                WorldCfg.RatePowerLunarPower,
-                WorldCfg.RatePowerHolyPower,
-                0, // alternate
-                WorldCfg.RatePowerMaelstrom,
-                WorldCfg.RatePowerChi,
-                WorldCfg.RatePowerInsanity,
-                WorldCfg.RatePowerComboPointsLoss,
-                0, // demonic fury, unused
-                WorldCfg.RatePowerArcaneCharges,
-                WorldCfg.RatePowerFury,
-                WorldCfg.RatePowerPain,
-                WorldCfg.RatePowerEssence,
-                0, // runes
-                0, // runes
-                0, // runes
-                0, // alternate
-                0, // alternate
-                0, // alternate
-            ];
-
-            if (RatesForPower[(int)power] != 0)
-                addvalue *= WorldConfig.Values[RatesForPower[(int)power]].Float;
-
             // Mana regen calculated in Player.UpdateManaRegen()
             if (power != PowerType.Mana)
             {
@@ -3762,7 +3729,7 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            float HealthIncreaseRate = WorldConfig.Values[WorldCfg.RateHealth].Float;
+            float HealthIncreaseRate = 1.0f;
 
             if (GetLevel() < 15)
                 HealthIncreaseRate *= (2.066f - (GetLevel() * 0.066f));

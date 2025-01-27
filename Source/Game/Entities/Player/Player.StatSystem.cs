@@ -459,6 +459,10 @@ namespace Game.Entities
             if (power == PowerType.Health || power >= PowerType.MaxWotlk)
                 return;
 
+            PowerTypeRecord powerInfo = Global.DB2Mgr.GetPowerTypeEntry(power);
+            if (powerInfo == null)
+                return;
+
             float result_regen = 0.0f; // Out-of-combat / without last mana use effect
             float result_regen_interrupted = 0.0f; // In combat / with last mana use effect
             float modifier = 1.0f; // Config rate or any other modifiers
@@ -510,7 +514,7 @@ namespace Game.Entities
                 case PowerType.Energy:
                 case PowerType.RunicPower:
                 {
-                    result_regen = powerRegenInfo[(int)power].Rate;
+                    result_regen = powerInfo.RegenPeace;
                     result_regen_interrupted = 0.0f;
 
                     result_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
@@ -524,15 +528,12 @@ namespace Game.Entities
                     break;
             }
 
-            if (powerRegenInfo[(int)power].Config != WorldCfg.None)
-                modifier *= WorldConfig.Values[powerRegenInfo[(int)power].Config].Float; // Config rate
-
             result_regen                *= modifier;
             result_regen_interrupted    *= modifier;
 
             // Unit fields contain an offset relative to the base power regeneration.
             if (power != PowerType.Mana)
-                result_regen -= powerRegenInfo[(int)power].Rate;
+                result_regen -= powerInfo.RegenPeace;
 
             if (power == PowerType.Energy)
                 result_regen_interrupted = result_regen;

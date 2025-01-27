@@ -656,7 +656,7 @@ namespace Game.Entities
                 case PowerType.Focus:
                     {
                         // For hunter pets.
-                        addvalue = 24 * WorldConfig.Values[WorldCfg.RatePowerFocus].Float;
+                        addvalue = 24;
                         break;
                     }
                 case PowerType.Energy:
@@ -672,10 +672,9 @@ namespace Game.Entities
                         {
                             if (!IsPowerRegenInterruptedByMP5Rule())
                             {
-                                float ManaIncreaseRate = WorldConfig.Values[WorldCfg.RatePowerMana].Float;
                                 float Spirit = GetStat(Stats.Spirit);
 
-                                addvalue = (int)((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
+                                addvalue = (int)(Spirit / 5.0f + 17.0f);
                             }
                         }
                         else
@@ -710,13 +709,12 @@ namespace Game.Entities
             // Not only pet, but any controlled creature (and not polymorphed)
             if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
             {
-                float HealthIncreaseRate = WorldConfig.Values[WorldCfg.RateHealth].Float;
                 float Spirit = GetStat(Stats.Spirit);
 
                 if (GetPower(PowerType.Mana) > 0)
-                    addvalue = (int)(Spirit * 0.25 * HealthIncreaseRate);
+                    addvalue = (int)(Spirit * 0.25);
                 else
-                    addvalue = (int)(Spirit * 0.80 * HealthIncreaseRate);
+                    addvalue = (int)(Spirit * 0.80);
             }
             else
                 addvalue = maxValue / 3;
