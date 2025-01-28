@@ -116,6 +116,18 @@ namespace Game.DataStorage
         #endregion
     }
 
+    public sealed class CharBaseInfoRecord
+    {
+        public int Id;
+        private byte _raceID;
+        private byte _classID;
+
+        #region Properties
+        public Race RaceID => (Race)_raceID;
+        public Class ClassID => (Class)_classID;
+        #endregion
+    }
+
     public sealed class ChrClassUIDisplayRecord
     {
         public int Id;

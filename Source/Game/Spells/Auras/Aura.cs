@@ -1422,8 +1422,7 @@ namespace Game.Spells
                                 }
 
                                 // effect on caster
-                                AuraEffect aurEff = aura.GetEffect(0);
-                                if (aurEff != null)
+                                if (aura.GetEffect(0) is AuraEffect casterAurEff)
                                 {
                                     float multiplier = casterAurEff.GetAmount();
                                     if (casterAurEff.GetId() == 47535)

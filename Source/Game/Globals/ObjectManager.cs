@@ -7016,25 +7016,32 @@ namespace Game
                 uint count = 0;
                 do
                 {
-                    Race currentrace = (Race)result.Read<byte>(0);
-                    Class currentclass = (Class)result.Read<byte>(1);
+                    Race currentRace = (Race)result.Read<byte>(0);
+                    Class currentClass = (Class)result.Read<byte>(1);
                     int mapId = result.Read<int>(2);
                     float positionX = result.Read<float>(3);
                     float positionY = result.Read<float>(4);
                     float positionZ = result.Read<float>(5);
                     float orientation = result.Read<float>(6);
 
-                    if (!CliDB.ChrRacesStorage.ContainsKey((int)currentrace))
+                    if (!RaceMask.Playable.HasRace(currentRace))
                     {
                         Log.outError(LogFilter.Sql, 
-                            $"Wrong race {currentrace} in `playercreateinfo` table, ignoring.");
+                            $"Wrong race ({currentRace}) in `playercreateinfo` table, ignoring.");
                         continue;
                     }
 
-                    if (!CliDB.ChrClassesStorage.ContainsKey((int)currentclass))
+                    if (!ClassMask.Playable.HasClass(currentClass))
                     {
                         Log.outError(LogFilter.Sql, 
-                            $"Wrong class {currentclass} in `playercreateinfo` table, ignoring.");
+                            $"Wrong class ({currentClass}) in `playercreateinfo` table, ignoring.");
+                        continue;
+                    }
+
+                    if (!Global.DB2Mgr.IsCharacterCreationAllowed(currentClass, currentRace))
+                    {
+                        Log.outError(LogFilter.Sql,
+                            $"Incorrect combination of class ({currentClass}) and race ({currentRace}) in `playercreateinfo` table, ignoring.");
                         continue;
                     }
 
@@ -7042,7 +7049,7 @@ namespace Game
                     if (!GridDefines.IsValidMapCoord(mapId, positionX, positionY, positionZ, orientation))
                     {
                         Log.outError(LogFilter.Sql,
-                            $"Wrong home position for class {currentclass} race {currentrace} " +
+                            $"Wrong home position for class {currentClass} race {currentRace} " +
                             $"pair in `playercreateinfo` table, ignoring.");
                         continue;
                     }
@@ -7051,22 +7058,22 @@ namespace Game
                     {
                         Log.outError(LogFilter.Sql, 
                             $"Home position in instanceable map for " +
-                            $"class {currentclass} race {currentrace} pair " +
+                            $"class {currentClass} race {currentRace} pair " +
                             $"in `playercreateinfo` table, ignoring.");
                         continue;
                     }
 
-                    if (Global.DB2Mgr.GetChrModel(currentrace, Gender.Male) == null)
+                    if (Global.DB2Mgr.GetChrModel(currentRace, Gender.Male) == null)
                     {
                         Log.outError(LogFilter.Sql, 
-                            $"Missing male model for race {currentrace}, ignoring.");
+                            $"Missing male model for race {currentRace}, ignoring.");
                         continue;
                     }
 
-                    if (Global.DB2Mgr.GetChrModel(currentrace, Gender.Female) == null)
+                    if (Global.DB2Mgr.GetChrModel(currentRace, Gender.Female) == null)
                     {
                         Log.outError(LogFilter.Sql, 
-                            $"Missing female model for race {currentrace}, ignoring.");
+                            $"Missing female model for race {currentRace}, ignoring.");
                         continue;
                     }
 
@@ -7087,7 +7094,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql, 
                                 $"Invalid NPE map id {info.createPositionNPE.Value.Loc.GetMapId()} " +
-                                $"for class {currentclass} race {currentrace} pair " +
+                                $"for class {currentClass} race {currentRace} pair " +
                                 $"in `playercreateinfo` table, ignoring.");
 
                             info.createPositionNPE = null;
@@ -7100,7 +7107,7 @@ namespace Game
                             Log.outError(LogFilter.Sql,
                                 $"Invalid NPE transport spawn id " +
                                 $"{info.createPositionNPE.Value.TransportGuid.Value} " +
-                                $"for class {currentclass} race {currentrace} pair " +
+                                $"for class {currentClass} race {currentRace} pair " +
                                 $"in `playercreateinfo` table, ignoring.");
 
                             // remove entire NPE data - assume user put transport offsets into npe_position fields
@@ -7117,7 +7124,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql,
                                 $"Invalid intro movie id {introMovieId} " +
-                                $"for class {currentclass} race {currentrace} pair " +
+                                $"for class {currentClass} race {currentRace} pair " +
                                 $"in `playercreateinfo` table, ignoring.");
                         }
                     }
@@ -7131,7 +7138,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql,
                                 $"Invalid intro scene id {introSceneId} " +
-                                $"for class {currentclass} race {currentrace} pair " +
+                                $"for class {currentClass} race {currentRace} pair " +
                                 $"in `playercreateinfo` table, ignoring.");
                         }
                     }
@@ -7145,12 +7152,12 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql,
                                 $"Invalid NPE intro scene id {introSceneId} " +
-                                $"for class {currentclass} race {currentrace} pair " +
+                                $"for class {currentClass} race {currentRace} pair " +
                                 $"in `playercreateinfo` table, ignoring.");
                         }
                     }
 
-                    _playerInfo[(currentrace, currentclass)] = info;
+                    _playerInfo[(currentRace, currentClass)] = info;
 
                     ++count;
                 } while (result.NextRow());
@@ -7242,27 +7249,37 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        Race currentrace = (Race)result.Read<byte>(0);
-                        if (currentrace >= Race.Max)
+                        Race currentRace = (Race)result.Read<byte>(0);
+                        if (!RaceMask.Playable.HasRace(currentRace) && currentRace != Race.None)
                         {
                             Log.outError(LogFilter.Sql, 
-                                $"Wrong race {currentrace} in `playercreateinfo_item` table, ignoring.");
+                                $"Wrong race {currentRace} in `playercreateinfo_item` table, ignoring.");
                             continue;
                         }
 
-                        Class currentclass = (Class)result.Read<byte>(1);
-                        if (currentclass >= Class.Max)
+                        Class currentClass = (Class)result.Read<byte>(1);
+                        if (!ClassMask.Playable.HasClass(currentClass) && currentClass != Class.None)
                         {
                             Log.outError(LogFilter.Sql, 
-                                $"Wrong class {currentclass} in `playercreateinfo_item` table, ignoring.");
+                                $"Wrong class {currentClass} in `playercreateinfo_item` table, ignoring.");
                             continue;
+                        }
+
+                        if (currentClass != Class.None && currentRace != Race.None)
+                        {
+                            if (!Global.DB2Mgr.IsCharacterCreationAllowed(currentClass, currentRace))
+                            {
+                                Log.outError(LogFilter.Sql,
+                                    $"Incorrect combination of class ({currentClass}) and race ({currentRace}) in `playercreateinfo_item` table, ignoring.");
+                                continue;
+                            }
                         }
 
                         int itemid = result.Read<int>(2);
                         if (GetItemTemplate(itemid).GetId() == 0)
                         {
                             Log.outError(LogFilter.Sql,
-                                $"Item id {itemid} (race {currentrace} class {currentclass}) " +
+                                $"Item id {itemid} (race {currentRace} class {currentClass}) " +
                                 $"in `playercreateinfo_item` table " +
                                 $"but not listed in `itemtemplate`, ignoring.");
                             continue;
@@ -7273,24 +7290,35 @@ namespace Game
                         if (amount == 0)
                         {
                             Log.outError(LogFilter.Sql,
-                                $"Item id {itemid} (class {currentrace} race {currentclass}) " +
+                                $"Item id {itemid} (class {currentRace} race {currentClass}) " +
                                 $"have amount == 0 in `playercreateinfo_item` table, ignoring.");
                             continue;
                         }
 
-                        if (currentrace == Race.None || currentclass == Class.None)
+                        if (currentRace == Race.None || currentClass == Class.None)
                         {
-                            Race minrace = currentrace != Race.None ? currentrace : Race.None + 1;
-                            Race maxrace = currentrace != Race.None ? currentrace + 1 : Race.Max;
-                            Class minclass = currentclass != Class.None ? currentclass : Class.None + 1;
-                            Class maxclass = currentclass != Class.None ? currentclass + 1 : Class.Max;
-                            for (var r = minrace; r < maxrace; ++r)
-                                for (var c = minclass; c < maxclass; ++c)
-                                    PlayerCreateInfoAddItemHelper(r, c, itemid, amount);
-
+                            if (currentRace == Race.None)
+                            {
+                                for (Race r = Race.None; r < Race.Max; r++)
+                                {
+                                    if (RaceMask.Playable.HasRace(r))
+                                    {
+                                        if (currentClass == Class.None)
+                                        {
+                                            for (Class c = Class.None; c < Class.Max; c++)
+                                            {
+                                                if (ClassMask.Playable.HasClass(c))
+                                                {
+                                                    PlayerCreateInfoAddItemHelper(r, c, itemid, amount);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                         else
-                            PlayerCreateInfoAddItemHelper(currentrace, currentclass, itemid, amount);
+                            PlayerCreateInfoAddItemHelper(currentRace, currentClass, itemid, amount);
 
                         ++count;
                     } while (result.NextRow());
@@ -7309,14 +7337,15 @@ namespace Game
                 {
                     if (rcInfo.Availability == 1)
                     {
-                        var raceMask = rcInfo.RaceMask;
-                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
+                        var raceMask = rcInfo.RaceMask == RaceMask.None ? RaceMask.AllPermanent : rcInfo.RaceMask;
+                        for (Race raceIndex = Race.None; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask == RaceMask.None || raceMask.HasRace(raceIndex))
+                            if (raceMask.HasRace(raceIndex))
                             {
+                                var classMask = rcInfo.ClassMask == ClassMask.None ? ClassMask.AllPermanent : rcInfo.ClassMask;
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
-                                    if (rcInfo.ClassMask.HasClass(classIndex))
+                                    if (classMask.HasClass(classIndex))
                                     {
                                         if (_playerInfo.LookupByKey((raceIndex, classIndex)) is PlayerInfo info)
                                             info.skills.Add(rcInfo);
@@ -7352,45 +7381,44 @@ namespace Game
                         ClassMask classMask = (ClassMask)result.Read<uint>(1);
                         int spellId = result.Read<int>(2);
 
-                        if (raceMask != RaceMask.None && !raceMask.HasAnyFlag(RaceMask.Playable))
-                        {
-                            Log.outError(LogFilter.Sql, 
-                                $"Wrong race mask {raceMask} " +
-                                $"in `playercreateinfo_spell_custom` table, ignoring.");
-                            continue;
-                        }
+                        if (raceMask == RaceMask.None)
+                            raceMask = RaceMask.AllPermanent;
 
-                        if (classMask != ClassMask.None && !classMask.HasAnyFlag(ClassMask.Playable))
-                        {
-                            Log.outError(LogFilter.Sql, 
-                                $"Wrong class mask {classMask} " +
-                                $"in `playercreateinfo_spell_custom` table, ignoring.");
-                            continue;
-                        }
+                        if (classMask == ClassMask.None)
+                            classMask = ClassMask.AllPermanent;                        
 
-                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
+                        for (Race raceIndex = Race.None; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask == RaceMask.None || raceMask.HasRace(raceIndex))
+                            if (raceMask.HasRace(raceIndex))
                             {
-                                for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
+                                if (raceMask != RaceMask.AllPermanent && !RaceMask.Playable.HasRace(raceIndex))
                                 {
-                                    if (classMask == ClassMask.None || classMask.HasClass(classIndex))
+                                    Log.outError(LogFilter.Sql,
+                                        $"Wrong race ({(ulong)raceIndex}) in the mask ({(ulong)raceMask}) " +
+                                        $"in `playercreateinfo_spell_custom` table, ignoring.");
+                                    continue;
+                                }
+
+                                for (Class classIndex = Class.None; classIndex < Class.Max; ++classIndex)
+                                {
+                                    if (classMask.HasClass(classIndex))
                                     {
-                                        PlayerInfo playerInfo = _playerInfo.LookupByKey((raceIndex, classIndex));
-                                        if (playerInfo != null)
+                                        if (classMask != ClassMask.AllPermanent && !ClassMask.Playable.HasClass(classIndex))
                                         {
-                                            playerInfo.customSpells.Add(spellId);
-                                            ++count;
+                                            Log.outError(LogFilter.Sql,
+                                                $"Wrong class ({(ulong)classIndex}) in the mask ({(ulong)classMask}) " +
+                                                $"in `playercreateinfo_spell_custom` table, ignoring.");
+                                            continue;
                                         }
-                                        // We need something better here, the check is not accounting for spells
-                                        // used by multiple races/classes but not all of them.
-                                        // Either split the masks per class, or per race, which kind of kills the point yet.
-                                        // else if (raceMask != 0 && classMask != 0)
-                                        //     TC_LOG_ERROR("sql.sql",
-                                        //     "Racemask/classmask ({}/{}) combination
-                                        //     was found containing an invalid race/class combination ({}/{})
-                                        //     in `{}` (Spell {}), ignoring.",
-                                        //     raceMask, classMask, raceIndex, classIndex, tableName, spellId);
+
+                                        if (Global.DB2Mgr.IsCharacterCreationAllowed(classIndex, raceIndex))
+                                        {
+                                            if (_playerInfo.TryGetValue((raceIndex, classIndex), out var playerInfo))
+                                            {
+                                                playerInfo.customSpells.Add(spellId);
+                                                ++count;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -7428,48 +7456,58 @@ namespace Game
                         int spellId = result.Read<int>(2);
                         PlayerCreateMode playerCreateMode = (PlayerCreateMode)result.Read<sbyte>(3);
 
-                        if (raceMask != RaceMask.None && !raceMask.HasAnyFlag(RaceMask.Playable))
-                        {
-                            Log.outError(LogFilter.Sql, 
-                                $"Wrong race mask {raceMask} " +
-                                $"in `playercreateinfo_cast_spell` table, ignoring.");
-                            continue;
-                        }
+                        if (raceMask == RaceMask.None)
+                            raceMask = RaceMask.AllPermanent;
 
-                        if (classMask != ClassMask.None && !classMask.HasAnyFlag(ClassMask.Playable))
-                        {
-                            Log.outError(LogFilter.Sql, 
-                                $"Wrong class mask {classMask} " +
-                                $"in `playercreateinfo_cast_spell` table, ignoring.");
-                            continue;
-                        }
+                        if (classMask == ClassMask.None)
+                            classMask = ClassMask.AllPermanent;
 
                         if (playerCreateMode <= PlayerCreateMode.None || playerCreateMode >= PlayerCreateMode.Max)
                         {
-                            Log.outError(LogFilter.Sql, 
-                                $"Uses invalid createMode {playerCreateMode} " +
+                            Log.outError(LogFilter.Sql,
+                                $"Uses invalid createMode ({playerCreateMode}[{(ulong)playerCreateMode}]) " +
                                 $"in `playercreateinfo_cast_spell` table, ignoring.");
                             continue;
                         }
 
-                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
+                        for (Race raceIndex = Race.None; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask == RaceMask.None || raceMask.HasRace(raceIndex))
+                            if (raceMask.HasRace(raceIndex))
                             {
-                                for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
+                                if (raceMask != RaceMask.AllPermanent && !RaceMask.Playable.HasRace(raceIndex))
                                 {
-                                    if (classMask == ClassMask.None || classMask.HasClass(classIndex))
+                                    Log.outError(LogFilter.Sql,
+                                        $"Wrong race ({(ulong)raceIndex}) in the mask ({(ulong)raceMask}) " +
+                                        $"in `playercreateinfo_cast_spell` table, ignoring.");
+                                    continue;
+                                }
+
+                                for (Class classIndex = Class.None; classIndex < Class.Max; ++classIndex)
+                                {
+                                    if (classMask.HasClass(classIndex))
                                     {
-                                        if (_playerInfo.LookupByKey((raceIndex, classIndex)) is PlayerInfo info)
+                                        if (classMask != ClassMask.AllPermanent && !ClassMask.Playable.HasClass(classIndex))
                                         {
-                                            info.castSpells[(int)playerCreateMode].Add(spellId);
-                                            ++count;
+                                            Log.outError(LogFilter.Sql,
+                                                $"Wrong class ({(ulong)classIndex}) in the mask ({(ulong)classMask}) " +
+                                                $"in `playercreateinfo_cast_spell` table, ignoring.");
+                                            continue;
+                                        }
+
+                                        if (Global.DB2Mgr.IsCharacterCreationAllowed(classIndex, raceIndex))
+                                        {
+                                            if (_playerInfo.TryGetValue((raceIndex, classIndex), out var playerInfo))
+                                            {
+                                                playerInfo.castSpells[(int)playerCreateMode].Add(spellId);
+                                                ++count;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    } while (result.NextRow());
+                    }
+                    while (result.NextRow());
 
                     Log.outInfo(LogFilter.ServerLoading, 
                         $"Loaded {count} player create cast spells in {Time.Diff(oldMSTime)} ms.");
@@ -7495,25 +7533,32 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        Race currentrace = (Race)result.Read<byte>(0);
-                        if (currentrace >= Race.Max)
+                        Race currentRace = (Race)result.Read<byte>(0);
+                        if (!RaceMask.Playable.HasRace(currentRace))
                         {
                             Log.outError(LogFilter.Sql, 
-                                $"Wrong race {currentrace} " +
+                                $"Wrong race {currentRace} " +
                                 $"in `playercreateinfo_action` table, ignoring.");
                             continue;
                         }
 
-                        Class currentclass = (Class)result.Read<byte>(1);
-                        if (currentclass >= Class.Max)
+                        Class currentClass = (Class)result.Read<byte>(1);
+                        if (!ClassMask.Playable.HasClass(currentClass))
                         {
                             Log.outError(LogFilter.Sql, 
-                                $"Wrong class {currentclass} " +
+                                $"Wrong class {currentClass} " +
                                 $"in `playercreateinfo_action` table, ignoring.");
                             continue;
                         }
 
-                        if (_playerInfo.LookupByKey((currentrace, currentclass)) is PlayerInfo info)
+                        if (!Global.DB2Mgr.IsCharacterCreationAllowed(currentClass, currentRace))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"Incorrect combination of class ({currentClass}) and race ({currentRace}) in `playercreateinfo_action` table, ignoring.");
+                            continue;
+                        }
+
+                        if (_playerInfo.LookupByKey((currentRace, currentClass)) is PlayerInfo info)
                             info.action.Add(new PlayerCreateInfoAction(result.Read<byte>(2), result.Read<int>(3), result.Read<byte>(4)));
 
                         ++count;
@@ -7528,49 +7573,15 @@ namespace Game
             // Loading levels data (class/race dependent)
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Level Stats Data...");
             {
-                short[][] raceStatModifiers = new short[(int)Race.Max][];
-                for (var i = 0; i < (int)Race.Max; ++i)
-                    raceStatModifiers[i] = new short[(int)Stats.Max];
-
                 {
-                    //                                          0     1    2    3    4     5
-                    SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte, spi FROM player_racestats");
+                    //                                         0      1      2     3    4    5     6    7     8        9
+                    SQLResult result = DB.World.Query("SELECT race, class, level, str, agi, sta, inte, spi, basehp, basemana FROM player_levelstats");
                 
                     if (result.IsEmpty())
                     {
                         Log.outInfo(LogFilter.ServerLoading, 
                             "Loaded 0 level stats definitions. " +
-                            "DB table `player_racestats` is empty.");
-
-                        Global.WorldMgr.StopNow();
-                        return;
-                    }
-
-                    do
-                    {
-                        Race currentrace = (Race)result.Read<byte>(0);
-                        if (currentrace >= Race.Max)
-                        {
-                            Log.outError(LogFilter.Sql, 
-                                $"Wrong race {currentrace} in `player_racestats` table, ignoring.");
-                            continue;
-                        }
-
-                        for (int i = 0; i < (int)Stats.Max; ++i)
-                            raceStatModifiers[(int)currentrace][i] = result.Read<short>(i + 1);
-
-                    } while (result.NextRow());
-                }
-
-                {
-                    //                                           0      1      2    3    4    5     6
-                    SQLResult result = DB.World.Query("SELECT class, level, str, agi, sta, inte, spi FROM player_classlevelstats");
-                
-                    if (result.IsEmpty())
-                    {
-                        Log.outInfo(LogFilter.ServerLoading, 
-                            "Loaded 0 level stats definitions. " +
-                            "DB table `player_classlevelstats` is empty.");
+                            "DB table `player_levelstats` is empty.");
 
                         Global.WorldMgr.StopNow();
                         return;
@@ -7580,43 +7591,58 @@ namespace Game
 
                     do
                     {
-                        Class currentclass = (Class)result.Read<byte>(0);
-                        if (currentclass >= Class.Max)
+                        Race currentRace = (Race)result.Read<byte>(0);
+                        if (!RaceMask.Playable.HasRace(currentRace))
                         {
-                            Log.outError(LogFilter.Sql, 
-                                $"Wrong class {currentclass} in `player_classlevelstats` table, ignoring.");
+                            Log.outError(LogFilter.Sql,
+                                $"Wrong race {currentRace} in `player_levelstats` table, ignoring.");
                             continue;
                         }
 
-                        int currentlevel = result.Read<byte>(1);
+                        Class currentClass = (Class)result.Read<byte>(1);
+                        if (!ClassMask.Playable.HasClass(currentClass))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"Wrong class {currentClass} in `player_levelstats` table, ignoring.");
+                            continue;
+                        }
+
+                        if (!Global.DB2Mgr.IsCharacterCreationAllowed(currentClass, currentRace))
+                        {
+                            Log.outError(LogFilter.Sql,
+                                $"Incorrect combination of class ({currentClass}) and race ({currentRace}) in `player_levelstats` table, ignoring.");
+                            continue;
+                        }
+
+                        int currentlevel = result.Read<byte>(2);
 
                         if (currentlevel > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
                         {
                             if (currentlevel > SharedConst.StrongMaxLevel)        // hardcoded level maximum
                             {
-                                Log.outError(LogFilter.Sql, 
+                                Log.outError(LogFilter.Sql,
                                     $"Wrong (> {SharedConst.StrongMaxLevel}) level {currentlevel} " +
-                                    $"in `player_classlevelstats` table, ignoring.");
+                                    $"in `player_levelstats` table, ignoring.");
                             }
                             else
                             {
-                                Log.outError(LogFilter.Sql, 
+                                Log.outError(LogFilter.Sql,
                                     $"Unused (> MaxPlayerLevel in worldserver.conf) level {currentlevel} " +
                                     $"in `player_levelstats` table, ignoring.");
                             }
                             continue;
                         }
 
-                        for (var race = 0; race < raceStatModifiers.Length; ++race)
+                        if (_playerInfo.LookupByKey((currentRace, currentClass)) is PlayerInfo playerInfo)
                         {
-                            if (_playerInfo.LookupByKey(((Race)race, currentclass)) is PlayerInfo playerInfo)
+                            for (var i = 0; i < (int)Stats.Max; i++)
                             {
-                                for (var i = 0; i < (int)Stats.Max; i++)
-                                {
-                                    playerInfo.levelInfo[currentlevel - 1].stats[i] =
-                                        (ushort)(result.Read<ushort>(i + 2) + raceStatModifiers[race][i]);
-                                }
+                                playerInfo.levelInfo[currentlevel - 1].stats[i] =
+                                    (ushort)(result.Read<ushort>(i + 3));
                             }
+
+                            playerInfo.levelInfo[currentlevel - 1].baseHealth = result.Read<ushort>(8);
+                            playerInfo.levelInfo[currentlevel - 1].baseMana = result.Read<ushort>(9);
                         }
 
                         ++count;
@@ -7624,51 +7650,47 @@ namespace Game
 
 
                     // Fill gaps and check integrity
-                    for (Race race = 0; race < Race.Max; ++race)
+                    for (Race raceID = 0; raceID < Race.Max; ++raceID)
                     {
-                        // skip non existed races
-                        if (!CliDB.ChrRacesStorage.ContainsKey((int)race))
-                            continue;
 
-                        for (Class class_ = 0; class_ < Class.Max; ++class_)
+                        for (Class classID = 0; classID < Class.Max; ++classID)
                         {
-                            // skip non existed classes
-                            if (CliDB.ChrClassesStorage.LookupByKey((int)class_) == null)
-                                continue;
-
-                            var playerInfo = _playerInfo.LookupByKey((race, class_));
-                            if (playerInfo == null)
+                            // skip non allowed
+                            if (!Global.DB2Mgr.IsCharacterCreationAllowed(classID, raceID))
+                                continue;                                                        
+                            
+                            if (!_playerInfo.TryGetValue((raceID, classID), out var playerInfo))
                                 continue;
 
                             Expansion configExpansion = (Expansion)WorldConfig.Values[WorldCfg.Expansion].Int32;
 
                             // skip expansion races if not playing with expansion
                             if (configExpansion < Expansion.BurningCrusade 
-                                && (race == Race.BloodElf || race == Race.Draenei))
+                                && (raceID == Race.BloodElf || raceID == Race.Draenei))
                                 continue;
 
                             // skip expansion classes if not playing with expansion
                             if (configExpansion < Expansion.WrathOfTheLichKing 
-                                && class_ == Class.DeathKnight)
+                                && classID == Class.DeathKnight)
                                 continue;
 
                             if (configExpansion < Expansion.MistsOfPandaria 
-                                && (race == Race.PandarenNeutral || race == Race.PandarenHorde || race == Race.PandarenAlliance))
+                                && (raceID == Race.PandarenNeutral || raceID == Race.PandarenHorde || raceID == Race.PandarenAlliance))
                                 continue;
 
                             if (configExpansion < Expansion.Legion 
-                                && class_ == Class.DemonHunter)
+                                && classID == Class.DemonHunter)
                                 continue;
 
                             if (configExpansion < Expansion.Dragonflight 
-                                && class_ == Class.Evoker)
+                                && classID == Class.Evoker)
                                 continue;
 
                             // fatal error if no level 1 data
                             if (playerInfo.levelInfo[0].stats[0] == 0)
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Race {race} Class {class_} Level 1 does not have stats data!");
+                                    $"Race {raceID} Class {classID} Level 1 does not have stats data!");
 
                                 Environment.Exit(1);
                                 return;
@@ -7680,7 +7702,7 @@ namespace Game
                                 if (playerInfo.levelInfo[level].stats[0] == 0)
                                 {
                                     Log.outError(LogFilter.Sql,
-                                        $"Race {race} Class {class_} Level {level + 1} " +
+                                        $"Race {raceID} Class {classID} Level {level + 1} " +
                                         $"does not have stats data. Using stats data of level {level}.");
 
                                     playerInfo.levelInfo[level] = playerInfo.levelInfo[level - 1];
@@ -7846,53 +7868,24 @@ namespace Game
 
         public PlayerInfo GetPlayerInfo(Race raceId, Class classId)
         {
-            if (raceId >= Race.Max)
-                return null;
-
-            if (classId >= Class.Max)
-                return null;
-
-            var info = _playerInfo.LookupByKey((raceId, classId));
-            if (info == null)
-                return null;
-
+            _playerInfo.TryGetValue((raceId, classId), out var info);
             return info;
         }
 
-        public void GetPlayerClassLevelInfo(Class _class, int level, out int baseMana)
+        public PlayerLevelInfo GetPlayerLevelInfo(Race raceId, Class classId, int level)
         {
-            baseMana = 0;
-            if (level < 1 || _class >= Class.Max)
-                return;
-
-            if (level > WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
-                level = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
-
-            GtBaseMPRecord mp = CliDB.BaseMPGameTable.GetRow(level);
-            if (mp == null)
+            if (_playerInfo.TryGetValue((raceId, classId), out var pInfo))
             {
-                Log.outError(LogFilter.Sql, 
-                    $"Tried to get non-existant Class-Level combination data " +
-                    $"for base mp. Class {_class} Level {level}.");
-                return;
+                if (level > 0)
+                {
+                    if (level <= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
+                        return pInfo.levelInfo[level - 1];
+                    else
+                        return BuildPlayerLevelInfo(raceId, classId, level);
+                }
             }
 
-            baseMana = (int)CliDB.GetGameTableColumnForClass(mp, _class);
-        }
-
-        public PlayerLevelInfo GetPlayerLevelInfo(Race race, Class _class, int level)
-        {
-            if (level < 1 || race >= Race.Max || _class >= Class.Max)
-                return null;
-
-            PlayerInfo pInfo = _playerInfo.LookupByKey((race, _class));
-            if (pInfo == null)
-                return null;
-
-            if (level <= WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32)
-                return pInfo.levelInfo[level - 1];
-            else
-                return BuildPlayerLevelInfo(race, _class, level);
+            return null;
         }
 
         PlayerLevelInfo BuildPlayerLevelInfo(Race race, Class _class, int level)

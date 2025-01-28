@@ -312,11 +312,10 @@ namespace Game.Entities
             if (!sendUpdate)
                 return;
 
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
+            if (this is Player player)
             {
-                if (thisPlayer.GetGroup() != null)
-                    thisPlayer.SetGroupUpdateFlag(GroupUpdateFlags.PowerType);
+                if (player.GetGroup() != null)
+                    player.SetGroupUpdateFlag(GroupUpdateFlags.PowerType);
             }
             else if (this is Pet pet)
             {
@@ -406,9 +405,8 @@ namespace Game.Entities
             TriggerOnPowerChangeAuras(powerType, oldPower, safeValue);
 
             // group update
-            if (IsTypeId(TypeId.Player))
+            if (this is Player player)
             {
-                Player player = ToPlayer();
                 if (player.GetGroup() != null)
                     player.SetGroupUpdateFlag(GroupUpdateFlags.CurPower);
             }

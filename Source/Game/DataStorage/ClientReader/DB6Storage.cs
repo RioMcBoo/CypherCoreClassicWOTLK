@@ -90,10 +90,13 @@ namespace Game.DataStorage
 
         void LoadHotfixData(BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
+            if (preparedStatement == HotfixStatements.None)
+                return;
+
             LoadFromDB(false, preparedStatement);
             LoadFromDB(true, preparedStatement);
 
-            if (preparedStatementLocale == 0)
+            if (preparedStatementLocale == HotfixStatements.None)
                 return;
 
             for (Locale locale = 0; locale < Locale.Total; ++locale)
@@ -468,7 +471,7 @@ namespace Game.DataStorage
             return _tableName;
         }
 
-        public void ReadDB2(DB2LoadData data, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = HotfixStatements.None)
+        public void ReadDB2(DB2LoadData data, string fileName, HotfixStatements preparedStatement = HotfixStatements.None, HotfixStatements preparedStatementLocale = HotfixStatements.None)
         {
             if (!LoadData($"{data.path}/{fileName}"))
             {

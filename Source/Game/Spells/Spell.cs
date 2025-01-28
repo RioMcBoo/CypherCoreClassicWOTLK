@@ -3159,7 +3159,7 @@ namespace Game.Spells
             }
 
             Item targetItem = m_targets.GetItemTarget();
-            if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerAndReagentCost))
+            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerAndReagentCost))
             {
                 // Powers have to be taken before SendSpellGo
                 TakePower();

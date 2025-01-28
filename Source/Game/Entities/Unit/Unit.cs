@@ -1460,21 +1460,14 @@ namespace Game.Entities
                     return 29414;
                 case 35200: // Roc Form
                     return 4877;
-                case 24858: // Moonkin Form
-                {
-                    if (HasAura(114301)) // Glyph of Stars
-                        return 0;
-                    break;
-                }
                 default:
                     break;
             }
 
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
+            if (this is Player player)
             {
                 ShapeshiftFormModelData formModelData = 
-                    Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), thisPlayer.GetNativeGender(), form);
+                    Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), player.GetNativeGender(), form);
 
                 if (formModelData != null)
                 {
@@ -1512,7 +1505,7 @@ namespace Game.Entities
                                 ChrCustomizationReqRecord choiceReq = 
                                     CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
 
-                                if (choiceReq == null || thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetRace(), GetClass(), false, thisPlayer.m_playerData.Customizations))
+                                if (choiceReq == null || player.GetSession().MeetsChrCustomizationReq(choiceReq, GetRace(), GetClass(), false, player.m_playerData.Customizations))
                                     displayIds.Add(displayInfo.DisplayID);
                             }
                         }
@@ -1522,7 +1515,7 @@ namespace Game.Entities
                     }
                     else
                     {
-                        var formChoice = thisPlayer.GetCustomizationChoice(formModelData.OptionID);
+                        var formChoice = player.GetCustomizationChoice(formModelData.OptionID);
                         if (formChoice != 0)
                         {
                             var choiceIndex = formModelData.Choices.FindIndex(choice =>
@@ -1813,8 +1806,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            Pet pet = ToPet();
-                            if (pet != null)
+                            if (this is Pet pet)
                             {
                                 if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
                                     displayPower = PowerType.Focus;
@@ -2742,11 +2734,9 @@ namespace Game.Entities
             {
                 foreach (Unit controlled in victim.m_Controlled)
                 {
-                    Creature cControlled = controlled.ToCreature();
-                    if (cControlled != null)
+                    if (controlled is Creature cControlled)
                     {
-                        CreatureAI controlledAI = cControlled.GetAI();
-                        if (controlledAI != null)
+                        if (cControlled.GetAI() is CreatureAI controlledAI)
                             controlledAI.OwnerAttackedBy(attacker);
                     }
                 }
@@ -2765,14 +2755,16 @@ namespace Game.Entities
                         victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage, spellProto);
                 }
                 else
+                {
                     victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage);
+                }
 
+                // interrupt spells with SpellInterruptFlags.DamageAbsorb on absorbed damage (no dots)
                 if (damageTaken == 0 && damagetype != DamageEffectType.DOT && cleanDamage != null && cleanDamage.absorbed_damage != 0)
                 {
                     if (victim != attacker && victim.IsPlayer())
                     {
-                        Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
-                        if (spell != null)
+                        if (victim.GetCurrentSpell(CurrentSpellTypes.Generic) is Spell spell)
                         {
                             if (spell.GetState() == SpellState.Preparing
                                 && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageAbsorb))

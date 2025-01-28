@@ -4494,6 +4494,33 @@ namespace Game.Entities
             return multiplier;
         }
 
+        public bool GetTotalAuraAggregate(AuraType auraType, Func<AuraEffect, bool> predicate, Func<AuraEffect, int> amountSearcher, Action<int> aggregator)
+        {
+            Dictionary<SpellGroup, int> sameEffectSpellGroup = new();
+            bool hasAura = false;
+
+            var mTotalAuraList = GetAuraEffectsByType(auraType);
+            foreach (AuraEffect aurEff in mTotalAuraList)
+            {
+                if (predicate(aurEff))
+                {                    
+                    int amount = amountSearcher(aurEff);
+                    hasAura = true;
+
+                    // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
+                    // If the Aura Effect does not have this Stack Rule, it returns false so we can aggregate as usual
+                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auraType, amount, sameEffectSpellGroup))
+                        aggregator(amount);
+                }
+            }
+
+            // Put the highest of the Same Effect Stack Rule SpellGroups to the aggregator
+            foreach (var pair in sameEffectSpellGroup)
+                aggregator(pair.Value);
+
+            return hasAura;
+        }
+
         public int GetMaxPositiveAuraModifier(AuraType auraType)
         {
             return GetMaxPositiveAuraModifier(auraType, aurEff => true);

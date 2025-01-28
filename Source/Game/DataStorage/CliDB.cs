@@ -81,6 +81,7 @@ namespace Game.DataStorage
             CharacterLoadoutStorage.ReadDB2(data, "CharacterLoadout.db2", HotfixStatements.SEL_CHARACTER_LOADOUT);
             CharacterLoadoutItemStorage.ReadDB2(data, "CharacterLoadoutItem.db2", HotfixStatements.SEL_CHARACTER_LOADOUT_ITEM);
             ChatChannelsStorage.ReadDB2(data, "ChatChannels.db2", HotfixStatements.SEL_CHAT_CHANNELS, HotfixStatements.SEL_CHAT_CHANNELS_LOCALE);
+            CharBaseInfoStorage.ReadDB2(data, "CharBaseInfo.db2"); // todo: attach to hotfixes
             ChrClassUIDisplayStorage.ReadDB2(data, "ChrClassUIDisplay.db2", HotfixStatements.SEL_CHR_CLASS_UI_DISPLAY);
             ChrClassesStorage.ReadDB2(data, "ChrClasses.db2", HotfixStatements.SEL_CHR_CLASSES, HotfixStatements.SEL_CHR_CLASSES_LOCALE);
             ChrClassesXPowerTypesStorage.ReadDB2(data, "ChrClassesXPowerTypes.db2", HotfixStatements.SEL_CHR_CLASSES_X_POWER_TYPES);
@@ -520,6 +521,7 @@ namespace Game.DataStorage
         public static DB6Storage<int, CharacterLoadoutRecord> CharacterLoadoutStorage = new();
         public static DB6Storage<int, CharacterLoadoutItemRecord> CharacterLoadoutItemStorage = new();
         public static DB6Storage<int, ChatChannelsRecord> ChatChannelsStorage = new();
+        public static DB6Storage<int, CharBaseInfoRecord> CharBaseInfoStorage = new();
         public static DB6Storage<int, ChrClassUIDisplayRecord> ChrClassUIDisplayStorage = new();
         public static DB6Storage<int, ChrClassesRecord> ChrClassesStorage = new();
         public static DB6Storage<int, ChrClassesXPowerTypesRecord> ChrClassesXPowerTypesStorage = new();

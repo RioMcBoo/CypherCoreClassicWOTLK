@@ -135,7 +135,7 @@ namespace Game.Networking.Packets
         public string Guild;
         public string GuildVirtualRealmName;
         public RaceMask RaceFilter;
-        public ClassMask ClassFilter = ClassMask.All;
+        public ClassMask ClassFilter = ClassMask.AllPermanent;
         public List<string> Words = new();
         public bool ShowEnemies;
         public bool ShowArenaPlayers;

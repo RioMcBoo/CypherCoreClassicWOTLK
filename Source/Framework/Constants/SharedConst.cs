@@ -702,11 +702,11 @@ namespace Framework.Constants
         DeathKnight = 1 << (Class.DeathKnight - 1),
         Shaman = 1 << (Class.Shaman - 1),
         Mage = 1 << (Class.Mage - 1),
-        Warlock = 1 << (Class.Warrior - 1),
+        Warlock = 1 << (Class.Warlock - 1),
         Monk = 1 << (Class.Monk - 1),
         Druid = 1 << (Class.Druid - 1),
         DemonHunter = 1 << (Class.DemonHunter - 1),
-        Evoker = 1 << (Class.Monk - 1),
+        Evoker = 1 << (Class.Evoker - 1),
         Adventurer = 1 << (Class.Adventurer - 1),
 
         //Helpers
@@ -715,7 +715,7 @@ namespace Framework.Constants
         Playable = Warrior | Paladin | Hunter | Rogue | Priest | DeathKnight | Shaman |
             Mage | Warlock | Druid,
 
-        All = -1,
+        AllPermanent = -1,
     }
 
     public enum ScalingClass
@@ -831,19 +831,13 @@ namespace Framework.Constants
         DracthyrAlliance = 1 << 16,
 
         //Helpers
-        Alliance = Human | Dwarf | NightElf | Gnome | Draenei |
-            Worgen | PandarenAlliance | VoidElf | LightforgedDraenei | KulTiran | DarkIronDwarf | MechaGnome |
-            DracthyrAlliance,
+        Alliance = Human | Dwarf | NightElf | Gnome | Draenei,
 
-        Horde = Orc | Undead | Tauren | Troll | BloodElf |
-            Goblin | PandarenHorde | HighmountainTauren | Nightborne | ZandalariTroll | Vulpera | MagharOrc |
-            DracthyrHorde,
+        Horde = Orc | Undead | Tauren | Troll | BloodElf,
 
-        Neutral = PandarenNeutral,
+        Playable = Alliance | Horde,
 
-        Playable = Alliance | Horde | Neutral,
-
-        All = Playable,
+        AllPermanent = -1,
     }
 
     public enum Expansion : sbyte
@@ -878,7 +872,6 @@ namespace Framework.Constants
         Happinnes = 4,
         Runes = 5,
         RunicPower = 6,
-        MaxWotlk = 7,
         ///<summary>(unused 3.4.3)</summary> 
         SoulShards = 7,
         ///<summary>(unused 3.4.3)</summary> 

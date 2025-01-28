@@ -38,6 +38,22 @@ namespace Game.DataStorage
 
         public void LoadStores()
         {
+            foreach (var record in CharBaseInfoStorage)
+            {
+                var set = record.Value;
+                if (!_chrClassesByRace.TryGetValue(set.RaceID, out var classList))
+                {
+                    classList = new();
+                    _chrClassesByRace[set.RaceID] = classList;
+                }
+
+                if (!classList.Add(set.ClassID))
+                {
+                    Log.outError(LogFilter.ServerLoading,
+                        $"CharBaseInfo ({record.Key}) contains duplicate Class ({set.ClassID}) for Race ({set.RaceID}). Ignoring values.");
+                }
+            }
+
             foreach (var areaGroupMember in AreaGroupMemberStorage.Values)
                 _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);
 
@@ -927,6 +943,21 @@ namespace Game.DataStorage
         public ChrModelRecord GetChrModel(Race race, Gender gender)
         {
             return _chrModelsByRaceAndGender.LookupByKey((race, gender));
+        }
+
+        public bool IsCharacterCreationAllowed(Class classID, Race raceID)
+        {
+            if (_chrClassesByRace.TryGetValue(raceID, out var classList))
+            {
+                return classList.Contains(classID);
+            }
+
+            return false;
+        }
+
+        public bool IsCharacterCreationAllowed(Race raceID)
+        {
+            return _chrClassesByRace.ContainsKey(raceID);
         }
 
         public string GetChrRaceName(Race race, Locale locale = Locale.enUS)
@@ -2118,6 +2149,7 @@ namespace Game.DataStorage
         int[][] _powersByClass = new int[(int)Class.Max][];
         MultiMap<int, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();
         Dictionary<(Race, Gender), ChrModelRecord> _chrModelsByRaceAndGender = new();
+        Dictionary<Race, HashSet<Class>> _chrClassesByRace = new();
         Dictionary<(Race, Gender, ShapeShiftForm), ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts = new();
         MultiMap<(Race, Gender), ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
         Dictionary<int, MultiMap<int, int>> _chrCustomizationRequiredChoices = new();
