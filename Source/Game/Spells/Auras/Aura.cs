@@ -1425,11 +1425,43 @@ namespace Game.Spells
                                 AuraEffect aurEff = aura.GetEffect(0);
                                 if (aurEff != null)
                                 {
-                                    float multiplier = aurEff.GetAmount();
+                                    float multiplier = casterAurEff.GetAmount();
+                                    if (casterAurEff.GetId() == 47535)
+                                        multiplier -= 0.5f;
+                                    else if (casterAurEff.GetId() == 47537)
+                                        multiplier += 0.5f;
+
                                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                                     args.SetOriginalCastId(GetCastId());
                                     args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier));
                                     caster.CastSpell(caster, 47755, args);
+                                }
+
+                                // effect on aura target
+                                if (aura.GetEffect(1) is AuraEffect targetAurEff)
+                                {
+                                    if (!RandomHelper.randChance(targetAurEff.GetAmount()))
+                                        break;
+
+                                    int triggeredSpellId = 0;
+                                    switch (target.GetPowerType())
+                                    {
+                                        case PowerType.Mana:
+                                        {
+                                            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                                            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(target.GetMaxPower(PowerType.Mana), 2));
+                                            caster.CastSpell(target, 63654, args);
+                                            break;
+                                        }
+                                        case PowerType.Rage: triggeredSpellId = 63653; break;
+                                        case PowerType.Energy: triggeredSpellId = 63655; break;
+                                        case PowerType.RunicPower: triggeredSpellId = 63652; break;
+                                        default:
+                                            break;
+                                    }
+
+                                    if (triggeredSpellId != 0)
+                                        caster.CastSpell(target, triggeredSpellId, true);
                                 }
                             }
                         }

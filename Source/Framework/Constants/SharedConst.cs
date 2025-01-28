@@ -183,6 +183,8 @@ namespace Framework.Constants
         public const int MaxCreatureNames = 4;
         public const int MaxCreatureModelIds = 4;
         public const int MaxTrainerspellAbilityReqs = 3;
+        public static readonly Milliseconds FoodEmoteInterval = (Seconds)5;
+        public static readonly Milliseconds PlayerRegenInterval = (Seconds)2;
         public static readonly Milliseconds CreatureRegenInterval = (Seconds)2;
         public static readonly Milliseconds PetFocusRegenInterval = (Seconds)4;
         public static readonly Milliseconds CreatureNoPathEvadeTime = (Seconds)5;

@@ -343,6 +343,8 @@ namespace Game.Entities
     public class PlayerLevelInfo
     {
         public int[] stats = new int[(int)Stats.Max];
+        public int baseHealth;
+        public int baseMana;
     }
 
     public class PlayerCurrency

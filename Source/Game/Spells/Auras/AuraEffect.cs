@@ -1300,7 +1300,7 @@ namespace Game.Spells
                     case ShapeShiftForm.TravelForm:
                     case ShapeShiftForm.AquaticForm:
                     case ShapeShiftForm.BearForm:
-                    case ShapeShiftForm.FlightFormEpic:
+                    case ShapeShiftForm.DireBearForm:
                     case ShapeShiftForm.FlightEpicForm:
                     case ShapeShiftForm.FlightForm:
                     case ShapeShiftForm.MoonkinForm:
@@ -1372,6 +1372,38 @@ namespace Game.Spells
                         if (dummy != null)
                             target.CastSpell(target, 37325, new CastSpellExtraArgs(dummy));
                         break;
+                    case ShapeShiftForm.BattleStance:
+                    case ShapeShiftForm.DefensiveStance:
+                    case ShapeShiftForm.BerserkerStance:
+                    {
+                        int Rage_val = 0;
+                        // Defensive Tactics
+                        if (form == ShapeShiftForm.DefensiveStance)
+                        {
+                            AuraEffect aurEff = target.IsScriptOverriden(m_spellInfo, 831);
+                            if (aurEff != null)
+                                Rage_val += aurEff.GetAmount() * 10;
+                        }
+
+                        // Stance mastery + Tactical mastery (both passive, and last have aura only in defense stance, but need apply at any stance switch)
+                        if (target is Player player)
+                        {
+                            var sp_list = player.GetSpellMap();
+                            foreach(var itr in sp_list)
+                            {
+                                if (itr.Value.State == PlayerSpellState.Removed || itr.Value.Disabled)
+                                    continue;
+
+                                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itr.Key, Difficulty.None);
+                                if (spellInfo != null && spellInfo.SpellFamilyName == SpellFamilyNames.Warrior && spellInfo.IconFileDataId == 139)
+                                    Rage_val += target.CalculateSpellDamage(null, spellInfo.GetEffect(0)) * 10;
+                            }
+                        }
+
+                        if (target.GetPower(PowerType.Rage) > Rage_val)
+                            target.SetPower(PowerType.Rage, Rage_val);
+                        break;
+                    }
                     default:
                         break;
                 }

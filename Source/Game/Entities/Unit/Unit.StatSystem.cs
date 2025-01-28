@@ -318,12 +318,16 @@ namespace Game.Entities
                 if (thisPlayer.GetGroup() != null)
                     thisPlayer.SetGroupUpdateFlag(GroupUpdateFlags.PowerType);
             }
-            /*else if (IsPet()) TODO 6.x
+            else if (this is Pet pet)
             {
-                Pet pet = ToCreature().ToPet();
-                if (pet.isControlled())
-                    pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
-            }*/
+                if (pet.IsControlled())
+                {
+                    if (GetOwner() is Player owner && owner.GetGroup() != null)
+                        owner.SetGroupUpdateFlag(/*GroupUpdateFlags.PowerType | */GroupUpdateFlags.Pet);
+
+                    //pet.SetGroupUpdateFlag(GroupUpdatePetFlags.PowerType);
+                }                    
+            }
 
             // Update max power
             UpdateMaxPower(powerType);
@@ -383,18 +387,23 @@ namespace Game.Entities
             if (maxPower < val)
                 val = maxPower;
 
+            SetPower(powerType, powerIndex, val, withPowerUpdate);
+        }
+
+        protected void SetPower(PowerType powerType, int powerIndex, int safeValue, bool withPowerUpdate = true)
+        {
             int oldPower = m_unitData.Power[powerIndex];
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, powerIndex), val);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, powerIndex), safeValue);
 
             if (IsInWorld && withPowerUpdate)
             {
                 PowerUpdate packet = new();
                 packet.Guid = GetGUID();
-                packet.Powers.Add(new PowerUpdatePower(val, (byte)powerType));
+                packet.Powers.Add(new PowerUpdatePower(safeValue, (byte)powerType));
                 SendMessageToSet(packet, IsTypeId(TypeId.Player));
             }
 
-            TriggerOnPowerChangeAuras(powerType, oldPower, val);
+            TriggerOnPowerChangeAuras(powerType, oldPower, safeValue);
 
             // group update
             if (IsTypeId(TypeId.Player))
@@ -403,12 +412,16 @@ namespace Game.Entities
                 if (player.GetGroup() != null)
                     player.SetGroupUpdateFlag(GroupUpdateFlags.CurPower);
             }
-            /*else if (IsPet()) TODO 6.x
+            else if (this is Pet pet)
             {
-                Pet pet = ToCreature().ToPet();
-                if (pet.isControlled())
-                    pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
-            }*/
+                if (pet.IsControlled())
+            {
+                    if (GetOwner() is Player owner && owner.GetGroup() != null)
+                        owner.SetGroupUpdateFlag(/*GroupUpdateFlags.CurPower | */GroupUpdateFlags.Pet);
+
+                    //pet.SetGroupUpdateFlag(GroupUpdatePetFlags.CurPower);
+                }
+            }
         }
 
         public void SetFullPower(PowerType powerType) { SetPower(powerType, GetMaxPower(powerType)); }

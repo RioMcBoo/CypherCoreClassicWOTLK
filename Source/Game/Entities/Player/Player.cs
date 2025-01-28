@@ -3530,8 +3530,10 @@ namespace Game.Entities
             m_regenTimerCount += RegenTimer;
             m_foodEmoteTimerCount += RegenTimer;
 
-            for (PowerType power = PowerType.Mana; power < PowerType.Max; power++)
-                Regenerate(power);
+            Regenerate(PowerType.Energy);
+            Regenerate(PowerType.Mana);
+            Regenerate(PowerType.Rage);
+            Regenerate(PowerType.RunicPower);
 
             // Runes act as cooldowns, and they don't need to send any data
             /*
@@ -3556,13 +3558,17 @@ namespace Game.Entities
             }
             */
 
-            if (m_regenTimerCount >= (Milliseconds)2000)
+            if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)
             {
                 // Not in combat or they have regeneration
-                if (!IsInCombat() || IsPolymorphed() || m_baseHealthRegen != 0 || HasAuraType(AuraType.ModRegenDuringCombat) || HasAuraType(AuraType.ModHealthRegenInCombat))
+                if (!IsInCombat() || IsPolymorphed() || m_baseHealthRegen != 0 ||
+                    HasAuraType(AuraType.ModRegenDuringCombat) ||
+                    HasAuraType(AuraType.ModHealthRegenInCombat))
+                {
                     RegenerateHealth();
+                }
 
-                m_regenTimerCount -= (Milliseconds)2000;
+                m_regenTimerCount -= SharedConst.PlayerRegenInterval;
             }
 
             RegenTimer = Milliseconds.Zero;
@@ -3571,7 +3577,7 @@ namespace Game.Entities
             // According to sniffs there is a background timer going on that repeats independed from the time window where the aura applies.
             // That's why we dont need to reset the timer on apply. In sniffs I have seen that the first call for the spell visual is totally random, then after
             // 5 seconds over and over again which confirms my theory that we have a independed timer.
-            if (m_foodEmoteTimerCount >= (Milliseconds)5000)
+            if (m_foodEmoteTimerCount >= SharedConst.FoodEmoteInterval)
             {
                 List<AuraEffect> auraList = GetAuraEffectsByType(AuraType.ModRegen);
                 auraList.AddRange(GetAuraEffectsByType(AuraType.ModPowerRegen));
@@ -3590,7 +3596,7 @@ namespace Game.Entities
                         break;
                     }
                 }
-                m_foodEmoteTimerCount -= (Milliseconds)5000;
+                m_foodEmoteTimerCount -= SharedConst.FoodEmoteInterval;
             }
         }
 
@@ -3601,110 +3607,67 @@ namespace Game.Entities
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
-            // @todo possible use of miscvalueb instead of amount
-            if (HasAuraTypeWithValue(AuraType.PreventRegeneratePower, (int)power))
-                return;
-
             int curValue = GetPower(power);
 
-            // TODO: updating haste should update UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER for certain power types
-            PowerTypeRecord powerType = DB2Mgr.GetPowerTypeEntry(power);
-            if (powerType == null)
+            PowerTypeRecord powerInfo = DB2Mgr.GetPowerTypeEntry(power);
+            if (powerInfo == null)
+                return;
+
+            if (powerInfo.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + powerInfo.RegenInterruptTime >= LoopTime.ServerTime)
                 return;
 
             float addvalue = 0;
 
-            if (power == PowerType.Mana && IsPowerRegenInterruptedByMP5Rule())
-                addvalue = (powerType.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[powerIndex]) * 0.001f * RegenTimer;            
-            else
-                addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[powerIndex]) * 0.001f * RegenTimer;
-
-            if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + powerType.RegenInterruptTime >= LoopTime.ServerTime)
-                return;
-
-            // Mana regen calculated in Player.UpdateManaRegen()
-            if (power != PowerType.Mana)
+            if (power == PowerType.Mana)
             {
-                addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
-                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : RegenTimer) / (5 * Time.MillisecondsInSecond);
-            }
-
-            int minPower = powerType.MinPower;
-            int maxPower = GetMaxPower(power);
-
-            if (powerType.CenterPower != 0)
-            {
-                if (curValue > powerType.CenterPower)
-                {
-                    addvalue = -Math.Abs(addvalue);
-                    minPower = powerType.CenterPower;
-                }
-                else if (curValue < powerType.CenterPower)
-                {
-                    addvalue = Math.Abs(addvalue);
-                    maxPower = powerType.CenterPower;
-                }
+                if (IsPowerRegenInterruptedByMP5Rule())
+                    addvalue = (powerInfo.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[powerIndex]) * 0.001f * RegenTimer;
                 else
-                    return;
-            }
-
-            addvalue += m_powerFraction[powerIndex];
-            int integerValue = (int)Math.Abs(addvalue);
-
-            bool forcesSetPower = false;
-            if (addvalue < 0.0f)
-            {
-                if (curValue <= minPower)
-                    return;
-            }
-            else if (addvalue > 0.0f)
-            {
-                if (curValue >= maxPower)
-                    return;
-            }
-            else
-                return;
-
-            if (addvalue < 0.0f)
-            {
-                if (curValue > minPower + integerValue)
-                {
-                    curValue -= integerValue;
-                    m_powerFraction[powerIndex] = addvalue + integerValue;
+                    addvalue = (powerInfo.RegenPeace + m_unitData.PowerRegenFlatModifier[powerIndex]) * 0.001f * RegenTimer;
                 }
-                else
+            else
                 {
-                    curValue = minPower;
+                if (IsInCombat())
+                    addvalue = (powerInfo.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[powerIndex]) * 0.001f * RegenTimer;
+                else
+                    addvalue = (powerInfo.RegenPeace + m_unitData.PowerRegenFlatModifier[powerIndex]) * 0.001f * RegenTimer;
+            }
+
+            float resultValue = curValue + addvalue + m_powerFraction[powerIndex];
+            int minPower = powerInfo.MinPower;
+            int maxPower = m_unitData.MaxPower[powerIndex];
+
+            if (curValue <= minPower && addvalue <= 0)
+                    return;
+
+            if (curValue >= maxPower && addvalue >= 0)
+                    return;
+
+            if (resultValue <= minPower)
+            {
+                resultValue = minPower;
+                m_powerFraction[powerIndex] = 0;
+                }
+            else if (resultValue >= maxPower)
+                {
+                resultValue = maxPower;
                     m_powerFraction[powerIndex] = 0;
-                    forcesSetPower = true;
                 }
-            }
             else
             {
-                if (curValue + integerValue <= maxPower)
-                {
-                    curValue += integerValue;
-                    m_powerFraction[powerIndex] = addvalue - integerValue;
+                m_powerFraction[powerIndex] = resultValue - (int)resultValue;
                 }
-                else
+
+            if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)
                 {
-                    curValue = maxPower;
-                    m_powerFraction[powerIndex] = 0;
-                    forcesSetPower = true;
-                }
+                SetPower(power, powerIndex, curValue);
             }
-
-            if (GetCommandStatus(PlayerCommandStates.Power))
-                curValue = maxPower;
-
-            if (m_regenTimerCount >= 2000 || forcesSetPower)
-                SetPower(power, curValue);
             else
             {
                 // throttle packet sending
                 DoWithSuppressingObjectUpdates(() =>
                 {
-                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, powerIndex), curValue);
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, powerIndex), (int)resultValue);
                     m_unitData.ClearChanged(m_unitData.Power, powerIndex);
                 });
             }
@@ -5309,19 +5272,17 @@ namespace Game.Entities
             if (guild != null)
                 guild.UpdateMemberData(this, GuildMemberData.Level, level);
 
-            PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
-
-            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out int basemana);
+            PlayerLevelInfo levelInfo = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
 
             LevelUpInfo packet = new();
             packet.Level = level;
             packet.HealthDelta = 0;
 
             // @todo find some better solution
-            packet.PowerDelta[0] = basemana - GetCreateMana(); // [0] is PowerType value? or dynamic powerindex?
+            packet.PowerDelta[0] = levelInfo.baseMana - GetCreateMana(); // [0] is PowerType value? or dynamic powerindex?
 
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
-                packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
+                packet.StatDelta[(int)i] = levelInfo.stats[(int)i] - (int)GetCreateStat(i);
 
             packet.NumNewTalents = DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass());
 
@@ -5341,10 +5302,10 @@ namespace Game.Entities
 
             // save base values (bonuses already included in stored stats
             for (var i = Stats.Strength; i < Stats.Max; ++i)
-                SetCreateStat(i, info.stats[(int)i]);
+                SetCreateStat(i, levelInfo.stats[(int)i]);
 
-            SetCreateHealth(0);
-            SetCreateMana(basemana);
+            SetCreateHealth(levelInfo.baseHealth);
+            SetCreateMana(levelInfo.baseMana);
 
             InitGlyphsForLevel();
             InitTalentForLevel();
@@ -5850,10 +5811,7 @@ namespace Game.Entities
             if (reapplyMods)                                        //reapply stats values only on .reset stats (level) command
                 _RemoveAllStatBonuses();
 
-            int basemana;
-            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
-
-            PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
+            PlayerLevelInfo levelInfo = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
             int exp_max_lvl = (int)ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
             int conf_max_lvl = WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32;
@@ -5883,15 +5841,14 @@ namespace Game.Entities
 
             // save base values (bonuses already included in stored stats
             for (var i = Stats.Strength; i < Stats.Max; ++i)
-                SetCreateStat(i, info.stats[(int)i]);
+                SetCreateStat(i, levelInfo.stats[(int)i]);
 
             for (var i = Stats.Strength; i < Stats.Max; ++i)
-                SetStat(i, info.stats[(int)i]);
-
-            SetCreateHealth(0);
+                SetStat(i, levelInfo.stats[(int)i]);
 
             //set create powers
-            SetCreateMana(basemana);
+            SetCreateHealth(levelInfo.baseHealth);            
+            SetCreateMana(levelInfo.baseMana);
 
             SetArmor((int)(GetCreateStat(Stats.Agility) * 2));
 

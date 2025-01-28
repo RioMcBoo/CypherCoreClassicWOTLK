@@ -1779,6 +1779,7 @@ namespace Game.Entities
                     displayPower = PowerType.Energy;
                     break;
                 case ShapeShiftForm.BearForm:
+                case ShapeShiftForm.DireBearForm:
                     displayPower = PowerType.Rage;
                     break;
                 case ShapeShiftForm.TravelForm:
@@ -1807,6 +1808,8 @@ namespace Game.Entities
 
                             if (powerDisplay != null)
                                 displayPower = (PowerType)powerDisplay.ActualType;
+                            else if (GetClass() == Class.Rogue)
+                                displayPower = PowerType.Energy;
                         }
                         else
                         {
@@ -2699,6 +2702,8 @@ namespace Game.Entities
 
         public static int DealDamage(Unit attacker, Unit victim, int damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
         {
+            int rage_damage = damage + (cleanDamage != null ? cleanDamage.absorbed_damage : 0);
+
             var damageDone = damage;
             var damageTaken = damage;
             if (attacker != null)
@@ -2807,17 +2812,32 @@ namespace Game.Entities
             }
 
             // Rage from Damage made (only from direct weapon damage)
-            if (attacker != null && cleanDamage != null && (cleanDamage.attackType == WeaponAttackType.BaseAttack || cleanDamage.attackType == WeaponAttackType.OffAttack) && damagetype == DamageEffectType.Direct && attacker != victim && attacker.GetPowerType() == PowerType.Rage)
+            if (attacker != null && cleanDamage != null && damagetype == DamageEffectType.Direct && attacker != victim && attacker.GetPowerType() == PowerType.Rage)
             {
-                uint rage = (uint)(attacker.GetBaseAttackTime(cleanDamage.attackType) / 1000.0f * 1.75f);
-                if (cleanDamage.attackType == WeaponAttackType.OffAttack)
-                    rage /= 2;
+                if (cleanDamage.attackType == WeaponAttackType.BaseAttack || cleanDamage.attackType == WeaponAttackType.OffAttack)
+                {
+                    float weaponAttackTypeFactor = 3.5f;
 
-                attacker.RewardRage(rage);
+                if (cleanDamage.attackType == WeaponAttackType.OffAttack)
+                        weaponAttackTypeFactor /= 2.0f;
+
+                    int weaponSpeedHitFactor = (int)(attacker.GetBaseAttackTime(cleanDamage.attackType) / (float)Time.MillisecondsInSecond * weaponAttackTypeFactor);
+                    
+                    if (cleanDamage.hitOutCome == MeleeHitOutcome.Crit)
+                        weaponSpeedHitFactor *= 2;
+
+                    attacker.RewardRage(rage_damage, weaponSpeedHitFactor, true);
+                }
             }
 
             if (damageDone == 0)
+            {
+                // Rage from absorbed damage
+                if (cleanDamage != null && cleanDamage.absorbed_damage != 0 && victim.GetPowerType() == PowerType.Rage)
+                    victim.RewardRage(cleanDamage.absorbed_damage, 0, false);
+
                 return 0;
+            }
 
             int health = (int)victim.GetHealth();
 
@@ -3005,6 +3025,13 @@ namespace Game.Entities
                         byte slot = (byte)RandomHelper.IRand(0, EquipmentSlot.End - 1);
                         victim.ToPlayer().DurabilityPointLossForEquipSlot(slot);
                     }
+                }
+
+                // Rage from damage received
+                if (attacker != victim && victim.GetPowerType() == PowerType.Rage)
+                {
+                    rage_damage = damage + (cleanDamage != null ? cleanDamage.absorbed_damage : 0);
+                    victim.RewardRage(rage_damage, 0, false);
                 }
 
                 if (attacker != null && attacker.IsPlayer())
@@ -3466,14 +3493,32 @@ namespace Game.Entities
             }
         }
 
-        public void RewardRage(uint baseRage)
+        public void RewardRage(int damage, int weaponSpeedHitFactor, bool attacker)
         {
-            float addRage = baseRage;
+            float addRage;
+            int level = GetLevel();
+
+            float rageconversion = (0.0091107836f * level * level) + 3.225598133f * level + 4.2652911f;
+
+            // Unknown if correct, but lineary adjust rage conversion above level 70
+            if (level > 70)
+                rageconversion += 13.27f * (level - 70);
+
+            if (attacker)
+        {
+                addRage = (damage / rageconversion * 7.5f + weaponSpeedHitFactor) / 2;
 
             // talent who gave more rage on attack
             MathFunctions.AddPct(ref addRage, GetTotalAuraModifier(AuraType.ModRageFromDamageDealt));
+            }
+            else
+            {
+                addRage = damage / rageconversion * 2.5f;
 
-            addRage *= WorldConfig.Values[WorldCfg.RatePowerRageIncome].Float;
+                // Berserker Rage effect
+                if (HasAura(18499))
+                    addRage *= 2.0f;
+            }
 
             ModifyPower(PowerType.Rage, (int)(addRage * 10));
         }

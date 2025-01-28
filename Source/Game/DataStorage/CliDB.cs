@@ -445,7 +445,7 @@ namespace Game.DataStorage
             ArtifactKnowledgeMultiplierGameTable = ReadGameTable<GtArtifactKnowledgeMultiplierRecord>("ArtifactKnowledgeMultiplier.txt");
             ArtifactLevelXPGameTable = ReadGameTable<GtArtifactLevelXPRecord>("artifactLevelXP.txt");
             BarberShopCostBaseGameTable = ReadGameTable<GtBarberShopCostBaseRecord>("BarberShopCostBase.txt");
-            BaseMPGameTable = ReadGameTable<GtBaseMPRecord>("BaseMp.txt");
+            //BaseMPGameTable = ReadGameTable<GtBaseMPRecord>("BaseMp.txt");
             BattlePetXPGameTable = ReadGameTable<GtBattlePetXPRecord>("BattlePetXP.txt");
             ChallengeModeDamageGameTable = ReadGameTable<GtChallengeModeDamageRecord>("ChallengeModeDamage.txt");
             ChallengeModeHealthGameTable = ReadGameTable<GtChallengeModeHealthRecord>("ChallengeModeHealth.txt");
@@ -802,7 +802,7 @@ namespace Game.DataStorage
         public static GameTable<GtArtifactKnowledgeMultiplierRecord> ArtifactKnowledgeMultiplierGameTable;
         public static GameTable<GtArtifactLevelXPRecord> ArtifactLevelXPGameTable;
         public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable;
-        public static GameTable<GtBaseMPRecord> BaseMPGameTable;
+        //public static GameTable<GtBaseMPRecord> BaseMPGameTable; // WOTLK CLASSIC does not use this table (it contains incorrect data)
         public static GameTable<GtBattlePetXPRecord> BattlePetXPGameTable;
         public static GameTable<GtChallengeModeDamageRecord> ChallengeModeDamageGameTable;
         public static GameTable<GtChallengeModeHealthRecord> ChallengeModeHealthGameTable;

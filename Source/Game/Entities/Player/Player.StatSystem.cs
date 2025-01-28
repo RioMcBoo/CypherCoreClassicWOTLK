@@ -456,90 +456,87 @@ namespace Game.Entities
 
         public void UpdatePowerRegen(PowerType power)
         {
-            if (power == PowerType.Health || power >= PowerType.MaxWotlk)
+            if (power == PowerType.Health || power >= PowerType.Max)
+                return;
+
+            var powerIndex = GetPowerIndex(power);
+            if (powerIndex == (int)PowerType.Max)
                 return;
 
             PowerTypeRecord powerInfo = Global.DB2Mgr.GetPowerTypeEntry(power);
             if (powerInfo == null)
                 return;
 
-            float result_regen = 0.0f; // Out-of-combat / without last mana use effect
-            float result_regen_interrupted = 0.0f; // In combat / with last mana use effect
-            float modifier = 1.0f; // Config rate or any other modifiers
+            float mod_regen = 0.0f; // Out-of-combat / without last mana use effect
+            float mod_regen_interrupted = 0.0f; // In combat / with last mana use effect
 
-            ///// @todo possible use of miscvalueb instead of amount
-            //if (HasAuraTypeWithValue(AuraType.PreventRegeneratePower, (int)power))
-            //{
-            //    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)power), power == PowerType.Energy ? -10.0f : 0.0f);
-            //    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)power), power == PowerType.Energy ? -10.0f : 0.0f);
-            //    return;
-            //}
-
-            switch (power)
+            if (power == PowerType.Mana)
             {
-                case PowerType.Mana:
+                // Aura of Despair [62692] - only
+                if (HasAuraTypeWithValue(AuraType.PreventRegeneratePower, (int)power))
                 {
-                    //var manaIndex = GetPowerIndex(PowerType.Mana);
-                    //if (manaIndex == (int)PowerType.Max)
-                    //    return;
-
-                    float Intellect = GetStat(Stats.Intellect);
-                    // Mana regen from spirit and intellect
-                    float power_regen = (float)Math.Sqrt(Intellect) * OCTRegenMPPerSpirit();
-                    // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
-                    power_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
-
-                    // Mana regen from SPELL_AURA_MOD_POWER_REGEN aura
-                    float power_regen_mp5 = (GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) + m_baseManaRegen) / 5.0f;
-
-                    // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
-                    var regenAura = GetAuraEffectsByType(AuraType.ModManaRegenFromStat);
-                    foreach (var aura in regenAura)
-                        power_regen_mp5 += GetStat((Stats)aura.GetMiscValue()) * aura.GetAmount() / 500.0f;
-
-                    // Set regen rate in cast state apply only on spirit based regen
-                    int modManaRegenInterrupt = GetTotalAuraModifier(AuraType.ModManaRegenInterrupt);
-                    if (modManaRegenInterrupt > 100)
-                        modManaRegenInterrupt = 100;
-
-                    result_regen                = power_regen_mp5 + power_regen;
-                    result_regen_interrupted    = power_regen_mp5 + MathFunctions.CalculatePct(power_regen, modManaRegenInterrupt);
-
-                    
-                    /* if (GetLevel() < 15) // this does not match the wotlk_classic client's tooltip (do we should delete this?)
-                        modifier *= 2.066f - (GetLevel() * 0.066f); */
-                    break;
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)power), 0);
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)power), 0);
+                    return;
                 }
-                case PowerType.Rage:
-                case PowerType.Energy:
-                case PowerType.RunicPower:
+
+                float Intellect = GetStat(Stats.Intellect);
+                // Mana regen from spirit and intellect
+                float power_regen = (float)Math.Sqrt(Intellect) * OCTRegenMPPerSpirit();
+                // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
+                power_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
+
+                // Mana regen from SPELL_AURA_MOD_POWER_REGEN aura
+                float power_regen_mp5 = (GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) + m_baseManaRegen) / 5.0f;
+
+                // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
+                var regenAura = GetAuraEffectsByType(AuraType.ModManaRegenFromStat);
+                foreach (var aura in regenAura)
+                    power_regen_mp5 += GetStat((Stats)aura.GetMiscValue()) * aura.GetAmount() / 500.0f;
+
+                // Set regen rate in cast state apply only on spirit based regen
+                int modManaRegenInterrupt = GetTotalAuraModifier(AuraType.ModManaRegenInterrupt);
+                if (modManaRegenInterrupt > 100)
+                    modManaRegenInterrupt = 100;
+
+                mod_regen = power_regen_mp5 + power_regen;
+                mod_regen_interrupted = power_regen_mp5 + MathFunctions.CalculatePct(power_regen, modManaRegenInterrupt);
+            }
+            else
+            {
+                float multModifier = GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
+                float flatModifier = GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) / 5.0f;
+                if (flatModifier > 0)
+                    flatModifier *= multModifier;
+
+                // Peace regen mod
                 {
-                    result_regen = powerInfo.RegenPeace;
-                    result_regen_interrupted = 0.0f;
+                    mod_regen = powerInfo.RegenPeace;
+                    if (powerInfo.RegenPeace > 0)
+                        mod_regen *= multModifier;
 
-                    result_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
-                    result_regen_interrupted += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) / 5.0f;
+                    if (power != PowerType.RunicPower) // Butchery [48979]^1 requires combat
+                        mod_regen += flatModifier;
 
-                    if (power != PowerType.RunicPower) // Butchery requires combat
-                        result_regen += result_regen_interrupted;
-                    break;
+                    // Unit fields contain an offset relative to the base power regeneration.
+                    mod_regen -= powerInfo.RegenPeace;
                 }
-                default:
-                    break;
+
+                // Combat regen mod
+                {
+                    mod_regen_interrupted = powerInfo.RegenCombat;
+                    if (powerInfo.RegenCombat > 0)
+                        mod_regen_interrupted *= multModifier;
+
+                    mod_regen_interrupted += flatModifier;
+
+                    // Unit fields contain an offset relative to the base power regeneration.
+                    mod_regen_interrupted -= powerInfo.RegenCombat;
+                }
             }
 
-            result_regen                *= modifier;
-            result_regen_interrupted    *= modifier;
-
-            // Unit fields contain an offset relative to the base power regeneration.
-            if (power != PowerType.Mana)
-                result_regen -= powerInfo.RegenPeace;
-
-            if (power == PowerType.Energy)
-                result_regen_interrupted = result_regen;
-
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)power), result_regen);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)power), result_regen_interrupted);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, powerIndex), mod_regen);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, powerIndex), mod_regen_interrupted);
         }
 
         public void UpdateSpellDamageAndHealingBonus()
