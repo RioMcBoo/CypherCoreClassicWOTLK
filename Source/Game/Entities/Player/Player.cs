@@ -5276,7 +5276,7 @@ namespace Game.Entities
 
             LevelUpInfo packet = new();
             packet.Level = level;
-            packet.HealthDelta = 0;
+            packet.HealthDelta = levelInfo.baseHealth - GetCreateHealth();
 
             // @todo find some better solution
             packet.PowerDelta[0] = levelInfo.baseMana - GetCreateMana(); // [0] is PowerType value? or dynamic powerindex?
