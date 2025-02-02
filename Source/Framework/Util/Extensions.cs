@@ -222,6 +222,47 @@ namespace System
             return SpellSchools.Normal;
         }
 
+        public static RuneType GetRuneType(this RuneIndex index)
+        {
+            switch (index)
+            {
+                case RuneIndex.Blood_0:
+                case RuneIndex.Blood_1:
+                    return RuneType.Blood;
+                case RuneIndex.Unholy_0:
+                case RuneIndex.Unholy_1:
+                    return RuneType.Unholy;
+                case RuneIndex.Frost_0:
+                case RuneIndex.Frost_1:
+                    return RuneType.Frost;
+                default:
+                    return RuneType.Max;
+            }
+        }
+
+        public static PowerType GetPowerType(this RuneType type)
+        {
+            switch (type)
+            {
+                case RuneType.Blood:
+                    return PowerType.RuneBlood;
+                case RuneType.Unholy:
+                    return PowerType.RuneUnholy;
+                case RuneType.Frost:
+                    return PowerType.RuneFrost;
+                default:
+                    return PowerType.Max;
+            }
+        }
+
+        public static RuneStateMask GetRuneMask(this RuneIndex index)
+        {
+            if (index >= RuneIndex.Max)
+                return RuneStateMask.None;
+
+            return (RuneStateMask)(1 << (byte)index);
+        }
+
         public static int GetBagFamilyRating(this BagFamilyMask mask)
         {
             // Skip work at easy cases

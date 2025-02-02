@@ -958,7 +958,7 @@ namespace Game.Networking.Packets
         public bool TryAutoDismount;
     }
 
-    class ResyncRunes : ServerPacket
+    public class ResyncRunes : ServerPacket
     {
         public ResyncRunes() : base(ServerOpcodes.ResyncRunes) { }
 
@@ -1746,21 +1746,49 @@ namespace Game.Networking.Packets
         public PowerType Type;
     }
 
-    public class RuneData
+    public struct RuneCooldown
     {
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt8(Start);
-            data.WriteUInt8(Count);
-            data.WriteInt32(Cooldowns.Count);
+        public static RuneCooldown Zero = new RuneCooldown(TimeSpan.Zero);
 
-            foreach (byte cd in Cooldowns)
-                data.WriteUInt8(cd);
+        public RuneCooldown(TimeSpan cooldown)
+        {
+            var remainsPercentOfBase = cooldown / PlayerConst.RuneCooldownBase;
+            byte remainsCompressed = (byte)(byte.MaxValue * remainsPercentOfBase);
+            PassedCompressed = (byte)(byte.MaxValue - remainsCompressed); // cooldown time (0-255)
         }
 
-        public byte Start;
-        public byte Count;
-        public List<byte> Cooldowns = new();
+        public byte PassedCompressed { get; init; }
+    }
+
+    public class RuneData
+    {
+        public RuneData()
+        {
+            RuneStateBefore = RuneStateMask.All;
+            RuneStateAfter = RuneStateMask.All;
+            Cooldowns.Add(RuneCooldown.Zero); // Blood
+            Cooldowns.Add(RuneCooldown.Zero); // Blood
+            Cooldowns.Add(RuneCooldown.Zero); // Unholy
+            Cooldowns.Add(RuneCooldown.Zero); // Unholy
+            Cooldowns.Add(RuneCooldown.Zero); // Frost
+            Cooldowns.Add(RuneCooldown.Zero); // Frost
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8((byte)RuneStateBefore);
+            data.WriteUInt8((byte)RuneStateAfter);
+            data.WriteInt32(Cooldowns.Count);
+
+            foreach (var cd in Cooldowns)
+            {
+                data.WriteUInt8(cd.PassedCompressed);
+            }
+        }
+
+        public RuneStateMask RuneStateBefore;
+        public RuneStateMask RuneStateAfter;
+        public List<RuneCooldown> Cooldowns = new((int)RuneIndex.Max);
     }
 
     public struct MissileTrajectoryResult

@@ -44,9 +44,10 @@ namespace Framework.Constants
         public const int MaxCUFProfiles = 5;
 
         public static Seconds[] copseReclaimDelay = [(Seconds)30, (Seconds)60, (Seconds)120];
+        public static readonly TimeSpan RuneCooldownBase = Time.SpanFromMilliseconds(10000);
+        public static readonly TimeSpan RuneCooldownMiss = Time.SpanFromMilliseconds(1500);     // cooldown applied on runes when the spell misses
 
-        public const int MaxRunes = 7;
-        public const int MaxRechargingRunes = 3;
+        public const int MaxRunes = 6;
 
         public const int CustomDisplaySize = 3;
 
@@ -196,6 +197,39 @@ namespace Framework.Constants
         MonkMistweaver = 270,
         DemonHunterHavoc = 577,
         DemonHunterVengeance = 581
+    }
+
+    public enum RuneType : byte
+    {
+        Blood,
+        Unholy,
+        Frost,
+        Death,
+        Max,
+    }
+
+    public enum RuneIndex : byte
+    {
+        Blood_0,
+        Blood_1,
+        Unholy_0,
+        Unholy_1,
+        Frost_0,
+        Frost_1,
+        Max
+    }
+
+    [Flags]
+    public enum RuneStateMask : byte
+    {
+        None = 0,
+        Blood_0 = 1 << RuneIndex.Blood_0,
+        Blood_1 = 1 << RuneIndex.Blood_1,
+        Unholy_0 = 1 << RuneIndex.Unholy_0,
+        Unholy_1 = 1 << RuneIndex.Unholy_1,
+        Frost_0 = 1 << RuneIndex.Frost_0,
+        Frost_1 = 1 << RuneIndex.Frost_1,
+        All = 1 << RuneIndex.Max,
     }
 
     public enum SpecResetType : byte
@@ -368,12 +402,6 @@ namespace Framework.Constants
         InDarkWater = 0x08,             // terrain type is dark water and player is afflicted by it
 
         ExistTimers = 0x10
-    }
-
-    public struct RuneCooldowns
-    {
-        public const int Base = 10000;
-        public const int Miss = 1500;     // cooldown applied on runes when the spell misses
     }
 
     [Flags]

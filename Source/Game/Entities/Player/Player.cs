@@ -18,6 +18,7 @@ using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
+using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -3535,35 +3536,29 @@ namespace Game.Entities
             Regenerate(PowerType.Rage);
             Regenerate(PowerType.RunicPower);
 
-            // Runes act as cooldowns, and they don't need to send any data
-            /*
-            if (GetClass() == Class.Deathknight)
+            // Runes act as cooldowns
+            if (GetClass() == Class.DeathKnight)
             {
-                uint regeneratedRunes = 0;
-                int regenIndex = 0;
-                while (regeneratedRunes < PlayerConst.MaxRechargingRunes && m_runes.CooldownOrder.Count > regenIndex)
-                {
-                    byte runeToRegen = m_runes.CooldownOrder[regenIndex];
-                    uint runeCooldown = GetRuneCooldown(runeToRegen);
-                    if (runeCooldown > RegenTimer)
-                    {
-                        SetRuneCooldown(runeToRegen, runeCooldown - RegenTimer);
-                        ++regenIndex;
-                    }
-                    else
-                        SetRuneCooldown(runeToRegen, 0);
+                bool forceUpdate = m_regenTimerCount >= SharedConst.PlayerRegenInterval;
 
-                    ++regeneratedRunes;
+                if (!m_runes.Initialized)
+                {
+                    forceUpdate = true;
                 }
+
+                var packetForUpdate = m_runes.Resync(LoopTime.ServerTime, forceUpdate);
+                if (packetForUpdate != null)
+                    SendPacket(packetForUpdate);
+
+                m_runes.Initialized = true;
             }
-            */
 
             if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)
             {
                 // Not in combat or they have regeneration
                 if (!IsInCombat() || IsPolymorphed() || m_baseHealthRegen != 0 ||
-                    HasAuraType(AuraType.ModRegenDuringCombat) ||
-                    HasAuraType(AuraType.ModHealthRegenInCombat))
+                HasAuraType(AuraType.ModRegenDuringCombat) ||
+                HasAuraType(AuraType.ModHealthRegenInCombat))
                 {
                     RegenerateHealth();
                 }

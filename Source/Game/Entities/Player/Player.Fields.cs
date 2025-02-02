@@ -12,6 +12,7 @@ using Game.Mails;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -379,26 +380,115 @@ namespace Game.Entities
 
     public class Runes
     {
-        public void SetRuneState(byte index, bool set = true)
+        public Runes()
         {
-            bool foundRune = CooldownOrder.Contains(index);
+            AvailableRunes = RuneStateMask.All;
+        }
+
+        private void SetRuneState(RuneIndex index, bool set = true)
+        {
             if (set)
             {
-                RuneState |= (byte)(1 << index);                      // usable
-                if (foundRune)
-                    CooldownOrder.Remove(index);
+                AvailableRunes |= index.GetRuneMask();                      // usable
             }
             else
             {
-                RuneState &= (byte)~(1 << index);                     // on cooldown
-                if (!foundRune)
-                    CooldownOrder.Add(index);
+                AvailableRunes &= ~index.GetRuneMask();                     // on cooldown
             }
         }
 
-        public List<byte> CooldownOrder = new();
-        public uint[] Cooldown = new uint[PlayerConst.MaxRunes];
-        public byte RuneState;                                        // mask of available runes
+        private bool GetRuneState(RuneIndex index)
+        {
+            return AvailableRunes.HasFlag(index.GetRuneMask());
+        }
+
+        public void SetDeathRune(RuneIndex index, bool set = true)
+        {
+            if (set)
+            {
+                DeathRunes |= index.GetRuneMask();
+            }
+            else
+            {
+                DeathRunes &= ~index.GetRuneMask();
+            }
+        }
+
+        public RuneType GetRuneType(RuneIndex index)
+        {
+            if (DeathRunes.HasFlag(index.GetRuneMask()))
+                return RuneType.Death;
+
+            return index.GetRuneType();
+        }
+
+        public void SetRuneCooldown(RuneIndex index, TimeSpan cooldown, ServerTime currentTime = default)
+        {
+            currentTime = currentTime == default? LoopTime.ServerTime : currentTime;
+            NextResetTime[(int)index] = currentTime + cooldown;
+        }
+
+        public TimeSpan GetRuneCooldown(RuneIndex index, ServerTime currentTime = default)
+        {
+            currentTime = currentTime == default ? LoopTime.ServerTime : currentTime;
+            var cooldown = NextResetTime[(int)index] - currentTime;
+
+            if (cooldown < TimeSpan.Zero)
+                cooldown = TimeSpan.Zero;
+
+            return cooldown;
+        }
+
+        public ResyncRunes Resync(ServerTime currentTime, bool forceUpdate, RuneStateMask runeStateBefore = RuneStateMask.All)
+        {
+            ResyncRunes data = null;
+
+            for (RuneIndex runeIndex = RuneIndex.Blood_0; runeIndex < RuneIndex.Max; runeIndex++)
+            {
+                TimeSpan cooldown = TimeSpan.Zero;
+
+                if (!GetRuneState(runeIndex))
+                {
+                    cooldown = GetRuneCooldown(runeIndex, currentTime);
+
+                    if (cooldown == TimeSpan.Zero)
+                    {
+                        SetRuneState(runeIndex, true);
+                        forceUpdate = true;
+                    }
+                    else
+                    {
+                        cooldown = NextResetTime[(int)runeIndex] - currentTime;
+                    }
+                }
+
+                if (forceUpdate)
+                {
+                    if (data == null)
+                        data = new ResyncRunes();
+                }
+
+                if (data != null)
+                {
+                    //data.Runes[(int)runeIndex].Type = currentRune.CurrentType;
+                    data.Runes.Cooldowns[(int)runeIndex] = new(cooldown);
+                }
+            }
+
+            if (data != null)
+            {
+                data.Runes.RuneStateBefore = runeStateBefore;
+                data.Runes.RuneStateAfter = AvailableRunes;
+            }
+
+            return data;
+        }
+
+        public RuneStateMask AvailableRunes { get; private set; }
+        public RuneStateMask DeathRunes { get; private set; }
+        public bool Initialized = false;
+
+        private ServerTime[] NextResetTime = new ServerTime[PlayerConst.MaxRunes];
     }
 
     public class ActionButton

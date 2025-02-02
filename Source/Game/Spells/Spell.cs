@@ -4218,7 +4218,7 @@ namespace Game.Spells
 
             m_targets.Write(castData.Target);
 
-            if (Convert.ToBoolean(castFlags & SpellCastFlags.PowerLeftSelf))
+            if (castFlags.HasAnyFlag(SpellCastFlags.PowerLeftSelf))
             {
                 castData.RemainingPower = new List<SpellPowerData>();
                 foreach (SpellPowerCost cost in m_powerCost)
@@ -4230,22 +4230,9 @@ namespace Game.Spells
                 }
             }
 
-            if (Convert.ToBoolean(castFlags & SpellCastFlags.RuneList))                   // rune cooldowns list
+            if (castFlags.HasAnyFlag(SpellCastFlags.RuneList))  // rune cooldowns list
             {
-                castData.RemainingRunes = new();
-                RuneData runeData = castData.RemainingRunes;
-
-                Player player = m_caster.ToPlayer();
-                runeData.Start = m_runesState; // runes state before
-                runeData.Count = player.GetRunesState(); // runes state after
-                /*
-                for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                {
-                    // float casts ensure the division is performed on floats as we need float result
-                    float baseCd = (float)player.GetRuneBaseCooldown();
-                    runeData.Cooldowns.Add((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255)); // rune cooldown passed
-                }
-                */
+                castData.RemainingRunes = m_caster.ToPlayer().ResyncRunes(m_runesState);
             }
 
             if (castFlags.HasFlag(SpellCastFlags.AdjustMissile))
@@ -8627,7 +8614,7 @@ namespace Game.Spells
         Milliseconds m_channeledDuration;                          // Calculated channeled spell duration in order to calculate correct pushback.
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
-        byte m_runesState;
+        RuneStateMask m_runesState;
         byte m_delayAtDamageCount;
 
         // Delayed spells system

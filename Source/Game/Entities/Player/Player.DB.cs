@@ -3525,22 +3525,7 @@ namespace Game.Entities
             }
 
             for (; loadedPowers < (int)PowerType.MaxPerClass; ++loadedPowers)
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, loadedPowers), 0);
-
-            // Init rune recharge
-            /*
-            if (GetPowerIndex(PowerType.Runes) != (int)PowerType.Max)
-            {
-                int runes = GetPower(PowerType.Runes);
-                int maxRunes = GetMaxPower(PowerType.Runes);
-                uint runeCooldown = GetRuneBaseCooldown();
-                while (runes < maxRunes)
-                {
-                    SetRuneCooldown((byte)runes, runeCooldown);
-                    ++runes;
-                }
-            }
-            */
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, loadedPowers), 0);           
 
             Log.outDebug(LogFilter.Player, 
                 $"Player.LoadFromDB: The value of player {GetName()} after load item and aura is: ");            
