@@ -3655,7 +3655,7 @@ namespace Game.Entities
 
             if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)
                 {
-                SetPower(power, powerIndex, curValue);
+                SetPower(power, powerIndex, (int)resultValue);
             }
             else
             {
