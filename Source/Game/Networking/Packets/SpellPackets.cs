@@ -1778,8 +1778,8 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt8((byte)RuneStateBefore);
             data.WriteUInt8((byte)RuneStateAfter);
-            data.WriteInt32(Cooldowns.Count);
 
+            data.WriteInt32(Cooldowns.Count);
             foreach (var cd in Cooldowns)
             {
                 data.WriteUInt8(cd.PassedCompressed);

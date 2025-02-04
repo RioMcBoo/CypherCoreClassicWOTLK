@@ -3539,18 +3539,9 @@ namespace Game.Entities
             // Runes act as cooldowns
             if (GetClass() == Class.DeathKnight)
             {
-                bool forceUpdate = m_regenTimerCount >= SharedConst.PlayerRegenInterval;
-
-                if (!m_runes.Initialized)
-                {
-                    forceUpdate = true;
-                }
-
-                var packetForUpdate = m_runes.Resync(LoopTime.ServerTime, forceUpdate);
+                var packetForUpdate = m_runes.Resync(LoopTime.ServerTime, false);
                 if (packetForUpdate != null)
                     SendPacket(packetForUpdate);
-
-                m_runes.Initialized = true;
             }
 
             if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)
@@ -3619,9 +3610,9 @@ namespace Game.Entities
                     addvalue = (powerInfo.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[powerIndex]) * 0.001f * RegenTimer;
                 else
                     addvalue = (powerInfo.RegenPeace + m_unitData.PowerRegenFlatModifier[powerIndex]) * 0.001f * RegenTimer;
-                }
+            }
             else
-                {
+            {
                 if (IsInCombat())
                     addvalue = (powerInfo.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[powerIndex]) * 0.001f * RegenTimer;
                 else
@@ -3633,28 +3624,28 @@ namespace Game.Entities
             int maxPower = m_unitData.MaxPower[powerIndex];
 
             if (curValue <= minPower && addvalue <= 0)
-                    return;
+                return;
 
             if (curValue >= maxPower && addvalue >= 0)
-                    return;
+                return;
 
             if (resultValue <= minPower)
             {
                 resultValue = minPower;
                 m_powerFraction[powerIndex] = 0;
-                }
+            }
             else if (resultValue >= maxPower)
-                {
+            {
                 resultValue = maxPower;
-                    m_powerFraction[powerIndex] = 0;
-                }
+                m_powerFraction[powerIndex] = 0;
+            }
             else
             {
                 m_powerFraction[powerIndex] = resultValue - (int)resultValue;
-                }
+            }
 
             if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)
-                {
+            {
                 SetPower(power, powerIndex, (int)resultValue);
             }
             else

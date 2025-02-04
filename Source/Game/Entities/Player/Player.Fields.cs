@@ -387,13 +387,20 @@ namespace Game.Entities
 
         private void SetRuneState(RuneIndex index, bool set = true)
         {
+            SetRuneState(index.GetRuneMask(), set);
+        }
+
+        private void SetRuneState(RuneStateMask mask, bool set = true)
+        {
+            PreviousState = AvailableRunes;
+
             if (set)
             {
-                AvailableRunes |= index.GetRuneMask();                      // usable
+                AvailableRunes |= mask;                      // usable
             }
             else
             {
-                AvailableRunes &= ~index.GetRuneMask();                     // on cooldown
+                AvailableRunes &= ~mask;                     // on cooldown
             }
         }
 
@@ -426,6 +433,22 @@ namespace Game.Entities
         {
             currentTime = currentTime == default? LoopTime.ServerTime : currentTime;
             NextResetTime[(int)index] = currentTime + cooldown;
+            SetRuneState(index, cooldown == TimeSpan.Zero);
+        }
+
+        public void SetRuneCooldown(RuneStateMask runesToSet, TimeSpan cooldown, ServerTime currentTime = default)
+        {
+            currentTime = currentTime == default ? LoopTime.ServerTime : currentTime;
+
+            for (RuneIndex index = 0; index < RuneIndex.Max; index++)
+            {
+                if (index.GetRuneMask().HasAnyFlag(runesToSet))
+                {
+                    NextResetTime[(int)index] = currentTime + cooldown;
+                }
+            }
+
+            SetRuneState(runesToSet, cooldown == TimeSpan.Zero);
         }
 
         public TimeSpan GetRuneCooldown(RuneIndex index, ServerTime currentTime = default)
@@ -439,7 +462,76 @@ namespace Game.Entities
             return cooldown;
         }
 
-        public ResyncRunes Resync(ServerTime currentTime, bool forceUpdate, RuneStateMask runeStateBefore = RuneStateMask.All)
+        public SpellCastResult GetRunesForSpellCast(List<SpellPowerCost> costs, out RuneStateMask runesToUse)
+        {
+            runesToUse = RuneStateMask.None;
+            RuneStateMask BaseRunes = this.BaseRunes;
+            RuneStateMask DeathRunes = this.DeathRunes;
+
+            foreach (var cost in costs)
+            {
+                if (cost.Power == PowerType.RuneBlood || cost.Power == PowerType.RuneUnholy || cost.Power == PowerType.RuneFrost)
+                {
+                    int runeCost = cost.Amount;
+
+                    if (runeCost < 0 || runeCost > 2)
+                        return SpellCastResult.NoPower; // Always 2 rune per RuneType in WOTLK_CLASSIC
+
+                    RuneIndex FirstBaseRuneIndex = cost.Power.GetRunesType().GetRuneFirstIndex();
+
+                    // Try to consume base runes                    
+                    for (RuneIndex i = FirstBaseRuneIndex; i <= FirstBaseRuneIndex + 1 && runeCost > 0; i++)
+                    {
+                        RuneStateMask currentRune = i.GetRuneMask();
+
+                        if (BaseRunes.HasAnyFlag(currentRune))
+                        {
+                            BaseRunes &= ~(currentRune & BaseRunes);
+                            runeCost -= 1;
+                        }
+                    }
+
+                    // Try to consume death runes
+                    if (runeCost > 0)
+                    {
+                        if (DeathRunes == RuneStateMask.None)
+                            return SpellCastResult.NoPower;
+
+                        // Try to consume sibling death runes                    
+                        for (RuneIndex i = FirstBaseRuneIndex; i <= FirstBaseRuneIndex + 1 && runeCost > 0; i++)
+                        {
+                            RuneStateMask currentRune = i.GetRuneMask();
+
+                            if (DeathRunes.HasAnyFlag(currentRune))
+                            {
+                                DeathRunes &= ~(currentRune & DeathRunes);
+                                runeCost -= 1;
+                            }
+                        }
+
+                        // Try to consume any death runes 
+                        for (RuneIndex i = 0; DeathRunes != RuneStateMask.None && runeCost > 0; i++)
+                        {
+                            RuneStateMask currentRune = i.GetRuneMask();
+
+                            if (DeathRunes.HasAnyFlag(currentRune))
+                            {
+                                DeathRunes &= ~(currentRune & DeathRunes);
+                                runeCost -= 1;
+                            }
+                        }
+                    }
+
+                    if (runeCost > 0)
+                        return SpellCastResult.NoPower;
+                }
+            }
+
+            runesToUse = AvailableRunes & ~(BaseRunes | DeathRunes);
+            return SpellCastResult.SpellCastOk;
+        }
+
+        public ResyncRunes Resync(ServerTime currentTime, bool forceUpdate)
         {
             ResyncRunes data = null;
 
@@ -470,14 +562,13 @@ namespace Game.Entities
 
                 if (data != null)
                 {
-                    //data.Runes[(int)runeIndex].Type = currentRune.CurrentType;
                     data.Runes.Cooldowns[(int)runeIndex] = new(cooldown);
                 }
             }
 
             if (data != null)
             {
-                data.Runes.RuneStateBefore = runeStateBefore;
+                data.Runes.RuneStateBefore = PreviousState;
                 data.Runes.RuneStateAfter = AvailableRunes;
             }
 
@@ -486,8 +577,9 @@ namespace Game.Entities
 
         public RuneStateMask AvailableRunes { get; private set; }
         public RuneStateMask DeathRunes { get; private set; }
-        public bool Initialized = false;
+        public RuneStateMask BaseRunes => AvailableRunes & ~DeathRunes;
 
+        private RuneStateMask PreviousState { get; set; }
         private ServerTime[] NextResetTime = new ServerTime[PlayerConst.MaxRunes];
     }
 

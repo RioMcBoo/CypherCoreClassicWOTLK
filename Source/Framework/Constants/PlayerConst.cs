@@ -230,6 +230,10 @@ namespace Framework.Constants
         Frost_0 = 1 << RuneIndex.Frost_0,
         Frost_1 = 1 << RuneIndex.Frost_1,
         All = (1 << RuneIndex.Max) -1,
+
+        AllBlood = Blood_0 | Blood_1,
+        AllUnholy = Unholy_0 | Unholy_1,
+        AllFrost = Frost_0 | Frost_1,
     }
 
     public enum SpecResetType : byte

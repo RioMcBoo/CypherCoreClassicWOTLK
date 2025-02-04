@@ -1133,6 +1133,12 @@ namespace Game
             // Handle Login-Achievements (should be handled after loading)
             _player.UpdateCriteria(CriteriaType.Login, 1);
 
+            ResyncRunes data = new()
+            {
+                Runes = pCurrChar.ResyncRunes()
+            };
+            SendPacket(data);
+
             Global.ScriptMgr.OnPlayerLogin(pCurrChar, firstLogin);
         }
 

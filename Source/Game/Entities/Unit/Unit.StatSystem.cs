@@ -426,6 +426,9 @@ namespace Game.Entities
 
         public int GetPower(PowerType powerType)
         {
+            if (powerType == PowerType.Health)
+                return (int)GetHealth();
+
             int powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
@@ -435,6 +438,9 @@ namespace Game.Entities
 
         public int GetMaxPower(PowerType powerType)
         {
+            if (powerType == PowerType.Health)
+                return (int)GetMaxHealth();
+
             int powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;

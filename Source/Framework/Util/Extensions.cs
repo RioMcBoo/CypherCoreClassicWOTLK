@@ -240,6 +240,36 @@ namespace System
             }
         }
 
+        public static RuneIndex GetRuneFirstIndex(this RuneType type)
+        {
+            switch (type)
+            {
+                case RuneType.Blood:
+                    return RuneIndex.Blood_0;
+                case RuneType.Unholy:
+                    return RuneIndex.Unholy_0;
+                case RuneType.Frost:
+                    return RuneIndex.Frost_0;
+                default:
+                    return RuneIndex.Max;
+            }
+        }
+
+        public static RuneType GetRunesType(this PowerType type)
+        {
+            switch (type)
+            {
+                case PowerType.RuneBlood:
+                    return RuneType.Blood;
+                case PowerType.RuneUnholy:
+                    return RuneType.Unholy;
+                case PowerType.RuneFrost:
+                    return RuneType.Frost;
+                default:
+                    return RuneType.Max;
+            }
+        }
+
         public static PowerType GetPowerType(this RuneType type)
         {
             switch (type)

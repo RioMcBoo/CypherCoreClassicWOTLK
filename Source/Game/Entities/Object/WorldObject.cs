@@ -735,7 +735,7 @@ namespace Game.Entities
                 Player player = ToPlayer();
 
                 bool HasSceneInstanceIDs = !player.GetSceneMgr().GetSceneTemplateByInstanceMap().Empty();
-                bool HasRuneState = false;  // ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
+                bool HasRuneState = ToUnit().GetPowerIndex(PowerType.RuneBlood) != (int)PowerType.Max;
                 bool HasActionButtons = true;
 
                 data.WriteBit(HasSceneInstanceIDs);
@@ -752,16 +752,7 @@ namespace Game.Entities
 
                 if (HasRuneState)
                 {
-                    /*
-                    float baseCd = player.GetRuneBaseCooldown();
-                    uint maxRunes = (uint)player.GetMaxPower(PowerType.Runes);
-
-                    data.WriteUInt8((byte)((1 << (int)maxRunes) - 1u));
-                    data.WriteUInt8(player.GetRunesState());
-                    data.WriteUInt32(maxRunes);
-                    for (byte i = 0; i < maxRunes; ++i)
-                        data.WriteUInt8((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255));
-                    */
+                    player.ResyncRunes().Write(data);
                 }
 
                 if (HasActionButtons)

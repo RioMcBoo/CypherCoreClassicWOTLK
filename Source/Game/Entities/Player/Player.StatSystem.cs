@@ -456,9 +456,6 @@ namespace Game.Entities
 
         public void UpdatePowerRegen(PowerType power)
         {
-            if (power == PowerType.Health || power >= PowerType.Max)
-                return;
-
             var powerIndex = GetPowerIndex(power);
             if (powerIndex == (int)PowerType.Max)
                 return;
@@ -942,8 +939,6 @@ namespace Game.Entities
                             ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, oldVal, false);
                             ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, newVal, true);
                             ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, newVal, true);
-                            if (GetClass() == Class.DeathKnight)
-                                UpdateAllRunesRegen();
                             break;
                         case CombatRating.HasteRanged:
                             ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, oldVal, false);

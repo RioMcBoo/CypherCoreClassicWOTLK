@@ -3468,14 +3468,29 @@ namespace Game.Entities
         /**********************************/
         /*************Runes****************/
         /**********************************/
-        public void SetRuneCooldown(RuneIndex index, TimeSpan cooldown, ServerTime serverTime = default)
+        public void SetRuneCooldown(RuneIndex index, TimeSpan cooldown, ServerTime currentTime = default)
         {
-            m_runes.SetRuneCooldown(index, cooldown, serverTime);
+            m_runes.SetRuneCooldown(index, cooldown, currentTime);
+        }
+
+        public void SetRuneCooldown(RuneStateMask runesToSet, TimeSpan cooldown, ServerTime currentTime = default)
+        {
+            m_runes.SetRuneCooldown(runesToSet, cooldown, currentTime);
         }
 
         public RuneStateMask GetRunesState()
         {
             return m_runes.AvailableRunes;
+        }
+
+        public RuneStateMask GetAvaibleDeathRunes()
+        {
+            return m_runes.DeathRunes;
+        }
+
+        public RuneStateMask GetAvaibleBaseRunes()
+        {
+            return m_runes.AvailableRunes & ~m_runes.DeathRunes;
         }
 
         public TimeSpan GetRuneBaseCooldown()
@@ -3492,9 +3507,14 @@ namespace Game.Entities
             return cooldown;
         }
 
-        public RuneData ResyncRunes(RuneStateMask runeStateBefore)
+        public SpellCastResult GetRunesForSpellCast(List<SpellPowerCost> costs, out RuneStateMask runesToUse)
         {
-            return m_runes.Resync(LoopTime.ServerTime, true, runeStateBefore).Runes;
+            return m_runes.GetRunesForSpellCast(costs, out runesToUse);
+        }
+
+        public RuneData ResyncRunes()
+        {
+            return m_runes.Resync(LoopTime.ServerTime, true).Runes;
         }
 
         public void InitRunes()
