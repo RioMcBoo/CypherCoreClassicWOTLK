@@ -3539,7 +3539,7 @@ namespace Game.Entities
             // Runes act as cooldowns
             if (GetClass() == Class.DeathKnight)
             {
-                var packetForUpdate = m_runes.Resync(LoopTime.ServerTime, false);
+                var packetForUpdate = m_runes.RecoverRunes(LoopTime.ServerTime);
                 if (packetForUpdate != null)
                     SendPacket(packetForUpdate);
             }

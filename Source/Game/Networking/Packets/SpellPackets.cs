@@ -1746,10 +1746,8 @@ namespace Game.Networking.Packets
         public PowerType Type;
     }
 
-    public struct RuneCooldown
+    public record struct RuneCooldown
     {
-        public static RuneCooldown Zero = new RuneCooldown(TimeSpan.Zero);
-
         public RuneCooldown(TimeSpan cooldown)
         {
             var remainsPercentOfBase = cooldown / PlayerConst.RuneCooldownBase;

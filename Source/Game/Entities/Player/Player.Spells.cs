@@ -3514,7 +3514,7 @@ namespace Game.Entities
 
         public RuneData ResyncRunes()
         {
-            return m_runes.Resync(LoopTime.ServerTime, true).Runes;
+            return m_runes.Resync(LoopTime.ServerTime);
         }
 
         public void InitRunes()

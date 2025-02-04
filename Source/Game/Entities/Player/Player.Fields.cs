@@ -397,8 +397,6 @@ namespace Game.Entities
 
         private void SetRuneState(RuneStateMask mask, bool set = true)
         {
-            PreviousState = AvailableRunes;
-
             if (set)
             {
                 AvailableRunes |= mask;                      // usable
@@ -438,6 +436,7 @@ namespace Game.Entities
         {
             currentTime = currentTime == default? LoopTime.ServerTime : currentTime;
             NextResetTime[(int)index] = currentTime + cooldown;
+            PreviousState = AvailableRunes;
             SetRuneState(index, cooldown == TimeSpan.Zero);
         }
 
@@ -452,7 +451,7 @@ namespace Game.Entities
                     NextResetTime[(int)index] = currentTime + cooldown;
                 }
             }
-
+            PreviousState = AvailableRunes;
             SetRuneState(runesToSet, cooldown == TimeSpan.Zero);
         }
 
@@ -536,9 +535,27 @@ namespace Game.Entities
             return SpellCastResult.SpellCastOk;
         }
 
-        public ResyncRunes Resync(ServerTime currentTime, bool forceUpdate)
+        public RuneData Resync(ServerTime currentTime)
         {
-            ResyncRunes data = null;
+            RuneData data = new RuneData();
+
+            for (RuneIndex runeIndex = RuneIndex.Blood_0; runeIndex < RuneIndex.Max; runeIndex++)
+            {
+                TimeSpan cooldown = GetRuneCooldown(runeIndex, currentTime);
+                data.Cooldowns.Add(new(cooldown));
+            }
+
+            data.RuneStateBefore = PreviousState;
+            data.RuneStateAfter = AvailableRunes;
+
+            PreviousState = AvailableRunes;
+
+            return data;
+        }
+
+        public ResyncRunes RecoverRunes(ServerTime currentTime)
+        {
+            ResyncRunes data = new ResyncRunes();
             bool HasRecoveredRune = false;
 
             for (RuneIndex runeIndex = RuneIndex.Blood_0; runeIndex < RuneIndex.Max; runeIndex++)
@@ -553,30 +570,21 @@ namespace Game.Entities
                     {
                         SetRuneState(runeIndex, true);
                         HasRecoveredRune = true;
-                    }
-                    else
-                    {
-                        cooldown = NextResetTime[(int)runeIndex] - currentTime;
-                    }
-                }
-
-                if (forceUpdate || HasRecoveredRune)
-                {
-                    if (data == null)
-                        data = new ResyncRunes();
-                }
-
-                if (data != null)
-                {
-                    if (IsStateChanged(runeIndex) && cooldown == TimeSpan.Zero)
                         data.Runes.Cooldowns.Add(new(cooldown));
+                    }
                 }
             }
 
-            if (data != null)
+            data.Runes.RuneStateBefore = PreviousState;
+            data.Runes.RuneStateAfter = AvailableRunes;
+
+            if (!HasRecoveredRune)
             {
-                data.Runes.RuneStateBefore = PreviousState;
-                data.Runes.RuneStateAfter = AvailableRunes;
+                data = null;
+            }
+            else
+            {
+                PreviousState = AvailableRunes;
             }
 
             return data;
