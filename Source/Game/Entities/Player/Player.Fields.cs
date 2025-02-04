@@ -385,6 +385,11 @@ namespace Game.Entities
             AvailableRunes = RuneStateMask.All;
         }
 
+        private bool IsStateChanged(RuneIndex index)
+        {
+            return index.GetRuneMask().HasAnyFlag(PreviousState ^ AvailableRunes);
+        }
+
         private void SetRuneState(RuneIndex index, bool set = true)
         {
             SetRuneState(index.GetRuneMask(), set);
@@ -534,6 +539,7 @@ namespace Game.Entities
         public ResyncRunes Resync(ServerTime currentTime, bool forceUpdate)
         {
             ResyncRunes data = null;
+            bool HasRecoveredRune = false;
 
             for (RuneIndex runeIndex = RuneIndex.Blood_0; runeIndex < RuneIndex.Max; runeIndex++)
             {
@@ -546,7 +552,7 @@ namespace Game.Entities
                     if (cooldown == TimeSpan.Zero)
                     {
                         SetRuneState(runeIndex, true);
-                        forceUpdate = true;
+                        HasRecoveredRune = true;
                     }
                     else
                     {
@@ -554,7 +560,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (forceUpdate)
+                if (forceUpdate || HasRecoveredRune)
                 {
                     if (data == null)
                         data = new ResyncRunes();
@@ -562,7 +568,8 @@ namespace Game.Entities
 
                 if (data != null)
                 {
-                    data.Runes.Cooldowns[(int)runeIndex] = new(cooldown);
+                    if (IsStateChanged(runeIndex) && cooldown == TimeSpan.Zero)
+                        data.Runes.Cooldowns.Add(new(cooldown));
                 }
             }
 

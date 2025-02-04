@@ -1753,7 +1753,7 @@ namespace Game.Networking.Packets
         public RuneCooldown(TimeSpan cooldown)
         {
             var remainsPercentOfBase = cooldown / PlayerConst.RuneCooldownBase;
-            byte remainsCompressed = (byte)(byte.MaxValue * remainsPercentOfBase);
+            var remainsCompressed = byte.MaxValue * remainsPercentOfBase;
             PassedCompressed = (byte)(byte.MaxValue - remainsCompressed); // cooldown time (0-255)
         }
 
@@ -1766,12 +1766,6 @@ namespace Game.Networking.Packets
         {
             RuneStateBefore = RuneStateMask.All;
             RuneStateAfter = RuneStateMask.All;
-            Cooldowns.Add(RuneCooldown.Zero); // Blood
-            Cooldowns.Add(RuneCooldown.Zero); // Blood
-            Cooldowns.Add(RuneCooldown.Zero); // Unholy
-            Cooldowns.Add(RuneCooldown.Zero); // Unholy
-            Cooldowns.Add(RuneCooldown.Zero); // Frost
-            Cooldowns.Add(RuneCooldown.Zero); // Frost
         }
 
         public void Write(WorldPacket data)
