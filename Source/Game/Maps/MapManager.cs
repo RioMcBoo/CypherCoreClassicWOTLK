@@ -279,7 +279,7 @@ namespace Game.Entities
             TimeSpan time = i_timer.GetCurrent();
             foreach (var (key, map) in i_maps)
             {
-                if (map.CanUnload(diff))
+                if (map.CanUnload(time))
                 {
                     if (DestroyMap(map))
                         i_maps.Remove(key);
@@ -288,7 +288,7 @@ namespace Game.Entities
                 }
 
                 if (m_updater != null)
-                    m_updater.ScheduleUpdate(map, i_timer.GetCurrent());
+                    m_updater.ScheduleUpdate(map, time);
                 else
                     map.Update(time);
             }

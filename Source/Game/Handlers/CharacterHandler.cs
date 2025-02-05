@@ -1133,11 +1133,14 @@ namespace Game
             // Handle Login-Achievements (should be handled after loading)
             _player.UpdateCriteria(CriteriaType.Login, 1);
 
-            ResyncRunes data = new()
+            if (pCurrChar.GetClass() == Class.DeathKnight)
             {
-                Runes = pCurrChar.Runes.Resync()
-            };
-            SendPacket(data);
+                ResyncRunes data = new()
+                {
+                    Runes = pCurrChar.Runes.Resync()
+                };
+                SendPacket(data);
+            }
 
             Global.ScriptMgr.OnPlayerLogin(pCurrChar, firstLogin);
         }
