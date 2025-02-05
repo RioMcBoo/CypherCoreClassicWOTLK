@@ -1744,19 +1744,7 @@ namespace Game.Networking.Packets
         
         public int Cost;
         public PowerType Type;
-    }
-
-    public record struct RuneCooldown
-    {
-        public RuneCooldown(TimeSpan cooldown)
-        {
-            var remainsPercentOfBase = cooldown / PlayerConst.RuneCooldownBase;
-            var remainsCompressed = byte.MaxValue * remainsPercentOfBase;
-            PassedCompressed = (byte)(byte.MaxValue - remainsCompressed); // cooldown time (0-255)
-        }
-
-        public byte PassedCompressed { get; init; }
-    }
+    }    
 
     public class RuneData
     {

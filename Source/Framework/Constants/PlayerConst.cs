@@ -43,9 +43,7 @@ namespace Framework.Constants
 
         public const int MaxCUFProfiles = 5;
 
-        public static Seconds[] copseReclaimDelay = [(Seconds)30, (Seconds)60, (Seconds)120];
-        public static readonly TimeSpan RuneCooldownBase = Time.SpanFromMilliseconds(10000);
-        public static readonly TimeSpan RuneCooldownMiss = Time.SpanFromMilliseconds(1500);     // cooldown applied on runes when the spell misses
+        public static Seconds[] copseReclaimDelay = [(Seconds)30, (Seconds)60, (Seconds)120];        
 
         public const int MaxRunes = 6;
 

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Game.Maps;
+
 namespace Game.Entities
 {
     public record struct FlatModifier
@@ -41,11 +43,8 @@ namespace Game.Entities
         public void Modify(int modifier, bool apply)
         {
             bool isPositive = IsPositive(modifier);
-
-            if (!apply)
-            {
-                modifier = IdleModifier - modifier;
-            }
+            
+            modifier = GetFinalModifier(modifier, apply);            
 
             if (isPositive)
             {
@@ -69,6 +68,21 @@ namespace Game.Entities
                 _positive -= flatModifier._positive;
                 _negative -= flatModifier._negative;
             }
+        }
+
+        private static int GetFinalModifier(int modifier, bool apply)
+        {
+            if (!apply)
+            {
+                modifier = IdleModifier - modifier;
+            }
+
+            return modifier;
+        }
+
+        public static void Modify(ref int value, int modifier, bool apply)
+        {
+            value += GetFinalModifier(modifier, apply);
         }
     }
 }

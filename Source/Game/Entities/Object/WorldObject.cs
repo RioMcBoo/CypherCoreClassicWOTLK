@@ -752,7 +752,7 @@ namespace Game.Entities
 
                 if (HasRuneState)
                 {
-                    player.ResyncRunes().Write(data);
+                    player.Runes.Resync().Write(data);
                 }
 
                 if (HasActionButtons)

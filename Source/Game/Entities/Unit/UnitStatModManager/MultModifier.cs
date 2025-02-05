@@ -15,8 +15,8 @@ namespace Game.Entities
 
         public static bool IsPositive(float multiplier) => multiplier > IdleModifier;
         public static bool IsNegative(float multiplier) => multiplier < IdleModifier;
-        public static bool IsPositive(int percentage) => IsPositive(MathFunctions.PercentageToMultiplier(percentage));
-        public static bool IsNegative(int percentage) => IsNegative(MathFunctions.PercentageToMultiplier(percentage));
+        public static bool IsPositive(int percentage) => IsPositive(PercentageToMultiplier(percentage));
+        public static bool IsNegative(int percentage) => IsNegative(PercentageToMultiplier(percentage));
         public bool IsIdle => Positive == IdleModifier && Negative == IdleModifier;
 
         public MultModifier() { }
@@ -55,11 +55,8 @@ namespace Game.Entities
         public void Modify(float multiplier, bool apply)
         {
             bool isPositive = IsPositive(multiplier);
-
-            if (!apply)
-            {
-                multiplier = IdleModifier / multiplier;
-            }
+            
+            multiplier = GetFinalMultiplier(multiplier, apply);
 
             if (isPositive)
             {
@@ -73,7 +70,7 @@ namespace Game.Entities
 
         public void ModifyPercentage(int percentage, bool apply)
         {
-            Modify(MathFunctions.PercentageToMultiplier(percentage), apply);
+            Modify(PercentageToMultiplier(percentage), apply);
         }
 
         public void Modify(MultModifier multModifier, bool apply)
@@ -88,6 +85,36 @@ namespace Game.Entities
                 _positive /= multModifier._positive;
                 _negative /= multModifier._negative;
             }
-        }        
+        }
+
+        public static float PercentageToMultiplier(float percentage)
+        {
+            return IdleModifier + percentage / 100.0f;
+        }
+
+        public static float MultiplierToPercentage(float multiplier)
+        {
+            return (multiplier - IdleModifier) * 100.0f;
+        }
+
+        private static float GetFinalMultiplier(float multiplier, bool apply)
+        {
+            if (!apply)
+            {
+                multiplier = IdleModifier / multiplier;
+            }
+
+            return multiplier;
+        }
+
+        public static void Modify(ref float value, float multiplier, bool apply)
+        {
+            value *= GetFinalMultiplier(multiplier, apply);
+        }
+
+        public static void ModifyPercentage(ref float value, int percentage, bool apply)
+        {
+            value *= GetFinalMultiplier(PercentageToMultiplier(percentage), apply);
+        }
     }
 }

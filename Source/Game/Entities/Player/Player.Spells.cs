@@ -3468,69 +3468,13 @@ namespace Game.Entities
         /**********************************/
         /*************Runes****************/
         /**********************************/
-        public void SetRuneCooldown(RuneIndex index, TimeSpan cooldown, ServerTime currentTime = default)
-        {
-            m_runes.SetRuneCooldown(index, cooldown, currentTime);
-        }
-
-        public void SetRuneCooldown(RuneStateMask runesToSet, TimeSpan cooldown, ServerTime currentTime = default)
-        {
-            m_runes.SetRuneCooldown(runesToSet, cooldown, currentTime);
-        }
-
-        public RuneStateMask GetRunesState()
-        {
-            return m_runes.AvailableRunes;
-        }
-
-        public RuneStateMask GetAvaibleDeathRunes()
-        {
-            return m_runes.DeathRunes;
-        }
-
-        public RuneStateMask GetAvaibleBaseRunes()
-        {
-            return m_runes.AvailableRunes & ~m_runes.DeathRunes;
-        }
-
-        public TimeSpan GetRuneBaseCooldown()
-        {
-            TimeSpan cooldown = PlayerConst.RuneCooldownBase;
-
-            var regenAura = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
-            foreach (var i in regenAura)
-            {
-                if (i.GetMiscValue() == (int)PowerType.Runes)
-                    cooldown *= 1.0f - i.GetAmount() / 100.0f;
-            }
-
-            return cooldown;
-        }
-
-        public SpellCastResult GetRunesForSpellCast(List<SpellPowerCost> costs, out RuneStateMask runesToUse)
-        {
-            return m_runes.GetRunesForSpellCast(costs, out runesToUse);
-        }
-
-        public RuneData ResyncRunes()
-        {
-            return m_runes.Resync(LoopTime.ServerTime);
-        }
 
         public void InitRunes()
         {
             if (GetClass() != Class.DeathKnight)
                 return;
 
-            m_runes = new Runes();
-
-            List<PowerType> powerTypes = [PowerType.RuneBlood, PowerType.RuneUnholy, PowerType.RuneFrost];
-            foreach (var power in powerTypes)
-            {
-                // set a base regen timer
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, GetPowerIndex(power)), 0.0f);
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, GetPowerIndex(power)), 0.0f);
-            }
+            Runes = new Runes(this);
         }
 
         public void UpdateAllRunesRegen()
@@ -3549,8 +3493,6 @@ namespace Game.Entities
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenPeace);
             */
         }
-
-        public TimeSpan GetRuneCooldown(RuneIndex index) { return m_runes.GetRuneCooldown(index); }
 
         public bool CanNoReagentCast(SpellInfo spellInfo)
         {

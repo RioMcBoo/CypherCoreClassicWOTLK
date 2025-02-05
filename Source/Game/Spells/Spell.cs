@@ -4232,7 +4232,7 @@ namespace Game.Spells
 
             if (castFlags.HasAnyFlag(SpellCastFlags.RuneList))  // rune cooldowns list
             {
-                castData.RemainingRunes = m_caster.ToPlayer().ResyncRunes(/*m_runesState*/);
+                castData.RemainingRunes = m_caster.ToPlayer().Runes.Resync(/*m_runesState*/);
             }
 
             if (castFlags.HasFlag(SpellCastFlags.AdjustMissile))
@@ -4881,7 +4881,7 @@ namespace Game.Spells
             if (player.GetClass() != Class.DeathKnight)
                 return SpellCastResult.SpellCastOk;
 
-            return player.GetRunesForSpellCast(m_powerCost, out _);
+            return player.Runes.GetRunesForSpellCast(m_powerCost, out _);
         }
 
         RuneStateMask TakeRunePower(bool didHit)
@@ -4895,10 +4895,9 @@ namespace Game.Spells
 
             // m_runesState = player.GetRunesState();                 // store previous state
 
-            if (player.GetRunesForSpellCast(m_powerCost, out usedRunes) == SpellCastResult.SpellCastOk)
+            if (player.Runes.GetRunesForSpellCast(m_powerCost, out usedRunes) == SpellCastResult.SpellCastOk)
             {
-                TimeSpan cooldown = didHit ? player.GetRuneBaseCooldown() : PlayerConst.RuneCooldownMiss;
-                player.SetRuneCooldown(usedRunes, cooldown, LoopTime.ServerTime);
+                player.Runes.SetRuneCooldown(usedRunes, didHit ? RuneCooldowns.Base : RuneCooldowns.Miss, LoopTime.ServerTime);
             }
 
             return usedRunes;

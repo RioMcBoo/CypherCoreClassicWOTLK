@@ -1135,7 +1135,7 @@ namespace Game
 
             ResyncRunes data = new()
             {
-                Runes = pCurrChar.ResyncRunes()
+                Runes = pCurrChar.Runes.Resync()
             };
             SendPacket(data);
 

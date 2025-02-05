@@ -133,7 +133,7 @@ namespace Game.Entities
             ItemSetEff.Clear();
 
             _declinedname = null;
-            m_runes = null;
+            Runes = null;
             m_achievementSys = null;
             reputationMgr = null;
 
@@ -3539,9 +3539,7 @@ namespace Game.Entities
             // Runes act as cooldowns
             if (GetClass() == Class.DeathKnight)
             {
-                var packetForUpdate = m_runes.RecoverRunes(LoopTime.ServerTime);
-                if (packetForUpdate != null)
-                    SendPacket(packetForUpdate);
+                Runes.Regenerate(LoopTime.ServerTime);
             }
 
             if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)

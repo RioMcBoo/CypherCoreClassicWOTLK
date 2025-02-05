@@ -181,16 +181,6 @@ public static class MathFunctions
         return value / max * 100.0f;
     }
 
-    public static float PercentageToMultiplier(float percentage)
-    {
-        return 1.0f + percentage / 100.0f;
-    }
-
-    public static float MultiplierToPercentage(float multiplier)
-    {
-        return (multiplier - 1.0f) * 100.0f;
-    }
-
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)
     {
         return num = (int)Math.Min(Math.Max(num, floor), ceil);
