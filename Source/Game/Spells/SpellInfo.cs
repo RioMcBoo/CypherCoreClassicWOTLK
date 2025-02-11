@@ -3387,6 +3387,26 @@ namespace Game.Spells
             return false;
         }
 
+        public bool IsRankOfTalent(int talentId)
+        {
+            TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
+            if (talentInfo == null)
+                return false;
+
+            for (int rank = 0; rank < PlayerConst.MaxTalentRank; rank++)
+            {
+                int rankSpell = talentInfo.SpellRank[rank];
+
+                if (rankSpell != Id)
+                    return true;
+                
+                if (rankSpell == 0)
+                    return false;
+            }
+
+            return false;
+        }
+
         public int GetSpellXSpellVisualId(WorldObject caster = null, WorldObject viewer = null)
         {
             foreach (SpellXSpellVisualRecord visual in _visuals)

@@ -4729,39 +4729,37 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
-            if (m_caster.GetTypeId() != TypeId.Player)
+            if (m_caster is not Player player)
                 return;
 
-            /*
-            Player* player = m_caster->ToPlayer();
-
-            if (player->getClass() != CLASS_DEATH_KNIGHT)
+            if (player.GetClass() != Class.DeathKnight)
                 return;
 
             // needed later
-            m_runesState = m_caster->ToPlayer()->GetRunesState();
+            m_runesState = player.Runes.AvailableRunes;
 
-            uint32 count = damage;
+            int count = damage;
             if (count == 0)
                 count = 1;
 
-            // first restore fully depleted runes
-            for (int32 j = 0; j < player->GetMaxPower(POWER_RUNES) && count > 0; ++j)
+            RuneStateMask activatedRunes = RuneStateMask.None;
+            ServerTime currentTime = LoopTime.ServerTime;
+
+            foreach (var rune in Runes.RunesList.Values)
             {
-                if (player->GetRuneCooldown(j) == player->GetRuneBaseCooldown())
+                if (count <= 0)
+                    break;
+
+                if (player.Runes.GetRuneType(rune) == (RuneType)effectInfo.MiscValue
+                    && player.Runes.GetRuneCooldown(rune, currentTime) > RuneCooldowns.Zero)
                 {
-                    player->SetRuneCooldown(j, 0);
+                    player.Runes.SetRuneCooldown(rune, RuneCooldowns.Zero, currentTime);
+                    activatedRunes |= rune.Mask;
                     --count;
                 }
             }
 
-            // then the rest if we still got something left
-            for (int32 j = 0; j < player->GetMaxPower(POWER_RUNES) && count > 0; ++j)
-            {
-                player->SetRuneCooldown(j, 0);
-                --count;
-            }
-            */
+            player.Runes.SendActivateRunes(activatedRunes);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateTamedPet)]

@@ -3536,12 +3536,6 @@ namespace Game.Entities
             Regenerate(PowerType.Rage);
             Regenerate(PowerType.RunicPower);
 
-            // Runes act as cooldowns
-            if (GetClass() == Class.DeathKnight)
-            {
-                Runes.Regenerate(LoopTime.ServerTime);
-            }
-
             if (m_regenTimerCount >= SharedConst.PlayerRegenInterval)
             {
                 // Not in combat or they have regeneration

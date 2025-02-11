@@ -522,7 +522,7 @@ namespace Framework.Constants
         Unk509 = 509,
         ModifiedRaidInstance = 510, // NYI; Related to "Fated" raid affixes
         ApplyProfessionEffect = 511, // Nyi; Miscvalue[0] = Professioneffectid
-        Unk512 = 512,
+        ConvertRune = 512,
         Unk513 = 513,
         Unk514 = 514,
         Unk515 = 515,

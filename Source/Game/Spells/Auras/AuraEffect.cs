@@ -195,7 +195,7 @@ namespace Game.Spells
             return totalTicks;
         }
 
-        void ResetPeriodic(bool resetPeriodicTimer = false)
+        public void ResetPeriodic(bool resetPeriodicTimer = false)
         {
             _ticksDone = 0;
             if (resetPeriodicTimer)
@@ -6032,8 +6032,45 @@ namespace Game.Spells
 
             playerTarget.UpdatePositionData();
         }
-        #endregion
+
+        [AuraEffectHandler(AuraType.ConvertRune)]
+        void HandleConvertRune(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            if (aurApp.GetTarget() is not Player player || player.GetClass() != Class.DeathKnight)
+                return;
+
+            int runesToConvert = GetAmount();
+            RuneType runeTypeToConvert = (RuneType)GetMiscValue();
+            RuneType runeTypeToConvertInto = (RuneType)GetMiscValueB();
+
+            if (runeTypeToConvertInto != RuneType.Death) // wotlk classic uses this type only
+                return;
+
+            if (apply)
+            {
+                foreach (var rune in Runes.RunesList.Values)
+                {
+                    if (runesToConvert <= 0)
+                        break;
+
+                    if (runeTypeToConvert != player.Runes.GetRuneType(rune))
+                        continue;
+
+                    if (player.Runes.GetRuneCooldown(rune, LoopTime.ServerTime) == RuneCooldowns.Zero)
+                    {
+                        player.Runes.ApplyConvertRuneAura(rune, this);
+                        --runesToConvert;
+                    }
+                }
+            }
+            else
+                player.Runes.RemoveConvertRuneAura(this);
+        }
     }
+    #endregion
 
     class AbsorbAuraOrderPred : Comparer<AuraEffect>
     {

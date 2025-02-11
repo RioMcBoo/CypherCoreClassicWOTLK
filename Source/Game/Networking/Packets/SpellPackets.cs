@@ -42,7 +42,7 @@ namespace Game.Networking.Packets
         }
 
         public int ChannelSpell;
-        public SpellInterruptReason Reason;   
+        public SpellInterruptReason Reason;
     }
 
     class CancelGrowthAura : ClientPacket
@@ -130,7 +130,7 @@ namespace Game.Networking.Packets
         }
 
         public long[] ActionButtons = new long[PlayerConst.MaxActionButtons];
-        public ActionsButtonsUpdateReason Reason;        
+        public ActionsButtonsUpdateReason Reason;
     }
 
     public class SetActionButton : ClientPacket
@@ -191,7 +191,7 @@ namespace Game.Networking.Packets
         {
             Cast.Read(_worldPacket);
         }
-        
+
         public SpellCastRequestPkt Cast;
     }
 
@@ -207,7 +207,7 @@ namespace Game.Networking.Packets
             PetGUID = _worldPacket.ReadPackedGuid();
             Cast.Read(_worldPacket);
         }
-        
+
         public ObjectGuid PetGUID;
         public SpellCastRequestPkt Cast;
     }
@@ -226,7 +226,7 @@ namespace Game.Networking.Packets
             CastItem = _worldPacket.ReadPackedGuid();
             Cast.Read(_worldPacket);
         }
-        
+
         public byte PackSlot;
         public byte Slot;
         public ObjectGuid CastItem;
@@ -313,7 +313,7 @@ namespace Game.Networking.Packets
 
         public List<LearnedSpellInfo> ClientLearnedSpellData = new();
     }
-    
+
     public class SpellFailure : ServerPacket
     {
         public SpellFailure() : base(ServerOpcodes.SpellFailure, ConnectionType.Instance) { }
@@ -362,7 +362,7 @@ namespace Game.Networking.Packets
         {
             throw new NotImplementedException();
         }
-        
+
         public ObjectGuid CastID;
         public int SpellID;
         public SpellCastResult Reason;
@@ -383,7 +383,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(FailedArg1);
             _worldPacket.WriteInt32(FailedArg2);
         }
-        
+
         public SpellCastVisual Visual;
     }
 
@@ -754,7 +754,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(SpellVisualKitID);
             _worldPacket.WriteInt32(Delay);
         }
-        
+
         public int SpellVisualKitID;
         public int Delay;
     }
@@ -970,16 +970,33 @@ namespace Game.Networking.Packets
         public RuneData Runes = new();
     }
 
+    class ConvertRune : ServerPacket
+    {
+        public ConvertRune() : base(ServerOpcodes.ConvertRune) { }
+
+        public override void Write()
+        {
+            Runes.Write(_worldPacket);
+
+            _worldPacket.WriteInt32((int)Index);
+            _worldPacket.WriteInt32((int)RuneType);
+        }
+
+        public RuneData Runes = new();
+        public RuneIndex Index;
+        public RuneType RuneType;
+    }
+
     class AddRunePower : ServerPacket
     {
         public AddRunePower() : base(ServerOpcodes.AddRunePower, ConnectionType.Instance) { }
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(AddedRunesMask);
+            _worldPacket.WriteInt32((int)AddedRunesMask);
         }
 
-        public uint AddedRunesMask;
+        public RuneStateMask AddedRunesMask;
     }
 
     class MissileTrajectoryCollision : ClientPacket
@@ -1139,7 +1156,7 @@ namespace Game.Networking.Packets
             RecipeID = _worldPacket.ReadInt32();
             IsFavorite = _worldPacket.HasBit();
         }
-        
+
         public int RecipeID;
         public bool IsFavorite;
     }
@@ -1389,7 +1406,7 @@ namespace Game.Networking.Packets
             if (ScaleType.HasValue)
                 data.WriteUInt8(ScaleType.Value);
         }
-        
+
         public ObjectGuid ViewerGUID;
         public byte? ColorType;
         public byte? ScaleType;
@@ -1404,7 +1421,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Amount);
             data.WriteFloat(Percentage);
         }
-        
+
         public ObjectGuid CasterGUID;
         public int SpellID;
         public int Amount;
@@ -1430,7 +1447,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(SpellXSpellVisualID);
             //data.WriteInt32(ScriptVisualID);
         }
-        
+
         public int SpellXSpellVisualID;
         //public int ScriptVisualID;
     }
@@ -1525,7 +1542,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(Transport);
             data.WriteVector3(Location);
         }
-        
+
         public ObjectGuid Transport;
         public Vector3 Location;
     }
@@ -1610,7 +1627,7 @@ namespace Game.Networking.Packets
             Pitch = data.ReadFloat();
             Speed = (Speed)data.ReadFloat();
         }
-        
+
         public float Pitch;
         public Speed Speed;
     }
@@ -1632,7 +1649,7 @@ namespace Game.Networking.Packets
             if (data.HasBit())
                 Unknown_1000 = data.ReadUInt8();
         }
-        
+
         public int ItemID;
         public int DataSlotIndex;
         public int Quantity;
@@ -1646,13 +1663,13 @@ namespace Game.Networking.Packets
             CurrencyID = data.ReadInt32();
             Count = data.ReadInt32();
         }
-        
+
         public int CurrencyID;
         public int Count;
     }
 
     public class SpellCastRequestPkt
-    {   
+    {
         public void Read(WorldPacket data)
         {
             CastID = data.ReadPackedGuid();
@@ -1741,19 +1758,13 @@ namespace Game.Networking.Packets
             data.WriteInt32(Cost);
             data.WriteInt8((sbyte)Type);
         }
-        
+
         public int Cost;
         public PowerType Type;
-    }    
+    }
 
     public class RuneData
     {
-        public RuneData()
-        {
-            RuneStateBefore = RuneStateMask.All;
-            RuneStateAfter = RuneStateMask.All;
-        }
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt8((byte)RuneStateBefore);
@@ -1778,7 +1789,7 @@ namespace Game.Networking.Packets
             data.WriteInt32((Milliseconds)TravelTime);
             data.WriteFloat(Pitch);
         }
-        
+
         public TimeSpan TravelTime;
         public float Pitch;
     }
@@ -1790,7 +1801,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(School);
             data.WriteUInt32(Value);
         }
-        
+
         public uint School;
         public uint Value;
     }
@@ -1803,7 +1814,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)Type);
             data.WritePackedGuid(BeaconGUID);
         }
-        
+
         public ObjectGuid BeaconGUID;
         public uint Points;
         public SpellHealPredictionType Type;
@@ -1908,7 +1919,7 @@ namespace Game.Networking.Packets
             if (TraitDefinitionID.HasValue)
                 data.WriteInt32(TraitDefinitionID.Value);
         }
-        
+
         public int SpellID;
         public bool IsFavorite;
         public int? field_8;
@@ -1923,7 +1934,7 @@ namespace Game.Networking.Packets
             data.WriteFloat(ModifierValue);
             data.WriteUInt8(ClassIndex);
         }
-        
+
         public float ModifierValue;
         public byte ClassIndex;
     }
@@ -1937,7 +1948,7 @@ namespace Game.Networking.Packets
             foreach (SpellModifierData modData in ModifierData)
                 modData.Write(data);
         }
-        
+
         public byte ModIndex;
         public List<SpellModifierData> ModifierData = new();
     }

@@ -4232,7 +4232,7 @@ namespace Game.Spells
 
             if (castFlags.HasAnyFlag(SpellCastFlags.RuneList))  // rune cooldowns list
             {
-                castData.RemainingRunes = m_caster.ToPlayer().Runes.Resync(/*m_runesState*/);
+                castData.RemainingRunes = m_caster.ToPlayer().Runes.GetRuneData(LoopTime.ServerTime, m_runesState);
             }
 
             if (castFlags.HasFlag(SpellCastFlags.AdjustMissile))
@@ -4893,7 +4893,7 @@ namespace Game.Spells
             if (player.GetClass() != Class.DeathKnight)
                 return usedRunes;
 
-            // m_runesState = player.GetRunesState();                 // store previous state
+            m_runesState = player.Runes.AvailableRunes; // store previous state
 
             if (player.Runes.GetRunesForSpellCast(m_powerCost, out usedRunes) == SpellCastResult.SpellCastOk)
             {

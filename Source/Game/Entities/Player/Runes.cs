@@ -28,6 +28,7 @@ namespace Game.Entities
         public readonly TimeSpan Amount;
         private RuneCooldowns(TimeSpan cooldown) { Amount = cooldown; }
 
+        public readonly static RuneCooldowns Zero = new(Time.SpanFromMilliseconds(0));
         public readonly static RuneCooldowns Base = new(Time.SpanFromMilliseconds(10000));
         public readonly static RuneCooldowns Miss = new(Time.SpanFromMilliseconds(1500));      // cooldown applied on runes when the spell misses
         public static implicit operator TimeSpan(RuneCooldowns runeCooldown) => runeCooldown.Amount;
@@ -61,7 +62,7 @@ namespace Game.Entities
             KeyValuePair.Create(RuneIndex.Frost_1, new RuneTemplate(RuneIndex.Frost_1, RuneStateMask.Frost_1, RuneType.Frost, PowerType.RuneFrost)),
         });
 
-        private static readonly ImmutableDictionary<PowerType, ImmutableList<RuneTemplate>> RunesByPowerList = ImmutableDictionary.CreateRange(
+        public static readonly ImmutableDictionary<PowerType, ImmutableList<RuneTemplate>> RunesByPowerList = ImmutableDictionary.CreateRange(
         new KeyValuePair<PowerType, ImmutableList<RuneTemplate>>[]{
             KeyValuePair.Create(PowerType.RuneBlood, (ImmutableList<RuneTemplate>)[RunesList[RuneIndex.Blood_0], RunesList[RuneIndex.Blood_1]]),
             KeyValuePair.Create(PowerType.RuneUnholy, (ImmutableList<RuneTemplate>)[RunesList[RuneIndex.Unholy_0], RunesList[RuneIndex.Unholy_1]]),
@@ -71,26 +72,27 @@ namespace Game.Entities
         public Runes(Player player)
         {
             Owner = player;
-            AvailableRunes = RuneStateMask.All;
-            RuneRegenMultiplier = MultModifier.IdleModifier;
-            CooldownMultiplier = MultModifier.IdleModifier;
+            m_availableRunes = RuneStateMask.All;
+            m_runeRegenMultiplier = MultModifier.IdleModifier;
+            m_cooldownMultiplier = MultModifier.IdleModifier;
 
-            UpdatePowerRegen(RuneRegenMultiplier);
+            //           1      2      3      4      5      6
+            m_runes = [new(), new(), new(), new(), new(), new()];
+
+            UpdatePowerRegen(m_runeRegenMultiplier);
         }
 
-        public void ApplyRegenSpeedPercentage(int percentage, bool apply, ServerTime currentTime = default)
+        public void ApplyRegenSpeedPercentage(int percentage, bool apply, ServerTime currentTime)
         {
-            currentTime = currentTime == default ? LoopTime.ServerTime : currentTime;
+            MultModifier.ModifyPercentage(ref m_runeRegenMultiplier, percentage, apply);
+            MultModifier.ModifyPercentage(ref m_cooldownMultiplier, percentage, !apply);
 
-            MultModifier.ModifyPercentage(ref RuneRegenMultiplier, percentage, apply);
-            MultModifier.ModifyPercentage(ref CooldownMultiplier, percentage, !apply);
-
-            UpdatePowerRegen(RuneRegenMultiplier);
+            UpdatePowerRegen(m_runeRegenMultiplier);
 
             foreach (var rune in RunesList.Values)
             {
                 TimeSpan cooldown = GetRuneCooldown(rune, currentTime);
-                _setRuneCooldown(rune.Mask, cooldown * CooldownMultiplier, currentTime);
+                SetRuneCooldown(rune.Mask, cooldown * m_cooldownMultiplier, currentTime);
             }
         }
 
@@ -117,42 +119,73 @@ namespace Game.Entities
             }
         }
 
-        private bool IsStateChanged(RuneTemplate rune)
+        private static void SetRuneState(ref RuneStateMask stateMask, RuneTemplate rune, bool active)
         {
-            return rune.Mask.HasAnyFlag(PreviousState ^ AvailableRunes);
+            SetRuneState(ref stateMask, rune.Mask, active);
         }
 
-        private void SetRuneState(RuneTemplate rune, bool set = true)
+        private static void SetRuneState(ref RuneStateMask stateMask, RuneStateMask runeMask, bool active)
         {
-            SetRuneState(rune.Mask, set);
-        }
-
-        private void SetRuneState(RuneStateMask mask, bool set = true)
-        {
-            if (set)
+            if (active)
             {
-                AvailableRunes |= mask;                      // usable
+                stateMask |= runeMask;
             }
             else
             {
-                AvailableRunes &= ~mask;                     // on cooldown
+                stateMask &= ~runeMask;
             }
         }
 
-        private bool IsRuneReady(RuneTemplate rune)
+        public static bool HasRune(RuneStateMask stateMask, RuneTemplate rune)
         {
-            return AvailableRunes.HasFlag(rune.Mask);
+            return HasRune(stateMask, rune.Mask);
         }
 
-        public void SetDeathRune(RuneTemplate rune, bool set = true)
+        public static bool HasRune(RuneStateMask stateMask, RuneStateMask runeMask)
         {
-            if (set)
+            return stateMask.HasFlag(runeMask);
+        }
+
+        private void SendConvertRune(RuneIndex runeIndex, RuneType runeType)
+        {
+            ConvertRune packet = new();
+            packet.Index = runeIndex;
+            packet.RuneType = runeType;
+
+            Owner.SendPacket(packet);
+        }
+
+        public void ApplyConvertRuneAura(RuneTemplate rune, AuraEffect convertAura)
+        {
+            SetRuneState(ref m_deathRunes, rune.Mask, true);
+            if (m_runes[(int)rune.Index].ConvertAuraList.Find(convertAura) == null)
             {
-                DeathRunes |= rune.Mask;
+                m_runes[(int)rune.Index].ConvertAuraList.AddFirst(convertAura);
             }
-            else
+
+            SendConvertRune(rune.Index, RuneType.Death);
+        }
+
+        public void RemoveConvertRuneAura(AuraEffect convertAura)
+        {
+            foreach (var rune in RunesList.Values)
             {
-                DeathRunes &= ~rune.Mask;
+                m_runes[(int)rune.Index].ConvertAuraList.Remove(convertAura);
+                if (m_runes[(int)rune.Index].ConvertAuraList.Count == 0)
+                {
+                    SetRuneState(ref m_deathRunes, rune.Mask, false);
+                    SendConvertRune(rune.Index, rune.Type);
+                }
+            }
+        }
+
+        public void SendActivateRunes(RuneStateMask activatedRunes)
+        {
+            if (activatedRunes != RuneStateMask.None)
+            {
+                AddRunePower packet = new();
+                packet.AddedRunesMask = activatedRunes;
+                Owner.SendPacket(packet);
             }
         }
 
@@ -164,41 +197,35 @@ namespace Game.Entities
             return rune.Type;
         }
 
-        public void SetRuneCooldown(RuneTemplate rune, RuneCooldowns cooldown, ServerTime currentTime = default)
+        public void SetRuneCooldown(RuneTemplate rune, RuneCooldowns cooldown, ServerTime currentTime)
         {
-            _setRuneCooldown(rune.Mask, cooldown.Amount * CooldownMultiplier, currentTime);
+            SetRuneCooldown(rune.Mask, cooldown.Amount * m_cooldownMultiplier, currentTime);
         }
 
-        public void SetRuneCooldown(RuneStateMask runesToSet, RuneCooldowns cooldown, ServerTime currentTime = default)
+        public void SetRuneCooldown(RuneStateMask runesToSet, RuneCooldowns cooldown, ServerTime currentTime)
         {
-            _setRuneCooldown(runesToSet, cooldown.Amount * CooldownMultiplier, currentTime);
+            SetRuneCooldown(runesToSet, cooldown.Amount * m_cooldownMultiplier, currentTime);
         }
 
-        private void _setRuneCooldown(RuneStateMask runesToSet, TimeSpan cooldown, ServerTime currentTime = default)
+        private void SetRuneCooldown(RuneStateMask runesToSet, TimeSpan cooldown, ServerTime currentTime)
         {
-            currentTime = currentTime == default ? LoopTime.ServerTime : currentTime;
-
             foreach (var rune in RunesList.Values)
             {
-                if (rune.Mask.HasAnyFlag(runesToSet))
+                if (runesToSet.HasFlag(rune.Mask))
                 {
-                    NextResetTime[(int)rune.Index] = currentTime + cooldown;
+                    m_runes[(int)rune.Index].NextResetTime = currentTime + cooldown;
                 }
             }
 
-            if (!NeedsToBeSynchronized)
-            {
-                PreviousState = AvailableRunes;
-                NeedsToBeSynchronized = true;
-            }
-
-            SetRuneState(runesToSet, cooldown == TimeSpan.Zero);
+            if (cooldown == TimeSpan.Zero)
+                SetRuneState(ref m_availableRunes, runesToSet, true);
+            else
+                SetRuneState(ref m_availableRunes, runesToSet, false);
         }
 
-        public TimeSpan GetRuneCooldown(RuneTemplate rune, ServerTime currentTime = default)
+        public TimeSpan GetRuneCooldown(RuneTemplate rune, ServerTime currentTime)
         {
-            currentTime = currentTime == default ? LoopTime.ServerTime : currentTime;
-            var cooldown = NextResetTime[(int)rune.Index] - currentTime;
+            var cooldown = m_runes[(int)rune.Index].NextResetTime - currentTime;
 
             if (cooldown < TimeSpan.Zero)
                 cooldown = TimeSpan.Zero;
@@ -209,6 +236,7 @@ namespace Game.Entities
         public SpellCastResult GetRunesForSpellCast(List<SpellPowerCost> costs, out RuneStateMask runesToUse)
         {
             runesToUse = RuneStateMask.None;
+            RuneStateMask AvailableRunes = this.AvailableRunes;
             RuneStateMask BaseRunes = this.BaseRunes;
             RuneStateMask DeathRunes = this.DeathRunes;
 
@@ -227,9 +255,9 @@ namespace Game.Entities
                         if (runeCost <= 0)
                             break;
 
-                        if (BaseRunes.HasAnyFlag(rune.Mask))
+                        if (HasRune(BaseRunes, rune))
                         {
-                            BaseRunes &= ~(rune.Mask & BaseRunes);
+                            SetRuneState(ref BaseRunes, rune.Mask, false);
                             runeCost -= 1;
                         }
                     }
@@ -246,9 +274,9 @@ namespace Game.Entities
                             if (runeCost <= 0)
                                 break;
 
-                            if (DeathRunes.HasAnyFlag(rune.Mask))
+                            if (HasRune(DeathRunes, rune))
                             {
-                                DeathRunes &= ~(rune.Mask & DeathRunes);
+                                SetRuneState(ref DeathRunes, rune, false);
                                 runeCost -= 1;
                             }
                         }
@@ -259,9 +287,9 @@ namespace Game.Entities
                             if (DeathRunes == RuneStateMask.None || runeCost <= 0)
                                 break;
 
-                            if (DeathRunes.HasAnyFlag(rune.Mask))
+                            if (HasRune(DeathRunes, rune))
                             {
-                                DeathRunes &= ~(rune.Mask & DeathRunes);
+                                SetRuneState(ref DeathRunes, rune, false);
                                 runeCost -= 1;
                             }
                         }
@@ -272,77 +300,84 @@ namespace Game.Entities
                 }
             }
 
-            runesToUse = AvailableRunes & ~(BaseRunes | DeathRunes);
+            runesToUse = AvailableRunes;
+            SetRuneState(ref runesToUse, BaseRunes | DeathRunes, false);
             return SpellCastResult.SpellCastOk;
         }
 
-        /// <summary> Always changes runes state. Use only as directed. </summary>
-        public RuneData Resync(ServerTime currentTime = default)
+        public RuneData GetRuneData(ServerTime currentTime, RuneStateMask runesStateBefore = RuneStateMask.All)
         {
-            currentTime = currentTime == default ? LoopTime.ServerTime : currentTime;
-
             RuneData data = new RuneData();
+            data.RuneStateBefore = runesStateBefore;
 
-            foreach (var rune in RunesList.Values)
-            {
-                TimeSpan cooldown = GetRuneCooldown(rune, currentTime);
-                data.Cooldowns.Add(new(cooldown, CooldownMultiplier));
-            }
-
-            data.RuneStateBefore = PreviousState;
-            data.RuneStateAfter = AvailableRunes;
-
-            PreviousState = AvailableRunes;
-            NeedsToBeSynchronized = false;
+            UpdateRunesState(currentTime, data);
 
             return data;
         }
 
-        public void Regenerate(ServerTime currentTime = default)
+        private RuneStateMask GetDeathRunesState()
         {
-            currentTime = currentTime == default ? LoopTime.ServerTime : currentTime;
+            return m_deathRunes;
+        }
 
-            ResyncRunes data = new ResyncRunes();
-            bool HasRecoveredRune = false;
+        private RuneStateMask GetRunesState()
+        {
+            UpdateRunesState(LoopTime.ServerTime);
+            return m_availableRunes;
+        }
 
+        private void UpdateRunesState(ServerTime currentTime, RuneData runeData = null)
+        {
+            if (m_lastStateUpdateTime == currentTime && runeData == null)
+                return;
+
+            RuneStateMask runesStateMask = RuneStateMask.None;
             foreach (var rune in RunesList.Values)
             {
-                TimeSpan cooldown = TimeSpan.Zero;
+                TimeSpan cooldown = GetRuneCooldown(rune, currentTime);
 
-                if (!IsRuneReady(rune))
+                if (cooldown > TimeSpan.Zero)
                 {
-                    cooldown = GetRuneCooldown(rune, currentTime);
+                    SetRuneState(ref runesStateMask, rune, false);
+                }
+                else
+                {
+                    SetRuneState(ref runesStateMask, rune, true);
+                }
 
-                    if (cooldown == TimeSpan.Zero)
-                    {
-                        SetRuneState(rune, true);
-                        HasRecoveredRune = true;
-                        data.Runes.Cooldowns.Add(new(cooldown, CooldownMultiplier));
-                    }
+                if (runeData != null)
+                {
+                    runeData.Cooldowns.Add(new(cooldown, m_cooldownMultiplier));
                 }
             }
 
-            data.Runes.RuneStateBefore = PreviousState;
-            data.Runes.RuneStateAfter = AvailableRunes;
+            if (runeData != null)
+            {
+                runeData.RuneStateAfter = runesStateMask;
+            }
 
-            if (!HasRecoveredRune)
-                return;
-
-            PreviousState = AvailableRunes;
-            NeedsToBeSynchronized = false;
-
-            Owner.SendPacket(data);
+            m_availableRunes = runesStateMask;
+            m_lastStateUpdateTime = currentTime;
         }
 
-        public RuneStateMask AvailableRunes { get; private set; }
-        public RuneStateMask DeathRunes { get; private set; }
+        public RuneStateMask AvailableRunes => GetRunesState();
+        public RuneStateMask DeathRunes => GetDeathRunesState();
         public RuneStateMask BaseRunes => AvailableRunes & ~DeathRunes;
         public readonly Player Owner;
 
-        private RuneStateMask PreviousState { get; set; }
-        private ServerTime[] NextResetTime = new ServerTime[PlayerConst.MaxRunes];
-        private bool NeedsToBeSynchronized;
-        private float RuneRegenMultiplier;
-        private float CooldownMultiplier;
+        public struct RuneInfo
+        {
+            public ServerTime NextResetTime;
+            public LinkedList<AuraEffect> ConvertAuraList = new();
+
+            public RuneInfo() { }
+        }
+
+        private RuneStateMask m_availableRunes;
+        private RuneStateMask m_deathRunes;
+        private RuneInfo[] m_runes;
+        private float m_runeRegenMultiplier;
+        private float m_cooldownMultiplier;
+        private ServerTime m_lastStateUpdateTime;
     }
 }

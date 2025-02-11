@@ -1137,7 +1137,7 @@ namespace Game
             {
                 ResyncRunes data = new()
                 {
-                    Runes = pCurrChar.Runes.Resync()
+                    Runes = pCurrChar.Runes.GetRuneData(LoopTime.ServerTime)
                 };
                 SendPacket(data);
             }

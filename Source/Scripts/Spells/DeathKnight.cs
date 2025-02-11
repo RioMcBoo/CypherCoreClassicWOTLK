@@ -814,48 +814,82 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
-    [Script] // 242057 - Rune Empowered
-    class spell_dk_t20_2p_rune_empowered : AuraScript
+    // -54639 - Blood of the North
+    // -49208 - Reaping
+    // -49467 - Death Rune Mastery
+    [Script]
+    class spell_dk_death_rune : AuraScript
     {
-        int _runicPowerSpent;
-
-        public override bool Validate(SpellInfo spellInfo)
+        public override bool Load()
         {
-            return ValidateSpellInfo(SpellIds.PillarOfFrost, SpellIds.BreathOfSindragosa);
+            return GetUnitOwner() is Player player && player.GetClass() == Class.DeathKnight;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        bool CheckProc(ProcEventInfo eventInfo)
         {
-            Spell procSpell = procInfo.GetProcSpell();
-            if (procSpell == null)
+            Unit caster = eventInfo.GetActor();
+
+            if (caster is not Player player)
+                return false;
+
+            if (player.GetClass() != Class.DeathKnight)
+                return false;
+
+            return true;
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            Player player = eventInfo.GetActor().ToPlayer();
+
+            AuraEffect aurEff = GetEffect(0);
+            if (aurEff == null)
                 return;
 
-            Aura pillarOfFrost = GetTarget().GetAura(SpellIds.PillarOfFrost);
-            if (pillarOfFrost == null)
-                return;
+            // Reset amplitude - set death rune remove timer to 30s
+            aurEff.ResetPeriodic(true);
 
-            _runicPowerSpent += procSpell.GetPowerTypeCostAmount(PowerType.RunicPower).GetValueOrDefault(0);
-            // Breath of Math.Sindragosa special case
-            SpellInfo breathOfSindragosa = SpellMgr.GetSpellInfo(SpellIds.BreathOfSindragosa, Difficulty.None);
-            if (procSpell.IsTriggeredByAura(breathOfSindragosa))
-            {
-                var powerRecord = breathOfSindragosa.PowerCosts.ToList().Find(power => power.PowerType == PowerType.RunicPower && power.PowerPctPerSecond > 0.0f);
-                if (powerRecord != null)
-                    _runicPowerSpent += MathFunctions.CalculatePct(GetTarget().GetMaxPower(PowerType.RunicPower), powerRecord.PowerPctPerSecond);
-            }
+            int runesLeft = 1;
 
-            if (_runicPowerSpent >= 600)
+            // Death Rune Mastery [2086]^1
+            if (GetSpellInfo().IconFileDataId == 135372)
+                runesLeft = 2;
+
+            foreach (var rune in Runes.RunesList.Values)
             {
-                pillarOfFrost.SetDuration(pillarOfFrost.GetDuration() + (Seconds)1);
-                _runicPowerSpent -= 600;
+                if (GetSpellInfo().IconFileDataId == 135372)
+                {
+                    if (rune.Type == RuneType.Blood)
+                        continue;
+                }
+                else
+                {
+                    if (rune.Type != RuneType.Blood)
+                        continue;
+                }
+
+                //if (player.Runes.GetRuneCooldown(rune) != (player.GetRuneBaseCooldown(rune) - player.GetLastRuneGraceTimer(rune)))
+                //    continue;
+
+                --runesLeft;
+                // Mark aura as used
+                player.Runes.ApplyConvertRuneAura(rune, aurEff);
             }
+        }
+
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            // timer expired - remove death runes
+            GetTarget().ToPlayer().Runes.RemoveConvertRuneAura(aurEff);
         }
 
         public override void Register()
         {
-            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+            DoCheckProc.Add(new(CheckProc));
+            OnProc.Add(new(HandleProc));
+            OnEffectPeriodic.Add(new(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
-    }
+    };
 
     [Script] // 55233 - Vampiric Blood
     class spell_dk_vampiric_blood : AuraScript
