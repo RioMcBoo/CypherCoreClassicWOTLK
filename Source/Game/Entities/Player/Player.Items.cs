@@ -5266,6 +5266,9 @@ namespace Game.Entities
             // check unique-equipped on gems
             foreach (SocketedGem gemData in pItem.m_itemData.Gems)
             {
+                if (gemData == null)
+                    continue;
+
                 ItemTemplate pGem = Global.ObjectMgr.GetItemTemplate(gemData.ItemId.GetValue());
                 if (pGem == null)
                     continue;

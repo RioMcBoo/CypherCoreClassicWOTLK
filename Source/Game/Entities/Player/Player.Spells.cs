@@ -508,24 +508,12 @@ namespace Game.Entities
             // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
             if (enchantmentSlot == EnchantmentSlot.EnhancementSocket || enchantmentSlot == EnchantmentSlot.EnhancementSocket2 || enchantmentSlot == EnchantmentSlot.EnhancementSocket3)
             {
-                if (item.GetSocketType(enchantmentSlot - EnchantmentSlot.EnhancementSocket) == 0)
+                if (item.GetSocketType(enchantmentSlot - EnchantmentSlot.EnhancementSocket) == SocketType.None)
                 {
                     // Check if the requirements for the prismatic socket are met before applying the gem stats
                     var pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
                     if (pPrismaticEnchant == null || (pPrismaticEnchant.RequiredSkillID > 0 && pPrismaticEnchant.RequiredSkillRank > GetSkillValue(pPrismaticEnchant.RequiredSkillID)))
                         return;
-                }
-
-                // Cogwheel gems dont have requirement data set in SpellItemEnchantment.dbc, but they do have it in Item-sparse.db2
-                var gem = item.GetGem(enchantmentSlot - EnchantmentSlot.EnhancementSocket);
-                if (gem != null)
-                {
-                    ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate(gem.ItemId);
-                    if (gemTemplate != null)
-                    {
-                        if (gemTemplate.GetRequiredSkill() != 0 && GetSkillValue(gemTemplate.GetRequiredSkill()) < gemTemplate.GetRequiredSkillRank())
-                            return;
-                    }
                 }
             }
 
@@ -1511,6 +1499,9 @@ namespace Game.Entities
                 {
                     foreach (SocketedGem gemData in pItem2.m_itemData.Gems)
                     {
+                        if (gemData == null)
+                            continue;
+
                         ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId.GetValue());
                         if (gemProto == null)
                             continue;

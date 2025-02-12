@@ -40,7 +40,7 @@ namespace System
             return lValue.HasFlag(lFlag);
         }
 
-        public static bool DoesMatchColor(this SocketColor mask, SocketType type)
+        public static bool DoesFitSocketType(this SocketColor mask, SocketType type)
         {
             switch (type)
             {

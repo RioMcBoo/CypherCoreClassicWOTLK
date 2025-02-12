@@ -914,29 +914,22 @@ namespace Game.Entities
 
         public bool HasAllSocketsFilledWithMatchingColors()
         {
-            var gemSlots = new Dictionary<int, SocketType>(ItemConst.MaxGemSockets);
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
-                var socketType = GetTemplate().GetSocketType(i);
-                if (socketType != SocketType.None)  // no socket slot
-                    gemSlots.Add(i, socketType);
-            }
-
-            if (gemSlots.Count > m_itemData.Gems.Size())
-                return false;
-
-            var gemSlot = 0;
-            foreach (var gemData in m_itemData.Gems)
-            {
-                if (gemSlots.TryGetValue(gemSlot, out var socketType))
-                {
-                    gemSlot++;
+                SocketType socketType = GetTemplate().GetSocketType(i);
+                if (socketType == SocketType.None)
                     continue;
-                }                    
 
-                var gemColor = SocketColor.None;
+                var existedGemInSocket = m_itemData.Gems[i];
+                if (existedGemInSocket == null)
+                    return false;
 
-                var gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
+                var gemProto = Global.ObjectMgr.GetItemTemplate(existedGemInSocket.ItemId);
+                if (gemProto == null)
+                    return false; // invalid gem id on this socket
+
+                SocketColor gemColor = SocketColor.None;
+                
                 if (gemProto != null)
                 {
                     var gemProperty = CliDB.GemPropertiesStorage.LookupByKey(gemProto.GetGemProperties());
@@ -944,7 +937,7 @@ namespace Game.Entities
                         gemColor = gemProperty.Color;
                 }
 
-                if (!gemColor.DoesMatchColor(socketType)) // bad gem color on this socket
+                if (!gemColor.DoesFitSocketType(socketType)) // bad gem color on this socket
                     return false;
             }
             return true;
