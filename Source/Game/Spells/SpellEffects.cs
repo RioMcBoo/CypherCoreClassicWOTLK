@@ -2232,7 +2232,38 @@ namespace Game.Spells
             }
 
             // select enchantment duration
-            Seconds duration = (Seconds)m_damage;
+            Seconds duration;
+
+            // rogue family enchantments exception by duration
+            if (m_spellInfo.Id == 38615)
+                duration = (Minutes)30;
+
+            // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
+            else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Rogue)
+                duration = (Hours)1;
+
+            // shaman family enchantments
+            else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Shaman)
+                duration = (Minutes)30;
+
+            // other cases with this SpellVisual already selected
+            else if (m_spellInfo.GetSpellVisual() == 215)
+                duration = (Minutes)30;
+
+            // some fishing pole bonuses except Glow Worm which lasts full hour
+            else if (m_spellInfo.GetSpellVisual() == 563 && m_spellInfo.Id != 64401)
+                duration = (Minutes)10;
+
+            // shaman rockbiter enchantments
+            else if (m_spellInfo.GetSpellVisual() == 0)
+                duration = (Minutes)30;
+            else if (m_spellInfo.Id == 29702)
+                duration = (Minutes)5;
+            else if (m_spellInfo.Id == 37360)
+                duration = (Minutes)5;
+            // default case
+            else
+                duration = (Hours)1;
 
             // item can be in trade slot and have owner diff. from caster
             Player item_owner = itemTarget.GetOwner();
