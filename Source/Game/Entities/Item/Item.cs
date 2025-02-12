@@ -11,6 +11,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -133,7 +134,7 @@ namespace Game.Entities
                     stmt.SetInt32(++index, m_itemData.Expiration.GetValue());
 
                     StringBuilder ss = new();
-                    for (int i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
+                    for (int i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.Effects.Count; ++i)
                         ss.AppendFormat($"{GetSpellCharges(i)} ");
 
                     stmt.SetString(++index, ss.ToString());
@@ -387,7 +388,7 @@ namespace Game.Entities
 
             // load charges after bonuses, they can add more item effects
             var tokens = new StringArray(fields.Read<string>(6), ' ');
-            for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount && i < tokens.Length; ++i)
+            for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.Effects.Count && i < tokens.Length; ++i)
             {
                 if (int.TryParse(tokens[i], out int value))
                     SetSpellCharges(i, value);
@@ -2151,7 +2152,7 @@ namespace Game.Entities
 
         public int GetScriptId() { return GetTemplate().ScriptId; }
 
-        public ItemEffectRecord[] GetEffects() { return _bonusData.Effects[0.._bonusData.EffectCount]; }
+        public ImmutableList<ItemEffectRecord> GetEffects() { return _bonusData.Effects; }
 
         public override Loot GetLootForPlayer(Player player) { return loot; }
 
@@ -2321,13 +2322,7 @@ namespace Game.Entities
             HasFixedLevel = false;
             RequiredLevelOverride = 0;
 
-            for (int i = 0; i < Effects.Length; ++i)
-            {
-                if (i < proto.Effects.Count)
-                    Effects[i] = proto.Effects[i];
-                else
-                    Effects[i] = null;
-            }
+            Effects = ImmutableList.CreateRange(proto.Effects);
 
             CanDisenchant = !proto.HasFlag(ItemFlags.NoDisenchant);
             CanScrap = proto.HasFlag(ItemFlags4.Scrapable);
@@ -2356,8 +2351,7 @@ namespace Game.Entities
         public int RequiredLevelOverride;
         public int Suffix;
         public int RequiredLevelCurve;
-        public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
-        public int EffectCount;
+        public readonly ImmutableList<ItemEffectRecord> Effects;
         public bool CanDisenchant;
         public bool CanScrap;
         public bool HasFixedLevel;
