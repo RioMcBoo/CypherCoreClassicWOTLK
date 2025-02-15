@@ -1388,7 +1388,7 @@ namespace Game.Entities
             // Calculate absorb resist
             if (damageInfo.Damage > 0)
             {
-                damageInfo.ProcVictim.Or(ProcFlags.TakeAnyDamage);
+                damageInfo.ProcVictim |= ProcFlags.TakeAnyDamage;
                 // Calculate absorb & resists
                 DamageInfo dmgInfo = new(damageInfo);
                 CalcAbsorbResist(dmgInfo);

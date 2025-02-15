@@ -1623,8 +1623,11 @@ namespace Game.Entities
             if (typeMaskActor != null && actor != null && !(spellInfo != null && spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs)))
                 actor.ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
 
-            if (typeMaskActionTarget && actionTarget != null && !(spellInfo != null && spellInfo.HasAttribute(SpellAttr3.SuppressTargetProcs)))
+            if (typeMaskActionTarget != ProcFlagsInit.None && actionTarget != null
+                && !(spellInfo != null && spellInfo.HasAttribute(SpellAttr3.SuppressTargetProcs)))
+            {
                 actionTarget.ProcSkillsAndReactives(true, actor, typeMaskActionTarget, hitMask, attType);
+            }
 
             if (actor != null)
                 actor.TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
@@ -1637,7 +1640,7 @@ namespace Game.Entities
                 return;
 
             // For melee/ranged based attack need update skills and set some Aura states if victim present
-            if (typeMask.HasFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget != null)
+            if (typeMask.HasAnyFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget != null)
             {
                 // Update skills here for players
                 // only when you are not fighting other players or their pets/totems (pvp)
@@ -1743,7 +1746,7 @@ namespace Game.Entities
             // prepare data for self trigger
             ProcEventInfo myProcEventInfo = new(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
             List<(uint, AuraApplication)> myAurasTriggeringProc = new();
-            if (typeMaskActor)
+            if (typeMaskActor != ProcFlagsInit.None)
             {
                 GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
 
@@ -1767,12 +1770,12 @@ namespace Game.Entities
             // prepare data for target trigger
             ProcEventInfo targetProcEventInfo = new(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
             List<(uint, AuraApplication)> targetAurasTriggeringProc = new();
-            if (typeMaskActionTarget && actionTarget != null)
+            if (typeMaskActionTarget != ProcFlagsInit.None && actionTarget != null)
                 actionTarget.GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
 
             TriggerAurasProcOnEvent(myProcEventInfo, myAurasTriggeringProc);
 
-            if (typeMaskActionTarget != null && actionTarget != null)
+            if (typeMaskActionTarget != ProcFlagsInit.None && actionTarget != null)
                 actionTarget.TriggerAurasProcOnEvent(targetProcEventInfo, targetAurasTriggeringProc);
         }
 

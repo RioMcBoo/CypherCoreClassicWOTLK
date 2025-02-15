@@ -2001,9 +2001,9 @@ namespace Game.Spells
                 case SpellDmgClass.Melee:
                     m_procAttacker = new ProcFlagsInit(ProcFlags.DealMeleeAbility);
                     if (m_attackType == WeaponAttackType.OffAttack)
-                        m_procAttacker.Or(ProcFlags.OffHandWeaponSwing);
+                        m_procAttacker |= ProcFlags.OffHandWeaponSwing;
                     else
-                        m_procAttacker.Or(ProcFlags.MainHandWeaponSwing);
+                        m_procAttacker |= ProcFlags.MainHandWeaponSwing;
                     m_procVictim = new ProcFlagsInit(ProcFlags.TakeMeleeAbility);
                     break;
                 case SpellDmgClass.Ranged:
@@ -3256,32 +3256,32 @@ namespace Game.Spells
 
             // Handle procs on cast
             ProcFlagsInit procAttacker = m_procAttacker;
-            if (!procAttacker)
+            if (procAttacker == ProcFlagsInit.None)
             {
                 if (m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
                 {
                     if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
+                        procAttacker |= ProcFlags.DealHelpfulPeriodic;
                     else
-                        procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
+                        procAttacker |= ProcFlags.DealHarmfulPeriodic;
                 }
                 else if (m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
                 {
                     if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulAbility);
+                        procAttacker |= ProcFlags.DealHelpfulAbility;
                     else
-                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
+                        procAttacker |= ProcFlags.DealHarmfulAbility;
                 }
                 else
                 {
                     if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulSpell);
+                        procAttacker |= ProcFlags.DealHelpfulSpell;
                     else
-                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
+                        procAttacker |= ProcFlags.DealHarmfulSpell;
                 }
             }
 
-            procAttacker.Or(ProcFlags2.CastSuccessful);
+            procAttacker |= ProcFlags2.CastSuccessful;
 
             ProcFlagsHit hitMask = m_hitMask;
             if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
@@ -3527,28 +3527,29 @@ namespace Game.Spells
                 return;
 
             ProcFlagsInit procAttacker = m_procAttacker;
-            if (!procAttacker)
+
+            if (procAttacker == ProcFlagsInit.None)
             {
                 if (m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
                 {
                     if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
+                        procAttacker |= ProcFlags.DealHelpfulPeriodic;
                     else
-                        procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
+                        procAttacker |= ProcFlags.DealHarmfulPeriodic;
                 }
                 else if (m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
                 {
                     if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulAbility);
+                        procAttacker |= ProcFlags.DealHelpfulAbility;
                     else
-                        procAttacker.Or(ProcFlags.DealHarmfulAbility);
+                        procAttacker |= ProcFlags.DealHarmfulAbility;
                 }
                 else
                 {
                     if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulSpell);
+                        procAttacker |= ProcFlags.DealHelpfulSpell;
                     else
-                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
+                        procAttacker |= ProcFlags.DealHarmfulSpell;
                 }
             }
 
@@ -8993,11 +8994,13 @@ namespace Game.Spells
                 bool canEffectTrigger = spell.unitTarget.CanProc();
 
                 // Trigger info was not filled in Spell::prepareDataForTriggerSystem - we do it now
-                if (canEffectTrigger && !procAttacker && !procVictim)
+                if (canEffectTrigger && procAttacker == ProcFlagsInit.None && procVictim == ProcFlagsInit.None)
                 {
                     bool positive = true;
                     if (spell.m_damage > 0)
+                    {
                         positive = false;
+                    }
                     else if (spell.m_healing == 0)
                     {
                         for (int i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
@@ -9023,39 +9026,39 @@ namespace Game.Spells
                             {
                                 if (positive)
                                 {
-                                    procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
-                                    procVictim.Or(ProcFlags.TakeHelpfulPeriodic);
+                                    procAttacker |= ProcFlags.DealHelpfulPeriodic;
+                                    procVictim |= ProcFlags.TakeHelpfulPeriodic;
                                 }
                                 else
                                 {
-                                    procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
-                                    procVictim.Or(ProcFlags.TakeHarmfulPeriodic);
+                                    procAttacker |= ProcFlags.DealHarmfulPeriodic;
+                                    procVictim |= ProcFlags.TakeHarmfulPeriodic;
                                 }
                             }
                             else if (spell.m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
                             {
                                 if (positive)
                                 {
-                                    procAttacker.Or(ProcFlags.DealHelpfulAbility);
-                                    procVictim.Or(ProcFlags.TakeHelpfulAbility);
+                                    procAttacker |= ProcFlags.DealHelpfulAbility;
+                                    procVictim |= ProcFlags.TakeHelpfulAbility;
                                 }
                                 else
                                 {
-                                    procAttacker.Or(ProcFlags.DealHarmfulAbility);
-                                    procVictim.Or(ProcFlags.TakeHarmfulAbility);
+                                    procAttacker |= ProcFlags.DealHarmfulAbility;
+                                    procVictim |= ProcFlags.TakeHarmfulAbility;
                                 }
                             }
                             else
                             {
                                 if (positive)
                                 {
-                                    procAttacker.Or(ProcFlags.DealHelpfulSpell);
-                                    procVictim.Or(ProcFlags.TakeHelpfulSpell);
+                                    procAttacker |= ProcFlags.DealHelpfulSpell;
+                                    procVictim |= ProcFlags.TakeHelpfulSpell;
                                 }
                                 else
                                 {
-                                    procAttacker.Or(ProcFlags.DealHarmfulSpell);
-                                    procVictim.Or(ProcFlags.TakeHarmfulSpell);
+                                    procAttacker |= ProcFlags.DealHarmfulSpell;
+                                    procVictim |= ProcFlags.TakeHarmfulSpell;
                                 }
                             }
                             break;
@@ -9113,7 +9116,7 @@ namespace Game.Spells
                         Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
                         hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
-                        procVictim.Or(ProcFlags.TakeAnyDamage);
+                        procVictim |= ProcFlags.TakeAnyDamage;
 
                         spell.m_damage = damageInfo.damage;
 
@@ -10039,36 +10042,97 @@ namespace Game.Spells
         public List<SpellLogEffectFeedPetParams> FeedPetTargets = new();
     }
 
-    public class ProcFlagsInit : FlagsArray<int>
+    public readonly record struct ProcFlagsInit
     {
-        public ProcFlagsInit(ProcFlags procFlags = 0, ProcFlags2 procFlags2 = 0) : base(2)
+        public static readonly ProcFlagsInit None = new(ProcFlags.None, ProcFlags2.None);
+
+        public ProcFlagsInit(ProcFlags procFlags = 0, ProcFlags2 procFlags2 = 0)
         {
-            _storage[0] = (int)procFlags;
-            _storage[1] = (int)procFlags2;
+            ProcFlags = procFlags;
+            ProcFlags2 = procFlags2;
         }
 
-        public ProcFlagsInit(params int[] flags) : base(flags) { }
-
-        public ProcFlagsInit Or(ProcFlags procFlags)
+        public static ProcFlagsInit operator |(ProcFlagsInit left, ProcFlags procFlags)
         {
-            _storage[0] |= (int)procFlags;
-            return this;
+            return new(left.ProcFlags | procFlags, left.ProcFlags2);
         }
 
-        public ProcFlagsInit Or(ProcFlags2 procFlags2)
+        public static ProcFlagsInit operator |(ProcFlagsInit left, ProcFlags2 procFlags2)
         {
-            _storage[1] |= (int)procFlags2;
-            return this;
+            return new(left.ProcFlags ,left.ProcFlags2 | procFlags2);
+        }
+
+        public static ProcFlagsInit operator &(ProcFlagsInit left, ProcFlags procFlags)
+        {
+            return new(left.ProcFlags & procFlags, left.ProcFlags2);
+        }
+
+        public static ProcFlagsInit operator &(ProcFlagsInit left, ProcFlags2 procFlags2)
+        {
+            return new(left.ProcFlags, left.ProcFlags2 & procFlags2);
+        }
+
+        public static ProcFlagsInit operator ^(ProcFlagsInit left, ProcFlags procFlags)
+        {
+            return new(left.ProcFlags ^ procFlags, left.ProcFlags2);
+        }
+
+        public static ProcFlagsInit operator ^(ProcFlagsInit left, ProcFlags2 procFlags2)
+        {
+            return new(left.ProcFlags, left.ProcFlags2 ^ procFlags2);
+        }
+
+        public static ProcFlagsInit operator |(ProcFlagsInit left, ProcFlagsInit right)
+        {
+            return new(left.ProcFlags | right.ProcFlags, left.ProcFlags2 | right.ProcFlags2);
+        }
+
+        public static ProcFlagsInit operator &(ProcFlagsInit left, ProcFlagsInit right)
+        {
+            return new(left.ProcFlags & right.ProcFlags, left.ProcFlags2 & right.ProcFlags2);
+        }
+
+        public static ProcFlagsInit operator ^(ProcFlagsInit left, ProcFlagsInit right)
+        {
+            return new(left.ProcFlags ^ right.ProcFlags, left.ProcFlags2 ^ right.ProcFlags2);
+        }
+
+        public static ProcFlagsInit operator ~(ProcFlagsInit left)
+        {
+            return new(~left.ProcFlags, ~left.ProcFlags2);
+        }
+
+        public bool HasAnyFlag(ProcFlags procFlags)
+        {
+            return ProcFlags.HasAnyFlag(procFlags);
+        }
+
+        public bool HasAnyFlag(ProcFlags2 procFlags2)
+        {
+            return ProcFlags2.HasAnyFlag(procFlags2);
         }
 
         public bool HasFlag(ProcFlags procFlags)
         {
-            return (_storage[0] & (int)procFlags) != 0;
+            return ProcFlags.HasFlag(procFlags);
         }
 
-        public bool HasFlag(ProcFlags2 procFlags)
+        public bool HasFlag(ProcFlags2 procFlags2)
         {
-            return (_storage[1] & (int)procFlags) != 0;
+            return ProcFlags2.HasFlag(procFlags2);
         }
+
+        public bool HasAnyFlag(ProcFlagsInit right)
+        {
+            return ProcFlags.HasAnyFlag(right.ProcFlags) || ProcFlags2.HasAnyFlag(right.ProcFlags2);
+        }
+
+        public bool HasFlag(ProcFlagsInit right)
+        {
+            return ProcFlags.HasFlag(right.ProcFlags) && ProcFlags2.HasFlag(right.ProcFlags2);
+        }
+
+        public readonly ProcFlags ProcFlags;
+        public readonly ProcFlags2 ProcFlags2;
     }
 }

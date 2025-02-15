@@ -79,7 +79,7 @@ namespace Game.Spells
             SpellAuraOptionsRecord _options = data.AuraOptions;
             if (_options != null)
             {
-                ProcFlags = new ProcFlagsInit(_options.ProcTypeMask);
+                ProcFlags = _options.ProcTypeMask;
                 ProcChance = _options.ProcChance;
                 ProcCharges = _options.ProcCharges;
                 ProcCooldown = _options.ProcCategoryRecovery;

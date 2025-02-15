@@ -479,11 +479,11 @@ namespace Game.Entities
         public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
             // proc Type doesn't match
-            if (!(eventInfo.GetTypeMask() & procEntry.ProcFlags))
+            if (!eventInfo.GetTypeMask().HasAnyFlag(procEntry.ProcFlags))
                 return false;
 
             // check XP or honor target requirement
-            if (((uint)procEntry.AttributesMask & 0x0000001) != 0)
+            if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReqExpOrHonor))
             {
                 Player actor = eventInfo.GetActor().ToPlayer();
                 if (actor != null)
@@ -506,15 +506,15 @@ namespace Game.Entities
             }
 
             // always trigger for these types
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.Heartbeat | ProcFlags.Kill | ProcFlags.Death))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.Heartbeat | ProcFlags.Kill | ProcFlags.Death))
                 return true;
 
             // check school mask (if set) for other trigger types
-            if (procEntry.SchoolMask != 0 && !Convert.ToBoolean(eventInfo.GetSchoolMask() & procEntry.SchoolMask))
+            if (procEntry.SchoolMask != SpellSchoolMask.None && !procEntry.SchoolMask.HasAnyFlag(eventInfo.GetSchoolMask()))
                 return false;
 
             // check spell family name/flags (if set) for spells
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.SpellMask))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.SpellMask))
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
                 if (eventSpellInfo != null)
@@ -524,27 +524,27 @@ namespace Game.Entities
                 }
 
                 // check spell Type mask (if set)
-                if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(eventInfo.GetSpellTypeMask() & procEntry.SpellTypeMask))
+                if (procEntry.SpellTypeMask != ProcFlagsSpellType.None && !procEntry.SpellTypeMask.HasAnyFlag(eventInfo.GetSpellTypeMask()))
                     return false;
             }
 
             // check spell phase mask
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.ReqSpellPhaseMask))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.ReqSpellPhaseMask))
             {
-                if (!Convert.ToBoolean(eventInfo.GetSpellPhaseMask() & procEntry.SpellPhaseMask))
+                if (!procEntry.SpellPhaseMask.HasAnyFlag(eventInfo.GetSpellPhaseMask()))
                     return false;
             }
 
             // check hit mask (on taken hit or on done hit, but not on spell cast phase)
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask) || (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneHitMask)
-                && !Convert.ToBoolean(eventInfo.GetSpellPhaseMask() & ProcFlagsSpellPhase.Cast)))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.TakenHitMask | ProcFlags.DoneHitMask)
+                && !eventInfo.GetSpellPhaseMask().HasAnyFlag(ProcFlagsSpellPhase.Cast))
             {
                 ProcFlagsHit hitMask = procEntry.HitMask;
                 // get default values if hit mask not set
                 if (hitMask == 0)
                 {
                     // for taken procs allow normal + critical hits by default
-                    if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
+                    if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.TakenHitMask))
                         hitMask |= ProcFlagsHit.Normal | ProcFlagsHit.Critical;
                     // for done procs allow normal + critical + absorbs by default
                     else
@@ -1408,7 +1408,7 @@ namespace Game.Entities
                     baseProcEntry.SchoolMask = (SpellSchoolMask)result.Read<uint>(1);
                     baseProcEntry.SpellFamilyName = (SpellFamilyNames)result.Read<uint>(2);
                     baseProcEntry.SpellFamilyMask = new FlagArray128(result.Read<uint>(3), result.Read<uint>(4), result.Read<uint>(5), result.Read<uint>(6));
-                    baseProcEntry.ProcFlags = new ProcFlagsInit(result.Read<int>(7), result.Read<int>(8), 2);
+                    baseProcEntry.ProcFlags = new ProcFlagsInit((ProcFlags)result.Read<int>(7), (ProcFlags2)result.Read<int>(8));
                     baseProcEntry.SpellTypeMask = (ProcFlagsSpellType)result.Read<uint>(9);
                     baseProcEntry.SpellPhaseMask = (ProcFlagsSpellPhase)result.Read<uint>(10);
                     baseProcEntry.HitMask = (ProcFlagsHit)result.Read<uint>(11);
@@ -1431,7 +1431,7 @@ namespace Game.Entities
                         SpellProcEntry procEntry = baseProcEntry;
 
                         // take defaults from dbcs
-                        if (!procEntry.ProcFlags)
+                        if (procEntry.ProcFlags == ProcFlagsInit.None)
                             procEntry.ProcFlags = spellInfo.ProcFlags;
                         if (procEntry.Charges == 0)
                             procEntry.Charges = spellInfo.ProcCharges;
@@ -1471,7 +1471,7 @@ namespace Game.Entities
                             procEntry.ProcsPerMinute = 0;
                         }
 
-                        if (!procEntry.ProcFlags)
+                        if (procEntry.ProcFlags == ProcFlagsInit.None)
                         {
                             Log.outError(LogFilter.Sql,
                                 $"`spell_proc` table entry for spellId {spellInfo.Id} " +
@@ -1485,14 +1485,14 @@ namespace Game.Entities
                                 $"has wrong `SpellTypeMask` set: {procEntry.SpellTypeMask}");
                         }
 
-                        if (procEntry.SpellTypeMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.SpellMask))
+                        if (procEntry.SpellTypeMask != 0 && !procEntry.ProcFlags.HasAnyFlag(ProcFlags.SpellMask))
                         {
                             Log.outError(LogFilter.Sql,
                                 $"`spell_proc` table entry for spellId {spellInfo.Id} " +
                                 $"has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value");
                         }
 
-                        if (procEntry.SpellPhaseMask == 0 && procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
+                        if (procEntry.SpellPhaseMask == 0 && procEntry.ProcFlags.HasAnyFlag(ProcFlags.ReqSpellPhaseMask))
                         {
                             Log.outError(LogFilter.Sql,
                                 $"`spell_proc` table entry for spellId {spellInfo.Id} " +
@@ -1507,15 +1507,15 @@ namespace Game.Entities
                                 $"has wrong `SpellPhaseMask` set: {procEntry.SpellPhaseMask}");
                         }
 
-                        if (procEntry.SpellPhaseMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
+                        if (procEntry.SpellPhaseMask != 0 && !procEntry.ProcFlags.HasAnyFlag(ProcFlags.ReqSpellPhaseMask))
                         {
                             Log.outError(LogFilter.Sql,
                                 $"`spell_proc` table entry for spellId {spellInfo.Id} " +
                                 $"has `SpellPhaseMask` value defined, but it won't be used for defined `ProcFlags` value");
                         }
 
-                        if (procEntry.SpellPhaseMask == 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask) 
-                            && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
+                        if (procEntry.SpellPhaseMask == 0 && !procEntry.ProcFlags.HasAnyFlag(ProcFlags.ReqSpellPhaseMask) 
+                            && procEntry.ProcFlags.HasAnyFlag(ProcFlags2.CastSuccessful))
                         {
                             procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Cast; // set default phase for PROC_FLAG_2_CAST_SUCCESSFUL
                         }
@@ -1528,7 +1528,7 @@ namespace Game.Entities
                         }
 
                         if (procEntry.HitMask != 0
-                            && !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || procEntry.SpellPhaseMask.HasAnyFlag(ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish)))))
+                            && !(procEntry.ProcFlags.HasAnyFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasAnyFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || procEntry.SpellPhaseMask.HasAnyFlag(ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish)))))
                         {
                             Log.outError(LogFilter.Sql,
                                 $"`spell_proc` table entry for spellId {spellInfo.Id} " +
@@ -1642,7 +1642,7 @@ namespace Game.Entities
 
                     // many proc auras with taken procFlag mask don't have attribute "can proc with triggered"
                     // they should proc nevertheless (example mage armor spells with judgement)
-                    if (!addTriggerFlag && spellInfo.ProcFlags.HasFlag(ProcFlags.TakenHitMask))
+                    if (!addTriggerFlag && spellInfo.ProcFlags.HasAnyFlag(ProcFlags.TakenHitMask))
                     {
                         switch (auraName)
                         {
@@ -1664,8 +1664,8 @@ namespace Game.Entities
                         {
                             Log.outError(LogFilter.Sql, 
                                 $"Spell Id {spellInfo.Id} has DBC ProcFlags " +
-                                $"0x{spellInfo.ProcFlags[0]:X} " +
-                                $"0x{spellInfo.ProcFlags[1]:X}, " +
+                                $"0x{spellInfo.ProcFlags.ProcFlags:X} " +
+                                $"0x{spellInfo.ProcFlags.ProcFlags2:X}, " +
                                 $"but it's of non-proc aura Type, " +
                                 $"it probably needs an entry in `spell_proc` table to be handled correctly.");
                             break;
@@ -1690,8 +1690,8 @@ namespace Game.Entities
                 procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
                 procEntry.HitMask = ProcFlagsHit.None; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
 
-                if (!procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask)
-                    && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
+                if (!procEntry.ProcFlags.HasAnyFlag(ProcFlags.ReqSpellPhaseMask)
+                    && procEntry.ProcFlags.HasAnyFlag(ProcFlags2.CastSuccessful))
                 {
                     procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Cast; // set default phase for PROC_FLAG_2_CAST_SUCCESSFUL
                 }
@@ -1734,7 +1734,7 @@ namespace Game.Entities
 
                 procEntry.AttributesMask = 0;
                 procEntry.DisableEffectsMask = nonProcMask;
-                if (spellInfo.ProcFlags.HasFlag(ProcFlags.Kill))
+                if (spellInfo.ProcFlags.HasAnyFlag(ProcFlags.Kill))
                     procEntry.AttributesMask |= ProcAttributes.ReqExpOrHonor;
                 if (addTriggerFlag)
                     procEntry.AttributesMask |= ProcAttributes.TriggeredCanProc;
@@ -1749,7 +1749,7 @@ namespace Game.Entities
                     && spellInfo.ProcBasePPM <= 0.0f
                     && procEntry.Cooldown <= 0
                     && procEntry.Charges <= 0
-                    && procEntry.ProcFlags.HasFlag(ProcFlags.DealMeleeAbility | ProcFlags.DealRangedAttack | ProcFlags.DealRangedAbility | ProcFlags.DealHelpfulAbility
+                    && procEntry.ProcFlags.HasAnyFlag(ProcFlags.DealMeleeAbility | ProcFlags.DealRangedAttack | ProcFlags.DealRangedAbility | ProcFlags.DealHelpfulAbility
                     | ProcFlags.DealHarmfulAbility | ProcFlags.DealHelpfulSpell | ProcFlags.DealHarmfulSpell | ProcFlags.DealHarmfulPeriodic | ProcFlags.DealHelpfulPeriodic)
                     && triggersSpell)
                 {
@@ -2850,7 +2850,7 @@ namespace Game.Entities
                         spellInfo.AuraInterruptFlags2 = (SpellAuraInterruptFlags2)spellsResult.Read<uint>(40);
                         spellInfo.ChannelInterruptFlags = (SpellAuraInterruptFlags)spellsResult.Read<uint>(41);
                         spellInfo.ChannelInterruptFlags2 = (SpellAuraInterruptFlags2)spellsResult.Read<uint>(42);
-                        spellInfo.ProcFlags = new ProcFlagsInit(spellsResult.Read<int>(43), spellsResult.Read<int>(44));
+                        spellInfo.ProcFlags = new ProcFlagsInit((ProcFlags)spellsResult.Read<int>(43), (ProcFlags2)spellsResult.Read<int>(44));
                         spellInfo.ProcChance = spellsResult.Read<int>(45);
                         spellInfo.ProcCharges = spellsResult.Read<int>(46);
                         spellInfo.ProcCooldown = (Milliseconds)spellsResult.Read<int>(47);

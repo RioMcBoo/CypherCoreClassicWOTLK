@@ -2590,7 +2590,7 @@ namespace Framework.Constants
                                   DealRangedAttack | TakeRangedAttack | DealRangedAbility | TakeRangedAbility)
     }
 
-    public enum ProcFlags2
+    public enum ProcFlags2 : uint
     {
         None = 0x00,
         TargetDies = 0x01,

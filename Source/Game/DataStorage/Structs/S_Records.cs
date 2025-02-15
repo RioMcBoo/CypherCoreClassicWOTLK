@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.Spells;
 using System;
 
 namespace Game.DataStorage
@@ -375,12 +376,13 @@ namespace Game.DataStorage
         public byte ProcChance;
         public int ProcCharges;
         public ushort SpellProcsPerMinuteID;
-        public int[] ProcTypeMask = new int[2];
+        private int[] _procTypeMask = new int[2];
         public int SpellID;
 
         #region Properties
         public Difficulty DifficultyID => (Difficulty)_difficultyID;
         public Milliseconds ProcCategoryRecovery => (Milliseconds)_procCategoryRecovery;
+        public ProcFlagsInit ProcTypeMask => new((ProcFlags)_procTypeMask[0], (ProcFlags2)_procTypeMask[1]);
         #endregion
     }
 

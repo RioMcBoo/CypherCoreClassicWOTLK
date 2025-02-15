@@ -1297,7 +1297,7 @@ namespace Scripts.Spells.Items
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DealRangedAttack | ProcFlags.DealRangedAbility))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DealRangedAttack | ProcFlags.DealRangedAbility))
             {
                 // in that case, do not cast heal spell
                 PreventDefaultAction();
@@ -2971,10 +2971,10 @@ namespace Scripts.Spells.Items
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
 
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DealHelpfulSpell))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DealHelpfulSpell))
                 caster.CastSpell(target, _healProc, aurEff);
 
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DealHarmfulSpell))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DealHarmfulSpell))
                 caster.CastSpell(target, _damageProc, aurEff);
         }
 

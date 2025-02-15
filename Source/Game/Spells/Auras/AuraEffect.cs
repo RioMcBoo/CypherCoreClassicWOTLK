@@ -5093,7 +5093,7 @@ namespace Game.Spells
             if (damage != 0)
             {
                 hitMask |= crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
-                procVictim.Or(ProcFlags.TakeAnyDamage);
+                procVictim |= ProcFlags.TakeAnyDamage;
             }
 
             int overkill = (int)(damage - target.GetHealth());
@@ -5202,7 +5202,7 @@ namespace Game.Spells
             if (damage != 0)
             {
                 hitMask |= crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
-                procVictim.Or(ProcFlags.TakeAnyDamage);
+                procVictim |= ProcFlags.TakeAnyDamage;
             }
 
             int new_damage = Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, 
@@ -5489,7 +5489,7 @@ namespace Game.Spells
             ProcFlagsSpellType spellTypeMask = ProcFlagsSpellType.NoDmgHeal;
             if (damageInfo.damage != 0)
             {
-                procVictim.Or(ProcFlags.TakeAnyDamage);
+                procVictim |= ProcFlags.TakeAnyDamage;
                 spellTypeMask |= ProcFlagsSpellType.Damage;
             }
 
@@ -5542,7 +5542,7 @@ namespace Game.Spells
         {
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
-            if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
+            if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.TakenHitMask))
                 triggerTarget = eventInfo.GetActor();
 
             int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
@@ -5573,7 +5573,7 @@ namespace Game.Spells
         {
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
-            if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
+            if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.TakenHitMask))
                 triggerTarget = eventInfo.GetActor();
 
             int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
