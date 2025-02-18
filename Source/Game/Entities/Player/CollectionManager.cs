@@ -652,8 +652,10 @@ namespace Game.Entities
 
             var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);
             foreach (TransmogSetRecord set in sets)
+            {
                 if (IsSetCompleted(set.Id))
                     _owner.GetPlayer().UpdateCriteria(CriteriaType.CollectTransmogSetFromGroup, set.TransmogSetGroupID);
+            }
         }
 
         void AddTemporaryAppearance(ObjectGuid itemGuid, ItemModifiedAppearanceRecord itemModifiedAppearance)

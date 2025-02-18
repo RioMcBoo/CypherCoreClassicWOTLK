@@ -487,8 +487,7 @@ namespace Game.Entities
                 float power_regen_mp5 = (GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) + m_baseManaRegen) / 5.0f;
 
                 // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
-                var regenAura = GetAuraEffectsByType(AuraType.ModManaRegenFromStat);
-                foreach (var aura in regenAura)
+                foreach (var aura in GetAuraEffectsByType(AuraType.ModManaRegenFromStat))
                     power_regen_mp5 += GetStat((Stats)aura.GetMiscValue()) * aura.GetAmount() / 500.0f;
 
                 // Set regen rate in cast state apply only on spirit based regen
@@ -732,8 +731,7 @@ namespace Game.Entities
 
             // Bonus from stats (talents)
             {
-                var mAPbyStat = GetAuraEffectsByType(AuraType.ModRangedAttackPowerOfStatPercent);
-                foreach (var aurEff in mAPbyStat)
+                foreach (var aurEff in GetAuraEffectsByType(AuraType.ModRangedAttackPowerOfStatPercent))
                 {
                     float bonus = MathFunctions.CalculatePct(GetStat((Stats)aurEff.GetMiscValue()), aurEff.GetAmount());
                     if (aurEff.GetSpellInfo().IsPassive())
@@ -867,8 +865,10 @@ namespace Game.Entities
             }
 
             foreach (var aurEff in GetAuraEffectsByType(AuraType.ModRatingPct))
-                if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
+            {
+                if (aurEff.GetMiscValue().HasAnyFlag(1 << (int)cr))
                     amount += MathFunctions.CalculatePct(amount, aurEff.GetAmount());
+            }
 
             if (amount < 0)
                 amount = 0;

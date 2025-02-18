@@ -564,8 +564,7 @@ namespace Scripts.Spells.DeathKnight
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
 
-            var mPeriodic = target.GetAuraEffectsByType(AuraType.PeriodicDamage);
-            foreach (var aurEff in mPeriodic)
+            foreach (var aurEff in target.GetAuraEffectsByType(AuraType.PeriodicDamage))
             {
                 SpellInfo spellInfo = aurEff.GetSpellInfo();
                 // search our Blood Plague and Frost Fever on target

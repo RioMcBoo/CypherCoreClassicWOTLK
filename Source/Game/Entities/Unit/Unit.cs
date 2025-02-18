@@ -2060,39 +2060,35 @@ namespace Game.Entities
         {
             AuraEffect handledAura = null;
             // try to receive model from transform auras
-            var transforms = GetAuraEffectsByType(AuraType.Transform);
-            if (!transforms.Empty())
+            // iterate over already applied transform auras - from newest to oldest
+            foreach (var eff in GetAuraEffectsByType(AuraType.Transform))
             {
-                // iterate over already applied transform auras - from newest to oldest
-                foreach (var eff in transforms)
+                AuraApplication aurApp = eff.GetBase().GetApplicationOfTarget(GetGUID());
+                if (aurApp != null)
                 {
-                    AuraApplication aurApp = eff.GetBase().GetApplicationOfTarget(GetGUID());
-                    if (aurApp != null)
+                    if (handledAura == null)
                     {
-                        if (handledAura == null)
+                        if (!ignorePositiveAurasPreventingMounting)
+                            handledAura = eff;
+                        else
                         {
-                            if (!ignorePositiveAurasPreventingMounting)
-                                handledAura = eff;
-                            else
+                            CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(eff.GetMiscValue());
+                            if (ci != null)
                             {
-                                CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(eff.GetMiscValue());
-                                if (ci != null)
+                                if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None,
+                                    ObjectManager.ChooseDisplayId(ci).CreatureDisplayID))
                                 {
-                                    if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None,
-                                        ObjectManager.ChooseDisplayId(ci).CreatureDisplayID))
-                                    {
-                                        handledAura = eff;
-                                    }
+                                    handledAura = eff;
                                 }
                             }
                         }
+                    }
 
-                        // prefer negative auras
-                        if (!aurApp.IsPositive())
-                        {
-                            handledAura = eff;
-                            break;
-                        }
+                    // prefer negative auras
+                    if (!aurApp.IsPositive())
+                    {
+                        handledAura = eff;
+                        break;
                     }
                 }
             }
@@ -2387,7 +2383,7 @@ namespace Game.Entities
         {
             if (HasAuraType(AuraType.ModFaction))
             {
-                SetFaction(GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
+                SetFaction(GetAuraEffectsByType(AuraType.ModFaction).Last().GetMiscValue());
                 return;
             }
 
@@ -3830,7 +3826,7 @@ namespace Game.Entities
                 if (aurApp == null)
                     continue;
                 // check damage school mask
-                if (!Convert.ToBoolean(absorbAurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
+                if (!absorbAurEff.GetMiscValue().HasAnyFlag((int)damageInfo.GetSchoolMask()))
                     continue;
 
                 // get amount which can be still absorbed by the aura
@@ -4053,8 +4049,8 @@ namespace Game.Entities
 
                 // bypass enemy armor by SPELL_AURA_BYPASS_ARMOR_FOR_CASTER
                 int armorBypassPct = 0;
-                var reductionAuras = victim.GetAuraEffectsByType(AuraType.BypassArmorForCaster);
-                foreach (var eff in reductionAuras)
+
+                foreach (var eff in victim.GetAuraEffectsByType(AuraType.BypassArmorForCaster))
                 {
                     if (eff.GetCasterGUID() == attacker.GetGUID())
                         armorBypassPct += eff.GetAmount();
@@ -4072,8 +4068,7 @@ namespace Game.Entities
                         modOwner.ApplySpellMod(spellInfo, SpellModOp.TargetResistance, ref armor);
                 }
 
-                var resIgnoreAuras = attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
-                foreach (var eff in resIgnoreAuras)
+                foreach (var eff in attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist))
                 {
                     if (eff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal) && eff.IsAffectingSpell(spellInfo))
                         armor = (float)Math.Floor(MathFunctions.AddPct(ref armor, -eff.GetAmount()));
@@ -4321,8 +4316,8 @@ namespace Game.Entities
                 SpellSchoolMask attackSchoolMask = spellProto != null ? spellProto.GetSchoolMask() : damageSchoolMask;
 
                 float damageReduction = 1.0f - TakenTotalMod;
-                var casterIgnoreResist = attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
-                foreach (AuraEffect aurEff in casterIgnoreResist)
+
+                foreach (AuraEffect aurEff in attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist))
                 {
                     if ((aurEff.GetMiscValue() & (int)attackSchoolMask) == 0)
                         continue;

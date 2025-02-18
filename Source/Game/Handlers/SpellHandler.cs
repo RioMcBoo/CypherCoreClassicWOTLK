@@ -459,7 +459,11 @@ namespace Game
                 return;
 
             // Get creator of the unit (SPELL_AURA_CLONE_CASTER does not stack)
-            Unit creator = unit.GetAuraEffectsByType(AuraType.CloneCaster).FirstOrDefault().GetCaster();
+            var auraList = unit.GetAuraEffectsByType(AuraType.CloneCaster);
+            if (auraList.Empty())
+                return;
+
+            Unit creator = auraList.First().GetCaster();
             if (creator == null)
                 return;
 

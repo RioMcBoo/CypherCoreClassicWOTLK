@@ -212,8 +212,10 @@ namespace Game.Spells
         public bool IsReady(SpellInfo spellInfo, int itemId = 0)
         {
             if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
+            {
                 if (IsSchoolLocked(spellInfo.GetSchoolMask()))
                     return false;
+            }
 
             if (HasCooldown(spellInfo, itemId))
                 return false;
@@ -811,18 +813,22 @@ namespace Game.Spells
 
             ServerTime now = LoopTime.ServerTime;
 
+            List<ChargeEntry> newList = new();
             for (var i = 0; i < chargeList.Count; ++i)
             {
                 var entry = chargeList[i];
                 entry.RechargeStart += cooldownMod;
                 entry.RechargeEnd += cooldownMod;
+                newList.Add(entry);
             }
 
-            List<ChargeEntry> newList = new();
+            _categoryCharges.SetValues(chargeCategoryId, newList);
+
+            List<ChargeEntry> cooldownRemainsList = new();
             foreach (var charge in chargeList)
             {
                 if (charge.RechargeEnd >= now)
-                    newList.Add(charge);
+                    cooldownRemainsList.Add(charge);
             }
             _categoryCharges.SetValues(chargeCategoryId, newList);
 

@@ -193,10 +193,13 @@ namespace Game
                 if (skillLineEntry.CategoryID == SkillCategory.Class)
                 {
                     foreach (SkillRaceClassInfoRecord skillRaceClassInfo in Global.DB2Mgr.GetSkillRaceClassInfo(skillLineEntry.Id))
+                    {
                         for (var i = Class.None; i < Class.Max; ++i)
+                        {
                             if (skillRaceClassInfo.ClassMask.HasClass(i))
                                 _skillLinesByClass[(int)i] = skillLineXTraitTreeEntry.SkillLineID;
-
+                        }
+                    }
                     tree.ConfigType = TraitConfigType.Combat;
                 }
                 else

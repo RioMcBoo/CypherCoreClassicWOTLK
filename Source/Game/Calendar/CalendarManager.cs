@@ -18,8 +18,8 @@ namespace Game
     {
         CalendarManager()
         {
-            _events = new List<CalendarEvent>();
-            _invites = new MultiMap<long,CalendarInvite>();
+            _events = new();
+            _invites = new();
         }
 
         public void LoadFromDB()

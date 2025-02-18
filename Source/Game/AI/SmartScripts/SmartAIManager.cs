@@ -21,7 +21,7 @@ namespace Game.AI
         SmartAIManager()
         {
             for (byte i = 0; i < (int)SmartScriptType.Max; i++)
-                _eventMap[i] = new MultiMap<int, SmartScriptHolder>();
+                _eventMap[i] = new();
         }
 
         public void LoadFromDB()

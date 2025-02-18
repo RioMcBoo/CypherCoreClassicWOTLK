@@ -1660,9 +1660,10 @@ namespace Game.Spells
                 // Dragonmaw Illusion (restore mount model)
                 if (GetId() == 42016 && target.GetMountDisplayId() == 16314)
                 {
-                    if (!target.GetAuraEffectsByType(AuraType.Mounted).Empty())
+                    var mountAuras = target.GetAuraEffectsByType(AuraType.Mounted);
+                    if (!mountAuras.Empty())
                     {
-                        int cr_id = target.GetAuraEffectsByType(AuraType.Mounted)[0].GetMiscValue();
+                        int cr_id = mountAuras.First().GetMiscValue();
                         CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(cr_id);
                         if (ci != null)
                         {
@@ -2978,8 +2979,7 @@ namespace Game.Spells
                 else
                 {
                     bool banishFound = false;
-                    var banishAuras = target.GetAuraEffectsByType(GetAuraType());
-                    foreach (var aurEff in banishAuras)
+                    foreach (var aurEff in target.GetAuraEffectsByType(GetAuraType()))
                     {
                         if (aurEff.GetSpellInfo().Mechanic == Mechanics.Banish)
                         {
@@ -3805,8 +3805,7 @@ namespace Game.Spells
                     // it's some rare case that you have 2 auras like that, but just in case ;)
 
                     bool remove = true;
-                    var castingSpeedNotStack = target.GetAuraEffectsByType(AuraType.ModCastingSpeedNotStack);
-                    foreach (AuraEffect aurEff in castingSpeedNotStack)
+                    foreach (AuraEffect aurEff in target.GetAuraEffectsByType(AuraType.ModCastingSpeedNotStack))
                     {
                         if (aurEff != this && aurEff.GetAmount() >= 1000)
                         {

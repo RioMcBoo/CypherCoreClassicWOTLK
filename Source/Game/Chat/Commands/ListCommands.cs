@@ -81,6 +81,7 @@ namespace Game.Chat.Commands
                         var creBounds = thisMap.GetCreatureBySpawnIdStore()[guid];
                         foreach (var creature in creBounds)
                             handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
+
                         liveFound = !creBounds.Empty();
                     }
 
@@ -455,6 +456,7 @@ namespace Game.Chat.Commands
                         var goBounds = thisMap.GetGameObjectBySpawnIdStore()[guid];
                         foreach (var go in goBounds)
                             handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID().ToString(), go.IsSpawned() ? "*" : " ");
+
                         liveFound = !goBounds.Empty();
                     }
 

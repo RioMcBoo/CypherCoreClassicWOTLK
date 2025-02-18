@@ -5179,8 +5179,7 @@ namespace Game.Spells
                 {
                     bool checkForm = true;
                     // Ignore form req aura
-                    var ignore = unitCaster.GetAuraEffectsByType(AuraType.ModIgnoreShapeshift);
-                    foreach (var aurEff in ignore)
+                    foreach (var aurEff in unitCaster.GetAuraEffectsByType(AuraType.ModIgnoreShapeshift))
                     {
                         if (!aurEff.IsAffectingSpell(m_spellInfo))
                             continue;
@@ -6303,8 +6302,7 @@ namespace Game.Spells
             SpellCastResult mechanicCheck(AuraType auraType, ref int _param1)
             {
                 bool foundNotMechanic = false;
-                var auras = unitCaster.GetAuraEffectsByType(auraType);
-                foreach (AuraEffect aurEff in auras)
+                foreach (AuraEffect aurEff in unitCaster.GetAuraEffectsByType(auraType))
                 {
                     ulong mechanicMask = aurEff.GetSpellInfo().GetAllEffectsMechanicMask();
                     if (mechanicMask != 0 && !Convert.ToBoolean(mechanicMask & GetSpellInfo().GetAllowedMechanicMask()))
@@ -6419,11 +6417,7 @@ namespace Game.Spells
                 return false;
 
             // Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
-            var auraEffects = unitCaster.GetAuraEffectsByType(auraType);
-            if (auraEffects.Empty())
-                return true;
-
-            foreach (AuraEffect aurEff in auraEffects)
+            foreach (AuraEffect aurEff in unitCaster.GetAuraEffectsByType(auraType))
             {
                 if (m_spellInfo.SpellCancelsAuraEffect(aurEff))
                     continue;
@@ -6523,8 +6517,7 @@ namespace Game.Spells
                     continue;
 
                 AuraType auraType = spellEffectInfo.ApplyAuraName;
-                var auras = target.GetAuraEffectsByType(auraType);
-                foreach (var eff in auras)
+                foreach (var eff in target.GetAuraEffectsByType(auraType))
                 {
                     if (GetSpellInfo().Id == eff.GetSpellInfo().Id)
                         return false;
@@ -8282,8 +8275,7 @@ namespace Game.Spells
             // handle SPELL_AURA_ADD_TARGET_TRIGGER auras:
             // save auras which were present on spell caster on cast, to prevent triggered auras from affecting caster
             // and to correctly calculate proc Chance when combopoints are present
-            var targetTriggers = unitCaster.GetAuraEffectsByType(AuraType.AddTargetTrigger);
-            foreach (var aurEff in targetTriggers)
+            foreach (var aurEff in unitCaster.GetAuraEffectsByType(AuraType.AddTargetTrigger))
             {
                 if (!aurEff.IsAffectingSpell(m_spellInfo))
                     continue;

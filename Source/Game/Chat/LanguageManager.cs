@@ -35,13 +35,17 @@ namespace Game.Chat
             {
                 var spellsRange = _langsMap[langEntry.Id];
                 if (spellsRange.Empty())
+                {
                     _langsMap.Add(langEntry.Id, new LanguageDesc());
+                }
                 else
                 {
                     List<LanguageDesc> langsWithSkill = new();
                     foreach (var spellItr in spellsRange)
+                    {
                         foreach (var skillPair in Global.SpellMgr.GetSkillLineAbilityMapBounds(spellItr.SpellId))
                             langsWithSkill.Add(new LanguageDesc(spellItr.SpellId, (int)skillPair.SkillLine));
+                    }
 
                     foreach (var langDesc in langsWithSkill)
                     {

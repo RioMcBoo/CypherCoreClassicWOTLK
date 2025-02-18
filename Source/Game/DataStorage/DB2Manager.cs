@@ -126,7 +126,7 @@ namespace Game.DataStorage
                 if (customizationChoice != null)
                 {
                     if (!_chrCustomizationRequiredChoices.ContainsKey(reqChoice.ChrCustomizationReqID))
-                        _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID] = new MultiMap<int, int>();
+                        _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID] = new();
 
                     _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID].Add(customizationChoice.ChrCustomizationOptionID, reqChoice.ChrCustomizationChoiceID);
                 }
@@ -514,10 +514,10 @@ namespace Game.DataStorage
 
             for (var i = 0; i < (int)UiMapSystem.Max; ++i)
             {
-                _uiMapAssignmentByMap[i] = new MultiMap<int, UiMapAssignmentRecord>();
-                _uiMapAssignmentByArea[i] = new MultiMap<int, UiMapAssignmentRecord>();
-                _uiMapAssignmentByWmoDoodadPlacement[i] = new MultiMap<int, UiMapAssignmentRecord>();
-                _uiMapAssignmentByWmoGroup[i] = new MultiMap<int, UiMapAssignmentRecord>();
+                _uiMapAssignmentByMap[i] = new();
+                _uiMapAssignmentByArea[i] = new();
+                _uiMapAssignmentByWmoDoodadPlacement[i] = new();
+                _uiMapAssignmentByWmoGroup[i] = new();
             }
 
             MultiMap<int, UiMapAssignmentRecord> uiMapAssignmentByUiMap = new();
@@ -1002,8 +1002,10 @@ namespace Game.DataStorage
         public int GetRedirectedContentTuningId(int contentTuningId, uint redirectFlag)
         {
             foreach (var conditionalContentTuning in _conditionalContentTuning[contentTuningId])
+            {
                 if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
                     return conditionalContentTuning.RedirectContentTuningID;
+            }
 
             return contentTuningId;
         }
@@ -1057,8 +1059,10 @@ namespace Game.DataStorage
         public CurrencyContainerRecord GetCurrencyContainerForCurrencyQuantity(int currencyId, int quantity)
         {
             foreach (var record in _currencyContainers[currencyId])
+            {
                 if (quantity >= record.MinAmount && (record.MaxAmount == 0 || quantity <= record.MaxAmount))
                     return record;
+            }
 
             return null;
         }
@@ -1067,7 +1071,7 @@ namespace Game.DataStorage
         {
             var points = _curvePoints[curveId];
             if (!points.Empty())
-                return ((points.First().X, points.Last().X));
+                return (points.First().X, points.Last().X);
 
             return (0.0f, 0.0f);
         }
@@ -1404,6 +1408,7 @@ namespace Game.DataStorage
         {
             if (index < _journalTiersByIndex.Count)
                 return _journalTiersByIndex[index];
+
             return null;
         }
 
@@ -1448,6 +1453,7 @@ namespace Game.DataStorage
             Difficulty NotUsed = Difficulty.None;
             return GetDefaultMapDifficulty(mapId, ref NotUsed);
         }
+
         public MapDifficultyRecord GetDefaultMapDifficulty(int mapId, ref Difficulty difficulty)
         {
             var dicMapDiff = _mapDifficulties.LookupByKey(mapId);
@@ -1936,8 +1942,10 @@ namespace Game.DataStorage
                 {
                     UiMapAssignmentStatus status;
                     if (CheckUiMapAssignmentStatus(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, assignment, out status))
+                    {
                         if (status < nearestMapAssignment)
                             nearestMapAssignment = status;
+                    }
                 }
             });
 

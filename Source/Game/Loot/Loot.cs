@@ -121,6 +121,7 @@ namespace Game.Loots
                     if (ffaItemItr != null && !ffaItemItr.is_looted)
                         return loot.GetLootMethod() == LootMethod.FreeForAll ? LootSlotType.Owner : LootSlotType.AllowLoot;
                 }
+
                 return null;
             }
 

@@ -1408,7 +1408,7 @@ namespace Game.Entities
                 Unit caster = null;
                 var fearAuras = GetAuraEffectsByType(AuraType.ModFear);
                 if (!fearAuras.Empty())
-                    caster = Global.ObjAccessor.GetUnit(this, fearAuras[0].GetCasterGUID());
+                    caster = Global.ObjAccessor.GetUnit(this, fearAuras.First().GetCasterGUID());
                 if (caster == null)
                     caster = GetAttackerForHelper();
                                 

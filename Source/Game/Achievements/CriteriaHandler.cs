@@ -3133,8 +3133,8 @@ namespace Game.Achievements
         {
             for (var i = 0; i < (int)CriteriaType.Count; ++i)
             {
-                _criteriasByAsset[i] = new MultiMap<int, Criteria>();
-                _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<int, Criteria>();
+                _criteriasByAsset[i] = new();
+                _scenarioCriteriasByTypeAndScenarioId[i] = new();
             }
 
             for (var i = 0; i < (int)CriteriaStartEvent.Count; ++i)
@@ -3259,7 +3259,7 @@ namespace Game.Achievements
             }
 
             for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
-                _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
+                _criteriasByFailEvent[i] = new();
 
             // Load criteria
             int criterias = 0;

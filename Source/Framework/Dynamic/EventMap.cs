@@ -224,7 +224,7 @@ namespace Framework.Dynamic
 
             foreach (var pair in _eventMap.ToList())
             {
-                if (Convert.ToBoolean(pair.Value & (1 << (int)(group + 15))))
+                if (pair.Value.HasAnyFlag(1 << (int)(group + 15)))
                 {
                     delayed.Add(pair.Key + delay, pair.Value);
                     _eventMap.Remove(pair.Key, pair.Value);

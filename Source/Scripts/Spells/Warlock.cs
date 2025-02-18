@@ -722,8 +722,10 @@ namespace Scripts.Spells.Warlock
             {
                 SpellInfo spellProto = aurApp.GetBase().GetSpellInfo();
                 if (aurApp.GetBase().GetCaster() == warlock)
+                {
                     if (spellProto.SpellFamilyName == SpellFamilyNames.Warlock && (spellProto.SpellFamilyFlags & classMask))
                         swapSpellScript.AddDot(id);
+                }
             }
 
             swapSpellScript.SetOriginalSwapSource(swapVictim);

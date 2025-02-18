@@ -1150,6 +1150,7 @@ namespace Game
                 if (data.SafeLocId == id)
                     return data;
             }
+
             return null;
         }
 
@@ -6840,6 +6841,7 @@ namespace Game
             {
                 if (it != data)
                     continue;
+
                 _spawnGroupMapStorage.Remove(data.spawnGroupData.groupId, it);
                 return;
             }
@@ -10360,9 +10362,10 @@ namespace Game
 
                     var parentAreaPhases = _phaseInfoByArea[parentAreaId];
                     foreach (PhaseAreaInfo parentAreaPhase in parentAreaPhases)
+                    {
                         if (parentAreaPhase.PhaseInfo.Id == pair.Value.PhaseInfo.Id)
                             parentAreaPhase.SubAreaExclusions.Add(pair.Key);
-
+                    }
                 } while (true);
             }
 
@@ -12443,8 +12446,10 @@ namespace Game
             var mailList = _mailLevelRewardStorage[(byte)level];
 
             foreach (var mailReward in mailList)
+            {
                 if (mailReward.raceMask.HasRace(race))
                     return mailReward;
+            }
 
             return null;
         }

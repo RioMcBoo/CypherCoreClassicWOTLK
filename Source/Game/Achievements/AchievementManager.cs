@@ -126,13 +126,17 @@ namespace Game.Achievements
             // check again the completeness for SUMM and REQ COUNT achievements,
             // as they don't depend on the completed criteria but on the sum of the progress of each individual criteria
             if (achievement.Flags.HasAnyFlag(AchievementFlags.Summ))
+            {
                 if (IsCompletedAchievement(achievement))
                     CompletedAchievement(achievement, referencePlayer);
+            }
 
             var achRefList = Global.AchievementMgr.GetAchievementByReferencedId(achievement.Id);
             foreach (AchievementRecord refAchievement in achRefList)
+            {
                 if (IsCompletedAchievement(refAchievement))
                     CompletedAchievement(refAchievement, referencePlayer);
+            }
         }
 
         bool IsCompletedAchievement(AchievementRecord entry)

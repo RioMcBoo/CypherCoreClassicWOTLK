@@ -1979,25 +1979,28 @@ namespace Game.Maps
 
         int DespawnAll(SpawnObjectType type, long spawnId)
         {
-            List<WorldObject> toUnload = new();
+            int count = 0;
             switch (type)
             {
                 case SpawnObjectType.Creature:
                     foreach (var creature in GetCreatureBySpawnIdStore()[spawnId])
-                        toUnload.Add(creature);
+                    {
+                        AddObjectToRemoveList(creature);
+                        count++;
+                    }
                     break;
                 case SpawnObjectType.GameObject:
                     foreach (var obj in GetGameObjectBySpawnIdStore()[spawnId])
-                        toUnload.Add(obj);
+                    {
+                        AddObjectToRemoveList(obj);
+                        count++;
+                    }
                     break;
                 default:
                     break;
             }
 
-            foreach (WorldObject o in toUnload)
-                AddObjectToRemoveList(o);
-
-            return toUnload.Count;
+            return count;
         }
 
         bool AddRespawnInfo(RespawnInfo info)
@@ -4835,7 +4838,7 @@ namespace Game.Maps
 
                         Creature cTarget = null;
                         var creatureBounds = _creatureBySpawnIdStore[step.script.CallScript.CreatureEntry];
-                        if (creatureBounds.Empty())
+                        if (!creatureBounds.Empty())
                         {
                             // Prefer alive (last respawned) creature
                             var foundCreature = creatureBounds.Find(creature => creature.IsAlive());

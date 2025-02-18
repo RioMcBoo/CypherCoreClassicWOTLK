@@ -3825,15 +3825,14 @@ namespace Game.Entities
 
         bool IsTotalImmune()
         {
-            var immune = GetAuraEffectsByType(AuraType.SchoolImmunity);
-
             int immuneMask = 0;
-            foreach (var eff in immune)
+            foreach (var eff in GetAuraEffectsByType(AuraType.SchoolImmunity))
             {
                 immuneMask |= eff.GetMiscValue();
-                if (Convert.ToBoolean(immuneMask & (int)SpellSchoolMask.All))            // total immunity
+                if (immuneMask.HasFlag((int)SpellSchoolMask.All))            // total immunity
                     return true;
             }
+
             return false;
         }
 
@@ -5634,6 +5633,7 @@ namespace Game.Entities
                 AuraType.FeatherFall, AuraType.Hover, AuraType.SafeFall,
                 AuraType.Fly, AuraType.ModIncreaseMountedFlightSpeed, AuraType.None
             ];
+
             foreach (var aura in auratypes)
             {
                 var auraList = GetAuraEffectsByType(aura);

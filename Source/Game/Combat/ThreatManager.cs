@@ -363,12 +363,11 @@ namespace Game.Combat
 
         public void TauntUpdate()
         {
-            var tauntEffects = _owner.GetAuraEffectsByType(AuraType.ModTaunt);
             TauntState state = TauntState.Taunt;
             Dictionary<ObjectGuid, TauntState> tauntStates = new();
 
             // Only the last taunt effect applied by something still on our threat list is considered
-            foreach (var auraEffect in tauntEffects)
+            foreach (var auraEffect in _owner.GetAuraEffectsByType(AuraType.ModTaunt))
                 tauntStates[auraEffect.GetCasterGUID()] = state++;
 
             foreach (var pair in _myThreatListEntries)

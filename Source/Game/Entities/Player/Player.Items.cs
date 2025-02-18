@@ -3501,8 +3501,10 @@ namespace Game.Entities
         public bool HasItemTotemCategory(int TotemCategory)
         {
             foreach (AuraEffect providedTotemCategory in GetAuraEffectsByType(AuraType.ProvideTotemCategory))
+            {
                 if (Global.DB2Mgr.IsTotemCategoryCompatibleWith(providedTotemCategory.GetMiscValueB(), TotemCategory))
                     return true;
+            }
 
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)

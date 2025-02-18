@@ -4317,8 +4317,7 @@ namespace Game.Spells
 
             int name_id = effectInfo.MiscValue;
 
-            var overrideSummonedGameObjects = unitCaster.GetAuraEffectsByType(AuraType.OverrideSummonedObject);
-            foreach (AuraEffect aurEff in overrideSummonedGameObjects)
+            foreach (AuraEffect aurEff in unitCaster.GetAuraEffectsByType(AuraType.OverrideSummonedObject))
             {
                 if (aurEff.GetMiscValue() == name_id)
                 {

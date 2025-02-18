@@ -207,8 +207,10 @@ namespace Game.Entities
                 spells[2] = 21169;
 
             foreach (var selfResSpell in spells)
+            {
                 if (selfResSpell != 0)
                     AddSelfResSpell(selfResSpell);
+            }
         }
 
         public void PetSpellInitialize()
@@ -1077,17 +1079,23 @@ namespace Game.Entities
             {
                 // Temporary bonuses
                 foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill))
+                {
                     if ((SkillType)effect.GetMiscValue() == skill)
                         effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+                }
 
                 foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill2))
+                {
                     if ((SkillType)effect.GetMiscValue() == skill)
                         effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+                }
 
                 // Permanent bonuses
                 foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkillTalent))
+                {
                     if ((SkillType)effect.GetMiscValue() == skill)
                         effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+                }
             }
 
             // Handle already stored skills

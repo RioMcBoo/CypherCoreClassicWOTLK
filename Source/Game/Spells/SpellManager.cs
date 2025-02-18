@@ -227,8 +227,10 @@ namespace Game.Entities
         {
             var node = GetSpellChainNode(spell_id);
             if (node != null)
+            {
                 if (node.next != null)
                     return node.next.Id;
+            }
 
             return 0;
         }
@@ -237,8 +239,10 @@ namespace Game.Entities
         {
             var node = GetSpellChainNode(spell_id);
             if (node != null)
+            {
                 if (node.prev != null)
                     return node.prev.Id;
+            }
 
             return 0;
         }
@@ -261,7 +265,9 @@ namespace Game.Entities
                     return GetSpellWithRank(node.rank < rank ? node.next.Id : node.prev.Id, rank, strict);
             }
             else if (strict && rank > 1)
+            {
                 return 0;
+            }
 
             return spell_id;
         }

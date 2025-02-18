@@ -44,8 +44,10 @@ namespace Game.Chat.Commands
                 int count = 0;
                 string scriptName = Global.ObjectMgr.GetScriptName(data.ScriptID);
                 foreach (var label in needles)
+                {
                     if (scriptName.Contains(label) || data.Name.Contains(label))
                         ++count;
+                }
 
                 if (count != 0)
                 {
@@ -66,8 +68,10 @@ namespace Game.Chat.Commands
 
                 // remove any matches without spawns
                 foreach (var pair in matches.ToList())
+                {
                     if (spawnLookup[pair.Value.Entry].Empty())
                         matches.Remove(pair.Key, pair.Value);
+                }
             }
 
             // check if we even have any matches left
@@ -208,8 +212,10 @@ namespace Game.Chat.Commands
                 string scriptName = Global.ObjectMgr.GetScriptName(pair.Value.ScriptId);
                 string mapName1 = CliDB.MapStorage.LookupByKey(pair.Key).MapName[handler.GetSessionDbcLocale()];
                 foreach (var label in labels)
+                {
                     if (scriptName.Contains(label))
                         ++count;
+                }
 
                 if (count != 0)
                     matches.Add(count, (pair.Key, mapName1, scriptName));

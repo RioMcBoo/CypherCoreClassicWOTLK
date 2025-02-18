@@ -136,8 +136,10 @@ namespace Game.BattleFields
         {
             var battlefields = _battlefieldsByMap[map];
             foreach (var battlefield in battlefields)
+            {
                 if (battlefield.GetBattleId() == battleId)
                     return battlefield;
+            }
 
             return null;
         }

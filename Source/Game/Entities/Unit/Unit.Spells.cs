@@ -32,8 +32,7 @@ namespace Game.Entities
                 DoneAdvertisedBenefit += ToPlayer().GetBaseSpellPowerBonus();
 
                 // Damage bonus from stats
-                var mDamageDoneOfStatPercent = GetAuraEffectsByType(AuraType.ModSpellDamageOfStatPercent);
-                foreach (var eff in mDamageDoneOfStatPercent)
+                foreach (var eff in GetAuraEffectsByType(AuraType.ModSpellDamageOfStatPercent))
                 {
                     SpellSchoolMask spellSchoolMask = (SpellSchoolMask)eff.GetMiscValue();
                     if (spellSchoolMask.HasAnyFlag(schoolMask))
@@ -323,8 +322,8 @@ namespace Game.Entities
             if (caster != null && TakenTotalMod < 1.0f)
             {
                 float damageReduction = 1.0f - TakenTotalMod;
-                var casterIgnoreResist = caster.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
-                foreach (AuraEffect aurEff in casterIgnoreResist)
+
+                foreach (AuraEffect aurEff in caster.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist))
                 {
                     if ((aurEff.GetMiscValue() & (int)spellProto.GetSchoolMask()) == 0)
                         continue;
@@ -355,8 +354,7 @@ namespace Game.Entities
                 advertisedBenefit += ToPlayer().GetBaseSpellPowerBonus();
 
                 // Healing bonus from stats
-                var mHealingDoneOfStatPercent = GetAuraEffectsByType(AuraType.ModSpellHealingOfStatPercent);
-                foreach (var i in mHealingDoneOfStatPercent)
+                foreach (var i in GetAuraEffectsByType(AuraType.ModSpellHealingOfStatPercent))
                 {
                     // stat used dependent from misc value (stat index)
                     Stats usedStat = (Stats)(i.GetSpellEffectInfo().MiscValue);
@@ -364,14 +362,14 @@ namespace Game.Entities
                 }
 
                 // ... and attack power SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER
-                var mHealingDonebyAP = GetAuraEffectsByType(AuraType.ModSpellHealingOfAttackPower);
-                foreach (var effect in mHealingDonebyAP)
+                foreach (var effect in GetAuraEffectsByType(AuraType.ModSpellHealingOfAttackPower))
                 {
                     SpellSchoolMask spellSchoolMask = (SpellSchoolMask)effect.GetMiscValue();
                     if (spellSchoolMask.HasAnyFlag(schoolMask))
                         advertisedBenefit += MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), effect.GetAmount());
                 }
             }
+
             return (int)advertisedBenefit;
         }
 
@@ -415,8 +413,8 @@ namespace Game.Entities
 
             // done scripted mod (take it from owner)
             Unit owner1 = GetOwner() ?? this;
-            var mOverrideClassScript = owner1.GetAuraEffectsByType(AuraType.OverrideClassScripts);
-            foreach (var effect in mOverrideClassScript)
+
+            foreach (var effect in owner1.GetAuraEffectsByType(AuraType.OverrideClassScripts))
             {
                 if (!effect.IsAffectingSpell(spellProto))
                     continue;
@@ -540,7 +538,7 @@ namespace Game.Entities
 
             // bonus from missing health of target
             float healthPctDiff = 100.0f - victim.GetHealthPct();
-            foreach (AuraEffect healingDonePctVsTargetHealth in GetAuraEffectsByType(AuraType.ModHealingDonePctVersusTargetHealth))
+            foreach (var healingDonePctVsTargetHealth in GetAuraEffectsByType(AuraType.ModHealingDonePctVersusTargetHealth))
             {
                 if (healingDonePctVsTargetHealth.IsAffectingSpell(spellProto))
                     MathFunctions.AddPct(ref DoneTotalMod, MathFunctions.CalculatePct((float)healingDonePctVsTargetHealth.GetAmount(), healthPctDiff));
@@ -667,8 +665,7 @@ namespace Game.Entities
                     if (caster != null)
                     {
                         // scripted (increase crit Chance ... against ... target by x%
-                        var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
-                        foreach (var eff in mOverrideClassScript)
+                        foreach (var eff in caster.GetAuraEffectsByType(AuraType.OverrideClassScripts))
                         {
                             if (!eff.IsAffectingSpell(spellInfo))
                                 continue;
@@ -821,8 +818,7 @@ namespace Game.Entities
             }
 
             // Ignore combat result aura
-            var ignore = GetAuraEffectsByType(AuraType.IgnoreCombatResult);
-            foreach (var aurEff in ignore)
+            foreach (var aurEff in GetAuraEffectsByType(AuraType.IgnoreCombatResult))
             {
                 if (!aurEff.IsAffectingSpell(spellInfo))
                     continue;
@@ -931,8 +927,7 @@ namespace Game.Entities
 
         public override int GetCastSpellXSpellVisualId(SpellInfo spellInfo)
         {
-            var visualOverrides = GetAuraEffectsByType(AuraType.OverrideSpellVisual);
-            foreach (AuraEffect effect in visualOverrides)
+            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.OverrideSpellVisual))
             {
                 if (effect.GetMiscValue() == spellInfo.Id)
                 {
@@ -1176,14 +1171,14 @@ namespace Game.Entities
                 if (aura == AuraType.None)
                     break;
 
-                var auras = GetAuraEffectsByType(aura);
-                foreach (var eff in auras)
+                foreach (var eff in GetAuraEffectsByType(aura))
                 {
                     // Get auras by caster
                     if (eff.GetCasterGUID() == casterGUID)
                         ++dots;
                 }
             }
+
             return dots;
         }
 
@@ -1473,8 +1468,10 @@ namespace Game.Entities
                 {
                     var immunitySourceSpell = Global.SpellMgr.GetSpellInfo(entry, Difficulty.None);
                     if (immunitySourceSpell != null)
+                    {
                         if (immunitySourceSpell.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                             return true;
+                    }
 
                     return false;
                 });
@@ -1506,8 +1503,7 @@ namespace Game.Entities
                 if (!spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 {
                     // Check for immune to application of harmful magical effects
-                    var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
-                    foreach (var auraEffect in immuneAuraApply)
+                    foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool))
                     {
                         if (auraEffect.GetMiscValue().HasAnyFlag((int)spellInfo.GetSchoolMask()) &&  // Check school
                             ((caster != null && !IsFriendlyTo(caster)) || !spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex)))
@@ -2484,8 +2480,7 @@ namespace Game.Entities
 
         public AuraEffect IsScriptOverriden(SpellInfo spell, int script)
         {
-            var auras = GetAuraEffectsByType(AuraType.OverrideClassScripts);
-            foreach (var eff in auras)
+            foreach (var eff in GetAuraEffectsByType(AuraType.OverrideClassScripts))
             {
                 if (eff.GetMiscValue() == script)
                 {
@@ -2909,7 +2904,7 @@ namespace Game.Entities
             foreach (var pair in GetAppliedAurasCopy())
             {
                 SpellInfo spellInfo = pair.Value.GetBase().GetSpellInfo();
-                if (spellInfo.Mechanic != 0 && Convert.ToBoolean(mechanicMask & (1ul << (int)spellInfo.Mechanic)))
+                if (spellInfo.Mechanic != 0 && mechanicMask.HasAnyFlag(1ul << (int)spellInfo.Mechanic))
                     return true;
 
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -2917,7 +2912,7 @@ namespace Game.Entities
                     if (spellEffectInfo != null && pair.Value.HasEffect(spellEffectInfo.EffectIndex) 
                         && spellEffectInfo.IsEffect() && spellEffectInfo.Mechanic != 0)
                     {
-                        if ((mechanicMask & (1ul << (int)spellEffectInfo.Mechanic)) != 0)
+                        if (mechanicMask.HasAnyFlag(1ul << (int)spellEffectInfo.Mechanic))
                             return true;
                     }
                 }
@@ -3566,6 +3561,7 @@ namespace Game.Entities
         {
             if (aura.IsRemoved())
                 return;
+
             AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
             if (aurApp != null)
                 RemoveAura(aurApp, mode);
@@ -3675,6 +3671,7 @@ namespace Game.Entities
                     Unit target = aurApp.GetTarget();
                     if (target == this)
                         continue;
+
                     target.RemoveAura(aurApp);
                     // things linked on aura remove may apply new area aura - so start from the beginning
                 }
@@ -3860,7 +3857,7 @@ namespace Game.Entities
 
                 // Check per caster aura state
                 // If aura with aurastate by caster not found return false
-                if (Convert.ToBoolean((1 << (int)flag) & (int)AuraStateType.PerCasterAuraStateMask))
+                if ((1 << (int)flag).HasAnyFlag((int)AuraStateType.PerCasterAuraStateMask))
                 {
                     var range = m_auraStateAuras[flag];
                     foreach (var auraApp in range)
@@ -4003,13 +4000,13 @@ namespace Game.Entities
         public AuraEffect GetAuraEffect(int spellId, int effIndex, ObjectGuid casterGUID = default)
         {
             foreach (var aura in m_appliedAuras[spellId])
+            {
+                if (aura.HasEffect(effIndex)
+                        && (casterGUID.IsEmpty() || aura.GetBase().GetCasterGUID() == casterGUID))
                 {
-                    if (aura.HasEffect(effIndex)
-                            && (casterGUID.IsEmpty() || aura.GetBase().GetCasterGUID() == casterGUID))
-                    {
-                        return aura.GetBase().GetEffect(effIndex);
-                    }
+                    return aura.GetBase().GetEffect(effIndex);
                 }
+            }
 
             return null;
         }
@@ -4057,14 +4054,14 @@ namespace Game.Entities
         // spell mustn't have familyflags
         public AuraEffect GetAuraEffect(AuraType type, SpellFamilyNames family, FlagArray128 familyFlag, ObjectGuid casterGUID = default)
         {
-            var auras = GetAuraEffectsByType(type);
-            foreach (var aura in auras)
+            foreach (var aura in GetAuraEffectsByType(type))
             {
                 SpellInfo spell = aura.GetSpellInfo();
                 if (spell.SpellFamilyName == family && spell.SpellFamilyFlags & familyFlag)
                 {
                     if (!casterGUID.IsEmpty() && aura.GetCasterGUID() != casterGUID)
                         continue;
+
                     return aura;
                 }
             }
@@ -4365,8 +4362,7 @@ namespace Game.Entities
             {
                 if (Global.SpellMgr.GetSpellGroupStackRule(spellGroup) == SpellGroupStackRule.ExclusiveSameEffect)
                 {
-                    var auraEffList = GetAuraEffectsByType(auraType);
-                    foreach (var auraEffect in auraEffList)
+                    foreach (var auraEffect in GetAuraEffectsByType(auraType))
                     {
                         if (aurEff != auraEffect && (!checkMiscValue || auraEffect.GetMiscValue() == miscValue) &&
                             Global.SpellMgr.IsSpellMemberOfSpellGroup(auraEffect.GetSpellInfo().Id, spellGroup))
@@ -4467,8 +4463,7 @@ namespace Game.Entities
             Dictionary<SpellGroup, int> sameEffectSpellGroup = new();
             int modifier = 0;
 
-            var mTotalAuraList = GetAuraEffectsByType(auraType);
-            foreach (AuraEffect aurEff in mTotalAuraList)
+            foreach (AuraEffect aurEff in GetAuraEffectsByType(auraType))
             {
                 if (predicate(aurEff))
                 {
@@ -4523,8 +4518,7 @@ namespace Game.Entities
             Dictionary<SpellGroup, int> sameEffectSpellGroup = new();
             bool hasAura = false;
 
-            var mTotalAuraList = GetAuraEffectsByType(auraType);
-            foreach (AuraEffect aurEff in mTotalAuraList)
+            foreach (AuraEffect aurEff in GetAuraEffectsByType(auraType))
             {
                 if (predicate(aurEff))
                 {                    
@@ -4552,12 +4546,8 @@ namespace Game.Entities
 
         public int GetMaxPositiveAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auraType);
-            if (mTotalAuraList.Empty())
-                return 0;
-
             int modifier = 0;
-            foreach (var aurEff in mTotalAuraList)
+            foreach (var aurEff in GetAuraEffectsByType(auraType))
             {
                 if (predicate(aurEff))
                     modifier = Math.Max(modifier, aurEff.GetAmount());
@@ -4573,12 +4563,8 @@ namespace Game.Entities
 
         public int GetMaxNegativeAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auraType);
-            if (mTotalAuraList.Empty())
-                return 0;
-
             int modifier = 0;
-            foreach (var aurEff in mTotalAuraList)
+            foreach (var aurEff in GetAuraEffectsByType(auraType))
             {
                 if (predicate(aurEff))
                     modifier = Math.Min(modifier, aurEff.GetAmount());

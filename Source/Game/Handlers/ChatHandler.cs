@@ -144,7 +144,7 @@ namespace Game
                 // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
                 var ModLangAuras = sender.GetAuraEffectsByType(AuraType.ModLanguage);
                 if (!ModLangAuras.Empty())
-                    lang = (Language)ModLangAuras.FirstOrDefault().GetMiscValue();
+                    lang = (Language)ModLangAuras.First().GetMiscValue();
             }
 
             if (!CanSpeak())

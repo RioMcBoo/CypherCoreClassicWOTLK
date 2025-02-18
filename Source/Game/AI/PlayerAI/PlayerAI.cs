@@ -583,11 +583,14 @@ namespace Game.AI
                 Aura aura = auraEff.GetBase();
                 if (aura == null)
                     continue;
+
                 SpellInfo auraInfo = aura.GetSpellInfo();
                 if (auraInfo == null)
                     continue;
+
                 if (auraInfo.HasAttribute(SpellAttr0.NoAuraCancel))
                     continue;
+
                 if (!auraInfo.IsPositive() || auraInfo.IsPassive())
                     continue;
 
@@ -1203,8 +1206,7 @@ namespace Game.AI
             //kill self if charm aura has infinite duration
             if (charmer.IsInEvadeMode())
             {
-                var auras = me.GetAuraEffectsByType(AuraType.ModCharm);
-                foreach (var effect in auras)
+                foreach (var effect in me.GetAuraEffectsByType(AuraType.ModCharm))
                 {
                     if (effect.GetCasterGUID() == charmer.GetGUID() && effect.GetBase().IsPermanent())
                     {

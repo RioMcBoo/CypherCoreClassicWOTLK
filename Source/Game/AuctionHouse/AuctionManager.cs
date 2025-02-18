@@ -237,7 +237,7 @@ namespace Game
                             continue;
                         }
 
-                        auction.SetItems(itemsByAuction.Extract(auction.Id));
+                        auction.Items = itemsByAuction.Extract(auction.Id);
                         auction.Owner = ObjectGuid.Create(HighGuid.Player, result.Read<long>(2));
                         auction.OwnerAccount = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner));
                         var bidder = result.Read<long>(3);
@@ -1631,11 +1631,9 @@ namespace Game
 
     public class AuctionPosting
     {
-        private List<Item> m_items = new();
-
         public int Id;
         public AuctionsBucketData Bucket;
-        public IReadOnlyList<Item> Items => m_items;
+        public List<Item> Items;
         public ObjectGuid Owner;
         public ObjectGuid OwnerAccount;
         public ObjectGuid Bidder;
@@ -1648,19 +1646,6 @@ namespace Game
         public AuctionPostingServerFlag ServerFlags;
 
         public List<ObjectGuid> BidderHistory;
-
-        public void SetItems(List<Item> newItems)
-        {
-            if (newItems == null)
-                throw new ArgumentNullException();
-
-            m_items = newItems;
-        }
-
-        public void RemoveItemsRange(int index, int count)
-        {
-            m_items.RemoveRange(index, count);
-        }
 
         public bool IsCommodity()
         {
