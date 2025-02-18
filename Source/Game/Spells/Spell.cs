@@ -4394,7 +4394,7 @@ namespace Game.Spells
                     switch (spellEffectInfo.ApplyAuraName)
                     {
                         case AuraType.PeriodicHeal:
-                        case AuraType.ObsModHealth:
+                        case AuraType.ModTotalHealthRegen:
                             points += unitCaster.SpellHealingBonusDone(target, spellInfo, 
                                 spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), 
                                 DamageEffectType.Direct, spellEffectInfo, 1, spell) * spellInfo.GetMaxTicks();

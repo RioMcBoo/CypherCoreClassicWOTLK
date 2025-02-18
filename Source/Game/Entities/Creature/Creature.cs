@@ -721,7 +721,7 @@ namespace Game.Entities
 
             // Apply modifiers (if any).
             addvalue *= (int)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
-            addvalue += (long)(GetTotalAuraModifier(AuraType.ModRegen) * (SharedConst.CreatureRegenInterval / (Milliseconds)5000));
+            addvalue += (long)(GetTotalAuraModifier(AuraType.ModHealthRegen) * (SharedConst.CreatureRegenInterval / (Milliseconds)5000));
 
             ModifyHealth(addvalue);
         }

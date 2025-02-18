@@ -1548,13 +1548,13 @@ namespace Game.Spells
                             switch (effectInfo.ApplyAuraName)
                             {
                                 // Food
-                                case AuraType.ModRegen:
-                                case AuraType.ObsModHealth:
+                                case AuraType.ModHealthRegen:
+                                case AuraType.ModTotalHealthRegen:
                                     food = true;
                                     break;
                                 // Drink
                                 case AuraType.ModPowerRegen:
-                                case AuraType.ObsModPower:
+                                case AuraType.ModTotalPowerRegen:
                                     drink = true;
                                     break;
                                 default:
@@ -2892,8 +2892,8 @@ namespace Game.Spells
                     case AuraType.PeriodicDamage:
                     case AuraType.PeriodicDamagePercent:
                     case AuraType.PeriodicHeal:
-                    case AuraType.ObsModHealth:
-                    case AuraType.ObsModPower:
+                    case AuraType.ModTotalHealthRegen:
+                    case AuraType.ModTotalPowerRegen:
                     case AuraType.PeriodicTriggerSpellFromClient:
                     case AuraType.PowerBurn:
                     case AuraType.PeriodicLeech:
@@ -3712,8 +3712,8 @@ namespace Game.Spells
                     case AuraType.ModDodgePercent:
                     case AuraType.ModHealingDone:
                     case AuraType.ModDamageDoneCreature:
-                    case AuraType.ObsModHealth:
-                    case AuraType.ObsModPower:
+                    case AuraType.ModTotalHealthRegen:
+                    case AuraType.ModTotalPowerRegen:
                     case AuraType.ModSpellCritPct:
                     case AuraType.ModHitChance:
                     case AuraType.ModSpellHitChance:
@@ -4606,7 +4606,7 @@ namespace Game.Spells
                         case AuraType.ModDamageTaken:
                         case AuraType.ModIncreaseHealth:
                         case AuraType.SchoolAbsorb:
-                        case AuraType.ModRegen:
+                        case AuraType.ModHealthRegen:
                         case AuraType.ManaShield:
                         case AuraType.ModHealing:
                         case AuraType.ModHealingDone:

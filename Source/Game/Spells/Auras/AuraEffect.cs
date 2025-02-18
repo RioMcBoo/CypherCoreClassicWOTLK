@@ -214,10 +214,10 @@ namespace Game.Spells
             // prepare periodics
             switch (GetAuraType())
             {
-                case AuraType.ObsModPower:
+                case AuraType.ModTotalPowerRegen:
                 case AuraType.PeriodicDamage:
                 case AuraType.PeriodicHeal:
-                case AuraType.ObsModHealth:
+                case AuraType.ModTotalHealthRegen:
                 case AuraType.PeriodicTriggerSpell:
                 case AuraType.PeriodicTriggerSpellFromClient:
                 case AuraType.PeriodicEnergize:
@@ -575,13 +575,13 @@ namespace Game.Spells
                     HandlePeriodicHealthFunnelAuraTick(target, caster);
                     break;
                 case AuraType.PeriodicHeal:
-                case AuraType.ObsModHealth:
+                case AuraType.ModTotalHealthRegen:
                     HandlePeriodicHealAurasTick(target, caster);
                     break;
                 case AuraType.PeriodicManaLeech:
                     HandlePeriodicManaLeechAuraTick(target, caster);
                     break;
-                case AuraType.ObsModPower:
+                case AuraType.ModTotalPowerRegen:
                     HandleObsModPowerAuraTick(target, caster);
                     break;
                 case AuraType.PeriodicEnergize:
@@ -5288,7 +5288,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             int damage = Math.Max(GetAmount(), 0);
 
-            if (GetAuraType() == AuraType.ObsModHealth)
+            if (GetAuraType() == AuraType.ModTotalHealthRegen)
                 damage = (int)target.CountPctFromMaxHealth(damage);
             else if (caster != null)
                 damage = caster.SpellHealingBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
@@ -5317,7 +5317,7 @@ namespace Game.Spells
                 target.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
 
             // %-based heal - does not proc auras
-            if (GetAuraType() == AuraType.ObsModHealth)
+            if (GetAuraType() == AuraType.ModTotalHealthRegen)
                 return;
 
             ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHelpfulPeriodic);

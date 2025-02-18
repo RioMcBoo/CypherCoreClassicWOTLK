@@ -405,9 +405,9 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectApply.Add(new(ApplyEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new(RemoveEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new(OnPeriodic, 0, AuraType.ObsModHealth));
+            OnEffectApply.Add(new(ApplyEffect, 0, AuraType.ModTotalHealthRegen, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new(RemoveEffect, 0, AuraType.ModTotalHealthRegen, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new(OnPeriodic, 0, AuraType.ModTotalHealthRegen));
         }
     }
 

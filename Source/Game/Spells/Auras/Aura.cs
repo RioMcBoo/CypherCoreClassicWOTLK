@@ -1658,8 +1658,8 @@ namespace Game.Spells
                             case AuraType.PeriodicManaLeech:
                             case AuraType.PeriodicLeech:
                             case AuraType.PowerBurn:
-                            case AuraType.ObsModPower:
-                            case AuraType.ObsModHealth:
+                            case AuraType.ModTotalPowerRegen:
+                            case AuraType.ModTotalHealthRegen:
                             case AuraType.PeriodicTriggerSpellWithValue:
                             {
                                 // periodic auras which target areas are not allowed to stack this way (replenishment for example)

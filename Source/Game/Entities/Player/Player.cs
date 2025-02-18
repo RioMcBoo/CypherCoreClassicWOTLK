@@ -3557,13 +3557,13 @@ namespace Game.Entities
             // 5 seconds over and over again which confirms my theory that we have a independed timer.
             if (m_foodEmoteTimerCount >= SharedConst.FoodEmoteInterval)
             {
-                List<AuraEffect> auraList = GetAuraEffectsByType(AuraType.ModRegen);
+                List<AuraEffect> auraList = GetAuraEffectsByType(AuraType.ModHealthRegen);
                 auraList.AddRange(GetAuraEffectsByType(AuraType.ModPowerRegen));
 
                 foreach (var auraEffect in auraList)
                 {
                     // Food emote comes above drinking emote if we have to decide (mage regen food for example)
-                    if (auraEffect.GetBase().HasEffectType(AuraType.ModRegen) && auraEffect.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing))
+                    if (auraEffect.GetBase().HasEffectType(AuraType.ModHealthRegen) && auraEffect.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing))
                     {
                         SendPlaySpellVisualKit(SpellConst.VisualKitFood, 0, 0);
                         break;
@@ -3688,7 +3688,7 @@ namespace Game.Entities
                 if (!IsInCombat())
                 {
                     addValue *= GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
-                    addValue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.MillisecondsInSecond / (5 * Time.MillisecondsInSecond);
+                    addValue += GetTotalAuraModifier(AuraType.ModHealthRegen) * 2 * Time.MillisecondsInSecond / (5 * Time.MillisecondsInSecond);
                 }
                 else if (HasAuraType(AuraType.ModRegenDuringCombat))
                     MathFunctions.ApplyPct(ref addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
