@@ -199,7 +199,7 @@ namespace Game.Entities
                 }
             }
 
-            foreach (var app in GetOwnedAuras())
+            foreach (var app in GetOwnedAurasCopy())
             {
                 Aura i_aura = app.Value;
                 if (i_aura == null)
@@ -209,7 +209,7 @@ namespace Game.Entities
             }
 
             // remove expired auras - do that after updates(used in scripts?)
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 if (pair.Value != null && pair.Value.IsExpired())
                     RemoveOwnedAura(pair, AuraRemoveMode.Expire);
@@ -2774,7 +2774,7 @@ namespace Game.Entities
 
                 // We're going to call functions which can modify content of the list during iteration over it's elements
                 // Let's copy the list so we can prevent iterator invalidation
-                var vCopyDamageCopy = victim.GetAuraEffectsByType(AuraType.ShareDamagePct);
+                var vCopyDamageCopy = victim.GetAuraEffectsByTypeCopy(AuraType.ShareDamagePct);
                 // copy damage to casters of this aura
                 foreach (var aura in vCopyDamageCopy)
                 {
@@ -3206,7 +3206,7 @@ namespace Game.Entities
             {
                 // We're going to call functions which can modify content of the list during iteration over it's elements
                 // Let's copy the list so we can prevent iterator invalidation
-                var vDamageShieldsCopy = victim.GetAuraEffectsByType(AuraType.DamageShield);
+                var vDamageShieldsCopy = victim.GetAuraEffectsByTypeCopy(AuraType.DamageShield);
                 foreach (var dmgShield in vDamageShieldsCopy)
                 {
                     SpellInfo spellInfo = dmgShield.GetSpellInfo();
@@ -3746,7 +3746,7 @@ namespace Game.Entities
 
             // We're going to call functions which can modify content of the list during iteration over it's elements
             // Let's copy the list so we can prevent iterator invalidation
-            var vSchoolAbsorbCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.SchoolAbsorb).ToList();
+            var vSchoolAbsorbCopy = damageInfo.GetVictim().GetAuraEffectsByTypeCopy(AuraType.SchoolAbsorb);
             vSchoolAbsorbCopy.Sort(new AbsorbAuraOrderPred());
 
             // absorb without mana cost
@@ -3819,7 +3819,7 @@ namespace Game.Entities
             }
 
             // absorb by mana cost
-            var vManaShieldCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.ManaShield);
+            var vManaShieldCopy = damageInfo.GetVictim().GetAuraEffectsByTypeCopy(AuraType.ManaShield);
             foreach (var absorbAurEff in vManaShieldCopy)
             {
                 if (damageInfo.GetDamage() == 0)
@@ -3905,7 +3905,7 @@ namespace Game.Entities
             {
                 // We're going to call functions which can modify content of the list during iteration over it's elements
                 // Let's copy the list so we can prevent iterator invalidation
-                var vSplitDamagePctCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.SplitDamagePct);
+                var vSplitDamagePctCopy = damageInfo.GetVictim().GetAuraEffectsByTypeCopy(AuraType.SplitDamagePct);
                 foreach (var itr in vSplitDamagePctCopy)
                 {
                     if (damageInfo.GetDamage() == 0)
@@ -3980,7 +3980,7 @@ namespace Game.Entities
             if (healInfo.GetHeal() == 0)
                 return;
 
-            var vHealAbsorb = new List<AuraEffect>(healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb));
+            var vHealAbsorb = healInfo.GetTarget().GetAuraEffectsByTypeCopy(AuraType.SchoolHealAbsorb);
             for (var i = 0; i < vHealAbsorb.Count && healInfo.GetHeal() > 0; ++i)
             {
                 AuraEffect absorbAurEff = vHealAbsorb[i];

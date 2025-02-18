@@ -23,7 +23,7 @@ namespace Game.Entities
     {
         public virtual void AtEnterCombat()
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
                 pair.Value.GetBase().CallScriptEnterLeaveCombatHandlers(pair.Value, true);
 
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
@@ -47,7 +47,7 @@ namespace Game.Entities
 
         public virtual void AtExitCombat()
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
                 pair.Value.GetBase().CallScriptEnterLeaveCombatHandlers(pair.Value, false);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
@@ -168,7 +168,7 @@ namespace Game.Entities
 
         public virtual void OnCombatExit()
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 AuraApplication aurApp = pair.Value;
                 aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, false);
@@ -732,7 +732,7 @@ namespace Game.Entities
 
         public Unit GetMeleeHitRedirectTarget(Unit victim, SpellInfo spellInfo = null)
         {
-            var interceptAuras = victim.GetAuraEffectsByType(AuraType.InterceptMeleeRangedAttacks);
+            var interceptAuras = victim.GetAuraEffectsByTypeCopy(AuraType.InterceptMeleeRangedAttacks);
             foreach (var i in interceptAuras)
             {
                 Unit magnet = i.GetCaster();

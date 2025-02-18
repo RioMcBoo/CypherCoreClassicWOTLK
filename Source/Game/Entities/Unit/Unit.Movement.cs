@@ -876,7 +876,7 @@ namespace Game.Entities
             if (IsLoading())
                 return;
 
-            foreach (var aurEff in GetAuraEffectsByType(AuraType.Mounted).ToList())
+            foreach (AuraEffect aurEff in GetAuraEffectsByTypeCopy(AuraType.Mounted))
             {
                 aurEff.RecalculateAmount();
                 if (aurEff.GetAmount() == 0)

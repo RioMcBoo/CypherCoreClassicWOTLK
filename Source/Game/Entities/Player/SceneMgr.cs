@@ -198,7 +198,7 @@ namespace Game.Entities
 
         void RemoveAurasDueToSceneId(int sceneId)
         {
-            var scenePlayAuras = GetPlayer().GetAuraEffectsByType(AuraType.PlayScene);
+            var scenePlayAuras = GetPlayer().GetAuraEffectsByTypeCopy(AuraType.PlayScene);
             foreach (var scenePlayAura in scenePlayAuras)
             {
                 if (scenePlayAura.GetMiscValue() == sceneId)

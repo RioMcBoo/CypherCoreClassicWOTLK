@@ -2923,7 +2923,7 @@ namespace Game.Entities
                 return victim;
             }
 
-            var magnetAuras = victim.GetAuraEffectsByType(AuraType.SpellMagnet);
+            var magnetAuras = victim.GetAuraEffectsByTypeCopy(AuraType.SpellMagnet);
             foreach (AuraEffect aurEff in magnetAuras)
             {
                 Unit magnet = aurEff.GetBase().GetCaster();

@@ -707,7 +707,7 @@ namespace Scripts.Spells.Warlock
             if (warlock == null || swapVictim == null)
                 return;
 
-            var appliedAuras = swapVictim.GetAppliedAuras();
+            var appliedAuras = swapVictim.GetAppliedAurasCopy();
             spell_warl_soul_swap_override swapSpellScript = null;
             Aura swapOverrideAura = warlock.GetAura(SpellIds.SoulSwapOverride);
             if (swapOverrideAura != null)

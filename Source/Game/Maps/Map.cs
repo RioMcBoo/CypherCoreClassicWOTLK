@@ -631,7 +631,7 @@ namespace Game.Maps
 
                 { // Update any creatures that own auras the player has applications of
                     List<Unit> toVisit = new();
-                    foreach (var pair in player.GetAppliedAuras())
+                    foreach (var pair in player.GetAppliedAurasCopy())
                     {
                         Unit caster = pair.Value.GetBase().GetCaster();
                         if (caster != null)

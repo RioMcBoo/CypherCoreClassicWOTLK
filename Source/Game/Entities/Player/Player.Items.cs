@@ -3927,8 +3927,7 @@ namespace Game.Entities
 
                 if (formChange)                                    // check aura active state from other form
                 {
-                    var range = GetAppliedAuras();
-                    foreach (var pair in range)
+                    foreach (var pair in GetAppliedAurasCopy())
                     {
                         if (pair.Key != spellInfo.Id)
                             continue;

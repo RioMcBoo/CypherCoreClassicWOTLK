@@ -3558,7 +3558,7 @@ namespace Game.Entities
             // 5 seconds over and over again which confirms my theory that we have a independed timer.
             if (m_foodEmoteTimerCount >= SharedConst.FoodEmoteInterval)
             {
-                var auraList = GetAuraEffectsByType(AuraType.ModHealthRegen).ToList();
+                List<AuraEffect> auraList = GetAuraEffectsByTypeCopy(AuraType.ModHealthRegen);
                 auraList.AddRange(GetAuraEffectsByType(AuraType.ModPowerRegen));
 
                 foreach (var auraEffect in auraList)

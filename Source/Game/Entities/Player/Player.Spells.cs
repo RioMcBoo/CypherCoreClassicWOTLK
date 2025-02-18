@@ -1761,7 +1761,7 @@ namespace Game.Entities
 
         void RemoveItemDependentAurasAndCasts(Item pItem)
         {
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 Aura aura = pair.Value;
 
@@ -2049,7 +2049,7 @@ namespace Game.Entities
         public void UpdateAreaDependentAuras(int newArea)
         {
             // remove auras from spells with area limitations
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
                 if (pair.Value.GetSpellInfo().CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SpellCastResult.SpellCastOk)

@@ -597,7 +597,7 @@ namespace Game.Spells
                     {
                         // check if not stacking aura already on target
                         // this one prevents unwanted usefull buff loss because of stacking and prevents overriding auras periodicaly by 2 near area aura owners
-                        foreach (var iter in unit.GetAppliedAuras())
+                        foreach (var iter in unit.GetAppliedAurasCopy())
                         {
                             Aura aura = iter.Value.GetBase();
                             if (!CanStackWith(aura))

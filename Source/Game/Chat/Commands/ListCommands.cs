@@ -643,7 +643,7 @@ namespace Game.Chat.Commands
                 string talentStr = handler.GetCypherString(CypherStrings.Talent);
                 string passiveStr = handler.GetCypherString(CypherStrings.Passive);
 
-                var auras = unit.GetAppliedAuras();
+                var auras = unit.GetAppliedAurasCopy();
                 handler.SendSysMessage(CypherStrings.CommandTargetListauras, auras.Count);
                 foreach (var (_, aurApp) in auras)
                 {

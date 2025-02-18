@@ -1969,7 +1969,7 @@ namespace Game.Entities
             trans.Append(stmt);
 
             byte index;
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 Aura aura = pair.Value;
                 if (!aura.CanBeSaved())

@@ -237,7 +237,7 @@ namespace Game
                             continue;
                         }
 
-                        auction.Items = itemsByAuction.Extract(auction.Id);
+                        auction.SetItems(itemsByAuction.Extract(auction.Id));
                         auction.Owner = ObjectGuid.Create(HighGuid.Player, result.Read<long>(2));
                         auction.OwnerAccount = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner));
                         var bidder = result.Read<long>(3);

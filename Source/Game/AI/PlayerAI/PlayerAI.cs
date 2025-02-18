@@ -577,7 +577,7 @@ namespace Game.AI
 
         public void CancelAllShapeshifts()
         {
-            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift).ToList();
+            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByTypeCopy(AuraType.ModShapeshift);
             foreach (AuraEffect auraEff in shapeshiftAuras)
             {
                 Aura aura = auraEff.GetBase();

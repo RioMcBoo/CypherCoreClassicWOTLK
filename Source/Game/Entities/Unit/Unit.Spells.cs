@@ -1143,9 +1143,8 @@ namespace Game.Entities
                 if (aType == AuraType.None)
                     break;
 
-                for (var i = 0; i < m_modAuras[aType].Count;)
+                foreach (var eff in GetAuraEffectsByTypeCopy(aType))
                 {
-                    var eff = m_modAuras[aType][i];
                     // Get auras with disease dispel Type by caster
                     if (eff.GetSpellInfo().Dispel == DispelType.Disease && eff.GetCasterGUID() == casterGUID)
                     {
@@ -1154,11 +1153,9 @@ namespace Game.Entities
                         if (remove)
                         {
                             RemoveAura(eff.GetId(), eff.GetCasterGUID());
-                            i = 0;
                             continue;
                         }
                     }
-                    i++;
                 }
             }
             return diseases;
@@ -1736,7 +1733,7 @@ namespace Game.Entities
             // or generate one on our own
             else
             {
-                foreach (var pair in GetAppliedAuras())
+                foreach (var pair in GetAppliedAurasCopy())
                     processAuraApplication(pair.Value);
             }
         }
@@ -1757,7 +1754,7 @@ namespace Game.Entities
                     if (modOwner != this && spell != null)
                     {
                         List<AuraApplication> modAuras = new();
-                        foreach (var itr in modOwner.GetAppliedAuras())
+                        foreach (var itr in modOwner.GetAppliedAurasCopy())
                         {
                             if (spell.m_appliedMods.Contains(itr.Value.GetBase()))
                                 modAuras.Add(itr.Value);
@@ -2162,7 +2159,7 @@ namespace Game.Entities
 
         public void RemoveAllGroupBuffsFromCaster(ObjectGuid casterGUID)
         {
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 Aura aura = pair.Value;
                 if (aura.GetCasterGUID() == casterGUID && aura.GetSpellInfo().IsGroupBuff())
@@ -2440,7 +2437,7 @@ namespace Game.Entities
         {
             // used just after dieing to remove all visible auras
             // and disable the mods for the passive ones
-            foreach (var app in GetAppliedAuras())
+            foreach (var app in GetAppliedAurasCopy())
             {
                 if (app.Value == null)
                     continue;
@@ -2450,7 +2447,7 @@ namespace Game.Entities
                     _UnapplyAura(app, AuraRemoveMode.Death);
             }
 
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 Aura aura = pair.Value;
                 if (pair.Value == null)
@@ -2471,14 +2468,14 @@ namespace Game.Entities
 
         public void RemoveAllAurasRequiringDeadTarget()
         {
-            foreach (var app in GetAppliedAuras())
+            foreach (var app in GetAppliedAurasCopy())
             {
                 Aura aura = app.Value.GetBase();
                 if (!aura.IsPassive() && aura.GetSpellInfo().IsRequiringDeadTarget())
                     _UnapplyAura(app, AuraRemoveMode.Default);
             }
 
-            foreach (var aura in GetOwnedAuras())
+            foreach (var aura in GetOwnedAurasCopy())
             {
                 if (!aura.Value.IsPassive() && aura.Value.GetSpellInfo().IsRequiringDeadTarget())
                     RemoveOwnedAura(aura, AuraRemoveMode.Default);
@@ -2727,12 +2724,12 @@ namespace Game.Entities
         // Auras
         public List<Aura> GetSingleCastAuras() { return m_scAuras; }
 
-        public List<KeyValuePair<int, Aura>> GetOwnedAuras()
+        public List<KeyValuePair<int, Aura>> GetOwnedAurasCopy()
         {
             return m_ownedAuras.ToList();
         }
 
-        public List<KeyValuePair<int, AuraApplication>> GetAppliedAuras()
+        public List<KeyValuePair<int, AuraApplication>> GetAppliedAurasCopy()
         {
             return m_appliedAuras.ToList();
         }
@@ -2909,7 +2906,7 @@ namespace Game.Entities
 
         public bool HasAuraWithMechanic(ulong mechanicMask)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 SpellInfo spellInfo = pair.Value.GetBase().GetSpellInfo();
                 if (spellInfo.Mechanic != 0 && Convert.ToBoolean(mechanicMask & (1ul << (int)spellInfo.Mechanic)))
@@ -3023,7 +3020,7 @@ namespace Game.Entities
         {
             DiminishingGroup diminishGroup = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
             DiminishingLevels level = GetDiminishing(diminishGroup);
-            foreach (var itr in GetAppliedAuras())
+            foreach (var itr in GetAppliedAurasCopy())
             {
                 SpellInfo spellInfo = itr.Value.GetBase().GetSpellInfo();
                 if (spellInfo.GetDiminishingReturnsGroupForSpell() != diminishGroup)
@@ -3079,7 +3076,7 @@ namespace Game.Entities
         {
             List<DispelableAura> dispelList = new();
 
-            var auras = GetOwnedAuras();
+            var auras = GetOwnedAurasCopy();
             foreach (var pair in auras)
             {
                 Aura aura = pair.Value;
@@ -3252,8 +3249,7 @@ namespace Game.Entities
 
         public void RemoveAurasDueToSpellBySteal(int spellId, ObjectGuid casterGUID, WorldObject stealer, int stolenCharges = 1)
         {
-            var range = m_ownedAuras[spellId];
-            foreach (var aura in range)
+            foreach (var aura in m_ownedAuras[spellId].ToList())
             {
                 if (aura.GetCasterGUID() == casterGUID)
                 {
@@ -3335,10 +3331,8 @@ namespace Game.Entities
 
         public void RemoveAurasDueToItemSpell(int spellId, ObjectGuid castItemGuid)
         {
-            var appliedAuras = m_appliedAuras[spellId];
-            for (var i = 0; i < appliedAuras.Count; ++i)
+            foreach (var app in m_appliedAuras[spellId].ToList())
             {
-                AuraApplication app = appliedAuras[i];
                 if (app.GetBase().GetCastItemGUID() == castItemGuid)
                 {
                     RemoveAura(app);
@@ -3348,19 +3342,15 @@ namespace Game.Entities
 
         public void RemoveAurasByType(AuraType auraType, ObjectGuid casterGUID = default, Aura except = null, bool negative = true, bool positive = true)
         {
-            var list = m_modAuras[auraType];
-            for (var i = 0; i < list.Count; i++)
+            foreach (var eff in GetAuraEffectsByTypeCopy(auraType))
             {
-                Aura aura = list[i].GetBase();
+                Aura aura = eff.GetBase();
                 AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
 
                 if (aura != except && (casterGUID.IsEmpty() || aura.GetCasterGUID() == casterGUID)
                     && ((negative && !aurApp.IsPositive()) || (positive && aurApp.IsPositive())))
                 {
-                    uint removedAuras = m_removedAurasCount;
                     RemoveAura(aurApp);
-                    if (m_removedAurasCount > removedAuras + 1)
-                        i = 0;
                 }
             }
         }
@@ -3375,7 +3365,7 @@ namespace Game.Entities
             // Such situation occurs when player is logging in inside an instance and fails the entry check for any reason.
             // The aura that was loaded from db (indirectly, via linked casts) gets removed before it has a Chance
             // to register in m_appliedAuras
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 Aura aura = pair.Value;
 
@@ -3420,7 +3410,7 @@ namespace Game.Entities
 
         public void RemoveOwnedAura(int spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 if (pair.Key != spellId)
                     continue;
@@ -3445,7 +3435,7 @@ namespace Game.Entities
             }
 
             int spellId = auraToRemove.GetId();
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 if (pair.Key != spellId)
                     continue;
@@ -3462,7 +3452,7 @@ namespace Game.Entities
 
         public void RemoveAurasDueToSpell(int spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 if (pair.Key != spellId)
                     continue;
@@ -3477,7 +3467,7 @@ namespace Game.Entities
 
         public void RemoveAurasDueToSpellByDispel(int spellId, int dispellerSpellId, ObjectGuid casterGUID, WorldObject dispeller, byte chargesRemoved = 1)
         {
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 if (pair.Key != spellId)
                     continue;
@@ -3504,8 +3494,7 @@ namespace Game.Entities
 
         public void RemoveAuraFromStack(int spellId, ObjectGuid casterGUID = default, AuraRemoveMode removeMode = AuraRemoveMode.Default, ushort num = 1)
         {
-            var range = m_ownedAuras[spellId];
-            foreach (var aura in range)
+            foreach (var aura in m_ownedAuras[spellId].ToList())
             {
                 if ((aura.GetAuraType() == AuraObjectType.Unit) && (casterGUID.IsEmpty() || aura.GetCasterGUID() == casterGUID))
                 {
@@ -3530,8 +3519,7 @@ namespace Game.Entities
 
         public void RemoveAura(int spellId, ObjectGuid caster = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            var range = m_appliedAuras[spellId];
-            foreach (var iter in range)
+            foreach (var iter in m_appliedAuras[spellId].ToList())
             {
                 Aura aura = iter.GetBase();
                 if (((aura.GetEffectMask() & reqEffMask) == reqEffMask) && (caster.IsEmpty() || aura.GetCasterGUID() == caster))
@@ -3564,8 +3552,7 @@ namespace Game.Entities
 
             int spellId = aurApp.GetBase().GetId();
 
-            var range = m_appliedAuras.Where(p => p.Key == spellId);
-            foreach (var pair in range)
+            foreach (var pair in m_appliedAuras.Where(p => p.Key == spellId).ToList())
             {
                 if (aurApp == pair.Value)
                 {
@@ -3586,7 +3573,7 @@ namespace Game.Entities
 
         public void RemoveAurasWithAttribute(SpellAttr0 flags)
         {
-            foreach (var app in GetAppliedAuras())
+            foreach (var app in GetAppliedAurasCopy())
             {
                 SpellInfo spell = app.Value.GetBase().GetSpellInfo();
                 if (spell.HasAttribute(flags))
@@ -3596,7 +3583,7 @@ namespace Game.Entities
 
         public void RemoveAurasWithFamily(SpellFamilyNames family, FlagArray128 familyFlag, ObjectGuid casterGUID)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 Aura aura = pair.Value.GetBase();
                 if (casterGUID.IsEmpty() || aura.GetCasterGUID() == casterGUID)
@@ -3613,7 +3600,7 @@ namespace Game.Entities
 
         public void RemoveAppliedAuras(Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 if (check(pair.Value))
                     RemoveAura(pair, removeMode);
@@ -3622,7 +3609,7 @@ namespace Game.Entities
 
         public void RemoveOwnedAuras(Func<Aura, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 if (check(pair.Value))
                     RemoveOwnedAura(pair, removeMode);
@@ -3631,8 +3618,7 @@ namespace Game.Entities
 
         void RemoveAppliedAuras(int spellId, Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            var list = m_appliedAuras[spellId];
-            foreach (var app in list)
+            foreach (var app in m_appliedAuras[spellId].ToList())
             {
                 if (check(app))
                     RemoveAura(app, removeMode);
@@ -3641,8 +3627,7 @@ namespace Game.Entities
 
         void RemoveOwnedAuras(int spellId, Func<Aura, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            var list = m_ownedAuras[spellId];
-            foreach (var aura in list)
+            foreach (var aura in m_ownedAuras[spellId].ToList())
             {
                 if (check(aura))
                     RemoveOwnedAura(aura, removeMode);
@@ -3651,19 +3636,15 @@ namespace Game.Entities
 
         public void RemoveAurasByType(AuraType auraType, Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            var list = m_modAuras[auraType];
-            for (var i = 0; i < list.Count; ++i)
+            foreach (var eff in GetAuraEffectsByTypeCopy(auraType))
             {
-                Aura aura = m_modAuras[auraType][i].GetBase();
+                Aura aura = eff.GetBase();
                 AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
                 Cypher.Assert(aurApp != null);
 
                 if (check(aurApp))
                 {
-                    uint removedAuras = m_removedAurasCount;
                     RemoveAura(aurApp, removeMode);
-                    if (m_removedAurasCount > removedAuras + 1)
-                        i = 0;
                 }
             }
         }
@@ -3671,7 +3652,7 @@ namespace Game.Entities
         public void RemoveAurasByShapeShift()
         {
             ulong mechanic_mask = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root);
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 Aura aura = pair.Value.GetBase();
                 if ((aura.GetSpellInfo().GetAllEffectsMechanicMask() & mechanic_mask) != 0 
@@ -3686,7 +3667,7 @@ namespace Game.Entities
         void RemoveAreaAurasDueToLeaveWorld()
         {
             // make sure that all area auras not applied on self are removed
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 var appMap = pair.Value.GetApplicationMap();
                 foreach (var aurApp in appMap.Values.ToList())
@@ -3700,7 +3681,7 @@ namespace Game.Entities
             }
 
             // remove area auras owned by others
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 if (pair.Value.GetBase().GetOwner() != this)
                     RemoveAura(pair);
@@ -3713,10 +3694,10 @@ namespace Game.Entities
             // we want to have all auras removed, so use your brain when linking events
             for (int counter = 0; !m_appliedAuras.Empty() || !m_ownedAuras.Empty(); counter++)
             {
-                foreach (var aurAppIter in GetAppliedAuras())
+                foreach (var aurAppIter in GetAppliedAurasCopy())
                     _UnapplyAura(aurAppIter, AuraRemoveMode.Default);
 
-                foreach (var aurIter in GetOwnedAuras())
+                foreach (var aurIter in GetOwnedAurasCopy())
                     RemoveOwnedAura(aurIter);
 
                 const int maxIteration = 50;
@@ -3734,7 +3715,7 @@ namespace Game.Entities
                     {
                         sstr.AppendLine("m_appliedAuras:");
 
-                        foreach (var auraAppPair in GetAppliedAuras())
+                        foreach (var auraAppPair in GetAppliedAurasCopy())
                             sstr.AppendLine(auraAppPair.Value.GetDebugInfo());
                     }
 
@@ -3742,7 +3723,7 @@ namespace Game.Entities
                     {
                         sstr.AppendLine("m_ownedAuras:");
 
-                        foreach (var auraPair in GetOwnedAuras())
+                        foreach (var auraPair in GetOwnedAurasCopy())
                             sstr.AppendLine(auraPair.Value.GetDebugInfo());
                     }
 
@@ -3768,7 +3749,7 @@ namespace Game.Entities
 
         public void RemoveAllAurasExceptType(AuraType type)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 if (pair.Value == null)
                     continue;
@@ -3777,7 +3758,7 @@ namespace Game.Entities
                     _UnapplyAura(pair, AuraRemoveMode.Default);
             }
 
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 if (pair.Value == null)
                     continue;
@@ -3790,14 +3771,14 @@ namespace Game.Entities
 
         public void RemoveAllAurasExceptType(AuraType type1, AuraType type2)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 Aura aura = pair.Value.GetBase();
                 if (!aura.GetSpellInfo().HasAura(type1) || !aura.GetSpellInfo().HasAura(type2))
                     _UnapplyAura(pair, AuraRemoveMode.Default);
             }
 
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 Aura aura = pair.Value;
                 if (!aura.GetSpellInfo().HasAura(type1) || !aura.GetSpellInfo().HasAura(type2))
@@ -3851,7 +3832,7 @@ namespace Game.Entities
                 {
                     RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AuraState), mask);
 
-                    foreach (var app in GetAppliedAuras())
+                    foreach (var app in GetAppliedAurasCopy())
                     {
                         if (app.Value == null)
                             continue;
@@ -3897,13 +3878,13 @@ namespace Game.Entities
 
         public void _ApplyAllAuraStatMods()
         {
-            foreach (var i in GetAppliedAuras())
+            foreach (var i in GetAppliedAurasCopy())
                 i.Value.GetBase().HandleAllEffects(i.Value, AuraEffectHandleModes.Stat, true);
         }
 
         public void _RemoveAllAuraStatMods()
         {
-            foreach (var i in GetAppliedAuras())
+            foreach (var i in GetAppliedAurasCopy())
                 i.Value.GetBase().HandleAllEffects(i.Value, AuraEffectHandleModes.Stat, false);
         }
 
@@ -3940,7 +3921,6 @@ namespace Game.Entities
             AuraStateType auraState = aura.GetSpellInfo().GetAuraState();
             if (auraState != 0)
             {
-                bool canBreak = false;
                 // Get mask of all aurastates from remaining auras
                 foreach(var i in m_auraStateAuras[auraState].ToList())                
                 {
@@ -4132,7 +4112,7 @@ namespace Game.Entities
 
         public AuraApplication GetAuraApplication(Func<AuraApplication, bool> predicate)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in m_appliedAuras)
             {
                 if (predicate(pair.Value))
                     return pair.Value;
@@ -4143,7 +4123,7 @@ namespace Game.Entities
 
         public AuraApplication GetAuraApplication(Func<Aura, bool> predicate)
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in m_appliedAuras)
             {
                 if (predicate(pair.Value.GetBase()))
                     return pair.Value;
@@ -4418,8 +4398,7 @@ namespace Game.Entities
 
         public bool IsHighestExclusiveAuraEffect(SpellInfo spellInfo, AuraType auraType, int effectAmount, uint auraEffectMask, bool removeOtherAuraApplications = false)
         {
-            var auras = GetAuraEffectsByType(auraType);
-            foreach (AuraEffect existingAurEff in auras)
+            foreach (AuraEffect existingAurEff in GetAuraEffectsByTypeCopy(auraType))
             {
                 if (Global.SpellMgr.CheckSpellGroupStackRules(spellInfo, existingAurEff.GetSpellInfo()) == SpellGroupStackRule.ExclusiveHighest)
                 {
@@ -4439,11 +4418,10 @@ namespace Game.Entities
                             AuraApplication aurApp = existingAurEff.GetBase().GetApplicationOfTarget(GetGUID());
                             if (aurApp != null)
                             {
-                                //bool hasMoreThanOneEffect = auraBase.HasMoreThanOneEffectForType(auraType);
-                                //uint removedAuras = m_removedAurasCount;
+                                // bool hasMoreThanOneEffect = auraBase.HasMoreThanOneEffectForType(auraType);
                                 RemoveAura(aurApp);
-                                //if (hasMoreThanOneEffect || m_removedAurasCount > removedAuras + 1)
-                                //continue;
+                                //if (hasMoreThanOneEffect)
+                                //  ontinue;
                             }
                         }
                     }
@@ -4467,6 +4445,11 @@ namespace Game.Entities
             }
 
             return null;
+        }
+
+        public List<AuraEffect> GetAuraEffectsByTypeCopy(AuraType type)
+        {
+            return m_modAuras[type].ToList();
         }
 
         public IReadOnlyList<AuraEffect> GetAuraEffectsByType(AuraType type)

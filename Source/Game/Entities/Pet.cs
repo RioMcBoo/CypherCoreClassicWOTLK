@@ -1001,7 +1001,7 @@ namespace Game.Entities
             trans.Append(stmt);
 
             byte index;
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAurasCopy())
             {
                 Aura aura = pair.Value;
 
@@ -1446,12 +1446,12 @@ namespace Game.Entities
 
             var petStore = Global.SpellMgr.PetFamilySpellsStorage[(int)cInfo.Family];
 
-                // For general hunter pets skill 270
-                // Passive 01~10, Passive 00 (20782, not used), Ferocious Inspiration (34457)
-                // Scale 01~03 (34902~34904, bonus from owner, not used)
-                foreach (var spellId in petStore)
-                    AddSpell(spellId, ActiveStates.Decide, PetSpellState.New, PetSpellType.Family);
-            }
+            // For general hunter pets skill 270
+            // Passive 01~10, Passive 00 (20782, not used), Ferocious Inspiration (34457)
+            // Scale 01~03 (34902~34904, bonus from owner, not used)
+            foreach (var spellId in petStore)
+                AddSpell(spellId, ActiveStates.Decide, PetSpellState.New, PetSpellType.Family);
+        }
 
         void CastPetAuras(bool current)
         {

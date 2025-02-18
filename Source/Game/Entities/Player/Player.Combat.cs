@@ -450,16 +450,14 @@ namespace Game.Entities
                 duel.Initiator.RemoveGameObject(obj, true);
 
             //remove auras
-            var itsAuras = opponent.GetAppliedAuras();
-            foreach (var pair in itsAuras)
+            foreach (var pair in opponent.GetAppliedAurasCopy())
             {
                 Aura aura = pair.Value.GetBase();
                 if (!pair.Value.IsPositive() && aura.GetCasterGUID() == GetGUID() && aura.GetApplyTime() >= duel.StartTime)
                     opponent.RemoveAura(pair);
             }
 
-            var myAuras = GetAppliedAuras();
-            foreach (var pair in myAuras)
+            foreach (var pair in GetAppliedAurasCopy())
             {
                 Aura aura = pair.Value.GetBase();
                 if (!pair.Value.IsPositive() && aura.GetCasterGUID() == opponent.GetGUID() && aura.GetApplyTime() >= duel.StartTime)
