@@ -203,7 +203,7 @@ namespace Game.Scenarios
                 var blobs = allPoints.LookupByKey(criteriaTreeID);
                 if (blobs != null)
                 {
-                    var points = blobs.LookupByKey(idx1);
+                    var points = blobs[idx1];
                     if (!points.Empty())
                     {
                         _scenarioPOIStore.Add(criteriaTreeID, new ScenarioPOI(blobIndex, mapID, uiMapID, priority, flags, worldEffectID, playerConditionID, navigationPlayerConditionID, points));

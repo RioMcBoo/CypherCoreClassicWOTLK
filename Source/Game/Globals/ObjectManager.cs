@@ -844,12 +844,12 @@ namespace Game
 
         public List<GossipMenus> GetGossipMenusMapBounds(int uiMenuId)
         {
-            return gossipMenusStorage.LookupByKey(uiMenuId);
+            return gossipMenusStorage[uiMenuId];
         }
 
         public List<GossipMenuItems> GetGossipMenuItemsMapBounds(int uiMenuId)
         {
-            return gossipMenuItemsStorage.LookupByKey(uiMenuId);
+            return gossipMenuItemsStorage[uiMenuId];
         }
 
         public GossipMenuAddon GetGossipMenuAddon(int menuId)
@@ -1004,7 +1004,7 @@ namespace Game
             //     then check faction
             //   if mapId != graveyard.mapId (ghost in instance) and search any graveyard associated
             //     then check faction
-            var range = GraveyardStorage.LookupByKey(zoneId);
+            var range = GraveyardStorage[zoneId];
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(MapId);
 
             ConditionSourceInfo conditionSource = new(conditionObject);
@@ -1144,7 +1144,7 @@ namespace Game
 
         public GraveyardData FindGraveyardData(int id, int zoneId)
         {
-            var range = GraveyardStorage.LookupByKey(zoneId);
+            var range = GraveyardStorage[zoneId];
             foreach (var data in range)
             {
                 if (data.SafeLocId == id)
@@ -1957,7 +1957,7 @@ namespace Game
 
         public List<int> GetSpellScriptsBounds(int spellId)
         {
-            return spellScriptsStorage.LookupByKey(spellId);
+            return spellScriptsStorage[spellId];
         }
 
         public int GetEventScriptId(int eventId)
@@ -3946,7 +3946,7 @@ namespace Game
                         TrainerType trainerType = (TrainerType)trainersResult.Read<byte>(1);
                         string greeting = trainersResult.Read<string>(2);
                         List<TrainerSpell> spells = new();
-                        var spellList = spellsByTrainer.LookupByKey(trainerId);
+                        var spellList = spellsByTrainer[trainerId];
                         if (spellList != null)
                         {
                             spells = spellList;
@@ -5707,7 +5707,7 @@ namespace Game
 
         public List<int> GetGameObjectQuestItemList(int id)
         {
-            return _gameObjectQuestItemStorage.LookupByKey(id);
+            return _gameObjectQuestItemStorage[id];
         }
 
         MultiMap<int, int> GetGameObjectQuestItemMap() { return _gameObjectQuestItemStorage; }
@@ -6316,7 +6316,7 @@ namespace Game
 
         public List<float> GetCreatureTemplateSparringValues(int entry)
         {
-            return _creatureTemplateSparringStorage.LookupByKey(entry);
+            return _creatureTemplateSparringStorage[entry];
         }
 
         public CreatureMovementData GetCreatureMovementOverride(long spawnId)
@@ -6326,7 +6326,7 @@ namespace Game
 
         public EquipmentInfo GetEquipmentInfo(int entry, int id)
         {
-            var equip = equipmentInfoStorage.LookupByKey(entry);
+            var equip = equipmentInfoStorage[entry];
             if (equip.Empty())
                 return null;
 
@@ -6841,7 +6841,7 @@ namespace Game
             if (templateIt.flags.HasAnyFlag(SpawnGroupFlags.System)) // system groups don't store their members in the map
                 return;
 
-            var spawnDatas = _spawnGroupMapStorage.LookupByKey(data.spawnGroupData.groupId);
+            var spawnDatas = _spawnGroupMapStorage[data.spawnGroupData.groupId];
             foreach (var it in spawnDatas)
             {
                 if (it != data)
@@ -6965,8 +6965,8 @@ namespace Game
 
         public SpawnGroupTemplateData GetDefaultSpawnGroup() { return _spawnGroupDataStorage.ElementAt(0).Value; }
         public SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
-        public List<SpawnMetadata> GetSpawnMetadataForGroup(int groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
-        public List<int> GetSpawnGroupsForMap(int mapId) { return _spawnGroupsByMap.LookupByKey(mapId); }
+        public List<SpawnMetadata> GetSpawnMetadataForGroup(int groupId) { return _spawnGroupMapStorage[groupId]; }
+        public List<int> GetSpawnGroupsForMap(int mapId) { return _spawnGroupsByMap[mapId]; }
 
         public SpawnMetadata GetSpawnMetadata(SpawnObjectType type, long spawnId)
         {
@@ -6995,7 +6995,7 @@ namespace Game
             }
         }
 
-        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(int mapId) { return _instanceSpawnGroupStorage.LookupByKey(mapId); }
+        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(int mapId) { return _instanceSpawnGroupStorage[mapId]; }
 
         //Player
         public void LoadPlayerInfo()
@@ -7183,7 +7183,7 @@ namespace Game
                     if (!characterLoadout.IsForNewCharacter)
                         continue;
 
-                    var items = itemsByCharacterLoadout.LookupByKey(characterLoadout.Id);
+                    var items = itemsByCharacterLoadout[characterLoadout.Id];
                     if (items.Empty())
                         continue;
 
@@ -9913,7 +9913,7 @@ namespace Game
                 var blobs = allPoints.LookupByKey(questID);
                 if (blobs != null)
                 {
-                    var points = blobs.LookupByKey(idx1);
+                    var points = blobs[idx1];
                     if (!points.Empty())
                     {
                         if (!_questPOIStorage.ContainsKey(questID))
@@ -10096,7 +10096,7 @@ namespace Game
 
         public List<int> GetGOQuestInvolvedRelationReverseBounds(int questId) 
         { 
-            return _goQuestInvolvedRelationsReverse.LookupByKey(questId); 
+            return _goQuestInvolvedRelationsReverse[questId]; 
         }
 
         public MultiMap<int, int> GetCreatureQuestRelationMapHACK() 
@@ -10116,7 +10116,7 @@ namespace Game
 
         public List<int> GetCreatureQuestInvolvedRelationReverseBounds(int questId) 
         { 
-            return _creatureQuestInvolvedRelationsReverse.LookupByKey(questId); 
+            return _creatureQuestInvolvedRelationsReverse[questId]; 
         }
 
         public QuestPOIData GetQuestPOIData(int questId)
@@ -10131,7 +10131,7 @@ namespace Game
 
         public List<int> GetQuestsForAreaTrigger(int triggerId)
         {
-            return _questAreaTriggerStorage.LookupByKey(triggerId);
+            return _questAreaTriggerStorage[triggerId];
         }
 
         public QuestGreeting GetQuestGreeting(TypeId type, int id)
@@ -10162,17 +10162,17 @@ namespace Game
 
         public List<int> GetExclusiveQuestGroupBounds(int exclusiveGroupId)
         {
-            return _exclusiveQuestGroups.LookupByKey(exclusiveGroupId);
+            return _exclusiveQuestGroups[exclusiveGroupId];
         }
 
         QuestRelationResult GetQuestRelationsFrom(MultiMap<int, int> map, int key, bool onlyActive) 
         { 
-            return new QuestRelationResult(map.LookupByKey(key), onlyActive); 
+            return new QuestRelationResult(map[key], onlyActive); 
         }
 
         public List<int> GetCreatureQuestItemList(int creatureEntry, Difficulty difficulty)
         {
-            var itr = creatureQuestItemStorage.LookupByKey((creatureEntry, difficulty));
+            var itr = creatureQuestItemStorage[(creatureEntry, difficulty)];
             if (itr != null)
                 return itr;
 
@@ -10364,7 +10364,7 @@ namespace Game
                     if (parentAreaId == 0)
                         break;
 
-                    var parentAreaPhases = _phaseInfoByArea.LookupByKey(parentAreaId);
+                    var parentAreaPhases = _phaseInfoByArea[parentAreaId];
                     foreach (PhaseAreaInfo parentAreaPhase in parentAreaPhases)
                         if (parentAreaPhase.PhaseInfo.Id == pair.Value.PhaseInfo.Id)
                             parentAreaPhase.SubAreaExclusions.Add(pair.Key);
@@ -10534,7 +10534,7 @@ namespace Game
 
         public List<PhaseAreaInfo> GetPhasesForArea(int areaId)
         {
-            return _phaseInfoByArea.LookupByKey(areaId);
+            return _phaseInfoByArea[areaId];
         }
 
         public TerrainSwapInfo GetTerrainSwapInfo(int terrainSwapId)
@@ -10544,7 +10544,7 @@ namespace Game
 
         public List<SpellClickInfo> GetSpellClickInfoMapBounds(int creature_id)
         {
-            return _spellClickInfoStorage.LookupByKey(creature_id);
+            return _spellClickInfoStorage[creature_id];
         }
 
         public SkillTiersEntry GetSkillTier(int skillTierId)
@@ -12447,7 +12447,7 @@ namespace Game
 
         public MailLevelReward GetMailLevelReward(int level, Race race)
         {
-            var mailList = _mailLevelRewardStorage.LookupByKey((byte)level);
+            var mailList = _mailLevelRewardStorage[(byte)level];
             if (mailList.Empty())
                 return null;
 
@@ -12936,7 +12936,7 @@ namespace Game
         public List<TempSummonData> GetSummonGroup(int summonerId, SummonerType summonerType, byte group)
         {
             Tuple<int, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
-            return _tempSummonDataStorage.LookupByKey(key);
+            return _tempSummonDataStorage[key];
         }
 
         public bool IsReservedName(string name)
@@ -13211,13 +13211,13 @@ namespace Game
             if (cre != null)
             {
                 // Give preference to GUID-based accessories
-                var list = _vehicleAccessoryStore.LookupByKey(cre.GetSpawnId());
+                var list = _vehicleAccessoryStore[cre.GetSpawnId()];
                 if (!list.Empty())
                     return list;
             }
 
             // Otherwise return entry-based
-            return _vehicleTemplateAccessoryStore.LookupByKey(veh.GetCreatureEntry());
+            return _vehicleTemplateAccessoryStore[veh.GetCreatureEntry()];
         }
 
         public VehicleSeatAddon GetVehicleSeatAddon(int seatId)

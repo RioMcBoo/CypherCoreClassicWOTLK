@@ -374,7 +374,7 @@ namespace Game.AI
 
                 foreach (var key in _eventMap[i].Keys)
                 {
-                    var list = _eventMap[i].LookupByKey(key);
+                    var list = _eventMap[i][key];
                     foreach (var e in list)
                     {
                         if (e.Link != 0)

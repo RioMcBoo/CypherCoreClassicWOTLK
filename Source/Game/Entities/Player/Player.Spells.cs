@@ -281,7 +281,7 @@ namespace Game.Entities
 
         public override SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag)
         {
-            var overrides = m_overrideSpells.LookupByKey(spellInfo.Id);
+            var overrides = m_overrideSpells[spellInfo.Id];
             if (!overrides.Empty())
             {
                 foreach (var spellId in overrides)

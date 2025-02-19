@@ -156,7 +156,7 @@ namespace Game.BattlePets
         
         public static ushort RollPetBreed(int species)
         {
-            var list = _availableBreedsPerSpecies.LookupByKey(species);
+            var list = _availableBreedsPerSpecies[species];
             if (list.Empty())
                 return 3; // default B/B
 

@@ -1892,7 +1892,7 @@ namespace Game.Maps
                     // escort check for creatures only (if the world config boolean is set)
                     bool isEscort = WorldConfig.Values[WorldCfg.RespawnDynamicEscortNpc].Bool && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
 
-                    var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
+                    var range = _creatureBySpawnIdStore[info.spawnId];
                     foreach (var creature in range)
                     {
                         if (creature.IsAlive())
@@ -1983,11 +1983,11 @@ namespace Game.Maps
             switch (type)
             {
                 case SpawnObjectType.Creature:
-                    foreach (var creature in GetCreatureBySpawnIdStore().LookupByKey(spawnId))
+                    foreach (var creature in GetCreatureBySpawnIdStore()[spawnId])
                         toUnload.Add(creature);
                     break;
                 case SpawnObjectType.GameObject:
-                    foreach (var obj in GetGameObjectBySpawnIdStore().LookupByKey(spawnId))
+                    foreach (var obj in GetGameObjectBySpawnIdStore()[spawnId])
                         toUnload.Add(obj);
                     break;
                 default:
@@ -3559,7 +3559,7 @@ namespace Game.Maps
 
         public List<Corpse> GetCorpsesInCell(int cellId)
         {
-            return _corpsesByCell.LookupByKey(cellId);
+            return _corpsesByCell[cellId];
         }
 
         public Corpse GetCorpseByPlayer(ObjectGuid ownerGuid)
@@ -3720,7 +3720,7 @@ namespace Game.Maps
 
         public Creature GetCreatureBySpawnId(long spawnId)
         {
-            var bounds = GetCreatureBySpawnIdStore().LookupByKey(spawnId);
+            var bounds = GetCreatureBySpawnIdStore()[spawnId];
             if (bounds.Empty())
                 return null;
 
@@ -3731,7 +3731,7 @@ namespace Game.Maps
 
         public GameObject GetGameObjectBySpawnId(long spawnId)
         {
-            var bounds = GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
+            var bounds = GetGameObjectBySpawnIdStore()[spawnId];
             if (bounds.Empty())
                 return null;
 
@@ -3742,7 +3742,7 @@ namespace Game.Maps
 
         public AreaTrigger GetAreaTriggerBySpawnId(long spawnId)
         {
-            var bounds = GetAreaTriggerBySpawnIdStore().LookupByKey(spawnId);
+            var bounds = GetAreaTriggerBySpawnIdStore()[spawnId];
             if (bounds.Empty())
                 return null;
 
@@ -4288,7 +4288,7 @@ namespace Game.Maps
 
         private GameObject _FindGameObject(WorldObject searchObject, long guid)
         {
-            var bounds = searchObject.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(guid);
+            var bounds = searchObject.GetMap().GetGameObjectBySpawnIdStore()[guid];
             if (bounds.Empty())
                 return null;
 
@@ -4840,7 +4840,7 @@ namespace Game.Maps
                         }
 
                         Creature cTarget = null;
-                        var creatureBounds = _creatureBySpawnIdStore.LookupByKey(step.script.CallScript.CreatureEntry);
+                        var creatureBounds = _creatureBySpawnIdStore[step.script.CallScript.CreatureEntry];
                         if (creatureBounds.Empty())
                         {
                             // Prefer alive (last respawned) creature

@@ -994,7 +994,7 @@ namespace Game
         {
             // always full list
             List<AuctionPosting> auctions = new();
-            foreach (var auctionId in _playerBidderAuctions.LookupByKey(player.GetGUID()))
+            foreach (var auctionId in _playerBidderAuctions[player.GetGUID()])
             {
                 AuctionPosting auction = _itemsByAuctionId.LookupByKey(auctionId);
                 if (auction != null)
@@ -1074,7 +1074,7 @@ namespace Game
         {
             // always full list
             List<AuctionPosting> auctions = new();
-            foreach (var auctionId in _playerOwnedAuctions.LookupByKey(player.GetGUID()))
+            foreach (var auctionId in _playerOwnedAuctions[player.GetGUID()])
             {
                 AuctionPosting auction = _itemsByAuctionId.LookupByKey(auctionId);
                 if (auction != null)

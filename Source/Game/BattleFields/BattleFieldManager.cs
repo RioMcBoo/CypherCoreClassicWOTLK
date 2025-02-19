@@ -134,7 +134,7 @@ namespace Game.BattleFields
 
         public BattleField GetBattlefieldByBattleId(Map map, uint battleId)
         {
-            var battlefields = _battlefieldsByMap.LookupByKey(map);
+            var battlefields = _battlefieldsByMap[map];
             foreach (var battlefield in battlefields)
                 if (battlefield.GetBattleId() == battleId)
                     return battlefield;

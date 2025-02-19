@@ -1198,7 +1198,7 @@ namespace Game
                 {
                     foreach (var spawnId in creaturesByMap[key])
                     {
-                        var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
+                        var creatureBounds = map.GetCreatureBySpawnIdStore()[spawnId];
                         foreach (var creature in creatureBounds)
                         {
                             var npcflag = GetNPCFlag(creature);
@@ -1348,7 +1348,7 @@ namespace Game
                     Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                     {
                         map.RemoveRespawnTime(SpawnObjectType.Creature, guid);
-                        var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(guid);
+                        var creatureBounds = map.GetCreatureBySpawnIdStore()[guid];
                         foreach (var creature in creatureBounds)
                             creature.AddObjectToRemoveList();
                     });
@@ -1378,7 +1378,7 @@ namespace Game
                     Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                     {
                         map.RemoveRespawnTime(SpawnObjectType.GameObject, guid);
-                        var gameobjectBounds = map.GetGameObjectBySpawnIdStore().LookupByKey(guid);
+                        var gameobjectBounds = map.GetGameObjectBySpawnIdStore()[guid];
                         foreach (var go in gameobjectBounds)
                             go.AddObjectToRemoveList();
 
@@ -1419,7 +1419,7 @@ namespace Game
                 // Update if spawned
                 Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                 {
-                    var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
+                    var creatureBounds = map.GetCreatureBySpawnIdStore()[spawnId];
                     foreach (var creature in creatureBounds)
                     {
                         if (activate)

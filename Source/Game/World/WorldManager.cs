@@ -2392,7 +2392,7 @@ namespace Game
 
         public bool IsBattlePetJournalLockAcquired(ObjectGuid battlenetAccountGuid)
         {
-            foreach (var sessionForBnet in m_sessionsByBnetGuid.LookupByKey(battlenetAccountGuid))
+            foreach (var sessionForBnet in m_sessionsByBnetGuid[battlenetAccountGuid])
             {
                 if (sessionForBnet.GetBattlePetMgr().HasJournalLock())
                     return true;

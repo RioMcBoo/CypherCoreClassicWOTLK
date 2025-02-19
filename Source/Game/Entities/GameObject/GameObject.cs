@@ -1192,7 +1192,7 @@ namespace Game.Entities
             {
                 // despawn all active objects, and remove their respawns
                 List<GameObject> toUnload = new();
-                foreach (var creature in map.GetGameObjectBySpawnIdStore().LookupByKey(spawnId))
+                foreach (var creature in map.GetGameObjectBySpawnIdStore()[spawnId])
                     toUnload.Add(creature);
 
                 foreach (GameObject obj in toUnload)

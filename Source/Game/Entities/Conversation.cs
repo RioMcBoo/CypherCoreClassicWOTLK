@@ -421,7 +421,7 @@ namespace Game.Entities
         {
             Creature bestFit = null;
 
-            foreach (var creature in _map.GetCreatureBySpawnIdStore().LookupByKey(worldObject.SpawnId))
+            foreach (var creature in _map.GetCreatureBySpawnIdStore()[worldObject.SpawnId])
             {
                 bestFit = creature;
 

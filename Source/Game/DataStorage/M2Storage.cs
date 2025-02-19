@@ -194,7 +194,7 @@ namespace Game.DataStorage
 
         public static List<FlyByCamera> GetFlyByCameras(int cameraId)
         {
-            return FlyByCameraStorage.LookupByKey(cameraId);
+            return FlyByCameraStorage[cameraId];
         }
 
         static MultiMap<int, FlyByCamera> FlyByCameraStorage = new();

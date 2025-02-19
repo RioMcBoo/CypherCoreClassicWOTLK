@@ -71,7 +71,7 @@ namespace Game
                 {
                     EnumCharactersResult.CharacterInfo charInfo = new(result.GetFields());
 
-                    var customizationsForChar = customizations.LookupByKey(charInfo.Guid.GetCounter());
+                    var customizationsForChar = customizations[charInfo.Guid.GetCounter()];
                     if (!customizationsForChar.Empty())
                         charInfo.Customizations = new Array<ChrCustomizationChoice>(customizationsForChar.ToArray());
 
@@ -2500,7 +2500,7 @@ namespace Game
             var team = GetPlayer().GetTeam();
 
             List<int> graveyardIds = new();
-            var range = Global.ObjectMgr.GraveyardStorage.LookupByKey(zoneId);
+            var range = Global.ObjectMgr.GraveyardStorage[zoneId];
 
             for (int i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
             {

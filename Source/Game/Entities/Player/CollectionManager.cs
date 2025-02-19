@@ -635,7 +635,7 @@ namespace Game.Entities
             int blockIndex = itemModifiedAppearance.Id / 32;
             int bitIndex = itemModifiedAppearance.Id % 32;
             owner.AddTransmogFlag(blockIndex, 1u << bitIndex);
-            var temporaryAppearance = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
+            var temporaryAppearance = _temporaryAppearances[itemModifiedAppearance.Id];
             if (!temporaryAppearance.Empty())
             {
                 owner.RemoveConditionalTransmog(itemModifiedAppearance.Id);
@@ -671,7 +671,7 @@ namespace Game.Entities
             if (itemModifiedAppearance == null)
                 return;
 
-            var guid = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
+            var guid = _temporaryAppearances[itemModifiedAppearance.Id];
             if (guid.Empty())
                 return;
 
@@ -696,7 +696,7 @@ namespace Game.Entities
 
         public List<ObjectGuid> GetItemsProvidingTemporaryAppearance(int itemModifiedAppearanceId)
         {
-            return _temporaryAppearances.LookupByKey(itemModifiedAppearanceId);
+            return _temporaryAppearances[itemModifiedAppearanceId];
         }
 
         public List<uint> GetAppearanceIds()

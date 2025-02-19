@@ -114,7 +114,7 @@ namespace Game.Loots
 
             if (freeforall)
             {
-                var ffaItems = loot.GetPlayerFFAItems().LookupByKey(player.GetGUID());
+                var ffaItems = loot.GetPlayerFFAItems()[player.GetGUID()];
                 if (ffaItems != null)
                 {
                     var ffaItemItr = ffaItems.Find(ffaItem => ffaItem.LootListId == LootListId);
@@ -969,7 +969,7 @@ namespace Game.Loots
 
             if (item.freeforall)
             {
-                var itemList = PlayerFFAItems.LookupByKey(player.GetGUID());
+                var itemList = PlayerFFAItems[player.GetGUID()];
                 if (itemList != null)
                 {
                     foreach (NotNormalLootItem notNormalLootItem in itemList)
@@ -1017,7 +1017,7 @@ namespace Game.Loots
                     return true;
             }
 
-            var ffaItems = GetPlayerFFAItems().LookupByKey(player.GetGUID());
+            var ffaItems = GetPlayerFFAItems()[player.GetGUID()];
             if (ffaItems != null)
             {
                 bool hasFfaItem = ffaItems.Any(ffaItem => !ffaItem.is_looted);

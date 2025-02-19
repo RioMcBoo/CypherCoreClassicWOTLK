@@ -750,7 +750,7 @@ namespace Game
             }
 
             // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
-            var invites = _invites.LookupByKey(calendarEvent.EventId);
+            var invites = _invites[calendarEvent.EventId];
             foreach (CalendarInvite invite in invites)
             {
                 Player player = Global.ObjAccessor.FindConnectedPlayer(invite.InviteeGuid);

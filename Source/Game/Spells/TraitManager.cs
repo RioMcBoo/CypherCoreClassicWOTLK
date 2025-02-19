@@ -110,11 +110,11 @@ namespace Game
                 Tree tree = new();
                 tree.Data = traitTree;
 
-                var costs = treeCosts.LookupByKey(traitTree.Id);
+                var costs = treeCosts[traitTree.Id];
                 if (costs != null)
                     tree.Costs = costs;
 
-                var currencies = treeCurrencies.LookupByKey(traitTree.Id);
+                var currencies = treeCurrencies[traitTree.Id];
                 if (currencies != null)
                     tree.Currencies = currencies;
 
@@ -132,11 +132,11 @@ namespace Game
                 NodeGroup nodeGroup = new();
                 nodeGroup.Data = traitNodeGroup;
 
-                var conditions = nodeGroupConditions.LookupByKey(traitNodeGroup.Id);
+                var conditions = nodeGroupConditions[traitNodeGroup.Id];
                 if (conditions != null)
                     nodeGroup.Conditions = conditions;
 
-                var costs = nodeGroupCosts.LookupByKey(traitNodeGroup.Id);
+                var costs = nodeGroupCosts[traitNodeGroup.Id];
                 if (costs != null)
                     nodeGroup.Costs = costs;
 
@@ -152,23 +152,23 @@ namespace Game
                 if (tree != null)
                     tree.Nodes.Add(node);
 
-                foreach (var traitNodeEntry in nodeEntries.LookupByKey(traitNode.Id))
+                foreach (var traitNodeEntry in nodeEntries[traitNode.Id])
                 {
                     NodeEntry entry = new();
                     entry.Data = traitNodeEntry;
 
-                    var conditions = nodeEntryConditions.LookupByKey(traitNodeEntry.Id);
+                    var conditions = nodeEntryConditions[traitNodeEntry.Id];
                     if (conditions != null)
                         entry.Conditions = conditions;
 
-                    var costs = nodeEntryCosts.LookupByKey(traitNodeEntry.Id);
+                    var costs = nodeEntryCosts[traitNodeEntry.Id];
                     if (costs != null)
                         entry.Costs = costs;
 
                     node.Entries.Add(entry);
                 }
 
-                foreach (var nodeGroupId in nodeGroups.LookupByKey(traitNode.Id))
+                foreach (var nodeGroupId in nodeGroups[traitNode.Id])
                 {
                     NodeGroup nodeGroup = _traitGroups.LookupByKey(nodeGroupId);
                     if (nodeGroup == null)
@@ -178,11 +178,11 @@ namespace Game
                     node.Groups.Add(nodeGroup);
                 }
 
-                var conditions1 = nodeConditions.LookupByKey(traitNode.Id);
+                var conditions1 = nodeConditions[traitNode.Id];
                 if (conditions1 != null)
                     node.Conditions = conditions1;
 
-                var costs1 = nodeCosts.LookupByKey(traitNode.Id);
+                var costs1 = nodeCosts[traitNode.Id];
                 if (costs1 != null)
                     node.Costs = costs1;
 
@@ -242,7 +242,7 @@ namespace Game
 
             foreach (TraitTreeLoadoutRecord traitTreeLoadout in CliDB.TraitTreeLoadoutStorage.Values)
             {
-                var entries = traitTreeLoadoutEntries.LookupByKey(traitTreeLoadout.Id);
+                var entries = traitTreeLoadoutEntries[traitTreeLoadout.Id];
                 if (entries != null)
                 {
                     entries.Sort((left, right) => { return left.OrderIndex.CompareTo(right.OrderIndex); });
@@ -285,12 +285,12 @@ namespace Game
                 case TraitConfigType.Combat:
                     ChrSpecializationRecord chrSpecializationEntry = CliDB.ChrSpecializationStorage.LookupByKey((int)traitConfig.ChrSpecializationID);
                     if (chrSpecializationEntry != null)
-                        return _traitTreesBySkillLine.LookupByKey(_skillLinesByClass[(int)chrSpecializationEntry.ClassID]);
+                        return _traitTreesBySkillLine[_skillLinesByClass[(int)chrSpecializationEntry.ClassID]];
                     break;
                 case TraitConfigType.Profession:
-                    return _traitTreesBySkillLine.LookupByKey(traitConfig.SkillLineID);
+                    return _traitTreesBySkillLine[traitConfig.SkillLineID];
                 case TraitConfigType.Generic:
-                    return _traitTreesByTraitSystem.LookupByKey(traitConfig.TraitSystemID);
+                    return _traitTreesByTraitSystem[traitConfig.TraitSystemID];
                 default:
                     break;
             }
@@ -387,7 +387,7 @@ namespace Game
                             currencies[currency.Id] += player.GetCurrencyQuantity(currency.CurrencyTypesID);
                             break;
                         case TraitCurrencyType.TraitSourced:
-                            var currencySources = _traitCurrencySourcesByCurrency.LookupByKey(currency.Id);
+                            var currencySources = _traitCurrencySourcesByCurrency[currency.Id];
                             if (currencySources != null)
                             {
                                 foreach (TraitCurrencySourceRecord currencySource in currencySources)
@@ -707,7 +707,7 @@ namespace Game
 
         public static List<TraitDefinitionEffectPointsRecord> GetTraitDefinitionEffectPointModifiers(int traitDefinitionId)
         {
-            return _traitDefinitionEffectPointModifiers.LookupByKey(traitDefinitionId);
+            return _traitDefinitionEffectPointModifiers[traitDefinitionId];
         }
 
         public static void InitializeStarterBuildTraitConfig(TraitConfigPacket traitConfig, Player player)
@@ -729,7 +729,7 @@ namespace Game
             Dictionary<int, int> currencies = new();
             FillOwnedCurrenciesMap(traitConfig, player, currencies);
 
-            var loadoutEntries = _traitTreeLoadoutsByChrSpecialization.LookupByKey((int)traitConfig.ChrSpecializationID);
+            var loadoutEntries = _traitTreeLoadoutsByChrSpecialization[(int)traitConfig.ChrSpecializationID];
             if (loadoutEntries != null)
             {
                 TraitEntryPacket findEntry(TraitConfigPacket config, int traitNodeId, int traitNodeEntryId)

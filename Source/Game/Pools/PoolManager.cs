@@ -498,7 +498,7 @@ namespace Game
         public SpawnedPoolData InitPoolsForMap(Map map)
         {
             SpawnedPoolData spawnedPoolData = new(map);
-            var poolIds = mAutoSpawnPoolsPerMap.LookupByKey(spawnedPoolData.GetMap().GetId());
+            var poolIds = mAutoSpawnPoolsPerMap[spawnedPoolData.GetMap().GetId()];
             if (poolIds != null)
                 foreach (var poolId in poolIds)
                     SpawnPool(spawnedPoolData, poolId);
@@ -662,7 +662,7 @@ namespace Game
             {
                 case "Creature":
                 {
-                    var creatureBounds = spawns.GetMap().GetCreatureBySpawnIdStore().LookupByKey(guid);
+                    var creatureBounds = spawns.GetMap().GetCreatureBySpawnIdStore()[guid];
                     foreach (var creature in creatureBounds)
                     {
                         // For dynamic spawns, save respawn time here
@@ -679,7 +679,7 @@ namespace Game
                 }
                 case "GameObject":
                 {
-                    var gameobjectBounds = spawns.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(guid);
+                    var gameobjectBounds = spawns.GetMap().GetGameObjectBySpawnIdStore()[guid];
                     foreach (var go in gameobjectBounds)
                     {
                         // For dynamic spawns, save respawn time here

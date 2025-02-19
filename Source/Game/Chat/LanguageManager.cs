@@ -33,7 +33,7 @@ namespace Game.Chat
             // Load languages from Languages.db2. Just the id, we don't need the name
             foreach (LanguagesRecord langEntry in CliDB.LanguagesStorage.Values)
             {
-                var spellsRange = _langsMap.LookupByKey(langEntry.Id);
+                var spellsRange = _langsMap[langEntry.Id];
                 if (spellsRange.Empty())
                     _langsMap.Add(langEntry.Id, new LanguageDesc());
                 else
@@ -84,7 +84,7 @@ namespace Game.Chat
 
         List<string> FindWordGroup(int language, int wordLen)
         {
-            return _wordsMap.LookupByKey((language, (byte)wordLen));
+            return _wordsMap[(language, (byte)wordLen)];
         }
 
         public string Translate(string msg, int language, Locale locale)
@@ -153,7 +153,7 @@ namespace Game.Chat
 
         public List<LanguageDesc> GetLanguageDescById(Language languageId)
         {
-            return _langsMap.LookupByKey((int)languageId);
+            return _langsMap[(int)languageId];
         }
 
         public bool ForEachLanguage(Func<int, LanguageDesc, bool> callback)

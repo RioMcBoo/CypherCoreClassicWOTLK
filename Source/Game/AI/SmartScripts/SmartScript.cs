@@ -4636,7 +4636,7 @@ namespace Game.AI
 
         GameObject FindGameObjectNear(WorldObject searchObject, long guid)
         {
-            var bounds = searchObject.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(guid);
+            var bounds = searchObject.GetMap().GetGameObjectBySpawnIdStore()[guid];
             if (bounds.Empty())
                 return null;
 
@@ -4645,7 +4645,7 @@ namespace Game.AI
 
         Creature FindCreatureNear(WorldObject searchObject, long guid)
         {
-            var bounds = searchObject.GetMap().GetCreatureBySpawnIdStore().LookupByKey(guid);
+            var bounds = searchObject.GetMap().GetCreatureBySpawnIdStore()[guid];
             if (bounds.Empty())
                 return null;
 

@@ -3281,7 +3281,7 @@ namespace Game.Achievements
                     $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} " +
                     $"but is currently equal to {CriteriaFailEvent.Count}");
 
-                var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
+                var treeList = _criteriaTreeByCriteria[criteriaEntry.Id];
                 if (treeList.Empty())
                     continue;
 
@@ -3513,17 +3513,17 @@ namespace Game.Achievements
                 return new List<Criteria>();
             }
 
-            return _criteriasByType.LookupByKey(type);
+            return _criteriasByType[type];
         }
 
         public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, int scenarioId)
         {
-            return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
+            return _scenarioCriteriasByTypeAndScenarioId[(int)type][scenarioId];
         }
 
         public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
         {
-            return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
+            return _criteriasByStartEvent[(int)startEvent][asset];
         }
 
         public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
@@ -3538,12 +3538,12 @@ namespace Game.Achievements
 
         public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
         {
-            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
+            return _criteriasByFailEvent[(int)failEvent][asset];
         }
 
         public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
         {
-            return _guildCriteriasByType.LookupByKey(type);
+            return _guildCriteriasByType[type];
         }
 
         public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
@@ -3553,7 +3553,7 @@ namespace Game.Achievements
 
         public List<CriteriaTree> GetCriteriaTreesByCriteria(int criteriaId)
         {
-            return _criteriaTreeByCriteria.LookupByKey(criteriaId);
+            return _criteriaTreeByCriteria[criteriaId];
         }
 
         public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)

@@ -246,7 +246,7 @@ namespace Game.Scripting
                     float posX = resultWP.Read<float>(4);
                     float posY = resultWP.Read<float>(5);
                     float posZ = resultWP.Read<float>(6);
-                    var chain = m_mSplineChainsMap.LookupByKey((entry, chainId));
+                    var chain = m_mSplineChainsMap[(entry, chainId)];
                     if (chain == null)
                     {
                         Log.outWarn(LogFilter.ServerLoading, 
@@ -292,7 +292,7 @@ namespace Game.Scripting
 
         List<SplineChainLink> GetSplineChain(int entry, ushort chainId)
         {
-            return m_mSplineChainsMap.LookupByKey((entry, chainId));
+            return m_mSplineChainsMap[(entry, chainId)];
         }
 
         public string ScriptsVersion() { return "Integrated Cypher Scripts"; }

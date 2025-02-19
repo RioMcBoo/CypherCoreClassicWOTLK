@@ -294,7 +294,7 @@ namespace Game.Loots
 
         public void RemoveItem(int itemId, int count, int itemIndex)
         {
-            var bounds = _lootItems.LookupByKey(itemId);
+            var bounds = _lootItems[itemId];
             foreach (var itr in bounds)
             {
                 if (itr.ItemIndex == itemIndex)

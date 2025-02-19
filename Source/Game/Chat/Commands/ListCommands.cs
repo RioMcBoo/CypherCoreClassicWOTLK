@@ -78,7 +78,7 @@ namespace Game.Chat.Commands
                     // If map found, try to find active version of this creature
                     if (thisMap != null)
                     {
-                        var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
+                        var creBounds = thisMap.GetCreatureBySpawnIdStore()[guid];
                         foreach (var creature in creBounds)
                             handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
                         liveFound = !creBounds.Empty();
@@ -452,7 +452,7 @@ namespace Game.Chat.Commands
                     // If map found, try to find active version of this object
                     if (thisMap != null)
                     {
-                        var goBounds = thisMap.GetGameObjectBySpawnIdStore().LookupByKey(guid);
+                        var goBounds = thisMap.GetGameObjectBySpawnIdStore()[guid];
                         foreach (var go in goBounds)
                             handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID().ToString(), go.IsSpawned() ? "*" : " ");
                         liveFound = !goBounds.Empty();

@@ -268,12 +268,12 @@ namespace Game.Entities
 
         public List<int> GetSpellsRequiredForSpellBounds(int spell_id)
         {
-            return mSpellReq.LookupByKey(spell_id);
+            return mSpellReq[spell_id];
         }
 
         public List<int> GetSpellsRequiringSpellBounds(int spell_id)
         {
-            return mSpellsReqSpell.LookupByKey(spell_id);
+            return mSpellsReqSpell[spell_id];
         }
 
         public bool IsSpellRequiringSpell(int spellid, int req_spellid)
@@ -295,7 +295,7 @@ namespace Game.Entities
 
         public List<SpellLearnSpellNode> GetSpellLearnSpellMapBounds(int spell_id)
         {
-            return mSpellLearnSpells.LookupByKey(spell_id);
+            return mSpellLearnSpells[spell_id];
         }
 
         bool IsSpellLearnSpell(int spell_id)
@@ -322,7 +322,7 @@ namespace Game.Entities
 
         public List<SpellGroup> GetSpellSpellGroupMapBounds(int spell_id)
         {
-            return mSpellSpellGroup.LookupByKey(GetFirstSpellInChain(spell_id));
+            return mSpellSpellGroup[GetFirstSpellInChain(spell_id)];
         }
 
         public bool IsSpellMemberOfSpellGroup(int spellid, SpellGroup groupid)
@@ -338,7 +338,7 @@ namespace Game.Entities
 
         List<int> GetSpellGroupSpellMapBounds(SpellGroup group_id)
         {
-            return mSpellGroupSpell.LookupByKey(group_id);
+            return mSpellGroupSpell[group_id];
         }
 
         public void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells)
@@ -377,7 +377,7 @@ namespace Game.Entities
             // Find group with SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT if it belongs to one
             foreach (var group in spellGroupList)
             {
-                var found = mSpellSameEffectStack.LookupByKey(group);
+                var found = mSpellSameEffectStack[group];
                 if (found != null)
                 {
                     // check auraTypes
@@ -571,7 +571,7 @@ namespace Game.Entities
 
         public List<SkillLineAbilityRecord> GetSkillLineAbilityMapBounds(int spell_id)
         {
-            return mSkillLineAbilityMap.LookupByKey(spell_id);
+            return mSkillLineAbilityMap[spell_id];
         }
 
         public PetAura GetPetAura(int spell_id, byte eff)
@@ -595,7 +595,7 @@ namespace Game.Entities
 
         public List<int> GetSpellLinked(SpellLinkedType type, int spellId)
         {
-            return mSpellLinkedMap.LookupByKey((type, spellId));
+            return mSpellLinkedMap[(type, spellId)];
         }
 
         public MultiMap<int, int> GetPetLevelupSpellList(CreatureFamily petFamily)
@@ -610,32 +610,32 @@ namespace Game.Entities
 
         public List<SpellArea> GetSpellAreaMapBounds(int spell_id)
         {
-            return mSpellAreaMap.LookupByKey(spell_id);
+            return mSpellAreaMap[spell_id];
         }
 
         public List<SpellArea> GetSpellAreaForQuestMapBounds(int quest_id)
         {
-            return mSpellAreaForQuestMap.LookupByKey(quest_id);
+            return mSpellAreaForQuestMap[quest_id];
         }
 
         public List<SpellArea> GetSpellAreaForQuestEndMapBounds(int quest_id)
         {
-            return mSpellAreaForQuestEndMap.LookupByKey(quest_id);
+            return mSpellAreaForQuestEndMap[quest_id];
         }
 
         public List<SpellArea> GetSpellAreaForAuraMapBounds(int spell_id)
         {
-            return mSpellAreaForAuraMap.LookupByKey(spell_id);
+            return mSpellAreaForAuraMap[spell_id];
         }
 
         public List<SpellArea> GetSpellAreaForAreaMapBounds(int area_id)
         {
-            return mSpellAreaForAreaMap.LookupByKey(area_id);
+            return mSpellAreaForAreaMap[area_id];
         }
 
         public SpellInfo GetSpellInfo(int spellId, Difficulty difficulty)
         {
-            var list = mSpellInfoMap.LookupByKey(spellId);
+            var list = mSpellInfoMap[spellId];
 
             var index = list.FindIndex(spellInfo => spellInfo.Difficulty == difficulty);
             if (index != -1)
@@ -659,7 +659,7 @@ namespace Game.Entities
 
         List<SpellInfo> _GetSpellInfo(int spellId)
         {
-            return mSpellInfoMap.LookupByKey(spellId);
+            return mSpellInfoMap[spellId];
         }
 
         public void ForEachSpellInfo(Action<SpellInfo> callback)
@@ -984,7 +984,7 @@ namespace Game.Entities
                     continue;
                 }
 
-                var db_node_bounds = mSpellLearnSpells.LookupByKey(spellLearnSpell.SpellID);
+                var db_node_bounds = mSpellLearnSpells[spellLearnSpell.SpellID];
                 bool found = false;
                 foreach (var spellNode in db_node_bounds)
                 {
@@ -4988,7 +4988,7 @@ namespace Game.Entities
         // SpellInfo object management
         public bool HasSpellInfo(int spellId, Difficulty difficulty)
         {
-            var list = mSpellInfoMap.LookupByKey(spellId);
+            var list = mSpellInfoMap[spellId];
             if (list.Count == 0)
                 return false;
 

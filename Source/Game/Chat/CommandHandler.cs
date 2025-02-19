@@ -377,7 +377,7 @@ namespace Game.Chat
             if (_session == null)
                 return null;
 
-            var bounds = _session.GetPlayer().GetMap().GetGameObjectBySpawnIdStore().LookupByKey(lowguid);
+            var bounds = _session.GetPlayer().GetMap().GetGameObjectBySpawnIdStore()[lowguid];
             if (!bounds.Empty())
                 return bounds.First();
 
@@ -391,7 +391,7 @@ namespace Game.Chat
 
             // Select the first alive creature or a dead one if not found
             Creature creature = null;
-            var bounds = _session.GetPlayer().GetMap().GetCreatureBySpawnIdStore().LookupByKey(lowguid);
+            var bounds = _session.GetPlayer().GetMap().GetCreatureBySpawnIdStore()[lowguid];
             foreach (var it in bounds)
             {
                 creature = it;

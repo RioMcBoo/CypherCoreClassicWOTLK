@@ -187,7 +187,7 @@ namespace Game
                 return 0;
             }
 
-            var textGroupContainer = sList.LookupByKey(textGroup);
+            var textGroupContainer = sList[textGroup];
             if (textGroupContainer.Empty())
             {
                 Log.outError(LogFilter.ChatSystem, 
@@ -411,7 +411,7 @@ namespace Game
                 return false;
             }
 
-            var textEntryList = textHolder.LookupByKey(textGroup);
+            var textEntryList = textHolder[textGroup];
             if (textEntryList.Empty())
             {
                 Log.outDebug(LogFilter.Unit, 
@@ -429,7 +429,7 @@ namespace Game
             if (multiMap == null)
                 return "";
 
-            var creatureTextEntryList = multiMap.LookupByKey(textGroup);
+            var creatureTextEntryList = multiMap[textGroup];
             if (creatureTextEntryList.Empty())
                 return "";
 

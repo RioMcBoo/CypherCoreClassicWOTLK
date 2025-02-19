@@ -144,7 +144,7 @@ namespace Game.DataStorage
                 {
                     _chrModelsByRaceAndGender[(raceModel.ChrRacesID, raceModel.Sex)] = model;
 
-                    var customizationOptionsForModel = customizationOptionsByModel.LookupByKey(model.Id);
+                    var customizationOptionsForModel = customizationOptionsByModel[model.Id];
                     if (customizationOptionsForModel != null)
                     {
                         _chrCustomizationOptionsByRaceAndGender.AddRange((raceModel.ChrRacesID, raceModel.Sex), customizationOptionsForModel);
@@ -155,11 +155,11 @@ namespace Game.DataStorage
                     }
 
                     // link shapeshift displays to race/gender/form
-                    foreach (var shapeshiftOptionsForModel in shapeshiftFormByModel.LookupByKey(model.Id))
+                    foreach (var shapeshiftOptionsForModel in shapeshiftFormByModel[model.Id])
                     {
                         ShapeshiftFormModelData data = new();
                         data.OptionID = shapeshiftOptionsForModel.Item1;
-                        data.Choices = _chrCustomizationChoicesByOption.LookupByKey(shapeshiftOptionsForModel.Item1);
+                        data.Choices = _chrCustomizationChoicesByOption[shapeshiftOptionsForModel.Item1];
                         if (!data.Choices.Empty())
                         {
                             for (int i = 0; i < data.Choices.Count; ++i)
@@ -544,7 +544,7 @@ namespace Game.DataStorage
                         continue;
                     UiMapAssignmentRecord uiMapAssignment = null;
                     UiMapAssignmentRecord parentUiMapAssignment = null;
-                    foreach (var uiMapAssignmentForMap in uiMapAssignmentByUiMap.LookupByKey(uiMap.Id))
+                    foreach (var uiMapAssignmentForMap in uiMapAssignmentByUiMap[uiMap.Id])
                     {
                         if (uiMapAssignmentForMap.MapID >= 0 &&
                             uiMapAssignmentForMap.Region[1].X - uiMapAssignmentForMap.Region[0].X > 0 &&
@@ -557,7 +557,7 @@ namespace Game.DataStorage
                     if (uiMapAssignment == null)
                         continue;
 
-                    foreach (var uiMapAssignmentForMap in uiMapAssignmentByUiMap.LookupByKey(uiMap.ParentUiMapID))
+                    foreach (var uiMapAssignmentForMap in uiMapAssignmentByUiMap[uiMap.ParentUiMapID])
                     {
                         if (uiMapAssignmentForMap.MapID == uiMapAssignment.MapID &&
                             uiMapAssignmentForMap.Region[1].X - uiMapAssignmentForMap.Region[0].X > 0 &&
@@ -758,7 +758,7 @@ namespace Game.DataStorage
             do
             {
                 uint tableHash = result.Read<uint>(0);
-                var allowedHotfixes = _allowedHotfixOptionalData.LookupByKey(tableHash);
+                var allowedHotfixes = _allowedHotfixOptionalData[tableHash];
                 if (allowedHotfixes.Empty())
                 {
                     Log.outError(LogFilter.Sql, 
@@ -845,7 +845,7 @@ namespace Game.DataStorage
         {
             Cypher.Assert(SharedConst.IsValidLocale(locale), $"Locale {locale} is invalid locale");
 
-            return _hotfixOptionalData[(int)locale].LookupByKey((tableHash, recordId));
+            return _hotfixOptionalData[(int)locale][(tableHash, recordId)];
         }
 
         public int GetEmptyAnimStateID()
@@ -861,7 +861,7 @@ namespace Game.DataStorage
 
         public List<int> GetAreasForGroup(int areaGroupId)
         {
-            return _areaGroupMembers.LookupByKey(areaGroupId);
+            return _areaGroupMembers[areaGroupId];
         }
 
         public bool IsInArea(int objectAreaId, int areaId)
@@ -927,12 +927,12 @@ namespace Game.DataStorage
 
         public List<ChrCustomizationChoiceRecord> GetCustomiztionChoices(int chrCustomizationOptionId)
         {
-            return _chrCustomizationChoicesByOption.LookupByKey(chrCustomizationOptionId);
+            return _chrCustomizationChoicesByOption[chrCustomizationOptionId];
         }
 
         public List<ChrCustomizationOptionRecord> GetCustomiztionOptions(Race race, Gender gender)
         {
-            return _chrCustomizationOptionsByRaceAndGender.LookupByKey((race, gender));
+            return _chrCustomizationOptionsByRaceAndGender[(race, gender)];
         }
 
         public MultiMap<int, int> GetRequiredCustomizationChoices(int chrCustomizationReqId)
@@ -992,7 +992,7 @@ namespace Game.DataStorage
 
         public int GetRedirectedContentTuningId(int contentTuningId, uint redirectFlag)
         {
-            foreach (var conditionalContentTuning in _conditionalContentTuning.LookupByKey(contentTuningId))
+            foreach (var conditionalContentTuning in _conditionalContentTuning[contentTuningId])
                 if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
                     return conditionalContentTuning.RedirectContentTuningID;
 
@@ -1047,7 +1047,7 @@ namespace Game.DataStorage
 
         public CurrencyContainerRecord GetCurrencyContainerForCurrencyQuantity(int currencyId, int quantity)
         {
-            foreach (var record in _currencyContainers.LookupByKey(currencyId))
+            foreach (var record in _currencyContainers[currencyId])
                 if (quantity >= record.MinAmount && (record.MaxAmount == 0 || quantity <= record.MaxAmount))
                     return record;
 
@@ -1056,7 +1056,7 @@ namespace Game.DataStorage
 
         public (float first, float last) GetCurveXAxisRange(int curveId)
         {
-            var points = _curvePoints.LookupByKey(curveId);
+            var points = _curvePoints[curveId];
             if (!points.Empty())
                 return ((points.First().X, points.Last().X));
 
@@ -1098,7 +1098,7 @@ namespace Game.DataStorage
         public float GetCurveValueAt(int curveId, float x)
         {
             var curve = CurveStorage.LookupByKey(curveId);
-            var points = _curvePoints.LookupByKey(curveId);
+            var points = _curvePoints[curveId];
             if (points.Empty())
                 return 0.0f;
 
@@ -1308,22 +1308,22 @@ namespace Game.DataStorage
 
         public List<int> GetFactionTeamList(int faction)
         {
-            return _factionTeams.LookupByKey(faction);
+            return _factionTeams[faction];
         }
 
         public List<FriendshipRepReactionRecord> GetFriendshipRepReactions(int friendshipRepID)
         {
-            return _friendshipRepReactions.LookupByKey(friendshipRepID);
+            return _friendshipRepReactions[friendshipRepID];
         }
 
         public List<int> GetGlyphBindableSpells(int glyphPropertiesId)
         {
-            return _glyphBindableSpells.LookupByKey(glyphPropertiesId);
+            return _glyphBindableSpells[glyphPropertiesId];
         }
 
         public List<ChrSpecialization> GetGlyphRequiredSpecs(int glyphPropertiesId)
         {
-            return _glyphRequiredSpecs.LookupByKey(glyphPropertiesId);
+            return _glyphRequiredSpecs[glyphPropertiesId];
         }
 
         public HeirloomRecord GetHeirloomByItemId(int itemId)
@@ -1343,7 +1343,7 @@ namespace Game.DataStorage
 
         public List<ItemLimitCategoryConditionRecord> GetItemLimitCategoryConditions(int categoryId)
         {
-            return _itemCategoryConditions.LookupByKey(categoryId);
+            return _itemCategoryConditions[categoryId];
         }
 
         public int GetItemDisplayId(int itemId, int appearanceModId)
@@ -1383,12 +1383,12 @@ namespace Game.DataStorage
 
         public List<ItemSetSpellRecord> GetItemSetSpells(int itemSetId)
         {
-            return _itemSetSpells.LookupByKey(itemSetId);
+            return _itemSetSpells[itemSetId];
         }
 
         public List<ItemSpecOverrideRecord> GetItemSpecOverrides(int itemId)
         {
-            return _itemSpecOverrides.LookupByKey(itemId);
+            return _itemSpecOverrides[itemId];
         }
 
         public JournalTierRecord GetJournalTier(int index)
@@ -1504,7 +1504,7 @@ namespace Game.DataStorage
 
         public List<(int, PlayerConditionRecord)> GetMapDifficultyConditions(Difficulty mapDifficultyId)
         {
-            return _mapDifficultyConditions.LookupByKey(mapDifficultyId);
+            return _mapDifficultyConditions[mapDifficultyId];
         }
 
         public MountRecord GetMount(int spellId)
@@ -1519,12 +1519,12 @@ namespace Game.DataStorage
 
         public List<MountTypeXCapabilityRecord> GetMountCapabilities(int mountType)
         {
-            return _mountCapabilitiesByType.LookupByKey(mountType);
+            return _mountCapabilitiesByType[mountType];
         }
 
         public List<MountXDisplayRecord> GetMountDisplays(int mountId)
         {
-            return _mountDisplays.LookupByKey(mountId);
+            return _mountDisplays[mountId];
         }
 
         public string GetNameGenEntry(Race race, Gender gender)
@@ -1614,7 +1614,7 @@ namespace Game.DataStorage
 
         public List<QuestLineXQuestRecord> GetQuestsForQuestLine(int questLineId)
         {
-            return _questsByQuestLine.LookupByKey(questLineId);
+            return _questsByQuestLine[questLineId];
         }
 
         public List<QuestPackageItemRecord> GetQuestPackageItems(int questPackageID)
@@ -1641,7 +1641,7 @@ namespace Game.DataStorage
 
         public List<int> GetPhasesForGroup(int group)
         {
-            return _phasesByGroup.LookupByKey(group);
+            return _phasesByGroup[group];
         }
 
         public PowerTypeRecord GetPowerTypeEntry(PowerType power)
@@ -1675,12 +1675,12 @@ namespace Game.DataStorage
 
         public List<RewardPackXCurrencyTypeRecord> GetRewardPackCurrencyTypesByRewardID(int rewardPackID)
         {
-            return _rewardPackCurrencyTypes.LookupByKey(rewardPackID);
+            return _rewardPackCurrencyTypes[rewardPackID];
         }
 
         public List<RewardPackXItemRecord> GetRewardPackItemsByRewardID(int rewardPackID)
         {
-            return _rewardPackItems.LookupByKey(rewardPackID);
+            return _rewardPackItems[rewardPackID];
         }
 
         public ShapeshiftFormModelData GetShapeshiftFormModelData(Race race, Gender gender, ShapeShiftForm form)
@@ -1690,17 +1690,17 @@ namespace Game.DataStorage
 
         public List<SkillLineRecord> GetSkillLinesForParentSkill(SkillType parentSkillId)
         {
-            return _skillLinesByParentSkillLine.LookupByKey(parentSkillId);
+            return _skillLinesByParentSkillLine[parentSkillId];
         }
 
         public List<SkillLineAbilityRecord> GetSkillLineAbilitiesBySkill(SkillType skillId)
         {
-            return _skillLineAbilitiesBySkillupSkill.LookupByKey(skillId);
+            return _skillLineAbilitiesBySkillupSkill[skillId];
         }
 
         public SkillRaceClassInfoRecord GetSkillRaceClassInfo(SkillType skill, Race race, Class class_)
         {
-            var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
+            var bounds = _skillRaceClassInfoBySkill[skill];
             foreach (var skllRaceClassInfo in bounds)
             {
                 var raceMask = skllRaceClassInfo.RaceMask;
@@ -1718,12 +1718,12 @@ namespace Game.DataStorage
 
         public List<SkillRaceClassInfoRecord> GetSkillRaceClassInfo(SkillType skill)
         {
-            return _skillRaceClassInfoBySkill.LookupByKey(skill);
+            return _skillRaceClassInfoBySkill[skill];
         }
 
         public List<SpecializationSpellsRecord> GetSpecializationSpells(ChrSpecialization specId)
         {
-            return _specializationSpellsBySpec.LookupByKey(specId);
+            return _specializationSpellsBySpec[specId];
         }
 
         public bool IsSpecSetMember(int specSetId, ChrSpecialization specId)
@@ -1738,12 +1738,12 @@ namespace Game.DataStorage
 
         public List<SpellProcsPerMinuteModRecord> GetSpellProcsPerMinuteMods(int spellprocsPerMinuteId)
         {
-            return _spellProcsPerMinuteMods.LookupByKey(spellprocsPerMinuteId);
+            return _spellProcsPerMinuteMods[spellprocsPerMinuteId];
         }
 
         public List<SpellVisualMissileRecord> GetSpellVisualMissiles(int spellVisualMissileSetId)
         {
-            return _spellVisualMissilesBySet.LookupByKey(spellVisualMissileSetId);
+            return _spellVisualMissilesBySet[spellVisualMissileSetId];
         }
 
         public List<TalentRecord> GetTalentsByPosition(Class class_, uint tier, uint column)
@@ -1781,12 +1781,12 @@ namespace Game.DataStorage
 
         public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(int itemModifiedAppearanceId)
         {
-            return _transmogSetsByItemModifiedAppearance.LookupByKey(itemModifiedAppearanceId);
+            return _transmogSetsByItemModifiedAppearance[itemModifiedAppearanceId];
         }
 
         public List<TransmogSetItemRecord> GetTransmogSetItems(int transmogSetId)
         {
-            return _transmogSetItemsByTransmogSet.LookupByKey(transmogSetId);
+            return _transmogSetItemsByTransmogSet[transmogSetId];
         }
 
         static bool CheckUiMapAssignmentStatus(float x, float y, float z, int? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
@@ -1923,7 +1923,7 @@ namespace Game.DataStorage
             UiMapAssignmentStatus nearestMapAssignment = new();
             var iterateUiMapAssignments = new Action<MultiMap<int, UiMapAssignmentRecord>, int>((assignments, id) =>
             {
-                foreach (var assignment in assignments.LookupByKey(id))
+                foreach (var assignment in assignments[id])
                 {
                     UiMapAssignmentStatus status;
                     if (CheckUiMapAssignmentStatus(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, assignment, out status))
@@ -2076,7 +2076,7 @@ namespace Game.DataStorage
             if (areaEntry == null)
                 return false;
 
-            foreach (var assignment in _uiMapAssignmentByArea[(int)UiMapSystem.World].LookupByKey(areaId))
+            foreach (var assignment in _uiMapAssignmentByArea[(int)UiMapSystem.World][areaId])
             {
                 if (assignment.MapID >= 0 && assignment.MapID != areaEntry.ContinentID)
                     continue;

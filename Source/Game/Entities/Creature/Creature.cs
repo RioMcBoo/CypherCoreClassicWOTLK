@@ -1068,7 +1068,7 @@ namespace Game.Entities
 
         public List<byte> GetTextRepeatGroup(byte textGroup)
         {
-            return m_textRepeat.LookupByKey(textGroup);
+            return m_textRepeat[textGroup];
         }
 
         public void ClearTextRepeatGroup(byte textGroup)
@@ -1878,7 +1878,7 @@ namespace Game.Entities
             {
                 // despawn all active creatures, and remove their respawns
                 List<Creature> toUnload = new();
-                foreach (var creature in map.GetCreatureBySpawnIdStore().LookupByKey(spawnId))
+                foreach (var creature in map.GetCreatureBySpawnIdStore()[spawnId])
                     toUnload.Add(creature);
 
                 foreach (Creature creature in toUnload)
@@ -3535,7 +3535,7 @@ namespace Game.Entities
             {
                 // If an alive instance of this spawnId is already found, skip creation
                 // If only dead instance(s) exist, despawn them and spawn a new (maybe also dead) version
-                var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
+                var creatureBounds = map.GetCreatureBySpawnIdStore()[spawnId];
                 List<Creature> despawnList = new();
 
                 foreach (var creature in creatureBounds)

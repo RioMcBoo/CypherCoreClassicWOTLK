@@ -28,7 +28,7 @@ namespace Game.Entities
 
                 // With dynamic spawn the creature may have just respawned
                 // we need to find previous instance of creature and delete it from the formation, as it'll be invalidated
-                var bounds = map.GetCreatureBySpawnIdStore().LookupByKey(creature.GetSpawnId());
+                var bounds = map.GetCreatureBySpawnIdStore()[creature.GetSpawnId()];
                 foreach (var other in bounds)
                 {
                     if (other == creature)

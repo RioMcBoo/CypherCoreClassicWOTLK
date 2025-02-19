@@ -1083,7 +1083,7 @@ namespace Game.Entities
 
                     traitConfig.Name = configsResult.Read<string>(7);
 
-                    foreach (var traitEntry in traitEntriesByConfig.LookupByKey(traitConfig.ID))
+                    foreach (var traitEntry in traitEntriesByConfig[traitConfig.ID])
                         traitConfig.Entries.Add(traitEntry);
 
                     if (TraitMgr.ValidateConfig(traitConfig, this) != TalentLearnResult.LearnOk)
@@ -4194,7 +4194,7 @@ namespace Game.Entities
                                 if (mailTemplateId != 0)
                                     draft = new MailDraft(mailTemplateId, false);    // items are already included
 
-                                var itemsList = itemsByMail.LookupByKey(mail_id);
+                                var itemsList = itemsByMail[mail_id];
                                 if (itemsList != null)
                                 {
                                     foreach (var item in itemsList)

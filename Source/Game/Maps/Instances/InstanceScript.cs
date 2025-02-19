@@ -149,7 +149,7 @@ namespace Game.Maps
 
         public virtual void UpdateDoorState(GameObject door)
         {
-            var range = doors.LookupByKey(door.GetEntry());
+            var range = doors[door.GetEntry()];
             if (range.Empty())
                 return;
 
@@ -278,7 +278,7 @@ namespace Game.Maps
 
         public virtual void AddDoor(GameObject door, bool add)
         {
-            var range = doors.LookupByKey(door.GetEntry());
+            var range = doors[door.GetEntry()];
             if (range.Empty())
                 return;
 

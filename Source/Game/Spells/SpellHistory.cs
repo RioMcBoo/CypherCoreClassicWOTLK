@@ -786,7 +786,7 @@ namespace Game.Spells
             if (chargeRecovery > 0 && GetMaxCharges(chargeCategoryId) > 0)
             {
                 ServerTime recoveryStart;
-                var charges = _categoryCharges.LookupByKey(chargeCategoryId);
+                var charges = _categoryCharges[chargeCategoryId];
                 if (charges.Empty())
                     recoveryStart = LoopTime.ServerTime;
                 else
@@ -805,7 +805,7 @@ namespace Game.Spells
             if (chargeCategoryEntry == null)
                 return;
 
-            var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
+            var chargeList = _categoryCharges[chargeCategoryId];
             if (chargeList == null || chargeList.Empty())
                 return;
 
@@ -826,7 +826,7 @@ namespace Game.Spells
 
         public void RestoreCharge(SpellCategories chargeCategoryId)
         {
-            var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
+            var chargeList = _categoryCharges[chargeCategoryId];
             if (!chargeList.Empty())
             {
                 chargeList.RemoveAt(chargeList.Count - 1);
@@ -840,7 +840,7 @@ namespace Game.Spells
 
         public void ResetCharges(SpellCategories chargeCategoryId)
         {
-            var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
+            var chargeList = _categoryCharges[chargeCategoryId];
             if (!chargeList.Empty())
             {
                 _categoryCharges.Remove(chargeCategoryId);
@@ -879,7 +879,7 @@ namespace Game.Spells
             if (maxCharges <= 0)
                 return true;
 
-            var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
+            var chargeList = _categoryCharges[chargeCategoryId];
             return chargeList.Empty() || chargeList.Count < maxCharges;
         }
 

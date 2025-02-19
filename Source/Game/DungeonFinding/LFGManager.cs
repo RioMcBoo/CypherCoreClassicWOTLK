@@ -1528,13 +1528,13 @@ namespace Game.DungeonFinding
         {
             LFGDungeonData dungeon = GetLFGDungeon(randomdungeon);
             byte group = (byte)(dungeon != null ? dungeon.group : 0);
-            return CachedDungeonMapStore.LookupByKey(group);
+            return CachedDungeonMapStore[group];
         }
 
         public LfgReward GetRandomDungeonReward(int dungeon, int level)
         {
             LfgReward reward = null;
-            var bounds = RewardMapStore.LookupByKey(dungeon & 0x00FFFFFF);
+            var bounds = RewardMapStore[dungeon & 0x00FFFFFF];
             foreach (var rew in bounds)
             {
                 reward = rew;

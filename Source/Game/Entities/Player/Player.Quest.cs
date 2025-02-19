@@ -2473,7 +2473,7 @@ namespace Game.Entities
 
         public void ItemRemovedQuestCheck(int entry, int count)
         {
-            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, entry)))
+            foreach (var objectiveStatusData in m_questObjectiveStatus[(QuestObjectiveType.Item, entry)])
             {
                 int questId = objectiveStatusData.QuestStatusPair.QuestID;
                 ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
@@ -2574,7 +2574,7 @@ namespace Game.Entities
             bool updatePhaseShift = false;
             bool updateZoneAuras = false;
 
-            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((objectiveType, objectId)))
+            foreach (var objectiveStatusData in m_questObjectiveStatus[(objectiveType, objectId)])
             {
                 int questId = objectiveStatusData.QuestStatusPair.QuestID;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -2822,7 +2822,7 @@ namespace Game.Entities
         {
             QuestObjective findObjectiveForItem(int tempItemId)
             {
-                foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, tempItemId)))
+                foreach (var objectiveItr in m_questObjectiveStatus[(QuestObjectiveType.Item, tempItemId)])
                 {
                     Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.QuestID);
                     QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveItr.ObjectiveId);
@@ -3307,7 +3307,7 @@ namespace Game.Entities
 
         public bool HasQuestForGO(int GOId)
         {
-            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.GameObject, GOId)))
+            foreach (var objectiveStatusData in m_questObjectiveStatus[(QuestObjectiveType.GameObject, GOId)])
             {
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveStatusData.QuestStatusPair.QuestID);
                 QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveStatusData.ObjectiveId);

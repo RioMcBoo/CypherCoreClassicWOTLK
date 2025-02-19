@@ -1444,7 +1444,7 @@ namespace Game.Entities
             if (cFamily == null)
                 return;
 
-            var petStore = Global.SpellMgr.PetFamilySpellsStorage.LookupByKey((int)cInfo.Family);
+            var petStore = Global.SpellMgr.PetFamilySpellsStorage[(int)cInfo.Family];
             if (petStore != null)
             {
                 // For general hunter pets skill 270

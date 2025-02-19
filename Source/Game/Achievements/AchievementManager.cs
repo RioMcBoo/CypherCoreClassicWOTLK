@@ -1087,7 +1087,7 @@ namespace Game.Achievements
 
         public List<AchievementRecord> GetAchievementByReferencedId(int id)
         {
-            return _achievementListByReferencedId.LookupByKey(id);
+            return _achievementListByReferencedId[id];
         }
 
         public AchievementReward GetAchievementReward(AchievementRecord achievement)

@@ -517,7 +517,7 @@ namespace Game.Maps
 
         public void CreateTransportsForMap(Map map)
         {
-            var mapTransports = _transportsByMap.LookupByKey(map.GetId());
+            var mapTransports = _transportsByMap[map.GetId()];
 
             // no transports here
             if (mapTransports.Empty())

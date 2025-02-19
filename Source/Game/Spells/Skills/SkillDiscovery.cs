@@ -148,7 +148,7 @@ namespace Game.Spells
         {
             // explicit discovery spell chances (always success if case exist)
             // in this case we have both skill and spell
-            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
+            var tab = SkillDiscoveryStorage[spellId];
             if (tab.Empty())
                 return 0;
 
@@ -183,7 +183,7 @@ namespace Game.Spells
 
         public static bool HasDiscoveredAllSpells(int spellId, Player player)
         {
-            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
+            var tab = SkillDiscoveryStorage[spellId];
             if (tab.Empty())
                 return true;
 
@@ -198,7 +198,7 @@ namespace Game.Spells
 
         public static bool HasDiscoveredAnySpell(int spellId, Player player)
         {
-            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
+            var tab = SkillDiscoveryStorage[spellId];
             if (tab.Empty())
                 return false;
 
@@ -221,7 +221,7 @@ namespace Game.Spells
             int skillvalue = skillId != 0 ? player.GetSkillValue(skillId) : 0;
 
             // check spell case
-            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
+            var tab = SkillDiscoveryStorage[spellId];
 
             if (!tab.Empty())
             {
@@ -240,7 +240,7 @@ namespace Game.Spells
                 return 0;
 
             // check skill line case
-            tab = SkillDiscoveryStorage.LookupByKey(-skillId);
+            tab = SkillDiscoveryStorage[-skillId];
             if (!tab.Empty())
             {
                 foreach (var item_iter in tab)
