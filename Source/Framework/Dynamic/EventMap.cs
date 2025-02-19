@@ -200,7 +200,7 @@ namespace Framework.Dynamic
 
             MultiMap<TimeSpan, int> delayed = new();
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.ToList())
             {
                 delayed.Add(pair.Key + delay, pair.Value);
                 _eventMap.Remove(pair.Key, pair.Value);
@@ -222,7 +222,7 @@ namespace Framework.Dynamic
 
             MultiMap<TimeSpan, int> delayed = new();
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.ToList())
             {
                 if (Convert.ToBoolean(pair.Value & (1 << (int)(group + 15))))
                 {
@@ -244,7 +244,7 @@ namespace Framework.Dynamic
             if (Empty())
                 return;
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.ToList())
             {
                 if (eventId == (pair.Value & 0x0000FFFF))
                     _eventMap.Remove(pair.Key, pair.Value);
@@ -266,7 +266,7 @@ namespace Framework.Dynamic
             if (group == 0 || group > 8 || Empty())
                 return;
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.ToList())
             {
                 if ((pair.Value & (1 << (group + 15))) != 0)
                     _eventMap.Remove(pair.Key, pair.Value);

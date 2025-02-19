@@ -2,12 +2,23 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using System.Numerics;
 
 namespace System.Collections.Generic
 {
     public static class CollectionExtensions
     {
-        public static bool Empty<TValue>(this ICollection<TValue> collection)
+        public static bool Empty<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> collection)
+        {
+            return collection.Count == 0;
+        }
+
+        public static bool Empty<TValue>(this IReadOnlyList<TValue> collection)
+        {
+            return collection.Count == 0;
+        }
+
+        public static bool Empty<TValue>(this IReadOnlySet<TValue> collection)
         {
             return collection.Count == 0;
         }
@@ -58,6 +69,66 @@ namespace System.Collections.Generic
                 return default;
 
             return new KeyValuePair<TKey, TValue>(key, dict[key]);
+        }
+
+        public static TValue? Find<TValue>(this IReadOnlyList<TValue> list, Predicate<TValue> match)
+        {
+            if (match == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (match(list[i]))
+                {
+                    return list[i];
+                }
+            }
+
+            return default;
+        }
+
+        public static bool Contains<TValue>(this IReadOnlyList<TValue> list, TValue value) where TValue : IBinaryNumber<TValue>
+        {
+            return list.TryFind(out _, out _, (item) => item == value);
+        }
+
+        public static bool Contains(this IReadOnlyList<object> list, object value)
+        {
+            return list.TryFind(out _, out _, (item) => item.Equals(value));
+        }
+
+        public static bool TryFind<TValue>(this IReadOnlyList<TValue> list, out TValue value, out int index, Predicate<TValue> match, bool aback = false)
+        {
+            value = default;
+            index = -1;
+
+            if (match == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (list.Count == 0)
+                return false;
+
+            int start = aback ? list.Count - 1 : 0;
+            int end = aback ? -1 : list.Count;
+            int iter = start;
+
+            while(iter != end)
+            {
+                if (match(list[iter]))
+                {
+                    value = list[iter];
+                    index = iter;
+                    return true;
+                }
+
+                iter = aback ? --iter : ++iter;
+            }
+
+            return false;
         }
 
         //public static bool ContainsKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)

@@ -2730,12 +2730,12 @@ namespace Game.Entities
 
         public List<KeyValuePair<int, Aura>> GetOwnedAuras()
         {
-            return m_ownedAuras.KeyValueList;
+            return m_ownedAuras.ToList();
         }
 
         public List<KeyValuePair<int, AuraApplication>> GetAppliedAuras()
         {
-            return m_appliedAuras.KeyValueList;
+            return m_appliedAuras.ToList();
         }
 
         public Aura AddAura(int spellId, Unit target)
