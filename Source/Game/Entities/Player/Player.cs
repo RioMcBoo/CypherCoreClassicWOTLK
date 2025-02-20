@@ -3671,11 +3671,6 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            float HealthIncreaseRate = 1.0f;
-
-            if (GetLevel() < 15)
-                HealthIncreaseRate *= (2.066f - (GetLevel() * 0.066f));
-
             float addValue = 0.0f;
 
             // polymorphed case
@@ -3684,7 +3679,7 @@ namespace Game.Entities
             // normal regen case (maybe partly in combat case)
             else if (!IsInCombat() || HasAuraType(AuraType.ModRegenDuringCombat))
             {
-                addValue = OCTRegenHPPerSpirit() * HealthIncreaseRate;
+                addValue = OCTRegenHPPerSpirit();
 
                 if (!IsInCombat())
                 {
