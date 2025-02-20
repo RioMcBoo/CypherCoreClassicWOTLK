@@ -3079,7 +3079,7 @@ namespace Game.Spells
                     }
                     else
                     {
-                        target.StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)school, amount, apply, UnitModType.TotalTemporary);
+                        target.StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)school, amount, apply, aurApp);
                     }
                 }
             }
@@ -3093,7 +3093,6 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
             SpellSchoolMask schoolMask = (SpellSchoolMask)GetMiscValue();
-            UnitModType unitModType = GetSpellInfo().IsPassive() ? UnitModType.BasePermanent : UnitModType.BaseTemporary;
 
             // only players have base stats
             if (!target.IsTypeId(TypeId.Player))
@@ -3101,7 +3100,7 @@ namespace Game.Spells
                 //pets only have base armor
                 if (target.IsPet() && schoolMask.HasSchool(SpellSchools.Normal))
                 {
-                    target.StatMods.ModifyMult(UnitMods.Armor, GetAmount(), apply, unitModType);
+                    target.StatMods.ModifyMult(UnitMods.Armor, GetAmount(), apply, aurApp);
                 }
             }
             else
@@ -3110,7 +3109,7 @@ namespace Game.Spells
                 {
                     if (schoolMask.HasSchool(school))
                     {
-                        target.StatMods.ModifyMult(UnitMods.ResistanceStart + (int)school, GetAmount(), apply, unitModType);
+                        target.StatMods.ModifyMult(UnitMods.ResistanceStart + (int)school, GetAmount(), apply, aurApp, true);
                     }
                 }
             }
@@ -3148,7 +3147,7 @@ namespace Game.Spells
             {
                 if (schoolMask.HasSchool(school))
                 {
-                    target.StatMods.ModifyMult(UnitMods.ResistanceStart + (int)school, GetAmount(), apply, UnitModType.TotalTemporary);
+                    target.StatMods.ModifyMult(UnitMods.ResistanceStart + (int)school, GetAmount(), apply, aurApp);
                 }
             }
         }
@@ -3168,7 +3167,7 @@ namespace Game.Spells
                 //only pets have base stats
                 if (target.IsPet() && schoolMask.HasSchool(SpellSchools.Normal))
                 {
-                    target.StatMods.ModifyFlat(UnitMods.Armor, GetAmount(), apply, UnitModType.BasePermanent);
+                    target.StatMods.ModifyFlat(UnitMods.Armor, GetAmount(), apply, aurApp, true);
                 }
             }
             else
@@ -3177,7 +3176,7 @@ namespace Game.Spells
                 {
                     if (schoolMask.HasSchool(school))
                     {
-                        target.StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)school, GetAmount(), apply, UnitModType.BasePermanent);
+                        target.StatMods.ModifyFlat(UnitMods.ResistanceStart + (int)school, GetAmount(), apply, aurApp, true);
                     }
                 }
             }
@@ -3237,7 +3236,7 @@ namespace Game.Spells
                         target.StatMods.ModifyFlat(UnitMods.StatStart + (int)i, spellGroupVal, !apply, UnitModType.TotalTemporary);
                     }
 
-                    target.StatMods.ModifyFlat(UnitMods.StatStart + (int)i, GetAmount(), apply, UnitModType.TotalTemporary);
+                    target.StatMods.ModifyFlat(UnitMods.StatStart + (int)i, GetAmount(), apply, aurApp);
                 }
             }
         }
@@ -3265,12 +3264,12 @@ namespace Game.Spells
             {
                 for (Stats i = Stats.Strength; i < Stats.Max; i++)
                 {
-                    target.StatMods.ModifyMult(UnitMods.StatStart + (int)i, amount, apply, UnitModType.BasePermanent);
+                    target.StatMods.ModifyMult(UnitMods.StatStart + (int)i, amount, apply, aurApp, true);
                 }
             }
             else
             {
-                target.StatMods.ModifyMult(UnitMods.StatStart + GetMiscValue(), amount, apply, UnitModType.BasePermanent);
+                target.StatMods.ModifyMult(UnitMods.StatStart + GetMiscValue(), amount, apply, aurApp, true);
             }
         }
 
@@ -3293,12 +3292,12 @@ namespace Game.Spells
             {
                 for (Stats i = Stats.Strength; i < Stats.Max; i++)
                 {
-                    target.StatMods.ModifyMult(UnitMods.StatStart + (int)i, amount, apply, UnitModType.TotalTemporary);
+                    target.StatMods.ModifyMult(UnitMods.StatStart + (int)i, amount, apply, aurApp);
                 }
             }
-            else // from talents
+            else
             {
-                target.StatMods.ModifyMult(UnitMods.StatStart + GetMiscValue(), amount, apply, UnitModType.TotalPermanent);
+                target.StatMods.ModifyMult(UnitMods.StatStart + GetMiscValue(), amount, apply, aurApp);
             }
         }
 
@@ -3481,7 +3480,6 @@ namespace Game.Spells
                 if (powerType == PowerType.Runes)
                 {
                     player.UpdateAllRunesRegen();
-                    //player.UpdateRuneRegen((RuneType)GetMiscValueB());
                 }
                 else
                 {
@@ -3970,7 +3968,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            target.StatMods.ModifyFlat(UnitMods.AttackPowerMelee, GetAmount(), apply, UnitModType.TotalTemporary);
+            target.StatMods.ModifyFlat(UnitMods.AttackPowerMelee, GetAmount(), apply, aurApp);
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPower)]
@@ -3984,7 +3982,7 @@ namespace Game.Spells
             if (!ClassMask.WandUsers.HasClass(target.GetClass()))
                 return;
 
-            target.StatMods.ModifyFlat(UnitMods.AttackPowerRanged, GetAmount(), apply, UnitModType.TotalTemporary);
+            target.StatMods.ModifyFlat(UnitMods.AttackPowerRanged, GetAmount(), apply, aurApp);
         }
 
         [AuraEffectHandler(AuraType.ModAttackPowerPct)]
@@ -3994,7 +3992,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            target.StatMods.ModifyMult(UnitMods.AttackPowerMelee, GetAmount(), apply, UnitModType.TotalTemporary);
+            target.StatMods.ModifyMult(UnitMods.AttackPowerMelee, GetAmount(), apply, aurApp);
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPowerPct)]
@@ -4008,7 +4006,7 @@ namespace Game.Spells
             if (ClassMask.WandUsers.HasClass(target.GetClass()))
                 return;
 
-            target.StatMods.ModifyMult(UnitMods.AttackPowerRanged, GetAmount(), apply, UnitModType.TotalTemporary);
+            target.StatMods.ModifyMult(UnitMods.AttackPowerRanged, GetAmount(), apply, aurApp);
         }
 
         /********************************/

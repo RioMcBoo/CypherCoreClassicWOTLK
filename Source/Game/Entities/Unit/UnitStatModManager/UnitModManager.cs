@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Spells;
 using System;
 
 namespace Game.Entities
@@ -395,6 +396,11 @@ namespace Game.Entities
             ModifyMult(unitModName, multiplier, apply, modType);
         }
 
+        public void ModifyMult(UnitMods unitModName, MultModifier multiplier, bool apply, AuraApplication aurApp, bool baseValue = false)
+        {           
+            ModifyMult(unitModName, multiplier, apply, GetUnitModTypeByAuraApplication(aurApp, baseValue));
+        }
+
         public void ModifyFlat(UnitMods unitModName, FlatModifier modifier, bool apply, UnitModType type = UnitModType.TotalTemporary)
         {
             if (modifier.IsIdle)
@@ -411,6 +417,20 @@ namespace Game.Entities
         {
             UnitModType modType = GetUnitModTypeFromEnchantmentSlot(enchantmentSlot);
             ModifyFlat(unitModName, modifier, apply, modType);
+        }
+
+        public void ModifyFlat(UnitMods unitModName, FlatModifier modifier, bool apply, AuraApplication aurApp, bool baseValue = false)
+        {
+            ModifyFlat(unitModName, modifier, apply, GetUnitModTypeByAuraApplication(aurApp, baseValue));
+        }
+
+        private UnitModType GetUnitModTypeByAuraApplication(AuraApplication aurApp, bool baseValue)
+        {
+            bool IsPassive = aurApp.GetBase().GetSpellInfo().IsPassive();
+            if (baseValue)
+                return IsPassive ? UnitModType.BasePermanent : UnitModType.BaseTemporary;
+            else
+                return IsPassive ? UnitModType.TotalPermanent : UnitModType.TotalTemporary;
         }
 
         private UnitModType GetUnitModTypeFromEnchantmentSlot(EnchantmentSlot enchantmentSlot)
