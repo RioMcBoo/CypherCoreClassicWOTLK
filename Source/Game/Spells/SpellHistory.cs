@@ -830,7 +830,7 @@ namespace Game.Spells
                 if (charge.RechargeEnd >= now)
                     cooldownRemainsList.Add(charge);
             }
-            _categoryCharges.SetValues(chargeCategoryId, newList);
+            _categoryCharges.SetValues(chargeCategoryId, cooldownRemainsList);
 
             SendSetSpellCharges(chargeCategoryId, chargeList);
         }

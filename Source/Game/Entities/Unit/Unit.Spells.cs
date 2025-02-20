@@ -3919,9 +3919,9 @@ namespace Game.Entities
             if (auraState != 0)
             {
                 // Get mask of all aurastates from remaining auras
-                foreach(var i in m_auraStateAuras[auraState].ToList())                
+                foreach (var i in m_auraStateAuras[auraState].ToList())
                 {
-                    if (i == aurApp)                    
+                    if (i == aurApp)
                     {
                         m_auraStateAuras.Remove(auraState, i);
                         continue;
