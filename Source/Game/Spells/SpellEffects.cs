@@ -4589,8 +4589,8 @@ namespace Game.Spells
 
             // Create dispel mask by dispel Type
             uint dispelMask = SpellInfo.GetDispelMask((DispelType)effectInfo.MiscValue);
-            var auras = unitTarget.GetOwnedAurasCopy();
-            foreach (var map in auras)
+
+            foreach (var map in unitTarget.GetOwnedAurasCopy())
             {
                 Aura aura = map.Value;
                 AuraApplication aurApp = aura.GetApplicationOfTarget(unitTarget.GetGUID());

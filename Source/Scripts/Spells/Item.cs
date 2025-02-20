@@ -3682,7 +3682,7 @@ namespace Scripts.Spells.Items
             // If another spell of the same group is already active the elixir should not be cast
             if (chosenSpellGroup != SpellGroup.None)
             {
-                var auraMap = target.GetAppliedAurasCopy();
+                var auraMap = target.GetAppliedAuras();
                 foreach (var (_, app) in auraMap)
                 {
                     int spellId = app.GetBase().GetId();

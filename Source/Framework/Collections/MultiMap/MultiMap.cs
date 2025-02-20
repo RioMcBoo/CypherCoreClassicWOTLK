@@ -142,7 +142,7 @@ namespace System.Collections.Generic
                 _interalStorage[key] = valueCollection;
         }
 
-        public MultiMapEditableValuesList<TKey, TValue> GetValues(TKey key) => new(_interalStorage, key);
+        public MultiMapEditableValuesList<TKey, TValue> GetValuesToChange(TKey key) => new(_interalStorage, key);
 
         public IReadOnlyCollection<TKey> Keys => new MultiMapKeysCollection<TKey, TValue>(_interalStorage);
 

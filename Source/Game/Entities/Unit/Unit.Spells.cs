@@ -1729,7 +1729,7 @@ namespace Game.Entities
             // or generate one on our own
             else
             {
-                foreach (var pair in GetAppliedAurasCopy())
+                foreach (var pair in GetAppliedAuras())
                     processAuraApplication(pair.Value);
             }
         }
@@ -1750,7 +1750,7 @@ namespace Game.Entities
                     if (modOwner != this && spell != null)
                     {
                         List<AuraApplication> modAuras = new();
-                        foreach (var itr in modOwner.GetAppliedAurasCopy())
+                        foreach (var itr in modOwner.GetAppliedAuras())
                         {
                             if (spell.m_appliedMods.Contains(itr.Value.GetBase()))
                                 modAuras.Add(itr.Value);
@@ -2724,9 +2724,19 @@ namespace Game.Entities
             return m_ownedAuras.ToList();
         }
 
+        public IReadOnlyMultiMap<int, Aura> GetOwnedAuras()
+        {
+            return m_ownedAuras;
+        }
+
         public List<KeyValuePair<int, AuraApplication>> GetAppliedAurasCopy()
         {
             return m_appliedAuras.ToList();
+        }
+
+        public IReadOnlyMultiMap<int, AuraApplication> GetAppliedAuras()
+        {
+            return m_appliedAuras;
         }
 
         public Aura AddAura(int spellId, Unit target)
@@ -2901,7 +2911,7 @@ namespace Game.Entities
 
         public bool HasAuraWithMechanic(ulong mechanicMask)
         {
-            foreach (var pair in GetAppliedAurasCopy())
+            foreach (var pair in GetAppliedAuras())
             {
                 SpellInfo spellInfo = pair.Value.GetBase().GetSpellInfo();
                 if (spellInfo.Mechanic != 0 && mechanicMask.HasAnyFlag(1ul << (int)spellInfo.Mechanic))
@@ -3015,7 +3025,7 @@ namespace Game.Entities
         {
             DiminishingGroup diminishGroup = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
             DiminishingLevels level = GetDiminishing(diminishGroup);
-            foreach (var itr in GetAppliedAurasCopy())
+            foreach (var itr in GetAppliedAuras())
             {
                 SpellInfo spellInfo = itr.Value.GetBase().GetSpellInfo();
                 if (spellInfo.GetDiminishingReturnsGroupForSpell() != diminishGroup)
@@ -3071,7 +3081,7 @@ namespace Game.Entities
         {
             List<DispelableAura> dispelList = new();
 
-            var auras = GetOwnedAurasCopy();
+            var auras = GetOwnedAuras();
             foreach (var pair in auras)
             {
                 Aura aura = pair.Value;
@@ -3875,13 +3885,13 @@ namespace Game.Entities
 
         public void _ApplyAllAuraStatMods()
         {
-            foreach (var i in GetAppliedAurasCopy())
+            foreach (var i in GetAppliedAuras())
                 i.Value.GetBase().HandleAllEffects(i.Value, AuraEffectHandleModes.Stat, true);
         }
 
         public void _RemoveAllAuraStatMods()
         {
-            foreach (var i in GetAppliedAurasCopy())
+            foreach (var i in GetAppliedAuras())
                 i.Value.GetBase().HandleAllEffects(i.Value, AuraEffectHandleModes.Stat, false);
         }
 

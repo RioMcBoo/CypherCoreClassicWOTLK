@@ -1001,7 +1001,7 @@ namespace Game.Entities
             trans.Append(stmt);
 
             byte index;
-            foreach (var pair in GetOwnedAurasCopy())
+            foreach (var pair in GetOwnedAuras())
             {
                 Aura aura = pair.Value;
 

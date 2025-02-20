@@ -204,7 +204,7 @@ namespace Game.DataStorage
 
             foreach (var curveId in unsortedPoints.Keys)
             {
-                var curvePoints = unsortedPoints.GetValues(curveId);
+                var curvePoints = unsortedPoints.GetValuesToChange(curveId);
                 curvePoints.Sort((point1, point2) => point1.OrderIndex.CompareTo(point2.OrderIndex));
                 _curvePoints.AddRange(curveId, curvePoints.Select(p => p.Pos));
             }
@@ -224,7 +224,7 @@ namespace Game.DataStorage
 
             foreach (var key in _friendshipRepReactions.Keys)
             {
-                var unsortedList = _friendshipRepReactions.GetValues(key);
+                var unsortedList = _friendshipRepReactions.GetValuesToChange(key);
                 unsortedList.Sort(new FriendshipRepReactionRecordComparer());
             }
 
@@ -310,7 +310,7 @@ namespace Game.DataStorage
 
             foreach (var key in _mountCapabilitiesByType.Keys)
             {
-                var unsortedList = _mountCapabilitiesByType.GetValues(key);
+                var unsortedList = _mountCapabilitiesByType.GetValuesToChange(key);
                 unsortedList.Sort(new MountTypeXCapabilityRecordComparer());
             }
 

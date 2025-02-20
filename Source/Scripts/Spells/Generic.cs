@@ -640,8 +640,7 @@ namespace Scripts.Spells.Generic
                 }
                 case 1: // On damaging spells, for removing a defend layer
                 {
-                    var auras = target.GetAppliedAurasCopy();
-                    foreach (var pair in auras)
+                    foreach (var pair in target.GetAppliedAurasCopy())
                     {
                         Aura aura = pair.Value.GetBase();
                         if (aura != null)
@@ -2063,8 +2062,7 @@ namespace Scripts.Spells.Generic
                 case 1: // On damaging spells, for removing a defend layer
                 case 2:
                 {
-                    var auras = target.GetAppliedAurasCopy();
-                    foreach (var pair in auras)
+                    foreach (var pair in target.GetAppliedAurasCopy())
                     {
                         Aura aura = pair.Value.GetBase();
                         if (aura != null)

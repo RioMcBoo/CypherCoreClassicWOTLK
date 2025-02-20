@@ -456,7 +456,7 @@ namespace Game.Spells
                     triggeredBy = this;
 
                 ObjectGuid guid = target.GetGUID();
-                foreach (var iter in target.GetAppliedAurasCopy())
+                foreach (var iter in target.GetAppliedAuras())
                 {
                     Aura aura = iter.Value.GetBase();
                     // only passive and permament auras-active auras should have amount set on spellcast and not be affected
