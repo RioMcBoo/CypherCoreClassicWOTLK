@@ -3065,7 +3065,7 @@ namespace Game.Maps
                 bones.SetRace((Race)corpse.m_corpseData.RaceID.GetValue());
                 bones.SetSex((Gender)corpse.m_corpseData.Sex.GetValue());
                 bones.SetClass((Class)corpse.m_corpseData.Class.GetValue());
-                bones.SetCustomizations(corpse.m_corpseData.Customizations);
+                bones.SetCustomizations(corpse.m_corpseData.Customizations.GetValues());
                 bones.ReplaceAllFlags((CorpseFlags)(corpse.m_corpseData.Flags | (uint)CorpseFlags.Bones));
                 bones.SetFactionTemplate(corpse.m_corpseData.FactionTemplate);
                 for (int i = 0; i < EquipmentSlot.End; ++i)
@@ -3557,7 +3557,7 @@ namespace Game.Maps
 
         public MultiMap<long, AreaTrigger> GetAreaTriggerBySpawnIdStore() { return _areaTriggerBySpawnIdStore; }
 
-        public List<Corpse> GetCorpsesInCell(int cellId)
+        public IReadOnlyList<Corpse> GetCorpsesInCell(int cellId)
         {
             return _corpsesByCell[cellId];
         }
@@ -3743,9 +3743,6 @@ namespace Game.Maps
         public AreaTrigger GetAreaTriggerBySpawnId(long spawnId)
         {
             var bounds = GetAreaTriggerBySpawnIdStore()[spawnId];
-            if (bounds.Empty())
-                return null;
-
             return bounds.FirstOrDefault();
         }
 
@@ -4289,10 +4286,7 @@ namespace Game.Maps
         private GameObject _FindGameObject(WorldObject searchObject, long guid)
         {
             var bounds = searchObject.GetMap().GetGameObjectBySpawnIdStore()[guid];
-            if (bounds.Empty())
-                return null;
-
-            return bounds[0];
+            return bounds.FirstOrDefault();
         }
 
         // Process queued scripts

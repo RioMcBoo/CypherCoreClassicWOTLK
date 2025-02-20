@@ -115,7 +115,7 @@ namespace Game.Loots
             if (freeforall)
             {
                 var ffaItems = loot.GetPlayerFFAItems()[player.GetGUID()];
-                if (ffaItems != null)
+                if (!ffaItems.Empty())
                 {
                     var ffaItemItr = ffaItems.Find(ffaItem => ffaItem.LootListId == LootListId);
                     if (ffaItemItr != null && !ffaItemItr.is_looted)
@@ -850,8 +850,7 @@ namespace Game.Loots
                 }
             }
 
-            if (!ffaItems.Empty())
-                PlayerFFAItems[player.GetGUID()] = ffaItems;
+            PlayerFFAItems.SetValues(player.GetGUID(), ffaItems);
         }
 
         public void NotifyItemRemoved(byte lootListId, Map map)
@@ -970,16 +969,13 @@ namespace Game.Loots
             if (item.freeforall)
             {
                 var itemList = PlayerFFAItems[player.GetGUID()];
-                if (itemList != null)
+                foreach (NotNormalLootItem notNormalLootItem in itemList)
                 {
-                    foreach (NotNormalLootItem notNormalLootItem in itemList)
+                    if (notNormalLootItem.LootListId == lootListId)
                     {
-                        if (notNormalLootItem.LootListId == lootListId)
-                        {
-                            is_looted = notNormalLootItem.is_looted;
-                            ffaItem = notNormalLootItem;
-                            break;
-                        }
+                        is_looted = notNormalLootItem.is_looted;
+                        ffaItem = notNormalLootItem;
+                        break;
                     }
                 }
             }
@@ -1018,7 +1014,7 @@ namespace Game.Loots
             }
 
             var ffaItems = GetPlayerFFAItems()[player.GetGUID()];
-            if (ffaItems != null)
+            if (!ffaItems.Empty())
             {
                 bool hasFfaItem = ffaItems.Any(ffaItem => !ffaItem.is_looted);
                 if (hasFfaItem)

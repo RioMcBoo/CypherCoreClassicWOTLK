@@ -806,7 +806,7 @@ namespace Game.Spells
                 return;
 
             var chargeList = _categoryCharges[chargeCategoryId];
-            if (chargeList == null || chargeList.Empty())
+            if (chargeList.Empty())
                 return;
 
             ServerTime now = LoopTime.ServerTime;
@@ -818,23 +818,27 @@ namespace Game.Spells
                 entry.RechargeEnd += cooldownMod;
             }
 
-            while (!chargeList.Empty() && chargeList[0].RechargeEnd < now)
-                chargeList.RemoveAt(0);
+            List<ChargeEntry> newList = new();
+            foreach (var charge in chargeList)
+            {
+                if (charge.RechargeEnd >= now)
+                    newList.Add(charge);
+            }
+            _categoryCharges.SetValues(chargeCategoryId, newList);
 
             SendSetSpellCharges(chargeCategoryId, chargeList);
         }
 
         public void RestoreCharge(SpellCategories chargeCategoryId)
         {
-            var chargeList = _categoryCharges[chargeCategoryId];
+            var chargeList = _categoryCharges[chargeCategoryId].ToList();
             if (!chargeList.Empty())
             {
                 chargeList.RemoveAt(chargeList.Count - 1);
 
                 SendSetSpellCharges(chargeCategoryId, chargeList);
 
-                if (chargeList.Empty())
-                    _categoryCharges.Remove(chargeCategoryId);
+                _categoryCharges.SetValues(chargeCategoryId, chargeList);
             }
         }
 
@@ -990,15 +994,14 @@ namespace Game.Spells
             }
         }
 
-        void SendSetSpellCharges(SpellCategories chargeCategoryId, List<ChargeEntry> chargeCollection)
+        void SendSetSpellCharges(SpellCategories chargeCategoryId, IReadOnlyList<ChargeEntry> chargeCollection)
         {
-            Player player = GetPlayerOwner();
-            if (player != null)
+            if (GetPlayerOwner() is Player player)
             {
                 SetSpellCharges setSpellCharges = new();
                 setSpellCharges.Category = chargeCategoryId;
                 if (!chargeCollection.Empty())
-                    setSpellCharges.NextRecoveryTime = (uint)(chargeCollection[0].RechargeEnd - DateTime.Now).TotalMilliseconds;
+                    setSpellCharges.NextRecoveryTime = (uint)(chargeCollection[0].RechargeEnd - LoopTime.ServerTime).TotalMilliseconds;
                 setSpellCharges.ConsumedCharges = (byte)chargeCollection.Count;
                 setSpellCharges.IsPet = player != _owner;
                 player.SendPacket(setSpellCharges);

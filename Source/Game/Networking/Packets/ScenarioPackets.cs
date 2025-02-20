@@ -188,6 +188,6 @@ namespace Game.Networking.Packets
     struct ScenarioPOIData
     {
         public int CriteriaTreeID;
-        public List<ScenarioPOI> ScenarioPOIs;
+        public IReadOnlyList<ScenarioPOI> ScenarioPOIs;
     }
 }

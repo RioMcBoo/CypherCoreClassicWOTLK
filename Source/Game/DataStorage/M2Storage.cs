@@ -141,7 +141,7 @@ namespace Game.DataStorage
                 }
             }
 
-            FlyByCameraStorage[dbcentry.Id] = cameras;
+            FlyByCameraStorage.SetValues(dbcentry.Id, cameras);
         }
 
         public static void LoadM2Cameras(string dataPath)
@@ -192,7 +192,7 @@ namespace Game.DataStorage
                 $"Loaded {FlyByCameraStorage.Keys.Count} cinematic waypoint sets in {Time.Diff(oldMSTime)} ms.");
         }
 
-        public static List<FlyByCamera> GetFlyByCameras(int cameraId)
+        public static IReadOnlyList<FlyByCamera> GetFlyByCameras(int cameraId)
         {
             return FlyByCameraStorage[cameraId];
         }

@@ -302,7 +302,7 @@ namespace Game
             return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
+        public override IReadOnlyList<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }

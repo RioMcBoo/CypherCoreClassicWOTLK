@@ -427,7 +427,7 @@ namespace Game
             return events;
         }
 
-        public List<CalendarInvite> GetEventInvites(long eventId)
+        public IReadOnlyList<CalendarInvite> GetEventInvites(long eventId)
         {
             return _invites[eventId];
         }
@@ -660,7 +660,7 @@ namespace Game
             packet.TextureID = calendarEvent.TextureId;
             packet.EventGuildID = calendarEvent.GuildId;
 
-            List<CalendarInvite> eventInviteeList = _invites[calendarEvent.EventId];
+            var eventInviteeList = _invites[calendarEvent.EventId];
             foreach (var calendarInvite in eventInviteeList)
             {
                 ObjectGuid inviteeGuid = calendarInvite.InviteeGuid;

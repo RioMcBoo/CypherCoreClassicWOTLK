@@ -203,7 +203,7 @@ namespace Game.Scenarios
                 var blobs = allPoints.LookupByKey(criteriaTreeID);
                 if (blobs != null)
                 {
-                    var points = blobs[idx1];
+                    var points = blobs.Extract(idx1);
                     if (!points.Empty())
                     {
                         _scenarioPOIStore.Add(criteriaTreeID, new ScenarioPOI(blobIndex, mapID, uiMapID, priority, flags, worldEffectID, playerConditionID, navigationPlayerConditionID, points));
@@ -221,7 +221,7 @@ namespace Game.Scenarios
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} scenario POI definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
-        public List<ScenarioPOI> GetScenarioPOIs(int CriteriaTreeID)
+        public IReadOnlyList<ScenarioPOI> GetScenarioPOIs(int CriteriaTreeID)
         {
             if (!_scenarioPOIStore.ContainsKey(CriteriaTreeID))
                 return null;

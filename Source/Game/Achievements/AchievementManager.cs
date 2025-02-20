@@ -671,7 +671,7 @@ namespace Game.Achievements
             _owner.SendPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
+        public override IReadOnlyList<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetPlayerCriteriaByType(type, asset);
         }
@@ -1060,7 +1060,7 @@ namespace Game.Achievements
             _owner.BroadcastPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
+        public override IReadOnlyList<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetGuildCriteriaByType(type);
         }
@@ -1085,7 +1085,7 @@ namespace Game.Achievements
 
         AchievementGlobalMgr() { }
 
-        public List<AchievementRecord> GetAchievementByReferencedId(int id)
+        public IReadOnlyList<AchievementRecord> GetAchievementByReferencedId(int id)
         {
             return _achievementListByReferencedId[id];
         }

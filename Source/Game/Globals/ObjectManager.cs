@@ -842,12 +842,12 @@ namespace Game
                 $"Loaded {count} Points of Interest definitions in {Time.Diff(oldMSTime)} ms.");
         }
 
-        public List<GossipMenus> GetGossipMenusMapBounds(int uiMenuId)
+        public IReadOnlyList<GossipMenus> GetGossipMenusMapBounds(int uiMenuId)
         {
             return gossipMenusStorage[uiMenuId];
         }
 
-        public List<GossipMenuItems> GetGossipMenuItemsMapBounds(int uiMenuId)
+        public IReadOnlyList<GossipMenuItems> GetGossipMenuItemsMapBounds(int uiMenuId)
         {
             return gossipMenuItemsStorage[uiMenuId];
         }
@@ -1708,7 +1708,7 @@ namespace Game
             }
 
             // Load all possible event ids from criterias
-            void addCriteriaEventsToStore(List<Criteria> criteriaList)
+            void addCriteriaEventsToStore(IReadOnlyList<Criteria> criteriaList)
             {
                 foreach (Criteria criteria in criteriaList)
                 {
@@ -1955,7 +1955,7 @@ namespace Game
             return _eventStorage.Contains(eventId);
         }
 
-        public List<int> GetSpellScriptsBounds(int spellId)
+        public IReadOnlyList<int> GetSpellScriptsBounds(int spellId)
         {
             return spellScriptsStorage[spellId];
         }
@@ -3945,14 +3945,8 @@ namespace Game
                         int trainerId = trainersResult.Read<int>(0);
                         TrainerType trainerType = (TrainerType)trainersResult.Read<byte>(1);
                         string greeting = trainersResult.Read<string>(2);
-                        List<TrainerSpell> spells = new();
-                        var spellList = spellsByTrainer[trainerId];
-                        if (spellList != null)
-                        {
-                            spells = spellList;
-                            spellsByTrainer.Remove(trainerId);
-                        }
 
+                        List<TrainerSpell> spells = spellsByTrainer.Extract(trainerId);
                         trainers.Add(trainerId, new Trainer(trainerId, trainerType, greeting, spells));
 
                     } while (trainersResult.NextRow());
@@ -5705,7 +5699,7 @@ namespace Game
             return _gameObjectAddonStorage.LookupByKey(lowguid);
         }
 
-        public List<int> GetGameObjectQuestItemList(int id)
+        public IReadOnlyList<int> GetGameObjectQuestItemList(int id)
         {
             return _gameObjectQuestItemStorage[id];
         }
@@ -5834,7 +5828,7 @@ namespace Game
                 $"have data{N}={dataN} but expected boolean (0/1) consumable field value.");
         }
 
-        public List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, long spawnId, int mapId, List<Difficulty> mapDifficulties)
+        public List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, long spawnId, int mapId, IReadOnlyList<Difficulty> mapDifficulties)
         {
             List<Difficulty> difficulties = new();
             StringArray tokens = new(difficultyString, ',');
@@ -6314,7 +6308,7 @@ namespace Game
             return cacheVendorItemStorage.LookupByKey(entry);
         }
 
-        public List<float> GetCreatureTemplateSparringValues(int entry)
+        public IReadOnlyList<float> GetCreatureTemplateSparringValues(int entry)
         {
             return _creatureTemplateSparringStorage[entry];
         }
@@ -6842,7 +6836,7 @@ namespace Game
                 return;
 
             var spawnDatas = _spawnGroupMapStorage[data.spawnGroupData.groupId];
-            foreach (var it in spawnDatas)
+            foreach (var it in spawnDatas.ToList())
             {
                 if (it != data)
                     continue;
@@ -6965,8 +6959,8 @@ namespace Game
 
         public SpawnGroupTemplateData GetDefaultSpawnGroup() { return _spawnGroupDataStorage.ElementAt(0).Value; }
         public SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
-        public List<SpawnMetadata> GetSpawnMetadataForGroup(int groupId) { return _spawnGroupMapStorage[groupId]; }
-        public List<int> GetSpawnGroupsForMap(int mapId) { return _spawnGroupsByMap[mapId]; }
+        public IReadOnlyList<SpawnMetadata> GetSpawnMetadataForGroup(int groupId) { return _spawnGroupMapStorage[groupId]; }
+        public IReadOnlyList<int> GetSpawnGroupsForMap(int mapId) { return _spawnGroupsByMap[mapId]; }
 
         public SpawnMetadata GetSpawnMetadata(SpawnObjectType type, long spawnId)
         {
@@ -6995,7 +6989,7 @@ namespace Game
             }
         }
 
-        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(int mapId) { return _instanceSpawnGroupStorage[mapId]; }
+        public IReadOnlyList<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(int mapId) { return _instanceSpawnGroupStorage[mapId]; }
 
         //Player
         public void LoadPlayerInfo()
@@ -9913,7 +9907,7 @@ namespace Game
                 var blobs = allPoints.LookupByKey(questID);
                 if (blobs != null)
                 {
-                    var points = blobs[idx1];
+                    var points = blobs.Extract(idx1);
                     if (!points.Empty())
                     {
                         if (!_questPOIStorage.ContainsKey(questID))
@@ -10094,7 +10088,7 @@ namespace Game
             return GetQuestRelationsFrom(_goQuestInvolvedRelations, entry, false); 
         }
 
-        public List<int> GetGOQuestInvolvedRelationReverseBounds(int questId) 
+        public IReadOnlyList<int> GetGOQuestInvolvedRelationReverseBounds(int questId) 
         { 
             return _goQuestInvolvedRelationsReverse[questId]; 
         }
@@ -10114,7 +10108,7 @@ namespace Game
             return GetQuestRelationsFrom(_creatureQuestInvolvedRelations, entry, false); 
         }
 
-        public List<int> GetCreatureQuestInvolvedRelationReverseBounds(int questId) 
+        public IReadOnlyList<int> GetCreatureQuestInvolvedRelationReverseBounds(int questId) 
         { 
             return _creatureQuestInvolvedRelationsReverse[questId]; 
         }
@@ -10129,7 +10123,7 @@ namespace Game
             return _questObjectives.LookupByKey(questObjectiveId);
         }
 
-        public List<int> GetQuestsForAreaTrigger(int triggerId)
+        public IReadOnlyList<int> GetQuestsForAreaTrigger(int triggerId)
         {
             return _questAreaTriggerStorage[triggerId];
         }
@@ -10160,7 +10154,7 @@ namespace Game
             return _questGreetingLocaleStorage[typeIndex].LookupByKey(id);
         }
 
-        public List<int> GetExclusiveQuestGroupBounds(int exclusiveGroupId)
+        public IReadOnlyList<int> GetExclusiveQuestGroupBounds(int exclusiveGroupId)
         {
             return _exclusiveQuestGroups[exclusiveGroupId];
         }
@@ -10170,10 +10164,10 @@ namespace Game
             return new QuestRelationResult(map[key], onlyActive); 
         }
 
-        public List<int> GetCreatureQuestItemList(int creatureEntry, Difficulty difficulty)
+        public IReadOnlyList<int> GetCreatureQuestItemList(int creatureEntry, Difficulty difficulty)
         {
             var itr = creatureQuestItemStorage[(creatureEntry, difficulty)];
-            if (itr != null)
+            if (!itr.Empty())
                 return itr;
 
             // If there is no data for the difficulty, try to get data for the fallback difficulty
@@ -10532,7 +10526,7 @@ namespace Game
             return _phaseInfoById.LookupByKey(phaseId);
         }
 
-        public List<PhaseAreaInfo> GetPhasesForArea(int areaId)
+        public IReadOnlyList<PhaseAreaInfo> GetPhasesForArea(int areaId)
         {
             return _phaseInfoByArea[areaId];
         }
@@ -10542,7 +10536,7 @@ namespace Game
             return _terrainSwapInfoById.LookupByKey(terrainSwapId);
         }
 
-        public List<SpellClickInfo> GetSpellClickInfoMapBounds(int creature_id)
+        public IReadOnlyList<SpellClickInfo> GetSpellClickInfoMapBounds(int creature_id)
         {
             return _spellClickInfoStorage[creature_id];
         }
@@ -11474,8 +11468,7 @@ namespace Game
 
                 data.time = (Milliseconds)result.Read<int>(9);
 
-                Tuple<int, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
-                _tempSummonDataStorage.Add(key, data);
+                _tempSummonDataStorage.Add((summonerId, summonerType, group), data);
 
                 ++count;
 
@@ -11639,7 +11632,7 @@ namespace Game
                     if (has_items)
                     {
                         // read items from cache
-                        List<MailItemInfo> temp = itemsCache[m.messageID];
+                        var temp = itemsCache.Extract(m.messageID);
                         Extensions.Swap(ref m.items, ref temp);
 
                         // if it is mail from non-player, or if it's already return mail, it shouldn't be returned, but deleted
@@ -12448,8 +12441,6 @@ namespace Game
         public MailLevelReward GetMailLevelReward(int level, Race race)
         {
             var mailList = _mailLevelRewardStorage[(byte)level];
-            if (mailList.Empty())
-                return null;
 
             foreach (var mailReward in mailList)
                 if (mailReward.raceMask.HasRace(race))
@@ -12933,10 +12924,9 @@ namespace Game
             return _sceneTemplateStorage.LookupByKey(sceneId);
         }
 
-        public List<TempSummonData> GetSummonGroup(int summonerId, SummonerType summonerType, byte group)
+        public IReadOnlyList<TempSummonData> GetSummonGroup(int summonerId, SummonerType summonerType, byte group)
         {
-            Tuple<int, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
-            return _tempSummonDataStorage[key];
+            return _tempSummonDataStorage[(summonerId, summonerType, group)];
         }
 
         public bool IsReservedName(string name)
@@ -13205,7 +13195,7 @@ namespace Game
             return _vehicleTemplateStore.LookupByKey(veh.GetCreatureEntry());
         }
 
-        public List<VehicleAccessory> GetVehicleAccessoryList(Vehicle veh)
+        public IReadOnlyList<VehicleAccessory> GetVehicleAccessoryList(Vehicle veh)
         {
             Creature cre = veh.GetBase().ToCreature();
             if (cre != null)
@@ -13232,7 +13222,7 @@ namespace Game
         Dictionary<int, ReputationOnKillEntry> _repOnKillStorage = new();
         Dictionary<int, RepSpilloverTemplate> _repSpilloverTemplateStorage = new();
         MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new();
-        MultiMap<Tuple<int, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new();
+        MultiMap<(int, SummonerType, byte), TempSummonData> _tempSummonDataStorage = new();
         Dictionary<int /*choiceId*/, PlayerChoice> _playerChoices = new();
         Dictionary<int, PageText> _pageTextStorage = new();
         List<string> _reservedNamesStorage = new();
@@ -13790,20 +13780,20 @@ namespace Game
 
     public class QuestPOIBlobData
     {
-        public int BlobIndex;
-        public int ObjectiveIndex;
-        public int QuestObjectiveID;
-        public int QuestObjectID;
-        public int MapID;
-        public int UiMapID;
-        public int Priority;
-        public int Flags;
-        public int WorldEffectID;
-        public int PlayerConditionID;
-        public int NavigationPlayerConditionID;
-        public int SpawnTrackingID;
-        public List<QuestPOIBlobPoint> Points;
-        public bool AlwaysAllowMergingBlobs;
+        public readonly int BlobIndex;
+        public readonly int ObjectiveIndex;
+        public readonly int QuestObjectiveID;
+        public readonly int QuestObjectID;
+        public readonly int MapID;
+        public readonly int UiMapID;
+        public readonly int Priority;
+        public readonly int Flags;
+        public readonly int WorldEffectID;
+        public readonly int PlayerConditionID;
+        public readonly int NavigationPlayerConditionID;
+        public readonly int SpawnTrackingID;
+        public readonly IReadOnlyList<QuestPOIBlobPoint> Points;
+        public readonly bool AlwaysAllowMergingBlobs;
 
         public QuestPOIBlobData(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags,
             int worldEffectID, int playerConditionID, int navigationPlayerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> points, bool alwaysAllowMergingBlobs)
@@ -14378,7 +14368,7 @@ namespace Game
 
         public QuestRelationResult() { }
 
-        public QuestRelationResult(List<int> range, bool onlyActive) : base(range)
+        public QuestRelationResult(IReadOnlyList<int> range, bool onlyActive) : base(range)
         {
             _onlyActive = onlyActive;
         }

@@ -302,7 +302,7 @@ namespace Game.Entities
         public override void SetFaction(int faction) { SetFactionTemplate(faction); }
         public void SetItem(int slot, int item) { SetUpdateFieldValue(ref m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Items, slot), item); }
 
-        public void SetCustomizations(List<ChrCustomizationChoice> customizations)
+        public void SetCustomizations(IReadOnlyList<ChrCustomizationChoice> customizations)
         {
             ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Customizations));
             foreach (var customization in customizations)

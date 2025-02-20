@@ -370,7 +370,7 @@ namespace Game.Scenarios
             return criteriasProgress;
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
+        public override IReadOnlyList<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(type, _data.Entry.Id);
         }

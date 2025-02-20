@@ -282,14 +282,11 @@ namespace Game.Entities
         public override SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag)
         {
             var overrides = m_overrideSpells[spellInfo.Id];
-            if (!overrides.Empty())
+            foreach (var spellId in overrides)
             {
-                foreach (var spellId in overrides)
-                {
-                    SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-                    if (newInfo != null)
-                        return GetCastSpellInfo(newInfo, triggerFlag);
-                }
+                SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+                if (newInfo != null)
+                    return GetCastSpellInfo(newInfo, triggerFlag);
             }
 
             return base.GetCastSpellInfo(spellInfo, triggerFlag);
@@ -1198,18 +1195,15 @@ namespace Game.Entities
                     skillStatusData.State = skillStatusData.State != SkillState.New ? SkillState.Deleted : SkillState.Unchanged; // skills marked as SKILL_NEW don't exist in database (this distinction is not neccessary for deletion but for re-learning the same skill before save to db happens)
 
                     // remove all spells that related to this skill
-                    List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skill);
+                    var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skill);
                     foreach (SkillLineAbilityRecord skillLineAbility in skillLineAbilities)
                         RemoveSpell(Global.SpellMgr.GetFirstSpellInChain(skillLineAbility.Spell));
 
-                    List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill);
-                    if (childSkillLines != null)
+                    var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill);
+                    foreach (SkillLineRecord childSkillLine in childSkillLines)
                     {
-                        foreach (SkillLineRecord childSkillLine in childSkillLines)
-                        {
-                            if (childSkillLine.ParentSkillLineID == skill)
-                                SetSkill(childSkillLine.Id, 0, 0, 0);
-                        }
+                        if (childSkillLine.ParentSkillLineID == skill)
+                            SetSkill(childSkillLine.Id, 0, 0, 0);
                     }
 
                     // Clear profession lines
@@ -1236,7 +1230,7 @@ namespace Game.Entities
 
                 if (skillSlot == 0)
                 {
-                    Log.outError(LogFilter.Misc, 
+                    Log.outError(LogFilter.Misc,
                         $"Tried to add skill {skill} but player {GetName()} ({GetGUID()}) " +
                         $"cannot have additional skills");
                     return;
@@ -1261,14 +1255,11 @@ namespace Game.Entities
                 else
                 {
                     // also learn missing child skills at 0 value
-                    List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill);
-                    if (childSkillLines != null)
+                    var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill);
+                    foreach (SkillLineRecord childSkillLine in childSkillLines)
                     {
-                        foreach (SkillLineRecord childSkillLine in childSkillLines)
-                        {
-                            if (!HasSkill(childSkillLine.Id))
-                                SetSkill(childSkillLine.Id, 0, 0, 0);
-                        }
+                        if (!HasSkill(childSkillLine.Id))
+                            SetSkill(childSkillLine.Id, 0, 0, 0);
                     }
 
                     int freeProfessionSlot = FindEmptyProfessionSlotFor(skill);
@@ -1677,7 +1668,7 @@ namespace Game.Entities
         {
             Class class_ = GetClass();
 
-            List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
+            var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
             foreach (var ability in skillLineAbilities)
             {
                 if (ability.SkillLine != skillId)

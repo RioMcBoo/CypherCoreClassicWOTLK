@@ -23,11 +23,6 @@ namespace System.Collections.Generic
             return collection.Count == 0;
         }
 
-        public static bool Empty<Tkey, TValue>(this IDictionary<Tkey, TValue> dictionary)
-        {
-            return dictionary.Count == 0;
-        }
-
         /// <summary>
         /// Returns the entry in this list at the given index, or the default value of the element
         /// type if the index was out of bounds.

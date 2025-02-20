@@ -1049,15 +1049,11 @@ namespace Game.Entities
 
         public void SetTextRepeatId(byte textGroup, byte id)
         {
-            if (!m_textRepeat.ContainsKey(textGroup))
+            if (!m_textRepeat.Contains(textGroup, id))
             {
                 m_textRepeat.Add(textGroup, id);
                 return;
             }
-
-            var repeats = m_textRepeat[textGroup];
-            if (!repeats.Contains(id))
-                repeats.Add(id);
             else
             {
                 Log.outError(LogFilter.Sql,
@@ -1066,16 +1062,14 @@ namespace Game.Entities
             }
         }
 
-        public List<byte> GetTextRepeatGroup(byte textGroup)
+        public IReadOnlyList<byte> GetTextRepeatGroup(byte textGroup)
         {
             return m_textRepeat[textGroup];
         }
 
         public void ClearTextRepeatGroup(byte textGroup)
         {
-            var groupList = m_textRepeat[textGroup];
-            if (groupList != null)
-                groupList.Clear();
+            m_textRepeat.Remove(textGroup);
         }
 
         public bool CanGiveExperience()
@@ -1877,11 +1871,7 @@ namespace Game.Entities
             Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
             {
                 // despawn all active creatures, and remove their respawns
-                List<Creature> toUnload = new();
                 foreach (var creature in map.GetCreatureBySpawnIdStore()[spawnId])
-                    toUnload.Add(creature);
-
-                foreach (Creature creature in toUnload)
                     map.AddObjectToRemoveList(creature);
 
                 map.RemoveRespawnTime(SpawnObjectType.Creature, spawnId, trans);

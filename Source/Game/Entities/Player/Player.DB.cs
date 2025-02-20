@@ -397,7 +397,7 @@ namespace Game.Entities
                     }
                 }
 
-                List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skillId);
+                var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skillId);
                 if (childSkillLines != null)
                 {
                     foreach (var childSkillLine in childSkillLines)
@@ -4195,7 +4195,7 @@ namespace Game.Entities
                                     draft = new MailDraft(mailTemplateId, false);    // items are already included
 
                                 var itemsList = itemsByMail[mail_id];
-                                if (itemsList != null)
+                                if (!itemsList.Empty())
                                 {
                                     foreach (var item in itemsList)
                                         draft.AddItem(item);

@@ -210,7 +210,7 @@ namespace Game
                 // not using Player.UpdateQuestObjectiveProgress,
                 // ObjectID in quest_objectives can be set to -1,
                 // areatrigger_involvedrelation then holds correct id
-                List<int> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
+                var quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
                 if (quests != null)
                 {
                     bool anyObjectiveChangedCompletionState = false;

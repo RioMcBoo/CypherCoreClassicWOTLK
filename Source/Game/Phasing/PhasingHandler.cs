@@ -128,7 +128,7 @@ namespace Game
             AddPhaseGroup(obj, phasesInGroup, obj.GetGUID(), updateVisibility, visitor);
         }
 
-        static void AddPhaseGroup(WorldObject obj, List<int> phasesInGroup, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
+        static void AddPhaseGroup(WorldObject obj, IReadOnlyList<int> phasesInGroup, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
         {
             bool changed = false;
             foreach (var phaseId in phasesInGroup)
@@ -158,7 +158,7 @@ namespace Game
             RemovePhaseGroup(obj, phasesInGroup, updateVisibility, visitor);
         }
 
-        static void RemovePhaseGroup(WorldObject obj, List<int> phasesInGroup, bool updateVisibility, ControlledUnitVisitor visitor)
+        static void RemovePhaseGroup(WorldObject obj, IReadOnlyList<int> phasesInGroup, bool updateVisibility, ControlledUnitVisitor visitor)
         {
             bool changed = false;
             foreach (var phaseId in phasesInGroup)

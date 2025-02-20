@@ -1311,7 +1311,7 @@ namespace Game.Entities
             else
             {
                 var bounds = m_spellImmune[(int)op][type];
-                foreach (var spell in bounds)
+                foreach (var spell in bounds.ToList())
                 {
                     if (spell == spellId)
                     {
@@ -2172,8 +2172,7 @@ namespace Game.Entities
 
         public void DelayOwnedAuras(int spellId, ObjectGuid caster, Milliseconds delaytime)
         {
-            var range = m_ownedAuras[spellId];
-            foreach (var aura in range)
+            foreach (var aura in m_ownedAuras[spellId])
             {
                 if (caster.IsEmpty() || aura.GetCasterGUID() == caster)
                 {
@@ -2899,15 +2898,11 @@ namespace Game.Entities
 
         public bool HasAuraEffect(int spellId, int effIndex, ObjectGuid casterGUID = default)
         {
-            var range = m_appliedAuras[spellId];
-            if (!range.Empty())
+            foreach (var aura in m_appliedAuras[spellId])
             {
-                foreach (var aura in range)
-                {
                     if (aura.HasEffect(effIndex) && (casterGUID.IsEmpty() || aura.GetBase().GetCasterGUID() == casterGUID))
                         return true;
                 }
-            }
 
             return false;
         }
@@ -2936,7 +2931,7 @@ namespace Game.Entities
 
         public bool HasAuraType(AuraType auraType)
         {
-            return !m_modAuras[auraType].Empty();
+            return m_modAuras.ContainsKey(auraType);
         }
 
         public bool HasAuraTypeWithCaster(AuraType auraType, ObjectGuid caster)
@@ -3947,20 +3942,15 @@ namespace Game.Entities
             {
                 bool canBreak = false;
                 // Get mask of all aurastates from remaining auras
-                var list = m_auraStateAuras[auraState];
-                for (var i = 0; i < list.Count && !(auraStateFound && canBreak);)
+                foreach(var i in m_auraStateAuras[auraState].ToList())                
                 {
-                    if (list[i] == aurApp)
+                    if (i == aurApp)                    
                     {
-                        m_auraStateAuras.Remove(auraState, list[i]);
-                        list = m_auraStateAuras[auraState];
-                        i = 0;
-                        canBreak = true;
+                        m_auraStateAuras.Remove(auraState, i);
                         continue;
                     }
 
                     auraStateFound = true;
-                    ++i;
                 }
             }
 
@@ -4018,9 +4008,8 @@ namespace Game.Entities
             Cypher.Assert(aurApp.GetBase().GetApplicationOfTarget(GetGUID()) == aurApp);
 
             var spellId = aurApp.GetBase().GetId();
-            var range = m_appliedAuras[spellId];
 
-            foreach (var app in range)
+            foreach (var app in m_appliedAuras[spellId].ToList())
             {
                 if (app == aurApp)
                 {
@@ -4033,10 +4022,7 @@ namespace Game.Entities
 
         public AuraEffect GetAuraEffect(int spellId, int effIndex, ObjectGuid casterGUID = default)
         {
-            var range = m_appliedAuras[spellId];
-            if (!range.Empty())
-            {
-                foreach (var aura in range)
+            foreach (var aura in m_appliedAuras[spellId])
                 {
                     if (aura.HasEffect(effIndex)
                             && (casterGUID.IsEmpty() || aura.GetBase().GetCasterGUID() == casterGUID))
@@ -4044,7 +4030,7 @@ namespace Game.Entities
                         return aura.GetBase().GetEffect(effIndex);
                     }
                 }
-            }
+
             return null;
         }
 
@@ -4471,8 +4457,7 @@ namespace Game.Entities
 
         public Aura GetOwnedAura(int spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, Aura except = null)
         {
-            var range = m_ownedAuras[spellId];
-            foreach (var aura in range)
+            foreach (var aura in m_ownedAuras[spellId])
             {
                 if (((aura.GetEffectMask() & reqEffMask) == reqEffMask) && (casterGUID.IsEmpty() || aura.GetCasterGUID() == casterGUID)
                     && (itemCasterGUID.IsEmpty() || aura.GetCastItemGUID() == itemCasterGUID) && (except == null || except != aura))
@@ -4484,7 +4469,7 @@ namespace Game.Entities
             return null;
         }
 
-        public List<AuraEffect> GetAuraEffectsByType(AuraType type)
+        public IReadOnlyList<AuraEffect> GetAuraEffectsByType(AuraType type)
         {
             return m_modAuras[type];
         }

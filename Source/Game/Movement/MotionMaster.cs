@@ -981,7 +981,7 @@ namespace Game.Movement
                 return;
             }
 
-            List<SplineChainLink> chain = Global.ScriptMgr.GetSplineChain(owner, (byte)dbChainId);
+            var chain = Global.ScriptMgr.GetSplineChain(owner, (byte)dbChainId);
             if (chain.Empty())
             {
                 Log.outError(LogFilter.Misc, 
@@ -993,7 +993,7 @@ namespace Game.Movement
             MoveAlongSplineChain(pointId, chain, walk);
         }
 
-        void MoveAlongSplineChain(int pointId, List<SplineChainLink> chain, bool walk)
+        void MoveAlongSplineChain(int pointId, IReadOnlyList<SplineChainLink> chain, bool walk)
         {
             Add(new SplineChainMovementGenerator(pointId, chain, walk));
         }

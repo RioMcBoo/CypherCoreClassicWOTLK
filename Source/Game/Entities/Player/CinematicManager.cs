@@ -19,7 +19,7 @@ namespace Game.Entities
         public CinematicSequencesRecord m_activeCinematic;
         public int m_activeCinematicCameraIndex;
         public Milliseconds m_cinematicLength;
-        public List<FlyByCamera> m_cinematicCamera;
+        public IReadOnlyList<FlyByCamera> m_cinematicCamera;
         Position m_remoteSightPosition;
         TempSummon m_CinematicObject;
 

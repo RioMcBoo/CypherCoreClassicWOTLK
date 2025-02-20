@@ -499,9 +499,8 @@ namespace Game
         {
             SpawnedPoolData spawnedPoolData = new(map);
             var poolIds = mAutoSpawnPoolsPerMap[spawnedPoolData.GetMap().GetId()];
-            if (poolIds != null)
-                foreach (var poolId in poolIds)
-                    SpawnPool(spawnedPoolData, poolId);
+            foreach (var poolId in poolIds)
+                SpawnPool(spawnedPoolData, poolId);
 
             return spawnedPoolData;
         }

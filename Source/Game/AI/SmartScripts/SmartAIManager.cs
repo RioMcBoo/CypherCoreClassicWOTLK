@@ -2681,7 +2681,7 @@ namespace Game.AI
             return temp;
         }
 
-        public static SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, int eventId)
+        public static SmartScriptHolder FindLinkedSourceEvent(IReadOnlyList<SmartScriptHolder> list, int eventId)
         {
             var sch = list.Find(p => p.Link == eventId);
             if (sch != null)
@@ -2690,7 +2690,7 @@ namespace Game.AI
             return null;
         }
 
-        public SmartScriptHolder FindLinkedEvent(List<SmartScriptHolder> list, int link)
+        public SmartScriptHolder FindLinkedEvent(IReadOnlyList<SmartScriptHolder> list, int link)
         {
             var sch = list.Find(p => p.EventId == link && p.GetEventType() == SmartEvents.Link);
             if (sch != null)

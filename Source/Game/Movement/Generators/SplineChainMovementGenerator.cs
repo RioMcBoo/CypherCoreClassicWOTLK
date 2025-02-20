@@ -12,7 +12,7 @@ namespace Game.Movement
 {
     public class SplineChainMovementGenerator : MovementGenerator
     {
-        public SplineChainMovementGenerator(int id, List<SplineChainLink> chain, bool walk = false)
+        public SplineChainMovementGenerator(int id, IReadOnlyList<SplineChainLink> chain, bool walk = false)
         {
             _id = id;
             _chain = chain;
@@ -251,7 +251,7 @@ namespace Game.Movement
         public int GetId() { return _id; }
 
         int _id;
-        List<SplineChainLink> _chain = new();
+        IReadOnlyList<SplineChainLink> _chain;
         byte _chainSize;
         bool _walk;
         byte _nextIndex;

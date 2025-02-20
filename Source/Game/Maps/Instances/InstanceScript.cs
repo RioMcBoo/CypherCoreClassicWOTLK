@@ -1038,7 +1038,7 @@ namespace Game.Maps
                 $"(Map {instance.GetId()}, Instance Id: {instance.GetInstanceId()})."); 
         }
 
-        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroups() { return _instanceSpawnGroups; }
+        public IReadOnlyList<InstanceSpawnGroupInfo> GetInstanceSpawnGroups() { return _instanceSpawnGroups; }
 
         // Override this function to validate all additional data loads
         public virtual void AfterDataLoad() { }
@@ -1052,7 +1052,7 @@ namespace Game.Maps
         Dictionary<int, int> _creatureInfo = new();
         Dictionary<int, int> _gameObjectInfo = new();
         Dictionary<int, ObjectGuid> _objectGuids = new();
-        List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new();
+        IReadOnlyList<InstanceSpawnGroupInfo> _instanceSpawnGroups;
         List<int> _activatedAreaTriggers = new();
         int _entranceId;
         int _temporaryEntranceId;

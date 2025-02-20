@@ -42,9 +42,6 @@ namespace Game.Entities
             m_unitStatModManager = new(this);
             m_unitStatModManager.ModifyMult(UnitMods.DamageOffHand, 0.5f, true, UnitModType.TotalPermanent);
 
-            foreach (AuraType auraType in Enum.GetValues(typeof(AuraType)))
-                m_modAuras[auraType] = new List<AuraEffect>();
-
             for (byte i = 0; i < (int)WeaponAttackType.Max; ++i)
                 m_weaponDamage[i] = [1.0f, 2.0f];
 
@@ -1518,14 +1515,14 @@ namespace Game.Entities
                         var formChoice = player.GetCustomizationChoice(formModelData.OptionID);
                         if (formChoice != 0)
                         {
-                            var choiceIndex = formModelData.Choices.FindIndex(choice =>
+                            var choiceIndex = formModelData.Choices.TryFind(out var _, out var index, choice =>
                             {
                                 return choice.Id == formChoice;
                             });
 
-                            if (choiceIndex != -1)
+                            if (choiceIndex)
                             {
-                                ChrCustomizationDisplayInfoRecord displayInfo = formModelData.Displays[choiceIndex];
+                                ChrCustomizationDisplayInfoRecord displayInfo = formModelData.Displays[index];
                                 if (displayInfo != null)
                                     return displayInfo.DisplayID;
                             }
@@ -3749,7 +3746,7 @@ namespace Game.Entities
 
             // We're going to call functions which can modify content of the list during iteration over it's elements
             // Let's copy the list so we can prevent iterator invalidation
-            var vSchoolAbsorbCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.SchoolAbsorb);
+            var vSchoolAbsorbCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.SchoolAbsorb).ToList();
             vSchoolAbsorbCopy.Sort(new AbsorbAuraOrderPred());
 
             // absorb without mana cost

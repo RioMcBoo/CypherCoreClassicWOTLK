@@ -96,7 +96,7 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Maps, $"{i_gameObjects} GameObjects, {i_creatures} Creatures, {i_areaTriggers} AreaTrriggers and {i_corpses} Corpses/Bones loaded for grid {i_grid.GetGridId()} on map {i_map.GetId()}");
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
@@ -104,7 +104,7 @@ namespace Game.Maps
                 LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
@@ -112,7 +112,7 @@ namespace Game.Maps
                 LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public override void Visit(IReadOnlyList<AreaTrigger> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             SortedSet<long> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
@@ -134,7 +134,7 @@ namespace Game.Maps
             _phaseOwner = phaseOwner;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
@@ -142,7 +142,7 @@ namespace Game.Maps
                 LoadHelper<GameObject>(cell_guids.gameobjects, cellCoord, ref i_gameObjects, i_map, _phaseId, _phaseOwner);
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
@@ -179,7 +179,7 @@ namespace Game.Maps
             i_corpses = gloader.i_corpses;
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public override void Visit(IReadOnlyList<Corpse> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             var corpses = i_map.GetCorpsesInCell(cellCoord.GetId());
@@ -212,7 +212,7 @@ namespace Game.Maps
     //Stop the creatures before unloading the NGrid
     class ObjectGridStoper : Notifier
     {
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
             for (var i = 0; i < objs.Count; ++i)
@@ -230,7 +230,7 @@ namespace Game.Maps
     //Move the foreign creatures back to respawn positions before unloading the NGrid
     class ObjectGridEvacuator : Notifier
     {
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -242,7 +242,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -258,7 +258,7 @@ namespace Game.Maps
     //Clean up and remove from world
     class ObjectGridCleaner : Notifier
     {
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IReadOnlyList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -276,7 +276,7 @@ namespace Game.Maps
     //Delete objects before deleting NGrid
     class ObjectGridUnloader : Notifier
     {
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IReadOnlyList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {

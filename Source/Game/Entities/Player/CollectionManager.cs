@@ -658,11 +658,10 @@ namespace Game.Entities
 
         void AddTemporaryAppearance(ObjectGuid itemGuid, ItemModifiedAppearanceRecord itemModifiedAppearance)
         {
-            var itemsWithAppearance = _temporaryAppearances[itemModifiedAppearance.Id];
-            if (itemsWithAppearance.Empty())
+            if (!_temporaryAppearances.ContainsKey(itemModifiedAppearance.Id))
                 _owner.GetPlayer().AddConditionalTransmog(itemModifiedAppearance.Id);
 
-            itemsWithAppearance.Add(itemGuid);
+            _temporaryAppearances.Add(itemModifiedAppearance.Id, itemGuid);
         }
 
         public void RemoveTemporaryAppearance(Item item)
@@ -671,15 +670,10 @@ namespace Game.Entities
             if (itemModifiedAppearance == null)
                 return;
 
-            var guid = _temporaryAppearances[itemModifiedAppearance.Id];
-            if (guid.Empty())
-                return;
-
-            guid.Remove(item.GetGUID());
-            if (guid.Empty())
+            if (_temporaryAppearances.Remove(itemModifiedAppearance.Id, item.GetGUID()))
             {
-                _owner.GetPlayer().RemoveConditionalTransmog(itemModifiedAppearance.Id);
-                _temporaryAppearances.Remove(itemModifiedAppearance.Id);
+                if (!_temporaryAppearances.ContainsKey(itemModifiedAppearance.Id))
+                    _owner.GetPlayer().RemoveConditionalTransmog(itemModifiedAppearance.Id);
             }
         }
 
@@ -694,7 +688,7 @@ namespace Game.Entities
             return (false, false);
         }
 
-        public List<ObjectGuid> GetItemsProvidingTemporaryAppearance(int itemModifiedAppearanceId)
+        public IReadOnlyList<ObjectGuid> GetItemsProvidingTemporaryAppearance(int itemModifiedAppearanceId)
         {
             return _temporaryAppearances[itemModifiedAppearanceId];
         }

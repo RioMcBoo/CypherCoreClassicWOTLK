@@ -1954,7 +1954,7 @@ namespace Game.Entities
 
             eff.EquippedItems.Add(item);
 
-            List<ItemSetSpellRecord> itemSetSpells = Global.DB2Mgr.GetItemSetSpells(setid);
+            var itemSetSpells = Global.DB2Mgr.GetItemSetSpells(setid);
             foreach (var itemSetSpell in itemSetSpells)
             {
                 //not enough for  spell
@@ -2008,7 +2008,7 @@ namespace Game.Entities
 
             eff.EquippedItems.Remove(item);
 
-            List<ItemSetSpellRecord> itemSetSpells = Global.DB2Mgr.GetItemSetSpells(setid);
+            var itemSetSpells = Global.DB2Mgr.GetItemSetSpells(setid);
             foreach (ItemSetSpellRecord itemSetSpell in itemSetSpells)
             {
                 // enough for spell

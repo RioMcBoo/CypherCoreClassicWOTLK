@@ -70,10 +70,10 @@ namespace Game.Achievements
             Log.outDebug(LogFilter.Achievement, 
                 $"UpdateCriteria({type}, {miscValue1}, {miscValue2}, {miscValue3}) {GetOwnerInfo()}");
 
-            List<Criteria> criteriaList = GetCriteriaByType(type, (int)miscValue1);
+            var criteriaList = GetCriteriaByType(type, (int)miscValue1);
             foreach (Criteria criteria in criteriaList)
             {
-                List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
                 if (!CanUpdateCriteria(criteria, trees, miscValue1, miscValue2, miscValue3, refe, referencePlayer))
                     continue;
 
@@ -473,7 +473,7 @@ namespace Game.Achievements
 
         public void StartCriteria(CriteriaStartEvent startEvent, int entry, TimeSpan timeLost = default)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetCriteriaByStartEvent(startEvent, entry);
+            var criteriaList = Global.CriteriaMgr.GetCriteriaByStartEvent(startEvent, entry);
 
             if (criteriaList.Empty())
                 return;
@@ -489,7 +489,7 @@ namespace Game.Achievements
                 if (timeLimit <= TimeSpan.Zero)
                     continue;
 
-                List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
 
                 bool canStart = trees.Any(tree => !IsCompletedCriteriaTree(tree));
 
@@ -512,7 +512,7 @@ namespace Game.Achievements
 
         public void FailCriteria(CriteriaFailEvent failEvent, int asset)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, asset);
+            var criteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, asset);
 
             if (criteriaList.Empty())
                 return;
@@ -521,7 +521,7 @@ namespace Game.Achievements
             {
                 _startedCriteria.Remove(criteria.Id);
 
-                List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
 
                 bool allTreesFullyComplete = trees.All(tree =>
                 {
@@ -864,7 +864,7 @@ namespace Game.Achievements
             return false;
         }
 
-        bool CanUpdateCriteria(Criteria criteria, List<CriteriaTree> trees, long miscValue1, long miscValue2, long miscValue3, WorldObject refe, Player referencePlayer)
+        bool CanUpdateCriteria(Criteria criteria, IReadOnlyList<CriteriaTree> trees, long miscValue1, long miscValue2, long miscValue3, WorldObject refe, Player referencePlayer)
         {
             if (Global.DisableMgr.IsDisabledFor(DisableType.Criteria, criteria.Id, null))
             {
@@ -2795,8 +2795,7 @@ namespace Game.Achievements
                         return false;
 
                     var formChoice = referencePlayer.GetCustomizationChoice(formModelData.OptionID);
-                    var choiceIndex = formModelData.Choices.FindIndex(choice => { return choice.Id == formChoice; });
-                    if (choiceIndex == -1)
+                    if (!formModelData.Choices.TryFind(out _, out int choiceIndex, choice => choice.Id == formChoice))
                         return false;
 
                     if (reqValue != formModelData.Displays[choiceIndex].DisplayID)
@@ -3107,7 +3106,7 @@ namespace Game.Achievements
         public virtual bool RequiredAchievementSatisfied(int achievementId) { return false; }
 
         public virtual string GetOwnerInfo() { return ""; }
-        public virtual List<Criteria> GetCriteriaByType(CriteriaType type, int asset) { return null; }
+        public virtual IReadOnlyList<Criteria> GetCriteriaByType(CriteriaType type, int asset) { return null; }
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
@@ -3503,25 +3502,22 @@ namespace Game.Achievements
             }
         }
 
-        public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, int asset)
+        public IReadOnlyList<Criteria> GetPlayerCriteriaByType(CriteriaType type, int asset)
         {
             if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
             {
-                if (_criteriasByAsset[(int)type].ContainsKey(asset))
                     return _criteriasByAsset[(int)type][asset];
-
-                return new List<Criteria>();
             }
 
             return _criteriasByType[type];
         }
 
-        public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, int scenarioId)
+        public IReadOnlyList<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, int scenarioId)
         {
             return _scenarioCriteriasByTypeAndScenarioId[(int)type][scenarioId];
         }
 
-        public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
+        public IReadOnlyList<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
         {
             return _criteriasByStartEvent[(int)startEvent][asset];
         }
@@ -3536,22 +3532,22 @@ namespace Game.Achievements
             return _criteriasByFailEvent[(int)failEvent];
         }
 
-        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
+        public IReadOnlyList<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
         {
             return _criteriasByFailEvent[(int)failEvent][asset];
         }
 
-        public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
+        public IReadOnlyList<Criteria> GetGuildCriteriaByType(CriteriaType type)
         {
             return _guildCriteriasByType[type];
         }
 
-        public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
+        public IReadOnlyList<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
         {
             return _questObjectiveCriteriasByType[type];
         }
 
-        public List<CriteriaTree> GetCriteriaTreesByCriteria(int criteriaId)
+        public IReadOnlyList<CriteriaTree> GetCriteriaTreesByCriteria(int criteriaId)
         {
             return _criteriaTreeByCriteria[criteriaId];
         }

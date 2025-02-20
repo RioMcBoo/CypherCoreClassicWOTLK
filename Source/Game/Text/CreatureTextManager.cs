@@ -13,6 +13,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game
 {
@@ -209,7 +210,7 @@ namespace Game
             if (tempGroup.Empty())
             {
                 source.ClearTextRepeatGroup(textGroup);
-                tempGroup = textGroupContainer;
+                tempGroup = textGroupContainer.ToList();
             }
 
             var textEntry = tempGroup.SelectRandomElementByWeight(t => t.probability);

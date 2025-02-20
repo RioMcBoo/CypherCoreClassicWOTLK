@@ -236,16 +236,16 @@ namespace Game.Spells
             _auraState = AuraStateType.None;
         }
 
-        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, List<SpellEffectRecord> effects)
+        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, IReadOnlyList<SpellEffectRecord> effects)
         {
             Id = spellName.Id;
             Difficulty = difficulty;
             SpellName = spellName.Name;
 
-            foreach (SpellEffectRecord spellEffect in effects)
+            for (int i = 0; i < effects.Count; ++i)
             {
-                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
-                _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
+                _effects.EnsureWritableListIndex(effects[i].EffectIndex, new SpellEffectInfo(this));
+                _effects[effects[i].EffectIndex] = new SpellEffectInfo(this, effects[i]);
             }
 
             // Correct EffectIndex for blank effects
@@ -855,7 +855,7 @@ namespace Game.Spells
             if (RequiredAreasID > 0)
             {
                 bool found = false;
-                List<int> areaGroupMembers = Global.DB2Mgr.GetAreasForGroup(RequiredAreasID);
+                var areaGroupMembers = Global.DB2Mgr.GetAreasForGroup(RequiredAreasID);
                 foreach (int areaId in areaGroupMembers)
                 {
                     if (Global.DB2Mgr.IsInArea(area_id, areaId))
@@ -4155,7 +4155,7 @@ namespace Game.Spells
         public int ProcCharges { get; set; }
         public Milliseconds ProcCooldown { get; set; }
         public float ProcBasePPM { get; set; }
-        List<SpellProcsPerMinuteModRecord> ProcPPMMods = new();
+        IReadOnlyList<SpellProcsPerMinuteModRecord> ProcPPMMods;
         public int MaxLevel { get; set; }
         public int BaseLevel { get; set; }
         public int SpellLevel { get; set; }

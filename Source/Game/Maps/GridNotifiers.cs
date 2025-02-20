@@ -14,15 +14,15 @@ namespace Game.Maps
 {
     public class Notifier
     {
-        public virtual void Visit(IList<WorldObject> objs) { }
-        public virtual void Visit(IList<Creature> objs) { }
-        public virtual void Visit(IList<AreaTrigger> objs) { }
-        public virtual void Visit(IList<SceneObject> objs) { }
-        public virtual void Visit(IList<Conversation> objs) { }
-        public virtual void Visit(IList<GameObject> objs) { }
-        public virtual void Visit(IList<DynamicObject> objs) { }
-        public virtual void Visit(IList<Corpse> objs) { }
-        public virtual void Visit(IList<Player> objs) { }
+        public virtual void Visit(IReadOnlyList<WorldObject> objs) { }
+        public virtual void Visit(IReadOnlyList<Creature> objs) { }
+        public virtual void Visit(IReadOnlyList<AreaTrigger> objs) { }
+        public virtual void Visit(IReadOnlyList<SceneObject> objs) { }
+        public virtual void Visit(IReadOnlyList<Conversation> objs) { }
+        public virtual void Visit(IReadOnlyList<GameObject> objs) { }
+        public virtual void Visit(IReadOnlyList<DynamicObject> objs) { }
+        public virtual void Visit(IReadOnlyList<Corpse> objs) { }
+        public virtual void Visit(IReadOnlyList<Player> objs) { }
 
         public void CreatureUnitRelocationWorker(Creature c, Unit u)
         {
@@ -50,15 +50,15 @@ namespace Game.Maps
             _mask = mask;
         }
 
-        public void Visit(IList<WorldObject> collection) { _notifier.Visit(collection); }
-        public void Visit(IList<Creature> creatures) { _notifier.Visit(creatures); }
-        public void Visit(IList<AreaTrigger> areatriggers) { _notifier.Visit(areatriggers); }
-        public void Visit(IList<SceneObject> sceneObjects) { _notifier.Visit(sceneObjects); }
-        public void Visit(IList<Conversation> conversations) { _notifier.Visit(conversations); }
-        public void Visit(IList<GameObject> gameobjects) { _notifier.Visit(gameobjects); }
-        public void Visit(IList<DynamicObject> dynamicobjects) { _notifier.Visit(dynamicobjects); }
-        public void Visit(IList<Corpse> corpses) { _notifier.Visit(corpses); }
-        public void Visit(IList<Player> players) { _notifier.Visit(players); }
+        public void Visit(IReadOnlyList<WorldObject> collection) { _notifier.Visit(collection); }
+        public void Visit(IReadOnlyList<Creature> creatures) { _notifier.Visit(creatures); }
+        public void Visit(IReadOnlyList<AreaTrigger> areatriggers) { _notifier.Visit(areatriggers); }
+        public void Visit(IReadOnlyList<SceneObject> sceneObjects) { _notifier.Visit(sceneObjects); }
+        public void Visit(IReadOnlyList<Conversation> conversations) { _notifier.Visit(conversations); }
+        public void Visit(IReadOnlyList<GameObject> gameobjects) { _notifier.Visit(gameobjects); }
+        public void Visit(IReadOnlyList<DynamicObject> dynamicobjects) { _notifier.Visit(dynamicobjects); }
+        public void Visit(IReadOnlyList<Corpse> corpses) { _notifier.Visit(corpses); }
+        public void Visit(IReadOnlyList<Player> players) { _notifier.Visit(players); }
 
         Notifier _notifier;
         internal GridMapTypeMask _mask;
@@ -74,7 +74,7 @@ namespace Game.Maps
             i_visibleNow = new List<WorldObject>();
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IReadOnlyList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -154,14 +154,14 @@ namespace Game.Maps
 
     public class VisibleChangesNotifier : Notifier
     {
-        ICollection<WorldObject> i_objects;
+        IReadOnlyList<WorldObject> i_objects;
 
-        public VisibleChangesNotifier(ICollection<WorldObject> objects)
+        public VisibleChangesNotifier(IReadOnlyList<WorldObject> objects)
         {
             i_objects = objects;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -177,7 +177,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -190,7 +190,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -210,7 +210,7 @@ namespace Game.Maps
     {
         public PlayerRelocationNotifier(Player player) : base(player) { }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             base.Visit(objs);
 
@@ -228,7 +228,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             base.Visit(objs);
 
@@ -254,7 +254,7 @@ namespace Game.Maps
             i_creature = c;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -266,7 +266,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             if (!i_creature.IsAlive())
                 return;
@@ -294,7 +294,7 @@ namespace Game.Maps
             i_radius = radius;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -314,7 +314,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -346,7 +346,7 @@ namespace Game.Maps
             isCreature = unit.IsTypeId(TypeId.Unit);
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -422,7 +422,7 @@ namespace Game.Maps
             required3dDist = req3dDist;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -448,7 +448,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -469,7 +469,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -519,7 +519,7 @@ namespace Game.Maps
             i_distSq = dist * dist;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -545,7 +545,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -568,7 +568,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -607,7 +607,7 @@ namespace Game.Maps
             i_timeDiff = diff;
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IReadOnlyList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -635,7 +635,7 @@ namespace Game.Maps
             action = _action;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -657,7 +657,7 @@ namespace Game.Maps
             Do = _Do;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -679,7 +679,7 @@ namespace Game.Maps
             _do = @do;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -703,7 +703,7 @@ namespace Game.Maps
             i_do = _do;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
@@ -716,7 +716,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
@@ -729,7 +729,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
@@ -742,7 +742,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public override void Visit(IReadOnlyList<Corpse> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
@@ -755,7 +755,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
@@ -768,7 +768,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public override void Visit(IReadOnlyList<AreaTrigger> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
@@ -781,7 +781,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public override void Visit(IReadOnlyList<SceneObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
                 return;
@@ -794,7 +794,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public override void Visit(IReadOnlyList<Conversation> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
@@ -810,7 +810,7 @@ namespace Game.Maps
 
     public class ResetNotifier : Notifier
     {
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -819,7 +819,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -837,7 +837,7 @@ namespace Game.Maps
             worldObject = obj;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -852,7 +852,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -865,7 +865,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -913,7 +913,7 @@ namespace Game.Maps
             _do = @do;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1021,7 +1021,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
@@ -1044,7 +1044,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
@@ -1067,7 +1067,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
@@ -1090,7 +1090,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public override void Visit(IReadOnlyList<Corpse> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
@@ -1113,7 +1113,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
@@ -1136,7 +1136,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public override void Visit(IReadOnlyList<AreaTrigger> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
@@ -1159,7 +1159,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public override void Visit(IReadOnlyList<SceneObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
                 return;
@@ -1182,7 +1182,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public override void Visit(IReadOnlyList<Conversation> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
@@ -1222,7 +1222,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
@@ -1238,7 +1238,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
@@ -1254,7 +1254,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
@@ -1270,7 +1270,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public override void Visit(IReadOnlyList<Corpse> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
@@ -1286,7 +1286,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
@@ -1302,7 +1302,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public override void Visit(IReadOnlyList<AreaTrigger> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
@@ -1318,7 +1318,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public override void Visit(IReadOnlyList<SceneObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
                 return;
@@ -1334,7 +1334,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public override void Visit(IReadOnlyList<Conversation> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
@@ -1368,7 +1368,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
@@ -1381,7 +1381,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
@@ -1394,7 +1394,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public override void Visit(IReadOnlyList<Corpse> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
@@ -1407,7 +1407,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
@@ -1420,7 +1420,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public override void Visit(IReadOnlyList<DynamicObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
@@ -1433,7 +1433,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public override void Visit(IReadOnlyList<AreaTrigger> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
@@ -1446,7 +1446,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public override void Visit(IReadOnlyList<SceneObject> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
@@ -1459,7 +1459,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public override void Visit(IReadOnlyList<Conversation> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
@@ -1485,7 +1485,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             // already found
             if (i_object != null)
@@ -1520,7 +1520,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1549,7 +1549,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1575,7 +1575,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1591,7 +1591,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1622,7 +1622,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1635,7 +1635,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1664,7 +1664,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1677,7 +1677,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1703,7 +1703,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             // already found
             if (i_object != null)
@@ -1738,7 +1738,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1767,7 +1767,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1793,7 +1793,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             // already found
             if (i_object != null)
@@ -1828,7 +1828,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1863,7 +1863,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<Player> objs)
+        public override void Visit(IReadOnlyList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {

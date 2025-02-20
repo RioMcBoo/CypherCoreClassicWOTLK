@@ -31,9 +31,9 @@ namespace Game
                 int j = RandomHelper.IRand(i, n);
                 if (i != j)
                 {
-                    var leftList = pool.members[i];
-                    pool.members[i] = pool.members[j];
-                    pool.members[j] = leftList;
+                    var leftList = pool.members.Extract(i);
+                    pool.members.SetValues(i, pool.members.Extract(j));
+                    pool.members.SetValues(j, leftList);
                 }
 
                 foreach (var quest in pool.members[i])

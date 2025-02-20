@@ -519,7 +519,7 @@ namespace Game
             return hasPermission;
         }
 
-        public List<RBACPermissions> GetRBACDefaultPermissions(byte secLevel)
+        public IReadOnlyList<RBACPermissions> GetRBACDefaultPermissions(byte secLevel)
         {
             return _defaultPermissions[secLevel];
         }

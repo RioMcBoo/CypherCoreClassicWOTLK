@@ -215,10 +215,6 @@ namespace Game.Scripting
                     ushort chainId = resultMeta.Read<ushort>(1);
                     byte splineId = resultMeta.Read<byte>(2);
 
-                    var key = (entry, chainId);
-                    if (!m_mSplineChainsMap.ContainsKey(key))
-                        m_mSplineChainsMap[key] = new List<SplineChainLink>();
-
                     var chain = m_mSplineChainsMap[(entry, chainId)];
                     if (splineId != chain.Count)
                     {
@@ -230,7 +226,7 @@ namespace Game.Scripting
                     Milliseconds expectedDuration = (Milliseconds)resultMeta.Read<int>(3);
                     Milliseconds msUntilNext = (Milliseconds)resultMeta.Read<int>(4);
                     Speed velocity = (Speed)resultMeta.Read<float>(5);
-                    chain.Add(new SplineChainLink(expectedDuration, msUntilNext, velocity));
+                    m_mSplineChainsMap.Add((entry, chainId), new SplineChainLink(expectedDuration, msUntilNext, velocity));
 
                     if (splineId == 0)
                         ++chainCount;
@@ -247,7 +243,7 @@ namespace Game.Scripting
                     float posY = resultWP.Read<float>(5);
                     float posZ = resultWP.Read<float>(6);
                     var chain = m_mSplineChainsMap[(entry, chainId)];
-                    if (chain == null)
+                    if (chain.Empty())
                     {
                         Log.outWarn(LogFilter.ServerLoading, 
                             $"Creature #{entry} has waypoint data for spline chain {chainId}. " +
@@ -285,12 +281,12 @@ namespace Game.Scripting
             UnitAI.FillAISpellInfo();
         }
 
-        public List<SplineChainLink> GetSplineChain(Creature who, ushort chainId)
+        public IReadOnlyList<SplineChainLink> GetSplineChain(Creature who, ushort chainId)
         {
             return GetSplineChain(who.GetEntry(), chainId);
         }
 
-        List<SplineChainLink> GetSplineChain(int entry, ushort chainId)
+        IReadOnlyList<SplineChainLink> GetSplineChain(int entry, ushort chainId)
         {
             return m_mSplineChainsMap[(entry, chainId)];
         }

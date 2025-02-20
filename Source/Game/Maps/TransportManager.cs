@@ -516,15 +516,9 @@ namespace Game.Maps
         }
 
         public void CreateTransportsForMap(Map map)
-        {
-            var mapTransports = _transportsByMap[map.GetId()];
-
-            // no transports here
-            if (mapTransports.Empty())
-                return;
-
+        {            
             // create transports
-            foreach (var transport in mapTransports)
+            foreach (var transport in _transportsByMap[map.GetId()])
             {
                 CreateTransport(transport.TransportGameObjectId, map, transport.SpawnId,
                     transport.PhaseUseFlags, transport.PhaseId, transport.PhaseGroup);

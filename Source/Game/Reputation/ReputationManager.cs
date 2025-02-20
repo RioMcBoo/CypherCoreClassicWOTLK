@@ -24,7 +24,7 @@ namespace Game
             _sendFactionIncreased = false;
         }
 
-        ReputationRank ReputationToRankHelper<T>(IList<T> thresholds, int standing, Func<T, int> thresholdExtractor)
+        ReputationRank ReputationToRankHelper<T>(IReadOnlyList<T> thresholds, int standing, Func<T, int> thresholdExtractor)
         {
             int i = 0;
             int rank = -1;

@@ -1445,15 +1445,13 @@ namespace Game.Entities
                 return;
 
             var petStore = Global.SpellMgr.PetFamilySpellsStorage[(int)cInfo.Family];
-            if (petStore != null)
-            {
+
                 // For general hunter pets skill 270
                 // Passive 01~10, Passive 00 (20782, not used), Ferocious Inspiration (34457)
                 // Scale 01~03 (34902~34904, bonus from owner, not used)
                 foreach (var spellId in petStore)
                     AddSpell(spellId, ActiveStates.Decide, PetSpellState.New, PetSpellType.Family);
             }
-        }
 
         void CastPetAuras(bool current)
         {
@@ -1614,19 +1612,13 @@ namespace Game.Entities
         {
             List<int> learnedSpells = new();
 
-            List<SpecializationSpellsRecord> specSpells = 
-                Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);
-
-            if (specSpells != null)
+            var specSpells = Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);foreach (var specSpell in specSpells)
             {
-                foreach (var specSpell in specSpells)
-                {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID, Difficulty.None);
-                    if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
-                        continue;
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID, Difficulty.None);
+                if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
+                    continue;
 
-                    learnedSpells.Add(specSpell.SpellID);
-                }
+                learnedSpells.Add(specSpell.SpellID);
             }
 
             LearnSpells(learnedSpells);
@@ -1641,27 +1633,18 @@ namespace Game.Entities
                 ChrSpecializationRecord specialization = Global.DB2Mgr.GetChrSpecializationByIndex(0, i);
                 if (specialization != null)
                 {
-                    List<SpecializationSpellsRecord> specSpells = 
-                        Global.DB2Mgr.GetSpecializationSpells(specialization.Id);
-
-                    if (specSpells != null)
-                    {
-                        foreach (var specSpell in specSpells)
-                            unlearnedSpells.Add(specSpell.SpellID);
-                    }
+                    var specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization.Id);
+                    foreach (var specSpell in specSpells)
+                        unlearnedSpells.Add(specSpell.SpellID);
                 }
 
                 ChrSpecializationRecord specialization1 = Global.DB2Mgr.GetChrSpecializationByIndex(Class.Max, i);
                 if (specialization1 != null)
                 {
-                    List<SpecializationSpellsRecord> specSpells = 
-                        Global.DB2Mgr.GetSpecializationSpells(specialization1.Id);
+                    var specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization1.Id);
 
-                    if (specSpells != null)
-                    {
-                        foreach (var specSpell in specSpells)
+                    foreach (var specSpell in specSpells)
                             unlearnedSpells.Add(specSpell.SpellID);
-                    }
                 }
             }
 

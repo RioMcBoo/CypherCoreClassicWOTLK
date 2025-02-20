@@ -238,7 +238,7 @@ namespace Game.Accounts
             }
 
             // Add default permissions
-            List<RBACPermissions> permissions = Global.AccountMgr.GetRBACDefaultPermissions(_secLevel);
+            var permissions = Global.AccountMgr.GetRBACDefaultPermissions(_secLevel);
             foreach (var id in permissions)
                 GrantPermission(id);
 

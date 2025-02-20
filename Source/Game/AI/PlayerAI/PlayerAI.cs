@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.AI
 {
@@ -576,8 +577,7 @@ namespace Game.AI
 
         public void CancelAllShapeshifts()
         {
-            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift);
-            List<Aura> removableShapeshifts = new();
+            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift).ToList();
             foreach (AuraEffect auraEff in shapeshiftAuras)
             {
                 Aura aura = auraEff.GetBase();
@@ -590,11 +590,9 @@ namespace Game.AI
                     continue;
                 if (!auraInfo.IsPositive() || auraInfo.IsPassive())
                     continue;
-                removableShapeshifts.Add(aura);
-            }
 
-            foreach (Aura aura in removableShapeshifts)
                 me.RemoveOwnedAura(aura, AuraRemoveMode.Cancel);
+            }
         }
 
         public Creature GetCharmer()

@@ -1876,7 +1876,7 @@ namespace Game
             _activate = activate;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public override void Visit(IReadOnlyList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1886,7 +1886,7 @@ namespace Game
             }
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public override void Visit(IReadOnlyList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {

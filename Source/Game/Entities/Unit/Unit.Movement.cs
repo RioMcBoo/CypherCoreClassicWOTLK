@@ -9,6 +9,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities
@@ -875,8 +876,7 @@ namespace Game.Entities
             if (IsLoading())
                 return;
 
-            var mounts = GetAuraEffectsByType(AuraType.Mounted);
-            foreach (AuraEffect aurEff in mounts.ToArray())
+            foreach (var aurEff in GetAuraEffectsByType(AuraType.Mounted).ToList())
             {
                 aurEff.RecalculateAmount();
                 if (aurEff.GetAmount() == 0)

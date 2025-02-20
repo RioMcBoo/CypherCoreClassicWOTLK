@@ -704,16 +704,12 @@ namespace Game
                     bool found = false;
                     foreach (int areaId in phaseInfo.Areas)
                     {
-                        List<PhaseAreaInfo> phases = Global.ObjectMgr.GetPhasesForArea(areaId);
-                        if (phases != null)
+                        foreach (var phase in Global.ObjectMgr.GetPhasesForArea(areaId))
                         {
-                            foreach (PhaseAreaInfo phase in phases)
+                            if (phase.PhaseInfo.Id == id.SourceGroup)
                             {
-                                if (phase.PhaseInfo.Id == id.SourceGroup)
-                                {
-                                    phase.Conditions.AddRange(conditions);
-                                    found = true;
-                                }
+                                phase.Conditions.AddRange(conditions);
+                                found = true;
                             }
                         }
                     }
@@ -724,8 +720,7 @@ namespace Game
             }
             else
             {
-                var phases = Global.ObjectMgr.GetPhasesForArea(id.SourceEntry);
-                foreach (PhaseAreaInfo phase in phases)
+                foreach (var phase in Global.ObjectMgr.GetPhasesForArea(id.SourceEntry))
                 {
                     if (phase.PhaseInfo.Id == id.SourceGroup)
                     {

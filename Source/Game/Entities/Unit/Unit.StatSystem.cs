@@ -466,7 +466,7 @@ namespace Game.Entities
 
         void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
         {
-            void processAuras(List<AuraEffect> effects)
+            void processAuras(IReadOnlyList<AuraEffect> effects)
             {
                 foreach (AuraEffect effect in effects)
                 {

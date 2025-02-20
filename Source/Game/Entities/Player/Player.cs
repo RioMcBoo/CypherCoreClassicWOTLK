@@ -407,9 +407,10 @@ namespace Game.Entities
                 DB.Login.Execute(stmt);
             }
 
-            if (!m_timedquests.Empty())
+            var timedQuests = GetTimedQuests();
+            if (!timedQuests.Empty())
             {
-                foreach (var id in m_timedquests)
+                foreach (var id in timedQuests)
                 {
                     QuestStatusData q_status = m_QuestStatus[id];
                     if (q_status.Timer <= diff)
@@ -3557,7 +3558,7 @@ namespace Game.Entities
             // 5 seconds over and over again which confirms my theory that we have a independed timer.
             if (m_foodEmoteTimerCount >= SharedConst.FoodEmoteInterval)
             {
-                List<AuraEffect> auraList = GetAuraEffectsByType(AuraType.ModHealthRegen);
+                var auraList = GetAuraEffectsByType(AuraType.ModHealthRegen).ToList();
                 auraList.AddRange(GetAuraEffectsByType(AuraType.ModPowerRegen));
 
                 foreach (var auraEffect in auraList)
@@ -4351,7 +4352,7 @@ namespace Game.Entities
             corpse.SetRace(GetRace());
             corpse.SetSex(GetNativeGender());
             corpse.SetClass(GetClass());
-            corpse.SetCustomizations(m_playerData.Customizations);
+            corpse.SetCustomizations(m_playerData.Customizations.GetValues());
             corpse.ReplaceAllFlags(flags);
             corpse.SetDisplayId(GetNativeDisplayId());
             corpse.SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey((int)GetRace()).FactionID);
@@ -6006,7 +6007,7 @@ namespace Game.Entities
                 ((Pet)obj).Remove(PetSaveMode.NotInSlot, true);
         }
 
-        public void UpdateVisibilityOf(ICollection<WorldObject> targets)
+        public void UpdateVisibilityOf(IReadOnlyList<WorldObject> targets)
         {
             if (targets.Empty())
                 return;

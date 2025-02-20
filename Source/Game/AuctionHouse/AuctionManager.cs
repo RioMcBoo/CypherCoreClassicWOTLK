@@ -208,7 +208,7 @@ namespace Game
 
             {
                 SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONS));
-            
+
                 if (!result.IsEmpty())
                 {
                     SQLTransaction trans = new();
@@ -237,7 +237,7 @@ namespace Game
                             continue;
                         }
 
-                        auction.Items = itemsByAuction[auction.Id];
+                        auction.Items = itemsByAuction.Extract(auction.Id);
                         auction.Owner = ObjectGuid.Create(HighGuid.Player, result.Read<long>(2));
                         auction.OwnerAccount = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner));
                         var bidder = result.Read<long>(3);
@@ -251,9 +251,7 @@ namespace Game
                         auction.StartTime = (ServerTime)(UnixTime64)result.Read<long>(8);
                         auction.EndTime = (ServerTime)(UnixTime64)result.Read<long>(9);
                         auction.ServerFlags = (AuctionPostingServerFlag)result.Read<byte>(10);
-
-                        if (biddersByAuction.ContainsKey(auction.Id))
-                            auction.BidderHistory = biddersByAuction[auction.Id];
+                        auction.BidderHistory = biddersByAuction.Extract(auction.Id);
 
                         auctionHouse.AddAuction(null, auction);
 
@@ -1633,10 +1631,11 @@ namespace Game
 
     public class AuctionPosting
     {
+        private List<Item> m_items = new();
+
         public int Id;
         public AuctionsBucketData Bucket;
-
-        public List<Item> Items = new();
+        public IReadOnlyList<Item> Items => m_items;
         public ObjectGuid Owner;
         public ObjectGuid OwnerAccount;
         public ObjectGuid Bidder;
@@ -1648,7 +1647,20 @@ namespace Game
         public ServerTime EndTime = ServerTime.Zero;
         public AuctionPostingServerFlag ServerFlags;
 
-        public List<ObjectGuid> BidderHistory = new();
+        public List<ObjectGuid> BidderHistory;
+
+        public void SetItems(List<Item> newItems)
+        {
+            if (newItems == null)
+                throw new ArgumentNullException();
+
+            m_items = newItems;
+        }
+
+        public void RemoveItemsRange(int index, int count)
+        {
+            m_items.RemoveRange(index, count);
+        }
 
         public bool IsCommodity()
         {

@@ -294,15 +294,18 @@ namespace Game.Loots
 
         public void RemoveItem(int itemId, int count, int itemIndex)
         {
-            var bounds = _lootItems[itemId];
-            foreach (var itr in bounds)
+            List<int> toRemoveList = new();
+            foreach (var itr in _lootItems[itemId])
             {
                 if (itr.ItemIndex == itemIndex)
                 {
-                    _lootItems.Remove(itr.ItemId);
+                    toRemoveList.Add(itr.ItemId);
                     break;
                 }
             }
+
+            foreach (var id in toRemoveList)
+                _lootItems.Remove(id);
 
             // Deletes a single item associated with an openable item from the DB
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);

@@ -689,7 +689,7 @@ namespace Game.BattleGrounds
             return BattlegroundTypeId.None;
         }
 
-        public List<Battleground> GetBGFreeSlotQueueStore(int mapId)
+        public IReadOnlyList<Battleground> GetBGFreeSlotQueueStore(int mapId)
         {
             return m_BGFreeSlotQueue[mapId];
         }
@@ -701,7 +701,7 @@ namespace Game.BattleGrounds
 
         public void RemoveFromBGFreeSlotQueue(int mapId, int instanceId)
         {
-            var queues = m_BGFreeSlotQueue[mapId];
+            var queues = m_BGFreeSlotQueue[mapId].ToList();
             foreach (var bg in queues)
             {
                 if (bg.GetInstanceID() == instanceId)

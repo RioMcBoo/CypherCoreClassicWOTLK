@@ -82,7 +82,7 @@ namespace Game.Chat
                 $"Loaded {_wordsMap.Count} word groups from {wordsNum} words in {Time.Diff(oldMSTime)} ms.");
         }
 
-        List<string> FindWordGroup(int language, int wordLen)
+        IReadOnlyList<string> FindWordGroup(int language, int wordLen)
         {
             return _wordsMap[(language, (byte)wordLen)];
         }
@@ -151,7 +151,7 @@ namespace Game.Chat
             return CliDB.LanguagesStorage.HasRecord((int)languageId);
         }
 
-        public List<LanguageDesc> GetLanguageDescById(Language languageId)
+        public IReadOnlyList<LanguageDesc> GetLanguageDescById(Language languageId)
         {
             return _langsMap[(int)languageId];
         }

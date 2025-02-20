@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.Networking;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -343,6 +344,8 @@ namespace Game.Entities
         {
             return _values.Count;
         }
+
+        public IReadOnlyList<T> GetValues() { return _values; }
 
         public T this[int index]
         {

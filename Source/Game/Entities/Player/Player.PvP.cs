@@ -12,6 +12,7 @@ using Game.PvP;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -595,7 +596,7 @@ namespace Game.Entities
                 {
                     var auras = GetAuraEffectsByType(AuraType.Mounted);
                     if (!auras.Empty())
-                        m_bgData.mountSpell = auras[0].GetId();
+                        m_bgData.mountSpell = auras.First().GetId();
                 }
                 else
                     m_bgData.mountSpell = 0;

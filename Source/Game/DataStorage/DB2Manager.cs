@@ -145,7 +145,7 @@ namespace Game.DataStorage
                     _chrModelsByRaceAndGender[(raceModel.ChrRacesID, raceModel.Sex)] = model;
 
                     var customizationOptionsForModel = customizationOptionsByModel[model.Id];
-                    if (customizationOptionsForModel != null)
+                    if (!customizationOptionsForModel.Empty())
                     {
                         _chrCustomizationOptionsByRaceAndGender.AddRange((raceModel.ChrRacesID, raceModel.Sex), customizationOptionsForModel);
 
@@ -162,8 +162,11 @@ namespace Game.DataStorage
                         data.Choices = _chrCustomizationChoicesByOption[shapeshiftOptionsForModel.Item1];
                         if (!data.Choices.Empty())
                         {
+                            List<ChrCustomizationDisplayInfoRecord> tempList = new();
                             for (int i = 0; i < data.Choices.Count; ++i)
-                                data.Displays.Add(displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id));
+                                tempList.Add(displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id));
+
+                            data.Displays = tempList;
                         }
 
                         _chrCustomizationChoicesForShapeshifts[(raceModel.ChrRacesID, raceModel.Sex, shapeshiftOptionsForModel.Item2)] = data;
@@ -201,7 +204,7 @@ namespace Game.DataStorage
 
             foreach (var curveId in unsortedPoints.Keys)
             {
-                var curvePoints = unsortedPoints[curveId];
+                var curvePoints = unsortedPoints.GetValues(curveId);
                 curvePoints.Sort((point1, point2) => point1.OrderIndex.CompareTo(point2.OrderIndex));
                 _curvePoints.AddRange(curveId, curvePoints.Select(p => p.Pos));
             }
@@ -220,7 +223,10 @@ namespace Game.DataStorage
                 _friendshipRepReactions.Add(friendshipRepReaction.FriendshipRepID, friendshipRepReaction);
 
             foreach (var key in _friendshipRepReactions.Keys)
-                _friendshipRepReactions[key].Sort(new FriendshipRepReactionRecordComparer());
+            {
+                var unsortedList = _friendshipRepReactions.GetValues(key);
+                unsortedList.Sort(new FriendshipRepReactionRecordComparer());
+            }
 
             foreach (GameObjectDisplayInfoRecord gameObjectDisplayInfo in GameObjectDisplayInfoStorage.Values)
             {
@@ -303,7 +309,10 @@ namespace Game.DataStorage
                 _mountCapabilitiesByType.Add(mountTypeCapability.MountTypeID, mountTypeCapability);
 
             foreach (var key in _mountCapabilitiesByType.Keys)
-                _mountCapabilitiesByType[key].Sort(new MountTypeXCapabilityRecordComparer());
+            {
+                var unsortedList = _mountCapabilitiesByType.GetValues(key);
+                unsortedList.Sort(new MountTypeXCapabilityRecordComparer());
+            }
 
             foreach (MountXDisplayRecord mountDisplay in MountXDisplayStorage.Values)
                 _mountDisplays.Add(mountDisplay.MountID, mountDisplay);
@@ -841,7 +850,7 @@ namespace Game.DataStorage
             return _hotfixBlob[(int)locale].LookupByKey((tableHash, recordId));
         }
 
-        public List<HotfixOptionalData> GetHotfixOptionalData(uint tableHash, int recordId, Locale locale)
+        public IReadOnlyList<HotfixOptionalData> GetHotfixOptionalData(uint tableHash, int recordId, Locale locale)
         {
             Cypher.Assert(SharedConst.IsValidLocale(locale), $"Locale {locale} is invalid locale");
 
@@ -859,7 +868,7 @@ namespace Game.DataStorage
             return 1772; // the Classic client expects the retail storage size so we have to hardcode the value
         }
 
-        public List<int> GetAreasForGroup(int areaGroupId)
+        public IReadOnlyList<int> GetAreasForGroup(int areaGroupId)
         {
             return _areaGroupMembers[areaGroupId];
         }
@@ -925,12 +934,12 @@ namespace Game.DataStorage
             return _powersByClass[(int)classId][(int)powerType];
         }
 
-        public List<ChrCustomizationChoiceRecord> GetCustomiztionChoices(int chrCustomizationOptionId)
+        public IReadOnlyList<ChrCustomizationChoiceRecord> GetCustomiztionChoices(int chrCustomizationOptionId)
         {
             return _chrCustomizationChoicesByOption[chrCustomizationOptionId];
         }
 
-        public List<ChrCustomizationOptionRecord> GetCustomiztionOptions(Race race, Gender gender)
+        public IReadOnlyList<ChrCustomizationOptionRecord> GetCustomiztionOptions(Race race, Gender gender)
         {
             return _chrCustomizationOptionsByRaceAndGender[(race, gender)];
         }
@@ -1063,7 +1072,7 @@ namespace Game.DataStorage
             return (0.0f, 0.0f);
         }
 
-        static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<Vector2> points)
+        static CurveInterpolationMode DetermineCurveType(CurveRecord curve, IReadOnlyList<Vector2> points)
         {
             switch (curve.Type)
             {
@@ -1105,7 +1114,7 @@ namespace Game.DataStorage
             return GetCurveValueAt(DetermineCurveType(curve, points), points, x);
         }
 
-        public float GetCurveValueAt(CurveInterpolationMode mode, IList<Vector2> points, float x)
+        public float GetCurveValueAt(CurveInterpolationMode mode, IReadOnlyList<Vector2> points, float x)
         {
             switch (mode)
             {
@@ -1306,22 +1315,22 @@ namespace Game.DataStorage
 
         }
 
-        public List<int> GetFactionTeamList(int faction)
+        public IReadOnlyList<int> GetFactionTeamList(int faction)
         {
             return _factionTeams[faction];
         }
 
-        public List<FriendshipRepReactionRecord> GetFriendshipRepReactions(int friendshipRepID)
+        public IReadOnlyList<FriendshipRepReactionRecord> GetFriendshipRepReactions(int friendshipRepID)
         {
             return _friendshipRepReactions[friendshipRepID];
         }
 
-        public List<int> GetGlyphBindableSpells(int glyphPropertiesId)
+        public IReadOnlyList<int> GetGlyphBindableSpells(int glyphPropertiesId)
         {
             return _glyphBindableSpells[glyphPropertiesId];
         }
 
-        public List<ChrSpecialization> GetGlyphRequiredSpecs(int glyphPropertiesId)
+        public IReadOnlyList<ChrSpecialization> GetGlyphRequiredSpecs(int glyphPropertiesId)
         {
             return _glyphRequiredSpecs[glyphPropertiesId];
         }
@@ -1341,7 +1350,7 @@ namespace Game.DataStorage
             return _itemClassByOldEnum[(int)itemClass];
         }
 
-        public List<ItemLimitCategoryConditionRecord> GetItemLimitCategoryConditions(int categoryId)
+        public IReadOnlyList<ItemLimitCategoryConditionRecord> GetItemLimitCategoryConditions(int categoryId)
         {
             return _itemCategoryConditions[categoryId];
         }
@@ -1381,12 +1390,12 @@ namespace Game.DataStorage
             return _itemModifiedAppearancesByItem.LookupByKey(itemId);
         }
 
-        public List<ItemSetSpellRecord> GetItemSetSpells(int itemSetId)
+        public IReadOnlyList<ItemSetSpellRecord> GetItemSetSpells(int itemSetId)
         {
             return _itemSetSpells[itemSetId];
         }
 
-        public List<ItemSpecOverrideRecord> GetItemSpecOverrides(int itemId)
+        public IReadOnlyList<ItemSpecOverrideRecord> GetItemSpecOverrides(int itemId)
         {
             return _itemSpecOverrides[itemId];
         }
@@ -1502,7 +1511,7 @@ namespace Game.DataStorage
             return mapDiff;
         }
 
-        public List<(int, PlayerConditionRecord)> GetMapDifficultyConditions(Difficulty mapDifficultyId)
+        public IReadOnlyList<(int, PlayerConditionRecord)> GetMapDifficultyConditions(Difficulty mapDifficultyId)
         {
             return _mapDifficultyConditions[mapDifficultyId];
         }
@@ -1517,12 +1526,12 @@ namespace Game.DataStorage
             return MountStorage.LookupByKey(id);
         }
 
-        public List<MountTypeXCapabilityRecord> GetMountCapabilities(int mountType)
+        public IReadOnlyList<MountTypeXCapabilityRecord> GetMountCapabilities(int mountType)
         {
             return _mountCapabilitiesByType[mountType];
         }
 
-        public List<MountXDisplayRecord> GetMountDisplays(int mountId)
+        public IReadOnlyList<MountXDisplayRecord> GetMountDisplays(int mountId)
         {
             return _mountDisplays[mountId];
         }
@@ -1612,7 +1621,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public List<QuestLineXQuestRecord> GetQuestsForQuestLine(int questLineId)
+        public IReadOnlyList<QuestLineXQuestRecord> GetQuestsForQuestLine(int questLineId)
         {
             return _questsByQuestLine[questLineId];
         }
@@ -1639,7 +1648,7 @@ namespace Game.DataStorage
             return v2.UniqueBitFlag;
         }
 
-        public List<int> GetPhasesForGroup(int group)
+        public IReadOnlyList<int> GetPhasesForGroup(int group)
         {
             return _phasesByGroup[group];
         }
@@ -1673,12 +1682,12 @@ namespace Game.DataStorage
             return _pvpItemBonus.LookupByKey(itemId);
         }
 
-        public List<RewardPackXCurrencyTypeRecord> GetRewardPackCurrencyTypesByRewardID(int rewardPackID)
+        public IReadOnlyList<RewardPackXCurrencyTypeRecord> GetRewardPackCurrencyTypesByRewardID(int rewardPackID)
         {
             return _rewardPackCurrencyTypes[rewardPackID];
         }
 
-        public List<RewardPackXItemRecord> GetRewardPackItemsByRewardID(int rewardPackID)
+        public IReadOnlyList<RewardPackXItemRecord> GetRewardPackItemsByRewardID(int rewardPackID)
         {
             return _rewardPackItems[rewardPackID];
         }
@@ -1688,12 +1697,12 @@ namespace Game.DataStorage
             return _chrCustomizationChoicesForShapeshifts.LookupByKey((race, gender, form));
         }
 
-        public List<SkillLineRecord> GetSkillLinesForParentSkill(SkillType parentSkillId)
+        public IReadOnlyList<SkillLineRecord> GetSkillLinesForParentSkill(SkillType parentSkillId)
         {
             return _skillLinesByParentSkillLine[parentSkillId];
         }
 
-        public List<SkillLineAbilityRecord> GetSkillLineAbilitiesBySkill(SkillType skillId)
+        public IReadOnlyList<SkillLineAbilityRecord> GetSkillLineAbilitiesBySkill(SkillType skillId)
         {
             return _skillLineAbilitiesBySkillupSkill[skillId];
         }
@@ -1716,12 +1725,12 @@ namespace Game.DataStorage
             return null;
         }
 
-        public List<SkillRaceClassInfoRecord> GetSkillRaceClassInfo(SkillType skill)
+        public IReadOnlyList<SkillRaceClassInfoRecord> GetSkillRaceClassInfo(SkillType skill)
         {
             return _skillRaceClassInfoBySkill[skill];
         }
 
-        public List<SpecializationSpellsRecord> GetSpecializationSpells(ChrSpecialization specId)
+        public IReadOnlyList<SpecializationSpellsRecord> GetSpecializationSpells(ChrSpecialization specId)
         {
             return _specializationSpellsBySpec[specId];
         }
@@ -1736,12 +1745,12 @@ namespace Game.DataStorage
             return _spellFamilyNames.Contains(family);
         }
 
-        public List<SpellProcsPerMinuteModRecord> GetSpellProcsPerMinuteMods(int spellprocsPerMinuteId)
+        public IReadOnlyList<SpellProcsPerMinuteModRecord> GetSpellProcsPerMinuteMods(int spellprocsPerMinuteId)
         {
             return _spellProcsPerMinuteMods[spellprocsPerMinuteId];
         }
 
-        public List<SpellVisualMissileRecord> GetSpellVisualMissiles(int spellVisualMissileSetId)
+        public IReadOnlyList<SpellVisualMissileRecord> GetSpellVisualMissiles(int spellVisualMissileSetId)
         {
             return _spellVisualMissilesBySet[spellVisualMissileSetId];
         }
@@ -1779,12 +1788,12 @@ namespace Game.DataStorage
             return _toys.Contains(toy);
         }
 
-        public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(int itemModifiedAppearanceId)
+        public IReadOnlyList<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(int itemModifiedAppearanceId)
         {
             return _transmogSetsByItemModifiedAppearance[itemModifiedAppearanceId];
         }
 
-        public List<TransmogSetItemRecord> GetTransmogSetItems(int transmogSetId)
+        public IReadOnlyList<TransmogSetItemRecord> GetTransmogSetItems(int transmogSetId)
         {
             return _transmogSetItemsByTransmogSet[transmogSetId];
         }
@@ -2116,7 +2125,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public List<ItemEffectRecord> GetItemEffectsForItemId(int itemId)
+        public IReadOnlyList<ItemEffectRecord> GetItemEffectsForItemId(int itemId)
         {
             return _itemEffectsByItemId[itemId];
         }
@@ -2474,8 +2483,8 @@ namespace Game.DataStorage
     public class ShapeshiftFormModelData
     {
         public int OptionID;
-        public List<ChrCustomizationChoiceRecord> Choices = new();
-        public List<ChrCustomizationDisplayInfoRecord> Displays = new();
+        public IReadOnlyList<ChrCustomizationChoiceRecord> Choices;
+        public IReadOnlyList<ChrCustomizationDisplayInfoRecord> Displays;
     }
 
     public class TalentSpellPos

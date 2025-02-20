@@ -487,7 +487,7 @@ namespace Game.DungeonFinding
                 {
                     // Expand random dungeons and check restrictions
                     if (rDungeonId != 0)
-                        dungeons = GetDungeonsByRandom(rDungeonId);
+                        dungeons = GetDungeonsByRandom(rDungeonId).ToList();
 
                     // if we have lockmap then there are no compatible dungeons
                     GetCompatibleDungeons(dungeons, players, joinData.lockmap, joinData.playersMissingRequirement, isContinue);
@@ -1524,7 +1524,7 @@ namespace Game.DungeonFinding
             }
         }
 
-        List<int> GetDungeonsByRandom(int randomdungeon)
+        IReadOnlyList<int> GetDungeonsByRandom(int randomdungeon)
         {
             LFGDungeonData dungeon = GetLFGDungeon(randomdungeon);
             byte group = (byte)(dungeon != null ? dungeon.group : 0);

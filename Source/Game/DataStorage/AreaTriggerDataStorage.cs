@@ -114,7 +114,7 @@ namespace Game.DataStorage
                     do
                     {
                         AreaTriggerId createPropertiesId = new(splines.Read<int>(0), splines.Read<bool>(1));
-                        splinesByCreateProperties.Add(createPropertiesId, new(splines.Read<float>(2), splines.Read<float>(3), splines.Read<float>(4)));
+                        splinesByCreateProperties.Add(createPropertiesId, (Vector3)new(splines.Read<float>(2), splines.Read<float>(3), splines.Read<float>(4)));
                     }
                     while (splines.NextRow());
                 }
@@ -137,7 +137,7 @@ namespace Game.DataStorage
                         AreaTriggerTemplate areaTriggerTemplate = new();
                         areaTriggerTemplate.Id = new(templates.Read<int>(0), templates.Read<bool>(1));
                         areaTriggerTemplate.Flags = (AreaTriggerFlag)templates.Read<int>(2);
-                        areaTriggerTemplate.Actions = actionsByAreaTrigger[areaTriggerTemplate.Id];
+                        areaTriggerTemplate.Actions = actionsByAreaTrigger.Extract(areaTriggerTemplate.Id);
 
                         _areaTriggerTemplateStore[areaTriggerTemplate.Id] = areaTriggerTemplate;
                     }
@@ -230,8 +230,8 @@ namespace Game.DataStorage
                             }
                         }
 
-                        createProperties.Shape.PolygonVertices = verticesByCreateProperties[createProperties.Id];
-                        createProperties.Shape.PolygonVerticesTarget = verticesTargetByCreateProperties[createProperties.Id];
+                        createProperties.Shape.PolygonVertices = verticesByCreateProperties.Extract(createProperties.Id);
+                        createProperties.Shape.PolygonVerticesTarget = verticesTargetByCreateProperties.Extract(createProperties.Id);
                         if (!createProperties.Shape.PolygonVerticesTarget.Empty() && createProperties.Shape.PolygonVertices.Count != createProperties.Shape.PolygonVerticesTarget.Count)
                         {
                             Log.outError(LogFilter.Sql, 
@@ -242,7 +242,7 @@ namespace Game.DataStorage
                             createProperties.Shape.PolygonVerticesTarget.Clear();
                         }
 
-                        createProperties.SplinePoints = splinesByCreateProperties[createProperties.Id];
+                        createProperties.SplinePoints = splinesByCreateProperties.Extract(createProperties.Id);
 
                         _areaTriggerCreateProperties[createProperties.Id] = createProperties;
                     }

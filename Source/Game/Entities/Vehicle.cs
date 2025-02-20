@@ -68,7 +68,7 @@ namespace Game.Entities
             if (GetBase().IsTypeId(TypeId.Player) || !evading)
                 RemoveAllPassengers();   // We might have aura's saved in the DB with now invalid casters - remove
 
-            List<VehicleAccessory> accessories = Global.ObjectMgr.GetVehicleAccessoryList(this);
+            var accessories = Global.ObjectMgr.GetVehicleAccessoryList(this);
             if (accessories == null)
                 return;
 

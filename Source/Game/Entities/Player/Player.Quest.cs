@@ -29,6 +29,7 @@ namespace Game.Entities
 
         void AddTimedQuest(int questId) { m_timedquests.Add(questId); }
         public void RemoveTimedQuest(int questId) { m_timedquests.Remove(questId); }
+        public IReadOnlyList<int> GetTimedQuests() { return m_timedquests; }
 
         public List<int> GetRewardedQuests() { return m_RewardedQuests; }
         Dictionary<int, QuestStatusData> GetQuestStatusMap() { return m_QuestStatus; }

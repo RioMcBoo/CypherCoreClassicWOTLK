@@ -70,7 +70,7 @@ namespace Game.DataStorage
                     templ.Name = templates.Read<string>(1);
                     templ.Description = templates.Read<string>(2);
                     templ.Level = templates.Read<byte>(3);
-                    templ.Classes = characterTemplateClasses[templ.TemplateSetId];
+                    templ.Classes = characterTemplateClasses.Extract(templ.TemplateSetId);
 
                     if (templ.Classes.Empty())
                     {
