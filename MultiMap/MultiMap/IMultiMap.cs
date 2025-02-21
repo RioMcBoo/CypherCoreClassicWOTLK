@@ -14,24 +14,10 @@ namespace System.Collections.Generic
         bool Remove(TKey key, TValue value);
         bool Remove(KeyValuePair<TKey, TValue> item);
 
-        bool ContainsKey(TKey key);
-        bool Contains(TKey key, TValue item);
-        bool Contains(KeyValuePair<TKey, TValue> item);
-
-        bool Empty();
-
-        IReadOnlyCollection<TKey> Keys { get; }
-        IReadOnlyCollection<TValue> Values { get; }
-
-        IReadOnlyList<TValue> this[TKey key] { get; }
-
         void SetValues(TKey key, List<TValue> valueCollection);
-        MultiMapEditableValuesList<TKey, TValue> GetValuesToChange(TKey key);
+        MultiMapEditableValuesByKey<TKey, TValue> GetValuesToChange(TKey key);
 
         void Clear();
-        int Count { get; }
-
-        bool TryGetValue(TKey key, out TValue value);
     }
 
     public interface IReadOnlyMultiMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
@@ -45,9 +31,7 @@ namespace System.Collections.Generic
         IReadOnlyCollection<TKey> Keys { get; }
         IReadOnlyCollection<TValue> Values { get; }
 
-        IReadOnlyList<TValue> this[TKey key] { get; }
-
-        void SetValues(TKey key, List<TValue> valueCollection);
+        IReadOnlyList<TValue> this[TKey key] { get; init; }
 
         int Count { get; }
 

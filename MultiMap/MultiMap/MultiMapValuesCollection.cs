@@ -5,21 +5,29 @@ namespace System.Collections.Generic
 {
     public sealed class MultiMapValuesCollection<TKey, TValue> : IReadOnlyCollection<TValue>
     {
-        IDictionary<TKey, List<TValue>> _dictionary;
+        private MultiMap<TKey, TValue> _map;
 
-        public MultiMapValuesCollection(IDictionary<TKey, List<TValue>> dictionary)
+        public MultiMapValuesCollection(MultiMap<TKey, TValue> map)
         {
-            _dictionary = dictionary;
+            _map = map;
         }
 
-        public int Count => _dictionary.Count;
+        public int Count => _map.Count;
 
         public IEnumerator<TValue> GetEnumerator()
         {
-            foreach (var list in _dictionary.Values)
+            int currentVersion = _map._version;
+
+            foreach (var list in _map._storage.Values)
             {
                 foreach (var item in list)
-                    yield return item;
+                {
+                    if (currentVersion == _map._version)
+                        yield return item;
+                    else
+                        throw new Exception("MultiMap was changed");
+                }
+                    
             }
         }
 

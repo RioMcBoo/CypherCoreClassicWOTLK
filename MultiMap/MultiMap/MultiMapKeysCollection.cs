@@ -5,18 +5,18 @@ namespace System.Collections.Generic
 {
     public sealed class MultiMapKeysCollection<TKey, TValue> : IReadOnlyCollection<TKey>
     {
-        IDictionary<TKey, List<TValue>> _dictionary;
+        private MultiMap<TKey, TValue> _map;
 
-        public MultiMapKeysCollection(IDictionary<TKey, List<TValue>> dictionary)
+        public MultiMapKeysCollection(MultiMap<TKey, TValue> map)
         {
-            _dictionary = dictionary;
+            _map = map;
         }
 
-        public int Count => _dictionary.Count;
+        public int Count => _map._storage.Count;
 
         public IEnumerator<TKey> GetEnumerator()
         {
-            return _dictionary.Keys.GetEnumerator();
+            return _map._storage.Keys.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
