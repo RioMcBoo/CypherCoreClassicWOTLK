@@ -2145,7 +2145,7 @@ namespace Game.Entities
 
         public int GetScriptId() { return GetTemplate().ScriptId; }
 
-        public ImmutableList<ItemEffectRecord> GetEffects() { return _bonusData.Effects; }
+        public IReadOnlyList<ItemEffectRecord> GetEffects() { return _bonusData.Effects; }
 
         public override Loot GetLootForPlayer(Player player) { return loot; }
 
@@ -2315,7 +2315,7 @@ namespace Game.Entities
             HasFixedLevel = false;
             RequiredLevelOverride = 0;
 
-            Effects = ImmutableList.CreateRange(proto.Effects);
+            Effects = proto.Effects;
 
             CanDisenchant = !proto.HasFlag(ItemFlags.NoDisenchant);
             CanScrap = proto.HasFlag(ItemFlags4.Scrapable);
@@ -2344,7 +2344,7 @@ namespace Game.Entities
         public int RequiredLevelOverride;
         public int Suffix;
         public int RequiredLevelCurve;
-        public readonly ImmutableList<ItemEffectRecord> Effects;
+        public readonly IReadOnlyList<ItemEffectRecord> Effects;
         public bool CanDisenchant;
         public bool CanScrap;
         public bool HasFixedLevel;

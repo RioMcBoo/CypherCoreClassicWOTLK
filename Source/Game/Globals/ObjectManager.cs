@@ -5934,18 +5934,19 @@ namespace Game
 
                 // Items that have no specializations set can be used by everyone
                 foreach (var specs in itemTemplate.Specializations)
+                {
                     if (specs.Count == 0)
                         specs.SetAll(true);
+                }
 
-                if (Global.DB2Mgr.GetItemEffectsForItemId(sparse.Id) is List<ItemEffectRecord> itemEffects)
-                    foreach (var itemEffect in itemEffects)
-                        itemTemplate.Effects.Add(itemEffect);
+                foreach (var itemEffect in Global.DB2Mgr.GetItemEffectsForItemId(sparse.Id))
+                    itemTemplate.Effects.Add(itemEffect);
 
                 ++sparseCount;
                 ItemTemplateStorage.Add(sparse.Id, itemTemplate);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, 
+            Log.outInfo(LogFilter.ServerLoading,
                 $"Loaded {sparseCount} item templates in {Time.Diff(oldMSTime)} ms.");
         }
 

@@ -82,7 +82,7 @@ namespace Game.Entities
         SpellHistory _spellHistory;
 
         //Auras
-        MultiMap<AuraType, AuraEffect> m_modAuras = new((int)AuraType.Total);
+        MultiMap<AuraType, AuraEffect> m_modAuras = new();
         List<Aura> m_removedAuras = new();
         List<AuraApplication> m_interruptableAuras = new();             // auras which have interrupt mask applied on unit
         MultiMap<AuraStateType, AuraApplication> m_auraStateAuras = new();        // Used for improve performance of aura state checks on aura apply/remove
