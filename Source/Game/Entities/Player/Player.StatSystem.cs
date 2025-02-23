@@ -787,7 +787,7 @@ namespace Game.Entities
             };
 
             // Add dynamic flat mods (talents)
-            foreach (var aurEff in GetAuraEffectsByType(AuraType.HandleAuraModResistenceOfStatPercent))
+            foreach (var aurEff in GetAuraEffectsByType(AuraType.ModResistanceOfStatPercent))
             {
                 SpellSchoolMask schoolsMask = (SpellSchoolMask)aurEff.GetMiscValue();
                 Stats stat = (Stats)aurEff.GetMiscValueB();
@@ -1320,9 +1320,9 @@ namespace Game.Entities
                 // Crit from Intellect
                 crit += GetSpellCritFromIntellect();
                 // Increase crit from AuraType.ModSpellCritSchoolPct
-                crit += GetTotalAuraModifierByMiscMask(AuraType.ModSpellCritSchoolPct, (uint)school.GetSpellSchoolMask());
+                crit += GetTotalAuraModifierByMiscMask(AuraType.ModSpellCritSchoolChance, (uint)school.GetSpellSchoolMask());
                 // Increase crit from AuraType.ModSpellCritPct
-                crit += GetTotalAuraModifier(AuraType.ModSpellCritPct);
+                crit += GetTotalAuraModifier(AuraType.ModSpellCritChance);
                 // Increase crit from spell crit ratings
                 crit += GetRatingBonusValue(CombatRating.CritSpell);
             }

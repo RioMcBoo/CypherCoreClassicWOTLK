@@ -921,7 +921,7 @@ namespace Framework.Constants
         Max = 1
     }
 
-    public enum ItemSubClassJunk
+    public enum ItemSubClassMisc
     {
         Junk = 0,
         Reagent = 1,

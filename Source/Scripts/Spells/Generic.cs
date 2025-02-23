@@ -4496,9 +4496,6 @@ namespace Scripts.Spells.Generic
             if (spellInfo.HasAura(AuraType.ModMoneyGain))
                 DoEffectCalcAmount.Add(new(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModMoneyGain));
 
-            if (spellInfo.HasAura(AuraType.ModAnimaGain))
-                DoEffectCalcAmount.Add(new(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModAnimaGain));
-
             if (spellInfo.HasAura(AuraType.Dummy))
                 DoEffectCalcAmount.Add(new(CalcWarModeBonus, SpellConst.EffectAll, AuraType.Dummy));
         }

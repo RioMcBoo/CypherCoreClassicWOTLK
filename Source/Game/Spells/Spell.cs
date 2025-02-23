@@ -371,7 +371,7 @@ namespace Game.Spells
                     if (speedPerMillisecond > 0.0f)
                         return (Milliseconds)Math.Floor(m_targets.GetDist2d() / speedPerMillisecond + launchDelay);
                 }
-                else if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                else if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                 {
                     return m_spellInfo.Speed.AsDelayMS + launchDelay;
                 }
@@ -2108,7 +2108,7 @@ namespace Game.Spells
                     }
                 }
 
-                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                     hitDelay += m_spellInfo.Speed.AsDelayMS;
                 else if (m_spellInfo.Speed > 0.0f)
                 {
@@ -2179,7 +2179,7 @@ namespace Game.Spells
             if (m_caster != go)
             {
                 Milliseconds hitDelay = m_spellInfo.LaunchDelay;
-                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                     hitDelay += m_spellInfo.Speed.AsDelayMS;
                 else if (m_spellInfo.Speed > 0.0f)
                 {
@@ -2263,7 +2263,7 @@ namespace Game.Spells
             if (m_caster != corpse)
             {
                 Milliseconds hitDelay = m_spellInfo.LaunchDelay;
-                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                     hitDelay += m_spellInfo.Speed.AsDelayMS;
                 else if (m_spellInfo.Speed > 0.0f)
                 {
@@ -6049,19 +6049,6 @@ namespace Game.Spells
             {
                 switch (spellEffectInfo.ApplyAuraName)
                 {
-                    case AuraType.ModPossessPet:
-                    {
-                        if (!m_caster.IsTypeId(TypeId.Player))
-                            return SpellCastResult.NoPet;
-
-                        Pet pet = m_caster.ToPlayer().GetPet();
-                        if (pet == null)
-                            return SpellCastResult.NoPet;
-
-                        if (!pet.GetCharmerGUID().IsEmpty())
-                            return SpellCastResult.AlreadyHaveCharm;
-                        break;
-                    }
                     case AuraType.ModPossess:
                     case AuraType.ModCharm:
                     case AuraType.AoeCharm:
@@ -6479,7 +6466,7 @@ namespace Game.Spells
 
             // check USABLE attributes
             // USABLE takes precedence over NOT_USABLE
-            if (isRatedBattleground && m_spellInfo.HasAttribute(SpellAttr9.UsableInRatedBattlegrounds))
+            if (isRatedBattleground && m_spellInfo.HasAttribute(SpellAttr9.IgnoreDefaultRatedBattlegroundRestrictions))
                 return SpellCastResult.SpellCastOk;
 
             if (isArena && m_spellInfo.HasAttribute(SpellAttr4.IgnoreDefaultArenaRestrictions))
@@ -6489,7 +6476,7 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr4.NotInArenaOrRatedBattleground))
                 return isArena ? SpellCastResult.NotInArena : SpellCastResult.NotInBattleground;
 
-            if (isArena && m_spellInfo.HasAttribute(SpellAttr9.NotUsableInArena))
+            if (isArena && m_spellInfo.HasAttribute(SpellAttr9.NotInArena))
                 return SpellCastResult.NotInArena;
 
             // check cooldowns
@@ -7451,7 +7438,6 @@ namespace Game.Spells
             {
                 case AuraType.ModPossess:
                 case AuraType.ModCharm:
-                case AuraType.ModPossessPet:
                 case AuraType.AoeCharm:
                     if (target.GetVehicleKit() != null && target.GetVehicleKit().IsControllableVehicle())
                         return false;

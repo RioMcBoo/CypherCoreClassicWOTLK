@@ -2936,7 +2936,7 @@ namespace Game.Entities
                         {
                             // Set up missile speed based delay
                             Milliseconds hitDelay = spellInfo.LaunchDelay;
-                            if (spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                            if (spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                                 hitDelay += spellInfo.Speed.AsDelayMS;
                             else if (spellInfo.Speed > 0)
                                 hitDelay += (Milliseconds)(Math.Max(victim.GetDistance(this), 5.0f) / spellInfo.Speed.PerMS);

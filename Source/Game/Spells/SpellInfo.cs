@@ -1693,7 +1693,6 @@ namespace Game.Spells
                     switch (effectInfo.ApplyAuraName)
                     {
                         case AuraType.ModCharm:
-                        case AuraType.ModPossessPet:
                         case AuraType.ModPossess:
                         case AuraType.AoeCharm:
                             _spellSpecific = SpellSpecificType.Charm;
@@ -2871,7 +2870,7 @@ namespace Game.Spells
             if (spell != null)
                 spell.GetCaster().ModSpellCastTime(this, ref castTime.Ticks, spell);
 
-            if (HasAttribute(SpellAttr0.UsesRangedSlot) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.AimedShot))
+            if (HasAttribute(SpellAttr0.UsesRangedSlot) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.CooldownIgnoresRangedWeapon))
                 castTime += (Milliseconds)500;
 
             return (castTime > 0) ? castTime : Milliseconds.Zero;
@@ -3714,15 +3713,14 @@ namespace Game.Spells
                     case AuraType.ModDamageDoneCreature:
                     case AuraType.ModTotalHealthRegen:
                     case AuraType.ModTotalPowerRegen:
-                    case AuraType.ModSpellCritPct:
+                    case AuraType.ModSpellCritChance:
                     case AuraType.ModHitChance:
                     case AuraType.ModSpellHitChance:
-                    case AuraType.ModSpellCritSchoolPct:
+                    case AuraType.ModSpellCritSchoolChance:
                     case AuraType.ModRangedHaste:
                     case AuraType.ModMeleeRangedHaste:
                     case AuraType.ModCastingSpeedNotStack:
                     case AuraType.HasteSpells:
-                    case AuraType.ModRecoveryRateBySpellLabel:
                     case AuraType.ModDetectRange:
                     case AuraType.ModIncreaseHealthPercent:
                     case AuraType.ModTotalStatPercentage:
@@ -3821,7 +3819,6 @@ namespace Game.Spells
                     case AuraType.ModWeaponCritPct:
                     case AuraType.PowerBurn:
                     case AuraType.ModCooldown:
-                    case AuraType.ModChargeCooldown:
                     case AuraType.ModIncreaseSpeed:
                     case AuraType.ModParryPercent:
                     case AuraType.SetVehicleId:
@@ -3869,7 +3866,6 @@ namespace Game.Spells
                     }
                     case AuraType.AddFlatModifier:          // mods
                     case AuraType.AddPctModifier:
-                    case AuraType.AddPctModifierBySpellLabel:
                     {
                         switch ((SpellModOp)effect.MiscValue)
                         {
@@ -4088,7 +4084,7 @@ namespace Game.Spells
                 || InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancels)
                 || (interruptCaster != null && interruptCaster.IsUnit() && interruptCaster.ToUnit().HasAuraTypeWithMiscvalue(AuraType.AllowInterruptSpell, Id))
                 || (((interruptTarget.GetMechanicImmunityMask() & (1 << (int)Mechanics.Interrupt)) == 0 || ignoreImmunity)
-                    && !interruptTarget.HasAuraTypeWithAffectMask(AuraType.PreventInterrupt, this)
+                    //&& !interruptTarget.HasAuraTypeWithAffectMask(AuraType.PreventInterrupt, this)
                     && PreventionType.HasAnyFlag(SpellPreventionType.Silence));
         }
 

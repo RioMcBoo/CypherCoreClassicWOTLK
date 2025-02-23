@@ -3781,7 +3781,7 @@ namespace Game.Spells
                     m_preGeneratedPath.CalculatePath(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
                 }
 
-                if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                     speed = (Speed)(m_preGeneratedPath.GetPathLength() / speed);
 
                 unitCaster.GetMotionMaster().MoveCharge(m_preGeneratedPath, speed, unitTarget, spellEffectExtraData);
@@ -3830,7 +3830,7 @@ namespace Game.Spells
 
                 Speed speed = MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) ? m_spellInfo.Speed : MotionMaster.SPEED_CHARGE;
 
-                if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                     speed = new(path.GetPathLength() / speed);
 
                 unitCaster.GetMotionMaster().MoveCharge(path, speed);
@@ -5472,7 +5472,7 @@ namespace Game.Spells
             playerTarget.GiveXP(xp, null);
         }
 
-        [SpellEffectHandler(SpellEffectName.GiveRestedEcperienceBonus)]
+        [SpellEffectHandler(SpellEffectName.GiveRestedExperienceBonus)]
         void EffectGiveRestedExperience()
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)

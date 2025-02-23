@@ -423,7 +423,7 @@ namespace Game.Entities
         [FieldOffset(0)]
         public ItemSubClassPermanent Permanent;
         [FieldOffset(0)]
-        public ItemSubClassJunk Junk;
+        public ItemSubClassMisc Junk;
         [FieldOffset(0)]
         public ItemSubClassGlyph Glyph;
         [FieldOffset(0)]

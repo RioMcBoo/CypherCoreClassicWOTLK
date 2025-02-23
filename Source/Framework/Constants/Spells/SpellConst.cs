@@ -1972,39 +1972,40 @@ namespace Framework.Constants
     }
     public enum SpellAttr9 : uint
     {
-        Unk0 = 0x01, // 0
-        Unk1 = 0x02, // 1
-        RestrictedFlightArea = 0x04, // 2
-        Unk3 = 0x08, // 3
-        SpecialDelayCalculation = 0x10, // 4
-        SummonPlayerTotem = 0x20, // 5
-        Unk6 = 0x40, // 6
-        Unk7 = 0x80, // 7
-        AimedShot = 0x100, // 8
-        NotUsableInArena = 0x200, // 9 Cannot Be Used In Arenas
-        Unk10 = 0x400, // 10
-        Unk11 = 0x800, // 11
-        Unk12 = 0x1000, // 12
-        Slam = 0x2000, // 13
-        UsableInRatedBattlegrounds = 0x4000, // 14 Can Be Used In Rated Battlegrounds
-        Unk15 = 0x8000, // 15
-        Unk16 = 0x10000, // 16
-        Unk17 = 0x20000, // 17
-        Unk18 = 0x40000, // 18
-        Unk19 = 0x80000, // 19
-        Unk20 = 0x100000, // 20
-        Unk21 = 0x200000, // 21
-        Unk22 = 0x400000, // 22
-        Unk23 = 0x800000, // 23
-        Unk24 = 0x1000000, // 24
-        Unk25 = 0x2000000, // 25
-        Unk26 = 0x4000000, // 26
-        Unk27 = 0x8000000, // 27
-        Unk28 = 0x10000000, // 28
-        Unk29 = 0x20000000, // 29
-        Unk30 = 0x40000000, // 30
-        Unk31 = 0x80000000  // 31
+        ForceDestLocation = 0x00000001, //  0
+        ModInvisIncludesParty = 0x00000002, //  1
+        OnlyWhenIllegallyMounted = 0x00000004, //  2 Dalaran and Wintergrasp flight area auras have it
+        DoNotLogAuraRefresh = 0x00000008, //  3
+        MissileSpeedIsDelayInSeconds = 0x00000010, //  4
+        IgnoreTotemRequirementsForCasting = 0x00000020, //  5
+        ItemCastGrantsSkillGain = 0x00000040, //  6
+        DoNotAddToUnlearnList = 0x00000080, //  7
+        CooldownIgnoresRangedWeapon = 0x00000100, //  8
+        NotInArena = 0x00000200, //  9 Cannot be used in arenas
+        TargetMustBeGrounded = 0x00000400, // 10
+        AllowWhileBanishedAuraState = 0x00000800, // 11
+        FaceUnitTargetUponCompletionOfJumpCharge = 0x00001000, // 12
+        HasteAffectsMeleeAbilityCasttime = 0x00002000, // 13
+        IgnoreDefaultRatedBattlegroundRestrictions = 0x00004000, // 14 Can be used in Rated Battlegrounds
+        DoNotDisplayPowerCost = 0x00008000, // 15
+        NextModalSpellRequiresSameUnitTarget = 0x00010000, // 16
+        AutocastOffByDefault = 0x00020000, // 17
+        IgnoreSchoolLockout = 0x00040000, // 18
+        AllowDarkSimulacrum = 0x00080000, // 19
+        AllowCastWhileChanneling = 0x00100000, // 20
+        SuppressVisualKitErrors = 0x00200000, // 21
+        SpellcastOverrideInSpellbook = 0x00400000, // 22
+        JumpchargeNoFacingControl = 0x00800000, // 23
+        IgnoreCasterHealingModifiers = 0x01000000, // 24
+        DontConsumeChargeIfItemDeleted = 0x02000000, // 25
+        ItemPassiveOnClient = 0x04000000, // 26
+        ForceCorpseTarget = 0x08000000, // 27
+        CannotKillTarget = 0x10000000, // 28
+        LogPassive = 0x20000000, // 29
+        NoMovementRadiusBonus = 0x40000000, // 30
+        ChannelPersistsOnPetFollow = 0x80000000  // 31
     }
+
     public enum SpellAttr10 : uint
     {
         Unk0 = 0x01, // 0
@@ -2417,7 +2418,7 @@ namespace Framework.Constants
         Unk234 = 234,
         Unk235 = 235,
         GiveExperience = 236,
-        GiveRestedEcperienceBonus = 237,
+        GiveRestedExperienceBonus = 237,
         IncreaseSkill = 238,
         EndGarrisonBuildingConstruction = 239,
         GiveArtifactPower = 240,

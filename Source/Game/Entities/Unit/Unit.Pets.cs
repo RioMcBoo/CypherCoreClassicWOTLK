@@ -692,7 +692,6 @@ namespace Game.Entities
         public void RemoveCharmAuras()
         {
             RemoveAurasByType(AuraType.ModCharm);
-            RemoveAurasByType(AuraType.ModPossessPet);
             RemoveAurasByType(AuraType.ModPossess);
             RemoveAurasByType(AuraType.AoeCharm);
         }

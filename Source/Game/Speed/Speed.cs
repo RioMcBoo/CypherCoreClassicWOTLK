@@ -11,10 +11,10 @@ public record struct Speed
     /// <summary>Yards per Millisecond</summary>
     public float PerMS => PerSec / Time.MillisecondsInSecond;
 
-    /// <summary>Is used for <see cref="Framework.Constants.SpellAttr9.SpecialDelayCalculation">special case</see></summary>
+    /// <summary>Is used for <see cref="Framework.Constants.SpellAttr9.MissileSpeedIsDelayInSeconds">special case</see></summary>
     public Milliseconds AsDelayMS => (Milliseconds)(PerSec * Time.MillisecondsInSecond);
 
-    /// <summary>Is used for <see cref="Framework.Constants.SpellAttr9.SpecialDelayCalculation">special case</see></summary>
+    /// <summary>Is used for <see cref="Framework.Constants.SpellAttr9.MissileSpeedIsDelayInSeconds">special case</see></summary>
     public Seconds AsDelaySec => (Seconds)PerSec;
 
     public static explicit operator Speed(double YardsPerSecond)

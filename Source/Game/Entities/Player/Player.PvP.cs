@@ -147,8 +147,6 @@ namespace Game.Entities
                 if (groupsize > 1)
                     honor_f /= groupsize;
 
-                // apply honor multiplier from aura (not stacking-get highest)
-                MathFunctions.AddPct(ref honor_f, GetMaxPositiveAuraModifier(AuraType.ModHonorGainPct));
                 honor_f += _restMgr.GetRestBonusFor(RestTypes.Honor, (int)honor_f);
             }
 

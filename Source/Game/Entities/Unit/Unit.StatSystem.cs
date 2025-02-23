@@ -650,7 +650,7 @@ namespace Game.Entities
                 {
                     chance = 5.0f;
                     chance += GetTotalAuraModifier(AuraType.ModWeaponCritPct);
-                    chance += GetTotalAuraModifier(AuraType.ModSpellCritPct);
+                    chance += GetTotalAuraModifier(AuraType.ModSpellCritChance);
                 }
             }
             return chance;

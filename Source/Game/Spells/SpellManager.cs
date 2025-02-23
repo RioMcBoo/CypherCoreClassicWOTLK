@@ -1560,7 +1560,6 @@ namespace Game.Entities
                                     continue;
 
                                 if (spellEffectInfo.ApplyAuraName == AuraType.AddPctModifier || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifier
-                                    || spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel
                                     || spellEffectInfo.ApplyAuraName == AuraType.IgnoreSpellCooldown)
                                 {
                                     found = true;
@@ -2444,7 +2443,6 @@ namespace Game.Entities
                 {
                     case AuraType.AddFlatModifier:
                     case AuraType.AddPctModifier:
-                    case AuraType.AddPctModifierBySpellLabel:
                         Cypher.Assert(effect.EffectMiscValue[0] < (int)SpellModOp.Max, 
                             $"MAX_SPELLMOD must be at least {effect.EffectMiscValue[0] + 1}");
                         break;
@@ -2980,7 +2978,6 @@ namespace Game.Entities
                         case AuraType.ControlVehicle:
                         case AuraType.BindSight:
                         case AuraType.ModPossess:
-                        case AuraType.ModPossessPet:
                         case AuraType.ModCharm:
                         case AuraType.AoeCharm:
                         // Controlled by Battleground
@@ -4709,7 +4706,7 @@ namespace Game.Entities
                         case SpellEffectName.Jump:
                         case SpellEffectName.JumpDest:
                         case SpellEffectName.LeapBack:
-                            if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0 && !spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                            if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0 && !spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSeconds))
                                 spellInfo.Speed = MotionMaster.SPEED_CHARGE;
                             break;
                     }

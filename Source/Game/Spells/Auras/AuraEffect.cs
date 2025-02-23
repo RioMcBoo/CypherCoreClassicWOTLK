@@ -300,20 +300,7 @@ namespace Game.Spells
                     }
                     (m_spellmod as SpellModifierByClassMask).value = GetAmount();
                     break;
-                case AuraType.AddPctModifierBySpellLabel:
-                    if (m_spellmod == null)
-                    {
-                        SpellPctModifierByLabel spellmod = new(GetBase());
-                        spellmod.op = (SpellModOp)GetMiscValue();
-
-                        spellmod.type = SpellModType.LabelPct;
-                        spellmod.spellId = GetId();
-                        spellmod.value.ModIndex = GetMiscValue();
-                        spellmod.value.LabelID = GetMiscValueB();
-                        m_spellmod = spellmod;
-                    }
-                    (m_spellmod as SpellPctModifierByLabel).value.ModifierValue = 1.0f + MathFunctions.CalculatePct(1.0f, GetAmount());
-                    break;
+                
                 default:
                     break;
             }
@@ -679,7 +666,7 @@ namespace Game.Spells
                     }
                     break;
                 }
-                case AuraType.ModSpellCritSchoolPct:
+                case AuraType.ModSpellCritSchoolChance:
                     // skip spells that can't crit
                     if (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
                         return false;
@@ -2650,7 +2637,7 @@ namespace Game.Spells
                 target.RemoveCharmedBy(caster);
         }
 
-        [AuraEffectHandler(AuraType.ModPossessPet)]
+        //[AuraEffectHandler(AuraType.ModPossessPet)]
         void HandleModPossessPet(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
@@ -3710,7 +3697,7 @@ namespace Game.Spells
             target.ToPlayer().UpdateBlockPercentage();
         }
 
-        [AuraEffectHandler(AuraType.ModSpellCritSchoolPct)]
+        [AuraEffectHandler(AuraType.ModSpellCritSchoolChance)]
         void HandleModSpellCritSchoolChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
@@ -3730,7 +3717,7 @@ namespace Game.Spells
             }
         }
 
-        [AuraEffectHandler(AuraType.ModSpellCritPct)]
+        [AuraEffectHandler(AuraType.ModSpellCritChance)]
         void HandleModSpellCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
@@ -5942,7 +5929,7 @@ namespace Game.Spells
                 bg.RemovePlayerPosition(target.GetGUID());
         }
 
-        [AuraEffectHandler(AuraType.StoreTeleportReturnPoint)]
+        //[AuraEffectHandler(AuraType.StoreTeleportReturnPoint)]
         void HandleStoreTeleportReturnPoint(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
@@ -5991,7 +5978,7 @@ namespace Game.Spells
                 return;            
         }
         
-        [AuraEffectHandler(AuraType.HandleAuraModResistenceOfStatPercent)]
+        [AuraEffectHandler(AuraType.ModResistanceOfStatPercent)]
         void HandleAuraModResistenceOfStatPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))

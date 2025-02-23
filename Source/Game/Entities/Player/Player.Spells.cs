@@ -876,7 +876,6 @@ namespace Game.Entities
             {
                 target.RemoveAurasByType(AuraType.BindSight, GetGUID());
                 target.RemoveAurasByType(AuraType.ModPossess, GetGUID());
-                target.RemoveAurasByType(AuraType.ModPossessPet, GetGUID());
             }
         }
 
