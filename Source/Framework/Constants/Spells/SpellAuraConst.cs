@@ -167,7 +167,7 @@ namespace Framework.Constants
         PetDamageMulti = 157,  //    Mod Pet Damage
         AllowTalentSwapping = 158,
         NoPvpCredit = 159,
-        ModAoeAvoidance = 160,
+        Unused160 = 160,
         ModHealthRegenInCombat = 161,
         PowerBurn = 162,
         ModCritDamageBonus = 163,
