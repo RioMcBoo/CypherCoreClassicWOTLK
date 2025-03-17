@@ -60,6 +60,9 @@ namespace Scripts.Spells.DeathKnight
         public const int UnholyVigor = 196263;
         public const int VolatileShielding = 207188;
         public const int VolatileShieldingDamage = 207194;
+        public const int BloodOfTheNorth = 54639;
+        public const int Reaping = 49208;
+        public const int DeathRuneMastery = 49467;
     }
 
     [Script] // 70656 - Advantage (T10 4P Melee Bonus)
@@ -67,20 +70,9 @@ namespace Scripts.Spells.DeathKnight
     {
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            Unit caster = eventInfo.GetActor();
-            if (caster != null)
+            if (eventInfo.GetActor() is Player player && player.GetClass() == Class.DeathKnight)
             {
-                Player player = caster.ToPlayer();
-                if (player == null || caster.GetClass() != Class.DeathKnight)
-                    return false;
-
-                /*
-                for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                    if (player.GetRuneCooldown(i) == 0)
-                        return false;
-                */
-
-                return true;
+                return player.Runes.AvailableRunes == RuneStateMask.None;
             }
 
             return false;
@@ -819,6 +811,11 @@ namespace Scripts.Spells.DeathKnight
     [Script]
     class spell_dk_death_rune : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BloodOfTheNorth, SpellIds.Reaping, SpellIds.DeathRuneMastery);
+        }
+
         public override bool Load()
         {
             return GetUnitOwner() is Player player && player.GetClass() == Class.DeathKnight;
@@ -867,8 +864,10 @@ namespace Scripts.Spells.DeathKnight
                         continue;
                 }
 
-                //if (player.Runes.GetRuneCooldown(rune) != (player.GetRuneBaseCooldown(rune) - player.GetLastRuneGraceTimer(rune)))
-                //    continue;
+                ServerTime currentTime = LoopTime.ServerTime;
+
+                if (player.Runes.GetRuneCooldown(rune, currentTime) == TimeSpan.Zero)
+                    continue;
 
                 --runesLeft;
                 // Mark aura as used
@@ -888,7 +887,7 @@ namespace Scripts.Spells.DeathKnight
             OnProc.Add(new(HandleProc));
             OnEffectPeriodic.Add(new(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
-    };
+    }
 
     [Script] // 55233 - Vampiric Blood
     class spell_dk_vampiric_blood : AuraScript
