@@ -31,7 +31,7 @@ namespace System.Collections.Generic
             }
         }
 
-        public bool IsReadOnly => false;
+        public bool IsReadOnly => true;
 
         public TValue this[int index]
         {
