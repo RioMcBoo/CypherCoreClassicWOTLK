@@ -7292,7 +7292,7 @@ namespace Game.Entities
                     continue;
 
                 // skip wrong class skills
-                if (_spell_idx.ClassMask != ClassMask.None && (_spell_idx.ClassMask.HasClass(class_)))
+                if (_spell_idx.ClassMask != ClassMask.None && !_spell_idx.ClassMask.HasClass(class_))
                     continue;
 
                 // skip wrong class and race skill saved in SkillRaceClassInfo.dbc
