@@ -504,7 +504,7 @@ namespace Game
                 if (incremental || IsRenownReputation(factionEntry))
                 {
                     // int32 *= float cause one point loss?
-                    standing = (int)Math.Floor(standing * WorldConfig.Values[WorldCfg.RateReputationGain].Float + 0.5f);
+                    standing = (int)(standing * WorldConfig.Values[WorldCfg.RateReputationGain].Float);
                     standing += oldStanding;
                 }
 
@@ -604,7 +604,7 @@ namespace Game
             if (factionEntry.Id != 0)
             {
                 // Never show factions of the opposing team
-                if (!((RaceMask)factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace())
+                if (!factionEntry.ReputationRaceMask(1).HasRace(_player.GetRace())
                     && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
                 {
                     SetVisible(factionEntry);
@@ -820,7 +820,7 @@ namespace Game
 
             for (int i = 0; i < 4; i++)
             {
-                var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
+                var raceMask = factionEntry.ReputationRaceMask(i);
                 if ((raceMask.HasRace(_player.GetRace()) 
                     || (raceMask == RaceMask.None && factionEntry.ReputationClassMask(i) != ClassMask.None)) 
                     && (factionEntry.ReputationClassMask(i).HasClass(class_) || factionEntry.ReputationClassMask(i) == ClassMask.None))
@@ -883,7 +883,7 @@ namespace Game
 
             for (int i = 0; i < 4; i++)
             {
-                var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
+                var raceMask = factionEntry.ReputationRaceMask(i);
                 if ((factionEntry.ReputationClassMask(i) == ClassMask.None || factionEntry.ReputationClassMask(i).HasClass(playerClass))
                     && (raceMask == RaceMask.None || raceMask.HasRace(race)))
                 {

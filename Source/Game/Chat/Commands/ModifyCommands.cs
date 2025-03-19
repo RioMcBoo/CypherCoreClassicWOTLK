@@ -355,12 +355,11 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(factionTxt))
                 return false;
 
-            if (!int.TryParse(factionTxt, out int factionId))
+            if (!int.TryParse(factionTxt, out int factionId) || factionId == 0)
                 return false;
 
             string rankTxt = args.NextString();
-            if (factionId == 0 || !int.TryParse(rankTxt, out int amount))
-                return false;
+            bool LookByRankName = !int.TryParse(rankTxt, out int amount);
 
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
             if (factionEntry == null)
@@ -376,20 +375,20 @@ namespace Game.Chat
             }
 
             // try to find rank by name
-            if ((amount == 0) && !(amount < 0) && !rankTxt.IsNumber())
+            if (LookByRankName)
             {
-                string rankStr = rankTxt.ToLower();
-
                 int i = 0;
-                int r = 0;
+                int rank = 0;
 
-                for (; i != ReputationMgr.ReputationRankThresholds.Length - 1; ++i, ++r)
+                for (; i < ReputationMgr.ReputationRankThresholds.Length; ++i, ++rank)
                 {
-                    string rank = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[r]);
-                    if (string.IsNullOrEmpty(rank))
+                    amount = ReputationMgr.ReputationRankThresholds[i];
+
+                    string rankName = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[rank]);
+                    if (string.IsNullOrEmpty(rankName))
                         continue;
 
-                    if (rank.Equals(rankStr, StringComparison.OrdinalIgnoreCase))
+                    if (rankName.Equals(rankTxt, StringComparison.OrdinalIgnoreCase))
                         break;
 
                     if (i == ReputationMgr.ReputationRankThresholds.Length - 1)
@@ -397,25 +396,23 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.CommandInvalidParam, rankTxt);
                         return false;
                     }
+                }
 
-                    amount = ReputationMgr.ReputationRankThresholds[i];
+                string deltaTxt = args.NextString();
+                if (!string.IsNullOrEmpty(deltaTxt))
+                {
+                    int toNextRank = 0;
+                    var nextThresholdIndex = i + 1;
 
-                    string deltaTxt = args.NextString();
-                    if (!string.IsNullOrEmpty(deltaTxt))
+                    if (nextThresholdIndex != ReputationMgr.ReputationRankThresholds.Length - 1)
+                        toNextRank = ReputationMgr.ReputationRankThresholds[nextThresholdIndex] - ReputationMgr.ReputationRankThresholds[i];
+
+                    if (!int.TryParse(deltaTxt, out int delta) || delta < 0 || delta >= toNextRank)
                     {
-                        int toNextRank = 0;
-                        var nextThresholdIndex = i;
-                        ++nextThresholdIndex;
-                        if (nextThresholdIndex != ReputationMgr.ReputationRankThresholds.Length - 1)
-                            toNextRank = nextThresholdIndex - i;
-
-                        if (!int.TryParse(deltaTxt, out int delta) || delta < 0 || delta >= toNextRank)
-                        {
-                            handler.SendSysMessage(CypherStrings.CommandFactionDelta, Math.Max(0, toNextRank - 1));
-                            return false;
-                        }
-                        amount += delta;
+                        handler.SendSysMessage(CypherStrings.CommandFactionDelta, Math.Max(0, toNextRank - 1));
+                        return false;
                     }
+                    amount += delta;
                 }
             }
 

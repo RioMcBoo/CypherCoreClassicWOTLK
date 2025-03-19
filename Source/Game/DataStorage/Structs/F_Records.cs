@@ -8,7 +8,7 @@ namespace Game.DataStorage
 {
     public sealed class FactionRecord
     {
-        public long[] ReputationRaceMask = new long[4];
+        private long[] _reputationRaceMask = new long[4];
         public LocalizedString Name;
         public LocalizedString Description;
         public int Id;
@@ -23,7 +23,7 @@ namespace Game.DataStorage
         private short[] _reputationClassMask = new short[4];
         public ushort[] ReputationFlags = new ushort[4];
         public int[] ReputationBase = new int[4];
-        public short[] ReputationMax = new short[4];
+        public int[] ReputationMax = new int[4];
         /// <summary>
         /// Faction outputs rep * ParentFactionModOut as spillover reputation
         /// </summary>
@@ -34,6 +34,7 @@ namespace Game.DataStorage
         public byte[] ParentFactionCap = new byte[2];
 
         #region Properties
+        public RaceMask ReputationRaceMask(int index) => (RaceMask)_reputationRaceMask[index];
         public ClassMask ReputationClassMask(int index) => (ClassMask)_reputationClassMask[index];
         #endregion
 

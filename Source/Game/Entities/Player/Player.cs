@@ -1899,7 +1899,7 @@ namespace Game.Entities
                 else
                     rep = CalculateReputationGain(ReputationSource.Quest, GetQuestLevel(quest), rep, quest.RewardFactionId[i], noQuestBonus);
 
-                bool noSpillover = Convert.ToBoolean(quest.RewardReputationMask & (1 << i));
+                bool noSpillover = quest.RewardReputationMask.HasAnyFlag(1u << i);
                 GetReputationMgr().ModifyReputation(factionEntry, rep, false, noSpillover);
             }
         }
