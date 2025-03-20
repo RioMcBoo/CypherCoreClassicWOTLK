@@ -266,6 +266,7 @@ namespace Game.DataStorage
         public ClassMask ClassMask => (ClassMask)_classMask;
         public AbilityLearnType AcquireMethod => (AbilityLearnType)_acquireMethod;
         public SkillLineAbilityFlags Flags => (SkillLineAbilityFlags)_flags;
+        /// <summary> unused in wotlk_classic</summary>
         public SkillType SkillupSkillLineID => (SkillType)_skillupSkillLineID;
         #endregion
 

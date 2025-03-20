@@ -349,11 +349,6 @@ namespace Game.Entities
 
         public bool UpdateSkillPro(SkillType skillId, int chance, int step)
         {
-            // levels sync. with spell requirement for skill levels to learn
-            // bonus abilities in sSkillLineAbilityStore
-            // Used only to avoid scan DBC at each skill grow
-            uint[] bonusSkillLevels = [75, 150, 225, 300, 375, 450, 525, 600, 700, 850];
-
             Log.outDebug(LogFilter.Player, $"UpdateSkillPro(SkillId {skillId}, Chance {chance / 10.0f:F3}%)");
             if (skillId == 0)
                 return false;
@@ -389,6 +384,11 @@ namespace Game.Entities
             SetSkillRank(skillStatusData.Pos, new_value);
             if (skillStatusData.State != SkillState.New)
                 skillStatusData.State = SkillState.Changed;
+
+            // levels sync. with spell requirement for skill levels to learn
+            // bonus abilities in sSkillLineAbilityStore
+            // Used only to avoid scan DBC at each skill grow
+            uint[] bonusSkillLevels = [75, 150, 225, 300, 375, 450];
 
             foreach (uint bsl in bonusSkillLevels)
             {
@@ -1313,21 +1313,21 @@ namespace Game.Entities
 
             foreach (var _spell_idx in bounds)
             {
-                if (_spell_idx.SkillupSkillLineID != 0)
+                if (_spell_idx.SkillLine != 0)
                 {
-                    int SkillValue = GetPureSkillValue(_spell_idx.SkillupSkillLineID);
+                    int SkillValue = GetPureSkillValue(_spell_idx.SkillLine);
 
                     // Alchemy Discoveries here
                     if (spellInfo.Mechanic == Mechanics.Discovery)
                     {
-                        int discoveredSpell = SkillDiscovery.GetSkillDiscoverySpell(_spell_idx.SkillupSkillLineID, spellInfo.Id, this);
+                        int discoveredSpell = SkillDiscovery.GetSkillDiscoverySpell(_spell_idx.SkillLine, spellInfo.Id, this);
                         if (discoveredSpell != 0)
                             LearnSpell(discoveredSpell, false);
                     }
 
                     int craft_skill_gain = _spell_idx.NumSkillUps * WorldConfig.Values[WorldCfg.SkillGainCrafting].Int32;
 
-                    return UpdateSkillPro(_spell_idx.SkillupSkillLineID, SkillGainChance(SkillValue, _spell_idx.TrivialSkillLineRankHigh,
+                    return UpdateSkillPro(_spell_idx.SkillLine, SkillGainChance(SkillValue, _spell_idx.TrivialSkillLineRankHigh,
                         (_spell_idx.TrivialSkillLineRankHigh + _spell_idx.TrivialSkillLineRankLow) / 2, _spell_idx.TrivialSkillLineRankLow), craft_skill_gain);
                 }
             }
