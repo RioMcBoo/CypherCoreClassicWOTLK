@@ -1703,7 +1703,10 @@ namespace Game.Networking.Packets
                 RemovedModifications[i].Read(data);
 
             if (hasMoveUpdate)
+            {
+                MoveUpdate = new();
                 MoveUpdate.Read(data);
+            }
 
             for (var i = 0; i < weightCount; ++i)
             {
@@ -1722,7 +1725,7 @@ namespace Game.Networking.Packets
         public byte SendCastFlags;
         public SpellTargetData Target = new();
         public MissileTrajectoryRequest MissileTrajectory;
-        public MovementInfo MoveUpdate = new();
+        public MovementInfo MoveUpdate;
         public List<SpellWeight> Weight = new();
         public Array<SpellCraftingReagent> OptionalReagents = new(6);
         public Array<SpellCraftingReagent> RemovedModifications = new(6);
