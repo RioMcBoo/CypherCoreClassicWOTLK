@@ -436,7 +436,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    AddSpell(result.Read<int>(0), result.Read<bool>(1), false, false, result.Read<bool>(2), true);
+                    SpellBook.Add(result.Read<int>(0), result.Read<bool>(1), false, false, result.Read<bool>(2), true);
                 }
                 while (result.NextRow());
             }
@@ -445,7 +445,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    var spell = m_spells.LookupByKey(favoritesResult.Read<int>(0));
+                    var spell = SpellBook[favoritesResult.Read<int>(0)];
                     if (spell != null)
                         spell.Favorite = true;
                 } while (favoritesResult.NextRow());
@@ -1909,8 +1909,9 @@ namespace Game.Entities
         void _SaveSpells(SQLTransaction trans)
         {
             PreparedStatement stmt;
+            List<int> removeList = new();
 
-            foreach (var (id, spell) in m_spells.ToList())
+            foreach (var (id, spell) in SpellBook.Spells)
             {
                 if (spell.State == PlayerSpellState.Removed || spell.State == PlayerSpellState.Changed)
                 {
@@ -1949,13 +1950,32 @@ namespace Game.Entities
 
                 if (spell.State == PlayerSpellState.Removed)
                 {
-                    m_spells.Remove(id);
+                    removeList.Add(id);
                     continue;
                 }
 
                 if (spell.State != PlayerSpellState.Temporary)
                     spell.State = PlayerSpellState.Unchanged;
             }
+
+            foreach (var id in removeList)
+                SpellBook.Remove(id);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_TRADE_SKILL_SPELLS);
+            stmt.SetInt64(0, GetGUID().GetCounter());
+            trans.Append(stmt);
+
+            foreach(var skill in SpellBook.TradeSkillSpells.Keys)
+            {
+                foreach (var spell in SpellBook.TradeSkillSpells[skill])
+                {
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_TRADE_SKILL_SPELL);
+                    stmt.SetInt64(0, GetGUID().GetCounter());
+                    stmt.SetInt16(1, (short)skill);
+                    stmt.SetInt32(2, spell);
+                    trans.Append(stmt);
+                }
+        }
         }
 
         void _SaveAuras(SQLTransaction trans)
@@ -3621,7 +3641,7 @@ namespace Game.Entities
 
             // Unlock battle pet system if it's enabled in bnet account
             if (GetSession().GetBattlePetMgr().IsBattlePetSystemEnabled())
-                LearnSpell(SharedConst.SpellBattlePetTraining, false);
+                SpellBook.Learn(SharedConst.SpellBattlePetTraining, false);
 
             m_achievementSys.CheckAllAchievementCriteria(this);
             m_questObjectiveCriteriaMgr.CheckAllQuestObjectiveCriteria(this);
@@ -4006,13 +4026,6 @@ namespace Game.Entities
             Pet pet = GetPet();
             if (pet != null)
                 pet.SavePetToDB(PetSaveMode.AsCurrent);
-        }
-
-        void DeleteSpellFromAllPlayers(int spellId)
-        {
-            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_SPELL_SPELLS);
-            stmt.SetInt32(0, spellId);
-            DB.Characters.Execute(stmt);
         }
 
         public static int GetZoneIdFromDB(ObjectGuid guid)

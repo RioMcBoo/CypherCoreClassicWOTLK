@@ -1214,7 +1214,7 @@ namespace Game.Guilds
             }
 
             foreach (var entry in CliDB.GuildPerkSpellsStorage.Values)
-                player.LearnSpell(entry.SpellID, true);
+                player.SpellBook.Learn(entry.SpellID, true);
 
             GetAchievementMgr().SendAllData(player);
 
@@ -1834,7 +1834,7 @@ namespace Game.Guilds
                 player.SetGuildLevel(0);
 
                 foreach (var entry in CliDB.GuildPerkSpellsStorage.Values)
-                    player.RemoveSpell(entry.SpellID, false, false);
+                    player.SpellBook.Remove(entry.SpellID, false, false);
             }
             else
                 Global.CharacterCacheStorage.UpdateCharacterGuildId(guid, 0);

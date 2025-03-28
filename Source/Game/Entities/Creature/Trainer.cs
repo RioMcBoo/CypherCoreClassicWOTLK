@@ -118,7 +118,7 @@ namespace Game.Entities
                     dependent = true;
                 }
 
-                player.LearnSpell(trainerSpell.SpellId, dependent);
+                player.SpellBook.Learn(trainerSpell.SpellId, dependent);
             }
         }
 

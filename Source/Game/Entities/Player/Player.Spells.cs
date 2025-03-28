@@ -294,6 +294,11 @@ namespace Game.Entities
             return base.GetCastSpellInfo(spellInfo, triggerFlag);
         }
 
+        public override bool HasSpell(int spellId)
+        {
+            return SpellBook.Has(spellId);
+        }
+
         public void SetOverrideSpellsId(int overrideSpellsId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideSpellsID), overrideSpellsId); }
 
         public void AddOverrideSpell(int overridenSpellId, int newSpellId)
@@ -304,6 +309,11 @@ namespace Game.Entities
         public void RemoveOverrideSpell(int overridenSpellId, int newSpellId)
         {
             m_overrideSpells.Remove(overridenSpellId, newSpellId);
+        }
+
+        public void RemoveOverrideSpell(int overridenSpellId)
+        {
+            m_overrideSpells.Remove(overridenSpellId);
         }
 
         public void SendSpellCategoryCooldowns()
@@ -1204,7 +1214,7 @@ namespace Game.Entities
                     // remove all spells that related to this skill
                     var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skill);
                     foreach (SkillLineAbilityRecord skillLineAbility in skillLineAbilities)
-                        RemoveSpell(Global.SpellMgr.GetFirstSpellInChain(skillLineAbility.Spell));
+                        SpellBook.Remove(Global.SpellMgr.GetFirstSpellInChain(skillLineAbility.Spell));
 
                     var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill);
                     foreach (SkillLineRecord childSkillLine in childSkillLines)
@@ -1322,7 +1332,7 @@ namespace Game.Entities
                     {
                         int discoveredSpell = SkillDiscovery.GetSkillDiscoverySpell(_spell_idx.SkillLine, spellInfo.Id, this);
                         if (discoveredSpell != 0)
-                            LearnSpell(discoveredSpell, false);
+                            SpellBook.Learn(discoveredSpell, false);
                     }
 
                     int craft_skill_gain = _spell_idx.NumSkillUps * WorldConfig.Values[WorldCfg.SkillGainCrafting].Int32;
@@ -1723,12 +1733,12 @@ namespace Game.Entities
 
                 // need unlearn spell
                 if (skillValue < ability.MinSkillLineRank && ability.AcquireMethod == AbilityLearnType.OnSkillValue)
-                    RemoveSpell(ability.Spell);
+                    SpellBook.Remove(ability.Spell);
                 // need learn
                 else if (!IsInWorld)
-                    AddSpell(ability.Spell, true, true, true, false, false, ability.SkillLine);
+                    SpellBook.Add(ability.Spell, true, true, true, false, false, ability.SkillLine);
                 else
-                    LearnSpell(ability.Spell, true, ability.SkillLine);
+                    SpellBook.Learn(ability.Spell, true, ability.SkillLine);
 
             }
         }
@@ -1880,7 +1890,7 @@ namespace Game.Entities
             return false;
         }
 
-        public Dictionary<int, PlayerSpell> GetSpellMap() { return m_spells; }
+        public IReadOnlyDictionary<int, PlayerSpell> GetSpellMap() { return SpellBook.Spells; }
 
         public override SpellSchools GetMeleeDamageSchool(WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
@@ -2013,36 +2023,6 @@ namespace Game.Entities
             return true;
         }
 
-        public void AddTemporarySpell(int spellId)
-        {
-            var spell = m_spells.LookupByKey(spellId);
-            // spell already added - do not do anything
-            if (spell != null)
-                return;
-
-            PlayerSpell newspell = new();
-            newspell.State = PlayerSpellState.Temporary;
-            newspell.Active = true;
-            newspell.Dependent = false;
-            newspell.Disabled = false;
-
-            m_spells[spellId] = newspell;
-        }
-
-        public void RemoveTemporarySpell(int spellId)
-        {
-            var spell = m_spells.LookupByKey(spellId);
-            // spell already not in list - do not do anything
-            if (spell == null)
-                return;
-
-            // spell has other state than temporary - do not change it
-            if (spell.State != PlayerSpellState.Temporary)
-                return;
-
-            m_spells.Remove(spellId);
-        }
-
         public void UpdateZoneDependentAuras(int newZone)
         {
             // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone.area update
@@ -2102,9 +2082,9 @@ namespace Game.Entities
                     $"Adding initial spell, id = {tspell}");
 
                 if (!IsInWorld)                                    // will send in INITIAL_SPELLS in list anyway at map add
-                    AddSpell(tspell, true, true, true, false);
+                    SpellBook.Add(tspell, true, true, true, false);
                 else                                                // but send in normal spell in game learn case
-                    LearnSpell(tspell, true);
+                    SpellBook.Learn(tspell, true);
             }
         }
 
@@ -2170,7 +2150,7 @@ namespace Game.Entities
             SendKnownSpells knownSpells = new();
             knownSpells.InitialLogin = IsLoading();
 
-            foreach (var spell in m_spells.ToList())
+            foreach (var spell in SpellBook.Spells)
             {
                 if (spell.Value.State == PlayerSpellState.Removed)
                     continue;
@@ -2189,310 +2169,6 @@ namespace Game.Entities
         void SendUnlearnSpells()
         {
             SendPacket(new SendUnlearnSpells());
-        }
-
-        public void LearnSpell(int spellId, bool dependent, SkillType fromSkill = 0, bool suppressMessaging = false, int? traitDefinitionId = null)
-        {
-            PlayerSpell spell = m_spells.LookupByKey(spellId);
-
-            bool disabled = (spell != null) && spell.Disabled;
-            bool active = !disabled || spell.Active;
-            bool favorite = spell != null ? spell.Favorite : false;
-
-            bool learning = AddSpell(spellId, active, true, dependent, false, false, fromSkill, favorite, traitDefinitionId);
-
-            // prevent duplicated entires in spell book, also not send if not in world (loading)
-            if (learning && IsInWorld)
-            {
-                LearnedSpells learnedSpells = new();
-                LearnedSpellInfo learnedSpellInfo = new();
-                learnedSpellInfo.SpellID = spellId;
-                learnedSpellInfo.IsFavorite = favorite;
-                learnedSpellInfo.TraitDefinitionID = traitDefinitionId;
-                learnedSpells.SuppressMessaging = suppressMessaging;
-                learnedSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
-                SendPacket(learnedSpells);
-            }
-
-            // learn all disabled higher ranks and required spells (recursive)
-            if (disabled)
-            {
-                var nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
-                if (nextSpell != 0)
-                {
-                    var _spell = m_spells.LookupByKey(nextSpell);
-                    if (spellId != 0 && _spell.Disabled)
-                        LearnSpell(nextSpell, false, fromSkill);
-                }
-
-                var spellsRequiringSpell = Global.SpellMgr.GetSpellsRequiringSpellBounds(spellId);
-                foreach (var id in spellsRequiringSpell)
-                {
-                    var spell1 = m_spells.LookupByKey(id);
-                    if (spell1 != null && spell1.Disabled)
-                        LearnSpell(id, false, fromSkill);
-                }
-            }
-            else
-                UpdateQuestObjectiveProgress(QuestObjectiveType.LearnSpell, spellId, 1);
-        }
-
-        public void RemoveSpell(int spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false)
-        {
-            var pSpell = m_spells.LookupByKey(spellId);
-            if (pSpell == null)
-                return;
-
-            if (pSpell.State == PlayerSpellState.Removed || (disabled && pSpell.Disabled) 
-                || pSpell.State == PlayerSpellState.Temporary)
-                return;
-
-            // unlearn non talent higher ranks (recursive)
-            int nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
-            if (nextSpell != 0)
-            {
-                SpellInfo spellInfo1 = Global.SpellMgr.GetSpellInfo(nextSpell, Difficulty.None);
-                if (HasSpell(nextSpell) && !spellInfo1.HasAttribute(SpellCustomAttributes.IsTalent))
-                    RemoveSpell(nextSpell, disabled, false);
-            }
-            //unlearn spells dependent from recently removed spells
-            var spellsRequiringSpell = Global.SpellMgr.GetSpellsRequiringSpellBounds(spellId);
-            foreach (var id in spellsRequiringSpell)
-                RemoveSpell(id, disabled);
-
-            // re-search, it can be corrupted in prev loop
-            pSpell = m_spells.LookupByKey(spellId);
-            if (pSpell == null)
-                return;                                             // already unleared
-
-            bool cur_active = pSpell.Active;
-            bool cur_dependent = pSpell.Dependent;
-            int? traitDefinitionId = pSpell.TraitDefinitionId;
-
-            if (disabled)
-            {
-                pSpell.Disabled = disabled;
-                if (pSpell.State != PlayerSpellState.New)
-                    pSpell.State = PlayerSpellState.Changed;
-            }
-            else
-            {
-                if (pSpell.State == PlayerSpellState.New)
-                    m_spells.Remove(spellId);
-                else
-                    pSpell.State = PlayerSpellState.Removed;
-            }
-
-            RemoveOwnedAura(spellId, GetGUID());
-
-            // remove pet auras
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-            {
-                PetAura petSpell = Global.SpellMgr.GetPetAura(spellId, i);
-                if (petSpell != null)
-                    RemovePetAura(petSpell);
-            }
-
-            // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-            if (spellInfo != null && spellInfo.IsPrimaryProfessionFirstRank())
-            {
-                int freeProfs = GetFreePrimaryProfessionPoints() + 1;
-                if (freeProfs <= WorldConfig.Values[WorldCfg.MaxPrimaryTradeSkill].Int32)
-                    SetFreePrimaryProfessions(freeProfs);
-            }
-
-            // remove dependent skill
-            var spellLearnSkill = Global.SpellMgr.GetSpellLearnSkill(spellId);
-            if (spellLearnSkill != null)
-            {
-                int prev_spell = Global.SpellMgr.GetPrevSpellInChain(spellId);
-                if (prev_spell == 0)                                    // first rank, remove skill
-                    SetSkill(spellLearnSkill.skill, 0, 0, 0);
-                else
-                {
-                    // search prev. skill setting by spell ranks chain
-                    var prevSkill = Global.SpellMgr.GetSpellLearnSkill(prev_spell);
-                    while (prevSkill == null && prev_spell != 0)
-                    {
-                        prev_spell = Global.SpellMgr.GetPrevSpellInChain(prev_spell);
-                        prevSkill = Global.SpellMgr.GetSpellLearnSkill(Global.SpellMgr.GetFirstSpellInChain(prev_spell));
-                    }
-
-                    if (prevSkill == null)                                 // not found prev skill setting, remove skill
-                        SetSkill(spellLearnSkill.skill, 0, 0, 0);
-                    else                                            // set to prev. skill setting values
-                    {
-                        ushort skill_value = GetPureSkillValue(prevSkill.skill);
-                        ushort skill_max_value = GetPureMaxSkillValue(prevSkill.skill);
-
-                        ushort new_skill_max_value = prevSkill.maxvalue;
-
-                        if (new_skill_max_value == 0)
-                        {
-                            var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo(prevSkill.skill, GetRace(), GetClass());
-                            if (rcInfo != null)
-                            {
-                                switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
-                                {
-                                    case SkillRangeType.Language:
-                                        skill_value = 300;
-                                        new_skill_max_value = 300;
-                                        break;
-                                    case SkillRangeType.Level:
-                                        new_skill_max_value = GetMaxSkillValueForLevel();
-                                        break;
-                                    case SkillRangeType.Mono:
-                                        new_skill_max_value = 1;
-                                        break;
-                                    case SkillRangeType.Rank:
-                                    {
-                                        var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
-                                        new_skill_max_value = (ushort)tier.GetValueForTierIndex(prevSkill.step - 1);
-                                        break;
-                                    }
-                                    default:
-                                        break;
-                                }
-
-                                if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
-                                    skill_value = new_skill_max_value;
-                            }
-                        }
-                        else if (skill_value > prevSkill.value)
-                            skill_value = prevSkill.value;
-
-                        if (skill_max_value > new_skill_max_value)
-                            skill_max_value = new_skill_max_value;
-
-                        if (skill_value > new_skill_max_value)
-                            skill_value = new_skill_max_value;
-
-                        SetSkill(prevSkill.skill, prevSkill.step, skill_value, skill_max_value);
-                    }
-                }
-            }
-
-            // remove dependent spells
-            var spell_bounds = Global.SpellMgr.GetSpellLearnSpellMapBounds(spellId);
-
-            foreach (var spellNode in spell_bounds)
-            {
-                RemoveSpell(spellNode.Spell, disabled);
-                if (spellNode.OverridesSpell != 0)
-                    RemoveOverrideSpell(spellNode.OverridesSpell, spellNode.Spell);
-            }
-
-            // activate lesser rank in spellbook/action bar, and cast it if need
-            bool prev_activate = false;
-
-            int prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
-            if (prev_id != 0)
-            {
-                // if ranked non-stackable spell: need activate lesser rank and update dendence state
-                // No need to check for spellInfo != NULL here because if cur_active is true,
-                // then that means that the spell was already in m_spells, and only valid spells can be pushed there.
-                if (cur_active && spellInfo.IsRanked())
-                {
-                    // need manually update dependence state (learn spell ignore like attempts)
-                    var prevSpell = m_spells.LookupByKey(prev_id);
-                    if (prevSpell != null)
-                    {
-                        if (prevSpell.Dependent != cur_dependent)
-                        {
-                            prevSpell.Dependent = cur_dependent;
-                            if (prevSpell.State != PlayerSpellState.New)
-                                prevSpell.State = PlayerSpellState.Changed;
-                        }
-
-                        // now re-learn if need re-activate
-                        if (!prevSpell.Active && learnLowRank)
-                        {
-                            if (AddSpell(prev_id, true, false, prevSpell.Dependent, prevSpell.Disabled))
-                            {
-                                // downgrade spell ranks in spellbook and action bar
-                                SendSupercededSpell(spellId, prev_id);
-                                prev_activate = true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (traitDefinitionId.HasValue)
-            {
-                var traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitDefinitionId.Value);
-                if (traitDefinition != null)
-                    RemoveOverrideSpell(traitDefinition.OverridesSpellID, spellId);
-            }
-
-            m_overrideSpells.Remove(spellId);
-
-            if (m_canTitanGrip)
-            {
-                if (spellInfo != null && spellInfo.IsPassive() && spellInfo.HasEffect(SpellEffectName.TitanGrip))
-                {
-                    RemoveAurasDueToSpell(m_titanGripPenaltySpellId);
-                    SetCanTitanGrip(false);
-                }
-            }
-
-            if (CanDualWield())
-            {
-                if (spellInfo != null && spellInfo.IsPassive() && spellInfo.HasEffect(SpellEffectName.DualWield))
-                    SetCanDualWield(false);
-            }
-
-            if (WorldConfig.Values[WorldCfg.OffhandCheckAtSpellUnlearn].Bool)
-                AutoUnequipOffhandIfNeed();
-
-            // remove from spell book if not replaced by lesser rank
-            if (!prev_activate)
-            {
-                UnlearnedSpells unlearnedSpells = new();
-                unlearnedSpells.SpellID.Add(spellId);
-                unlearnedSpells.SuppressMessaging = suppressMessaging;
-                SendPacket(unlearnedSpells);
-            }
-        }
-
-        public void SetSpellFavorite(int spellId, bool favorite)
-        {
-            var spell = m_spells.LookupByKey(spellId);
-            if (spell == null)
-                return;
-
-            spell.Favorite = favorite;
-            if (spell.State == PlayerSpellState.Unchanged)
-                spell.State = PlayerSpellState.Changed;
-        }
-
-        bool HandlePassiveSpellLearn(SpellInfo spellInfo)
-        {
-            // note: form passives activated with shapeshift spells be implemented by HandleShapeshiftBoosts
-            // instead of spell_learn_spell
-            // talent dependent passives activated at form apply have proper stance data
-            ShapeShiftForm form = GetShapeshiftForm();
-            bool need_cast = spellInfo.Stances == 0 || (form != 0 && Convert.ToBoolean(spellInfo.Stances & (1 << ((int)form - 1)))) ||
-            (form == 0 && spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm));
-
-            // Check EquippedItemClass
-            // passive spells which apply aura and have an item requirement are to be added manually, instead of casted
-            if (spellInfo.EquippedItemClass >= 0)
-            {
-                foreach (var spellEffectInfo in spellInfo.GetEffects())
-                {
-                    if (spellEffectInfo.IsAura())
-                    {
-                        if (!HasAura(spellInfo.Id) && HasItemFitToSpellRequirements(spellInfo))
-                            AddAura(spellInfo.Id, this);
-                        return false;
-                    }
-                }
-            }
-
-            //Check CasterAuraStates
-            return need_cast && (spellInfo.CasterAuraState == 0 || HasAuraState(spellInfo.CasterAuraState));
         }
 
         public void AddStoredAuraTeleportLocation(int spellId)
@@ -2518,458 +2194,6 @@ namespace Game.Entities
                 return auraLocation.Loc;
 
             return null;
-        }
-
-        bool AddSpell(int spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, SkillType fromSkill = 0, bool favorite = false, int? traitDefinitionId = null)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-            if (spellInfo == null)
-            {
-                // do character spell book cleanup (all characters)
-                if (!IsInWorld && !learning)
-                {
-                    Log.outError(LogFilter.Spells,
-                        $"Player.AddSpell: Spell (ID: {spellId}) does not exist. " +
-                        $"Deleting for all characters in `character_spell`.");
-
-                    DeleteSpellFromAllPlayers(spellId);
-                }
-                else
-                {
-                    Log.outError(LogFilter.Spells,
-                        $"Player.AddSpell: Spell (ID: {spellId}) does not exist");
-                }
-
-                return false;
-            }
-
-            if (!Global.SpellMgr.IsSpellValid(spellInfo, this, false))
-            {
-                // do character spell book cleanup (all characters)
-                if (!IsInWorld && !learning)
-                {
-                    Log.outError(LogFilter.Spells,
-                        $"Player.AddSpell: Spell (ID: {spellId}) is invalid. " +
-                        $"Deleting for all characters in `character_spell`.");
-
-                    DeleteSpellFromAllPlayers(spellId);
-                }
-                else
-                {
-                    Log.outError(LogFilter.Spells,
-                        $"Player.AddSpell: Spell (ID: {spellId}) is invalid");
-                }
-
-                return false;
-            }
-
-            PlayerSpellState state = learning ? PlayerSpellState.New : PlayerSpellState.Unchanged;
-
-            bool dependent_set = false;
-            bool disabled_case = false;
-            bool superceded_old = false;
-
-            PlayerSpell spell = m_spells.LookupByKey(spellId);
-            if (spell != null && spell.State == PlayerSpellState.Temporary)
-                RemoveTemporarySpell(spellId);
-
-            if (spell != null)
-            {
-                var next_active_spell_id = 0;
-                // fix activate state for non-stackable low rank (and find next spell for !active case)
-                if (spellInfo.IsRanked())
-                {
-                    var next = Global.SpellMgr.GetNextSpellInChain(spellId);
-                    if (next != 0)
-                    {
-                        if (HasSpell(next))
-                        {
-                            // high rank already known so this must !active
-                            active = false;
-                            next_active_spell_id = next;
-                        }
-                    }
-                }
-
-                // not do anything if already known in expected state
-                if (spell.State != PlayerSpellState.Removed && spell.Active == active &&
-                    spell.Dependent == dependent && spell.Disabled == disabled)
-                {
-                    if (!IsInWorld && !learning)
-                        spell.State = PlayerSpellState.Unchanged;
-
-                    return false;
-                }
-
-                // dependent spell known as not dependent, overwrite state
-                if (spell.State != PlayerSpellState.Removed && !spell.Dependent && dependent)
-                {
-                    spell.Dependent = dependent;
-                    if (spell.State != PlayerSpellState.New)
-                        spell.State = PlayerSpellState.Changed;
-                    dependent_set = true;
-                }
-
-                if (spell.TraitDefinitionId != traitDefinitionId)
-                {
-                    if (spell.TraitDefinitionId.HasValue)
-                    {
-                        TraitDefinitionRecord traitDefinition = 
-                            CliDB.TraitDefinitionStorage.LookupByKey(spell.TraitDefinitionId.Value);
-
-                        if (traitDefinition != null)
-                            RemoveOverrideSpell(traitDefinition.OverridesSpellID, spellId);
-                    }
-
-                    spell.TraitDefinitionId = traitDefinitionId;
-                }
-
-                spell.Favorite = favorite;
-
-                // update active state for known spell
-                if (spell.Active != active && spell.State != PlayerSpellState.Removed && !spell.Disabled)
-                {
-                    spell.Active = active;
-
-                    if (!IsInWorld && !learning && !dependent_set) // explicitly load from DB and then exist in it already and set correctly
-                        spell.State = PlayerSpellState.Unchanged;
-                    else if (spell.State != PlayerSpellState.New)
-                        spell.State = PlayerSpellState.Changed;
-
-                    if (active)
-                    {
-                        if (spellInfo.IsPassive() && HandlePassiveSpellLearn(spellInfo))
-                            CastSpell(this, spellId, true);
-                    }
-                    else if (IsInWorld)
-                    {
-                        if (next_active_spell_id != 0)
-                            SendSupercededSpell(spellId, next_active_spell_id);
-                        else
-                        {
-                            UnlearnedSpells removedSpells = new();
-                            removedSpells.SpellID.Add(spellId);
-                            SendPacket(removedSpells);
-                        }
-                    }
-
-                    return active;
-                }
-
-                if (spell.Disabled != disabled && spell.State != PlayerSpellState.Removed)
-                {
-                    if (spell.State != PlayerSpellState.New)
-                        spell.State = PlayerSpellState.Changed;
-                    spell.Disabled = disabled;
-
-                    if (disabled)
-                        return false;
-
-                    disabled_case = true;
-                }
-                else
-                {
-                    switch (spell.State)
-                    {
-                        case PlayerSpellState.Unchanged:
-                            return false;
-                        case PlayerSpellState.Removed:
-                        {
-                            m_spells.Remove(spellId);
-                            state = PlayerSpellState.Changed;
-                            break;
-                        }
-                        default:
-                        {
-                            // can be in case spell loading but learned at some previous spell loading
-                            if (!IsInWorld && !learning && !dependent_set)
-                                spell.State = PlayerSpellState.Unchanged;
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            if (!disabled_case) // skip new spell adding if spell already known (disabled spells case)
-            {
-                // non talent spell: learn low ranks (recursive call)
-                var prev_spell = Global.SpellMgr.GetPrevSpellInChain(spellId);
-                if (prev_spell != 0)
-                {
-                    if (!IsInWorld || disabled)                    // at spells loading, no output, but allow save
-                        AddSpell(prev_spell, active, true, true, disabled, false, fromSkill);
-                    else                                            // at normal learning
-                        LearnSpell(prev_spell, true, fromSkill);
-                }
-
-                PlayerSpell newspell = new();
-                newspell.State = state;
-                newspell.Active = active;
-                newspell.Dependent = dependent;
-                newspell.Disabled = disabled;
-                newspell.Favorite = favorite;
-                if (traitDefinitionId.HasValue)
-                    newspell.TraitDefinitionId = traitDefinitionId.Value;
-
-                // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-                if (newspell.Active && !newspell.Disabled && spellInfo.IsRanked())
-                {
-                    foreach (var _spell in m_spells)
-                    {
-                        if (_spell.Value.State == PlayerSpellState.Removed)
-                            continue;
-
-                        SpellInfo i_spellInfo = Global.SpellMgr.GetSpellInfo(_spell.Key, Difficulty.None);
-                        if (i_spellInfo == null)
-                            continue;
-
-                        if (spellInfo.IsDifferentRankOf(i_spellInfo))
-                        {
-                            if (_spell.Value.Active)
-                            {
-                                if (spellInfo.IsHighRankOf(i_spellInfo))
-                                {
-                                    if (IsInWorld)                 // not send spell (re-/over-)learn packets at loading
-                                        SendSupercededSpell(_spell.Key, spellId);
-
-                                    // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
-                                    _spell.Value.Active = false;
-                                    if (_spell.Value.State != PlayerSpellState.New)
-                                        _spell.Value.State = PlayerSpellState.Changed;
-                                    superceded_old = true;          // new spell replace old in action bars and spell book.
-                                }
-                                else
-                                {
-                                    if (IsInWorld)                 // not send spell (re-/over-)learn packets at loading
-                                        SendSupercededSpell(spellId, _spell.Key);
-
-                                    // mark new spell as disable (not learned yet for client and will not learned)
-                                    newspell.Active = false;
-                                    if (newspell.State != PlayerSpellState.New)
-                                        newspell.State = PlayerSpellState.Changed;
-                                }
-                            }
-                        }
-                    }
-                }
-                m_spells[spellId] = newspell;
-
-                // return false if spell disabled
-                if (newspell.Disabled)
-                    return false;
-            }
-
-            bool castSpell = false;
-
-            // cast talents with SPELL_EFFECT_LEARN_SPELL (other dependent spells will learned later as not auto-learned)
-            // note: all spells with SPELL_EFFECT_LEARN_SPELL isn't passive
-            if (!loading && spellInfo.HasAttribute(SpellCustomAttributes.IsTalent) && spellInfo.HasEffect(SpellEffectName.LearnSpell))
-            {
-                // ignore stance requirement for talent learn spell (stance set for spell only for client spell description show)
-                castSpell = true;
-            }
-            // also cast passive spells (including all talents without SPELL_EFFECT_LEARN_SPELL) with additional checks
-            else if (spellInfo.IsPassive())
-                castSpell = HandlePassiveSpellLearn(spellInfo);
-            else if (spellInfo.HasEffect(SpellEffectName.SkillStep))
-                castSpell = true;
-            else if (spellInfo.HasAttribute(SpellAttr1.CastWhenLearned))
-                castSpell = true;
-
-            if (castSpell)
-            {
-                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-
-                if (traitDefinitionId.HasValue)
-                {
-                    TraitConfig traitConfig = GetTraitConfig(m_activePlayerData.ActiveCombatTraitConfigID);
-                    if (traitConfig != null)
-                    {
-                        int traitEntryIndex = traitConfig.Entries.FindIndexIf(traitEntry =>
-                        {
-                            return CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.TraitDefinitionID == traitDefinitionId;
-                        });
-
-                        int rank = 0;
-                        if (traitEntryIndex >= 0)
-                            rank = traitConfig.Entries[traitEntryIndex].Rank + traitConfig.Entries[traitEntryIndex].GrantedRanks;
-
-                        if (rank > 0)
-                        {
-                            var traitDefinitionEffectPoints = TraitMgr.GetTraitDefinitionEffectPointModifiers(traitDefinitionId.Value);
-                            if (traitDefinitionEffectPoints != null)
-                            {
-                                foreach (TraitDefinitionEffectPointsRecord traitDefinitionEffectPoint in traitDefinitionEffectPoints)
-                                {
-                                    if (traitDefinitionEffectPoint.EffectIndex >= spellInfo.GetEffects().Count)
-                                        continue;
-
-                                    float basePoints = Global.DB2Mgr.GetCurveValueAt(traitDefinitionEffectPoint.CurveID, rank);
-                                    if (traitDefinitionEffectPoint.OperationType == TraitPointsOperationType.Multiply)
-                                        basePoints *= spellInfo.GetEffect(traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
-
-                                    args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, (int)basePoints);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                CastSpell(this, spellId, args);
-                if (spellInfo.HasEffect(SpellEffectName.SkillStep))
-                    return false;
-            }
-
-            if (traitDefinitionId.HasValue)
-            {
-                TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitDefinitionId.Value);
-                if (traitDefinition != null)
-                    AddOverrideSpell(traitDefinition.OverridesSpellID, spellId);
-            }
-
-            // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
-            var freeProfs = GetFreePrimaryProfessionPoints();
-            if (freeProfs != 0)
-            {
-                if (spellInfo.IsPrimaryProfessionFirstRank())
-                    SetFreePrimaryProfessions(freeProfs - 1);
-            }
-
-            var skill_bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
-
-            SpellLearnSkillNode spellLearnSkill = Global.SpellMgr.GetSpellLearnSkill(spellId);
-            if (spellLearnSkill != null)
-            {
-                // add dependent skills if this spell is not learned from adding skill already
-                if (spellLearnSkill.skill != fromSkill)
-                {
-                    ushort skill_value = GetPureSkillValue(spellLearnSkill.skill);
-                    ushort skill_max_value = GetPureMaxSkillValue(spellLearnSkill.skill);
-
-                    if (skill_value < spellLearnSkill.value)
-                        skill_value = spellLearnSkill.value;
-
-                    ushort new_skill_max_value = spellLearnSkill.maxvalue;
-
-                    if (new_skill_max_value == 0)
-                    {
-                        var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo(spellLearnSkill.skill, GetRace(), GetClass());
-                        if (rcInfo != null)
-                        {
-                            switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
-                            {
-                                case SkillRangeType.Language:
-                                    skill_value = 300;
-                                    new_skill_max_value = 300;
-                                    break;
-                                case SkillRangeType.Level:
-                                    new_skill_max_value = GetMaxSkillValueForLevel();
-                                    break;
-                                case SkillRangeType.Mono:
-                                    new_skill_max_value = 1;
-                                    break;
-                                case SkillRangeType.Rank:
-                                {
-                                    var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
-                                    new_skill_max_value = (ushort)tier.GetValueForTierIndex(spellLearnSkill.step - 1);
-                                    break;
-                                }
-                                default:
-                                    break;
-                            }
-
-                            if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
-                                skill_value = new_skill_max_value;
-                        }
-                    }
-
-                    if (skill_max_value < new_skill_max_value)
-                        skill_max_value = new_skill_max_value;
-
-                    SetSkill(spellLearnSkill.skill, spellLearnSkill.step, skill_value, skill_max_value);
-                }
-            }
-            else
-            {
-                // not ranked skills
-                foreach (var _spell_idx in skill_bounds)
-                {
-                    SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey((int)_spell_idx.SkillLine);
-                    if (pSkill == null)
-                        continue;
-
-                    if (_spell_idx.SkillLine == fromSkill)
-                        continue;
-
-                    // Runeforging special case
-                    if ((_spell_idx.AcquireMethod == AbilityLearnType.OnSkillLearn && !HasSkill(_spell_idx.SkillLine))
-                        || ((_spell_idx.SkillLine == SkillType.Runeforging) && _spell_idx.TrivialSkillLineRankHigh == 0))
-                    {
-                        SkillRaceClassInfoRecord rcInfo = 
-                            Global.DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass());
-
-                        if (rcInfo != null)
-                            LearnDefaultSkill(rcInfo);
-                    }
-                }
-            }
-
-
-            // learn dependent spells
-            var spell_bounds = Global.SpellMgr.GetSpellLearnSpellMapBounds(spellId);
-            foreach (var spellNode in spell_bounds)
-            {
-                if (!spellNode.AutoLearned)
-                {
-                    if (!IsInWorld || !spellNode.Active)       // at spells loading, no output, but allow save
-                        AddSpell(spellNode.Spell, spellNode.Active, true, true, false);
-                    else                                            // at normal learning
-                        LearnSpell(spellNode.Spell, true);
-                }
-
-                if (spellNode.OverridesSpell != 0 && spellNode.Active)
-                    AddOverrideSpell(spellNode.OverridesSpell, spellNode.Spell);
-            }
-
-            if (!GetSession().PlayerLoading())
-            {
-                // not ranked skills
-                foreach (var _spell_idx in skill_bounds)
-                {
-                    UpdateCriteria(CriteriaType.LearnTradeskillSkillLine, (long)_spell_idx.SkillLine);
-                    UpdateCriteria(CriteriaType.LearnSpellFromSkillLine, (long)_spell_idx.SkillLine);
-                }
-
-                UpdateCriteria(CriteriaType.LearnOrKnowSpell, spellId);
-            }
-
-            // needs to be when spell is already learned, to prevent infinite recursion crashes
-            if (Global.DB2Mgr.GetMount(spellId) != null)
-                GetSession().GetCollectionMgr().AddMount(spellId, MountStatusFlags.None, false, !IsInWorld);
-
-            // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
-            return active && !disabled && !superceded_old;
-        }
-
-        public override bool HasSpell(int spellId)
-        {
-            var spell = m_spells.LookupByKey(spellId);
-            if (spell != null)
-                return spell.State != PlayerSpellState.Removed && !spell.Disabled;
-
-            return false;
-        }
-
-        public bool HasActiveSpell(int spellId)
-        {
-            var spell = m_spells.LookupByKey(spellId);
-            if (spell != null)
-            {
-                return spell.State != PlayerSpellState.Removed && spell.Active
-                    && !spell.Disabled;
-            }
-
-            return false;
         }
 
         public void AddSpellMod(SpellModifier mod, bool apply)
@@ -3381,16 +2605,6 @@ namespace Game.Entities
                 SendPacket(pctMods);
         }
 
-        void SendSupercededSpell(int oldSpell, int newSpell)
-        {
-            SupercededSpells supercededSpells = new();
-            LearnedSpellInfo learnedSpellInfo = new();
-            learnedSpellInfo.SpellID = newSpell;
-            learnedSpellInfo.Superceded = oldSpell;
-            supercededSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
-            SendPacket(supercededSpells);
-        }
-
         public void UpdateEquipSpellsAtFormChange()
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
@@ -3746,7 +2960,7 @@ namespace Game.Entities
             else
             {
                 foreach (var spellId in smap.Keys)
-                    RemoveSpell(spellId, false, false);           // only iter.first can be accessed, object by iter.second can be deleted already
+                    SpellBook.Remove(spellId, false, false);           // only iter.first can be accessed, object by iter.second can be deleted already
             }
 
             LearnDefaultSkills();
@@ -3869,7 +3083,7 @@ namespace Game.Entities
             // check known spell or raid marker spell (which not requires player to know it)
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(_pendingSpellCastRequest.CastRequest.SpellID, GetMap().GetDifficultyID());
             Player plrCaster = castingUnit.ToPlayer();
-            if (plrCaster != null && !plrCaster.HasActiveSpell(spellInfo.Id) && !spellInfo.HasAttribute(SpellAttr8.SkipIsKnownCheck))
+            if (plrCaster != null && !plrCaster.SpellBook.HasActive(spellInfo.Id) && !spellInfo.HasAttribute(SpellAttr8.SkipIsKnownCheck))
             {
                 bool allow = false;
 

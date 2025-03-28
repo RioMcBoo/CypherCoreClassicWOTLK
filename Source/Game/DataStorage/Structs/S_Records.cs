@@ -268,6 +268,7 @@ namespace Game.DataStorage
         public SkillLineAbilityFlags Flags => (SkillLineAbilityFlags)_flags;
         /// <summary> unused in wotlk_classic</summary>
         public SkillType SkillupSkillLineID => (SkillType)_skillupSkillLineID;
+        public bool IsSkillTradeSpell => TrivialSkillLineRankHigh != 0 && TrivialSkillLineRankLow != 0;
         #endregion
 
         #region Helpers

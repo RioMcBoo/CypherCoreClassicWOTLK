@@ -714,7 +714,7 @@ namespace Game.Spells
             Player player = unitTarget.ToPlayer();
             int spellToUnlearn = effectInfo.TriggerSpell;
 
-            player.RemoveSpell(spellToUnlearn);
+            player.SpellBook.Remove(spellToUnlearn);
 
             Log.outDebug(LogFilter.Spells, 
                 $"Spell: Player {player.GetGUID()} " +
@@ -1760,13 +1760,13 @@ namespace Game.Spells
                         dependent = true;
                     }
 
-                    player.LearnSpell(itemEffect.SpellID, dependent);
+                    player.SpellBook.Learn(itemEffect.SpellID, dependent);
                 }
             }
 
             if (effectInfo.TriggerSpell != 0)
             {
-                player.LearnSpell(effectInfo.TriggerSpell, false);
+                player.SpellBook.Learn(effectInfo.TriggerSpell, false);
                 Log.outDebug(LogFilter.Spells, 
                     $"Spell: {player.GetGUID()} " +
                     $"has learned spell {effectInfo.TriggerSpell} " +

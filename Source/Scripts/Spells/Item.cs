@@ -2272,7 +2272,7 @@ namespace Scripts.Spells.Items
             // learn random explicit discovery recipe (if any)
             int discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
             if (discoveredSpellId != 0)
-                caster.LearnSpell(discoveredSpellId, false);
+                caster.SpellBook.Learn(discoveredSpellId, false);
         }
 
         public override void Register()

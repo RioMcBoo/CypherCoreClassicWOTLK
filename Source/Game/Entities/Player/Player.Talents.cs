@@ -63,13 +63,13 @@ namespace Game.Entities
             {
                 if (Global.SpellMgr.GetSpellInfo(talent.SpellRank[itr.Rank], Difficulty.None) is SpellInfo spellToRemove)
                 {
-                    RemoveSpell(spellToRemove.Id, true);
+                    SpellBook.Remove(spellToRemove.Id, true);
 
                     // search for spells that the talent teaches and unlearn them
                     foreach (var spellEffectInfo in spellToRemove.GetEffects())
                     {
                         if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
-                            RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                            SpellBook.Remove(spellEffectInfo.TriggerSpell, true);
                     }
                 }
             }
@@ -79,7 +79,7 @@ namespace Game.Entities
             // Inactive talent groups will only be initialized
             if (GetActiveTalentGroup() == talentGroupId)
             {
-                LearnSpell(spellInfo.Id, true);
+                SpellBook.Learn(spellInfo.Id, true);
                 if (talent.OverridesSpellID != default)
                     AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
             }
@@ -100,13 +100,13 @@ namespace Game.Entities
 
             if (Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None) is SpellInfo spellToRemove)
             {
-                RemoveSpell(spellToRemove.Id, true);
+                SpellBook.Remove(spellToRemove.Id, true);
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellToRemove.GetEffects())
                 {
                     if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
-                        RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                        SpellBook.Remove(spellEffectInfo.TriggerSpell, true);
                 }
             }
 
@@ -331,13 +331,13 @@ namespace Game.Entities
                     if (spellInfo == null)
                         continue;
 
-                    RemoveSpell(spellInfo.Id, true);
+                    SpellBook.Remove(spellInfo.Id, true);
 
                     // search for spells that the talent teaches and unlearn them
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
                         if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
-                            RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                            SpellBook.Remove(spellEffectInfo.TriggerSpell, true);
                     }
                 }
 
@@ -373,7 +373,7 @@ namespace Game.Entities
                         continue;
                 }
 
-                LearnSpell(spellInfo.Id, true);     // add the talent to the PlayerSpellMap
+                SpellBook.Learn(spellInfo.Id, true);     // add the talent to the PlayerSpellMap
 
                 if (talentEntry.OverridesSpellID != 0)
                     AddOverrideSpell(talentEntry.OverridesSpellID, talentEntry.SpellID);
@@ -789,6 +789,11 @@ namespace Game.Entities
             }
         }
 
+        public TraitConfig GetTraitConfig()
+        {
+            return GetTraitConfig(m_activePlayerData.ActiveCombatTraitConfigID);
+        }
+
         public TraitConfig GetTraitConfig(int configId)
         {
             int index = m_activePlayerData.TraitConfigs.FindIndexIf(config => config.ID == configId);
@@ -1010,9 +1015,9 @@ namespace Game.Entities
             if (traitDefinition.SpellID != 0)
             {
                 if (apply)
-                    LearnSpell(traitDefinition.SpellID, true, 0, false, traitNodeEntry.TraitDefinitionID);
+                    SpellBook.Learn(traitDefinition.SpellID, true, 0, false, traitNodeEntry.TraitDefinitionID);
                 else
-                    RemoveSpell(traitDefinition.SpellID);
+                    SpellBook.Remove(traitDefinition.SpellID);
             }
         }
 

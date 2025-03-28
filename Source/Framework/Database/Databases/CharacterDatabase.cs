@@ -124,6 +124,11 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED, "SELECT g.guildid, g.name, gr.rname, gr.rid, gm.pnote, gm.offnote " +       
                              "FROM guild g JOIN guild_member gm ON g.guildid = gm.guildid " +       
                              "JOIN guild_rank gr ON g.guildid = gr.guildid AND gm.`rank` = gr.rid WHERE gm.guid = ?");
+
+            PrepareStatement(CharStatements.SEL_CHARACTER_TRADE_SKILL_SPELLS, "SELECT spell FROM character_trade_skill_spells WHERE guid = ? AND skill = ?");
+            PrepareStatement(CharStatements.INS_CHARACTER_TRADE_SKILL_SPELL, "INSERT INTO character_trade_skill_spells (guid, skill, spell) VALUES (?, ?, ?)");
+            PrepareStatement(CharStatements.DEL_CHARACTER_TRADE_SKILL_SPELLS, "DELETE FROM character_trade_skill_spells WHERE guid = ?");
+
             PrepareStatement(CharStatements.SEL_CHARACTER_ACHIEVEMENTS, "SELECT achievement, date FROM character_achievement WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_CRITERIAPROGRESS, "SELECT criteria, counter, date FROM character_achievement_progress WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_EQUIPMENTSETS, "SELECT setguid, setindex, name, iconname, ignore_mask, AssignedSpecIndex, item0, item1, item2, item3, item4, item5, item6, item7, item8, " +       
@@ -135,6 +140,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER_GLYPHS, "SELECT talentGroup, glyphSlot, glyphId FROM character_glyphs WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_TALENTS, "SELECT talentId, talentRank, talentGroup FROM character_talent WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_SKILLS, "SELECT skill, value, max, professionSlot FROM character_skills WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_SKILL_VALUES, "SELECT value, max FROM character_skills WHERE guid = ? AND skill = ? LIMIT 1");
             PrepareStatement(CharStatements.SEL_CHARACTER_RANDOMBG, "SELECT guid FROM character_battleground_random WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUSREW, "SELECT quest FROM character_queststatus_rewarded WHERE guid = ? AND active = 1");
@@ -751,6 +757,9 @@ namespace Framework.Database
         SEL_CHARACTER_AURA_EFFECTS,
         SEL_CHARACTER_SPELL,
         SEL_CHARACTER_SPELL_FAVORITES,
+        SEL_CHARACTER_TRADE_SKILL_SPELLS,
+        INS_CHARACTER_TRADE_SKILL_SPELL,
+        DEL_CHARACTER_TRADE_SKILL_SPELLS,
 
         SEL_CHARACTER_QUESTSTATUS,
         SEL_CHARACTER_QUESTSTATUS_OBJECTIVES,
@@ -793,6 +802,7 @@ namespace Framework.Database
         SEL_CHARACTER_GLYPHS,
         SEL_CHARACTER_TALENTS,
         SEL_CHARACTER_SKILLS,
+        SEL_CHARACTER_SKILL_VALUES,
         SEL_CHARACTER_RANDOMBG,
         SEL_CHARACTER_BANNED,
         SEL_CHARACTER_QUESTSTATUSREW,

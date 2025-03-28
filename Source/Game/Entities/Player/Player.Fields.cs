@@ -101,7 +101,7 @@ namespace Game.Entities
         int m_questRewardedTalentPoints;
 
         //Spell
-        Dictionary<int, PlayerSpell> m_spells = new();
+        public SpellBook SpellBook;
         Dictionary<SkillType, SkillStatusData> mSkillStatus = new();
         Dictionary<int, PlayerCurrency> _currencyStorage = new();
         List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
