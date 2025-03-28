@@ -94,8 +94,10 @@ namespace Game.Chat.Commands
 
                 Player target = player.GetConnectedPlayer();
                 foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
-                    if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) && skillInfo.CanLink != 0) // only prof. with recipes have
+                {
+                    if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) && skillInfo.CanLink) // only prof. with recipes have
                         HandleLearnSkillRecipesHelper(target, skillInfo.Id);
+                }
 
                 handler.SendSysMessage(CypherStrings.CommandLearnAllCraft);
                 return true;
@@ -155,8 +157,10 @@ namespace Game.Chat.Commands
                 {
                     if ((skillInfo.CategoryID != SkillCategory.Profession &&
                         skillInfo.CategoryID != SkillCategory.Secondary) ||
-                        skillInfo.CanLink == 0)                            // only prof with recipes have set
+                        skillInfo.CanLink)                            // only prof with recipes have set
+                    {
                         continue;
+                    }
 
                     Locale locale = handler.GetSessionDbcLocale();
                     name = skillInfo.DisplayName[locale];

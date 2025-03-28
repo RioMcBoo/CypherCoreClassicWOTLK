@@ -352,11 +352,6 @@ namespace Game.Entities
             }
         }
 
-        public bool UpdateSkillPro(int skillId, int chance, int step)
-        {
-            return UpdateSkillPro((SkillType)skillId, chance, step);
-        }
-
         public bool UpdateSkillPro(SkillType skillId, int chance, int step)
         {
             Log.outDebug(LogFilter.Player, $"UpdateSkillPro(SkillId {skillId}, Chance {chance / 10.0f:F3}%)");
@@ -874,9 +869,9 @@ namespace Game.Entities
 
             // Apply/Remove bonus to child skill lines
             var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skillid);
-            if (childSkillLines != null)
-                foreach (var childSkillLine in childSkillLines)
-                    ModifySkillBonus(childSkillLine.Id, val, talent);
+
+            foreach (var childSkillLine in childSkillLines)
+                ModifySkillBonus(childSkillLine.Id, val, talent);
         }
 
         public void StopCastingBindSight()
@@ -1071,7 +1066,7 @@ namespace Game.Entities
 
         public void SetSkill(SkillType skill, int step, int newVal, int maxVal)
         {
-            SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey((int)skill);
+            SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skill);
             if (skillEntry == null)
             {
                 Log.outError(LogFilter.Misc, 
@@ -1346,11 +1341,6 @@ namespace Game.Entities
 
         public bool UpdateGatherSkill(SkillType skillId, int skillValue, int redLevel, int multiplicator = 1, WorldObject obj = null)
         {
-            return UpdateGatherSkill((int)skillId, skillValue, redLevel, multiplicator, obj);
-        }
-
-        public bool UpdateGatherSkill(int skillId, int skillValue, int redLevel, int multiplicator = 1, WorldObject obj = null)
-        {
             Log.outDebug(LogFilter.Player, $"UpdateGatherSkill(SkillId {skillId} SkillLevel {skillValue} RedLevel {redLevel})");
 
             SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
@@ -1435,12 +1425,12 @@ namespace Game.Entities
             return false;
         }
 
-        public SkillType GetProfessionSkillForExp(SkillType skill, int expansion)
+        public SkillType GetProfessionSkillForExp(int skill, int expansion)
         {
-            return GetProfessionSkillForExp((int)skill, expansion);
+            return GetProfessionSkillForExp((SkillType)skill, expansion);
         }
 
-        public SkillType GetProfessionSkillForExp(int skill, int expansion)
+        public SkillType GetProfessionSkillForExp(SkillType skill, int expansion)
         {
             SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skill);
             if (skillEntry == null)
@@ -1756,7 +1746,7 @@ namespace Game.Entities
         
         int FindEmptyProfessionSlotFor(SkillType skillId)
         {
-            SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey((int)skillId);
+            SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
             if (skillEntry == null)
                 return -1;
 
@@ -2028,9 +2018,13 @@ namespace Game.Entities
             // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone.area update
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newZone);
             foreach (var spell in saBounds)
+            {
                 if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && spell.IsFitToRequirements(this, newZone, 0))
+                {
                     if (!HasAura(spell.spellId))
                         CastSpell(this, spell.spellId, true);
+                }
+            }
         }
 
         public void UpdateAreaDependentAuras(int newArea)

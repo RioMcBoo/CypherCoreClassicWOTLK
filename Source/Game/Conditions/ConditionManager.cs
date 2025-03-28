@@ -1386,7 +1386,7 @@ namespace Game
                 }
                 case ConditionTypes.Skill:
                 {
-                    SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(cond.ConditionValue1);
+                    SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey((SkillType)cond.ConditionValue1);
                     if (pSkill == null)
                     {
                         Log.outError(LogFilter.Sql, 

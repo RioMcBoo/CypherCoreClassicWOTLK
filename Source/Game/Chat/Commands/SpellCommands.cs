@@ -112,7 +112,7 @@ namespace Game.Chat
                 return false;
             }
 
-            SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(skillId);
+            SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey((SkillType)skillId);
             if (skillLine == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidSkillId, skillId);

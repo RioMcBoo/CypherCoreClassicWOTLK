@@ -11,7 +11,7 @@ namespace Game.Entities
     {
         public int SpellId;
         public uint MoneyCost;
-        public int ReqSkillLine;
+        public SkillType ReqSkillLine;
         public int ReqSkillRank;
         public Array<int> ReqAbility = new(3);
         public byte ReqLevel;

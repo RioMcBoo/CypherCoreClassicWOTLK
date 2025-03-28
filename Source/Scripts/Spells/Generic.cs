@@ -502,8 +502,10 @@ namespace Scripts.Spells.Generic
                 {
                     var skillLineAbilities = DB2Mgr.GetSkillLineAbilitiesBySkill(racialSkillId);
                     if (skillLineAbilities != null)
+                    {
                         foreach (var ability in skillLineAbilities)
                             player.SpellBook.Remove(ability.Spell, false, false);
+                    }
                 }
 
                 if (DB2Mgr.GetSkillRaceClassInfo(racialSkillId, newRace, player.GetClass()) != null)

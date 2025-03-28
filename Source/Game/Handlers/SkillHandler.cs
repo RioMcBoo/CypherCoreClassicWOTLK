@@ -24,7 +24,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnPreviewTalents, Processing = PacketProcessing.Inplace)]
         void HandleLearnTalentsGroup(LearnPreviewTalents packet)
         {
-            foreach(var talentInfo in packet.talentInfos)
+            foreach (var talentInfo in packet.talentInfos)
             {
                 _player.LearnTalent(talentInfo.TalentID, talentInfo.Rank);
             }

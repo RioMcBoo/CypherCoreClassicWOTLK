@@ -418,7 +418,7 @@ namespace Game.DataStorage
 
             foreach (SkillRaceClassInfoRecord entry in SkillRaceClassInfoStorage.Values)
             {
-                if (SkillLineStorage.ContainsKey((int)entry.SkillID))
+                if (SkillLineStorage.ContainsKey(entry.SkillID))
                     _skillRaceClassInfoBySkill.Add(entry.SkillID, entry);
             }
 

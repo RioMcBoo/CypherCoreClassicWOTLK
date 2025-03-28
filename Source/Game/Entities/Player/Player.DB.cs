@@ -345,7 +345,7 @@ namespace Game.Entities
                     var skillStatusData = mSkillStatus[skill];
                     int step = 0;
 
-                    SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey((int)rcEntry.SkillID);
+                    SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
                     if (skillLine != null)
                     {
                         if (skillLine.CategoryID == SkillCategory.Secondary)
@@ -385,7 +385,7 @@ namespace Game.Entities
                 LearnSkillRewardedSpells(skillId, skillValue, race);
 
                 // enable parent skill line if missing
-                var skillEntry = CliDB.SkillLineStorage.LookupByKey((int)skillId);
+                var skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
                 if (skillEntry.ParentSkillLineID != 0 && skillEntry.ParentTierIndex > 0 && GetSkillStep(skillEntry.ParentSkillLineID) < skillEntry.ParentTierIndex)
                 {
                     var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
@@ -1072,7 +1072,7 @@ namespace Game.Entities
                             traitConfig.LocalIdentifier = configsResult.Read<int>(4);
                             break;
                         case TraitConfigType.Profession:
-                            traitConfig.SkillLineID = configsResult.Read<int>(5);
+                            traitConfig.SkillLineID = (SkillType)configsResult.Read<int>(5);
                             break;
                         case TraitConfigType.Generic:
                             traitConfig.TraitSystemID = configsResult.Read<int>(6);
@@ -1975,7 +1975,7 @@ namespace Game.Entities
                     stmt.SetInt32(2, spell);
                     trans.Append(stmt);
                 }
-        }
+            }            
         }
 
         void _SaveAuras(SQLTransaction trans)

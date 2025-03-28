@@ -702,7 +702,7 @@ namespace Game.DataStorage
         public static DB6Storage<int, SceneScriptPackageRecord> SceneScriptPackageStorage = new();
         public static DB6Storage<int, SceneScriptTextRecord> SceneScriptTextStorage = new();
         public static DB6Storage<int, ServerMessagesRecord> ServerMessagesStorage = new();
-        public static DB6Storage<int, SkillLineRecord> SkillLineStorage = new();
+        public static DB6Storage<SkillType, SkillLineRecord> SkillLineStorage = new();
         public static DB6Storage<int, SkillLineAbilityRecord> SkillLineAbilityStorage = new();
         public static DB6Storage<int, SkillLineXTraitTreeRecord> SkillLineXTraitTreeStorage = new();
         public static DB6Storage<int, SkillRaceClassInfoRecord> SkillRaceClassInfoStorage = new();

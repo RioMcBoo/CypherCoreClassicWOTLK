@@ -770,7 +770,7 @@ namespace Game.Entities
             setter.ModifyValue(setter.ID).SetValue(traitConfig.ID);
             setter.ModifyValue(setter.Name).SetValue(traitConfig.Name);
             setter.ModifyValue(setter.Type).SetValue((int)traitConfig.Type);
-            setter.ModifyValue(setter.SkillLineID).SetValue(traitConfig.SkillLineID);
+            setter.ModifyValue(setter.SkillLineID).SetValue((int)traitConfig.SkillLineID);
             setter.ModifyValue(setter.ChrSpecializationID).SetValue((int)traitConfig.ChrSpecializationID);
             setter.ModifyValue(setter.CombatConfigFlags).SetValue((int)traitConfig.CombatConfigFlags);
             setter.ModifyValue(setter.LocalIdentifier).SetValue(traitConfig.LocalIdentifier);

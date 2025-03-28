@@ -16,8 +16,8 @@ namespace Game
         static Dictionary<int, NodeGroup> _traitGroups = new();
         static Dictionary<int, Node> _traitNodes = new();
         static Dictionary<int, Tree> _traitTrees = new();
-        static int[] _skillLinesByClass = new int[(int)Class.Max];
-        static MultiMap<int, Tree> _traitTreesBySkillLine = new();
+        static SkillType[] _skillLinesByClass = new SkillType[(int)Class.Max];
+        static MultiMap<SkillType, Tree> _traitTreesBySkillLine = new();
         static MultiMap<int, Tree> _traitTreesByTraitSystem = new();
         static int _configIdGenerator;
         static MultiMap<int, TraitCurrencySourceRecord> _traitCurrencySourcesByCurrency = new();

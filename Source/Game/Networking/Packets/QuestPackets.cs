@@ -165,7 +165,7 @@ namespace Game.Networking.Packets
 
                 _worldPacket.WriteInt32(Info.RewardTitle);
                 _worldPacket.WriteInt32(Info.RewardArenaPoints);
-                _worldPacket.WriteInt32(Info.RewardSkillLineID);
+                _worldPacket.WriteInt32((int)Info.RewardSkillLineID);
                 _worldPacket.WriteInt32(Info.RewardNumSkillUps);
 
                 _worldPacket.WriteInt32(Info.PortraitGiver);
@@ -379,7 +379,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteInt32(XPReward);
             _worldPacket.WriteInt64(MoneyReward);
-            _worldPacket.WriteInt32(SkillLineIDReward);
+            _worldPacket.WriteInt32((int)SkillLineIDReward);
             _worldPacket.WriteInt32(NumSkillUpsReward);
 
             _worldPacket.WriteBit(UseQuestReward);
@@ -393,7 +393,7 @@ namespace Game.Networking.Packets
         public int QuestID;
         public int XPReward;
         public long MoneyReward;
-        public int SkillLineIDReward;
+        public SkillType SkillLineIDReward;
         public int NumSkillUpsReward;
         public bool UseQuestReward;
         public bool LaunchGossip;
@@ -1040,7 +1040,7 @@ namespace Game.Networking.Packets
         public string AreaDescription;
         public int RewardTitle; // new 2.4.0, player gets this title (id from CharTitles)
         public int RewardArenaPoints;
-        public int RewardSkillLineID; // reward skill id
+        public SkillType RewardSkillLineID; // reward skill id
         public int RewardNumSkillUps; // reward skill points
         public int PortraitGiver; // quest giver entry ?
         public int PortraitGiverMount;
@@ -1111,7 +1111,7 @@ namespace Game.Networking.Packets
         public uint FactionFlags;
         public int[] SpellCompletionDisplayID = new int[SharedConst.QuestRewardDisplaySpellCount];
         public int SpellCompletionID;
-        public int SkillLineID;
+        public SkillType SkillLineID;
         public int NumSkillUps;
         public int TreasurePickerID;
         public QuestChoiceItem[] ChoiceItems = new QuestChoiceItem[SharedConst.QuestRewardChoicesCount];
@@ -1163,7 +1163,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(CurrencyQty[i]);
             }
 
-            data.WriteInt32(SkillLineID);
+            data.WriteInt32((int)SkillLineID);
             data.WriteInt32(NumSkillUps);
             data.WriteInt32(TreasurePickerID);
 

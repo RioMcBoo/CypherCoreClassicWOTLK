@@ -158,7 +158,7 @@ namespace Game.Networking.Packets
             ChrSpecializationID = (ChrSpecialization)ufConfig.ChrSpecializationID.GetValue();
             CombatConfigFlags = (TraitCombatConfigFlags)(int)ufConfig.CombatConfigFlags;
             LocalIdentifier = ufConfig.LocalIdentifier;
-            SkillLineID = ufConfig.SkillLineID;
+            SkillLineID = (SkillType)ufConfig.SkillLineID.GetValue();
             TraitSystemID = ufConfig.TraitSystemID;
             foreach (var ufEntry in ufConfig.Entries)
                 Entries.Add(new TraitEntryPacket(ufEntry));
@@ -178,7 +178,7 @@ namespace Game.Networking.Packets
                     LocalIdentifier = data.ReadInt32();
                     break;
                 case TraitConfigType.Profession:
-                    SkillLineID = data.ReadInt32();
+                    SkillLineID = (SkillType)data.ReadInt32();
                     break;
                 case TraitConfigType.Generic:
                     TraitSystemID = data.ReadInt32();
@@ -211,7 +211,7 @@ namespace Game.Networking.Packets
                     data.WriteInt32(LocalIdentifier);
                     break;
                 case TraitConfigType.Profession:
-                    data.WriteInt32(SkillLineID);
+                    data.WriteInt32((int)SkillLineID);
                     break;
                 case TraitConfigType.Generic:
                     data.WriteInt32(TraitSystemID);
@@ -234,7 +234,7 @@ namespace Game.Networking.Packets
         public ChrSpecialization ChrSpecializationID = 0;
         public TraitCombatConfigFlags CombatConfigFlags;
         public int LocalIdentifier;  // Local to specialization
-        public int SkillLineID;
+        public SkillType SkillLineID;
         public int TraitSystemID;
         public Array<TraitEntryPacket> Entries = new(100);
         public string Name = string.Empty;

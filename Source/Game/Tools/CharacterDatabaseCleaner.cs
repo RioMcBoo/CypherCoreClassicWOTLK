@@ -101,7 +101,7 @@ namespace Game
 
         static bool SkillCheck(int skill)
         {
-            return CliDB.SkillLineStorage.ContainsKey(skill);
+            return CliDB.SkillLineStorage.ContainsKey((SkillType)skill);
         }
 
         static void CleanCharacterSkills()
