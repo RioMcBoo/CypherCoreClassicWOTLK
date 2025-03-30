@@ -1349,10 +1349,10 @@ namespace Game.Entities
 
             int gatheringSkillGain = WorldConfig.Values[WorldCfg.SkillGainGathering].Int32;
 
-            int baseSkillLevelStep = 30;
+            int baseSkillLevelStep = 25;
             int yellowLevel = redLevel + baseSkillLevelStep;
-            int greenLevel = yellowLevel + baseSkillLevelStep;
-            int grayLevel = greenLevel + baseSkillLevelStep;
+            int greenLevel = yellowLevel + 2 * baseSkillLevelStep;
+            int grayLevel = greenLevel + 4* baseSkillLevelStep;
 
             GameObject go = obj?.ToGameObject();
             if (go != null)
@@ -1367,9 +1367,12 @@ namespace Game.Entities
             }
 
             // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
-            switch (skillEntry.ParentSkillLineID)
+            switch (skillEntry.Id)
             {
                 case SkillType.Herbalism:
+                case SkillType.LockPicking:
+                case SkillType.Jewelcrafting:
+                case SkillType.Inscription:
                     return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator, gatheringSkillGain);
                 case SkillType.Skinning:
                     if (WorldConfig.Values[WorldCfg.SkillChanceSkinningSteps].Int32 == 0)
