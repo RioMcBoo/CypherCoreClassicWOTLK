@@ -213,11 +213,6 @@ namespace Game.Spells
 
         public static int GetSkillDiscoverySpell(SkillType skillId, int spellId, Player player)
         {
-            return GetSkillDiscoverySpell((int)skillId, spellId, player);
-        }
-
-        public static int GetSkillDiscoverySpell(int skillId, int spellId, Player player)
-        {
             int skillvalue = skillId != 0 ? player.GetSkillValue(skillId) : 0;
 
             // check spell case
@@ -241,7 +236,7 @@ namespace Game.Spells
                 return 0;
 
             // check skill line case
-            tab = SkillDiscoveryStorage[-skillId];
+            tab = SkillDiscoveryStorage[-(int)skillId];
 
             foreach (var skillData in tab)
             {

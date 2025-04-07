@@ -70,7 +70,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        bool CanTitanGrip() { return m_canTitanGrip; }
+        public bool CanTitanGrip() { return m_canTitanGrip; }
 
         float GetRatingMultiplier(CombatRating cr)
         {
@@ -163,6 +163,11 @@ namespace Game.Entities
         {
             // disarm applied only to mainhand weapon
             return !IsInFeralForm() && (!mainhand || !HasUnitFlag(UnitFlags.Disarmed));
+        }
+
+        public int GetTitanGripSpellId()
+        {
+            return m_titanGripPenaltySpellId;
         }
 
         public void SetCanTitanGrip(bool value, int penaltySpellId = 0)

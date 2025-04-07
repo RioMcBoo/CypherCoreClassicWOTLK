@@ -93,6 +93,7 @@ namespace Framework.Constants
         RaptorRiding = 533,
         MechanostriderPiloting = 553,
         UndeadHorsemanship = 554,
+        LockPicking = 633,
         PetBat = 653,
         PetHyena = 654,
         PetBirdOfPrey = 655,

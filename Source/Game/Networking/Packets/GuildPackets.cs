@@ -1664,7 +1664,7 @@ namespace Game.Networking.Packets
                 Count = item.GetCount();
                 Charges = Math.Abs(item.GetSpellCharges());
                 EnchantmentID = item.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent);
-                OnUseEnchantmentID = item.GetEnchantmentId(EnchantmentSlot.EnhancementUse);
+                OnUseEnchantmentID = item.GetEnchantmentId(EnchantmentSlot.EnhancementTemporary);
                 Flags = item.m_itemData.DynamicFlags;
 
                 byte i = 0;

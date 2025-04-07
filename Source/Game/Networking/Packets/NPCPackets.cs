@@ -169,7 +169,7 @@ namespace Game.Networking.Packets
             {
                 _worldPacket.WriteInt32(spell.SpellID);
                 _worldPacket.WriteUInt32(spell.MoneyCost);
-                _worldPacket.WriteInt32(spell.ReqSkillLine);
+                _worldPacket.WriteInt32((int)spell.ReqSkillLine);
                 _worldPacket.WriteInt32(spell.ReqSkillRank);
 
                 for (uint i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; ++i)
@@ -445,7 +445,7 @@ namespace Game.Networking.Packets
     {
         public int SpellID;
         public uint MoneyCost;
-        public int ReqSkillLine;
+        public SkillType ReqSkillLine;
         public int ReqSkillRank;
         public int[] ReqAbility = new int[SharedConst.MaxTrainerspellAbilityReqs];
         public TrainerSpellState Usable;

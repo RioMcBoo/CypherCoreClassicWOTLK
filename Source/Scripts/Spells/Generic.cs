@@ -502,8 +502,10 @@ namespace Scripts.Spells.Generic
                 {
                     var skillLineAbilities = DB2Mgr.GetSkillLineAbilitiesBySkill(racialSkillId);
                     if (skillLineAbilities != null)
+                    {
                         foreach (var ability in skillLineAbilities)
-                            player.RemoveSpell(ability.Spell, false, false);
+                            player.SpellBook.Remove(ability.Spell, false, false);
+                    }
                 }
 
                 if (DB2Mgr.GetSkillRaceClassInfo(racialSkillId, newRace, player.GetClass()) != null)
@@ -2614,13 +2616,13 @@ namespace Scripts.Spells.Generic
                 {
                     int discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
                     if (discoveredSpellId != 0)
-                        caster.LearnSpell(discoveredSpellId, false);
+                        caster.SpellBook.Learn(discoveredSpellId, false);
                 }
             }
 
             int discoveredSpellId1 = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
             if (discoveredSpellId1 != 0)
-                caster.LearnSpell(discoveredSpellId1, false);
+                caster.SpellBook.Learn(discoveredSpellId1, false);
         }
 
         public override void Register()

@@ -63,6 +63,8 @@ namespace Game.Entities
             m_logintime = LoopTime.ServerTime;
             m_Last_tick = m_logintime;
 
+            SpellBook = new(this);
+
             m_dungeonDifficulty = Difficulty.Normal;
             m_raidDifficulty = Difficulty.NormalRaid;
             m_legacyRaidDifficulty = Difficulty.Raid10N;
@@ -122,7 +124,7 @@ namespace Game.Entities
                     m_items[i].Dispose();
             }
 
-            m_spells.Clear();
+            SpellBook.Clear();
             _specializationInfo = null;
             m_mail.Clear();
 

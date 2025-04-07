@@ -307,90 +307,90 @@ namespace Scripts.World.NpcProfessions
             switch (type)
             {
                 case SpellIds.UnlearnWeapon:                              // SUnlearnWeapon
-                    player.RemoveSpell(36125);                     // Light Earthforged Blade
-                    player.RemoveSpell(36128);                     // Light Emberforged Hammer
-                    player.RemoveSpell(36126);                     // Light Skyforged Axe
+                    player.SpellBook.Remove(36125);                     // Light Earthforged Blade
+                    player.SpellBook.Remove(36128);                     // Light Emberforged Hammer
+                    player.SpellBook.Remove(36126);                     // Light Skyforged Axe
                     break;
                 case SpellIds.UnlearnArmor:                               // SUnlearnArmor
-                    player.RemoveSpell(36122);                     // Earthforged Leggings
-                    player.RemoveSpell(36129);                     // Heavy Earthforged Breastplate
-                    player.RemoveSpell(36130);                     // Stormforged Hauberk
-                    player.RemoveSpell(34533);                     // Breastplate of Kings
-                    player.RemoveSpell(34529);                     // Nether Chain Shirt
-                    player.RemoveSpell(34534);                     // Bulwark of Kings
-                    player.RemoveSpell(36257);                     // Bulwark of the Ancient Kings
-                    player.RemoveSpell(36256);                     // Embrace of the Twisting Nether
-                    player.RemoveSpell(34530);                     // Twisting Nether Chain Shirt
-                    player.RemoveSpell(36124);                     // Windforged Leggings
+                    player.SpellBook.Remove(36122);                     // Earthforged Leggings
+                    player.SpellBook.Remove(36129);                     // Heavy Earthforged Breastplate
+                    player.SpellBook.Remove(36130);                     // Stormforged Hauberk
+                    player.SpellBook.Remove(34533);                     // Breastplate of Kings
+                    player.SpellBook.Remove(34529);                     // Nether Chain Shirt
+                    player.SpellBook.Remove(34534);                     // Bulwark of Kings
+                    player.SpellBook.Remove(36257);                     // Bulwark of the Ancient Kings
+                    player.SpellBook.Remove(36256);                     // Embrace of the Twisting Nether
+                    player.SpellBook.Remove(34530);                     // Twisting Nether Chain Shirt
+                    player.SpellBook.Remove(36124);                     // Windforged Leggings
                     break;
                 case SpellIds.UnlearnHammer:                              // SUnlearnHammer
-                    player.RemoveSpell(36262);                     // Dragonstrike
-                    player.RemoveSpell(34546);                     // Dragonmaw
-                    player.RemoveSpell(34545);                     // Drakefist Hammer
-                    player.RemoveSpell(36136);                     // Lavaforged Warhammer
-                    player.RemoveSpell(34547);                     // Thunder
-                    player.RemoveSpell(34567);                     // Deep Thunder
-                    player.RemoveSpell(36263);                     // Stormherald
-                    player.RemoveSpell(36137);                     // Great Earthforged Hammer
+                    player.SpellBook.Remove(36262);                     // Dragonstrike
+                    player.SpellBook.Remove(34546);                     // Dragonmaw
+                    player.SpellBook.Remove(34545);                     // Drakefist Hammer
+                    player.SpellBook.Remove(36136);                     // Lavaforged Warhammer
+                    player.SpellBook.Remove(34547);                     // Thunder
+                    player.SpellBook.Remove(34567);                     // Deep Thunder
+                    player.SpellBook.Remove(36263);                     // Stormherald
+                    player.SpellBook.Remove(36137);                     // Great Earthforged Hammer
                     break;
                 case SpellIds.UnlearnAxe:                                 // SUnlearnAxe
-                    player.RemoveSpell(36260);                     // Wicked Edge of the Planes
-                    player.RemoveSpell(34562);                     // Black Planar Edge
-                    player.RemoveSpell(34541);                     // The Planar Edge
-                    player.RemoveSpell(36134);                     // Stormforged Axe
-                    player.RemoveSpell(36135);                     // Skyforged Great Axe
-                    player.RemoveSpell(36261);                     // Bloodmoon
-                    player.RemoveSpell(34543);                     // Lunar Crescent
-                    player.RemoveSpell(34544);                     // Mooncleaver
+                    player.SpellBook.Remove(36260);                     // Wicked Edge of the Planes
+                    player.SpellBook.Remove(34562);                     // Black Planar Edge
+                    player.SpellBook.Remove(34541);                     // The Planar Edge
+                    player.SpellBook.Remove(36134);                     // Stormforged Axe
+                    player.SpellBook.Remove(36135);                     // Skyforged Great Axe
+                    player.SpellBook.Remove(36261);                     // Bloodmoon
+                    player.SpellBook.Remove(34543);                     // Lunar Crescent
+                    player.SpellBook.Remove(34544);                     // Mooncleaver
                     break;
                 case SpellIds.UnlearnSword:                               // SUnlearnSword
-                    player.RemoveSpell(36258);                     // Blazefury
-                    player.RemoveSpell(34537);                     // Blazeguard
-                    player.RemoveSpell(34535);                     // Fireguard
-                    player.RemoveSpell(36131);                     // Windforged Rapier
-                    player.RemoveSpell(36133);                     // Stoneforged Claymore
-                    player.RemoveSpell(34538);                     // Lionheart Blade
-                    player.RemoveSpell(34540);                     // Lionheart Chapion
-                    player.RemoveSpell(36259);                     // Lionheart Executioner
+                    player.SpellBook.Remove(36258);                     // Blazefury
+                    player.SpellBook.Remove(34537);                     // Blazeguard
+                    player.SpellBook.Remove(34535);                     // Fireguard
+                    player.SpellBook.Remove(36131);                     // Windforged Rapier
+                    player.SpellBook.Remove(36133);                     // Stoneforged Claymore
+                    player.SpellBook.Remove(34538);                     // Lionheart Blade
+                    player.SpellBook.Remove(34540);                     // Lionheart Chapion
+                    player.SpellBook.Remove(36259);                     // Lionheart Executioner
                     break;
                 case SpellIds.UnlearnDragon:                              // SUnlearnDragon
-                    player.RemoveSpell(36076);                     // Dragonstrike Leggings
-                    player.RemoveSpell(36079);                     // Golden Dragonstrike Breastplate
-                    player.RemoveSpell(35576);                     // Ebon Netherscale Belt
-                    player.RemoveSpell(35577);                     // Ebon Netherscale Bracers
-                    player.RemoveSpell(35575);                     // Ebon Netherscale Breastplate
-                    player.RemoveSpell(35582);                     // Netherstrike Belt
-                    player.RemoveSpell(35584);                     // Netherstrike Bracers
-                    player.RemoveSpell(35580);                     // Netherstrike Breastplate
+                    player.SpellBook.Remove(36076);                     // Dragonstrike Leggings
+                    player.SpellBook.Remove(36079);                     // Golden Dragonstrike Breastplate
+                    player.SpellBook.Remove(35576);                     // Ebon Netherscale Belt
+                    player.SpellBook.Remove(35577);                     // Ebon Netherscale Bracers
+                    player.SpellBook.Remove(35575);                     // Ebon Netherscale Breastplate
+                    player.SpellBook.Remove(35582);                     // Netherstrike Belt
+                    player.SpellBook.Remove(35584);                     // Netherstrike Bracers
+                    player.SpellBook.Remove(35580);                     // Netherstrike Breastplate
                     break;
                 case SpellIds.UnlearnElemental:                           // SUnlearnElemental
-                    player.RemoveSpell(36074);                     // Blackstorm Leggings
-                    player.RemoveSpell(36077);                     // Primalstorm Breastplate
-                    player.RemoveSpell(35590);                     // Primalstrike Belt
-                    player.RemoveSpell(35591);                     // Primalstrike Bracers
-                    player.RemoveSpell(35589);                     // Primalstrike Vest
+                    player.SpellBook.Remove(36074);                     // Blackstorm Leggings
+                    player.SpellBook.Remove(36077);                     // Primalstorm Breastplate
+                    player.SpellBook.Remove(35590);                     // Primalstrike Belt
+                    player.SpellBook.Remove(35591);                     // Primalstrike Bracers
+                    player.SpellBook.Remove(35589);                     // Primalstrike Vest
                     break;
                 case SpellIds.UnlearnTribal:                              // SUnlearnTribal
-                    player.RemoveSpell(35585);                     // Windhawk Hauberk
-                    player.RemoveSpell(35587);                     // Windhawk Belt
-                    player.RemoveSpell(35588);                     // Windhawk Bracers
-                    player.RemoveSpell(36075);                     // Wildfeather Leggings
-                    player.RemoveSpell(36078);                     // Living Crystal Breastplate
+                    player.SpellBook.Remove(35585);                     // Windhawk Hauberk
+                    player.SpellBook.Remove(35587);                     // Windhawk Belt
+                    player.SpellBook.Remove(35588);                     // Windhawk Bracers
+                    player.SpellBook.Remove(36075);                     // Wildfeather Leggings
+                    player.SpellBook.Remove(36078);                     // Living Crystal Breastplate
                     break;
                 case SpellIds.UnlearnSpellfire:                           // SUnlearnSpellfire
-                    player.RemoveSpell(26752);                     // Spellfire Belt
-                    player.RemoveSpell(26753);                     // Spellfire Gloves
-                    player.RemoveSpell(26754);                     // Spellfire Robe
+                    player.SpellBook.Remove(26752);                     // Spellfire Belt
+                    player.SpellBook.Remove(26753);                     // Spellfire Gloves
+                    player.SpellBook.Remove(26754);                     // Spellfire Robe
                     break;
                 case SpellIds.UnlearnMooncloth:                           // SUnlearnMooncloth
-                    player.RemoveSpell(26760);                     // Primal Mooncloth Belt
-                    player.RemoveSpell(26761);                     // Primal Mooncloth Shoulders
-                    player.RemoveSpell(26762);                     // Primal Mooncloth Robe
+                    player.SpellBook.Remove(26760);                     // Primal Mooncloth Belt
+                    player.SpellBook.Remove(26761);                     // Primal Mooncloth Shoulders
+                    player.SpellBook.Remove(26762);                     // Primal Mooncloth Robe
                     break;
                 case SpellIds.UnlearnShadoweave:                          // SUnlearnShadoweave
-                    player.RemoveSpell(26756);                     // Frozen Shadoweave Shoulders
-                    player.RemoveSpell(26757);                     // Frozen Shadoweave Boots
-                    player.RemoveSpell(26758);                     // Frozen Shadoweave Robe
+                    player.SpellBook.Remove(26756);                     // Frozen Shadoweave Shoulders
+                    player.SpellBook.Remove(26757);                     // Frozen Shadoweave Boots
+                    player.SpellBook.Remove(26758);                     // Frozen Shadoweave Robe
                     break;
             }
         }

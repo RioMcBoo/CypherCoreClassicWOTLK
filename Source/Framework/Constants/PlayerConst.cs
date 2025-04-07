@@ -68,6 +68,8 @@ namespace Framework.Constants
         public const int CurrencyMaxCapAncientMana = 2000;
 
         public const float MaxAreaSpiritHealerRange = 20.0f;
+
+        public const int ProfessionSkillPerStep = 75;
     }
 
     public struct MoneyConstants

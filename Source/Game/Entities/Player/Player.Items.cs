@@ -404,7 +404,7 @@ namespace Game.Entities
             {
                 for (byte i = 0; i < ItemConst.MaxBagSize; i++)
                 {
-                    Item item = GetItemByPos(i);
+                    Item item = GetItemByPos(new(i, j));
                     if (item != null)
                     {
                         long cost = item.CalculateDurabilityRepairCost(discountMod);

@@ -41,11 +41,11 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            targetPlayer.LearnSpell(spellId, false);
+            targetPlayer.SpellBook.Learn(spellId, false);
             if (allRanks)
             {
                 while ((spellId = Global.SpellMgr.GetNextSpellInChain(spellId)) != 0)
-                    targetPlayer.LearnSpell(spellId, false);
+                    targetPlayer.SpellBook.Learn(spellId, false);
             }
 
             return true;
@@ -63,7 +63,7 @@ namespace Game.Chat.Commands
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                         continue;
 
-                    handler.GetSession().GetPlayer().LearnSpell(skillSpell.Spell, false);
+                    handler.GetSession().GetPlayer().SpellBook.Learn(skillSpell.Spell, false);
                 }
 
                 handler.SendSysMessage(CypherStrings.LearningGmSkills);
@@ -74,13 +74,13 @@ namespace Game.Chat.Commands
             static bool HandleLearnDebugSpellsCommand(CommandHandler handler)
             {
                 Player  player = handler.GetPlayer();
-                player.LearnSpell(63364, false); /* 63364 - Saronite Barrier (reduces damage taken by 99%) */
-                player.LearnSpell(1908, false);  /*  1908 - Uber Heal Over Time (heals target to full constantly) */
-                player.LearnSpell(27680, false); /* 27680 - Berserk (+500% damage, +150% speed, 10m duration) */
-                player.LearnSpell(62555, false); /* 62555 - Berserk (+500% damage, +150% melee haste, 10m duration) */
-                player.LearnSpell(64238, false); /* 64238 - Berserk (+900% damage, +150% melee haste, 30m duration) */
-                player.LearnSpell(72525, false); /* 72525 - Berserk (+240% damage, +160% haste, infinite duration) */
-                player.LearnSpell(66776, false); /* 66776 - Rage (+300% damage, -95% damage taken, +100% speed, infinite duration) */
+                player.SpellBook.Learn(63364, false); /* 63364 - Saronite Barrier (reduces damage taken by 99%) */
+                player.SpellBook.Learn(1908, false);  /*  1908 - Uber Heal Over Time (heals target to full constantly) */
+                player.SpellBook.Learn(27680, false); /* 27680 - Berserk (+500% damage, +150% speed, 10m duration) */
+                player.SpellBook.Learn(62555, false); /* 62555 - Berserk (+500% damage, +150% melee haste, 10m duration) */
+                player.SpellBook.Learn(64238, false); /* 64238 - Berserk (+900% damage, +150% melee haste, 30m duration) */
+                player.SpellBook.Learn(72525, false); /* 72525 - Berserk (+240% damage, +160% haste, infinite duration) */
+                player.SpellBook.Learn(66776, false); /* 66776 - Rage (+300% damage, -95% damage taken, +100% speed, infinite duration) */
                 return true;
             }
 
@@ -94,8 +94,10 @@ namespace Game.Chat.Commands
 
                 Player target = player.GetConnectedPlayer();
                 foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
-                    if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) && skillInfo.CanLink != 0) // only prof. with recipes have
+                {
+                    if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) && skillInfo.CanLink) // only prof. with recipes have
                         HandleLearnSkillRecipesHelper(target, skillInfo.Id);
+                }
 
                 handler.SendSysMessage(CypherStrings.CommandLearnAllCraft);
                 return true;
@@ -124,7 +126,7 @@ namespace Game.Chat.Commands
                 Global.LanguageMgr.ForEachLanguage((_, languageDesc) =>
                 {
                     if (languageDesc.SpellId != 0)
-                        handler.GetSession().GetPlayer().LearnSpell(languageDesc.SpellId, false);
+                        handler.GetSession().GetPlayer().SpellBook.Learn(languageDesc.SpellId, false);
 
                     return true;
                 });
@@ -155,8 +157,10 @@ namespace Game.Chat.Commands
                 {
                     if ((skillInfo.CategoryID != SkillCategory.Profession &&
                         skillInfo.CategoryID != SkillCategory.Secondary) ||
-                        skillInfo.CanLink == 0)                            // only prof with recipes have set
+                        skillInfo.CanLink)                            // only prof with recipes have set
+                    {
                         continue;
+                    }
 
                     Locale locale = handler.GetSessionDbcLocale();
                     name = skillInfo.DisplayName[locale];
@@ -263,7 +267,7 @@ namespace Game.Chat.Commands
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, player, false))
                         continue;
 
-                    player.LearnSpell(skillLine.Spell, false);
+                    player.SpellBook.Learn(skillLine.Spell, false);
                 }
             }
         }
@@ -314,7 +318,7 @@ namespace Game.Chat.Commands
                     if (!Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                         continue;
 
-                    handler.GetSession().GetPlayer().LearnSpell(spellInfo.Id, false);
+                    handler.GetSession().GetPlayer().SpellBook.Learn(spellInfo.Id, false);
                 }
 
                 handler.SendSysMessage(CypherStrings.CommandLearnClassSpells);
@@ -338,7 +342,7 @@ namespace Game.Chat.Commands
                 spellId = Global.SpellMgr.GetFirstSpellInChain(spellId);
 
             if (target.HasSpell(spellId))
-                target.RemoveSpell(spellId, false, !allRanks);
+                target.SpellBook.Remove(spellId, false, !allRanks);
             else
                 handler.SendSysMessage(CypherStrings.ForgetSpell);
 

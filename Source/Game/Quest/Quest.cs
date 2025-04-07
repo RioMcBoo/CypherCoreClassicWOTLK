@@ -73,7 +73,7 @@ namespace Game
 
             RewardTitleId = fields.Read<int>(64);
             RewardArenaPoints = fields.Read<int>(65);
-            RewardSkillId = fields.Read<int>(66);
+            RewardSkillId = (SkillType)fields.Read<int>(66);
             RewardSkillPoints = fields.Read<int>(67);
 
             QuestGiverPortrait = fields.Read<int>(68);
@@ -880,7 +880,7 @@ namespace Game
         public int POIPriority;
         public int RewardTitleId { get; set; }
         public int RewardArenaPoints;
-        public int RewardSkillId;
+        public SkillType RewardSkillId;
         public int RewardSkillPoints;
         public int QuestGiverPortrait;
         public int QuestGiverPortraitMount;

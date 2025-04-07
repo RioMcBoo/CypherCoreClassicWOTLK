@@ -714,7 +714,7 @@ namespace Game.Spells
             Player player = unitTarget.ToPlayer();
             int spellToUnlearn = effectInfo.TriggerSpell;
 
-            player.RemoveSpell(spellToUnlearn);
+            player.SpellBook.Remove(spellToUnlearn);
 
             Log.outDebug(LogFilter.Spells, 
                 $"Spell: Player {player.GetGUID()} " +
@@ -1338,7 +1338,9 @@ namespace Game.Spells
             }
 
             if (gameObjTarget != null)
+            {
                 gameObjTarget.Use(player);
+            }
             else if (itemTarget != null)
             {
                 itemTarget.SetItemFlag(ItemFieldFlags.Unlocked);
@@ -1760,13 +1762,13 @@ namespace Game.Spells
                         dependent = true;
                     }
 
-                    player.LearnSpell(itemEffect.SpellID, dependent);
+                    player.SpellBook.Learn(itemEffect.SpellID, dependent);
                 }
             }
 
             if (effectInfo.TriggerSpell != 0)
             {
-                player.LearnSpell(effectInfo.TriggerSpell, false);
+                player.SpellBook.Learn(effectInfo.TriggerSpell, false);
                 Log.outDebug(LogFilter.Spells, 
                     $"Spell: {player.GetGUID()} " +
                     $"has learned spell {effectInfo.TriggerSpell} " +
@@ -3703,48 +3705,15 @@ namespace Game.Spells
                 return;
 
             // Skill gain for skinning
-            // This formula is still used (10.0.5.48526)
             if (skill == SkillType.Skinning)
             {
-                int reqValue;
-                if (targetLevel <= 10)
-                    reqValue = 1;
-                else if (targetLevel < 20)
-                    reqValue = (targetLevel - 10) * 10;
-                else if (targetLevel <= 73)
-                    reqValue = targetLevel * 5;
-                else if (targetLevel < 80)
-                    reqValue = targetLevel * 10 - 365;
-                else if (targetLevel <= 84)
-                    reqValue = targetLevel * 5 + 35;
-                else if (targetLevel <= 87)
-                    reqValue = targetLevel * 15 - 805;
-                else if (targetLevel <= 92)
-                    reqValue = (targetLevel - 62) * 20;
-                else if (targetLevel <= 104)
-                    reqValue = targetLevel * 5 + 175;
-                else if (targetLevel <= 107)
-                    reqValue = targetLevel * 15 - 905;
-                else if (targetLevel <= 112)
-                    reqValue = (targetLevel - 72) * 20;
-                else if (targetLevel <= 122)
-                    reqValue = (targetLevel - 32) * 10;
-                else
-                    reqValue = 900;
+                int reqValue = targetLevel < 10 ? 0 : (targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5); 
 
-                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(creature.GetContentTuning());
-                if (contentTuning == null)
-                    return;
-
-                var skinningSkill = player.GetProfessionSkillForExp(skill, 0);
-                if (skinningSkill == 0)
-                    return;
-
-                int pureSkillValue = player.GetPureSkillValue(skinningSkill);
+                int pureSkillValue = player.GetPureSkillValue(skill);
                 if (pureSkillValue != 0)
                 {
                     // Double chances for elites
-                    player.UpdateGatherSkill(skinningSkill, pureSkillValue, reqValue, creature.IsElite() ? 2 : 1);
+                    player.UpdateGatherSkill(skill, pureSkillValue, reqValue, creature.IsElite() ? 2 : 1);
                 }
             }
         }

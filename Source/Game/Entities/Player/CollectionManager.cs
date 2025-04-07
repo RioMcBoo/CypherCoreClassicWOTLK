@@ -384,8 +384,8 @@ namespace Game.Entities
             {
                 if (!factionMount)
                     SendSingleMountUpdate(spellId, flags);
-                if (!player.HasSpell(spellId))
-                    player.LearnSpell(spellId, true);
+                if (!player.SpellBook.Has(spellId))
+                    player.SpellBook.Learn(spellId, true);
             }
 
             return true;

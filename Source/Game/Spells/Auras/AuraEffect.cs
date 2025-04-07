@@ -1437,9 +1437,9 @@ namespace Game.Spells
                     if (shapeInfo.PresetSpellID[i] == 0)
                         continue;
                     if (apply)
-                        target.ToPlayer().AddTemporarySpell(shapeInfo.PresetSpellID[i]);
+                        target.ToPlayer().SpellBook.AddTemporary(shapeInfo.PresetSpellID[i]);
                     else
-                        target.ToPlayer().RemoveTemporarySpell(shapeInfo.PresetSpellID[i]);
+                        target.ToPlayer().SpellBook.RemoveTemporary(shapeInfo.PresetSpellID[i]);
                 }
             }
         }
@@ -4561,9 +4561,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                player.LearnSpell(GetMiscValue(), true, 0, true);
+                player.SpellBook.Learn(GetMiscValue(), true, 0, true);
             else
-                player.RemoveSpell(GetMiscValue(), false, false, true);
+                player.SpellBook.Remove(GetMiscValue(), false, false, true);
         }
 
         [AuraEffectHandler(AuraType.ComprehendLanguage)]
@@ -4802,7 +4802,7 @@ namespace Game.Spells
                     {
                         int spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
-                            target.AddTemporarySpell(spellId);
+                            target.SpellBook.AddTemporary(spellId);
                     }
                 }
             }
@@ -4816,7 +4816,7 @@ namespace Game.Spells
                     {
                         int spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
-                            target.RemoveTemporarySpell(spellId);
+                            target.SpellBook.RemoveTemporary(spellId);
                     }
                 }
             }
@@ -5675,9 +5675,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                player.AddTemporarySpell(_effectInfo.TriggerSpell);
+                player.SpellBook.AddTemporary(_effectInfo.TriggerSpell);
             else
-                player.RemoveTemporarySpell(_effectInfo.TriggerSpell);
+                player.SpellBook.RemoveTemporary(_effectInfo.TriggerSpell);
         }
 
         [AuraEffectHandler(AuraType.OverridePetSpecs)]

@@ -5023,7 +5023,7 @@ namespace Game.Entities
 
         public SkillRangeType GetSkillRangeType(SkillRaceClassInfoRecord rcEntry)
         {
-            SkillLineRecord skill = CliDB.SkillLineStorage.LookupByKey((int)rcEntry.SkillID);
+            SkillLineRecord skill = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
             if (skill == null)
                 return SkillRangeType.None;
 
@@ -5045,13 +5045,13 @@ namespace Game.Entities
 
         public bool IsPrimaryProfessionSkill(SkillType skill)
         {
-            SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey((int)skill);
+            SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
             return pSkill != null && pSkill.CategoryID == SkillCategory.Profession && pSkill.ParentSkillLineID == 0;
         }
 
         public bool IsWeaponSkill(SkillType skill)
         {
-            var pSkill = CliDB.SkillLineStorage.LookupByKey((int)skill);
+            var pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
             return pSkill != null && pSkill.CategoryID == SkillCategory.Weapon;
         }
 

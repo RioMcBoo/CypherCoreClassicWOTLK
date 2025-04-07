@@ -101,12 +101,13 @@ namespace Game
 
         static bool SkillCheck(int skill)
         {
-            return CliDB.SkillLineStorage.ContainsKey(skill);
+            return CliDB.SkillLineStorage.ContainsKey((SkillType)skill);
         }
 
         static void CleanCharacterSkills()
         {
             CheckUnique("skill", "character_skills", SkillCheck);
+            CheckUnique("skill", "character_trade_skill_spells", SkillCheck);
         }
 
         static bool SpellCheck(int spell_id)
@@ -118,6 +119,7 @@ namespace Game
         static void CleanCharacterSpell()
         {
             CheckUnique("spell", "character_spell", SpellCheck);
+            CheckUnique("spell", "character_trade_skill_spells", SpellCheck);
         }
 
         static bool TalentCheck(int talent_id)

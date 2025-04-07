@@ -215,8 +215,10 @@ namespace Game.DataStorage
         private int _id;
         private sbyte _categoryID;
         public int SpellIconFileID;
-        public sbyte CanLink;
+        private sbyte _canLink;
+        /// <summary> unused in wotlk_classic</summary>
         private int _parentSkillLineID;
+        /// <summary> unused in wotlk_classic</summary>
         public int ParentTierIndex;
         private ushort _flags;
         public int SpellBookSpellID;
@@ -224,8 +226,10 @@ namespace Game.DataStorage
         #region Properties
         public SkillType Id => (SkillType)_id;
         public SkillCategory CategoryID => (SkillCategory)_categoryID;
+        /// <summary> unused in wotlk_classic</summary>
         public SkillType ParentSkillLineID => (SkillType)_parentSkillLineID;
         public SkillLineFlags Flags => (SkillLineFlags)_flags;
+        public bool CanLink => _canLink != 0;
         #endregion
 
         #region Helpers
@@ -256,6 +260,7 @@ namespace Game.DataStorage
         private sbyte _flags;
         public sbyte NumSkillUps;
         public short UniqueBit;
+        /// <summary> unused in wotlk_classic</summary>
         public short TradeSkillCategoryID;
         private short _skillupSkillLineID;
         public int[] CharacterPoints = new int[2];
@@ -268,6 +273,7 @@ namespace Game.DataStorage
         public SkillLineAbilityFlags Flags => (SkillLineAbilityFlags)_flags;
         /// <summary> unused in wotlk_classic</summary>
         public SkillType SkillupSkillLineID => (SkillType)_skillupSkillLineID;
+        public bool IsSkillTradeSpell => TrivialSkillLineRankHigh != 0 && TrivialSkillLineRankLow != 0;
         #endregion
 
         #region Helpers
@@ -286,9 +292,13 @@ namespace Game.DataStorage
     public sealed class SkillLineXTraitTreeRecord
     {
         public int Id;
-        public int SkillLineID;
+        private int _skillLineID;
         public int TraitTreeID;
         public int OrderIndex;
+
+        #region Helpers
+        public SkillType SkillLineID => (SkillType)_skillLineID;
+        #endregion
     }
 
     public sealed class SkillRaceClassInfoRecord

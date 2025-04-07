@@ -3887,7 +3887,7 @@ namespace Game
                         int trainerId = trainerSpellsResult.Read<int>(0);
                         spell.SpellId = trainerSpellsResult.Read<int>(1);
                         spell.MoneyCost = trainerSpellsResult.Read<uint>(2);
-                        spell.ReqSkillLine = trainerSpellsResult.Read<int>(3);
+                        spell.ReqSkillLine = (SkillType)trainerSpellsResult.Read<int>(3);
                         spell.ReqSkillRank = trainerSpellsResult.Read<int>(4);
                         spell.ReqAbility[0] = trainerSpellsResult.Read<int>(5);
                         spell.ReqAbility[1] = trainerSpellsResult.Read<int>(6);
@@ -9011,7 +9011,7 @@ namespace Game
                 // RequiredSkillId, can be 0
                 if (qinfo.RequiredSkillId != SkillType.None)
                 {
-                    if (!CliDB.SkillLineStorage.ContainsKey((int)qinfo.RequiredSkillId))
+                    if (!CliDB.SkillLineStorage.ContainsKey(qinfo.RequiredSkillId))
                     {
                         Log.outError(LogFilter.Sql, 
                             $"Quest {qinfo.Id} has `RequiredSkillId` = {qinfo.RequiredSkillId} " +
@@ -11875,7 +11875,7 @@ namespace Game
                         reward.PackageId = 0;
                     }
 
-                    if (reward.SkillLineId != 0 && !CliDB.SkillLineStorage.ContainsKey((int)reward.SkillLineId))
+                    if (reward.SkillLineId != 0 && !CliDB.SkillLineStorage.ContainsKey(reward.SkillLineId))
                     {
                         Log.outError(LogFilter.Sql,
                             $"Table `playerchoice_response_reward` " +

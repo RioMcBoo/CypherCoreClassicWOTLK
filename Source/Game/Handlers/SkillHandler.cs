@@ -2,11 +2,13 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
-using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game
 {
@@ -22,7 +24,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnPreviewTalents, Processing = PacketProcessing.Inplace)]
         void HandleLearnTalentsGroup(LearnPreviewTalents packet)
         {
-            foreach(var talentInfo in packet.talentInfos)
+            foreach (var talentInfo in packet.talentInfos)
             {
                 _player.LearnTalent(talentInfo.TalentID, talentInfo.Rank);
             }
@@ -75,7 +77,7 @@ namespace Game
             if (!_player.HasSpell(tradeSkillSetFavorite.RecipeID))
                 return;
 
-            _player.SetSpellFavorite(tradeSkillSetFavorite.RecipeID, tradeSkillSetFavorite.IsFavorite);
+            _player.SpellBook.SetFavorite(tradeSkillSetFavorite.RecipeID, tradeSkillSetFavorite.IsFavorite);
         }
 
         [WorldPacketHandler(ClientOpcodes.RemoveGlyph)]
@@ -97,6 +99,82 @@ namespace Game
                     _player.SendTalentsInfoData();
                 }
             }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.ShowTradeSkill, Processing = PacketProcessing.ThreadUnsafe)]
+        void HandleShowTradeSkill(ShowTradeSkill packet)
+        {
+            SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(packet.SkillId);
+            if (skillEntry == null || !skillEntry.CanLink)
+                return;
+
+            var spellLearnSkill = Global.SpellMgr.GetSpellLearnSkill(packet.SpellId);
+
+            if (spellLearnSkill.skill != packet.SkillId)
+                return;
+
+            ShowTradeSkillResponse response = new()
+            {
+                SpellId = packet.SpellId,
+                CasterGUID = packet.CasterGUID,
+                SkillLineId = spellLearnSkill.skill,
+                SkillMaxRank = spellLearnSkill.step * PlayerConst.ProfessionSkillPerStep,
+            };
+
+            if (Global.ObjAccessor.FindPlayer(packet.CasterGUID) is Player master)
+            {                
+                response.SkillRank = master.GetSkillValue(spellLearnSkill.skill);
+                if (response.SkillRank < 1)
+                    return;
+
+                response.KnownAbilitySpellIDs = master.SpellBook.GetTradeSkillSpells(packet.SkillId).ToList();  
+            }
+            else
+            {
+                long mastersLowGuid = packet.CasterGUID.GetCounter();
+                int skillValue = 0;
+                int skillMaxValue = 0;
+
+                PreparedStatement stmt;
+                SQLResult result;
+
+                Log.outDebug(LogFilter.Sql, $"Loading current and max values for player's [GUID: {mastersLowGuid}] {packet.SkillId} ...");
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SKILL_VALUES);
+                stmt.SetInt64(0, mastersLowGuid);
+                stmt.SetInt16(1, (short)packet.SkillId);
+                result = DB.Characters.Query(stmt);
+
+                if (result.IsEmpty())
+                    return;
+
+                skillValue = result.Read<short>(0);
+                skillMaxValue = result.Read<short>(1);
+                result.Close();
+
+                if (response.SkillMaxRank != skillMaxValue)
+                    return;
+
+                if (skillValue < 1 || skillValue > skillMaxValue)
+                    return;
+
+                response.SkillRank = skillValue;
+                response.SkillMaxRank = skillMaxValue;
+
+                Log.outDebug(LogFilter.Sql, $"Loading Trade Skill Spells for player's [GUID: {mastersLowGuid}] {packet.SkillId} ...");
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TRADE_SKILL_SPELLS);
+                stmt.SetInt64(0, mastersLowGuid);
+                stmt.SetInt16(1, (short)packet.SkillId);
+                result = DB.Characters.Query(stmt);
+
+                response.KnownAbilitySpellIDs = new();
+                do
+                {
+                    response.KnownAbilitySpellIDs.Add(result.Read<int>(0));
+                }
+                while (result.NextRow());
+            }
+
+            GetPlayer().SendPacket(response);
         }
     }
 }
