@@ -41,12 +41,6 @@ namespace Framework.Constants
         Invoice = 6
     }
 
-    public enum AuctionHouseResultLimits
-    {
-        Browse = 500,
-        Items = 50
-    }
-
     [Flags]
     public enum AuctionHouseFilterMask
     {
@@ -67,11 +61,26 @@ namespace Framework.Constants
 
     public enum AuctionHouseSortOrder
     {
-        Price = 0,
-        Name = 1,
-        Level = 2,
-        Bid = 3,
-        Buyout = 4
+        ItemLevel = 0,
+        Rarity = 1,
+        TimeLeft = 3,
+        Seller = 7,
+        CurrentBidTotal = 8,
+        BuyOutPerUnit = 12,
+        CurrentBidPerUnit = 13,
+        BuyOutTotal = 14,
+
+        Price = 2000,
+        Name,
+        Level,
+        Bid,
+        Buyout,
+    }
+
+    public enum AuctionHouseSortDirection : byte
+    {
+        Ascending = 0,
+        Descending = 1,
     }
 
     public enum AuctionHouseBrowseMode
@@ -90,5 +99,13 @@ namespace Framework.Constants
     {
         None = 0x0,
         GmLogBuyer = 0x1  // write transaction to gm log file for buyer (optimization flag - avoids querying database for offline player permissions)
+    }
+
+    public enum AuctionHouseId
+    {
+        Neutral = 1,
+        Alliance = 2,
+        Horde = 6,
+        Goblins = 7
     }
 }

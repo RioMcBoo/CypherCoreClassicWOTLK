@@ -147,6 +147,8 @@ namespace Framework.Constants
         /// </summary>
         public const Locale DefaultLocale = Locale.enUS;
         public const int MaxAccountTutorialValues = 8;
+        public const int AuctionListItemsMax = 50;
+        public const int AuctionBrowseItemsMax = 500;
         public static readonly TimeSpan MinAuctionTime = (Hours)12;
         public const int MaxConditionTargets = 3;
 
