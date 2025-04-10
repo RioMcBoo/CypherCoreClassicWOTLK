@@ -493,7 +493,7 @@ namespace Game.DataStorage
         public static DB6Storage<int, ArtifactQuestXPRecord> ArtifactQuestXPStorage = new();
         public static DB6Storage<int, ArtifactTierRecord> ArtifactTierStorage = new();
         public static DB6Storage<int, ArtifactUnlockRecord> ArtifactUnlockStorage = new();
-        public static DB6Storage<int, AuctionHouseRecord> AuctionHouseStorage = new();
+        public static DB6Storage<AuctionHouseId, AuctionHouseRecord> AuctionHouseStorage = new();
         public static DB6Storage<int, AzeriteEmpoweredItemRecord> AzeriteEmpoweredItemStorage = new();
         public static DB6Storage<int, AzeriteEssenceRecord> AzeriteEssenceStorage = new();
         public static DB6Storage<int, AzeriteEssencePowerRecord> AzeriteEssencePowerStorage = new();
