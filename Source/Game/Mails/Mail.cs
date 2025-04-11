@@ -141,7 +141,7 @@ namespace Game.Mails
         public MailSender(AuctionHouseObject sender)
         {
             m_messageType = MailMessageType.Auction;
-            m_senderId = sender.GetAuctionHouseId();
+            m_senderId = (long)sender.GetAuctionHouseId();
             m_stationery = MailStationery.Auction;
         }
 

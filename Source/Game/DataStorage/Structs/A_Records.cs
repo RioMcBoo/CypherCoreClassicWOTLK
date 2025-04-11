@@ -358,7 +358,7 @@ namespace Game.DataStorage
 
     public sealed class AuctionHouseRecord
     {
-        public int Id;
+        private int _id;
         public LocalizedString Name;
         /// <summary>
         /// id of faction.dbc for player factions associated with city
@@ -366,6 +366,10 @@ namespace Game.DataStorage
         public ushort FactionID;
         public byte DepositRate;
         public byte ConsignmentRate;
+
+        #region Properties
+        public AuctionHouseId Id => (AuctionHouseId)_id;
+        #endregion
     }
 
     public sealed class AzeriteEmpoweredItemRecord

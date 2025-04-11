@@ -983,6 +983,7 @@ namespace Framework.Constants
 
     public enum ItemQuality : sbyte
     {
+        None = -1,
         Poor = 0,                 //Grey
         Normal = 1,                 //White
         Uncommon = 2,                 //Green
