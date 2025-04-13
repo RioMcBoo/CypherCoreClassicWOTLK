@@ -62,3 +62,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `modelid`, `equ
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `VerifiedBuild`) VALUES (79707, 15659, 0, 0, 0, 0, 0, -8814.55, 660.315, 96.6818, 1.72788, 300, 0, 0, 6645, 0, 0, 0);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `VerifiedBuild`) VALUES (120784, 29093, 0, 0, 0, 0, 0, -8807.04, 638.359, 94.312, 3.56047, 300, 0, 0, 1220, 0, 0, 0);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `VerifiedBuild`) VALUES (79836, 5493, 0, 0, 0, 0, 1, -8802.57, 767.463, 96.4213, 1.6057, 300, 0, 0, 1342, 0, 0, 0);
+
+
+-- Fix Inscription Trainer in Stormwind
+INSERT INTO `creature_template_gossip` (`CreatureID`, `MenuID`) VALUES (30713, 9879);
