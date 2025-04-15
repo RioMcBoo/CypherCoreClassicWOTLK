@@ -156,3 +156,7 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+
+# Database population
+TDB_full_world_*
+TDB_full_hotfixes_*
