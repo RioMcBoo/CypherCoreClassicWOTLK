@@ -214,17 +214,17 @@ namespace Game.Chat.Commands
                         continue;
 
                     // search highest talent rank
-                    int highestrank = 0;
+                    int highestrank = -1;
                     for (byte rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
                     {
                         if (talentInfo.SpellRank[rank] != 0)
                         {
-                            highestrank = rank + 1;
+                            highestrank = rank;
                             break;
                         }
                     }
 
-                    if (highestrank == 0)    // ??? none spells in talent
+                    if (highestrank < 0)    // ??? none spells in talent
                         continue;
 
                     // learn highest rank of talent
