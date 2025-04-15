@@ -168,7 +168,7 @@ namespace Game.Entities
                 return false;
             }
 
-            var cEntry = CliDB.ChrClassesStorage.LookupByKey((int)createInfo.ClassId);
+            var cEntry = CliDB.ChrClassesStorage.LookupByKey(createInfo.ClassId);
             if (cEntry == null)
             {
                 Log.outError(LogFilter.Player, 

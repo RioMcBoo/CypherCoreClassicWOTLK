@@ -2954,7 +2954,7 @@ namespace Game.Entities
 
             if (proto.GetClass() == ItemClass.Armor && proto.GetInventoryType() != InventoryType.Cloak)
             {
-                ChrClassesRecord classesEntry = CliDB.ChrClassesStorage.LookupByKey((int)GetClass());
+                ChrClassesRecord classesEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
                 if ((classesEntry.ArmorTypeMask & 1 << (int)proto.GetSubClass()) == 0)
                     return InventoryResult.ClientLockedOut;
             }

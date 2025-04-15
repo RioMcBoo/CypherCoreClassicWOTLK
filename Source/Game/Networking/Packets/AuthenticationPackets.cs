@@ -176,7 +176,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt32(characterTemplate.Classes.Count);
                     foreach (var templateClass in characterTemplate.Classes)
                     {
-                        _worldPacket.WriteUInt8(templateClass.ClassID);
+                        _worldPacket.WriteUInt8((byte)templateClass.ClassID);
                         _worldPacket.WriteUInt8((byte)templateClass.FactionGroup);
                     }
 

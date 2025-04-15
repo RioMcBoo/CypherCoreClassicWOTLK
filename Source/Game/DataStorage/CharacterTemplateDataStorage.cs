@@ -25,7 +25,7 @@ namespace Game.DataStorage
                     {
                         int templateId = classesResult.Read<int>(0);
                         FactionMasks factionGroup = (FactionMasks)classesResult.Read<byte>(1);
-                        byte classID = classesResult.Read<byte>(2);
+                        Class classID = (Class)classesResult.Read<byte>(2);
 
                         if (!factionGroup.HasFlag(FactionMasks.Player) || !factionGroup.HasFlag(FactionMasks.Alliance | FactionMasks.Horde))
                         {
@@ -103,14 +103,14 @@ namespace Game.DataStorage
 
     public struct CharacterTemplateClass
     {
-        public CharacterTemplateClass(FactionMasks factionGroup, byte classID)
+        public CharacterTemplateClass(FactionMasks factionGroup, Class classID)
         {
             FactionGroup = factionGroup;
             ClassID = classID;
         }
 
         public FactionMasks FactionGroup;
-        public byte ClassID;
+        public Class ClassID;
     }
 
     public class CharacterTemplate

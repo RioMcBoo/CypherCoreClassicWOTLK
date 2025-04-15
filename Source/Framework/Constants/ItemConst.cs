@@ -684,6 +684,34 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
+    public enum ItemClassMask : int
+    {
+        None = 0,
+        Consumable = 1 << ItemClass.Consumable,
+        Container = 1 << ItemClass.Container,
+        Weapon = 1 << ItemClass.Weapon,
+        Gem = 1 << ItemClass.Gem,
+        Armor = 1 << ItemClass.Armor,
+        Reagent = 1 << ItemClass.Reagent,
+        Projectile = 1 << ItemClass.Projectile,
+        TradeGoods = 1 << ItemClass.TradeGoods,
+        ItemEnhancement = 1 << ItemClass.ItemEnhancement,
+        Recipe = 1 << ItemClass.Recipe,
+        Money = 1 << ItemClass.Money, // Obsolete
+        Quiver = 1 << ItemClass.Quiver,
+        Quest = 1 << ItemClass.Quest,
+        Key = 1 << ItemClass.Key,
+        Permanent = 1 << ItemClass.Permanent, // Obsolete
+        Miscellaneous = 1 << ItemClass.Miscellaneous,
+        Glyph = 1 << ItemClass.Glyph,
+        BattlePets = 1 << ItemClass.BattlePets,
+        WowToken = 1 << ItemClass.WowToken,
+        Profession = 1 << ItemClass.Profession,
+
+        AllPermanent = -1,
+    }
+
     public enum ItemSubClassConsumable
     {
         Consumable = 0,
@@ -697,6 +725,22 @@ namespace Framework.Constants
         ConsumableOther = 8,
         VantusRune = 9,
         Max
+    }
+
+    [Flags]
+    public enum ItemSubClassConsumableMask
+    {
+        None = 0,
+        Consumable = 1 << ItemSubClassConsumable.Consumable,
+        Potion = 1 << ItemSubClassConsumable.Potion,
+        Elixir = 1 << ItemSubClassConsumable.Elixir,
+        Flask = 1 << ItemSubClassConsumable.Flask,
+        Scroll = 1 << ItemSubClassConsumable.Scroll,
+        FoodDrink = 1 << ItemSubClassConsumable.FoodDrink,
+        ItemEnhancement = 1 << ItemSubClassConsumable.ItemEnhancement,
+        Bandage = 1 << ItemSubClassConsumable.Bandage,
+        ConsumableOther = 1 << ItemSubClassConsumable.ConsumableOther,
+        VantusRune = 1 << ItemSubClassConsumable.VantusRune,
     }
 
     public enum ItemSubClassContainer
@@ -714,6 +758,24 @@ namespace Framework.Constants
         CookingContainer = 10,
         ReagentContainer = 11,
         Max
+    }
+
+    [Flags]
+    public enum ItemSubClassContainerMask
+    {
+        None = 0,
+        Container = 1 << ItemSubClassContainer.Container,
+        SoulContainer = 1 << ItemSubClassContainer.SoulContainer,
+        HerbContainer = 1 << ItemSubClassContainer.HerbContainer,
+        EnchantingContainer = 1 << ItemSubClassContainer.EnchantingContainer,
+        EngineeringContainer = 1 << ItemSubClassContainer.EngineeringContainer,
+        GemContainer = 1 << ItemSubClassContainer.GemContainer,
+        MiningContainer = 1 << ItemSubClassContainer.MiningContainer,
+        LeatherworkingContainer = 1 << ItemSubClassContainer.LeatherworkingContainer,
+        InscriptionContainer = 1 << ItemSubClassContainer.InscriptionContainer,
+        TackleContainer = 1 << ItemSubClassContainer.TackleContainer,
+        CookingContainer = 1 << ItemSubClassContainer.CookingContainer,
+        ReagentContainer = 1 << ItemSubClassContainer.ReagentContainer,
     }
 
     public enum ItemSubClassWeapon
@@ -739,13 +801,12 @@ namespace Framework.Constants
         Crossbow = 18,
         Wand = 19,
         FishingPole = 20,
-
-        Max = 21
-
+        Max
     }
 
     public enum ItemSubClassWeaponMask
     {
+        None = 0,
         Axe = 1 << ItemSubClassWeapon.Axe,
         Axe2 = 1 << ItemSubClassWeapon.Axe2,
         Bow = 1 << ItemSubClassWeapon.Bow,
@@ -788,6 +849,24 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
+    public enum ItemSubClassGemMask
+    {
+        None = 0,
+        Intellect = 1 << ItemSubClassGem.Intellect,
+        Agility = 1 << ItemSubClassGem.Agility,
+        Strength = 1 << ItemSubClassGem.Strength,
+        Stamina = 1 << ItemSubClassGem.Stamina,
+        Spirit = 1 << ItemSubClassGem.Spirit,
+        CriticalStrike = 1 << ItemSubClassGem.CriticalStrike,
+        Mastery = 1 << ItemSubClassGem.Mastery,
+        Haste = 1 << ItemSubClassGem.Haste,
+        Versatility = 1 << ItemSubClassGem.Versatility,
+        Other = 1 << ItemSubClassGem.Other,
+        MultipleStats = 1 << ItemSubClassGem.MultipleStats,
+        ArtifactRelic = 1 << ItemSubClassGem.ArtifactRelic,
+    }
+
     public enum ItemSubClassArmor
     {
         Miscellaneous = 0,
@@ -805,12 +884,39 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
+    public enum ItemSubClassArmorMask
+    {
+        None = 0,
+        Miscellaneous = 1 << ItemSubClassArmor.Miscellaneous,
+        Cloth = 1 << ItemSubClassArmor.Cloth,
+        Leather = 1 << ItemSubClassArmor.Leather,
+        Mail = 1 << ItemSubClassArmor.Mail,
+        Plate = 1 << ItemSubClassArmor.Plate,
+        Cosmetic = 1 << ItemSubClassArmor.Cosmetic,
+        Shield = 1 << ItemSubClassArmor.Shield,
+        Libram = 1 << ItemSubClassArmor.Libram,
+        Idol = 1 << ItemSubClassArmor.Idol,
+        Totem = 1 << ItemSubClassArmor.Totem,
+        Sigil = 1 << ItemSubClassArmor.Sigil,
+        Relic = 1 << ItemSubClassArmor.Relic,
+    }
+
     public enum ItemSubClassReagent
     {
         Reagent = 0,
         Keystone = 1,
         ContextToken = 2,
         Max
+    }
+
+    [Flags]
+    public enum ItemSubClassReagentMask
+    {
+        None = 0,
+        Reagent = 1 << ItemSubClassReagent.Reagent,
+        Keystone = 1 << ItemSubClassReagent.Keystone,
+        ContextToken = 1 << ItemSubClassReagent.ContextToken,
     }
 
     public enum ItemSubClassProjectile
@@ -821,6 +927,17 @@ namespace Framework.Constants
         Bullet = 3,
         Thrown = 4,  // Obsolete
         Max
+    }
+
+    [Flags]
+    public enum ItemSubClassProjectileMask
+    {
+        None = 0,
+        Wand = 1 << ItemSubClassProjectile.Wand, // Obsolete
+        Bolt = 1 << ItemSubClassProjectile.Bolt, // Obsolete
+        Arrow = 1 << ItemSubClassProjectile.Arrow,
+        Bullet = 1 << ItemSubClassProjectile.Bullet,
+        Thrown = 1 << ItemSubClassProjectile.Thrown, // Obsolete
     }
 
     public enum ItemSubClassTradeGoods
@@ -848,6 +965,32 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
+    public enum ItemSubClassTradeGoodsMask
+    {
+        None = 0,
+        TradeGoods = 1 << ItemSubClassTradeGoods.TradeGoods,
+        Parts = 1 << ItemSubClassTradeGoods.Parts,
+        Explosives = 1 << ItemSubClassTradeGoods.Explosives,
+        Devices = 1 << ItemSubClassTradeGoods.Devices,
+        Jewelcrafting = 1 << ItemSubClassTradeGoods.Jewelcrafting,
+        Cloth = 1 << ItemSubClassTradeGoods.Cloth,
+        Leather = 1 << ItemSubClassTradeGoods.Leather,
+        MetalStone = 1 << ItemSubClassTradeGoods.MetalStone,
+        Meat = 1 << ItemSubClassTradeGoods.Meat,
+        Herb = 1 << ItemSubClassTradeGoods.Herb,
+        Elemental = 1 << ItemSubClassTradeGoods.Elemental,
+        TradeGoodsOther = 1 << ItemSubClassTradeGoods.TradeGoodsOther,
+        Enchanting = 1 << ItemSubClassTradeGoods.Enchanting,
+        Material = 1 << ItemSubClassTradeGoods.Material,
+        Enchantment = 1 << ItemSubClassTradeGoods.Enchantment,
+        WeaponEnchantment = 1 << ItemSubClassTradeGoods.WeaponEnchantment,
+        Inscription = 1 << ItemSubClassTradeGoods.Inscription,
+        ExplosivesDevices = 1 << ItemSubClassTradeGoods.ExplosivesDevices,
+        OptionalReagent = 1 << ItemSubClassTradeGoods.OptionalReagent,
+        FinishingReagent = 1 << ItemSubClassTradeGoods.FinishingReagent,
+    }
+
     public enum ItemSubclassItemEnhancement
     {
         Head = 0,
@@ -868,6 +1011,27 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
+    public enum ItemSubclassItemEnhancementMask
+    {
+        None = 0,
+        Head = 1 << ItemSubclassItemEnhancement.Head,
+        Neck = 1 << ItemSubclassItemEnhancement.Neck,
+        Shoulder = 1 << ItemSubclassItemEnhancement.Shoulder,
+        Cloak = 1 << ItemSubclassItemEnhancement.Cloak,
+        Chest = 1 << ItemSubclassItemEnhancement.Chest,
+        Wrist = 1 << ItemSubclassItemEnhancement.Wrist,
+        Hands = 1 << ItemSubclassItemEnhancement.Hands,
+        Waist = 1 << ItemSubclassItemEnhancement.Waist,
+        Legs = 1 << ItemSubclassItemEnhancement.Legs,
+        Feet = 1 << ItemSubclassItemEnhancement.Feet,
+        Finger = 1 << ItemSubclassItemEnhancement.Finger,
+        Weapon = 1 << ItemSubclassItemEnhancement.Weapon,
+        TwoHandedWeapon = 1 << ItemSubclassItemEnhancement.TwoHandedWeapon,
+        ShieldOffHand = 1 << ItemSubclassItemEnhancement.ShieldOffHand,
+        Misc = 1 << ItemSubclassItemEnhancement.Misc,
+    }
+
     public enum ItemSubClassRecipe
     {
         Book = 0,
@@ -885,10 +1049,35 @@ namespace Framework.Constants
         Max = 12
     }
 
+    [Flags]
+    public enum ItemSubClassRecipeMask
+    {
+        None = 0,
+        Book = 1 << ItemSubClassRecipe.Book,
+        LeatherworkingPattern = 1 << ItemSubClassRecipe.LeatherworkingPattern,
+        TailoringPattern = 1 << ItemSubClassRecipe.TailoringPattern,
+        EngineeringSchematic = 1 << ItemSubClassRecipe.EngineeringSchematic,
+        Blacksmithing = 1 << ItemSubClassRecipe.Blacksmithing,
+        CookingRecipe = 1 << ItemSubClassRecipe.CookingRecipe,
+        AlchemyRecipe = 1 << ItemSubClassRecipe.AlchemyRecipe,
+        FirstAidManual = 1 << ItemSubClassRecipe.FirstAidManual,
+        EnchantingFormula = 1 << ItemSubClassRecipe.EnchantingFormula,
+        FishingManual = 1 << ItemSubClassRecipe.FishingManual,
+        JewelcraftingRecipe = 1 << ItemSubClassRecipe.JewelcraftingRecipe,
+        InscriptionTechnique = 1 << ItemSubClassRecipe.InscriptionTechnique,
+    }
+
     public enum ItemSubClassMoney
     {
         Money = 0,  // Obsolete
         Max = 1
+    }
+
+    [Flags]
+    public enum ItemSubClassMoneyMask
+    {
+        None = 0,
+        Money = 1 << ItemSubClassMoney.Money // Obsolete
     }
 
     public enum ItemSubClassQuiver
@@ -900,12 +1089,31 @@ namespace Framework.Constants
         Max = 4,
     }
 
+    [Flags]
+    public enum ItemSubClassQuiverMask
+    {
+        None = 0,
+        Quiver0 = 1 << ItemSubClassQuiver.Quiver0, // Obsolete
+        Quiver1 = 1 << ItemSubClassQuiver.Quiver1, // Obsolete
+        Quiver = 1 << ItemSubClassQuiver.Quiver,
+        AmmoPouch = 1 << ItemSubClassQuiver.AmmoPouch,
+    }
+
     public enum ItemSubClassQuest
     {
         Quest = 0,
         Unk3 = 3, // 1 Item (33604)
         Unk8 = 8, // 2 Items (37445, 49700)
         Max = 9
+    }
+
+    [Flags]
+    public enum ItemSubClassQuestMask
+    {
+        None = 0,
+        Quest = 1 << ItemSubClassQuest.Quest,
+        Unk3 = 1 << ItemSubClassQuest.Unk3, // 1 Item (33604)
+        Unk8 = 1 << ItemSubClassQuest.Unk8  // 2 Items (37445, 49700)
     }
 
     public enum ItemSubClassKey
@@ -915,10 +1123,25 @@ namespace Framework.Constants
         Max = 2
     }
 
+    [Flags]
+    public enum ItemSubClassKeyMask
+    {
+        None = 0,
+        Key = 1 << ItemSubClassKey.Key,
+        Lockpick = 1 << ItemSubClassKey.Lockpick
+    }
+
     public enum ItemSubClassPermanent
     {
         Permanent = 0,
         Max = 1
+    }
+
+    [Flags]
+    public enum ItemSubClassPermanentMask
+    {
+        None = 0,
+        Permanent = 1 << ItemSubClassPermanent.Permanent // Obsolete
     }
 
     public enum ItemSubClassMisc
@@ -931,6 +1154,19 @@ namespace Framework.Constants
         Mount = 5,
         MountEquipment = 6,
         Max
+    }
+
+    [Flags]
+    public enum ItemSubClassMiscMask
+    {
+        None = 0,
+        Junk = 1 << ItemSubClassMisc.Junk,
+        Reagent = 1 << ItemSubClassMisc.Reagent,
+        CompanionPet = 1 << ItemSubClassMisc.CompanionPet,
+        Holiday = 1 << ItemSubClassMisc.Holiday,
+        Other = 1 << ItemSubClassMisc.Other,
+        Mount = 1 << ItemSubClassMisc.Mount,
+        MountEquipment = 1 << ItemSubClassMisc.MountEquipment,
     }
 
     public enum ItemSubClassGlyph
@@ -950,16 +1186,48 @@ namespace Framework.Constants
         Max = 13
     }
 
+    [Flags]
+    public enum ItemSubClassGlyphMask
+    {
+        None = 0,
+        Warrior = 1 << ItemSubClassGlyph.Warrior,
+        Paladin = 1 << ItemSubClassGlyph.Paladin,
+        Hunter = 1 << ItemSubClassGlyph.Hunter,
+        Rogue = 1 << ItemSubClassGlyph.Rogue,
+        Priest = 1 << ItemSubClassGlyph.Priest,
+        DeathKnight = 1 << ItemSubClassGlyph.DeathKnight,
+        Shaman = 1 << ItemSubClassGlyph.Shaman,
+        Mage = 1 << ItemSubClassGlyph.Mage,
+        Warlock = 1 << ItemSubClassGlyph.Warlock,
+        Monk = 1 << ItemSubClassGlyph.Monk,
+        Druid = 1 << ItemSubClassGlyph.Druid,
+        DemonHunter = 1 << ItemSubClassGlyph.DemonHunter
+    }
+
     public enum ItemSubclassBattlePet
     {
         BattlePet = 0,
         Max = 1
     }
 
+    [Flags]
+    public enum ItemSubclassBattlePetMask
+    {
+        None = 0,
+        BattlePet = 1 << ItemSubclassBattlePet.BattlePet
+    }
+
     public enum ItemSubclassWowToken
     {
         WowToken = 0,
         Max = 1
+    }
+
+    [Flags]
+    public enum ItemSubclassWowTokenMask
+    {
+        None = 0,
+        WowToken = 1 << ItemSubclassWowToken.WowToken
     }
 
     public enum ItemSubclassProfession
@@ -981,18 +1249,52 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
+    public enum ItemSubclassProfessionMask
+    {
+        None = 0,
+        Blacksmithing = 1 << ItemSubclassProfession.Blacksmithing,
+        Leatherworking = 1 << ItemSubclassProfession.Leatherworking,
+        Alchemy = 1 << ItemSubclassProfession.Alchemy,
+        Herbalism = 1 << ItemSubclassProfession.Herbalism,
+        Cooking = 1 << ItemSubclassProfession.Cooking,
+        Mining = 1 << ItemSubclassProfession.Mining,
+        Tailoring = 1 << ItemSubclassProfession.Tailoring,
+        Engineering = 1 << ItemSubclassProfession.Engineering,
+        Enchanting = 1 << ItemSubclassProfession.Enchanting,
+        Fishing = 1 << ItemSubclassProfession.Fishing,
+        Skinning = 1 << ItemSubclassProfession.Skinning,
+        Jewelcrafting = 1 << ItemSubclassProfession.Jewelcrafting,
+        Inscription = 1 << ItemSubclassProfession.Inscription,
+        Archaeology = 1 << ItemSubclassProfession.Archaeology
+    }
+
     public enum ItemQuality : sbyte
     {
         None = -1,
-        Poor = 0,                 //Grey
+        Poor = 0,                   //Grey
         Normal = 1,                 //White
-        Uncommon = 2,                 //Green
-        Rare = 3,                 //Blue
-        Epic = 4,                 //Purple
-        Legendary = 5,                 //Orange
-        Artifact = 6,                 //Light Yellow
-        Heirloom = 7,
+        Uncommon = 2,               //Green
+        Rare = 3,                   //Blue
+        Epic = 4,                   //Purple
+        Legendary = 5,              //Orange
+        Artifact = 6,               //Light Yellow
+        Heirloom = 7,               // Light Blue
         Max = 8
+    }
+
+    [Flags]
+    public enum ItemQualityMask : int
+    {
+        None = 0,
+        Poor = 1 << ItemQuality.Poor,                 // Grey
+        Normal = 1 << ItemQuality.Normal,             // White
+        Uncommon = 1 << ItemQuality.Uncommon,         // Green
+        Rare = 1 << ItemQuality.Rare,                 // Blue
+        Epic = 1 << ItemQuality.Epic,                 // Purple
+        Legendary = 1 << ItemQuality.Legendary,       // Orange
+        Artifact = 1 << ItemQuality.Artifact,         // Light Yellow
+        Heirloom = 1 << ItemQuality.Heirloom          // Light Blue
     }
 
     [Flags]

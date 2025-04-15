@@ -2851,7 +2851,7 @@ namespace Game.Guilds
                     return false;
                 }
 
-                if (!CliDB.ChrClassesStorage.ContainsKey((int)m_class))
+                if (!CliDB.ChrClassesStorage.ContainsKey(m_class))
                 {
                     Log.outError(LogFilter.Guild, 
                         $"{m_guid} has a broken data in field `characters`.`class`, deleting him from guild!");

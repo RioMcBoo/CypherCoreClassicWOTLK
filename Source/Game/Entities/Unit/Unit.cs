@@ -1786,7 +1786,7 @@ namespace Game.Entities
                     }
                     else
                     {
-                        ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey((int)GetClass());
+                        ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
                         if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
                             displayPower = cEntry.DisplayPower;
 

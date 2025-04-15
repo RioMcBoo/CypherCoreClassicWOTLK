@@ -523,7 +523,7 @@ namespace Game.DataStorage
         public static DB6Storage<int, ChatChannelsRecord> ChatChannelsStorage = new();
         public static DB6Storage<int, CharBaseInfoRecord> CharBaseInfoStorage = new();
         public static DB6Storage<int, ChrClassUIDisplayRecord> ChrClassUIDisplayStorage = new();
-        public static DB6Storage<int, ChrClassesRecord> ChrClassesStorage = new();
+        public static DB6Storage<Class, ChrClassesRecord> ChrClassesStorage = new();
         public static DB6Storage<int, ChrClassesXPowerTypesRecord> ChrClassesXPowerTypesStorage = new();
         public static DB6Storage<int, ChrCustomizationChoiceRecord> ChrCustomizationChoiceStorage = new();
         public static DB6Storage<int, ChrCustomizationDisplayInfoRecord> ChrCustomizationDisplayInfoStorage = new();

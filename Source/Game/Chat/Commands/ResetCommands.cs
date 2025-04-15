@@ -45,7 +45,7 @@ namespace Game.Chat
 
         static bool HandleResetStatsOrLevelHelper(Player player)
         {
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)player.GetClass());
+            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(player.GetClass());
             if (classEntry == null)
             {
                 Log.outError(LogFilter.Server, 

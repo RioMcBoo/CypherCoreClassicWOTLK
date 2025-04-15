@@ -5088,12 +5088,12 @@ namespace Game.Spells
                             && !m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot)
                             && !m_spellInfo.HasEffect(SpellEffectName.Attack)
                             && !m_spellInfo.HasAttribute(SpellAttr12.IgnoreCastingDisabled)
-                            && !playerCaster.HasAuraTypeWithFamilyFlags(AuraType.DisableCastingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey((int)playerCaster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
+                            && !playerCaster.HasAuraTypeWithFamilyFlags(AuraType.DisableCastingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey(playerCaster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
                             return SpellCastResult.CantDoThatRightNow;
 
                         if (playerCaster.HasAuraType(AuraType.DisableAttackingExceptAbilities))
                         {
-                            if (!playerCaster.HasAuraTypeWithFamilyFlags(AuraType.DisableAttackingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey((int)playerCaster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
+                            if (!playerCaster.HasAuraTypeWithFamilyFlags(AuraType.DisableAttackingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey(playerCaster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
                             {
                                 if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot)
                                     || m_spellInfo.IsNextMeleeSwingSpell()

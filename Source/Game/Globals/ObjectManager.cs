@@ -391,7 +391,7 @@ namespace Game
                         Expansion activeExpansionLevel = (Expansion)result.Read<byte>(2);
                         Expansion accountExpansionLevel = (Expansion)result.Read<byte>(3);
 
-                        ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)classID);
+                        ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(classID);
                         if (classEntry == null)
                         {
                             Log.outError(LogFilter.Sql,

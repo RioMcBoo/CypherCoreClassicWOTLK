@@ -1085,7 +1085,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool HasAuraTypeWithFamilyFlags(AuraType auraType, uint familyName, FlagArray128 familyFlags)
+        public bool HasAuraTypeWithFamilyFlags(AuraType auraType, SpellFamilyNames familyName, FlagArray128 familyFlags)
         {
             foreach (AuraEffect aura in GetAuraEffectsByType(auraType))
             {

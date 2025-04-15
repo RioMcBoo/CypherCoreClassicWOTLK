@@ -919,7 +919,7 @@ namespace Game.DataStorage
 
         public string GetClassName(Class class_, Locale locale = Locale.enUS)
         {
-            ChrClassesRecord classEntry = ChrClassesStorage.LookupByKey((int)class_);
+            ChrClassesRecord classEntry = ChrClassesStorage.LookupByKey(class_);
             if (classEntry == null)
                 return "";
 

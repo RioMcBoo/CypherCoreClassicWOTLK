@@ -302,7 +302,7 @@ namespace Game
                 }
             }
 
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)charCreate.CreateInfo.ClassId);
+            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(charCreate.CreateInfo.ClassId);
             if (classEntry == null)
             {
                 Log.outError(LogFilter.Network, 
@@ -899,7 +899,7 @@ namespace Game
                                 pCurrChar.SendMovieStart(playerInfo.introMovieId.Value);
                             else if (playerInfo.introSceneId.HasValue)
                                 pCurrChar.GetSceneMgr().PlayScene(playerInfo.introSceneId.Value);
-                            else if (CliDB.ChrClassesStorage.TryGetValue((int)pCurrChar.GetClass(), out ChrClassesRecord chrClassesRecord) && chrClassesRecord.CinematicSequenceID != 0)
+                            else if (CliDB.ChrClassesStorage.TryGetValue(pCurrChar.GetClass(), out ChrClassesRecord chrClassesRecord) && chrClassesRecord.CinematicSequenceID != 0)
                                 pCurrChar.SendCinematicStart(chrClassesRecord.CinematicSequenceID);
                             else if (CliDB.ChrRacesStorage.TryGetValue((int)pCurrChar.GetRace(), out ChrRacesRecord chrRacesRecord) && chrRacesRecord.CinematicSequenceID != 0)
                                 pCurrChar.SendCinematicStart(chrRacesRecord.CinematicSequenceID);
@@ -2328,7 +2328,7 @@ namespace Game
             if (GetPlayer().m_activePlayerData.XP != 0)
                 return;
 
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)GetPlayer().GetClass());
+            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(GetPlayer().GetClass());
             if (classEntry != null)
             {
                 ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)GetPlayer().GetRace());

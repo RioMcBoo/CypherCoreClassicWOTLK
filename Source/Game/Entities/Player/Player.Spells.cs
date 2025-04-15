@@ -2922,11 +2922,11 @@ namespace Game.Entities
             // and we can't use original map for safe iterative with visit each spell at loop end
             var smap = GetSpellMap();
 
-            uint family;
+            SpellFamilyNames family;
 
             if (myClassOnly)
             {
-                ChrClassesRecord clsEntry = CliDB.ChrClassesStorage.LookupByKey((int)GetClass());
+                ChrClassesRecord clsEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
                 if (clsEntry == null)
                     return;
                 family = clsEntry.SpellClassSet;
@@ -2946,7 +2946,7 @@ namespace Game.Entities
                         continue;
 
                     // skip other spell families
-                    if ((uint)spellInfo.SpellFamilyName != family)
+                    if (spellInfo.SpellFamilyName != family)
                         continue;
 
                     // skip broken spells

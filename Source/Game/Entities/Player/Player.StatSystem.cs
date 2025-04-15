@@ -591,7 +591,7 @@ namespace Game.Entities
             float baseValue;
             float level = GetLevel();
 
-            var entry = CliDB.ChrClassesStorage.LookupByKey((int)GetClass());
+            var entry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
 
             float strengthValue = Math.Max(GetStat(Stats.Strength) * entry.AttackPowerPerStrength, 0.0f);
             float agilityValue = Math.Max(GetStat(Stats.Agility) * entry.AttackPowerPerAgility, 0.0f);
@@ -709,7 +709,7 @@ namespace Game.Entities
             float baseValue;
             float level = GetLevel();
 
-            var entry = CliDB.ChrClassesStorage.LookupByKey((int)GetClass());
+            var entry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
 
             float agilityValue = Math.Max(GetStat(Stats.Agility) * entry.RangedAttackPowerPerAgility, 0.0f);
             float classSpecificBonus = GetClass() switch

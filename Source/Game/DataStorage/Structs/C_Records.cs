@@ -163,13 +163,14 @@ namespace Game.DataStorage
         public byte RangedAttackPowerPerAgility;
         public byte AttackPowerPerAgility;
         public byte AttackPowerPerStrength;
-        public byte SpellClassSet;
+        private byte _spellClassSet;
         public byte RolesMask;
         public byte DamageBonusStat;
         public byte HasRelicSlot;
 
         #region Properties
         public PowerType DisplayPower => (PowerType)_displayPower;
+        public SpellFamilyNames SpellClassSet => (SpellFamilyNames)_spellClassSet;
         #endregion
 
         #region Helpers

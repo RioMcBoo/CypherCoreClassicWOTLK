@@ -290,11 +290,11 @@ namespace Game.Chat.Commands
             [Command("trainer", CypherStrings.CommandLearnMyTrainerHelp, RBACPermissions.CommandLearnAllMySpells)]
             static bool HandleLearnMySpellsCommand(CommandHandler handler)
             {
-                ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)handler.GetPlayer().GetClass());
+                ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(handler.GetPlayer().GetClass());
                 if (classEntry == null)
                     return true;
 
-                uint family = classEntry.SpellClassSet;
+                var family = classEntry.SpellClassSet;
 
                 foreach (var (_, entry) in CliDB.SkillLineAbilityStorage)
                 {
@@ -311,7 +311,7 @@ namespace Game.Chat.Commands
                         continue;
 
                     // skip other spell families
-                    if ((uint)spellInfo.SpellFamilyName != family)
+                    if (spellInfo.SpellFamilyName != family)
                         continue;
 
                     // skip broken spells

@@ -825,7 +825,7 @@ namespace Scripts.Spells.Items
 
             int model = 0;
             Gender gender = target.GetGender();
-            ChrClassesRecord chrClass = CliDB.ChrClassesStorage.LookupByKey((int)target.GetClass());
+            ChrClassesRecord chrClass = CliDB.ChrClassesStorage.LookupByKey(target.GetClass());
             if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Plate)) != 0)
                 model = gender == Gender.Male ? DireBrewModels.PlateMale : DireBrewModels.PlateFemale;
             else if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Mail)) != 0)
