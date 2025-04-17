@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MultiMap\CustomCollections.csproj" />
+    <ProjectReference Include="..\CustomCollections\CustomCollections.csproj" />
   </ItemGroup>
   
 </Project>
