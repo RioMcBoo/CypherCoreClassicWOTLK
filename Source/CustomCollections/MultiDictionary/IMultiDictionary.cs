@@ -3,24 +3,24 @@
 
 namespace System.Collections.Generic
 {
-    public interface IMultiMap<TKey, TValue> : IReadOnlyMultiMap<TKey, TValue>
+    public interface IMultiDictionary<TKey, TValue> : IReadOnlyMultiDictionary<TKey, TValue>
     {
         void Add(TKey key, TValue value);
         void AddRange(TKey key, IEnumerable<TValue> valueCollection);
         void Add(KeyValuePair<TKey, TValue> item);
 
-        List<TValue> Extract(TKey key);
+        BinarySortedList<TValue> Extract(TKey key);
         bool Remove(TKey key);
         bool Remove(TKey key, TValue value);
         bool Remove(KeyValuePair<TKey, TValue> item);
 
-        void SetValues(TKey key, List<TValue> valueList);
-        MultiMapEditableValuesByKey<TKey, TValue> GetValuesToChange(TKey key);
+        void SetValues(TKey key, BinarySortedList<TValue> valueList);
+        MultiDictionaryEditableValuesByKey<TKey, TValue> GetValuesToChange(TKey key);
 
         void Clear();
     }
 
-    public interface IReadOnlyMultiMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+    public interface IReadOnlyMultiDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
         bool ContainsKey(TKey key);
         bool Contains(TKey key, TValue item);

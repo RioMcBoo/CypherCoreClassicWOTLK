@@ -3,7 +3,7 @@
 
 namespace System.Collections.Generic
 {
-    public sealed class MultiMapEditableValuesByKey<TKey, TValue> : IList<TValue>
+    public sealed class MultiMapEditableValuesByKey<TKey, TValue> : IList<TValue>, ICollection<TValue>
     {
         private MultiMap<TKey, TValue> _map;
         private TKey _key;

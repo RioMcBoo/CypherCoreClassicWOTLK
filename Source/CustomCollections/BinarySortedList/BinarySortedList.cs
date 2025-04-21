@@ -1,9 +1,10 @@
-﻿
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 namespace System.Collections.Generic
 {
     [Flags]
-    public enum SortedArrayOptions
+    public enum BinarySortedListOptions
     {
         None = 0,
         DisallowDuplicates = 1,
@@ -11,7 +12,14 @@ namespace System.Collections.Generic
         DisallowResize = 4,
     }
 
-    public class SortedArray<T> : IReadOnlyList<T>, IReadOnlyCollection<T>
+    public enum FindIndexOptions
+    {
+        Random = 0,
+        First = 1,
+        Last = 2,
+    }
+
+    public class BinarySortedList<T> : IReadOnlyList<T>, IReadOnlyCollection<T>, ICollection<T>
     {
         private enum ShiftOperation
         {
@@ -29,6 +37,8 @@ namespace System.Collections.Generic
         private bool CanMoveLeft => LeftBuffer > 0;
         private bool CanMoveRight => RightBuffer > 0;
 
+        public bool IsReadOnly => false;
+
         private int VIndex(int storageIndex) => storageIndex - _zeroIndex;
         private int SIndex(int virtualIndex) => virtualIndex + _zeroIndex;
 
@@ -37,36 +47,51 @@ namespace System.Collections.Generic
         private int _zeroIndex;
         private int _count;
         private int _version;
+        BinarySortedListOptions _options = BinarySortedListOptions.None;
         private readonly IComparer<T> _comparer;
 
-        public SortedArray(int capacity = DefaultCapacity, IComparer<T> comparer = null)
+        public BinarySortedList(int capacity = DefaultCapacity, BinarySortedListOptions options = BinarySortedListOptions.None, IComparer<T> comparer = null)
         {
             _storage = new T[capacity];
             _zeroIndex = CalculateZeroIndex(capacity, 0);
             _comparer = comparer;
+            _options = options;
+            CheckOptions(ref _options);
         }
 
-        public SortedArray(IEnumerable<T> initialValues, SortedArrayOptions options = SortedArrayOptions.None, IComparer<T> comparer = null)
+        public BinarySortedList(IEnumerable<T> initialValues, BinarySortedListOptions options = BinarySortedListOptions.None, IComparer<T> comparer = null)
         {
             _storage = new T[DefaultCapacity];
             _zeroIndex = CalculateZeroIndex(DefaultCapacity, 0);
             _comparer = comparer;
+            _options = options;
+            CheckOptions(ref _options);
 
             foreach (var item in initialValues)
             {
-                Add(item, options);
+                Add(item);
             }
         }
 
-        public SortedArray(IReadOnlyCollection<T> initialValues, SortedArrayOptions options = SortedArrayOptions.None, IComparer<T> comparer = null)
+        public BinarySortedList(IReadOnlyCollection<T> initialValues, BinarySortedListOptions options = BinarySortedListOptions.None, IComparer<T> comparer = null)
         {
             _storage = new T[initialValues.Count];
             _zeroIndex = CalculateZeroIndex(initialValues.Count, 0);
             _comparer = comparer;
+            _options = options;
+            CheckOptions(ref _options);
 
             foreach (var item in initialValues)
             {
-                Add(item, options);
+                Add(item);
+            }
+        }
+
+        private void CheckOptions(ref BinarySortedListOptions options)
+        {
+            if ((options & BinarySortedListOptions.DisallowDuplicates) > 0 && (options & BinarySortedListOptions.SkipDuplicates) > 0)
+            {
+                options &= ~BinarySortedListOptions.SkipDuplicates;
             }
         }
 
@@ -104,10 +129,11 @@ namespace System.Collections.Generic
             }
         }
 
-        private int FindInsertPlace(ref T item, int arrayStartIndex, int arrayEndIndex)
+        private int FindIndex(ref T item, int arrayStartIndex, int arrayEndIndex, FindIndexOptions indexOption = FindIndexOptions.Random)
         {
             int lo = arrayStartIndex;
             int hi = arrayEndIndex;
+            int? index = null;
 
             while (lo <= hi)
             {
@@ -123,7 +149,21 @@ namespace System.Collections.Generic
 
                 if (compareResult == 0)
                 {
-                    return i;
+                    index = i;
+
+                    if (indexOption == FindIndexOptions.Random)
+                    {
+                        return i;
+                    }
+
+                    if (indexOption == FindIndexOptions.First)
+                    {
+                        hi = i - 1;
+                    }
+                    else if (indexOption == FindIndexOptions.Last)
+                    {
+                        lo = i + 1;
+                    }
                 }
                 else if (compareResult > 0)
                 {
@@ -133,6 +173,11 @@ namespace System.Collections.Generic
                 {
                     lo = i + 1;
                 }
+            }
+
+            if (index.HasValue)
+            {
+                return index.Value;
             }
 
             return ~lo;
@@ -219,42 +264,59 @@ namespace System.Collections.Generic
             _zeroIndex = newZeroIndex;
         }
 
-        public int Find(T item) => Find(ref item);
+        public int FindRandomIndex(T item) => FindRandomIndex(ref item);
+        public int FindFirstIndex(T item) => FindFirstIndex(ref item);
+        public int FindLastIndex(T item) => FindLastIndex(ref item);
 
-        public int Find(ref T item)
+        public int FindRandomIndex(ref T item) => FindIndex(ref item, FindIndexOptions.Random);
+        public int FindFirstIndex(ref T item) => FindIndex(ref item, FindIndexOptions.First);
+        public int FindLastIndex(ref T item) => FindIndex(ref item, FindIndexOptions.Last);
+
+        public int FindIndex(T item, FindIndexOptions findOption) => FindIndex(ref item, findOption);
+        public int FindIndex(ref T item, FindIndexOptions findOption)
         {
             if (_count == 0)
                 return ~_count;
 
             if (_count == 1)
-                return FindInsertPlace(ref item, 0, 0);
+                return FindIndex(ref item, 0, 0);
 
             int findResult;
             int currentIndex;
+            int startIndex = 0;
+            int endIndex = Count - 1;
 
-            // Try find item in the very low edge
-            currentIndex = 0;
-            findResult = FindInsertPlace(ref item, currentIndex, currentIndex);
-
-            if (findResult > -1 || findResult == ~currentIndex)
+            if (findOption != FindIndexOptions.Last)
             {
-                return findResult;
+                // Try find item in the very low edge
+                currentIndex = startIndex;
+                startIndex++;
+                findResult = FindIndex(ref item, currentIndex, currentIndex, findOption);
+
+                if (findResult > -1 || findResult == ~currentIndex)
+                {
+                    return findResult;
+                }
             }
 
-            // Try find item in the very high edge
-            currentIndex = Count - 1;
-            findResult = FindInsertPlace(ref item, currentIndex, currentIndex);
-
-            if (findResult > -1 || findResult == ~(currentIndex + 1))
+            if (findOption != FindIndexOptions.First)
             {
-                return findResult;
+                // Try find item in the very high edge
+                currentIndex = endIndex;
+                endIndex--;
+                findResult = FindIndex(ref item, currentIndex, currentIndex, findOption);
+
+                if (findResult > -1 || findResult == ~(currentIndex + 1))
+                {
+                    return findResult;
+                }
             }
 
             // Try find item in the remains
-            return FindInsertPlace(ref item, 1, Count - 2);
+            return FindIndex(ref item, startIndex, endIndex, findOption);
         }
 
-        private ShiftOperation GetOperation(int insertPlace, (int left, int right) parts, SortedArrayOptions options)
+        private ShiftOperation GetOperation(int insertPlace, (int left, int right) parts, BinarySortedListOptions options)
         {
             ShiftOperation operation;
             bool couldWeCenter = (Capacity - Count) >= DefaultCapacity;
@@ -311,27 +373,43 @@ namespace System.Collections.Generic
             return operation;
         }
 
-        public int Add(T item, SortedArrayOptions options = SortedArrayOptions.None) => Add(ref item, options);
-
-        public int Add(ref T item, SortedArrayOptions options = SortedArrayOptions.None)
+        public void Add(T item) => Add(ref item);
+        public void Add(ref T item)
         {
-            _version++;
+            if (TryAdd(ref item, out _))
+            {
+                return;
+            }
+            else
+            {
+                if ((_options & BinarySortedListOptions.DisallowDuplicates) > 0)
+                    throw new ArgumentException("Item already exists in the array", nameof(item));
+            }
+        }
+
+        public bool TryAdd(T item) => TryAdd(ref item, out _);
+        public bool TryAdd(ref T item) => TryAdd(ref item, out _);
+        public bool TryAdd(T item, out int index) => TryAdd(ref item, out index);
+        public bool TryAdd(ref T item, out int index)
+        {
+            _version = unchecked(++_version);
             int currentVersion = _version;
-            int findResult = Find(ref item);
+            int findResult = FindRandomIndex(ref item);
 
             if (findResult > -1)
             {
-                if (options.HasFlag(SortedArrayOptions.DisallowDuplicates))
-                    throw new ArgumentException("Item already exists in the array", nameof(item));
-                else if (options.HasFlag(SortedArrayOptions.SkipDuplicates))
-                    return ~findResult;
+                if ((_options & (BinarySortedListOptions.SkipDuplicates | BinarySortedListOptions.DisallowDuplicates)) > 0)
+                {
+                    index = ~findResult;
+                    return false;
+                }
             }
 
             int insertPlace = findResult < 0 ? ~findResult : findResult;
 
             var parts = GetPartLengths(insertPlace, Count);
 
-            var operation = GetOperation(insertPlace, parts, options);
+            var operation = GetOperation(insertPlace, parts, _options);
 
             switch (operation)
             {
@@ -346,7 +424,7 @@ namespace System.Collections.Generic
                     Center(insertPlace, parts);
                     break;
                 case ShiftOperation.Resize:
-                    if (options.HasFlag(SortedArrayOptions.DisallowResize))
+                    if (_options.HasFlag(BinarySortedListOptions.DisallowResize))
                         throw new InvalidOperationException("Can't resize array");
                     else
                         Resize(insertPlace, parts, Capacity * 2);
@@ -359,7 +437,9 @@ namespace System.Collections.Generic
             if (currentVersion != _version)
                 throw new Exception("SortedArray was changed");
 
-            return findResult;
+            index = findResult;
+
+            return true;
         }
 
         public T this[int index]
@@ -371,9 +451,9 @@ namespace System.Collections.Generic
             }
         }
 
-        public void Remove(int index)
+        public void RemoveAt(int index)
         {
-            _version++;
+            _version = unchecked(++_version);
 
             CheckIndex(index);
 
@@ -419,6 +499,49 @@ namespace System.Collections.Generic
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public void Clear()
+        {
+            _version = unchecked(++_version);
+            _storage = new T[_storage.Length];
+            _count = 0;
+            _zeroIndex = CalculateZeroIndex(_storage.Length, _count);
+        }
+
+        public bool Contains(T item) => Contains(ref item);
+        public bool Contains(ref T item) => FindRandomIndex(ref item) > -1;
+
+        public void CopyTo(T[] array, int arrayIndex = 0)
+        {
+            // Delegate rest of error checking to Array.Copy.
+            Array.Copy(_storage, _zeroIndex, array, arrayIndex, _count);
+        }
+
+        public void CopyTo(int index, T[] array, int arrayIndex, int count)
+        {
+            if (_count - index < count)
+            {
+                throw new ArgumentException("Not enough elements in the source array");
+            }
+
+            // Delegate rest of error checking to Array.Copy.
+            Array.Copy(_storage, SIndex(index), array, arrayIndex, count);
+        }
+
+        public bool Remove(T item) => Remove(ref item);
+        public bool Remove(ref T item)
+        {
+            int index = FindRandomIndex(ref item);
+            if (index > -1)
+            {
+                RemoveAt(index);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
