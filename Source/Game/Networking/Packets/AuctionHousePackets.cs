@@ -581,7 +581,7 @@ namespace Game.Networking.Packets
         public void Initialize(AuctionPosting auction)
         {
             AuctionID = auction.Id;
-            Item = new ItemInstance(auction.Items[0]);
+            Item = new ItemInstance(auction.Item);
             BidAmount = auction.BidAmount;
         }
 

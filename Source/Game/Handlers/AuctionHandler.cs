@@ -482,7 +482,7 @@ namespace Game
                     $"create auction: {item.GetTemplate().GetName()} " +
                     $"(Entry: {item.GetEntry()} Count: {item.GetCount()})");
 
-            auction.Items.Add(item);
+            auction.Item = item;
 
             Log.outInfo(LogFilter.Network, 
                 $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} " +

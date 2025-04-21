@@ -64,17 +64,15 @@ namespace Framework.Constants
         ItemLevel = 0,
         Rarity = 1,
         TimeLeft = 3,
+        Unk_5 = 5,
+        Unk_6 = 6,
         Seller = 7,
         CurrentBidTotal = 8,
+        /// <summary>It's not certain</summary>
+        Name = 9,
         BuyOutPerUnit = 12,
         CurrentBidPerUnit = 13,
         BuyOutTotal = 14,
-
-        Price = 2000,
-        Name,
-        Level,
-        Bid,
-        Buyout,
     }
 
     public enum AuctionHouseSortDirection : byte
