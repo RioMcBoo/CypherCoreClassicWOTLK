@@ -8,7 +8,6 @@ using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
-using System.Collections.Generic;
 
 namespace Game
 {
@@ -32,45 +31,23 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            AuctionHouseFilterMask Filters = AuctionManager.MakeFilters(listItems.Quality, listItems.UsableOnly, listItems.ExactMatch);
+            AuctionHouseFilters Filters = new(listItems);
 
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
-            Log.outDebug(LogFilter.Auctionhouse, 
+            Log.outDebug(LogFilter.Auctionhouse,
                 $"Auctionhouse search ({listItems.Auctioneer}), " +
                 $"searchedname: {listItems.Name}, " +
                 $"levelmin: {listItems.MinLevel}, " +
                 $"levelmax: {listItems.MaxLevel}, " +
                 $"filters: {Filters}");
 
-            AuctionSearchClassFilters classFilters = null;
 
             AuctionListItemsResult listItemsResult = new();
-            if (!listItems.ItemClassFilters.Empty())
-            {
-                classFilters = new();
 
-                foreach (var classFilter in listItems.ItemClassFilters)
-                {
-                    if (!classFilter.SubClassFilters.Empty())
-                    {
-                        foreach (var subClassFilter in classFilter.SubClassFilters)
-                        {
-                            if (classFilter.ItemClass < ItemClass.Max)
-                            {
-                                classFilters.Classes[(int)classFilter.ItemClass].SubclassMask |= (AuctionSearchClassFilters.FilterType)(1 << subClassFilter.ItemSubclass);
-                                if (subClassFilter.ItemSubclass < ItemConst.MaxItemSubclassTotal)
-                                    classFilters.Classes[(int)classFilter.ItemClass].InvTypes[subClassFilter.ItemSubclass] = subClassFilter.InvTypeMask;
-                            }
-                        }
-                    }
-                    else
-                        classFilters.Classes[(int)classFilter.ItemClass].SubclassMask = AuctionSearchClassFilters.FilterType.SkipSubclass;
-                }
-            }
 
-            auctionHouse.BuildListAuctionItems(listItemsResult, _player, listItems.Name, listItems.MinLevel, listItems.MaxLevel, Filters, classFilters,
-                listItems.KnownPets, listItems.KnownPets.Length, (byte)listItems.MaxPetLevel, listItems.Offset, listItems.Sorts, listItems.Sorts.Count);
+            auctionHouse.BuildListAuctionItems(listItemsResult, _player, Filters, listItems.KnownPets, listItems.KnownPets.Length,
+                (byte)listItems.MaxPetLevel, listItems.Offset, listItems.Sorts, listItems.Sorts.Count);
 
             listItemsResult.DesiredDelay = (Milliseconds)throttle.DelayUntilNext.ToMilliseconds();
             SendPacket(listItemsResult);
@@ -253,14 +230,15 @@ namespace Game
                 stmt.SetInt32(3, auction.Id);
                 trans.Append(stmt);
 
-                auction.BidderHistory.Add(player.GetGUID());
-                if (auction.BidderHistory.Contains(player.GetGUID()))
+                if (auction.BidderHistory.Add(player.GetGUID()))
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AUCTION_BIDDER);
                     stmt.SetInt32(0, auction.Id);
                     stmt.SetInt64(1, player.GetGUID().GetCounter());
                     trans.Append(stmt);
                 }
+
+                auctionHouse.AddBidder(auction.Bidder, auction.Id);
 
                 // Not sure if we must send this now.
                 Player owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
@@ -404,7 +382,7 @@ namespace Game
 
             if (sellItem.MinBid > PlayerConst.MaxMoneyAmount || sellItem.BuyoutPrice > PlayerConst.MaxMoneyAmount)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) " +
                     $"attempted to sell item with higher price than max gold amount.");
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.Inventory, throttle.DelayUntilNext, InventoryResult.TooMuchGold);
@@ -414,7 +392,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(sellItem.Auctioneer, NPCFlags1.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WORLD: HandleAuctionSellItem - Unit ({sellItem.Auctioneer}) " +
                     $"not found or you can't interact with him.");
                 return;
@@ -423,7 +401,7 @@ namespace Game
             AuctionHouseRecord auctionHouseEntry = Global.AuctionHouseMgr.GetAuctionHouseEntry(creature.GetFaction());
             if (auctionHouseEntry == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WORLD: HandleAuctionSellItem - Unit ({sellItem.Auctioneer})" +
                     $" has wrong faction.");
                 return;
@@ -477,14 +455,14 @@ namespace Game
             auction.EndTime = auction.StartTime + auctionTime;
 
             if (HasPermission(RBACPermissions.LogGmTrade))
-                Log.outCommand(GetAccountId(), 
+                Log.outCommand(GetAccountId(),
                     $"GM {GetPlayerName()} (Account: {GetAccountId()}) " +
                     $"create auction: {item.GetTemplate().GetName()} " +
                     $"(Entry: {item.GetEntry()} Count: {item.GetCount()})");
 
             auction.Item = item;
 
-            Log.outInfo(LogFilter.Network, 
+            Log.outInfo(LogFilter.Network,
                 $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} " +
                 $"is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
                 $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} " +

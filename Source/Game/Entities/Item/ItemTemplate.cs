@@ -390,6 +390,8 @@ namespace Game.Entities
     [StructLayout(LayoutKind.Explicit)]
     public struct ItemSubClass
     {
+        public static readonly int Max = ItemConst.MaxItemSubclassTotal;
+        public ItemSubClassMask GetItemSubClassMask() => new ItemSubClassMask(this);
         [FieldOffset(0)]
         public int data;
         [FieldOffset(0)]
@@ -445,6 +447,10 @@ namespace Game.Entities
     [StructLayout(LayoutKind.Explicit)]
     public struct ItemSubClassMask
     {
+        public static readonly ItemSubClassMask AllPermanent = new ItemSubClassMask(-1);
+        public static readonly ItemSubClassMask None = new ItemSubClassMask(0);
+        public bool HasItemSubClass(ItemSubClass subClass) => (data & new ItemSubClassMask(subClass)) != 0;
+
         [FieldOffset(0)]
         public int data;
         [FieldOffset(0)]
@@ -491,6 +497,11 @@ namespace Game.Entities
         public ItemSubClassMask(int data = default)
         {
             this.data = data;
+        }
+
+        public ItemSubClassMask(ItemSubClass subClass)
+        {
+            this.data = 1 << subClass;
         }
 
         public static implicit operator ItemSubClassMask(int data) { return new ItemSubClassMask(data); }

@@ -201,14 +201,44 @@ namespace System
             return (LocaleMask)(1 << (ushort)locale);
         }
 
-        public static bool HasSchool(this SpellSchoolMask mask, SpellSchools _school)
+        public static bool HasSchool(this SpellSchoolMask mask, SpellSchools school)
         {
-            return (mask & _school.GetSpellSchoolMask()) != 0;
+            return (mask & school.GetSpellSchoolMask()) != 0;
         }
 
         public static SpellSchoolMask GetSpellSchoolMask(this SpellSchools school)
         {
             return (SpellSchoolMask)(1 << (int)school);
+        }
+
+        public static ItemQualityMask GetItemQualityMask(this ItemQuality quality)
+        {
+            return (ItemQualityMask)(1 << (int)quality);
+        }
+
+        public static ItemClassMask GetItemClassMask(this ItemClass @class)
+        {
+            return (ItemClassMask)(1 << (int)@class);
+        }
+
+        public static bool HasItemClass(this ItemClassMask mask, ItemClass @class)
+        {
+            return (mask & @class.GetItemClassMask()) != 0;
+        }
+
+        public static InventoryTypeMask GetInventoryTypeMask(this InventoryType inventoryType)
+        {
+            return (InventoryTypeMask)(1L << (int)inventoryType);
+        }
+
+        public static bool HasInventoryType(this InventoryTypeMask mask, InventoryType inventoryType)
+        {
+            return (mask & inventoryType.GetInventoryTypeMask()) != 0;
+        }
+
+        public static bool HasQuality(this ItemQualityMask mask, ItemQuality quality)
+        {
+            return (mask & quality.GetItemQualityMask()) != 0;
         }
 
         public static SpellSchools GetFirstSchool(this SpellSchoolMask mask)

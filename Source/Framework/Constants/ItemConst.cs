@@ -634,6 +634,49 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
+    public enum InventoryTypeMask : long
+    {
+        None = 0,
+        NonEquip = 1L << InventoryType.NonEquip,
+        Head = 1L << InventoryType.Head,
+        Neck = 1L << InventoryType.Neck,
+        Shoulders = 1L << InventoryType.Shoulders,
+        Body = 1L << InventoryType.Body,
+        Chest = 1L << InventoryType.Chest,
+        Waist = 1L << InventoryType.Waist,
+        Legs = 1L << InventoryType.Legs,
+        Feet = 1L << InventoryType.Feet,
+        Wrists = 1L << InventoryType.Wrists,
+        Hands = 1L << InventoryType.Hands,
+        Finger = 1L << InventoryType.Finger,
+        Trinket = 1L << InventoryType.Trinket,
+        Weapon = 1L << InventoryType.Weapon,
+        Shield = 1L << InventoryType.Shield,
+        Ranged = 1L << InventoryType.Ranged,
+        Cloak = 1L << InventoryType.Cloak,
+        Weapon2Hand = 1L << InventoryType.Weapon2Hand,
+        Bag = 1L << InventoryType.Bag,
+        Tabard = 1L << InventoryType.Tabard,
+        Robe = 1L << InventoryType.Robe,
+        WeaponMainhand = 1L << InventoryType.WeaponMainhand,
+        WeaponOffhand = 1L << InventoryType.WeaponOffhand,
+        Holdable = 1L << InventoryType.Holdable,
+        Ammo = 1L << InventoryType.Ammo,
+        Thrown = 1L << InventoryType.Thrown,
+        RangedRight = 1L << InventoryType.RangedRight,
+        Quiver = 1L << InventoryType.Quiver,
+        Relic = 1L << InventoryType.Relic,
+        ProfessionTool = 1L << InventoryType.ProfessionTool,
+        ProfessionGear = 1L << InventoryType.ProfessionGear,
+        EquipableSpellOffensive = 1L << InventoryType.EquipableSpellOffensive,
+        EquipableSpellUtility = 1L << InventoryType.EquipableSpellUtility,
+        EquipableSpellDefensive = 1L << InventoryType.EquipableSpellDefensive,
+        EquipableSpellMobility = 1L << InventoryType.EquipableSpellMobility,
+        AllPermanent = -1,
+    }
+
+
     public enum VisibleEquipmentSlot
     {
         Head = 0,
@@ -1046,7 +1089,7 @@ namespace Framework.Constants
         FishingManual = 9,
         JewelcraftingRecipe = 10,
         InscriptionTechnique = 11,
-        Max = 12
+        Max
     }
 
     [Flags]
@@ -1070,7 +1113,7 @@ namespace Framework.Constants
     public enum ItemSubClassMoney
     {
         Money = 0,  // Obsolete
-        Max = 1
+        Max
     }
 
     [Flags]
@@ -1086,7 +1129,7 @@ namespace Framework.Constants
         Quiver1 = 1, // Obsolete
         Quiver = 2,
         AmmoPouch = 3,
-        Max = 4,
+        Max
     }
 
     [Flags]
@@ -1104,7 +1147,7 @@ namespace Framework.Constants
         Quest = 0,
         Unk3 = 3, // 1 Item (33604)
         Unk8 = 8, // 2 Items (37445, 49700)
-        Max = 9
+        Max
     }
 
     [Flags]
@@ -1120,7 +1163,7 @@ namespace Framework.Constants
     {
         Key = 0,
         Lockpick = 1,
-        Max = 2
+        Max
     }
 
     [Flags]
@@ -1134,7 +1177,7 @@ namespace Framework.Constants
     public enum ItemSubClassPermanent
     {
         Permanent = 0,
-        Max = 1
+        Max
     }
 
     [Flags]
@@ -1183,7 +1226,7 @@ namespace Framework.Constants
         Monk = 10,
         Druid = 11,
         DemonHunter = 12,
-        Max = 13
+        Max
     }
 
     [Flags]
@@ -1207,7 +1250,7 @@ namespace Framework.Constants
     public enum ItemSubclassBattlePet
     {
         BattlePet = 0,
-        Max = 1
+        Max
     }
 
     [Flags]
@@ -1220,7 +1263,7 @@ namespace Framework.Constants
     public enum ItemSubclassWowToken
     {
         WowToken = 0,
-        Max = 1
+        Max
     }
 
     [Flags]
@@ -1272,15 +1315,15 @@ namespace Framework.Constants
     public enum ItemQuality : sbyte
     {
         None = -1,
-        Poor = 0,                   //Grey
-        Normal = 1,                 //White
-        Uncommon = 2,               //Green
-        Rare = 3,                   //Blue
-        Epic = 4,                   //Purple
-        Legendary = 5,              //Orange
-        Artifact = 6,               //Light Yellow
+        Poor = 0,                   // Grey
+        Normal = 1,                 // White
+        Uncommon = 2,               // Green
+        Rare = 3,                   // Blue
+        Epic = 4,                   // Purple
+        Legendary = 5,              // Orange
+        Artifact = 6,               // Light Yellow
         Heirloom = 7,               // Light Blue
-        Max = 8
+        Max
     }
 
     [Flags]
@@ -1294,7 +1337,8 @@ namespace Framework.Constants
         Epic = 1 << ItemQuality.Epic,                 // Purple
         Legendary = 1 << ItemQuality.Legendary,       // Orange
         Artifact = 1 << ItemQuality.Artifact,         // Light Yellow
-        Heirloom = 1 << ItemQuality.Heirloom          // Light Blue
+        Heirloom = 1 << ItemQuality.Heirloom,         // Light Blue
+        AllPermanent = -1,
     }
 
     [Flags]

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class AuctionListItems : ClientPacket
+    public class AuctionListItems : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public int Offset;
@@ -22,7 +22,7 @@ namespace Game.Networking.Packets
         public string Name;
         public bool UsableOnly;
         public bool ExactMatch;
-        public Array<AuctionListFilterClass> ItemClassFilters = new(1);
+        public Array<AuctionListFilterClass> ItemClassFilters = new((int)ItemClass.Max);
         public Array<AuctionSortDef> Sorts = new(8);
 
         public AuctionListItems(WorldPacket packet) : base(packet) { }
@@ -69,7 +69,11 @@ namespace Game.Networking.Packets
 
             int sortDataSize = _worldPacket.ReadInt32();
             for (var i = 0; i < sortsCount; ++i)
-                Sorts[i] = new AuctionSortDef(_worldPacket);
+            {
+                var current = new AuctionSortDef(_worldPacket);
+                Cypher.Assert(!Sorts.Contains(current));
+                Sorts.Add(current);
+            }
         }
     }
 
@@ -119,8 +123,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Auctioneer = _worldPacket.ReadPackedGuid();
-            Offset = _worldPacket.ReadInt32();
-            
+            Offset = _worldPacket.ReadInt32();            
 
             int auctionIDCount = _worldPacket.ReadBits<int>(7);
             if (_worldPacket.HasBit())
@@ -369,7 +372,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionOutbidNotification : ServerPacket
-    {    
+    {
         public AuctionBidderNotification Info;
         public long BidAmount;
         public long MinIncrement;
@@ -425,11 +428,11 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionWonNotification : ServerPacket
+    class AuctionWonBidNotification : ServerPacket
     {  
-        public AuctionBidderNotification Info;
+        public AuctionWonNotification Info;
 
-        public AuctionWonNotification() : base(ServerOpcodes.AuctionWonNotification) { }
+        public AuctionWonBidNotification() : base(ServerOpcodes.AuctionWonNotification) { }
 
         public override void Write()
         {
@@ -516,11 +519,11 @@ namespace Game.Networking.Packets
     public struct AuctionListFilterSubClass
     {
         public ItemSubClass ItemSubclass;
-        public ulong InvTypeMask;
+        public InventoryTypeMask InvTypeMask;
 
         public AuctionListFilterSubClass(WorldPacket data)
         {
-            InvTypeMask = data.ReadUInt64();
+            InvTypeMask = (InventoryTypeMask)data.ReadUInt64();
             ItemSubclass = data.ReadInt32();
         }
     }
@@ -739,6 +742,30 @@ namespace Game.Networking.Packets
 
             if (AuctionBucketKey != null)
                 AuctionBucketKey.Write(data);
+        }
+    }
+
+    struct AuctionWonNotification
+    {
+        public AuctionHouseId AuctionHouseId;
+        public int AuctionId;
+        public ObjectGuid Bidder;
+        public ItemInstance Item;
+
+        public void Initialize(AuctionHouseId auctionHouseId, AuctionPosting auction, Item item)
+        {
+            AuctionHouseId = auctionHouseId;
+            AuctionId = auction.Id;
+            Item = new ItemInstance(item);
+            Bidder = auction.Bidder;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32((int)AuctionHouseId);
+            data.WriteInt32(AuctionId);
+            data.WritePackedGuid(Bidder);
+            Item.Write(data);
         }
     }
 
