@@ -212,12 +212,13 @@ namespace Game
             else
                 auction.ServerFlags &= ~AuctionPostingServerFlag.GmLogBuyer;
 
-            if (canBuyout && placeBid.BidAmount == auction.BuyoutPrice)
+            bool auctionSold = canBuyout && placeBid.BidAmount == auction.BuyoutPrice;
+
+            if (auctionSold)
             {
                 // buyout
                 auctionHouse.SendAuctionSold(auction, null, trans);
                 auctionHouse.SendAuctionWon(auction, player, trans);
-
                 auctionHouse.RemoveAuction(trans, auction);
             }
             else
@@ -254,7 +255,8 @@ namespace Game
                     if (success)
                     {
                         GetPlayer().UpdateCriteria(CriteriaType.HighestAuctionBid, placeBid.BidAmount);
-                        SendAuctionCommandResult(placeBid.AuctionID, AuctionCommand.PlaceBid, AuctionResult.Ok, throttle.DelayUntilNext);
+                        if (!auctionSold)
+                            SendAuctionCommandResult(placeBid.AuctionID, AuctionCommand.PlaceBid, AuctionResult.Ok, throttle.DelayUntilNext);
                     }
                     else
                         SendAuctionCommandResult(placeBid.AuctionID, AuctionCommand.PlaceBid, AuctionResult.DatabaseError, throttle.DelayUntilNext);
