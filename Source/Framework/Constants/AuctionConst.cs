@@ -84,9 +84,8 @@ namespace Framework.Constants
 
     public enum AuctionHouseId
     {
-        Neutral = 1,
         Alliance = 2,
         Horde = 6,
-        Goblins = 7
+        Neutral = 7,
     }
 }

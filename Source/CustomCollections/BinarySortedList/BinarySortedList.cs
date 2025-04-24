@@ -50,6 +50,15 @@ namespace System.Collections.Generic
         BinarySortedListOptions _options = BinarySortedListOptions.None;
         private readonly IComparer<T> _comparer;
 
+        public BinarySortedList(BinarySortedListOptions options, IComparer<T> comparer = null)
+        {
+            _storage = new T[DefaultCapacity];
+            _zeroIndex = CalculateZeroIndex(DefaultCapacity, 0);
+            _comparer = comparer;
+            _options = options;
+            CheckOptions(ref _options);
+        }
+
         public BinarySortedList(int capacity = DefaultCapacity, BinarySortedListOptions options = BinarySortedListOptions.None, IComparer<T> comparer = null)
         {
             _storage = new T[capacity];
@@ -314,6 +323,64 @@ namespace System.Collections.Generic
 
             // Try find item in the remains
             return FindIndex(ref item, startIndex, endIndex, findOption);
+        }
+
+        public T? Find(Predicate<T> match)
+        {
+            if (match == null)
+            {
+                throw new ArgumentNullException(nameof(match));
+            }
+
+            for (int i = 0; i < _count; i++)
+            {
+                T item = _storage[SIndex(i)];
+                if (match(item))
+                {
+                    return item;
+                }
+            }
+
+            return default;
+        }
+
+        public T? FindLast(Predicate<T> match)
+        {
+            if (match == null)
+            {
+                throw new ArgumentNullException(nameof(match));
+            }
+
+            for (int i = _count - 1; i >= 0; i--)
+            {
+                T item = _storage[SIndex(i)];
+                if (match(item))
+                {
+                    return item;
+                }
+            }
+
+            return default;
+        }
+
+        public List<T> FindAll(Predicate<T> match)
+        {
+            if (match == null)
+            {
+                throw new ArgumentNullException(nameof(match));
+            }
+
+            List<T> list = new List<T>();
+            for (int i = _count - 1; i >= 0; i--)
+            {
+                T item = _storage[SIndex(i)];
+                if (match(item))
+                {
+                    list.Add(item);
+                }
+            }
+
+            return list;
         }
 
         private ShiftOperation GetOperation(int insertPlace, (int left, int right) parts, BinarySortedListOptions options)

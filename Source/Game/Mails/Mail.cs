@@ -138,10 +138,10 @@ namespace Game.Mails
             m_stationery = MailStationery.Default; 
         }
 
-        public MailSender(AuctionHouseObject sender)
+        public MailSender(AuctionHouseId sender)
         {
             m_messageType = MailMessageType.Auction;
-            m_senderId = (long)sender.GetAuctionHouseId();
+            m_senderId = (long)sender;
             m_stationery = MailStationery.Auction;
         }
 

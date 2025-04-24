@@ -45,7 +45,6 @@ namespace Game
 
             AuctionListItemsResult listItemsResult = new();
 
-
             auctionHouse.BuildListAuctionItems(listItemsResult, _player, Filters, listItems.KnownPets, listItems.KnownPets.Length,
                 (byte)listItems.MaxPetLevel, listItems.Offset, listItems.Sorts, listItems.Sorts.Count);
 
@@ -148,7 +147,8 @@ namespace Game
             AuctionPosting auction = auctionHouse.GetAuction(placeBid.AuctionID);
             if (auction == null)
             {
-                SendAuctionCommandResult(placeBid.AuctionID, AuctionCommand.PlaceBid, AuctionResult.ItemNotFound, throttle.DelayUntilNext);
+                auctionHouse.UpdateSearchSession(_player, placeBid.AuctionID);
+                SendAuctionCommandResult(placeBid.AuctionID, AuctionCommand.PlaceBid, AuctionResult.ItemNotFound, throttle.DelayUntilNext);                
                 return;
             }
 
@@ -239,7 +239,7 @@ namespace Game
                     trans.Append(stmt);
                 }
 
-                auctionHouse.AddBidder(auction.Bidder, auction.Id);
+                auctionHouse.AddBidder(auction.Bidder, auction);
 
                 // Not sure if we must send this now.
                 Player owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
@@ -318,6 +318,7 @@ namespace Game
             // Now remove the auction
             player.SaveInventoryAndGoldToDB(trans);
             auctionHouse.RemoveAuction(trans, auction);
+
             AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
             {
                 if (GetPlayer() != null && GetPlayer().GetGUID() == _player.GetGUID())
@@ -470,10 +471,10 @@ namespace Game
                 $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} " +
                 $"with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} " +
                 $"and with time {(Seconds)auctionTime} (in sec) " +
-                $"in auctionhouse {auctionHouse.GetAuctionHouseId()}");
+                $"in auctionhouse {auctionHouse.Id}");
 
             // Add to pending auctions, or fail with insufficient funds error
-            if (!Global.AuctionHouseMgr.PendingAuctionAdd(_player, auctionHouse.GetAuctionHouseId(), auctionId, auction.Deposit))
+            if (!Global.AuctionHouseMgr.PendingAuctionAdd(_player, auction))
             {
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.NotEnoughMoney, throttle.DelayUntilNext);
                 return;
