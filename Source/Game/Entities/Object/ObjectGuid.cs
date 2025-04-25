@@ -769,7 +769,7 @@ namespace Game.Entities
 
         static string FormatPlayer(HighGuid typeName, ObjectGuid guid)
         {
-            return $"{typeName}-{guid.GetRealmId()}-0x{guid.GetLowValue():X16}";
+            return $"{typeName}-{guid.GetRealmId()}-{guid.GetLowValue():X16}";
         }
 
         static ObjectGuid ParsePlayer(HighGuid type, string guidString)
