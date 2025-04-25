@@ -583,6 +583,7 @@ namespace Game
                 if (m.state == MailState.Deleted || LoopTime.ServerTime < m.deliver_time)
                     continue;
 
+                response.TotalNumRecords++;
                 // max. 100 mails can be sent
                 if (response.Mails.Count < 100)
                     response.Mails.Add(new MailListEntry(m, player));
