@@ -557,7 +557,7 @@ namespace Game
     public class AuctionHouseObject
     {
         BinarySortedList<AuctionPosting> _itemsByAuctionId = new(BinarySortedListOptions.DisallowDuplicates); // default is sorted by auctionId
-        BinarySortedList<AuctionPosting> _removedAuctionsCache = new(BinarySortedListOptions.DisallowDuplicates, new AuctionPosting.RemovedAuctionSorter());
+        BinarySortedList<AuctionPosting> _removedAuctionsCache = new(comparer: new AuctionPosting.RemovedAuctionSorter());
 
         MultiMap<ObjectGuid, AuctionPosting> _playerOwnedAuctions = new();
         MultiMap<ObjectGuid, AuctionPosting> _playerBidderAuctions = new();
@@ -727,29 +727,9 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
         }
 
-        IReadOnlyCollection<AuctionPosting> GetPage(BinarySortedList<AuctionPosting> list, int offset, int count, int limit = -1)
-        {
-            limit = limit < 0 ? list.Count : limit;
-            limit = limit < list.Count ? limit : list.Count;
+        static IReadOnlyCollection<AuctionPosting> EmptyPage = new List<AuctionPosting>(0);
 
-            int remains = limit - offset;
-
-            if (remains > 0)
-            {
-                if (remains > count)
-                    remains = count;
-
-                AuctionPosting[] page = new AuctionPosting[remains];
-                list.CopyTo(offset, page, 0, remains);
-                return page;
-            }
-
-            return EmptyPage;
-        }
-
-        static IReadOnlyCollection<AuctionPosting> EmptyPage => new List<AuctionPosting>(0);
-
-        bool TryGetSavedSearchSessionData(Player player, out IReadOnlyCollection<AuctionPosting> result, out int totalCount, int offset, ServerTime now)
+        bool TryGetSavedSearchSessionData(Player player, out IEnumerable<AuctionPosting> result, out int totalCount, int offset, ServerTime now)
         {
             result = EmptyPage;
             totalCount = 0;
@@ -760,13 +740,11 @@ namespace Game
                 {
                     session.LastBrowseTime = now;
 
-                    result = GetPage(session.History, offset, SharedConst.AuctionListItemsMax, session.Limit);
-                                        
-                    if (result != null)
-                    {
-                        totalCount = session.History.Count;
-                        return true;
-                    }
+                    AuctionPaginator paginator = new AuctionPaginator(session.History, session.Limit);
+                    result = paginator.GetPage(offset);
+                    totalCount = paginator.GetTotalCount();
+
+                    return true;
                 }
             }
 
@@ -799,7 +777,7 @@ namespace Game
                 //knownPetSpecies.resize(CliDB.BattlePetSpeciesStorage.GetNumRows());
             }*/
 
-            IReadOnlyCollection<AuctionPosting> result = EmptyPage;
+            IEnumerable<AuctionPosting> result = EmptyPage;
             int totalCount = 0;
             int limit = -1;
 
@@ -807,8 +785,9 @@ namespace Game
             {
                 // If filters are not used, we will ignore sorting, because it makes no sense without applying a filter.
                 // And then we can directly pass paginated at least all elements at once without caching the search.
-                result = GetPage(_itemsByAuctionId, offset, SharedConst.AuctionListItemsMax);
-                totalCount = _itemsByAuctionId.Count;
+                AuctionPaginator paginator = new AuctionPaginator(_itemsByAuctionId);
+                result = paginator.GetPage(offset);
+                totalCount = paginator.GetTotalCount();
             }
             else if (!TryGetSavedSearchSessionData(player, out result, out totalCount, offset, now))
             {
@@ -816,7 +795,6 @@ namespace Game
                 BinarySortedList<AuctionPosting> searchResult = new(BinarySortedListOptions.DisallowDuplicates, sorter);
 
                 ItemTemplate itemChain = _itemsByAuctionId.First().Item.GetTemplate();
-                int alreadyAdded = 0;
 
                 foreach (var auction in _itemsByAuctionId)
                 {
@@ -826,7 +804,7 @@ namespace Game
 
                     // If only one type of item is found with the current filters,
                     // then we should not limit the maximum number since there is no way to narrow the search
-                    if (itemChain == null && alreadyAdded >= SharedConst.AuctionBrowseItemsMax)
+                    if (itemChain == null && searchResult.Count >= SharedConst.AuctionBrowseItemsMax)
                     {
                         limit = SharedConst.AuctionBrowseItemsMax;
                         break;
@@ -925,7 +903,7 @@ namespace Game
 
                     if (filters.UsableOnly)
                     {
-                        if (player.CanUseItem(itemTemplate) != InventoryResult.Ok)
+                        if (player.CanUseItem(auction.Item) != InventoryResult.Ok)
                             continue;
                     }
 
@@ -935,18 +913,19 @@ namespace Game
                     //}
 
                     searchResult.Add(auction);
-                    alreadyAdded++;
                 }
 
-                result = GetPage(searchResult, offset, SharedConst.AuctionListItemsMax, limit);
-                totalCount = searchResult.Count;
+                AuctionPaginator paginator = new AuctionPaginator(searchResult, limit);
+                result = paginator.GetPage(offset);                
+                totalCount = paginator.GetTotalCount();
+
                 SaveSearchSession(player, searchResult, limit, now);
             }
 
             foreach (var resultAuction in result)
             {
                 AuctionItem auctionItem = new();
-                resultAuction.BuildAuctionItem(auctionItem, true, false, resultAuction.OwnerAccount != player.GetSession().GetAccountGUID(), resultAuction.Bidder.IsEmpty());
+                resultAuction.BuildAuctionItem(auctionItem, false, resultAuction.OwnerAccount != player.GetSession().GetAccountGUID(), resultAuction.Bidder.IsEmpty());
                 auctionItemsResult.Items.Add(auctionItem);
             }
 
@@ -968,7 +947,7 @@ namespace Game
             foreach (var auction in _playerBidderAuctions[player.GetGUID()])
             {
                 AuctionItem auctionItem = new();
-                auction.BuildAuctionItem(auctionItem, true, true, true, false);
+                auction.BuildAuctionItem(auctionItem, true, true, false);
                 listBidderItemsResult.Items.Add(auctionItem);
             }
         }
@@ -980,7 +959,7 @@ namespace Game
             foreach (var auction in _playerOwnedAuctions[player.GetGUID()])
             {
                 AuctionItem auctionItem = new();
-                auction.BuildAuctionItem(auctionItem, true, true, false, false);
+                auction.BuildAuctionItem(auctionItem, true, false, false);
                 listOwnerItemsResult.Items.Add(auctionItem);
             }
         }
@@ -1012,7 +991,7 @@ namespace Game
             foreach (var auction in _itemsByAuctionId.Skip(keyIndex))
             {
                 AuctionItem auctionItem = new();
-                auction.BuildAuctionItem(auctionItem, true, true, true, auction.Bidder.IsEmpty());
+                auction.BuildAuctionItem(auctionItem, true, true, auction.Bidder.IsEmpty());
                 replicateResponse.Items.Add(auctionItem);
                 if (--count == 0)
                     break;
@@ -1321,7 +1300,7 @@ namespace Game
             return Id.CompareTo(other.Id);
         }
 
-        public void BuildAuctionItem(AuctionItem auctionItem, bool alwaysSendItem, bool sendKey, bool censorServerInfo, bool censorBidInfo)
+        public void BuildAuctionItem(AuctionItem auctionItem, bool sendKey, bool censorServerInfo, bool censorBidInfo)
         {
             // SMSG_AUCTION_LIST_BIDDER_ITEMS_RESULT, SMSG_AUCTION_LIST_ITEMS_RESULT (if not commodity), SMSG_AUCTION_LIST_OWNER_ITEMS_RESULT, SMSG_AUCTION_REPLICATE_RESPONSE (if not commodity)
             //auctionItem.Item - here to unify comment
@@ -1605,6 +1584,43 @@ namespace Game
         }
     }
 
+    public class AuctionPaginator
+    {
+        readonly BinarySortedList<AuctionPosting> List;
+        readonly int Limit;
+
+        public AuctionPaginator(BinarySortedList<AuctionPosting> list, int limit = -1)
+        {
+            List = list;
+
+            limit = limit < 0 ? list.Count : limit;
+            limit = limit < list.Count ? limit : list.Count;
+
+            Limit = limit;
+        }
+
+        public IEnumerable<AuctionPosting> GetPage(int offset, int count = SharedConst.AuctionListItemsMax)
+        {
+            int remains = Limit - offset;
+
+            if (remains > 0)
+            {
+                if (remains > count)
+                    remains = count;
+
+                for (int i = offset; i < offset + remains; ++i)
+                {
+                    yield return List[i];
+                }
+            }
+        }
+
+        public int GetTotalCount()
+        {
+            return Limit;
+        }
+    }
+
     public class AuctionSearchClassFilters : IEquatable<AuctionSearchClassFilters>
     {
         public ItemClassMask Classes;
@@ -1632,7 +1648,7 @@ namespace Game
             }
 
             return true;
-        }
+        }        
 
         public class SubclassFilter : IEquatable<SubclassFilter>
         {
