@@ -27,7 +27,7 @@ namespace Framework.Constants
 
         public const int ReqPrimaryTreeTalents = 31;
         public const int ExploredZonesSize = 192;
-        public const long MaxMoneyAmount = 99999999999;
+        public const long MaxMoneyAmount = 9999999999;
         public const int MaxActionButtons = 180;
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
 
