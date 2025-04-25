@@ -185,7 +185,6 @@ namespace Game.Mails
             {
                 pReceiver.AddNewMailDeliverTime(deliver_time);
 
-
                 Mail m = new();
                 m.messageID = mailId;
                 m.mailTemplateId = GetMailTemplateId();

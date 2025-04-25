@@ -115,17 +115,17 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt64(MailID);
-            _worldPacket.WriteInt32(Command);
-            _worldPacket.WriteInt32(ErrorCode);
-            _worldPacket.WriteInt32(BagResult);
+            _worldPacket.WriteInt32((int)Command);
+            _worldPacket.WriteInt32((int)ErrorCode);
+            _worldPacket.WriteInt32((int)BagResult);
             _worldPacket.WriteInt64(AttachID);
             _worldPacket.WriteInt32(QtyInInventory);
         }
 
         public long MailID;
-        public int Command;
-        public int ErrorCode;
-        public int BagResult;
+        public MailResponseType Command;
+        public MailResponseResult ErrorCode;
+        public InventoryResult BagResult;
         public long AttachID;
         public int QtyInInventory;
     }

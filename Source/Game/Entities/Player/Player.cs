@@ -3137,11 +3137,11 @@ namespace Game.Entities
         {
             MailCommandResult result = new();
             result.MailID = mailId;
-            result.Command = (int)mailAction;
-            result.ErrorCode = (int)mailError;
+            result.Command = mailAction;
+            result.ErrorCode = mailError;
 
             if (mailError == MailResponseResult.EquipError)
-                result.BagResult = (int)equipError;
+                result.BagResult = equipError;
             else if (mailAction == MailResponseType.ItemTaken)
             {
                 result.AttachID = itemGuid;
