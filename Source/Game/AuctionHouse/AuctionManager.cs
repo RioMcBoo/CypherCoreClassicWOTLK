@@ -127,7 +127,8 @@ namespace Game
         public string BuildItemAuctionMailSubject(AuctionMailType type, AuctionPosting auction)
         {
             return BuildAuctionMailSubject(
-                auction.Item.GetEntry(), 
+                auction.Item.GetEntry(),
+                auction.Item.GetItemRandomPropertyId(),
                 type, 
                 auction.Id, 
                 auction.Item.GetCount(),
@@ -135,31 +136,30 @@ namespace Game
                 auction.Item.GetContext());
         }
 
-        public string BuildCommodityAuctionMailSubject(AuctionMailType type, int itemId, int itemCount)
+        public string BuildAuctionMailSubject(int itemId, int randomPropertyId, AuctionMailType type, int auctionId, int itemCount, int battlePetSpeciesId, ItemContext context)
         {
-            return BuildAuctionMailSubject(itemId, type, 0, itemCount, 0, ItemContext.None);
-        }
-
-        public string BuildAuctionMailSubject(int itemId, AuctionMailType type, int auctionId, int itemCount, int battlePetSpeciesId, ItemContext context)
-        {
-            string str = $"{itemId}:0:{(int)type}:{auctionId}:{itemCount}:{battlePetSpeciesId}:0:0:0:0:{(int)context}";
-
-            return str;
+            return $"{itemId}:{randomPropertyId}:{(int)type}:{auctionId}:{itemCount}:{battlePetSpeciesId}:0:0:0:0:0:{(int)context}";
         }
 
         public string BuildAuctionWonMailBody(ObjectGuid guid, long bid, long buyout)
         {
-            return $"{guid}:{bid}:{buyout}:0";
+            return $"{ObjectGuidInfo.Format(guid)}:{bid}:{buyout}:0";
         }
 
         public string BuildAuctionSoldMailBody(ObjectGuid guid, long bid, long buyout, long deposit, long consignment)
         {
-            return $"{guid}:{bid}:{buyout}:{deposit}:{consignment}:0";
+            return $"{ObjectGuidInfo.Format(guid)}:{bid}:{buyout}:{deposit}:{consignment}:0";
         }
 
-        public string BuildAuctionInvoiceMailBody(ObjectGuid guid, long bid, long buyout, long deposit, long consignment, TimeSpan moneyDelay, ServerTime eta)
+        public string BuildAuctionExpiredMailBody(long bid, long buyout, long deposit, long consignment)
         {
-            return $"{guid}:{bid}:{buyout}:{deposit}:{consignment}:{(Seconds)moneyDelay}:{(WowTime)eta}:0";
+            return $"{ObjectGuidInfo.Format(default)}:{bid}:{buyout}:{deposit}:0:0";
+        }
+
+        public string BuildAuctionInvoiceMailBody(ObjectGuid guid, long bid, long buyout, long deposit, long consignment, TimeSpan moneyDelay, RealmTime eta)
+        {
+            // todo: estimate time doesn't show in the client properly (it is always 12:22), we need sniffs
+            return $"{ObjectGuidInfo.Format(guid)}:{bid}:{buyout}:{deposit}:{consignment}:{(Seconds)moneyDelay}:{(WowTime)eta}:0";
         }
 
         public void LoadAuctions()
@@ -1158,7 +1158,7 @@ namespace Game
 
                 mail.AddItem(auction.Item);
 
-                mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(_auctionHouse.Id), MailCheckFlags.Copied, TimeSpan.Zero);
+                mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(_auctionHouse.Id), MailCheckFlags.Copied);
             }
             else
             {
@@ -1194,8 +1194,9 @@ namespace Game
             // owner exist (online or offline)
             if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
-                ServerTime eta = LoopTime.ServerTime;
+                RealmTime eta = LoopTime.RealmTime;
                 eta += WorldConfig.Values[WorldCfg.MailDeliveryDelay].TimeSpan;
+
                 if (owner != null)
                 {
                     //eta += owner.GetSession().GetTimezoneOffset();

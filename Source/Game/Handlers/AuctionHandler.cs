@@ -217,6 +217,7 @@ namespace Game
             if (auctionSold)
             {
                 // buyout
+                auctionHouse.SendAuctionInvoice(auction, null, trans);
                 auctionHouse.SendAuctionSold(auction, null, trans);
                 auctionHouse.SendAuctionWon(auction, player, trans);
                 auctionHouse.RemoveAuction(trans, auction);
