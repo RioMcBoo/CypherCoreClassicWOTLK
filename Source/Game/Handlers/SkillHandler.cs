@@ -122,12 +122,13 @@ namespace Game
             };
 
             if (Global.ObjAccessor.FindPlayer(packet.CasterGUID) is Player master)
-            {                
+            {
                 response.SkillRank = master.GetSkillValue(spellLearnSkill.skill);
                 if (response.SkillRank < 1)
                     return;
 
-                response.KnownAbilitySpellIDs = master.SpellBook.GetTradeSkillSpells(packet.SkillId).ToList();  
+                response.KnownAbilitySpellIDs = master.SpellBook.GetTradeSkillSpells(packet.SkillId).ToList();
+                GetPlayer().SendPacket(response);
             }
             else
             {
@@ -142,39 +143,46 @@ namespace Game
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SKILL_VALUES);
                 stmt.SetInt64(0, mastersLowGuid);
                 stmt.SetInt16(1, (short)packet.SkillId);
-                result = DB.Characters.Query(stmt);
 
-                if (result.IsEmpty())
-                    return;
-
-                skillValue = result.Read<short>(0);
-                skillMaxValue = result.Read<short>(1);
-                result.Close();
-
-                if (response.SkillMaxRank != skillMaxValue)
-                    return;
-
-                if (skillValue < 1 || skillValue > skillMaxValue)
-                    return;
-
-                response.SkillRank = skillValue;
-                response.SkillMaxRank = skillMaxValue;
-
-                Log.outDebug(LogFilter.Sql, $"Loading Trade Skill Spells for player's [GUID: {mastersLowGuid}] {packet.SkillId} ...");
-                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TRADE_SKILL_SPELLS);
-                stmt.SetInt64(0, mastersLowGuid);
-                stmt.SetInt16(1, (short)packet.SkillId);
-                result = DB.Characters.Query(stmt);
-
-                response.KnownAbilitySpellIDs = new();
-                do
+                _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithChainingCallback((queryCallback, result) =>
                 {
-                    response.KnownAbilitySpellIDs.Add(result.Read<int>(0));
-                }
-                while (result.NextRow());
-            }
+                    if (result.IsEmpty())
+                        return;
 
-            GetPlayer().SendPacket(response);
+                    skillValue = result.Read<short>(0);
+                    skillMaxValue = result.Read<short>(1);
+                    result.Close();
+
+                    if (response.SkillMaxRank != skillMaxValue)
+                        return;
+
+                    if (skillValue < 1 || skillValue > skillMaxValue)
+                        return;
+
+                    response.SkillRank = skillValue;
+                    response.SkillMaxRank = skillMaxValue;
+
+                    Log.outDebug(LogFilter.Sql, $"Loading Trade Skill Spells for player's [GUID: {mastersLowGuid}] {packet.SkillId} ...");
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TRADE_SKILL_SPELLS);
+                    stmt.SetInt64(0, mastersLowGuid);
+                    stmt.SetInt16(1, (short)packet.SkillId);
+                    queryCallback.SetNextQuery(DB.Characters.AsyncQuery(stmt));
+
+                }).WithChainingCallback((queryCallback, result) =>
+                {
+                    if (result.IsEmpty())
+                        return;
+
+                    response.KnownAbilitySpellIDs = new();
+                    do
+                    {
+                        response.KnownAbilitySpellIDs.Add(result.Read<int>(0));
+                    }
+                    while (result.NextRow());
+
+                    GetPlayer().SendPacket(response);
+                }));                
+            }            
         }
     }
 }
