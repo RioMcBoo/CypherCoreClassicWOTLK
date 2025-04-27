@@ -2928,7 +2928,7 @@ namespace Game.Entities
             var powers = new int[(int)PowerType.MaxPerClass];
             for (var i = 0; i < powers.Length; ++i)
                 powers[i] = result.Read<int>(fieldIndex++);
-
+            var usedAmmoID = result.Read<int>(fieldIndex++);
             var instance_id = result.Read<int>(fieldIndex++);
             var lootSpecId = (ChrSpecialization)result.Read<int>(fieldIndex++);
             var exploredZones = result.Read<string>(fieldIndex++);
@@ -3545,7 +3545,9 @@ namespace Game.Entities
             }
 
             for (; loadedPowers < (int)PowerType.MaxPerClass; ++loadedPowers)
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, loadedPowers), 0);           
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, loadedPowers), 0);
+
+            SetUsedAmmoId(usedAmmoID);
 
             Log.outDebug(LogFilter.Player, 
                 $"Player.LoadFromDB: The value of player {GetName()} after load item and aura is: ");            
@@ -3769,6 +3771,7 @@ namespace Game.Entities
                 for (int i = 0; i < (int)PowerType.MaxPerClass; ++i)
                     stmt.SetInt32(index++, m_unitData.Power[i]);
 
+                stmt.SetInt32(index++, GetUsedAmmoId());
                 stmt.SetUInt32(index++, GetSession().GetLatency());
                 stmt.SetInt32(index++, (int)GetLootSpecId());
 
@@ -3904,6 +3907,7 @@ namespace Game.Entities
                 for (int i = 0; i < (int)PowerType.MaxPerClass; ++i)
                     stmt.SetInt32(index++, m_unitData.Power[i]);
 
+                stmt.SetInt32(index++, GetUsedAmmoId());
                 stmt.SetUInt32(index++, GetSession().GetLatency());
                 stmt.SetUInt32(index++, (uint)GetLootSpecId());
 

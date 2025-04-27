@@ -1359,7 +1359,7 @@ namespace Game.DataStorage
             return _itemCategoryConditions[categoryId];
         }
 
-        public int GetItemDisplayId(int itemId, int appearanceModId)
+        public int GetItemDisplayId(int itemId, int appearanceModId = 0)
         {
             ItemModifiedAppearanceRecord modifiedAppearance = GetItemModifiedAppearance(itemId, appearanceModId);
             if (modifiedAppearance != null)

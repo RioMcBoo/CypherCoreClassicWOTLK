@@ -1875,7 +1875,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(AmmoDisplayID.Value);
 
             if (AmmoInventoryType.HasValue)
-                data.WriteInt32(AmmoInventoryType.Value);
+                data.WriteInt32((int)AmmoInventoryType.Value);
         }
 
         public ObjectGuid CasterGUID;
@@ -1895,7 +1895,7 @@ namespace Game.Networking.Packets
         public RuneData RemainingRunes;
         public MissileTrajectoryResult MissileTrajectory;
         public int? AmmoDisplayID;
-        public int? AmmoInventoryType;
+        public InventoryType? AmmoInventoryType;
         public byte DestLocSpellCastIndex;
         public List<TargetLocation> TargetPoints = new();
         public CreatureImmunities Immunities;

@@ -4138,7 +4138,11 @@ namespace Game.Spells
             */
 
             if (castFlags.HasFlag(SpellCastFlags.Projectile))
-                castData.AmmoDisplayID = GetSpellCastDataAmmo();
+            {
+                var ammoInfo = GetSpellCastDataAmmo();
+                castData.AmmoDisplayID = ammoInfo.ammoDisplayID;
+                castData.AmmoInventoryType = ammoInfo.ammoInventoryType;
+            }
 
             if (castFlags.HasFlag(SpellCastFlags.Immunity))
             {
@@ -4242,6 +4246,13 @@ namespace Game.Spells
                 castData.MissileTrajectory.Pitch = m_targets.GetPitch();
             }
 
+            if (castFlags.HasFlag(SpellCastFlags.Projectile))
+            {
+                var ammoInfo = GetSpellCastDataAmmo();
+                castData.AmmoDisplayID = ammoInfo.ammoDisplayID;
+                castData.AmmoInventoryType = ammoInfo.ammoInventoryType;
+            }
+
             packet.LogData.Initialize(this);
 
             m_caster.SendCombatLogMessage(packet);
@@ -4283,10 +4294,10 @@ namespace Game.Spells
                 m_channelTargetEffectMask = 0;
         }
 
-        int GetSpellCastDataAmmo()
+        (int? ammoDisplayID, InventoryType? ammoInventoryType) GetSpellCastDataAmmo()
         {
-            InventoryType ammoInventoryType = 0;
-            int ammoDisplayID = 0;
+            InventoryType? ammoInventoryType = null;
+            int? ammoDisplayID = null;
 
             Player playerCaster = m_caster.ToPlayer();
             if (playerCaster != null)
@@ -4294,13 +4305,30 @@ namespace Game.Spells
                 Item pItem = playerCaster.GetWeaponForAttack(WeaponAttackType.RangedAttack);
                 if (pItem != null)
                 {
-                    ammoInventoryType = pItem.GetTemplate().GetInventoryType();
-                    if (ammoInventoryType == InventoryType.Thrown)
-                        ammoDisplayID = pItem.GetDisplayId(playerCaster);
-                    else if (playerCaster.HasAura(46699))      // Requires No Ammo
+                    var itemInventoryType = pItem.GetTemplate().GetInventoryType();
+                    if (itemInventoryType == InventoryType.Thrown)
                     {
-                        ammoDisplayID = 5996;                   // normal arrow
-                        ammoInventoryType = InventoryType.Ammo;
+                        ammoDisplayID = pItem.GetDisplayId(playerCaster);
+                        ammoInventoryType = itemInventoryType;
+                    }
+                    else
+                    {
+                        int ammoID = playerCaster.m_activePlayerData.AmmoID;
+                        if (ammoID > 0)
+                        {
+                            ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(ammoID);
+                            if (pProto != null)
+                            {
+                                ammoDisplayID = pProto.GetDisplayInfoID();
+                                ammoInventoryType = pProto.GetInventoryType();
+                            }
+                        }
+                        else if (playerCaster.HasAura(46699))      // Requires No Ammo, used by Thori'dal, the Stars' Fury [item:34334]
+                        {
+                            // Thori'dal no longer needs to set these 
+                            // ammoDisplayID = 41489;                 // Monster - Special Arrow (Thori'dal) [item:37309]
+                            // ammoInventoryType = InventoryType.Ammo;
+                        }
                     }
                 }
             }
@@ -4309,8 +4337,6 @@ namespace Game.Spells
                 Unit unitCaster = m_caster.ToUnit();
                 if (unitCaster != null)
                 {
-                    int nonRangedAmmoDisplayID = 0;
-                    InventoryType nonRangedAmmoInventoryType = 0;
                     for (byte i = (int)WeaponAttackType.BaseAttack; i < (int)WeaponAttackType.Max; ++i)
                     {
                         int itemId = unitCaster.GetVirtualItemId(i);
@@ -4329,35 +4355,27 @@ namespace Game.Spells
                                             break;
                                         case ItemSubClassWeapon.Bow:
                                         case ItemSubClassWeapon.Crossbow:
-                                            ammoDisplayID = 5996;       // is this need fixing?
+                                            ammoDisplayID = 2414;
                                             ammoInventoryType = InventoryType.Ammo;
                                             break;
                                         case ItemSubClassWeapon.Gun:
-                                            ammoDisplayID = 5998;       // is this need fixing?
+                                            ammoDisplayID = 2418;
                                             ammoInventoryType = InventoryType.Ammo;
                                             break;
                                         default:
-                                            nonRangedAmmoDisplayID = Global.DB2Mgr.GetItemDisplayId(itemId, unitCaster.GetVirtualItemAppearanceMod(i));
-                                            nonRangedAmmoInventoryType = itemEntry.InventoryType;
                                             break;
                                     }
 
-                                    if (ammoDisplayID != 0)
+                                    if (ammoDisplayID.HasValue)
                                         break;
                                 }
                             }
                         }
                     }
-
-                    if (ammoDisplayID == 0 && ammoInventoryType == 0)
-                    {
-                        ammoDisplayID = nonRangedAmmoDisplayID;
-                        ammoInventoryType = nonRangedAmmoInventoryType;
-                    }
                 }
             }
 
-            return ammoDisplayID;
+            return (ammoDisplayID, ammoInventoryType);
         }
 
         static (int, SpellHealPredictionType) CalcPredictedHealing(SpellInfo spellInfo, Unit unitCaster, Unit target, int castItemEntry, int castItemLevel, Spell spell, bool withPeriodic)

@@ -939,7 +939,13 @@ namespace Game.Entities
             msg = CanStoreNewItem(ItemPos.Undefined, out Dest, itemId, amount);
             if (msg == InventoryResult.Ok)
             {
-                StoreNewItem(Dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
+                var newItem = StoreNewItem(Dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
+
+                // if this is ammo then use it
+                msg = CanUseAmmo(newItem.GetEntry());
+                if (msg == InventoryResult.Ok && GetUsedAmmoId() == 0)
+                    SetAmmo(newItem.GetEntry());
+
                 return true;                                        // stored
             }
 

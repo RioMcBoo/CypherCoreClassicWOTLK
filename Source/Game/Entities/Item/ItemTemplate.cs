@@ -300,6 +300,11 @@ namespace Game.Entities
         public ushort GetScalingStatDistributionID() { return ExtendedData.ScalingStatDistributionID; }
         public int GetScalingStatValueID() { return BasicData.ScalingStatValue; }
 
+        public int GetDisplayInfoID()
+        {
+            return Global.DB2Mgr.GetItemDisplayId(GetId());
+        }
+
         public ScalingStatDistributionRecord GetScalingStatDistribution()
         {
             return CliDB.ScalingStatDistributionStorage.LookupByKey(GetScalingStatDistributionID());
