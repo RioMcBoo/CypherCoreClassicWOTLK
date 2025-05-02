@@ -2869,7 +2869,7 @@ namespace Game.Spells
             if (CastTimeEntry != null)
                 castTime = Time.Max(CastTimeEntry.Base, CastTimeEntry.Minimum);
 
-            if (castTime <= 0)
+            if (castTime < 0)
                 return Milliseconds.Zero;
 
             if (spell != null)
