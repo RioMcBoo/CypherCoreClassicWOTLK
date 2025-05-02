@@ -1714,8 +1714,7 @@ namespace Game.Entities
 
             // check "realtime" interrupts
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if ((IsMoving() && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).CheckMovement() != SpellCastResult.SpellCastOk)
-                || IsNonMeleeSpellCast(false, false, true, autoRepeatSpellInfo.Id == 75))
+            if ((GetTypeId() == TypeId.Player && ToPlayer().IsMoving()) || IsNonMeleeSpellCast(false, false, true, autoRepeatSpellInfo.Id == 75))
             {
                 // cancel wand shoot
                 if (autoRepeatSpellInfo.Id != 75)
