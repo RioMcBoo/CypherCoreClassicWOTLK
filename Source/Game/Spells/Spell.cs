@@ -7193,6 +7193,45 @@ namespace Game.Spells
                             case ItemSubClassWeapon.Gun:
                             case ItemSubClassWeapon.Bow:
                             case ItemSubClassWeapon.Crossbow:
+                            {
+                                int ammo = player.GetUsedAmmoId();
+                                if (ammo == 0)
+                                {
+                                    // Requires No Ammo
+                                    if (player.HasAura(46699))
+                                        break;                      // skip other checks
+
+                                    return SpellCastResult.NoAmmo;
+                                }
+
+                                ItemTemplate ammoProto = Global.ObjectMgr.GetItemTemplate(ammo);
+                                if (ammoProto == null)
+                                    return SpellCastResult.NeedAmmo;
+
+                                if (ammoProto.GetClass() != ItemClass.Projectile)
+                                    return SpellCastResult.NeedAmmo;
+
+                                // check ammo ws. weapon compatibility
+                                switch (item.GetTemplate().GetSubClass().Weapon)
+                                {
+                                    case ItemSubClassWeapon.Bow:
+                                    case ItemSubClassWeapon.Crossbow:
+                                        if (ammoProto.GetSubClass().Projectile != ItemSubClassProjectile.Arrow)
+                                            return SpellCastResult.NeedAmmo;
+                                        break;
+                                    case ItemSubClassWeapon.Gun:
+                                        if (ammoProto.GetSubClass().Projectile != ItemSubClassProjectile.Bullet)
+                                            return SpellCastResult.NeedAmmo;
+                                        break;
+                                }
+
+                                if (!player.HasItemCount(ammo))
+                            {
+                                    player.SetUsedAmmoId(0);
+                                    return SpellCastResult.NoAmmo;
+                                }
+                                break;
+                            }
                             case ItemSubClassWeapon.Wand:
                                 break;
                             default:
