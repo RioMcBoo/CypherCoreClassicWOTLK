@@ -5242,6 +5242,18 @@ namespace Game.Spells
                         return SpellCastResult.AffectingCombat;
                 }
 
+                // cancel autorepeat spells if cast start when moving
+                // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
+                if (unitCaster.GetTypeId() == TypeId.Player && unitCaster.ToPlayer().IsMoving() && (!unitCaster.IsCharmed() || !unitCaster.GetCharmerGUID().IsCreature()))
+                {
+                    // skip stuck spell to allow use it in falling case and apply spell limitations at movement
+                    if ((!unitCaster.HasUnitMovementFlag(MovementFlag.FallingFar) || !m_spellInfo.HasEffect(SpellEffectName.Stuck)) &&
+                        (IsAutoRepeat() || m_spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing)))
+                    {
+                        return SpellCastResult.Moving;
+                    }
+                }
+
                 // Check vehicle flags
                 if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle))
                 {
