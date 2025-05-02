@@ -1751,7 +1751,7 @@ namespace Game.Entities
                 }
 
                 // we want to shoot
-                Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.IgnoreGCD);
+                Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
                 spell.Prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
 
             // all went good, reset attack
