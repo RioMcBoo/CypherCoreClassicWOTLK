@@ -7618,6 +7618,42 @@ namespace Game.Spells
             return false;
         }
 
+        void TakeAmmo()
+        {
+            // Only players use ammo
+            if (m_caster is not Player player)
+                return;
+
+            // only ranged
+            if (m_attackType != WeaponAttackType.RangedAttack)
+                return;
+
+            Item item = player.GetWeaponForAttack(WeaponAttackType.RangedAttack);
+            if (item == null || item.IsBroken())
+                return;
+
+            if (item.GetTemplate().GetInventoryType() == InventoryType.Thrown)
+            {
+                if (item.GetMaxStackCount() == 1)
+                {
+                    // decrease durability for non-stackable throw weapon
+                    player.DurabilityPointsLoss(item, 1);
+                }
+                else
+                {
+                    // decrease items amount for stackable throw weapon
+                    int count = 1;
+                    player.DestroyItemCount(item, ref count, true);
+                }
+            }
+            else
+            {
+                int ammo = player.GetUsedAmmoId();
+                if (ammo != 0)
+                    player.DestroyItemCount(ammo, 1, true);
+            }
+        }
+
         void HandleLaunchPhase()
         {
             // handle effects with SPELL_EFFECT_HANDLE_LAUNCH mode
@@ -7631,6 +7667,21 @@ namespace Game.Spells
             }
 
             PrepareTargetProcessing();
+
+            // Take ammunition if the ranged attack requires ammunition
+            if (m_caster is Player player)
+            {
+                bool usesAmmo = m_spellInfo.IsUsesAmmo();
+                if (player.HasAuraTypeWithAffectMask(AuraType.AbilityConsumeNoAmmo, m_spellInfo))
+                    usesAmmo = false;
+
+                // Do not consume ammo for the triggered AoE ticks of Volley (Hunter spell)
+                if (IsTriggered() && m_spellInfo.SpellFamilyName == SpellFamilyNames.Hunter && m_spellInfo.IsTargetingArea())
+                    usesAmmo = false;
+
+                if (usesAmmo)
+                    TakeAmmo();
+            }
 
             foreach (TargetInfo target in m_UniqueTargetInfo)
                 PreprocessSpellLaunch(target);

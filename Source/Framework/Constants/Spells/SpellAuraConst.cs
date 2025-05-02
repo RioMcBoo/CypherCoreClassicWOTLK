@@ -282,7 +282,7 @@ namespace Framework.Constants
         ModSpellDamageFromCaster = 271,
         ModBlockValuePct = 272, //NYI
         XRay = 273,
-        ModBlockValueFlat = 274,  //NYI
+        AbilityConsumeNoAmmo = 274,
         ModIgnoreShapeshift = 275,
         ModDamageDoneForMechanic = 276,
         ModMaxAffectedTargets = 277,
