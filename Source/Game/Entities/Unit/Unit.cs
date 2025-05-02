@@ -1727,6 +1727,28 @@ namespace Game.Entities
             //if (m_AutoRepeatFirstCast && GetAttackTimer(WeaponAttackType.RangedAttack) < (Milliseconds)500 && autoRepeatSpellInfo.Id != 75)
             //    SetAttackTimer(WeaponAttackType.RangedAttack, (Milliseconds)500);
             //m_AutoRepeatFirstCast = false;
+            if (GetTypeId() == TypeId.Player)
+            {
+                Unit currentTarget = Global.ObjAccessor.GetUnit(this, GetTarget());
+                Spell spell = m_currentSpells[CurrentSpellTypes.AutoRepeat];
+
+                if (spell.m_targets.GetUnitTarget() != currentTarget)
+                {
+                    if (currentTarget == null || spell.GetSpellInfo().CheckExplicitTarget(this, currentTarget) == SpellCastResult.BadTargets)
+                    {
+                        // In wotlk_classic, when changing the target for ranged auto attacks, the client does not send a new packet,
+                        // so the current target has to be checked manually when updating auto attacks.
+                        // if the wrong target was chosen, we should stop ranged autoattack.
+                        
+                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                        return;
+                    }
+                    else
+                    {
+                        spell.m_targets.SetUnitTarget(currentTarget);
+                    }
+                }
+            }
 
             // castroutine
             if (IsAttackReady(WeaponAttackType.RangedAttack) 
