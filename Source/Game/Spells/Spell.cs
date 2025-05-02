@@ -5145,7 +5145,7 @@ namespace Game.Spells
                             return SpellCastResult.NotReady;
                     }
 
-                    if ((IsAutoRepeat() || (int)m_spellInfo.CategoryId == 76) 
+                    if ((IsAutoRepeat() || m_spellInfo.CategoryId == SpellCategories.RangedOneShoot) 
                         && !m_caster.ToUnit().IsAttackReady(WeaponAttackType.RangedAttack))
                         return SpellCastResult.DontReport;
                 }

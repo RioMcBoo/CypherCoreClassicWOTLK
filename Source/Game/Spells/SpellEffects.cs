@@ -1496,18 +1496,18 @@ namespace Game.Spells
 
             Player p_target = m_caster.ToPlayer();
 
-            uint subClassMask = (uint)m_spellInfo.EquippedItemSubClassMask;
+            ItemSubClassMask subClassMask = m_spellInfo.EquippedItemSubClassMask;
             if (m_spellInfo.EquippedItemClass == ItemClass.Weapon 
-                && !Convert.ToBoolean(p_target.GetWeaponProficiency() & subClassMask))
+                && !p_target.GetWeaponProficiency().HasFlag(subClassMask.Weapon))
             {
-                p_target.AddWeaponProficiency(subClassMask);
+                p_target.AddWeaponProficiency(subClassMask.Weapon);
                 p_target.SendProficiency(ItemClass.Weapon, p_target.GetWeaponProficiency());
             }
 
             if (m_spellInfo.EquippedItemClass == ItemClass.Armor 
-                && !Convert.ToBoolean(p_target.GetArmorProficiency() & subClassMask))
+                && !p_target.GetArmorProficiency().HasFlag(subClassMask.Armor))
             {
-                p_target.AddArmorProficiency(subClassMask);
+                p_target.AddArmorProficiency(subClassMask.Armor);
                 p_target.SendProficiency(ItemClass.Armor, p_target.GetArmorProficiency());
             }
         }

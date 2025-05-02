@@ -4167,7 +4167,7 @@ namespace Game.Spells
         public int[] ReagentCount = new int[SpellConst.MaxReagents];
         public List<SpellReagentsCurrencyRecord> ReagentsCurrency = new();
         public ItemClass EquippedItemClass { get; set; }
-        public int EquippedItemSubClassMask { get; set; }
+        public ItemSubClassMask EquippedItemSubClassMask { get; set; }
         public int EquippedItemInventoryTypeMask { get; set; }
         public int IconFileDataId { get; set; }
         public int ActiveIconFileDataId { get; set; }

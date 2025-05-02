@@ -568,14 +568,14 @@ namespace Game.Entities
             {
                 case ItemClass.Weapon:
                 {
-                    if (!Convert.ToBoolean(_owner.GetPlayer().GetWeaponProficiency() & (1 << (int)itemTemplate.GetSubClass())))
+                    if (!_owner.GetPlayer().GetWeaponProficiency().HasWeapon(itemTemplate.GetSubClass().Weapon))
                         return false;
-                    if (itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Exotic ||
-                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Exotic2 ||
-                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Miscellaneous ||
-                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Thrown ||
-                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Spear ||
-                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.FishingPole)
+                    if (itemTemplate.GetSubClass().Weapon == ItemSubClassWeapon.Exotic ||
+                        itemTemplate.GetSubClass().Weapon == ItemSubClassWeapon.Exotic2 ||
+                        itemTemplate.GetSubClass().Weapon == ItemSubClassWeapon.Miscellaneous ||
+                        itemTemplate.GetSubClass().Weapon == ItemSubClassWeapon.Thrown ||
+                        itemTemplate.GetSubClass().Weapon == ItemSubClassWeapon.Spear ||
+                        itemTemplate.GetSubClass().Weapon == ItemSubClassWeapon.FishingPole)
                         return false;
                     break;
                 }

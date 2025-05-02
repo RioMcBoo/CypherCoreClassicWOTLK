@@ -12,6 +12,7 @@ using Game.Mails;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -39,8 +40,8 @@ namespace Game.Entities
         public List<Item> ItemUpdateQueue = new();
         VoidStorageItem[] _voidStorageItems = new VoidStorageItem[SharedConst.VoidStorageMaxSlot];
         Item[] m_items = new Item[(int)PlayerSlots.Count];
-        uint m_WeaponProficiency;
-        uint m_ArmorProficiency;
+        ItemSubClassWeaponMask m_WeaponProficiency;
+        ItemSubClassArmorMask m_ArmorProficiency;
         byte m_currentBuybackSlot;
         TradeData m_trade;
 

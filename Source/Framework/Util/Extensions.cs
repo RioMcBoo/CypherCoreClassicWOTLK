@@ -354,6 +354,11 @@ namespace System
             return (mask & (ItemSubClassWeaponMask)(1 << (int)_weapon)) != 0;
         }
 
+        public static bool HasArmor(this ItemSubClassArmorMask mask, ItemSubClassArmor _armor)
+        {
+            return (mask & (ItemSubClassArmorMask)(1 << (int)_armor)) != 0;
+        }
+
         public static QuestSlotStateMask SetSlot(this QuestSlotStateMask mask, int slot)
         {
             return mask | (QuestSlotStateMask)((uint)QuestSlotStateMask.QuestSlotStart << slot);

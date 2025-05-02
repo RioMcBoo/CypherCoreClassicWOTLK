@@ -430,7 +430,7 @@ namespace Game.Entities
         [FieldOffset(0)]
         public ItemSubClassPermanent Permanent;
         [FieldOffset(0)]
-        public ItemSubClassMisc Junk;
+        public ItemSubClassMisc Misc;
         [FieldOffset(0)]
         public ItemSubClassGlyph Glyph;
         [FieldOffset(0)]
@@ -446,6 +446,26 @@ namespace Game.Entities
         }
 
         public static implicit operator ItemSubClass(int data) { return new ItemSubClass(data); }
+        public static implicit operator ItemSubClass(ItemSubClassConsumable subclass) { return new ItemSubClass() { Consumable = subclass}; }
+        public static implicit operator ItemSubClass(ItemSubClassContainer subclass) { return new ItemSubClass() { Container = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassWeapon subclass) { return new ItemSubClass() { Weapon = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassGem subclass) { return new ItemSubClass() { Gem = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassArmor subclass) { return new ItemSubClass() { Armor = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassReagent subclass) { return new ItemSubClass() { Reagent = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassProjectile subclass) { return new ItemSubClass() { Projectile = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassTradeGoods subclass) { return new ItemSubClass() { TradeGoods = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubclassItemEnhancement subclass) { return new ItemSubClass() { Enhancement = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassRecipe subclass) { return new ItemSubClass() { Recipe = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassMoney subclass) { return new ItemSubClass() { Money = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassQuiver subclass) { return new ItemSubClass() { Quiver = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassQuest subclass) { return new ItemSubClass() { Quest = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassKey subclass) { return new ItemSubClass() { Key = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassPermanent subclass) { return new ItemSubClass() { Permanent = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassMisc subclass) { return new ItemSubClass() { Misc = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubClassGlyph subclass) { return new ItemSubClass() { Glyph = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubclassBattlePet subclass) { return new ItemSubClass() { BattlePet = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubclassWowToken subclass) { return new ItemSubClass() { WowToken = subclass }; }
+        public static implicit operator ItemSubClass(ItemSubclassProfession subclass) { return new ItemSubClass() { Profession = subclass }; }
         public static implicit operator int(ItemSubClass itemSubClass) { return itemSubClass.data; }
     }
 
@@ -489,7 +509,7 @@ namespace Game.Entities
         [FieldOffset(0)]
         public ItemSubClassPermanentMask Permanent;
         [FieldOffset(0)]
-        public ItemSubClassMiscMask Junk;
+        public ItemSubClassMiscMask Misc;
         [FieldOffset(0)]
         public ItemSubClassGlyphMask Glyph;
         [FieldOffset(0)]
@@ -510,6 +530,26 @@ namespace Game.Entities
         }
 
         public static implicit operator ItemSubClassMask(int data) { return new ItemSubClassMask(data); }
+        public static implicit operator ItemSubClassMask(ItemSubClassConsumableMask mask) { return new ItemSubClassMask() { Consumable = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassContainerMask mask) { return new ItemSubClassMask() { Container = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassWeaponMask mask) { return new ItemSubClassMask() { Weapon = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassGemMask mask) { return new ItemSubClassMask() { Gem = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassArmorMask mask) { return new ItemSubClassMask() { Armor = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassReagentMask mask) { return new ItemSubClassMask() { Reagent = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassProjectileMask mask) { return new ItemSubClassMask() { Projectile = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassTradeGoodsMask mask) { return new ItemSubClassMask() { TradeGoods = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubclassItemEnhancementMask mask) { return new ItemSubClassMask() { Enhancement = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassRecipeMask mask) { return new ItemSubClassMask() { Recipe = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassMoneyMask mask) { return new ItemSubClassMask() { Money = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassQuiverMask mask) { return new ItemSubClassMask() { Quiver = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassQuestMask mask) { return new ItemSubClassMask() { Quest = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassKeyMask mask) { return new ItemSubClassMask() { Key = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassPermanentMask mask) { return new ItemSubClassMask() { Permanent = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassMiscMask mask) { return new ItemSubClassMask() { Misc = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubClassGlyphMask mask) { return new ItemSubClassMask() { Glyph = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubclassBattlePetMask mask) { return new ItemSubClassMask() { BattlePet = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubclassWowTokenMask mask) { return new ItemSubClassMask() { WowToken = mask }; }
+        public static implicit operator ItemSubClassMask(ItemSubclassProfessionMask mask) { return new ItemSubClassMask() { Profession = mask }; }
         public static implicit operator int(ItemSubClassMask itemSubClassMask) { return itemSubClassMask.data; }
     }
 }

@@ -243,6 +243,12 @@ namespace Game
                 Spell.SendCastResult(_player, spellInfo, default, cast.Cast.CastID, SpellCastResult.SpellInProgress);
         }
 
+        [WorldPacketHandler(ClientOpcodes.CancelQueuedSpell, Processing = PacketProcessing.ThreadSafe)]
+        void HandleCancelQueuedSpell(CancelQueuedSpell packet)
+        {
+            
+        }
+
         [WorldPacketHandler(ClientOpcodes.CancelCast, Processing = PacketProcessing.ThreadSafe)]
         void HandleCancelCast(CancelCast packet)
         {

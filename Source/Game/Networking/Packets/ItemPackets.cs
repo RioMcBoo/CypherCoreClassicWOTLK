@@ -209,12 +209,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(ProficiencyMask);
-            _worldPacket.WriteUInt8(ProficiencyClass);
+            _worldPacket.WriteInt32((int)ProficiencyMask);
+            _worldPacket.WriteUInt8((byte)ProficiencyClass);
         }
 
-        public uint ProficiencyMask;
-        public byte ProficiencyClass;
+        public ItemSubClassMask ProficiencyMask;
+        public ItemClass ProficiencyClass;
     }
 
     public class InventoryChangeFailure : ServerPacket

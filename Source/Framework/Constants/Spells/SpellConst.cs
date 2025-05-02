@@ -37,7 +37,8 @@ namespace Framework.Constants
         DevourMagic = 12,
         Judgement = 1210,               // Judgement (seal trigger)
         Food = 11,
-        Drink = 59
+        Drink = 59,
+        RangedOneShoot = 76,
     }
 
     public enum SpellLinkedType
@@ -534,6 +535,7 @@ namespace Framework.Constants
         LowCastlevel = 73,
         MainhandEmpty = 74,
         Moving = 75,
+        /// <summary>stops automatic shooting</summary>
         NeedAmmo = 76,
         NeedAmmoPouch = 77,
         NeedExoticAmmo = 78,

@@ -1858,6 +1858,7 @@ namespace Game.Entities
                         if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
                     }
+
                     if (pSpell.m_spellInfo.CalcCastTime() > 0)
                         AddUnitState(UnitState.Casting);
 
@@ -2679,11 +2680,15 @@ namespace Game.Entities
 
                 // send autorepeat cancel message for autorepeat spells
                 if (spellType == CurrentSpellTypes.AutoRepeat)
+                {
                     if (IsTypeId(TypeId.Player))
                         ToPlayer().SendAutoRepeatCancel(this);
+                }
 
                 if (spell.GetState() != SpellState.Finished)
+                {
                     spell.Cancel();
+                }
                 else
                 {
                     m_currentSpells[spellType] = null;

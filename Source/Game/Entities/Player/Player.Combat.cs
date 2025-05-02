@@ -58,15 +58,15 @@ namespace Game.Entities
                 KilledMonsterCredit(creature_id, creature_guid);
         }
 
-        public void AddWeaponProficiency(uint newflag) { m_WeaponProficiency |= newflag; }
-        public void AddArmorProficiency(uint newflag) { m_ArmorProficiency |= newflag; }
-        public uint GetWeaponProficiency() { return m_WeaponProficiency; }
-        public uint GetArmorProficiency() { return m_ArmorProficiency; }
-        public void SendProficiency(ItemClass itemClass, uint itemSubclassMask)
+        public void AddWeaponProficiency(ItemSubClassWeaponMask newflag) { m_WeaponProficiency |= newflag; }
+        public void AddArmorProficiency(ItemSubClassArmorMask newflag) { m_ArmorProficiency |= newflag; }
+        public ItemSubClassWeaponMask GetWeaponProficiency() { return m_WeaponProficiency; }
+        public ItemSubClassArmorMask GetArmorProficiency() { return m_ArmorProficiency; }
+        public void SendProficiency(ItemClass itemClass, ItemSubClassMask itemSubclassMask)
         {
             SetProficiency packet = new();
             packet.ProficiencyMask = itemSubclassMask;
-            packet.ProficiencyClass = (byte)itemClass;
+            packet.ProficiencyClass = itemClass;
             SendPacket(packet);
         }
 
