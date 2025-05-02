@@ -2890,10 +2890,15 @@ namespace Game.Spells
             if (m_spellState == SpellState.Finished)
                 return;
 
+            m_autoRepeat = false;
+
+            // Unable to cancel flying projectiles
+            if (m_spellState == SpellState.Delayed && m_spellInfo.Speed > 0)
+                return;
+
             SpellState oldState = m_spellState;
             m_spellState = SpellState.Finished;
 
-            m_autoRepeat = false;
             switch (oldState)
             {
                 case SpellState.Preparing:
