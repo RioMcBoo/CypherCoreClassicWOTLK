@@ -3183,7 +3183,7 @@ namespace Game.Entities
                     && (source == null || spell.GetSpellInfo().Id != source.Id)
                     && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), source))
                 {
-                    InterruptNonMeleeSpells(false);
+                    InterruptNonMeleeSpells(false, spell.GetSpellInfo().Id);
                 }
             }
 
