@@ -534,7 +534,7 @@ namespace Game.Entities
 
         public void ResetAttackTimer(WeaponAttackType type = WeaponAttackType.BaseAttack)
         {
-            m_attackTimer[(int)type] = (Milliseconds)(GetBaseAttackTime(type) * m_modAttackSpeedPct[(int)type]);
+            m_attackTimer[(int)type] = GetAttackTime(type);
         }
 
         public void SetAttackTimer(WeaponAttackType type, Milliseconds time)
@@ -555,6 +555,11 @@ namespace Game.Entities
         public Milliseconds GetBaseAttackTime(WeaponAttackType att)
         {
             return m_baseAttackSpeed[(int)att];
+        }
+
+        public Milliseconds GetAttackTime(WeaponAttackType att)
+        {
+            return (Milliseconds)(GetBaseAttackTime(att) * m_modAttackSpeedPct[(int)att]);
         }
 
         public void DoMeleeAttackIfReady()

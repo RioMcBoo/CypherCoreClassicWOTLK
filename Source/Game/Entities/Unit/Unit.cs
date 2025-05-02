@@ -1714,7 +1714,7 @@ namespace Game.Entities
 
             // check "realtime" interrupts
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if ((IsMoving() && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).CheckMovement() != SpellCastResult.SpellCastOk) 
+            if ((IsMoving() && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).CheckMovement() != SpellCastResult.SpellCastOk)
                 || IsNonMeleeSpellCast(false, false, true, autoRepeatSpellInfo.Id == 75))
             {
                 // cancel wand shoot
@@ -1739,7 +1739,7 @@ namespace Game.Entities
                         // In wotlk_classic, when changing the target for ranged auto attacks, the client does not send a new packet,
                         // so the current target has to be checked manually when updating auto attacks.
                         // if the wrong target was chosen, we should stop ranged autoattack.
-                        
+
                         InterruptSpell(CurrentSpellTypes.AutoRepeat);
                         return;
                     }
@@ -1751,7 +1751,7 @@ namespace Game.Entities
             }
 
             // castroutine
-            if (IsAttackReady(WeaponAttackType.RangedAttack) 
+            if (IsAttackReady(WeaponAttackType.RangedAttack)
                 && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).GetState() != SpellState.Preparing)
             {
                 // Check if able to cast
@@ -1759,14 +1759,21 @@ namespace Game.Entities
                 if (result != SpellCastResult.SpellCastOk)
                 {
                     if (autoRepeatSpellInfo.Id != 75)
-                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
-                    else if (GetTypeId() == TypeId.Player)
                     {
-                        Spell.SendCastResult(
-                            ToPlayer(), autoRepeatSpellInfo, 
-                            m_currentSpells[CurrentSpellTypes.AutoRepeat].m_SpellVisual, 
-                            m_currentSpells[CurrentSpellTypes.AutoRepeat].m_castId, 
-                            result);
+                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                    }
+                    else if (this is Player player)
+                    {
+                        var currentTime = LoopTime.ServerTime;
+
+                        if (player.AutoRepeatNotifyState.CheckAndApply(result, currentTime, GetAttackTime(WeaponAttackType.RangedAttack))) // to prevent packet spamming
+                        {
+                            Spell.SendCastResult(
+                                player, autoRepeatSpellInfo,
+                                m_currentSpells[CurrentSpellTypes.AutoRepeat].m_SpellVisual,
+                                m_currentSpells[CurrentSpellTypes.AutoRepeat].m_castId,
+                                result);
+                        }
                     }
 
                     return;
@@ -1776,9 +1783,9 @@ namespace Game.Entities
                 Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
                 spell.Prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
 
-            // all went good, reset attack
-            ResetAttackTimer(WeaponAttackType.RangedAttack);
-        }
+                // all went good, reset attack
+                ResetAttackTimer(WeaponAttackType.RangedAttack);
+            }
         }
 
         public PowerType CalculateDisplayPowerType()

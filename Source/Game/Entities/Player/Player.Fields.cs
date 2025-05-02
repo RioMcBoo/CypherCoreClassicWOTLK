@@ -42,6 +42,7 @@ namespace Game.Entities
         Item[] m_items = new Item[(int)PlayerSlots.Count];
         ItemSubClassWeaponMask m_WeaponProficiency;
         ItemSubClassArmorMask m_ArmorProficiency;
+        public AutoRepeatSpellNotifyState AutoRepeatNotifyState;
         byte m_currentBuybackSlot;
         TradeData m_trade;
 
@@ -658,4 +659,28 @@ namespace Game.Entities
         public readonly PlayerSpellState State;
         public readonly byte Rank;
     };
+
+    public struct AutoRepeatSpellNotifyState
+    {
+        ServerTime LastNotifyTime;
+        SpellCastResult LastError;
+
+        public bool CheckAndApply(SpellCastResult error, ServerTime currentTime, TimeSpan desiredDelay)
+        {
+            if (error != LastError)
+            {
+                LastError = error;
+                LastNotifyTime = currentTime;
+                return true;
+            }
+
+            if (currentTime - desiredDelay >= LastNotifyTime)
+            {
+                LastNotifyTime = currentTime;
+                return true;
+            }
+
+            return false;
+        }
+    }
 }
