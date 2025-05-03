@@ -2875,8 +2875,12 @@ namespace Game.Spells
             if (spell != null)
                 spell.GetCaster().ModSpellCastTime(this, ref castTime.Ticks, spell);
 
-            if (HasAttribute(SpellAttr0.UsesRangedSlot) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.CooldownIgnoresRangedWeapon))
-                castTime += (Milliseconds)500;
+            // apply delay to ranged spells, except auto-shooting
+            if (IsRangedWeaponSpell() && Id != 75 && !HasAttribute(SpellAttr9.CooldownIgnoresRangedWeapon))
+            {
+                if (castTime < (Milliseconds)500)
+                    castTime = (Milliseconds)500;
+            }
 
             return (castTime > 0) ? castTime : Milliseconds.Zero;
         }

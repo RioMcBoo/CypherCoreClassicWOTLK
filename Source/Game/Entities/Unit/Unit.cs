@@ -1719,13 +1719,9 @@ namespace Game.Entities
                 // cancel wand shoot
                 if (autoRepeatSpellInfo.Id != 75)
                     InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                
                 return;
             }
-
-            //// apply delay (Auto Shot (spellID 75) not affected)
-            //if (m_AutoRepeatFirstCast && GetAttackTimer(WeaponAttackType.RangedAttack) < (Milliseconds)500 && autoRepeatSpellInfo.Id != 75)
-            //    SetAttackTimer(WeaponAttackType.RangedAttack, (Milliseconds)500);
-            //m_AutoRepeatFirstCast = false;
             if (GetTypeId() == TypeId.Player)
             {
                 Unit currentTarget = Global.ObjAccessor.GetUnit(this, GetTarget());
