@@ -104,7 +104,7 @@ namespace Scripts.Spells.Pets
                 // For others recalculate it from:
                 float critMelee = 5.0f;
                 // Increase crit from AuraType.ModWeaponCritPercent
-                critMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPct);
+                critMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPct, auraEffect => owner.CheckAttackFitToAuraRequirement(WeaponAttackType.BaseAttack, auraEffect));
                 // Increase crit from AuraType.ModCritPct
                 critMelee += owner.GetTotalAuraModifier(AuraType.ModSpellCritChance);
                 // Increase crit melee from melee crit ratings
@@ -646,7 +646,7 @@ namespace Scripts.Spells.Pets
                 // For others recalculate it from:
                 float CritMelee = 5.0f;
                 // Increase crit from AuraType.ModWeaponCritPercent
-                CritMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPct);
+                CritMelee += owner.GetTotalAuraModifier(AuraType.ModWeaponCritPct, auraEffect => owner.CheckAttackFitToAuraRequirement(WeaponAttackType.BaseAttack, auraEffect));
                 // Increase crit from AuraType.ModCritPct
                 CritMelee += owner.GetTotalAuraModifier(AuraType.ModSpellCritChance);
                 // Increase crit melee from melee crit ratings

@@ -298,7 +298,7 @@ namespace Framework.Constants
         DeflectSpells = 287,
         IgnoreHitDirection = 288,
         PreventDurabilityLoss = 289,
-        ModCritChance = 290, //NYI
+        ModCritChance = 290,
         ModXpQuestPct = 291,
         OpenStable = 292,
         OverrideSpells = 293,

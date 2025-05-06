@@ -805,7 +805,7 @@ namespace Game.Entities
 
         public void AddPetToUpdateFields(PetStable.PetInfo pet, PetSaveMode slot, PetStableFlags flags)
         {
-            StableInfo ufStable = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
+            StableInfo ufStable = new();
             StablePetInfo ufPet = new();
             ufPet.ModifyValue(ufPet.PetSlot).SetValue((int)slot);
             ufPet.ModifyValue(ufPet.PetNumber).SetValue(pet.PetNumber);
@@ -815,6 +815,8 @@ namespace Game.Entities
             ufPet.ModifyValue(ufPet.PetFlags).SetValue((byte)flags);
             ufPet.ModifyValue(ufPet.Name).SetValue(pet.Name);
             AddDynamicUpdateFieldValue(ufStable.ModifyValue(ufStable.Pets), ufPet);
+
+            m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable).SetValue(ufStable);
         }
 
         public void SetPetSlot(int petNumber, PetSaveMode dstPetSlot)

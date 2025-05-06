@@ -3735,8 +3735,9 @@ namespace Game.Spells
             }
         }
 
-        [AuraEffectHandler(AuraType.ModWeaponCritPct)]
-        void HandleAuraModWeaponCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+
+        [AuraEffectHandler(AuraType.ModCritChance)]
+        void HandleAuraModCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3746,11 +3747,28 @@ namespace Game.Spells
             if (target is Player player)
             {
                 player.UpdateAllWeaponDependentCritAuras();
+                player.UpdateAllSpellCritChances();
             }
             else
             {
-                Cypher.Assert(false, "Units have not WeaponCritChance mod.", "HandleAuraModWeaponCritChance");
-            }            
+                target.BaseSpellCritChance += apply ? GetAmount() : -GetAmount();
+            }
+        }
+
+        [AuraEffectHandler(AuraType.ModWeaponCritPct)]
+        void HandleAuraModWeaponCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+                return;
+
+            if (aurApp.GetTarget() is Player player)
+            {
+                player.UpdateAllWeaponDependentCritAuras();
+            }
+            else
+            {
+                // implemented in Pet::CalculateAmountCritMelee
+            }
         }
 
         [AuraEffectHandler(AuraType.ModSpellHitChance)]
