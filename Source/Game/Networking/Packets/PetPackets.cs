@@ -81,15 +81,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
             _worldPacket.WriteUInt8((byte)ReactState);
 
-            foreach (int actionButton in ActionButtons)
-                _worldPacket.WriteInt32(actionButton);
+            foreach (var actionButton in ActionButtons)
+                _worldPacket.WriteUInt32(actionButton.PackedData);
 
             _worldPacket.WriteInt32(Actions.Count);
             _worldPacket.WriteInt32(Cooldowns.Count);
             _worldPacket.WriteInt32(SpellHistory.Count);
 
             foreach (var action in Actions)
-                _worldPacket.WriteInt32(action);
+                _worldPacket.WriteUInt32(action.PackedData);
 
             foreach (PetSpellCooldown cooldown in Cooldowns)
             {
@@ -117,9 +117,9 @@ namespace Game.Networking.Packets
         public CommandStates CommandState;
         public byte Flag;
 
-        public int[] ActionButtons = new int[10];
+        public CharmActionButton[] ActionButtons = new CharmActionButton[10];
 
-        public List<int> Actions = new();
+        public List<CharmActionButton> Actions = new();
         public List<PetSpellCooldown> Cooldowns = new();
         public List<PetSpellHistory> SpellHistory = new();
     }
@@ -231,14 +231,14 @@ namespace Game.Networking.Packets
         {
             PetGUID = _worldPacket.ReadPackedGuid();
 
-            Action = _worldPacket.ReadInt32();
+            Button = new(_worldPacket.ReadUInt32());
             TargetGUID = _worldPacket.ReadPackedGuid();
 
             ActionPosition = _worldPacket.ReadVector3();
         }
 
         public ObjectGuid PetGUID;
-        public int Action;
+        public CharmActionButton Button;
         public ObjectGuid TargetGUID;
         public Vector3 ActionPosition;
     }
@@ -252,12 +252,12 @@ namespace Game.Networking.Packets
             PetGUID = _worldPacket.ReadPackedGuid();
 
             Index = _worldPacket.ReadInt32();
-            Action = _worldPacket.ReadInt32();
+            ActionButton = new(_worldPacket.ReadUInt32());
         }
 
         public ObjectGuid PetGUID;
         public int Index;
-        public int Action;
+        public CharmActionButton ActionButton;
     }
 
     class SetPetSpecialization : ServerPacket

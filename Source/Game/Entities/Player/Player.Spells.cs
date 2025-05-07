@@ -234,17 +234,17 @@ namespace Game.Entities
 
             // action bar loop
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
-                petSpellsPacket.ActionButtons[i] = charmInfo.GetActionBarEntry(i).packedData;
+                petSpellsPacket.ActionButtons[i] = charmInfo.GetActionBarEntry(i);
 
             if (pet.IsPermanentPetFor(this))
             {
                 // spells loop
                 foreach (var pair in pet.m_spells)
                 {
-                    if (pair.Value.state == PetSpellState.Removed)
+                    if (pair.Value.UpdateState == PetSpellState.Removed)
                         continue;
 
-                    petSpellsPacket.Actions.Add(UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(pair.Key, (byte)pair.Value.active));
+                    petSpellsPacket.Actions.Add(new(pair.Key, pair.Value.ActiveState));
                 }
             }
 

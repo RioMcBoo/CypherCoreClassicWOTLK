@@ -3827,7 +3827,7 @@ namespace Game.Entities
                         Pet pet = ToPet();
                         foreach (var spell in pet.m_spells)
                         {
-                            if (spell.Value.state == PetSpellState.Removed)
+                            if (spell.Value.UpdateState == PetSpellState.Removed)
                                 continue;
                             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell.Key, Difficulty.None);
                             if (spellInfo == null || !spellInfo.IsPassive())

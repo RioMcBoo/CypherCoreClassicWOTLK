@@ -840,12 +840,12 @@ namespace Game.Entities
             foreach (var pair in m_spells.ToList())
             {
                 // prevent saving family passives to DB
-                if (pair.Value.type == PetSpellType.Family)
+                if (pair.Value.SpellType == PetSpellType.Family)
                     continue;
 
                 PreparedStatement stmt;
 
-                switch (pair.Value.state)
+                switch (pair.Value.UpdateState)
                 {
                     case PetSpellState.Removed:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_BY_SPELL);
@@ -864,20 +864,20 @@ namespace Game.Entities
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
                         stmt.SetInt32(1, pair.Key);
-                        stmt.SetUInt8(2, (byte)pair.Value.active);
+                        stmt.SetUInt8(2, (byte)pair.Value.ActiveState);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.New:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
                         stmt.SetInt32(1, pair.Key);
-                        stmt.SetUInt8(2, (byte)pair.Value.active);
+                        stmt.SetUInt8(2, (byte)pair.Value.ActiveState);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.Unchanged:
                         continue;
                 }
-                pair.Value.state = PetSpellState.Unchanged;
+                pair.Value.UpdateState = PetSpellState.Unchanged;
             }
         }
 
@@ -1081,14 +1081,14 @@ namespace Game.Entities
             var petSpell = m_spells.LookupByKey(spellId);
             if (petSpell != null)
             {
-                if (petSpell.state == PetSpellState.Removed)
+                if (petSpell.UpdateState == PetSpellState.Removed)
                     state = PetSpellState.Changed;
                 else
                 {
-                    if (state == PetSpellState.Unchanged && petSpell.state != PetSpellState.Unchanged)
+                    if (state == PetSpellState.Unchanged && petSpell.UpdateState != PetSpellState.Unchanged)
                     {
                         // can be in case spell loading but learned at some previous spell loading
-                        petSpell.state = PetSpellState.Unchanged;
+                        petSpell.UpdateState = PetSpellState.Unchanged;
 
                         if (active == ActiveStates.Enabled)
                             ToggleAutocast(spellInfo, true);
@@ -1101,25 +1101,25 @@ namespace Game.Entities
             }
 
             PetSpell newspell = new();
-            newspell.state = state;
-            newspell.type = type;
+            newspell.UpdateState = state;
+            newspell.SpellType = type;
 
             if (active == ActiveStates.Decide)                               // active was not used before, so we save it's autocast/passive state here
             {
                 if (spellInfo.IsAutocastable())
-                    newspell.active = ActiveStates.Disabled;
+                    newspell.ActiveState = ActiveStates.Disabled;
                 else
-                    newspell.active = ActiveStates.Passive;
+                    newspell.ActiveState = ActiveStates.Passive;
             }
             else
-                newspell.active = active;
+                newspell.ActiveState = active;
 
             // talent: unlearn all other talent ranks (high and low)
             if (spellInfo.IsRanked())
             {
                 foreach (var pair in m_spells)
                 {
-                    if (pair.Value.state == PetSpellState.Removed)
+                    if (pair.Value.UpdateState == PetSpellState.Removed)
                         continue;
 
                     SpellInfo oldRankSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
@@ -1132,9 +1132,9 @@ namespace Game.Entities
                         // replace by new high rank
                         if (spellInfo.IsHighRankOf(oldRankSpellInfo))
                         {
-                            newspell.active = pair.Value.active;
+                            newspell.ActiveState = pair.Value.ActiveState;
 
-                            if (newspell.active == ActiveStates.Enabled)
+                            if (newspell.ActiveState == ActiveStates.Enabled)
                                 ToggleAutocast(oldRankSpellInfo, false);
 
                             UnlearnSpell(pair.Key, false, false);
@@ -1157,7 +1157,7 @@ namespace Game.Entities
             else
                 GetCharmInfo().AddSpellToActionBar(spellInfo);
 
-            if (newspell.active == ActiveStates.Enabled)
+            if (newspell.ActiveState == ActiveStates.Enabled)
                 ToggleAutocast(spellInfo, true);
 
             return true;
@@ -1275,13 +1275,13 @@ namespace Game.Entities
             if (petSpell == null)
                 return false;
 
-            if (petSpell.state == PetSpellState.Removed)
+            if (petSpell.UpdateState == PetSpellState.Removed)
                 return false;
 
-            if (petSpell.state == PetSpellState.New)
+            if (petSpell.UpdateState == PetSpellState.New)
                 m_spells.Remove(spellId);
             else
-                petSpell.state = PetSpellState.Removed;
+                petSpell.UpdateState = PetSpellState.Removed;
 
             RemoveAurasDueToSpell(spellId);
 
@@ -1314,15 +1314,15 @@ namespace Game.Entities
         {
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
-                UnitActionBarEntry ab = GetCharmInfo().GetActionBarEntry(i);
-                if (ab != null)
-                    if (ab.GetAction() != 0 && ab.IsActionBarForSpell())
+                CharmActionButton ab = GetCharmInfo().GetActionBarEntry(i);
+
+                if (ab.Action != 0 && ab.IsSpell)
                     {
-                        if (!HasSpell(ab.GetAction()))
+                    if (!HasSpell(ab.Action))
                             GetCharmInfo().SetActionBar(i, 0, ActiveStates.Passive);
-                        else if (ab.GetActiveState() == ActiveStates.Enabled)
+                    else if (ab.State == ActiveStates.Enabled)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ab.GetAction(), Difficulty.None);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ab.Action, Difficulty.None);
                             if (spellInfo != null)
                                 ToggleAutocast(spellInfo, true);
                         }
@@ -1358,11 +1358,11 @@ namespace Game.Entities
                 {
                     m_autospells.Add(spellInfo.Id);
 
-                    if (petSpell.active != ActiveStates.Enabled)
+                    if (petSpell.ActiveState != ActiveStates.Enabled)
                     {
-                        petSpell.active = ActiveStates.Enabled;
-                        if (petSpell.state != PetSpellState.New)
-                            petSpell.state = PetSpellState.Changed;
+                        petSpell.ActiveState = ActiveStates.Enabled;
+                        if (petSpell.UpdateState != PetSpellState.New)
+                            petSpell.UpdateState = PetSpellState.Changed;
                     }
                 }
             }
@@ -1371,11 +1371,11 @@ namespace Game.Entities
                 if (hasSpell)
                 {
                     m_autospells.Remove(spellInfo.Id);
-                    if (petSpell.active != ActiveStates.Disabled)
+                    if (petSpell.ActiveState != ActiveStates.Disabled)
                     {
-                        petSpell.active = ActiveStates.Disabled;
-                        if (petSpell.state != PetSpellState.New)
-                            petSpell.state = PetSpellState.Changed;
+                        petSpell.ActiveState = ActiveStates.Disabled;
+                        if (petSpell.UpdateState != PetSpellState.New)
+                            petSpell.UpdateState = PetSpellState.Changed;
                     }
                 }
             }
@@ -1430,7 +1430,7 @@ namespace Game.Entities
         public override bool HasSpell(int spell)
         {
             var petSpell = m_spells.LookupByKey(spell);
-            return petSpell != null && petSpell.state != PetSpellState.Removed;
+            return petSpell != null && petSpell.UpdateState != PetSpellState.Removed;
         }
 
         // Get all passive spells in our skill line
@@ -1685,8 +1685,8 @@ namespace Game.Entities
 
             for (byte i = SharedConst.ActionBarIndexStart; i < SharedConst.ActionBarIndexEnd; ++i)
             {
-                ss.AppendFormat(
-                    $"{(uint)GetCharmInfo().GetActionBarEntry(i).GetActiveState()} {(uint)GetCharmInfo().GetActionBarEntry(i).GetAction()} ");
+                var actionBarEntry = GetCharmInfo().GetActionBarEntry(i);
+                ss.AppendFormat($"{(uint)actionBarEntry.State} {(uint)actionBarEntry.Action} ");
             }
 
             return ss.ToString();
@@ -1717,9 +1717,9 @@ namespace Game.Entities
 
     public class PetSpell
     {
-        public ActiveStates active;
-        public PetSpellState state;
-        public PetSpellType type;
+        public ActiveStates ActiveState;
+        public PetSpellState UpdateState;
+        public PetSpellType SpellType;
     }
 
     public class PetStable
@@ -1791,13 +1791,20 @@ namespace Game.Entities
         }
     }
     
+    [Flags]
     public enum ActiveStates : byte
     {
-        Passive = 0x01,                                    // 0x01 - passive
-        Disabled = 0x81,                                    // 0x80 - castable
-        Enabled = 0xC1,                                    // 0x40 | 0x80 - auto cast + castable
-        Command = 0x07,                                    // 0x01 | 0x02 | 0x04
-        Reaction = 0x06,                                    // 0x02 | 0x04
+        Passive = 0x01,
+        Defensive = 0x02,
+        Agressive = 0x04,
+        AutoCast = 0x40,
+        Spell = 0x80,
+
+        Disabled = Spell | Passive,
+        Enabled = Spell | AutoCast,
+        Command = Passive | Defensive | Agressive,
+        Reaction = Defensive | Agressive,
+
         Decide = 0x00                                     // custom
     }
 

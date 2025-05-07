@@ -381,30 +381,52 @@ namespace Game.Entities
 
     public class ActionButton
     {
+        uint _packedData;
+        ActionButtonUpdateState _uState;
+
         public ActionButton()
         {
-            packedData = 0;
-            uState = ActionButtonUpdateState.New;
+            _packedData = 0;
+            _uState = ActionButtonUpdateState.New;
         }
 
-        public ActionButtonType GetButtonType() { return (ActionButtonType)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packedData); }
+        public ActionButton(uint packedData)
+        {
+            _packedData = packedData;
+            _uState = ActionButtonUpdateState.New;
+        }
 
-        public int GetAction() { return UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packedData); }
+        public uint PackedData => _packedData;
+        public ActionButtonUpdateState State { get =>_uState; set => _uState = value; }
+        public ActionButtonType Type => UNIT_ACTION_BUTTON_TYPE(_packedData);
+        public int Action => UNIT_ACTION_BUTTON_ACTION(_packedData);
 
         public void SetActionAndType(int action, ActionButtonType type)
         {
-            int newData = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(action, (byte)type);
-            
-            if (newData != packedData || uState == ActionButtonUpdateState.Deleted)
+            var newData = MAKE_UNIT_ACTION_BUTTON(action, type);
+
+            if (newData != _packedData || _uState == ActionButtonUpdateState.Deleted)
             {
-                packedData = newData;
-                if (uState != ActionButtonUpdateState.New)
-                    uState = ActionButtonUpdateState.Changed;
+                _packedData = newData;
+                if (_uState != ActionButtonUpdateState.New)
+                    _uState = ActionButtonUpdateState.Changed;
             }
         }
 
-        public int packedData;
-        public ActionButtonUpdateState uState;
+        static uint MAKE_UNIT_ACTION_BUTTON(int action, ActionButtonType type)
+        {
+            return (uint)(action | ((int)type << 23));
+        }
+
+        static int UNIT_ACTION_BUTTON_ACTION(uint packedData)
+        {
+            return (int)(packedData & 0x007FFFFF);
+        }
+
+        static ActionButtonType UNIT_ACTION_BUTTON_TYPE(uint packedData)
+        {
+            return (ActionButtonType)((packedData & 0xFF800000) >>> 23);
+        }
     }
 
     public class ResurrectionData

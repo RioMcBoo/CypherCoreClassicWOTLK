@@ -683,7 +683,7 @@ namespace Game.Entities
 
                     ActionButton ab = AddActionButton(button, action, type);
                     if (ab != null)
-                        ab.uState = ActionButtonUpdateState.UnChanged;
+                        ab.State = ActionButtonUpdateState.UnChanged;
                     else
                     {
                         Log.outError(LogFilter.Player, 
@@ -693,7 +693,7 @@ namespace Game.Entities
 
                         // Will deleted in DB at next save (it can create data until save but marked as deleted)
                         m_actionButtons[button] = new ActionButton();
-                        m_actionButtons[button].uState = ActionButtonUpdateState.Deleted;
+                        m_actionButtons[button].State = ActionButtonUpdateState.Deleted;
                     }
                 } while (result.NextRow());
             }
@@ -2155,7 +2155,7 @@ namespace Game.Entities
 
             foreach (var pair in m_actionButtons.ToList())
             {
-                switch (pair.Value.uState)
+                switch (pair.Value.State)
                 {
                     case ActionButtonUpdateState.New:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_ACTION);
@@ -2163,23 +2163,23 @@ namespace Game.Entities
                         stmt.SetUInt8(1, GetActiveTalentGroup());
                         stmt.SetInt32(2, traitConfigId);
                         stmt.SetUInt8(3, pair.Key);
-                        stmt.SetInt32(4, pair.Value.GetAction());
-                        stmt.SetUInt8(5, (byte)pair.Value.GetButtonType());
+                        stmt.SetInt32(4, pair.Value.Action);
+                        stmt.SetUInt8(5, (byte)pair.Value.Type);
                         trans.Append(stmt);
 
-                        pair.Value.uState = ActionButtonUpdateState.UnChanged;
+                        pair.Value.State = ActionButtonUpdateState.UnChanged;
                         break;
                     case ActionButtonUpdateState.Changed:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_ACTION);
-                        stmt.SetInt32(0, pair.Value.GetAction());
-                        stmt.SetUInt8(1, (byte)pair.Value.GetButtonType());
+                        stmt.SetInt32(0, pair.Value.Action);
+                        stmt.SetUInt8(1, (byte)pair.Value.Type);
                         stmt.SetInt64(2, GetGUID().GetCounter());
                         stmt.SetUInt8(3, pair.Key);
                         stmt.SetUInt8(4, GetActiveTalentGroup());
                         stmt.SetInt32(5, traitConfigId);
                         trans.Append(stmt);
 
-                        pair.Value.uState = ActionButtonUpdateState.UnChanged;
+                        pair.Value.State = ActionButtonUpdateState.UnChanged;
                         break;
                     case ActionButtonUpdateState.Deleted:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACTION_BY_BUTTON_SPEC);

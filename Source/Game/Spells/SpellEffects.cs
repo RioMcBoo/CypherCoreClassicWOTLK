@@ -5092,12 +5092,12 @@ namespace Game.Spells
             for (; n_buttons != 0; --n_buttons, ++button_id)
             {
                 ActionButton ab = player.GetActionButton((byte)button_id);
-                if (ab == null || ab.GetButtonType() != ActionButtonType.Spell)
+                if (ab == null || ab.Type != ActionButtonType.Spell)
                     continue;
 
                 //! Action button data is unverified when it's set so it can be "hacked"
                 //! to contain invalid spells, so filter here.
-                int spell_id = ab.GetAction();
+                int spell_id = ab.Action;
                 if (spell_id == 0)
                     continue;
 

@@ -3119,10 +3119,10 @@ namespace Game.Entities
 
         public virtual int GetPetAutoSpellOnPos(byte pos)
         {
-            if (pos >= SharedConst.MaxSpellCharm || GetCharmInfo() == null || GetCharmInfo().GetCharmSpell(pos).GetActiveState() != ActiveStates.Enabled)
+            if (pos >= SharedConst.MaxSpellCharm || GetCharmInfo() == null || GetCharmInfo().GetCharmSpell(pos).State != ActiveStates.Enabled)
                 return 0;
             else
-                return GetCharmInfo().GetCharmSpell(pos).GetAction();
+                return GetCharmInfo().GetCharmSpell(pos).Action;
         }
 
         public float GetPetChaseDistance()

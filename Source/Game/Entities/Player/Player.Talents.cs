@@ -1084,8 +1084,10 @@ namespace Game.Entities
 
                 // trigger a save with traitConfigId
                 foreach (var (_, button) in m_actionButtons)
-                    if (button.uState != ActionButtonUpdateState.Deleted)
-                        button.uState = ActionButtonUpdateState.New;
+                {
+                    if (button.State != ActionButtonUpdateState.Deleted)
+                        button.State = ActionButtonUpdateState.New;
+                }
             }
 
             m_traitConfigStates[traitConfigId] = PlayerSpellState.Changed;

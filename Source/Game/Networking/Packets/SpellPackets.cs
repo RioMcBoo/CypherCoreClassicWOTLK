@@ -139,11 +139,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Action = _worldPacket.ReadInt32();
+            Button = new(_worldPacket.ReadUInt32());
             Index = _worldPacket.ReadUInt8();
         }
 
-        public int Action; // two packed values (action and Type)
+        public ActionButton Button;
         public byte Index;
     }
 

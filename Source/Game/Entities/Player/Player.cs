@@ -1184,13 +1184,13 @@ namespace Game.Entities
             }
 
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
-                petSpells.ActionButtons[i] = charmInfo.GetActionBarEntry(i).packedData;
+                petSpells.ActionButtons[i] = charmInfo.GetActionBarEntry(i);
 
             for (byte i = 0; i < SharedConst.MaxSpellCharm; ++i)
             {
                 var cspell = charmInfo.GetCharmSpell(i);
-                if (cspell.GetAction() != 0)
-                    petSpells.Actions.Add(cspell.packedData);
+                if (cspell.Action != 0)
+                    petSpells.Actions.Add(cspell);
             }
 
             // Cooldowns
@@ -1219,7 +1219,7 @@ namespace Game.Entities
             petSpellsPacket.PetGUID = charm.GetGUID();
 
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
-                petSpellsPacket.ActionButtons[i] = charmInfo.GetActionBarEntry(i).packedData;
+                petSpellsPacket.ActionButtons[i] = charmInfo.GetActionBarEntry(i);
 
             // Cooldowns
             charm.GetSpellHistory().WritePacket(petSpellsPacket);
@@ -1243,7 +1243,7 @@ namespace Game.Entities
             petSpells.Flag = 0x8;
 
             for (int i = 0; i < SharedConst.MaxSpellControlBar; ++i)
-                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(0, (byte)(i + 8));
+                petSpells.ActionButtons[i] = new(0, (ActiveStates)(i + 8));
 
             for (int i = 0; i < SharedConst.MaxCreatureSpells; ++i)
             {
@@ -1266,7 +1266,7 @@ namespace Game.Entities
                 if (spellInfo.IsPassive())
                     vehicle.CastSpell(vehicle, spellInfo.Id, true);
 
-                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(spellId, (byte)(i + 8));
+                petSpells.ActionButtons[i] = new(spellId, (ActiveStates)(i + 8));
             }
 
             // Cooldowns
@@ -1682,22 +1682,22 @@ namespace Game.Entities
         public void RemoveActionButton(byte _button)
         {
             var button = m_actionButtons.LookupByKey(_button);
-            if (button == null || button.uState == ActionButtonUpdateState.Deleted)
+            if (button == null || button.State == ActionButtonUpdateState.Deleted)
                 return;
 
-            if (button.uState == ActionButtonUpdateState.New)
+            if (button.State == ActionButtonUpdateState.New)
                 m_actionButtons.Remove(_button);                   // new and not saved
             else
-                button.uState = ActionButtonUpdateState.Deleted;    // saved, will deleted at next save
+                button.State = ActionButtonUpdateState.Deleted;    // saved, will deleted at next save
 
-            Log.outDebug(LogFilter.Player, 
+            Log.outDebug(LogFilter.Player,
                 $"Action Button '{button}' Removed from Player '{GetGUID()}'");
         }
 
         public ActionButton GetActionButton(byte _button)
         {
             var button = m_actionButtons.LookupByKey(_button);
-            if (button == null || button.uState == ActionButtonUpdateState.Deleted)
+            if (button == null || button.State == ActionButtonUpdateState.Deleted)
                 return null;
 
             return button;
@@ -1711,8 +1711,8 @@ namespace Game.Entities
 
             foreach (var pair in m_actionButtons)
             {
-                if (pair.Value.uState != ActionButtonUpdateState.Deleted && pair.Key < packet.ActionButtons.Length)
-                    packet.ActionButtons[pair.Key] = pair.Value.packedData;
+                if (pair.Value.State != ActionButtonUpdateState.Deleted && pair.Key < packet.ActionButtons.Length)
+                    packet.ActionButtons[pair.Key] = pair.Value.PackedData;
             }
 
             packet.Reason = state;
