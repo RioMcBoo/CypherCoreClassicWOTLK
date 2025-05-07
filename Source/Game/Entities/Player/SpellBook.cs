@@ -763,7 +763,10 @@ namespace Game.Entities
                     {
                         var skillEntry = CliDB.SkillLineStorage.LookupByKey(_spell_idx.SkillLine);
                         if (skillEntry != null && skillEntry.CanLink && _spell_idx.IsSkillTradeSpell)
-                            TradeSkillSpellCollection.Add(_spell_idx.SkillLine, spellId);
+                        {
+                            if (_spell_idx.ClassMask.HasClass(player.GetClass()) && _spell_idx.RaceMask.HasRace(player.GetRace()))
+                                TradeSkillSpellCollection.Add(_spell_idx.SkillLine, spellId);
+                        }
                     }
 
                     if (!IsPlayerLoading)
