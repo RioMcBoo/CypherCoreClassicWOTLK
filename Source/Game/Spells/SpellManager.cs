@@ -606,7 +606,7 @@ namespace Game.Entities
 
         public MultiMap<int, int> GetPetLevelupSpellList(CreatureFamily petFamily)
         {
-            return mPetLevelupSpellMap.LookupByKey((int)petFamily);
+            return mPetLevelupSpellMap.LookupByKey(petFamily);
         }
 
         public PetDefaultSpellsEntry GetPetDefaultSpellsEntry(int id)
@@ -2056,7 +2056,7 @@ namespace Game.Entities
                             continue;
 
                         if (!mPetLevelupSpellMap.ContainsKey(creatureFamily.Id))
-                            mPetLevelupSpellMap.Add(creatureFamily.Id, new MultiMap<int, int>());
+                            mPetLevelupSpellMap.Add(creatureFamily.Id, new());
 
                         var spellSet = mPetLevelupSpellMap.LookupByKey(creatureFamily.Id);
                         if (spellSet.Count == 0)
@@ -5106,7 +5106,7 @@ namespace Game.Entities
         MultiMap<int, SpellArea> mSpellAreaForAuraMap = new();
         MultiMap<int, SpellArea> mSpellAreaForAreaMap = new();
         MultiMap<int, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
-        Dictionary<int, MultiMap<int, int>> mPetLevelupSpellMap = new();
+        Dictionary<CreatureFamily, MultiMap<int /*spell_level*/, int/*spell_id*/>> mPetLevelupSpellMap = new();
         Dictionary<int, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
         MultiMap<int, SpellInfo> mSpellInfoMap = new();
         Dictionary<(int, Race), int> mSpellTotemModel = new();
@@ -5116,7 +5116,7 @@ namespace Game.Entities
         public delegate void SpellEffectHandler(Spell spell);
         Dictionary<SpellEffectName, SpellEffectHandler> SpellEffectsHandlers = new();
 
-        public MultiMap<int, int> PetFamilySpellsStorage = new();
+        public MultiMap<CreatureFamily, int> PetFamilySpellsStorage = new();
         #endregion
     }
 

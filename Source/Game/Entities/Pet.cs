@@ -759,7 +759,7 @@ namespace Game.Entities
             }
 
             SetDisplayId(creature.GetDisplayId());
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cinfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
             if (cFamily != null)
                 SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
             else
@@ -773,7 +773,7 @@ namespace Game.Entities
             if (!CreateBaseAtTamed(cinfo, owner.GetMap()))
                 return false;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cinfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
             if (cFamily != null)
                 SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
 
@@ -814,7 +814,7 @@ namespace Game.Entities
             if (cInfo == null)
                 return false;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cInfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
             if (cFamily == null)
                 return false;
 
@@ -1440,11 +1440,11 @@ namespace Game.Entities
             if (cInfo == null)
                 return;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cInfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
             if (cFamily == null)
                 return;
 
-            var petStore = Global.SpellMgr.PetFamilySpellsStorage[(int)cInfo.Family];
+            var petStore = Global.SpellMgr.PetFamilySpellsStorage[cInfo.Family];
 
             // For general hunter pets skill 270
             // Passive 01~10, Passive 00 (20782, not used), Ferocious Inspiration (34457)
@@ -1531,7 +1531,7 @@ namespace Game.Entities
 
         public override float GetNativeObjectScale()
         {
-            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)GetCreatureTemplate().Family);
+            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey(GetCreatureTemplate().Family);
             if (creatureFamily != null && creatureFamily.MinScale > 0.0f && GetPetType() == PetType.Hunter)
             {
                 float scale;

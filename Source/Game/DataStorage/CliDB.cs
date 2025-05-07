@@ -543,7 +543,7 @@ namespace Game.DataStorage
         public static DB6Storage<int, ConversationLineRecord> ConversationLineStorage = new();
         public static DB6Storage<int, CreatureDisplayInfoRecord> CreatureDisplayInfoStorage = new();
         public static DB6Storage<int, CreatureDisplayInfoExtraRecord> CreatureDisplayInfoExtraStorage = new();
-        public static DB6Storage<int, CreatureFamilyRecord> CreatureFamilyStorage = new();
+        public static DB6Storage<CreatureFamily, CreatureFamilyRecord> CreatureFamilyStorage = new();
         public static DB6Storage<int, CreatureModelDataRecord> CreatureModelDataStorage = new();
         public static DB6Storage<int, CreatureTypeRecord> CreatureTypeStorage = new();
         public static DB6Storage<int, CriteriaRecord> CriteriaStorage = new();

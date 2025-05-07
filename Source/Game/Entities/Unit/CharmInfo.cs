@@ -46,7 +46,6 @@ namespace Game.Entities
 
         public void InitPetActionBar()
         {
-
             // the first 3 SpellOrActions are attack, follow and stay
             for (byte i = 0; i < SharedConst.ActionBarIndexPetSpellStart - SharedConst.ActionBarIndexStart; ++i)
                 SetActionBar((byte)(SharedConst.ActionBarIndexStart + i), (int)CommandStates.Attack - i, ActiveStates.Command);
@@ -191,6 +190,7 @@ namespace Game.Entities
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -223,7 +223,7 @@ namespace Game.Entities
             {
                 if (spellInfo.Id == _charmspells[x].Action)
                     _charmspells[x].State = apply ? ActiveStates.Enabled : ActiveStates.Disabled;
-        }
+            }
         }
 
         public void SetPetNumber(int petnumber, bool statwindow)
@@ -421,7 +421,7 @@ namespace Game.Entities
         }
 
         public bool IsSpell
-            {
+        {
             get
             {
                 ActiveStates state = State;
@@ -432,10 +432,10 @@ namespace Game.Entities
         public bool IsCommand
         {
             get
-        {
+            {
                 ActiveStates state = State;
                 return state == ActiveStates.Command || state == ActiveStates.Reaction;
-        }
+            }
         }
 
         static uint MAKE_UNIT_ACTION_STATE(int action, ActiveStates state)

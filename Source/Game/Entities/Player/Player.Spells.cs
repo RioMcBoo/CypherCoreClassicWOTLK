@@ -226,7 +226,7 @@ namespace Game.Entities
 
             PetSpells petSpellsPacket = new();
             petSpellsPacket.PetGUID = pet.GetGUID();
-            petSpellsPacket.CreatureFamily = (ushort)pet.GetCreatureTemplate().Family;         // creature family (required for pet talents)
+            petSpellsPacket.CreatureFamily = pet.GetCreatureTemplate().Family;         // creature family (required for pet talents)
             petSpellsPacket.Specialization = pet.GetSpecialization();
             petSpellsPacket.TimeLimit = (Milliseconds)pet.GetDuration();
             petSpellsPacket.ReactState = pet.GetReactState();

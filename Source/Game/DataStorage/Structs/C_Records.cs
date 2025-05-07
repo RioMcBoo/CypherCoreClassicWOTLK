@@ -605,7 +605,7 @@ namespace Game.DataStorage
 
     public sealed class CreatureFamilyRecord
     {
-        public int Id;
+        private int _id;
         public LocalizedString Name;
         public float MinScale;
         public sbyte MinScaleLevel;
@@ -618,6 +618,7 @@ namespace Game.DataStorage
         private short[] _skillLine = new short[2];
 
         #region Properties
+        public CreatureFamily Id => (CreatureFamily)_id;
         public SkillType SkillLine(int index) => (SkillType)_skillLine[index];
         #endregion
     }

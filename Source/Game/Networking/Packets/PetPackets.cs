@@ -75,7 +75,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(PetGUID);
-            _worldPacket.WriteUInt16(CreatureFamily);
+            _worldPacket.WriteUInt16((ushort)CreatureFamily);
             _worldPacket.WriteUInt16((ushort)Specialization);
             _worldPacket.WriteInt32(TimeLimit);
             _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
@@ -110,7 +110,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid PetGUID;
-        public ushort CreatureFamily;
+        public CreatureFamily CreatureFamily;
         public ChrSpecialization Specialization;
         public Milliseconds TimeLimit;
         public ReactStates ReactState;

@@ -3032,7 +3032,6 @@ namespace Game.Entities
             {
                 do
                 {
-
                     ChrCustomizationChoice choice = new();
                     choice.ChrCustomizationOptionID = customizationsResult.Read<int>(0);
                     choice.ChrCustomizationChoiceID = customizationsResult.Read<int>(1);

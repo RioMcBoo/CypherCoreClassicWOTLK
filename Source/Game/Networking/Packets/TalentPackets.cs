@@ -231,6 +231,7 @@ namespace Game.Networking.Packets
 
             foreach (var talentInfo in Talents)
                 talentInfo.Write(data);
+
             foreach (var glyphInfo in GlyphIDs)
                 data.WriteUInt16((ushort)glyphInfo);
         }

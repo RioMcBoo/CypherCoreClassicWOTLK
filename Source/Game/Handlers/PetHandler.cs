@@ -85,8 +85,10 @@ namespace Game
                 //If a pet is dismissed, m_Controlled will change
                 List<Unit> controlled = new();
                 foreach (var unit in GetPlayer().m_Controlled)
+                {
                     if (unit.GetEntry() == pet.GetEntry() && unit.IsAlive())
                         controlled.Add(unit);
+                }
 
                 foreach (var unit in controlled)
                     HandlePetActionHelper(unit, guid1, spellid, flag, guid2, packet.ActionPosition.X, packet.ActionPosition.Y, packet.ActionPosition.Z);
@@ -495,8 +497,10 @@ namespace Game
 
             List<Unit> pets = new();
             foreach (Unit controlled in _player.m_Controlled)
+            {
                 if (controlled.GetEntry() == pet.GetEntry() && controlled.IsAlive())
                     pets.Add(controlled);
+            }
 
             int position = packet.Index;
 
@@ -521,26 +525,34 @@ namespace Game
                         if (act_state == ActiveStates.Enabled)
                         {
                             if (petControlled.GetTypeId() == TypeId.Unit && petControlled.IsPet())
+                            {
                                 ((Pet)petControlled).ToggleAutocast(spellInfo, true);
+                            }
                             else
                             {
                                 foreach (var unit in GetPlayer().m_Controlled)
+                                {
                                     if (unit.GetEntry() == petControlled.GetEntry())
                                         unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, true);
                             }
+                        }
                         }
                         //sign for no/turn off autocast
                         else if (act_state == ActiveStates.Disabled)
                         {
                             if (petControlled.GetTypeId() == TypeId.Unit && petControlled.IsPet())
+                            {
                                 petControlled.ToPet().ToggleAutocast(spellInfo, false);
+                            }
                             else
                             {
                                 foreach (var unit in GetPlayer().m_Controlled)
+                                {
                                     if (unit.GetEntry() == petControlled.GetEntry())
                                         unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, false);
                             }
                         }
+                    }
                     }
 
                     charmInfo.SetActionBar((byte)position, spell_id, act_state);

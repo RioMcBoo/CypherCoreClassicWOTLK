@@ -12,8 +12,10 @@ namespace Game.Entities
         {
             var powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
             if (powerType != null)
+            {
                 if (!powerType.HasFlag(PowerTypeFlags.IsUsedByNPCs))
                     return 0;
+            }
 
             return base.GetCreatePowerValue(power);
         }

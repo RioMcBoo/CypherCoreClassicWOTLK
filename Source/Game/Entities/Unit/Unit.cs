@@ -1713,7 +1713,6 @@ namespace Game.Entities
             SpellInfo autoRepeatSpellInfo = m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo;
 
             // check "realtime" interrupts
-            // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
             if ((GetTypeId() == TypeId.Player && ToPlayer().IsMoving()) || IsNonMeleeSpellCast(false, false, true, autoRepeatSpellInfo.Id == 75))
             {
                 // cancel wand shoot

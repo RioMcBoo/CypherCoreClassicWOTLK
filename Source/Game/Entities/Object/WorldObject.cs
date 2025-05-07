@@ -772,6 +772,7 @@ namespace Game.Entities
                 Conversation self = ToConversation();
                 if (data.WriteBit(self.GetTextureKitId() != 0))
                     data.WriteInt32(self.GetTextureKitId());
+
                 data.FlushBits();
             }
         }

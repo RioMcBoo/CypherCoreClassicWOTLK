@@ -1049,7 +1049,7 @@ namespace Game.DataStorage
             if (petfamily == CreatureFamily.None)
                 return null;
 
-            CreatureFamilyRecord petFamily = CreatureFamilyStorage.LookupByKey((int)petfamily);
+            CreatureFamilyRecord petFamily = CreatureFamilyStorage.LookupByKey(petfamily);
             if (petFamily == null)
                 return "";
 

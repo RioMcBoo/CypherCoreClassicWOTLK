@@ -3420,7 +3420,7 @@ namespace Game
                 cInfo.CreatureType = default_;
             }
 
-            if (cInfo.Family != CreatureFamily.None && !CliDB.CreatureFamilyStorage.ContainsKey((int)cInfo.Family))
+            if (cInfo.Family != CreatureFamily.None && !CliDB.CreatureFamilyStorage.ContainsKey(cInfo.Family))
             {
                 CreatureFamily default_ = CreatureFamily.None;
 

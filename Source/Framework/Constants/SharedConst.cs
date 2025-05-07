@@ -226,7 +226,7 @@ namespace Framework.Constants
         public const int ActionBarIndexEnd = 10;
         public const int MaxSpellControlBar = 10;
         public const int MaxPetTalentRank = 3;
-        public const int ActionBarIndexMax = (ActionBarIndexEnd - ActionBarIndexStart);
+        public const int ActionBarIndexMax = ActionBarIndexEnd - ActionBarIndexStart;
 
         /// <summary>
         /// Object Const

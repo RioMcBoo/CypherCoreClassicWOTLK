@@ -614,15 +614,15 @@ namespace Game.Entities
 
             //Determine pet Type
             PetType petType = PetType.Max;
-            if (IsPet() && GetOwner().IsTypeId(TypeId.Player))
+            if (IsPet() && GetOwner() is Player owner)
             {
-                if (GetOwner().GetClass() == Class.Warlock
-                        || GetOwner().GetClass() == Class.Shaman        // Fire Elemental
-                        || GetOwner().GetClass() == Class.DeathKnight) // Risen Ghoul
+                if (owner.GetClass() == Class.Warlock
+                        || owner.GetClass() == Class.Shaman        // Fire Elemental
+                        || owner.GetClass() == Class.DeathKnight) // Risen Ghoul
                 {
                     petType = PetType.Summon;
                 }
-                else if (GetOwner().GetClass() == Class.Hunter)
+                else if (owner.GetClass() == Class.Hunter)
                 {
                     petType = PetType.Hunter;
                     UnitTypeMask |= UnitTypeMask.HunterPet;
@@ -631,7 +631,7 @@ namespace Game.Entities
                 {
                     Log.outError(LogFilter.Unit, 
                         $"Unknown Type pet {GetEntry()} is summoned " +
-                        $"by player class {GetOwner().GetClass()}");
+                        $"by player class {owner.GetClass()}");
                 }
             }
 
@@ -739,6 +739,7 @@ namespace Game.Entities
                         {
                             if (pInfo == null)
                                 SetCreateHealth(30 + 30 * petlevel);
+
                             float bonusDmg = GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.15f;
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel * 2.5f - ((float)petlevel / 2) + bonusDmg);
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel * 2.5f + ((float)petlevel / 2) + bonusDmg);
@@ -748,6 +749,7 @@ namespace Game.Entities
                         {
                             if (pInfo == null)
                                 SetCreateHealth(100 + 120 * petlevel);
+
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
                             break;
@@ -1225,8 +1227,8 @@ namespace Game.Entities
         public void SetBonusDamage(int damage)
         {
             m_bonusSpellDamage = damage;
-            Player playerOwner = GetOwner().ToPlayer();
-            if (playerOwner != null)
+
+            if (GetOwner() is Player playerOwner)
                 playerOwner.SetPetSpellPower(damage);
         }
 
@@ -1237,6 +1239,7 @@ namespace Game.Entities
             float ownersBonus = 0.0f;
 
             Unit owner = GetOwner();
+
             // Handle Death Knight Glyphs and Talents
             float mod = 0.75f;
             if (IsPetGhoul() && (stat == Stats.Stamina || stat == Stats.Strength))
