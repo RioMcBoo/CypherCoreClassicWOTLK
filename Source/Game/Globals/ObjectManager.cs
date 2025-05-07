@@ -8011,7 +8011,10 @@ namespace Game
                 var pInfoMapEntry = petInfoStore.LookupByKey(creatureid);
 
                 if (pInfoMapEntry == null)
+                {
                     pInfoMapEntry = new PetLevelInfo[WorldConfig.Values[WorldCfg.MaxPlayerLevel].Int32];
+                    petInfoStore[creatureid] = pInfoMapEntry;
+                }
 
                 PetLevelInfo pLevelInfo = new();
                 pLevelInfo.health = result.Read<int>(2);
