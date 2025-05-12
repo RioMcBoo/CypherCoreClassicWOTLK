@@ -145,8 +145,10 @@ namespace Game.Entities
                 }
 
                 if (minion.HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
+                {
                     if (GetMinionGUID().IsEmpty())
                         SetMinionGUID(minion.GetGUID());
+                }
 
                 var properties = minion.m_Properties;
                 if (properties != null && properties.Title == SummonTitle.Companion)
@@ -178,8 +180,10 @@ namespace Game.Entities
 
                 // FIXME: hack, speed must be set only at follow
                 if (IsTypeId(TypeId.Player) && minion.IsPet())
+                {
                     for (UnitMoveType i = 0; i < UnitMoveType.Max; ++i)
                         minion.SetSpeedRate(i, m_speed_rate[(int)i]);
+                }
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, Difficulty.None);
@@ -263,6 +267,7 @@ namespace Game.Entities
                     }
                 }
             }
+
             UpdatePetCombatState();
         }
 
@@ -822,14 +827,14 @@ namespace Game.Entities
             Player player = ToPlayer();
             PetStable petStable = player.GetOrInitPetStable();
 
-            var freeActiveSlot = Array.FindIndex(petStable.ActivePets, petInfo => petInfo == null);
-            if (freeActiveSlot == -1)
+            if (petStable.CurrentPetIndex.HasValue || petStable.UnslottedPets.Count > 0)
                 return false;
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetFaction(GetFaction());
-            pet.SetCreatedBySpell(spell_id);            
-            pet.SetUnitFlag(UnitFlags.PlayerControlled);
+            pet.SetCreatedBySpell(spell_id);
+            if (GetTypeId() == TypeId.Player)
+                pet.SetUnitFlag(UnitFlags.PlayerControlled);
 
             if (!pet.InitStatsForLevel(level))
             {
@@ -845,12 +850,12 @@ namespace Game.Entities
             pet.InitPetCreateSpells();
             pet.SetFullHealth();
 
-            petStable.SetCurrentActivePetIndex(freeActiveSlot);
+            petStable.SetCurrentActivePetIndex(0);
 
             PetStable.PetInfo petInfo = new();
             pet.FillPetInfo(petInfo);
             player.AddPetToUpdateFields(petInfo, (PetSaveMode)petStable.GetCurrentActivePetIndex(), PetStableFlags.Active);
-            petStable.ActivePets[freeActiveSlot] = petInfo;
+            petStable.ActivePets[0] = petInfo;
             return true;
         }
 

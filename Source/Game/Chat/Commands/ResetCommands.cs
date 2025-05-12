@@ -180,13 +180,12 @@ namespace Game.Chat
                 target.SendSysMessage(CypherStrings.ResetTalents);
                 if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)
                     handler.SendSysMessage(CypherStrings.ResetTalentsOnline, handler.GetNameLink(target));
-
-                /* TODO: 6.x remove/update pet talents
-                Pet* pet = target.GetPet();
-                Pet.resetTalentsForAllPetsOf(target, pet);
+                                
+                Pet pet = target.GetPet();
+                target.ResetTalentsForAllPets(pet);
                 if (pet != null)
                     target.SendTalentsInfoData(true);
-                */
+                
                 return true;
             }
             else if (!player.GetGUID().IsEmpty())

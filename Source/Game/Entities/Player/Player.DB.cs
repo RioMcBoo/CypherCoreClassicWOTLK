@@ -1715,7 +1715,7 @@ namespace Game.Entities
 
             } while (result.NextRow());
 
-            if (Pet.GetLoadPetInfo(m_petStable, 0, summonedPetNumber, null).Item1 != null)
+            if (Pet.GetLoadPetInfo(m_petStable, 0, summonedPetNumber, null).PetInfo != null)
                 m_temporaryUnsummonedPetNumber = summonedPetNumber;
         }
 

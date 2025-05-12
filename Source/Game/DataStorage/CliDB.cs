@@ -845,6 +845,19 @@ namespace Game.DataStorage
         #endregion
 
         #region Helper Methods
+        public static TalentSpellPos GetTalentSpellPos(int spellId)
+        {
+            return TalentSpellPosMap.LookupByKey(spellId);
+        }
+
+        public static int GetTalentSpellCost(int spellId)
+        {
+            if (GetTalentSpellPos(spellId) is TalentSpellPos pos)
+                return pos.Rank + 1;
+
+            return 0;
+        }
+
         public static float GetGameTableColumnForClass(dynamic row, Class class_)
         {
             if (row.values.Length == (int)Class.Max - 1)

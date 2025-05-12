@@ -986,15 +986,7 @@ namespace Game
             // reset for all pets before pet loading
             if (pCurrChar.HasAtLoginFlag(AtLoginFlags.ResetPetTalents))
             {
-                // Delete all of the player's pet spells
-                PreparedStatement stmtSpells = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_PET_SPELLS_BY_OWNER);
-                stmtSpells.SetInt64(0, pCurrChar.GetGUID().GetCounter());
-                DB.Characters.Execute(stmtSpells);
-
-                // Then reset all of the player's pet specualizations
-                PreparedStatement stmtSpec = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_PET_SPECS_BY_OWNER);
-                stmtSpec.SetInt64(0, pCurrChar.GetGUID().GetCounter());
-                DB.Characters.Execute(stmtSpec);
+                pCurrChar.ResetTalentsForAllPets(null, true);                
             }
 
             // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)

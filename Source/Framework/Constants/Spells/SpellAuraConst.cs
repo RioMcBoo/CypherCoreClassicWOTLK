@@ -152,7 +152,7 @@ namespace Framework.Constants
         ModBaseResistancePct = 142,
         ModResistanceExclusive = 143,
         SafeFall = 144,
-        ModIncreaseHealthPercent2 = 145,
+        ModPetTalentPoints = 145,
         AllowTamePetType = 146,
         MechanicImmunityMask = 147,
         ModChargeRecoveryRate = 148, // NYI

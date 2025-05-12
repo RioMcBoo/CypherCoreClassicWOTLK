@@ -30,11 +30,16 @@ namespace Game.DataStorage
         public int RequiredSpellID;
         public int[] CategoryMask = new int[2];
         public int[] SpellRank = new int[PlayerConst.MaxDB2TalentRank];
-        public int[] PrereqTalent = new int[3];
-        public int[] PrereqRank = new int[3];
+
+        /// <summary> Used only 0-index </summary>
+        private int[] _prereqTalent = new int[3];
+        /// <summary> Used only 0-index </summary>
+        private int[] _prereqRank = new int[3];
 
         #region Properties
         public Class ClassID => (Class)_classID;
+        public int PrereqTalent => _prereqTalent[0];
+        public int PrereqRank => _prereqRank[0];
         #endregion
     }
 

@@ -161,13 +161,10 @@ namespace Game.Entities
                 return false;
 
             // Check talent dependencies
-            for (int i = 0; i < talentInfo.PrereqRank.Length; ++i)
+            if (talentInfo.PrereqTalent > 0)
             {
-                if (talentInfo.PrereqTalent[i] == default)
-                    continue;
-
-                if (!talentMap.TryGetValue(talentInfo.PrereqTalent[i], out itr)
-                    || itr.Rank < talentInfo.PrereqRank[i])
+                if (!talentMap.TryGetValue(talentInfo.PrereqTalent, out itr)
+                    || itr.Rank < talentInfo.PrereqRank)
                 {
                     return false;
                 }
@@ -566,14 +563,117 @@ namespace Game.Entities
 
             InitTalentForLevel();
             return true;
-        }        
+        }
 
-        public void SendTalentsInfoData()
+        public void ResetPetTalents()
         {
-            UpdateTalentData packet = new();
-            var ActiveGroup = GetActiveTalentGroup();
-            packet.ActiveGroup = ActiveGroup;
-            packet.UnspentTalentPoints = GetFreeTalentPoints();
+            // This needs another gossip option + NPC text as a confirmation.
+            // The confirmation gossip listid has the text: "Yes, please do."
+            Pet pet = GetPet();
+
+            if (pet == null || pet.GetPetType() != PetType.Hunter || pet.UsedTalentCount == 0)
+                return;
+
+            CharmInfo charmInfo = pet.GetCharmInfo();
+            if (charmInfo == null)
+            {
+                Log.outError(LogFilter.Player,
+                    $"Object {pet.GetGUID()} is considered pet-like, but doesn't have charm info!");
+
+                return;
+            }
+
+            pet.ResetTalents();
+            SendTalentsInfoData(true);
+        }
+
+        public void ResetTalentsForAllPets(Pet onlinePet = null, bool involuntarily = false)
+        {
+            // not need after this call
+            if (HasAtLoginFlag(AtLoginFlags.ResetPetTalents))
+                RemoveAtLoginFlag(AtLoginFlags.ResetPetTalents, true);
+
+            // reset for online
+            if (onlinePet != null)
+                onlinePet.ResetTalents(involuntarily);
+
+            PetStable petStable = GetPetStable();
+            if (petStable == null)
+                return;
+
+            HashSet<int> petIds = new();
+            if (petStable.CurrentPetIndex.HasValue)
+                petIds.Add(petStable.CurrentPetIndex.Value);
+
+            foreach (var stabledPet in petStable.StabledPets)
+            {
+                if (stabledPet != null)
+                    petIds.Add(stabledPet.PetNumber);
+            }
+
+            foreach (var unslottedPet in petStable.UnslottedPets)
+            {
+                if (unslottedPet != null)
+                    petIds.Add(unslottedPet.PetNumber);
+            }
+
+            // now need only reset for offline pets (all pets except online case)
+            if (onlinePet != null)
+                petIds.Remove(onlinePet.GetCharmInfo().GetPetNumber());
+
+            // no offline pets
+            if (petIds.Empty())
+                return;
+
+            if (onlinePet == null)
+                SendPacket(new TalentsInvoluntarilyReset(true));
+
+            //bool need_comma = false;
+            //std::ostringstream ss;
+            //ss << "DELETE FROM pet_spell WHERE guid IN (";
+
+            //for (uint32 id : petIds)
+            //{
+            //    if (need_comma)
+            //        ss << ',';
+
+            //    ss << id;
+
+            //    need_comma = true;
+            //}
+
+            //ss << ") AND spell IN (";
+
+            //need_comma = false;
+            //for (uint32 spell : sPetTalentSpells)
+            //{
+            //    if (need_comma)
+            //        ss << ',';
+
+            //    ss << spell;
+
+            //    need_comma = true;
+            //}
+
+            //ss << ')';
+
+            //CharacterDatabase.Execute(ss.str().c_str());
+
+            //*********************
+            // Delete all of the player's pet spells
+            PreparedStatement stmtSpells = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_PET_SPELLS_BY_OWNER);
+            stmtSpells.SetInt64(0, GetGUID().GetCounter());
+            DB.Characters.Execute(stmtSpells);
+
+            // Then reset all of the player's pet specualizations
+            PreparedStatement stmtSpec = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_PET_SPECS_BY_OWNER);
+            stmtSpec.SetInt64(0, GetGUID().GetCounter());
+            DB.Characters.Execute(stmtSpec);
+        }
+
+        void BuildPlayerTalentsInfoData(UpdateTalentData data)
+        {
+            data.UnspentTalentPoints = GetFreeTalentPoints();
 
             for (byte specIdx = 0; specIdx < (1 + GetBonusTalentGroupCount()); ++specIdx)
             {
@@ -589,7 +689,7 @@ namespace Game.Entities
                     TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(pair.Key);
                     if (talentInfo == null)
                     {
-                        Log.outError(LogFilter.Player, 
+                        Log.outError(LogFilter.Player,
                             $"Player::SendTalentsInfoData: " +
                             $"Player '{GetName()}' ({GetGuild()}) " +
                             $"has unknown talent id: {pair.Key}.");
@@ -599,7 +699,7 @@ namespace Game.Entities
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellRank[pair.Value.Rank], Difficulty.None);
                     if (spellEntry == null)
                     {
-                        Log.outError(LogFilter.Player, 
+                        Log.outError(LogFilter.Player,
                             $"Player::SendTalentsInfoData: " +
                             $"Player '{GetName()}' ({GetGuild()}) " +
                             $"has unknown talent spell: {talentInfo.SpellID}.");
@@ -610,7 +710,226 @@ namespace Game.Entities
                 }
 
                 groupInfoPkt.GlyphIDs = GetGlyphs(specIdx);
-                packet.TalentGroupInfos.Add(groupInfoPkt);
+                data.TalentGroupInfos.Add(groupInfoPkt);
+            }
+        }
+
+        void BuildPetTalentsInfoData(UpdateTalentData data)
+        {
+            Pet pet = GetPet();
+            if (pet == null)
+                return;
+
+            CreatureTemplate ci = pet.GetCreatureTemplate();
+            if (ci == null)
+                return;
+
+            CreatureFamilyRecord pet_family = CliDB.CreatureFamilyStorage.LookupByKey(ci.Family);
+            if (pet_family == null || pet_family.PetTalentType < 0)
+                return;
+
+            data.UnspentTalentPoints = pet.GetFreeTalentPoints();            
+
+            TalentGroupInfo groupInfoPkt = new();
+            groupInfoPkt.SpecID = PlayerConst.MaxSpecializations;
+
+            for (int talentTabId = 1; talentTabId < CliDB.TalentTabStorage.Count; ++talentTabId)
+            {
+                TalentTabRecord talentTabInfo = CliDB.TalentTabStorage.LookupByKey(talentTabId);
+                if (talentTabInfo == null)
+                    continue;
+
+                if (!talentTabInfo.PetTalentMask.HasAnyFlag(1u << pet_family.PetTalentType))
+                    continue;
+
+                for (int talentId = 0; talentId < CliDB.TalentStorage.Count; ++talentId)
+                {
+                    TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
+                    if (talentInfo == null)
+                        continue;
+
+                    // skip another tab talents
+                    if (talentInfo.TabID != talentTabId)
+                        continue;
+
+                    // find max talent rank (0~4)
+                    sbyte curtalent_maxrank = -1;
+                    for (sbyte rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
+                    {
+                        if (talentInfo.SpellRank[rank] > 0 && pet.HasSpell(talentInfo.SpellRank[rank]))
+                        {
+                            curtalent_maxrank = rank;
+                            break;
+                        }
+                    }
+
+                    // not learned talent
+                    if (curtalent_maxrank < 0)
+                        continue;
+
+                    groupInfoPkt.Talents.Add(new(talentInfo.Id, (byte)curtalent_maxrank));
+                }
+
+                data.TalentGroupInfos.Add(groupInfoPkt);
+            }
+        }
+
+        public void LearnPetTalent(ObjectGuid petGuid, int talentId, int talentRank)
+        {
+            Pet pet = GetPet();
+
+            if (pet == null)
+                return;
+
+            if (petGuid != pet.GetGUID())
+                return;
+
+            byte CurTalentPoints = pet.GetFreeTalentPoints();
+
+            if (CurTalentPoints == 0)
+                return;
+
+            if (talentRank >= PlayerConst.MaxPetTalentRank)
+                return;
+
+            TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
+
+            if (talentInfo == null)
+                return;
+
+            TalentTabRecord talentTabInfo = CliDB.TalentTabStorage.LookupByKey(talentInfo.TabID);
+
+            if (talentTabInfo == null)
+                return;
+
+            CreatureTemplate ci = pet.GetCreatureTemplate();
+
+            if (ci == null)
+                return;
+
+            CreatureFamilyRecord pet_family = CliDB.CreatureFamilyStorage.LookupByKey(ci.Family);
+
+            if (pet_family == null)
+                return;
+
+            if (pet_family.PetTalentType < 0)                       // not hunter pet
+                return;
+
+            // prevent learn talent for different family (cheating)
+            if (!talentTabInfo.PetTalentMask.HasAnyFlag(1u << pet_family.PetTalentType))
+                return;
+
+            // find current max talent rank (0~5)
+            int curtalent_maxrank = 0; // 0 = not learned any rank
+            for (int rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
+            {
+                if (talentInfo.SpellRank[rank] > 0 && pet.HasSpell(talentInfo.SpellRank[rank]))
+                {
+                    curtalent_maxrank = rank + 1;
+                    break;
+                }
+            }
+
+            // we already have same or higher talent rank learned
+            if (curtalent_maxrank >= (talentRank + 1))
+                return;
+
+            // check if we have enough talent points
+            if (CurTalentPoints < (talentRank - curtalent_maxrank + 1))
+                return;
+
+            // Check if it requires another talent
+            if (talentInfo.PrereqTalent > 0)
+            {
+                if (CliDB.TalentStorage.LookupByKey(talentInfo.PrereqTalent) is TalentRecord depTalentInfo)
+                {
+                    bool hasEnoughRank = false;
+                    for (int rank = talentInfo.PrereqRank; rank < PlayerConst.MaxTalentRank; rank++)
+                    {
+                        if (depTalentInfo.SpellRank[rank] != 0)
+                        {
+                            if (pet.HasSpell(depTalentInfo.SpellRank[rank]))
+                                hasEnoughRank = true;
+                        }
+                    }
+
+                    if (!hasEnoughRank)
+                        return;
+                }
+            }
+
+            // Find out how many points we have in this field
+            int spentPoints = 0;
+
+            int tTab = talentInfo.TabID;
+            if (talentInfo.TierID > 0)
+            {
+                int numRows = CliDB.TalentStorage.Count;
+                for (int i = 0; i < numRows; ++i)          // Loop through all talents.
+                {
+                    // Someday, someone needs to revamp
+                    if (CliDB.TalentStorage.LookupByKey(i) is TalentRecord tmpTalent)                                  // the way talents are tracked
+                    {
+                        if (tmpTalent.TabID == tTab)
+                        {
+                            for (int rank = 0; rank < PlayerConst.MaxTalentRank; rank++)
+                            {
+                                if (tmpTalent.SpellRank[rank] != 0)
+                                {
+                                    if (pet.HasSpell(tmpTalent.SpellRank[rank]))
+                                    {
+                                        spentPoints += (rank + 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // not have required min points spent in talent tree
+            if (spentPoints < (talentInfo.TierID * PlayerConst.MaxPetTalentRank))
+                return;
+
+            // spell not set in Talent.db2
+            int spellid = talentInfo.SpellRank[talentRank];
+            if (spellid == 0)
+            {
+                Log.outError(LogFilter.Player,
+                            $"Player::LearnPetTalent: " +
+                            $"Talent.db2 contains talent: {talentId}, Rank: {talentRank}, spell id = 0");
+                return;
+            }
+
+            // already known
+            if (pet.HasSpell(spellid))
+                return;
+
+            // learn! (other talent ranks will unlearned at learning)
+            pet.LearnSpell(spellid);
+
+            Log.outLog(LogFilter.Player, LogLevel.Debug,
+                            $"Player::LearnPetTalent: " +
+                            $"PetTalentID: {talentId}, Rank: {talentRank}, Spell: {spellid}{Environment.NewLine}");
+
+            // update free talent points
+            pet.SetFreeTalentPoints((byte)(CurTalentPoints - (talentRank - curtalent_maxrank + 1)));
+        }
+
+        public void SendTalentsInfoData(bool IsPetTalents = false)
+        {
+            UpdateTalentData packet = new();
+            var ActiveGroup = GetActiveTalentGroup();
+            packet.ActiveGroup = ActiveGroup;
+            packet.IsPetTalents = IsPetTalents;
+
+            if (IsPetTalents)
+            {
+                BuildPetTalentsInfoData(packet);
+            }
+            else
+            {
+                BuildPlayerTalentsInfoData(packet);
             }
 
             SendPacket(packet);

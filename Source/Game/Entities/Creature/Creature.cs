@@ -234,8 +234,7 @@ namespace Game.Entities
                     $"Creature (Entry: {entry}) has no model defined " +
                     $"in table `creature_template`, can't load. ");
                 return false;
-            }
-            
+            }            
 
             CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo, data);
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);

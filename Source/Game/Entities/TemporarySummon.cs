@@ -645,6 +645,8 @@ namespace Game.Entities
             SetBaseAttackTime(WeaponAttackType.OffAttack, SharedConst.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.RangedAttack, SharedConst.BaseAttackTime);
 
+            SetModCastingSpeed(1.0f);
+
             //scale
             SetObjectScale(GetNativeObjectScale());
 
@@ -693,8 +695,10 @@ namespace Game.Entities
                 SetCreateStat(Stats.Spirit, 27);
             }
 
-            // Power
+            // Power            
             SetPowerType(powerType);
+            if (IsPetGhoul() || IsRisenAlly()) // DK pets have energy
+                SetFullPower(powerType);
 
             // Damage
             SetBonusDamage(0);
@@ -711,8 +715,17 @@ namespace Game.Entities
 
                     SetBonusDamage((int)(val * 0.15f));
 
-                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
-                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
+                    if (pInfo != null)
+                    {
+                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, pInfo.minDamage);
+                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, pInfo.maxDamage);
+                    }
+                    else
+                    {
+                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
+                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
+                    }
+
                     break;
                 }
                 case PetType.Hunter:
@@ -938,7 +951,7 @@ namespace Game.Entities
 
         public override void UpdateResistances(SpellSchools school, bool skipDependents = false)
         {
-            if (school != SpellSchools.Normal)
+            if (school > SpellSchools.Normal)
             {
                 UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
                 UnitModResult resistValue = new();
@@ -1242,7 +1255,7 @@ namespace Game.Entities
 
             // Handle Death Knight Glyphs and Talents
             float mod = 0.75f;
-            if (IsPetGhoul() && (stat == Stats.Stamina || stat == Stats.Strength))
+            if ((IsPetGhoul() || IsRisenAlly()) && (stat == Stats.Stamina || stat == Stats.Strength))
             {
                 switch (stat)
                 {

@@ -96,6 +96,21 @@ namespace Game.Networking.Packets
         public bool IsFullUpdate;
     }
 
+    class TalentsInvoluntarilyReset : ServerPacket
+    {
+        public TalentsInvoluntarilyReset(bool isPetTalents) : base(ServerOpcodes.TalentsInvoluntarilyReset)
+        {
+            IsPetTalents = (byte)(isPetTalents ? 1 : 0);
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(IsPetTalents);
+        }
+
+        byte IsPetTalents;
+    }
+
     class LearnPvpTalents : ClientPacket
     {
         public LearnPvpTalents(WorldPacket packet) : base(packet) { }
@@ -161,6 +176,47 @@ namespace Game.Networking.Packets
 
         public uint count;
         public Array<TalentInfo> talentInfos = new(60);
+    }
+
+    class LearnPetTalent : ClientPacket
+    {
+        public LearnPetTalent(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Pet = _worldPacket.ReadPackedGuid();
+            TalentID = _worldPacket.ReadInt32();
+            Rank = _worldPacket.ReadUInt16();
+        }
+
+        public ObjectGuid Pet;
+        public int TalentID;
+        public ushort Rank;
+    }
+
+    class LearnPetPreviewTalents : ClientPacket
+    {
+        public LearnPetPreviewTalents(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Pet = _worldPacket.ReadPackedGuid();
+            count = _worldPacket.ReadUInt32();
+
+            for (int i = 0; i < count; i++)
+            {
+                TalentInfo talentInfo = new TalentInfo();
+                talentInfo.Read(_worldPacket);
+                talentInfos.Add(talentInfo);
+            }
+        }
+
+        public ObjectGuid Pet;
+        public uint count;
+        /// <summary>
+        /// Client has max 24 different pet-talents, rounded up : 30
+        /// </summary>
+        public Array<TalentInfo> talentInfos = new(30);
     }
 
     class RemoveGlyph : ClientPacket

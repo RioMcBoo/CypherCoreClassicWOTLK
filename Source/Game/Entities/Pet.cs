@@ -89,22 +89,28 @@ namespace Game.Entities
             }
         }
 
-        public static (PetStable.PetInfo, PetSaveMode) GetLoadPetInfo(PetStable stable, int petEntry, int petnumber, PetSaveMode? slot)
+        public static (PetStable.PetInfo PetInfo, PetSaveMode SaveMode) GetLoadPetInfo(PetStable stable, int petEntry, int petnumber, PetSaveMode? slot)
         {
             if (petnumber != 0)
             {
                 // Known petnumber entry
                 for (var activeSlot = 0; activeSlot < stable.ActivePets.Length; ++activeSlot)
+                {
                     if (stable.ActivePets[activeSlot] != null && stable.ActivePets[activeSlot].PetNumber == petnumber)
                         return (stable.ActivePets[activeSlot], PetSaveMode.FirstActiveSlot + activeSlot);
+                }
 
                 for (var stableSlot = 0; stableSlot < stable.StabledPets.Length; ++stableSlot)
+                {
                     if (stable.StabledPets[stableSlot] != null && stable.StabledPets[stableSlot].PetNumber == petnumber)
                         return (stable.StabledPets[stableSlot], PetSaveMode.FirstStableSlot + stableSlot);
+                }
 
                 foreach (var pet in stable.UnslottedPets)
+                {
                     if (pet.PetNumber == petnumber)
                         return (pet, PetSaveMode.NotInSlot);
+                }
             }
             else if (slot.HasValue)
             {
@@ -119,12 +125,16 @@ namespace Game.Entities
                 }
 
                 if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
+                {
                     if (stable.ActivePets[(int)slot.Value] != null)
                         return (stable.ActivePets[(int)slot.Value], slot.Value);
+                }
 
                 if (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot)
+                {
                     if (stable.StabledPets[(int)slot.Value] != null)
                         return (stable.StabledPets[(int)slot.Value], slot.Value);
+                }
             }
             else if (petEntry != 0)
             {
@@ -132,8 +142,10 @@ namespace Game.Entities
                 // (only from current or not stabled pets)
 
                 foreach (var pet in stable.UnslottedPets)
+                {
                     if (pet.CreatureId == petEntry)
                         return (pet, PetSaveMode.NotInSlot);
+                }
             }
             else
             {
@@ -361,6 +373,8 @@ namespace Game.Entities
                     if (m_removed)
                         return;
 
+                    InitTalentForLevel();                                   // set original talents points before spell loading
+
                     TimeSpan timediff = LoopTime.ServerTime - lastSaveTime;
                     _LoadAuras(holder.GetResult(PetLoginQueryLoad.Auras), holder.GetResult(PetLoginQueryLoad.AuraEffects), timediff);
 
@@ -368,6 +382,7 @@ namespace Game.Entities
                     if (!isTemporarySummon)
                     {
                         _LoadSpells(holder.GetResult(PetLoginQueryLoad.Spells));
+                        InitTalentForLevel();
                         GetSpellHistory().LoadFromDB<Pet>(holder.GetResult(PetLoginQueryLoad.Cooldowns), holder.GetResult(PetLoginQueryLoad.Charges));
                         LearnPetPassives();
                         InitLevelupSpellsForLevel();
@@ -394,8 +409,9 @@ namespace Game.Entities
                         owner.PetSpellInitialize();
                     }
 
-
                     SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
+
+                    owner.SendTalentsInfoData(true);
 
                     if (GetPetType() == PetType.Hunter)
                     {
@@ -787,6 +803,8 @@ namespace Game.Entities
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry, Global.ObjectMgr.GeneratePetNumber()))
                 return false;
 
+            SetMaxPower(PowerType.Happinnes, GetCreatePowerValue(PowerType.Happinnes));
+            SetPower(PowerType.Happinnes, 166500);
             SetPetNameTimestamp(ServerTime.Zero);
             SetPetExperience(0);
             SetPetNextLevelExperience((int)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
@@ -1160,6 +1178,17 @@ namespace Game.Entities
             if (newspell.ActiveState == ActiveStates.Enabled)
                 ToggleAutocast(spellInfo, true);
 
+            int talentCost = CliDB.GetTalentSpellCost(spellId);
+
+            if (talentCost > 0)
+            {
+                int free_points = GetMaxTalentPointsForLevel(GetLevel());
+                UsedTalentCount += talentCost;
+                // update free talent points
+                free_points -= UsedTalentCount;
+                SetFreeTalentPoints(free_points > 0 ? free_points : 0);
+            }
+
             return true;
         }
 
@@ -1285,6 +1314,18 @@ namespace Game.Entities
 
             RemoveAurasDueToSpell(spellId);
 
+            int talentCost = CliDB.GetTalentSpellCost(spellId);
+            if (talentCost > 0)
+            {
+                if (UsedTalentCount > talentCost)
+                    UsedTalentCount -= talentCost;
+                else
+                    UsedTalentCount = 0;
+                // update free talent points
+                int free_points = GetMaxTalentPointsForLevel(GetLevel()) - UsedTalentCount;
+                SetFreeTalentPoints(free_points > 0 ? free_points : 0);
+            }
+
             if (learnPrev)
             {
                 var prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
@@ -1317,16 +1358,16 @@ namespace Game.Entities
                 CharmActionButton ab = GetCharmInfo().GetActionBarEntry(i);
 
                 if (ab.Action != 0 && ab.IsSpell)
-                    {
+                {
                     if (!HasSpell(ab.Action))
-                            GetCharmInfo().SetActionBar(i, 0, ActiveStates.Passive);
+                        GetCharmInfo().SetActionBar(i, 0, ActiveStates.Passive);
                     else if (ab.State == ActiveStates.Enabled)
-                        {
+                    {
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ab.Action, Difficulty.None);
-                            if (spellInfo != null)
-                                ToggleAutocast(spellInfo, true);
-                        }
+                        if (spellInfo != null)
+                            ToggleAutocast(spellInfo, true);
                     }
+                }
             }
         }
 
@@ -1339,6 +1380,100 @@ namespace Game.Entities
             InitLevelupSpellsForLevel();
 
             CastPetAuras(false);
+        }
+
+        public bool ResetTalents(bool involuntarily = false)
+        {
+            Player player = GetOwner();
+
+            // not need after this call
+            if (player.HasAtLoginFlag(AtLoginFlags.ResetPetTalents))
+                player.RemoveAtLoginFlag(AtLoginFlags.ResetPetTalents, true);
+
+            CreatureTemplate ci = GetCreatureTemplate();
+            if (ci == null)
+                return false;
+
+            // Check pet talent type
+            CreatureFamilyRecord pet_family = CliDB.CreatureFamilyStorage.LookupByKey(ci.Family);
+            if (pet_family == null || pet_family.PetTalentType < 0)
+                return false;
+
+            int level = GetLevel();
+            int talentPointsForLevel = GetMaxTalentPointsForLevel(level);
+
+            if (UsedTalentCount == 0)
+            {
+                SetFreeTalentPoints(talentPointsForLevel);
+                return false;
+            }
+
+            for (int i = 0; i < CliDB.TalentStorage.GetNumRows(); ++i)
+            {
+                TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(i);
+
+                if (talentInfo == null)
+                    continue;
+
+                TalentTabRecord talentTabInfo = CliDB.TalentTabStorage.LookupByKey(talentInfo.TabID);
+
+                if (talentTabInfo == null)
+                    continue;
+
+                // unlearn only talents for pets family talent type
+                if (!talentTabInfo.PetTalentMask.HasAnyFlag(1u << pet_family.PetTalentType))
+                    continue;
+
+                foreach (var talentSpellId in talentInfo.SpellRank)
+                {
+                    foreach (var itr in m_spells.ToList())
+                    {
+                        if (itr.Value.UpdateState == PetSpellState.Removed)                        
+                            continue;
+                        
+                        // remove learned spells (all ranks)
+                        var itrFirstId = Global.SpellMgr.GetFirstSpellInChain(itr.Key);
+
+                        // unlearn if first rank is talent or learned by talent
+                        if (itrFirstId == talentSpellId || Global.SpellMgr.IsSpellLearnToSpell(talentSpellId, itrFirstId))
+                        {
+                            UnlearnSpell(itr.Key, false);
+                        }
+                    }
+                }
+            }
+
+            SetFreeTalentPoints(talentPointsForLevel);
+
+            if (!m_loading)
+                player.PetSpellInitialize();
+
+            if (involuntarily)
+                player.SendPacket(new TalentsInvoluntarilyReset(true));
+
+            return true;
+        }
+
+        void InitTalentForLevel()
+        {
+            int level = GetLevel();
+            int talentPointsForLevel = GetMaxTalentPointsForLevel(level);
+            // Reset talents in case low level (on level down) or wrong points for level (hunter can unlearn TP increase talent)
+            if (talentPointsForLevel == 0 || UsedTalentCount > talentPointsForLevel)
+                ResetTalents(); // Remove all talent points
+
+            SetFreeTalentPoints(talentPointsForLevel - UsedTalentCount);
+
+            if (!m_loading)
+                GetOwner().SendTalentsInfoData(true);
+        }
+
+        int GetMaxTalentPointsForLevel(int level)
+        {
+            int points = (level >= 20) ? ((level - 16) / 4) : 0;
+            // Mod points from owner SPELL_AURA_MOD_PET_TALENT_POINTS
+            points += GetOwner().GetTotalAuraModifier(AuraType.ModPetTalentPoints);
+            return points;
         }
 
         public void ToggleAutocast(SpellInfo spellInfo, bool apply)
@@ -1514,10 +1649,17 @@ namespace Game.Entities
 
             switch (GetPetType())
             {
-                // always same level
                 case PetType.Summon:
-                case PetType.Hunter:
+                    // always same level
                     GivePetLevel(owner.GetLevel());
+                    break;                
+                case PetType.Hunter:
+                    // can't be greater owner level
+                    if (GetLevel() > owner.GetLevel())
+                        GivePetLevel(owner.GetLevel());
+                    // can't be below owner level - 5
+                    else if (GetLevel() + 5 < owner.GetLevel())
+                        GivePetLevel(owner.GetLevel() - 5);
                     break;
                 default:
                     break;
@@ -1699,11 +1841,15 @@ namespace Game.Entities
                 $"PetType: {GetPetType()}  PetNumber: {GetCharmInfo().GetPetNumber()}";
         }
 
+        public byte GetFreeTalentPoints() { return m_unitData.PetTalentPoints; }
+        public void SetFreeTalentPoints(int points) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetTalentPoints), (byte)points); }
+
         public DeclinedName GetDeclinedNames() { return _declinedname; }
 
         public new Dictionary<int, PetSpell> m_spells = new();
         List<int> m_autospells = new();
         public bool m_removed;
+        public int UsedTalentCount { get; private set; }
 
         PetType m_petType;
         TimeSpan m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
@@ -1790,7 +1936,7 @@ namespace Game.Entities
             CurrentPetIndex = index | UnslottedPetIndexMask; 
         }
     }
-    
+
     [Flags]
     public enum ActiveStates : byte
     {

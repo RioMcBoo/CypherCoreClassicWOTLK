@@ -13722,6 +13722,8 @@ namespace Game
         public int health;
         public int mana;
         public int armor;
+        public int minDamage;
+        public int maxDamage;
     }
 
     public struct InstanceSpawnGroupInfo

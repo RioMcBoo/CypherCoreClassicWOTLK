@@ -20,7 +20,7 @@ namespace Game
             Unit pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.CritterGUID);
             if (pet == null)
             {
-                Log.outDebug(LogFilter.Network, 
+                Log.outDebug(LogFilter.Network,
                     $"Critter {packet.CritterGUID} does not exist - " +
                     $"player '{GetPlayer().GetName()}' ({GetPlayer().GetGUID()} / " +
                     $"account: {GetAccountId()}) attempted to dismiss it (possibly lagged out)");
@@ -50,14 +50,14 @@ namespace Game
             Unit pet = Global.ObjAccessor.GetUnit(GetPlayer(), guid1);
             if (pet == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"HandlePetAction: {guid1} doesn't exist for {GetPlayer().GetGUID()}");
                 return;
             }
 
             if (pet != GetPlayer().GetFirstControlled())
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"HandlePetAction: {guid1} does not belong to {GetPlayer().GetGUID()}");
                 return;
             }
@@ -101,7 +101,7 @@ namespace Game
             Unit pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.PetGUID);
             if (pet == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"HandlePetStopAttack: {packet.PetGUID} does not exist");
                 return;
             }
@@ -125,7 +125,7 @@ namespace Game
             CharmInfo charmInfo = pet.GetCharmInfo();
             if (charmInfo == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetAction(petGuid: {guid1}, tagGuid: {guid2}, spellId: {spellid}, flag: {flag}): " +
                     $"object (GUID: {pet.GetGUID()} Entry: {pet.GetEntry()} TypeId: {pet.GetTypeId()}) " +
                     $"is considered pet-like but doesn't have a charminfo!");
@@ -258,7 +258,7 @@ namespace Game
                             charmInfo.SaveStayPosition();
                             break;
                         default:
-                            Log.outError(LogFilter.Network, 
+                            Log.outError(LogFilter.Network,
                                 $"WORLD: unknown PET flag Action {flag} and spellid {spellid}.");
                             break;
                     }
@@ -370,7 +370,7 @@ namespace Game
                             pet.SendPetAIReaction(guid1);
                         }
 
-                        if (unit_target != null && !GetPlayer().IsFriendlyTo(unit_target) 
+                        if (unit_target != null && !GetPlayer().IsFriendlyTo(unit_target)
                             && !pet.IsPossessed() && !pet.IsVehicle())
                         {
                             // This is true if pet has no target or has target but targets differs.
@@ -410,7 +410,7 @@ namespace Game
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.Network, 
+                    Log.outError(LogFilter.Network,
                         $"WORLD: unknown PET flag Action {flag} and spellid {spellid}.");
                     break;
             }
@@ -456,7 +456,7 @@ namespace Game
             {
                 if (!GetPlayer().IsGameMaster() && !GetPlayer().HasAuraType(AuraType.OpenStable))
                 {
-                    Log.outDebug(LogFilter.Network, 
+                    Log.outDebug(LogFilter.Network,
                         $"{guid} attempt open stable in cheating way.");
                     return false;
                 }
@@ -466,7 +466,7 @@ namespace Game
             {
                 if (GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags1.StableMaster, NPCFlags2.None) == null)
                 {
-                    Log.outDebug(LogFilter.Network, 
+                    Log.outDebug(LogFilter.Network,
                         $"Stablemaster {guid} not found or you can't interact with him.");
                     return false;
                 }
@@ -481,7 +481,7 @@ namespace Game
             Unit pet = Global.ObjAccessor.GetUnit(GetPlayer(), petguid);
             if (pet == null || pet != GetPlayer().GetFirstControlled())
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"HandlePetSetAction: Unknown {petguid} or pet owner {GetPlayer().GetGUID()}");
                 return;
             }
@@ -489,7 +489,7 @@ namespace Game
             CharmInfo charmInfo = pet.GetCharmInfo();
             if (charmInfo == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetSetAction: {pet.GetGUID()} " +
                     $"is considered pet-like but doesn't have a charminfo!");
                 return;
@@ -507,7 +507,7 @@ namespace Game
             int spell_id = packet.ActionButton.Action;
             ActiveStates act_state = packet.ActionButton.State;
 
-            Log.outDebug(LogFilter.Network, 
+            Log.outDebug(LogFilter.Network,
                 $"Player {GetPlayer().GetName()} has changed pet spell action. " +
                 $"Position: {position}, Spell: {spell_id}, State: {act_state}");
 
@@ -534,8 +534,8 @@ namespace Game
                                 {
                                     if (unit.GetEntry() == petControlled.GetEntry())
                                         unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, true);
+                                }
                             }
-                        }
                         }
                         //sign for no/turn off autocast
                         else if (act_state == ActiveStates.Disabled)
@@ -550,9 +550,9 @@ namespace Game
                                 {
                                     if (unit.GetEntry() == petControlled.GetEntry())
                                         unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, false);
+                                }
                             }
                         }
-                    }
                     }
 
                     charmInfo.SetActionBar((byte)position, spell_id, act_state);
@@ -645,14 +645,14 @@ namespace Game
             Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.PetGUID);
             if (pet == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetSpellAutocast: {packet.PetGUID} not found.");
                 return;
             }
 
             if (pet != GetPlayer().GetGuardianPet() && pet != GetPlayer().GetCharmed())
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetSpellAutocast: {packet.PetGUID} " +
                     $"isn't pet of player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}).");
                 return;
@@ -661,7 +661,7 @@ namespace Game
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.SpellID, pet.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetSpellAutocast: " +
                     $"Unknown spell id {packet.SpellID} used by {packet.PetGUID}.");
                 return;
@@ -681,7 +681,7 @@ namespace Game
                 CharmInfo charmInfo = petControlled.GetCharmInfo();
                 if (charmInfo == null)
                 {
-                    Log.outError(LogFilter.Network, 
+                    Log.outError(LogFilter.Network,
                         $"WorldSession.HandlePetSpellAutocastOpcod: " +
                         $"object {petControlled.GetGUID()} is considered pet-like " +
                         $"but doesn't have a charminfo!");
@@ -703,7 +703,7 @@ namespace Game
             Unit caster = Global.ObjAccessor.GetUnit(GetPlayer(), petCastSpell.PetGUID);
             if (caster == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetCastSpell: Caster {petCastSpell.PetGUID} not found.");
                 return;
             }
@@ -711,7 +711,7 @@ namespace Game
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(petCastSpell.Cast.SpellID, caster.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetCastSpell: unknown spell id {petCastSpell.Cast.SpellID} " +
                     $"tried to cast by {petCastSpell.PetGUID}");
                 return;
@@ -720,7 +720,7 @@ namespace Game
             // This opcode is also sent from charmed and possessed units (players and creatures)
             if (caster != GetPlayer().GetGuardianPet() && caster != GetPlayer().GetCharmed())
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetCastSpell: {petCastSpell.PetGUID} " +
                     $"isn't pet of player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}).");
                 return;
@@ -829,6 +829,26 @@ namespace Game
                         _player.CharmSpellInitialize();
                 }
             }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.PetLearnTalent)]
+        void HandlePetLearnTalent(LearnPetTalent packet)
+        {
+            _player.LearnPetTalent(packet.Pet, packet.TalentID, packet.Rank);
+            _player.SendTalentsInfoData(true);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.LearnPreviewTalentsPet)]
+        void HandlePetLearnPreviewTalents(LearnPetPreviewTalents packet)
+        {
+            ObjectGuid guid = new();
+
+            foreach (var i in packet.talentInfos)
+            {
+                _player.LearnPetTalent(guid, i.TalentID, i.Rank);
+            }
+
+            _player.SendTalentsInfoData(true);
         }
     }
 }

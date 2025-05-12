@@ -474,6 +474,28 @@ namespace Scripts.World.NpcsSpecial
         ];
     }
 
+    enum PetTrainerOption
+    {
+        PetUnlearn = 6520,
+        PleaseDo = 0
+    };
+
+    [Script]
+    class npc_pet_trainer : ScriptedAI
+    {
+        public npc_pet_trainer(Creature creature) : base(creature) { }
+
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
+        {
+            if (menuId == (int)PetTrainerOption.PetUnlearn && gossipListId == (int)PetTrainerOption.PleaseDo)
+            {
+                player.ResetPetTalents();
+                ScriptObject.CloseGossipMenuFor(player);
+            }
+            return false;
+        }
+    }
+
     [Script]
     class npc_doctor : ScriptedAI
     {
