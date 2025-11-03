@@ -14,7 +14,7 @@ The current support game version is: 3.4.3.54261
 * ~~Download and Complie the Extractor [Download](https://github.com/CypherCore/Tools)~~ Use TrinityCore extractors for now: [Project for compilation](https://github.com/TrinityCoreLegacy/TrinityCore/tree/3.4.3)
 * Run all extractors in the wow directory
 * Copy all created folders into server directory (ex: C:\CypherCore\Data)
-* Make sure Conf files are updated and point the the correct folders and sql user and databases
+* Make sure Conf files are updated and point the the correct folders
 
 ### Installing the database
 * Download the full Trinity Core database [(TDB_full_343.24081_2024_08_17)](https://github.com/TrinityCore/TrinityCore/releases/tag/TDB343.24081)
@@ -22,7 +22,7 @@ The current support game version is: 3.4.3.54261
 * Make sure Conf files are updated and point the the correct folders and sql user and databases
 
 ### Playing
-* Must use Arctium WoW Client Launcher [Download](https://arctium.io/wow)
+* Must use [Arctium WoW Client Launcher](https://arctium.io/wow)
 * Create link with next parameters (example for Windows): "<path>\World of Warcraft Classic\Arctium WoW Launcher.exe" --version=Classic
 * Modify your "<path>\World of Warcraft\_classic_\WTF\Config.wtf"  ->  SET portal "127.0.0.1"
 
