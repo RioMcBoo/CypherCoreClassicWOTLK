@@ -11,7 +11,7 @@ The current support game version is: 3.4.3.54261
 * Optional: [MySQL Server 8.0.35](https://downloads.mysql.com/archives/community/) (instead of MariaDB, This is a proven version)
 
 ### Server Setup
-* ~~Download and Complie the Extractor [Download](https://github.com/CypherCore/Tools)~~ Use TrinityCore extractors for now: [Download](https://github.com/TrinityCoreLegacy/TrinityCore/tree/3.4.3)
+* ~~Download and Complie the Extractor [Download](https://github.com/CypherCore/Tools)~~ Use TrinityCore extractors for now: [Project for compilation](https://github.com/TrinityCoreLegacy/TrinityCore/tree/3.4.3)
 * Run all extractors in the wow directory
 * Copy all created folders into server directory (ex: C:\CypherCore\Data)
 * Make sure Conf files are updated and point the the correct folders and sql user and databases
