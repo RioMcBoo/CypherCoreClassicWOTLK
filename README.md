@@ -47,7 +47,7 @@ The current support game version is: 3.4.3.54261
 ### Notes
 * The version of the Mmap/Vmap/etc extractor itself must support the current client version. The version of the extractor's output files must match the version of the processor for these files in the solution. Unfortunately, when working with outdated TC branches, the supported version of the extractor can only be determined from the commit history. To avoid errors, simply follow Server Setup section.
 * To run the emulator in debug mode, you need to configure configuration files directly in the final build folder.
-* It is recommended to reassign the path to the SQL files to a trusted folder whose contents will not change each time you work with different branches in version control systems (e.g. Git) to avoid database corruption due to automatic DB updates. And copy updates from the solution manually to a trusted folder (or control the automatic update setup in the configuration files in all branches).
+* It is recommended to reassign the path to the SQL files to a trusted folder whose contents will not change each time you work with different branches in version control systems (e.g. Git) to avoid database corruption due to automatic DB updates. And copy updates from the solution manually to the trusted folder (or control the automatic update settings in the configuration files in the all final build folders of all branches of the solution).
 
 ### Legal
 * Blizzard, Battle.net, World of Warcraft, and all associated logos and designs are trademarks or registered trademarks of Blizzard Entertainment.
