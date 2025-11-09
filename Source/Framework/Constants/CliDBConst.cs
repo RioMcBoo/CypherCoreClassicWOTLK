@@ -1831,15 +1831,18 @@ namespace Framework.Constants
         Some = 8
     }
 
+    [Flags]
     public enum MountCapabilityFlags : int
     {
         Ground = 0x1,
         Flying = 0x2,
         Float = 0x4,
         Underwater = 0x8,
+        Jump = 0x10,
         IgnoreRestrictions = 0x20
     }
 
+    [Flags]
     public enum MountFlags : int
     {
         SelfMount = 0x02,                   // Player becomes the mount himself
