@@ -76,6 +76,18 @@ namespace Game.Entities
             return GetLiquidStatus().HasFlag(ZLiquidStatus.OceanFloor);
         }
 
+        private void GetInWaterState(ZLiquidStatus liquidStatus, out bool isSubmerged, out bool isUndernWater)
+        {
+            isSubmerged = false;
+            isUndernWater = false;
+
+            if (HasUnitMovementFlag(MovementFlag.Swimming))
+            {
+                isSubmerged = liquidStatus.HasAnyFlag(ZLiquidStatus.InWater);
+                isUndernWater = liquidStatus.HasAnyFlag(ZLiquidStatus.UnderWater);
+            }
+        }
+
         void PropagateSpeedChange() { GetMotionMaster().PropagateSpeedChange(); }
 
         public Speed GetSpeed(UnitMoveType mtype)
@@ -906,14 +918,15 @@ namespace Game.Entities
                 return;
 
             // remove appropriate auras if we are swimming/not swimming respectively
-            if (IsInWater())
+            GetInWaterState(GetLiquidStatus(), out bool isSubmerged, out bool isUndernWater);
+            if (isUndernWater)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.UnderWater);
-            else
+            if (!isSubmerged)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.AboveWater);
 
             // liquid aura handling
             LiquidTypeRecord curLiquid = null;
-            if (IsInWater() && newLiquidData != null)
+            if (isSubmerged && newLiquidData != null)
                 curLiquid = CliDB.LiquidTypeStorage.LookupByKey(newLiquidData.entry);
             if (curLiquid != _lastLiquid)
             {
