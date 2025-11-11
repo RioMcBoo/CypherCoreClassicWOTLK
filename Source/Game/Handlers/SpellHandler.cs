@@ -309,40 +309,6 @@ namespace Game
             });
         }
 
-        [WorldPacketHandler(ClientOpcodes.PetCancelAura, Processing = PacketProcessing.Inplace)]
-        void HandlePetCancelAura(PetCancelAura packet)
-        {
-            if (!Global.SpellMgr.HasSpellInfo(packet.SpellID, Difficulty.None))
-            {
-                Log.outError(LogFilter.Network, 
-                    $"WORLD: unknown PET spell id {packet.SpellID}");
-                return;
-            }
-
-            Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(_player, packet.PetGUID);
-            if (pet == null)
-            {
-                Log.outError(LogFilter.Network, 
-                    $"HandlePetCancelAura: Attempt to cancel an aura for non-existant {packet.PetGUID} by player '{GetPlayer().GetName()}'");
-                return;
-            }
-
-            if (pet != GetPlayer().GetGuardianPet() && pet != GetPlayer().GetCharmed())
-            {
-                Log.outError(LogFilter.Network, 
-                    $"HandlePetCancelAura: {packet.PetGUID} is not a pet of player '{GetPlayer().GetName()}'");
-                return;
-            }
-
-            if (!pet.IsAlive())
-            {
-                pet.SendPetActionFeedback(PetActionFeedback.Dead, 0);
-                return;
-            }
-
-            pet.RemoveOwnedAura(packet.SpellID, ObjectGuid.Empty, 0, AuraRemoveMode.Cancel);
-        }
-
         [WorldPacketHandler(ClientOpcodes.CancelModSpeedNoControlAuras, Processing = PacketProcessing.Inplace)]
         void HandleCancelModSpeedNoControlAuras(CancelModSpeedNoControlAuras cancelModSpeedNoControlAuras)
         {

@@ -1792,13 +1792,13 @@ namespace Game.Entities
     }
     
     [Flags]
-    public enum ActiveStates : byte
+    public enum ActiveStates : int
     {
         Passive = 0x01,
         Defensive = 0x02,
         Agressive = 0x04,
-        AutoCast = 0x40,
-        Spell = 0x80,
+        AutoCast = 0x80,
+        Spell = 0x100,
 
         Disabled = Spell | Passive,
         Enabled = Spell | AutoCast,
