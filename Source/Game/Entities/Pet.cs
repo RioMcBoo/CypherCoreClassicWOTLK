@@ -829,7 +829,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    AddSpell(result.Read<int>(0), (ActiveStates)result.Read<byte>(1), PetSpellState.Unchanged);
+                    AddSpell(result.Read<int>(0), (ActiveStates)result.Read<uint>(1), PetSpellState.Unchanged);
                 }
                 while (result.NextRow());
             }
@@ -864,14 +864,14 @@ namespace Game.Entities
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
                         stmt.SetInt32(1, pair.Key);
-                        stmt.SetUInt8(2, (byte)pair.Value.ActiveState);
+                        stmt.SetUInt32(2, (uint)pair.Value.ActiveState);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.New:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
                         stmt.SetInt32(1, pair.Key);
-                        stmt.SetUInt8(2, (byte)pair.Value.ActiveState);
+                        stmt.SetUInt32(2, (uint)pair.Value.ActiveState);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.Unchanged:
