@@ -137,11 +137,6 @@ namespace System.Collections.Generic
             collection.RemoveAll(check.Invoke);
         }
 
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
-        {
-            return source.OrderBy(x => Guid.NewGuid());
-        }
-
         public static void Swap<T>(this T[] array, int position1, int position2)
         {
             //
@@ -263,6 +258,12 @@ namespace System.Collections.Generic
         {
             while (list.Count <= index)
                 list.Add(defaultValue);
+        }
+
+        public static T[] ReverseAnd<T>(this T[] array)
+        {
+            array.Reverse();
+            return array;
         }
     }
 

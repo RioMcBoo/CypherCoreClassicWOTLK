@@ -372,7 +372,7 @@ namespace System
         public static string ToHexString(this byte[] byteArray, bool reverse = false)
         {
             if (reverse)
-                return byteArray.Reverse().Aggregate("", (current, b) => current + b.ToString("X2"));
+                return byteArray.ReverseAnd().Aggregate("", (current, b) => current + b.ToString("X2"));
             else
                 return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
         }
@@ -387,7 +387,7 @@ namespace System
                 string temp = String.Concat(str[i * 2], str[i * 2 + 1]);
                 res[i] = Convert.ToByte(temp, 16);
             }
-            return reverse ? res.Reverse().ToArray() : res;
+            return reverse ? res.ReverseAnd().ToArray() : res;
         }
 
         public static byte[] ToByteArray(this string value, char separator)
