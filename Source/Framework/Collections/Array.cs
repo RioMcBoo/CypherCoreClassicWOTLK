@@ -7,34 +7,25 @@ namespace System.Collections.Generic
 {
     public class Array<T> : List<T>
     {
-        int _limit;
+        public Array(int size) : base(size) { }
 
-        public Array(int size) : base(size)
-        {
-            _limit = size;
-        }
-
-        public Array(params T[] args) : base(args)
-        {
-            _limit = args.Length;
-        }
+        public Array(params T[] args) : base(args) { }
 
         public Array(int size, T defaultFillValue) : base(size)
         {
-            _limit = size;
             Fill(defaultFillValue);
         }
 
         public void Fill(T value)
         {
-            for (var i = 0; i < _limit; ++i)
+            for (var i = 0; i < base.Capacity; ++i)
                 Add(value);
         }
        
         public new void Add(T item)
         {
-            if (Count >= _limit)
-                throw new InternalBufferOverflowException("Attempted to read more array elements from packet " + Count + 1 + " than allowed " + _limit);
+            if (Count >= base.Capacity)
+                throw new InternalBufferOverflowException($"Attempted to read more array elements from packet {Count + 1} than allowed {base.Capacity}");
 
             base.Add(item);
         }
@@ -49,8 +40,8 @@ namespace System.Collections.Generic
             {
                 if (index >= Count)
                 {
-                    if (Count >= _limit)
-                        throw new InternalBufferOverflowException("Attempted to read more array elements from packet " + Count + 1 + " than allowed " + _limit);
+                    if (Count >= base.Capacity)
+                        throw new InternalBufferOverflowException($"Attempted to read more array elements from packet {Count + 1} than allowed {base.Capacity}");
 
                     Insert(index, value);
                 }
@@ -59,7 +50,7 @@ namespace System.Collections.Generic
             }
         }
 
-        public int GetLimit() { return _limit; }
+        public int GetLimit() { return base.Capacity; }
 
         public static implicit operator T[] (Array<T> array)
         {
