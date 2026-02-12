@@ -415,10 +415,6 @@ namespace Game
                     }
                     break;
                 }
-                default:
-                    Log.outError(LogFilter.Network, 
-                        $"WORLD: unknown PET flag Action {flag} and spellid {spellid}.");
-                    break;
             }
         }
 
