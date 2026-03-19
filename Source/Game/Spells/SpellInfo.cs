@@ -401,7 +401,7 @@ namespace Game.Spells
 
         public bool NeedsExplicitUnitTarget()
         {
-            return Convert.ToBoolean(GetExplicitTargetMask() & SpellCastTargetFlags.UnitMask);
+            return GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask);
         }
 
         public bool NeedsToBeTriggeredByCaster(SpellInfo triggeringSpell)
@@ -1011,8 +1011,10 @@ namespace Game.Spells
                             {
                                 var mountType = spellShapeshiftForm.MountTypeID;
                                 if (mountType != 0)
+                                {
                                     if (player.GetMountCapability(mountType) == null)
                                         return SpellCastResult.NotHere;
+                            }
                             }
                             break;
                         }
@@ -3379,6 +3381,7 @@ namespace Game.Spells
         {
             if (Id == spellInfo.Id)
                 return false;
+
             return IsRankOf(spellInfo);
         }
 

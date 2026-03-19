@@ -75,7 +75,7 @@ namespace Game.Chat
             // Check if pet already has it
             if (pet.HasSpell(spellId))
             {
-                handler.SendSysMessage("Pet already has spell: {0}", spellId);
+                handler.SendSysMessage($"Pet already has spell: {spellId}");
                 return false;
             }
 
@@ -88,7 +88,7 @@ namespace Game.Chat
 
             pet.LearnSpell(spellId);
 
-            handler.SendSysMessage("Pet has learned spell {0}", spellId);
+            handler.SendSysMessage($"Pet has learned spell {spellId}");
             return true;
         }
 
@@ -107,7 +107,7 @@ namespace Game.Chat
             if (pet.HasSpell(spellId))
                 pet.RemoveSpell(spellId, false);
             else
-                handler.SendSysMessage("Pet doesn't have that spell");
+                handler.SendSysMessage($"Pet doesn't have spell {spellInfo.Id}");
 
             return true;
         }

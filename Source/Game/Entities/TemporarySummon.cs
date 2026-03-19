@@ -938,7 +938,7 @@ namespace Game.Entities
 
         public override void UpdateResistances(SpellSchools school, bool skipDependents = false)
         {
-            if (school != SpellSchools.Normal)
+            if (school > SpellSchools.Normal)
             {
                 UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
                 UnitModResult resistValue = new();

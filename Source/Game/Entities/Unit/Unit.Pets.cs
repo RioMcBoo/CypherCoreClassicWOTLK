@@ -145,8 +145,10 @@ namespace Game.Entities
                 }
 
                 if (minion.HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
+                {
                     if (GetMinionGUID().IsEmpty())
                         SetMinionGUID(minion.GetGUID());
+                }
 
                 var properties = minion.m_Properties;
                 if (properties != null && properties.Title == SummonTitle.Companion)
@@ -178,8 +180,10 @@ namespace Game.Entities
 
                 // FIXME: hack, speed must be set only at follow
                 if (IsTypeId(TypeId.Player) && minion.IsPet())
+                {
                     for (UnitMoveType i = 0; i < UnitMoveType.Max; ++i)
                         minion.SetSpeedRate(i, m_speed_rate[(int)i]);
+                }
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, Difficulty.None);

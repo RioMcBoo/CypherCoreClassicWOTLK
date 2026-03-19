@@ -7,7 +7,6 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Global;
@@ -608,7 +607,7 @@ namespace Scripts.Spells.Rogue
                 }
             }
 
-            List<int> possibleBuffs = new(Spells);
+            List<int> possibleBuffs = Spells.ToList();
             possibleBuffs.Shuffle();
 
             // https://www.icy-veins.com/wow/outlaw-rogue-pve-dps-rotation-cooldowns-abilities

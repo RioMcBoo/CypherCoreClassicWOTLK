@@ -1138,7 +1138,7 @@ namespace Game
                 TimeSpan configTimeZoneOffsetValue = WorldConfig.Values[WorldCfg.TimeZoneOffset].TimeSpan;
 
                 if (configTimeZoneOffsetValue < Timezone.MinimalTimeZoneOffset)
-                    Timezone.Initialize(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now));
+                    Timezone.Initialize(TimeZoneInfo.Local.GetUtcOffset(DateTime.Now));
                 else if (configTimeZoneOffsetValue > Timezone.MaximalTimeZoneOffset)
                     Timezone.Initialize((RealmZone)WorldConfig.Values[WorldCfg.RealmZone].Int32);
                 else

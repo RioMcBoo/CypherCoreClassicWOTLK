@@ -224,7 +224,7 @@ namespace Game.Entities
             m_creatureDifficulty = creatureInfo.GetDifficulty(!IsPet() ? GetMap().GetDifficultyID() : Difficulty.None);
 
             // equal to player Race field, but creature does not have race
-            SetRace(0);
+            SetRace(Race.None);
             SetClass(creatureInfo.UnitClass);
 
             // Cancel load if no model defined
@@ -236,7 +236,6 @@ namespace Game.Entities
                 return false;
             }
             
-
             CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo, data);
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
             if (minfo == null)                                             // Cancel load if no model defined
