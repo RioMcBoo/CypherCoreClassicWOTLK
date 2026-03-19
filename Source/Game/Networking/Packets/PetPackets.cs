@@ -78,7 +78,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16((ushort)CreatureFamily);
             _worldPacket.WriteUInt16((ushort)Specialization);
             _worldPacket.WriteInt32(TimeLimit);
-            _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
+            _worldPacket.WriteUInt8((byte)CommandState);
+            _worldPacket.WriteUInt8(Flag);
             _worldPacket.WriteUInt8((byte)ReactState);
 
             foreach (var actionButton in ActionButtons)
@@ -117,8 +118,7 @@ namespace Game.Networking.Packets
         public CommandStates CommandState;
         public byte Flag;
 
-        public CharmActionButton[] ActionButtons = new CharmActionButton[10];
-
+        public Array<CharmActionButton> ActionButtons = new (SharedConst.ActionBarIndexMax);
         public List<CharmActionButton> Actions = new();
         public List<PetSpellCooldown> Cooldowns = new();
         public List<PetSpellHistory> SpellHistory = new();

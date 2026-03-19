@@ -69,15 +69,6 @@ namespace Framework.Constants
         Attack = 1
     }
 
-    public enum CommandStates : byte
-    {
-        Stay = 0,
-        Follow = 1,
-        Attack = 2,
-        Abandon = 3,
-        MoveTo = 4
-    }
-
     public enum PetNameInvalidReason : byte
     {
         // custom, not send

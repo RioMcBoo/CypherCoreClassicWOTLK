@@ -1243,7 +1243,7 @@ namespace Game.Entities
             petSpells.Flag = 0x8;
 
             for (int i = 0; i < SharedConst.MaxSpellControlBar; ++i)
-                petSpells.ActionButtons[i] = new(0, (ActiveStates)(i + 8));
+                petSpells.ActionButtons[i] = new((ActiveStates)(i + 8), 0);
 
             for (int i = 0; i < SharedConst.MaxCreatureSpells; ++i)
             {
@@ -1266,7 +1266,7 @@ namespace Game.Entities
                 if (spellInfo.IsPassive())
                     vehicle.CastSpell(vehicle, spellInfo.Id, true);
 
-                petSpells.ActionButtons[i] = new(spellId, (ActiveStates)(i + 8));
+                petSpells.ActionButtons[i] = new((ActiveStates)(i + 8), spellId);
             }
 
             // Cooldowns

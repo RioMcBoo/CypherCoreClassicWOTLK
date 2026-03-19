@@ -381,29 +381,22 @@ namespace Game.Entities
 
     public class ActionButton
     {
-        uint _packedData;
+        WowActionButton _packedData;
         ActionButtonUpdateState _uState;
 
-        public ActionButton()
+        public ActionButton(uint packedData = 0)
         {
-            _packedData = 0;
+            _packedData = new(packedData);
             _uState = ActionButtonUpdateState.New;
         }
-
-        public ActionButton(uint packedData)
-        {
-            _packedData = packedData;
-            _uState = ActionButtonUpdateState.New;
-        }
-
-        public uint PackedData => _packedData;
-        public ActionButtonUpdateState State { get =>_uState; set => _uState = value; }
-        public ActionButtonType Type => UNIT_ACTION_BUTTON_TYPE(_packedData);
-        public int Action => UNIT_ACTION_BUTTON_ACTION(_packedData);
+        public WowActionButton PackedData => _packedData;
+        public ActionButtonUpdateState State { get => _uState; set => _uState = value; }
+        public ActionButtonType Type => (ActionButtonType)_packedData.Type;
+        public int Action => _packedData.Value;
 
         public void SetActionAndType(int action, ActionButtonType type)
         {
-            var newData = MAKE_UNIT_ACTION_BUTTON(action, type);
+            WowActionButton newData = new(WowActionButton.MakePackedData((int)type, action));
 
             if (newData != _packedData || _uState == ActionButtonUpdateState.Deleted)
             {
@@ -411,21 +404,6 @@ namespace Game.Entities
                 if (_uState != ActionButtonUpdateState.New)
                     _uState = ActionButtonUpdateState.Changed;
             }
-        }
-
-        static uint MAKE_UNIT_ACTION_BUTTON(int action, ActionButtonType type)
-        {
-            return (uint)(action | ((int)type << 23));
-        }
-
-        static int UNIT_ACTION_BUTTON_ACTION(uint packedData)
-        {
-            return (int)(packedData & 0x007FFFFF);
-        }
-
-        static ActionButtonType UNIT_ACTION_BUTTON_TYPE(uint packedData)
-        {
-            return (ActionButtonType)((packedData & 0xFF800000) >>> 23);
         }
     }
 

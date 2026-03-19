@@ -1791,22 +1791,8 @@ namespace Game.Entities
         }
     }
     
-    [Flags]
-    public enum ActiveStates : int
-    {
-        Passive = 0x01,
-        Defensive = 0x02,
-        Agressive = 0x04,
-        AutoCast = 0x80,
-        Spell = 0x100,
 
-        Disabled = Spell | Passive,
-        Enabled = Spell | AutoCast,
-        Command = Passive | Defensive | Agressive,
-        Reaction = Defensive | Agressive,
 
-        Decide = 0x00                                     // custom
-    }
 
     enum PetLoginQueryLoad
     {

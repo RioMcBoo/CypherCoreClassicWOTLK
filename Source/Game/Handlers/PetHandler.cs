@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -135,10 +136,11 @@ namespace Game
 
             switch (flag)
             {
-                case ActiveStates.Command: //0x07
+                case ActiveStates.Command:
+                {
                     switch ((CommandStates)spellid)
                     {
-                        case CommandStates.Stay: // flat = 1792  //STAY
+                        case CommandStates.Stay:
                             pet.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
                             pet.GetMotionMaster().MoveIdle();
                             charmInfo.SetCommandState(CommandStates.Stay);
@@ -150,7 +152,7 @@ namespace Game
                             charmInfo.SetIsReturning(false);
                             charmInfo.SaveStayPosition();
                             break;
-                        case CommandStates.Follow: // spellid = 1792  //FOLLOW
+                        case CommandStates.Follow:
                             pet.AttackStop();
                             pet.InterruptNonMeleeSpells(false);
                             pet.GetMotionMaster().MoveFollow(GetPlayer(), SharedConst.PetFollowDist, pet.GetFollowAngle());
@@ -162,7 +164,7 @@ namespace Game
                             charmInfo.SetIsCommandFollow(true);
                             charmInfo.SetIsFollowing(false);
                             break;
-                        case CommandStates.Attack: // spellid = 1792  //ATTACK
+                        case CommandStates.Attack:
                         {
                             // Can't attack if owner is pacified
                             if (GetPlayer().HasAuraType(AuraType.ModPacify))
@@ -260,11 +262,14 @@ namespace Game
                             break;
                         default:
                             Log.outError(LogFilter.Network, 
-                                $"WORLD: unknown PET flag Action {flag} and spellid {spellid}.");
-                            break;
+                                $"WorldSession.HandlePetAction: Command {spellid} " +
+                                $"is not valid. Skip.");
+                            return;
                     }
                     break;
-                case ActiveStates.Reaction: // 0x6
+                }
+                case ActiveStates.Reaction:
+                {
                     switch ((ReactStates)spellid)
                     {
                         case ReactStates.Passive: //passive
@@ -275,17 +280,18 @@ namespace Game
                             if (pet.IsTypeId(TypeId.Unit))
                                 pet.ToCreature().SetReactState((ReactStates)spellid);
                             break;
-                    }
-                    break;
                 default:
-                {
-                    if (!flag.HasFlag(ActiveStates.Spell))
-                    {
                         Log.outError(LogFilter.Network,
-                        $"WORLD: unknown PET flag Action {flag} and spellid {spellid}.");
+                            $"WorldSession.HandlePetAction: Reaction {spellid} " +
+                            $"is not valid. Skip.");
+                            return;
+                    }
                         break;
                     }
-
+                case ActiveStates.Passive:
+                case ActiveStates.Disabled:
+                case ActiveStates.Enabled:
+                {
                     Unit unit_target = null;
 
                     if (!guid2.IsEmpty())
@@ -416,6 +422,9 @@ namespace Game
                     break;
                 }
             }
+
+            Log.outDebug(LogFilter.Network,
+                        $"WorldSession.HandlePetAction: Unknown Action {flag} and spellid {spellid})");
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryPetName, Processing = PacketProcessing.Inplace)]
@@ -483,7 +492,7 @@ namespace Game
             Unit currentPet = Global.ObjAccessor.GetUnit(GetPlayer(), petguid);
             if (currentPet == null || currentPet != GetPlayer().GetFirstControlled())
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"HandlePetSetAction: Unknown {petguid} or pet owner {GetPlayer().GetGUID()}");
                 return;
             }
@@ -491,7 +500,7 @@ namespace Game
             CharmInfo charmInfo = currentPet.GetCharmInfo();
             if (charmInfo == null)
             {
-                Log.outError(LogFilter.Network, 
+                Log.outError(LogFilter.Network,
                     $"WorldSession.HandlePetSetAction: {currentPet.GetGUID()} " +
                     $"is considered pet-like but doesn't have a charminfo!");
                 return;
@@ -501,7 +510,7 @@ namespace Game
             int spell_id = packet.ActionButton.Action;
             ActiveStates act_state = packet.ActionButton.State;
 
-            Log.outDebug(LogFilter.Network, 
+            Log.outDebug(LogFilter.Network,
                 $"Player {GetPlayer().GetName()} has changed pet spell action. " +
                 $"Position: {position}, Spell: {spell_id}, State: {act_state}");
 
@@ -509,13 +518,13 @@ namespace Game
             foreach (Unit petControlled in pets)
             {
                 //if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add
-                if (act_state.HasFlag(ActiveStates.Spell) && petControlled.HasSpell(spell_id))
+                if (packet.ActionButton.IsSpell && petControlled.HasSpell(spell_id))
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, petControlled.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
                         //sign for autocast
-                        if (act_state.HasFlag(ActiveStates.AutoCast))
+                        if (act_state == ActiveStates.Enabled)
                         {
                             if (petControlled.GetTypeId() == TypeId.Unit && petControlled.IsPet())
                             {
@@ -527,13 +536,13 @@ namespace Game
                                 {
                                     if (unit.GetEntry() == petControlled.GetEntry())
                                         unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, true);
+                                }
                             }
-                        }
 
                             charmInfo.SetActionBar((byte)position, spell_id, ActiveStates.Enabled);
                         }
                         //sign for no/turn off autocast
-                        else if (act_state.HasFlag(ActiveStates.Passive))
+                        else if (act_state == ActiveStates.Disabled)
                         {
                             if (petControlled.GetTypeId() == TypeId.Unit && petControlled.IsPet())
                             {
@@ -545,11 +554,11 @@ namespace Game
                                 {
                                     if (unit.GetEntry() == petControlled.GetEntry())
                                         unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, false);
+                                }
                             }
-                        }
 
                             charmInfo.SetActionBar((byte)position, spell_id, ActiveStates.Disabled);
-                    }
+                        }
                     }
                 }
             }

@@ -244,7 +244,7 @@ namespace Game.Entities
                     if (pair.Value.UpdateState == PetSpellState.Removed)
                         continue;
 
-                    petSpellsPacket.Actions.Add(new(pair.Key, pair.Value.ActiveState));
+                    petSpellsPacket.Actions.Add(new(pair.Value.ActiveState, pair.Key));
                 }
             }
 

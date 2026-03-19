@@ -125,7 +125,7 @@ namespace Game.Entities
 
                 if (spellInfo == null)
                 {
-                    _charmspells[x] = new(spellId, ActiveStates.Disabled);
+                    _charmspells[x] = new(ActiveStates.Disabled, spellId);
                     continue;
                 }
 
@@ -135,11 +135,11 @@ namespace Game.Entities
                 if (spellInfo.IsPassive())
                 {
                     _unit.CastSpell(_unit, spellInfo.Id, new CastSpellExtraArgs(true));
-                    _charmspells[x] = new(spellId, ActiveStates.Passive);
+                    _charmspells[x] = new(ActiveStates.Passive, spellId);
                 }
                 else
                 {
-                    _charmspells[x] = new(spellId, ActiveStates.Disabled);
+                    _charmspells[x] = new(ActiveStates.Disabled, spellId);
 
                     ActiveStates newstate;
 
@@ -249,7 +249,7 @@ namespace Game.Entities
                 ActiveStates type = tokens[i++].ToEnum<ActiveStates>();
                 int.TryParse(tokens[i], out int action);
 
-                PetActionBar[index] = new(action, type);
+                PetActionBar[index] = new(type, action);
 
                 // check correctness
                 if (PetActionBar[index].IsSpell)
@@ -363,7 +363,7 @@ namespace Game.Entities
 
         public void SetActionBar(byte index, int spellOrAction, ActiveStates state)
         {
-            PetActionBar[index] = new(spellOrAction, state);
+            PetActionBar[index] = new(state, spellOrAction);
         }
         public CharmActionButton GetActionBarEntry(byte index) { return PetActionBar[index]; }
 
@@ -385,72 +385,5 @@ namespace Game.Entities
         float _stayX;
         float _stayY;
         float _stayZ;
-    }
-
-    public struct CharmActionButton
-    {
-        uint _packedData;
-
-        public CharmActionButton()
-        {
-           State = ActiveStates.Disabled;
-        }
-
-        public CharmActionButton(uint packedData)
-        {
-            _packedData = packedData;
-        }
-
-        public CharmActionButton(int action, ActiveStates state)
-        {
-            _packedData = MAKE_UNIT_ACTION_STATE(action, state);
-        }
-
-        public uint PackedData => _packedData;
-
-        public ActiveStates State
-        {
-            get => UNIT_ACTION_BUTTON_STATE(_packedData);
-            set => _packedData = MAKE_UNIT_ACTION_STATE(Action, value);
-        }
-
-        public int Action
-        {
-            get => UNIT_ACTION_STATE_ACTION(_packedData);
-            set => _packedData = MAKE_UNIT_ACTION_STATE(value, State);
-        }
-
-        public bool IsSpell
-        {
-            get
-            {
-                ActiveStates state = State;
-                return state == ActiveStates.Disabled || state == ActiveStates.Enabled || state == ActiveStates.Passive;
-            }
-        }
-
-        public bool IsCommand
-        {
-            get
-            {
-                ActiveStates state = State;
-                return state == ActiveStates.Command || state == ActiveStates.Reaction;
-            }
-        }
-
-        static uint MAKE_UNIT_ACTION_STATE(int action, ActiveStates state)
-        {
-            return (uint)(action | ((int)state << 23));
-        }
-
-        static int UNIT_ACTION_STATE_ACTION(uint packedData)
-        {
-            return (int)(packedData & 0x007FFFFF);
-        }
-
-        static ActiveStates UNIT_ACTION_BUTTON_STATE(uint packedData)
-        {
-            return (ActiveStates)((packedData & 0xFF800000) >>> 23);
-        }
     }
 }
