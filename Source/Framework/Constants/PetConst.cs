@@ -7,10 +7,11 @@ namespace Framework.Constants
 {
     public enum CharmType
     {
-        Charm,
-        Possess,
-        Vehicle,
-        Convert
+        None = 0,
+        Charm = 1,
+        Possess = 2,
+        Vehicle = 3,
+        Convert = 4,
     }
 
     public enum PetType

@@ -213,8 +213,8 @@ namespace Framework.Constants
         /// <summary>
         /// Pet Const
         /// </summary>
-        public const int MaxActivePets = 5;
-        public const int MaxPetStables = 200;
+        public const int MaxActivePets = 1;
+        public const int MaxPetStables = 4;
         public const int CallPetSpellId = 883;
         public const int SpellPetSummoningDisorientation = 32752;
         public const float PetFollowDist = 1.0f;
